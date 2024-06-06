@@ -11,15 +11,15 @@ export default defineConfig({
     react(),
     svgr(),
     VitePWA(),
-    electron({
-      main: {
-        entry: "./electron/main.ts",
-      },
-      preload: {
-        input: path.join(__dirname, "./electron/preload.ts"),
-      },
-      renderer: {},
-    }),
+    // electron({
+    //   main: {
+    //     entry: "./electron/main.ts",
+    //   },
+    //   preload: {
+    //     input: path.join(__dirname, "./electron/preload.ts"),
+    //   },
+    //   renderer: {},
+    // }),
   ],
   resolve: {
     alias: {

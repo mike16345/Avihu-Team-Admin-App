@@ -1,10 +1,7 @@
 import { app, BrowserWindow } from "electron";
 import path from "node:path";
 import Logger from "electron-log";
-import {
-  initBackgroundProcesses,
-  killBackgroundProcesses,
-} from "./BackgroundProcesses";
+import { initBackgroundProcesses, killBackgroundProcesses } from "./BackgroundProcesses";
 
 // Replace '/path/to/your/directory' with the path to the directory you want to print
 // The built directory structure
@@ -27,11 +24,9 @@ const day = currentDateTime.getDate();
 const hours = currentDateTime.getHours();
 const minutes = currentDateTime.getMinutes();
 
-const fullDate = `${day < 10 ? "0" + day : day}-${
-  month < 10 ? "0" + month : month
-}-${year}-${hours < 10 ? "0" + hours : hours}-${
-  minutes < 10 ? "0" + minutes : minutes
-}`;
+const fullDate = `${day < 10 ? "0" + day : day}-${month < 10 ? "0" + month : month}-${year}-${
+  hours < 10 ? "0" + hours : hours
+}-${minutes < 10 ? "0" + minutes : minutes}`;
 
 // Set logger file path
 Logger.transports.file.resolvePathFn = () =>
@@ -85,7 +80,7 @@ app.on("window-all-closed", () => {
 });
 
 process.on("exit", function () {
-  killBackgroundProcesses();
+  // killBackgroundProcesses();
 });
 
 app.on("activate", () => {
@@ -97,9 +92,6 @@ app.on("activate", () => {
 });
 
 app.whenReady().then(() => {
-  console.log('Logger',Logger);
-
-  initBackgroundProcesses();
+  // initBackgroundProcesses();
   createWindow();
 });
-
