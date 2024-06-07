@@ -1,7 +1,6 @@
 #root {
   width: 100%;
   height: 100%;
-  overflow: hidden;
   -webkit-touch-callout: none;
   /* iOS Safari */
   -webkit-user-select: none;
@@ -164,4 +163,19 @@ body {
   -webkit-backdrop-filter: blur(4px);
   border-radius: 10px;
   border: 2px solid rgba(255, 255, 255, 0.18);
+}
+
+/* Hide scrollbars for WebKit browsers (Chrome, Safari) */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbars for Firefox */
+.hide-scrollbar {
+  scrollbar-width: none; /* Firefox */
+}
+
+/* General styling */
+.hide-scrollbar {
+  overflow: auto;
 }
