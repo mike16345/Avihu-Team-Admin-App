@@ -41,7 +41,7 @@ export const ViewDietPlanPage = () => {
   return (
     <div className="w-full h-full hide-scrollbar overflow-y-auto">
       <Button onClick={handleAddMeal}>Add meal</Button>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col  gap-4 max-w-lg md:max-w-xl lg:max-w-2xl">
         {totalMeals.map((_, index) => {
           return (
             <DietPlanDropDown
@@ -55,7 +55,7 @@ export const ViewDietPlanPage = () => {
             />
           );
         })}
-        <Button onClick={handleSaveDietPlan}>Save diet plan</Button>
+        {totalMeals.length > 0 && <Button onClick={handleSaveDietPlan}>Save diet plan</Button>}
       </div>
       <AlertDialog open={openDeleteModal} onOpenChange={setOpenDeleteModal}>
         <AlertDialogContent>
