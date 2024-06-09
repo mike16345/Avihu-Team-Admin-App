@@ -1,24 +1,36 @@
-export interface ICustomItemInstructions {
+export interface ICustomItemInstructions extends IDietItem {
   item: string;
-  quantity: number;
-  unit: "grams" | "spoons";
 }
 
 export interface ICustomProteinInstructions extends ICustomItemInstructions {}
 export interface ICustomCarbsInstructions extends ICustomItemInstructions {}
+export interface ICustomVeggiesInstructions extends ICustomItemInstructions {}
+export interface ICustomFatsInstructions extends ICustomItemInstructions {}
+
+export interface IDietItem {
+  quantity: number;
+  unit: DietItemUnit;
+}
 
 export interface IMeal {
-  totalProtein: number;
-  totalCarbs: number;
-  totalFats?: number;
-  totalVeggies?: number;
+  totalProtein: IDietItem;
+  totalCarbs: IDietItem;
+  totalFats?: IDietItem;
+  totalVeggies?: IDietItem;
   customProteinInstructions?: ICustomProteinInstructions[];
-  customCarbsInstructions?: ICustomCarbsInstructions;
-  customVeggiesInstructions?: ICustomItemInstructions[];
-  customFatsInstructions?: ICustomItemInstructions[];
+  customCarbsInstructions?: ICustomCarbsInstructions[];
+  customVeggiesInstructions?: ICustomVeggiesInstructions[];
+  customFatsInstructions?: ICustomFatsInstructions[];
 }
 
 export interface IDietPlan {
   meals: IMeal[];
   totalCalories?: number;
 }
+
+export type DietItemUnit = "grams" | "spoons";
+export type CustomInstructions =
+  | "customProteinInstructions"
+  | "customCarbsInstructions"
+  | "customVeggiesInstructions"
+  | "customFatsInstructions";

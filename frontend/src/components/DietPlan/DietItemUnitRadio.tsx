@@ -2,26 +2,24 @@ import { FC } from "react";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Label } from "../ui/label";
 
-type CustomInstructionsRadioProps = {
+type DietItemUnitRadioProps = {
   onChangeSelection: Function;
 };
 
-export const CustomInstructionsRadio: FC<CustomInstructionsRadioProps> = ({
-  onChangeSelection,
-}) => {
+export const DietItemUnitRadio: FC<DietItemUnitRadioProps> = ({ onChangeSelection }) => {
   return (
     <RadioGroup
       onValueChange={(val) => onChangeSelection(val)}
       className="flex flex-col "
-      defaultValue="Fixed"
+      defaultValue="grams"
     >
       <div className="flex items-center space-x-2">
-        <RadioGroupItem value="Custom" id="Custom" />
-        <Label htmlFor="Custom">Custom Instructions</Label>
+        <RadioGroupItem value="grams" id="Grams" />
+        <Label htmlFor="Grams">Grams</Label>
       </div>
       <div className="flex items-center space-x-2">
-        <RadioGroupItem value="Fixed" id="Fixed" />
-        <Label htmlFor="Fixed">Fixed Amount</Label>
+        <RadioGroupItem value="spoons" id="Spoons" />
+        <Label htmlFor="spoons">Spoons</Label>
       </div>
     </RadioGroup>
   );
