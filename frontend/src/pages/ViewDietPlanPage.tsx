@@ -9,17 +9,27 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { useDietPlanApi } from "@/hooks/useDietPlanApi";
 import { IDietPlan, IMeal } from "@/interfaces/IDietPlan";
 import { useState } from "react";
 
 export const ViewDietPlanPage = () => {
+  const { addDietPlan } = useDietPlanApi();
+
   const [totalMeals, setTotalMeals] = useState<number[]>([]);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [mealToDelete, setMealToDelete] = useState<number | null>(null);
   const [dietPlan, setDietPlan] = useState<IDietPlan>({ meals: [] });
 
-  const handleSaveDietPlan = () => {
+  const handleSaveDietPlan = async () => {
     console.log("saving diet plan", dietPlan);
+    await addDietPlan("665f0b0b00b1a04e8f1c4478", dietPlan)
+      .then((res) => {
+        console.log("res", res);
+      })
+      .catch((err) => {
+        console.error("error", err);
+      });
   };
 
   const handleAddMeal = () => {
@@ -55,7 +65,7 @@ export const ViewDietPlanPage = () => {
             />
           );
         })}
-        {totalMeals.length > 0 && <Button onClick={handleSaveDietPlan}>Save diet plan</Button>}
+        {dietPlan.meals.length > 0 && <Button onClick={handleSaveDietPlan}>Save diet plan</Button>}
       </div>
       <AlertDialog open={openDeleteModal} onOpenChange={setOpenDeleteModal}>
         <AlertDialogContent>
