@@ -15,23 +15,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "../ui/input";
 import { CustomInstructionsRadio } from "./CustomInstructionsRadio";
-import {
-  CustomInstructions,
-  DietItemUnit,
-  ICustomCarbsInstructions,
-  ICustomFatsInstructions,
-  ICustomProteinInstructions,
-  ICustomVeggiesInstructions,
-  IMeal,
-} from "@/interfaces/IDietPlan";
+import { DietItemUnit, IMeal } from "@/interfaces/IDietPlan";
 import { CustomItemSelection } from "./CustomItemSelection";
 import { DietItemUnitRadio } from "./DietItemUnitRadio";
-
-type DietPlanDropDownProps = {
-  mealNumber: number;
-  onDelete: () => void;
-  setDietPlan: (meal: IMeal) => void;
-};
 
 const mealSchema = z.object({
   totalProtein: z.object({
@@ -54,29 +40,13 @@ const mealSchema = z.object({
       unit: z.enum(["grams", "spoons"]),
     })
     .optional(),
-
-  customProteinInstructions: z.array(
-    z.object({
-      item: z.string(),
-      quantity: z.coerce.number().min(0, { message: "Protein must be 0 or more." }),
-      unit: z.enum(["grams", "spoons"]),
-    })
-  ),
-  customCarbsInstructions: z.array(
-    z.object({
-      item: z.string(),
-      quantity: z.coerce.number().min(0, { message: "Carbs must be 0 or more." }),
-      unit: z.enum(["grams", "spoons"]),
-    })
-  ),
-  customFatsInstructions: z.array(
-    z.object({
-      item: z.string(),
-      quantity: z.coerce.number().min(0, { message: "Fats must be 0 or more." }),
-      unit: z.enum(["grams", "spoons"]),
-    })
-  ),
 });
+
+type DietPlanDropDownProps = {
+  mealNumber: number;
+  onDelete: () => void;
+  setDietPlan: (meal: IMeal) => void;
+};
 
 export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
   mealNumber,
@@ -92,14 +62,10 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
   const form = useForm<IMeal>({
     resolver: zodResolver(mealSchema),
     defaultValues: {
-      totalProtein: { quantity: 0, unit: "grams" },
-      totalCarbs: { quantity: 0, unit: "grams" },
-      totalFats: { quantity: 0, unit: "grams" },
-      totalVeggies: { quantity: 0, unit: "grams" },
-      customProteinInstructions: [],
-      customCarbsInstructions: [],
-      customFatsInstructions: [],
-      customVeggiesInstructions: [],
+      totalProtein: { quantity: 1, unit: "grams", customInstructions: [] },
+      totalCarbs: { quantity: 1, unit: "grams", customInstructions: [] },
+      totalFats: { quantity: 0, unit: "grams", customInstructions: [] },
+      totalVeggies: { quantity: 0, unit: "grams", customInstructions: [] },
     },
   });
 
@@ -109,62 +75,27 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
     formState: { errors },
   } = form;
 
-  const onSubmit = (values: IMeal) => {
+  const onSubmit = async (values: IMeal) => {
     console.log("values", values);
     setDietPlan(values);
   };
 
-  const handleToggleCustomItem = (selectedItems: string[], type: CustomInstructions) => {
-    var selected;
-    switch (type) {
-      case "customCarbsInstructions":
-        const carbs = form.getValues().totalCarbs;
-        selected = selectedItems.map((item) => {
-          return {
-            item: item,
-            quantity: carbs.quantity,
-            unit: carbs.unit,
-          } as ICustomCarbsInstructions;
-        });
-        break;
-      case "customFatsInstructions":
-        const fats = form.getValues().totalFats;
-        selected = selectedItems.map((item) => {
-          return {
-            item: item,
-            quantity: fats?.quantity || 1,
-            unit: fats?.unit || "grams",
-          } as ICustomFatsInstructions;
-        });
-        break;
-      case "customProteinInstructions":
-        const { quantity, unit } = form.getValues().totalProtein;
-        selected = selectedItems.map((item) => {
-          return { item: item, quantity: quantity, unit: unit } as ICustomProteinInstructions;
-        });
-        break;
-      case "customVeggiesInstructions":
-        const veggies = form.getValues().totalVeggies;
-        selected = selectedItems.map((item) => {
-          return {
-            item: item,
-            quantity: veggies?.quantity || 1,
-            unit: veggies?.unit || "grams",
-          } as ICustomVeggiesInstructions;
-        });
-        break;
-      default:
-        break;
-    }
+  const handleToggleCustomItem = (selectedItems: string[], type: keyof IMeal) => {
+    const item = form.getValues()[type];
+    if (!item) return;
+    const customInstructions = selectedItems.map((selectedItem) => {
+      return { item: selectedItem, quantity: item.quantity };
+    });
 
-    form.setValue(type, selected);
-    console.log("setting value", type, selected);
+    form.setValue(type, { ...item, customInstructions: customInstructions });
     console.log("form", form.getValues());
   };
 
   const handleSetUnit = (unit: DietItemUnit, type: keyof IMeal) => {
-    // TODO: Fix the set value to item. 
-    form.setValue(type, { ...form.getValues()[type], unit });
+    const itemToSet = form.getValues()[type];
+    if (!itemToSet) return;
+
+    form.setValue(type, { ...itemToSet, unit: unit });
   };
 
   return (
@@ -213,8 +144,11 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
                   </div>
                   {showCustomProtein && (
                     <CustomItemSelection
+                      selectedItems={form
+                        ?.getValues("totalProtein.customInstructions")
+                        ?.map((s) => s.item)}
                       onItemToggle={(selectedItems) =>
-                        handleToggleCustomItem(selectedItems, "customProteinInstructions")
+                        handleToggleCustomItem(selectedItems, "totalProtein")
                       }
                     />
                   )}
@@ -239,14 +173,17 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
                       onChangeSelection={(val: string) => setShowCustomCarbs(val === "Custom")}
                     />
                     <DietItemUnitRadio
-                      onChangeSelection={(val: DietItemUnit) => console.log("val", val)}
+                      onChangeSelection={(val: DietItemUnit) => handleSetUnit(val, "totalProtein")}
                     />
                   </div>
 
                   {showCustomCarbs && (
                     <CustomItemSelection
+                      selectedItems={form
+                        ?.getValues("totalCarbs.customInstructions")
+                        ?.map((s) => s.item)}
                       onItemToggle={(selectedItems) =>
-                        handleToggleCustomItem(selectedItems, "customCarbsInstructions")
+                        handleToggleCustomItem(selectedItems, "totalCarbs")
                       }
                     />
                   )}
@@ -274,8 +211,11 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
                   />
                   {showCustomFats && (
                     <CustomItemSelection
+                      selectedItems={form
+                        ?.getValues("totalFats.customInstructions")
+                        ?.map((s) => s.item)}
                       onItemToggle={(selectedItems) =>
-                        handleToggleCustomItem(selectedItems, "customFatsInstructions")
+                        handleToggleCustomItem(selectedItems, "totalFats")
                       }
                     />
                   )}
@@ -304,8 +244,11 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
 
                   {showCustomVeggies && (
                     <CustomItemSelection
+                      selectedItems={form
+                        ?.getValues("totalVeggies.customInstructions")
+                        ?.map((s) => s.item)}
                       onItemToggle={(selectedItems) =>
-                        handleToggleCustomItem(selectedItems, "customVeggiesInstructions")
+                        handleToggleCustomItem(selectedItems, "totalVeggies")
                       }
                     />
                   )}
