@@ -11,16 +11,8 @@ const proteinItems = [
   "Duck",
   "Salmon",
   "Tuna",
-  "Shrimp",
-  "Crab",
-  "Lobster",
-  "Oysters",
-  "Scallops",
-  "Mussels",
-  "Clams",
   "Eggs",
   "Tofu",
-  "Tempeh",
   "Edamame",
   "Lentils",
   "Chickpeas",
@@ -47,38 +39,19 @@ const proteinItems = [
   "Ricotta Cheese",
   "String Cheese",
   "Sausage",
-  "Bacon",
-  "Prosciutto",
   "Pepperoni",
   "Pastrami",
   "Corned Beef",
   "Veal",
-  "Bison",
-  "Elk",
-  "Venison",
   "Goat",
-  "Rabbit",
-  "Quail",
-  "Pheasant",
-  "Herring",
-  "Mackerel",
   "Sardines",
   "Anchovies",
   "Tilapia",
-  "Catfish",
   "Trout",
-  "Swordfish",
-  "Halibut",
   "Bass",
   "Cod",
   "Haddock",
   "Grouper",
-  "Snapper",
-  "Octopus",
-  "Squid",
-  "Sea Urchin",
-  "Sea Cucumber",
-  "Conch",
   "Caviar",
   "Seitan",
   "Textured Vegetable Protein",
@@ -89,15 +62,18 @@ const proteinItems = [
   "Whey Protein",
   "Casein Protein",
   "Plant-Based Meat",
-  "Insect Protein",
 ];
 
 type CustomItemSelectionProps = {
   onItemToggle: (selectedItems: string[]) => void;
+  selectedItems?: string[];
 };
 
-export const CustomItemSelection: FC<CustomItemSelectionProps> = ({ onItemToggle }) => {
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+export const CustomItemSelection: FC<CustomItemSelectionProps> = ({
+  onItemToggle,
+  selectedItems,
+}) => {
+  const [selected, setSelectedItems] = useState<string[]>(selectedItems || []);
 
   const toggleSelect = (item: string) => {
     setSelectedItems((prevSelectedItems) => {
@@ -117,11 +93,9 @@ export const CustomItemSelection: FC<CustomItemSelectionProps> = ({ onItemToggle
         <Badge
           key={index}
           onClick={() => toggleSelect(item)}
-          className={`cursor-pointer ${
-            selectedItems.includes(item) ? "bg-green-500  text-white" : ""
-          }`}
+          className={`cursor-pointer ${selected.includes(item) ? "bg-green-500  text-white" : ""}`}
         >
-          {selectedItems.includes(item) ? (
+          {selected.includes(item) ? (
             <FaCheck size={10} className="inline mr-1" />
           ) : (
             <FaPlus size={10} className="inline mr-1" />
