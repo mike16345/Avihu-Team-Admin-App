@@ -24,9 +24,9 @@ const ExcerciseInput = ({ options, setter, title }) => {
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                     {Array.from({ length: excercisesLength }).map((item, index) => (
-                        <div className='py-5' key={index}>
+                        <div className='py-5 flex' key={index}>
                             <ComboBox options={options} setter={setter} />
-                            <div >
+                            <div className='flex'>
                                 <Label>סטים</Label>
                                 <Input
                                     placeholder='1/2/3/4...'

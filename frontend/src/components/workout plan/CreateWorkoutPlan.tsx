@@ -24,49 +24,38 @@ const CreateWorkoutPlan = () => {
     const [e, setE] = useState()
 
     return (
-        <div>
-            <Sheet>
-                <SheetTrigger asChild>
-                    <Button variant="outline">Open</Button>
-                </SheetTrigger>
-                <SheetContent dir='rtl' className='overflow-y-scroll'>
-                    <SheetHeader>
-                        <SheetTitle className='text-right'>תוכנית אימון</SheetTitle>
-                        <SheetDescription className='text-right'>
-                            כאן תוכל לבנות ללקוח שלך את תוכנית האימון
-                        </SheetDescription>
-                    </SheetHeader>
-                    <ComboBox options={workoutTemp} setter={setWorkoutPlan} />
-                    {workoutPlan === `AB` &&
-                        <div>
-                            <ExcerciseInput options={excercises} setter={setE} title='אימון A' />
-                            <ExcerciseInput options={excercises} setter={setE} title='אימון B' />
-                        </div>
-                    }
-                    {workoutPlan === `ABC` &&
-                        <div>
-                            <ExcerciseInput options={excercises} setter={setE} title='אימון A' />
-                            <ExcerciseInput options={excercises} setter={setE} title='אימון B' />
-                            <ExcerciseInput options={excercises} setter={setE} title='אימון C' />
-                        </div>
-                    }
-                    {workoutPlan === `Daily` &&
-                        <div>
-                            <ExcerciseInput options={excercises} setter={setE} title='אימון A' />
-                            <ExcerciseInput options={excercises} setter={setE} title='אימון B' />
-                            <ExcerciseInput options={excercises} setter={setE} title='אימון C' />
-                            <ExcerciseInput options={excercises} setter={setE} title='אימון D' />
-                            <ExcerciseInput options={excercises} setter={setE} title='אימון E' />
-                            <ExcerciseInput options={excercises} setter={setE} title='אימון F' />
-                        </div>
-                    }
-                    <SheetFooter>
-                        <SheetClose asChild>
-                            <Button type="submit">Save changes</Button>
-                        </SheetClose>
-                    </SheetFooter>
-                </SheetContent>
-            </Sheet>
+        <div className='p-5 overflow-y-scroll max-h-[95vh] w-full' >
+            <h1 className='text-4xl'>תוכנית אימון</h1>
+            <p>
+                כאן תוכל לייתר תוכנית אימון ללקוחות שלך
+            </p>
+            <div className='p-2'>
+                <ComboBox options={workoutTemp} setter={setWorkoutPlan} />
+                {workoutPlan === `AB` &&
+                    <div >
+                        <ExcerciseInput options={excercises} setter={setE} title='אימון A' />
+                        <ExcerciseInput options={excercises} setter={setE} title='אימון B' />
+                    </div>
+                }
+                {workoutPlan === `ABC` &&
+                    <div >
+                        <ExcerciseInput options={excercises} setter={setE} title='אימון A' />
+                        <ExcerciseInput options={excercises} setter={setE} title='אימון B' />
+                        <ExcerciseInput options={excercises} setter={setE} title='אימון C' />
+                    </div>
+                }
+                {workoutPlan === `Daily` &&
+                    <div >
+                        <ExcerciseInput options={excercises} setter={setE} title='אימון A' />
+                        <ExcerciseInput options={excercises} setter={setE} title='אימון B' />
+                        <ExcerciseInput options={excercises} setter={setE} title='אימון C' />
+                        <ExcerciseInput options={excercises} setter={setE} title='אימון D' />
+                        <ExcerciseInput options={excercises} setter={setE} title='אימון E' />
+                        <ExcerciseInput options={excercises} setter={setE} title='אימון F' />
+                    </div>
+                }
+            </div>
+
         </div>
     )
 }
