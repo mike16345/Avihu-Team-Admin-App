@@ -20,7 +20,7 @@ const CreateWorkoutPlan = () => {
     const workoutTemp = [`AB`, `ABC`, `Daily`, `Custom`];
     const excercises = [`לחיצת חזה`, `פרפר`, `תחתונים`, `סקוואט`];
 
-    const [workoutPlan, setWorkoutPlan] = useState();
+    const [workoutPlan, setWorkoutPlan] = useState(`AB`);
     const [e, setE] = useState()
 
     return (
@@ -39,15 +39,25 @@ const CreateWorkoutPlan = () => {
                     <ComboBox options={workoutTemp} setter={setWorkoutPlan} />
                     {workoutPlan === `AB` &&
                         <div>
-                            <h2>אימון A</h2>
-                            <ExcerciseInput options={excercises} setter={setE} />
-                            <ExcerciseInput options={excercises} setter={setE} />
-                            <ExcerciseInput options={excercises} setter={setE} />
-
-                            <h2>אימון B</h2>
-                            <ExcerciseInput options={excercises} setter={setE} />
-                            <ExcerciseInput options={excercises} setter={setE} />
-                            <ExcerciseInput options={excercises} setter={setE} />
+                            <ExcerciseInput options={excercises} setter={setE} title='אימון A' />
+                            <ExcerciseInput options={excercises} setter={setE} title='אימון B' />
+                        </div>
+                    }
+                    {workoutPlan === `ABC` &&
+                        <div>
+                            <ExcerciseInput options={excercises} setter={setE} title='אימון A' />
+                            <ExcerciseInput options={excercises} setter={setE} title='אימון B' />
+                            <ExcerciseInput options={excercises} setter={setE} title='אימון C' />
+                        </div>
+                    }
+                    {workoutPlan === `Daily` &&
+                        <div>
+                            <ExcerciseInput options={excercises} setter={setE} title='אימון A' />
+                            <ExcerciseInput options={excercises} setter={setE} title='אימון B' />
+                            <ExcerciseInput options={excercises} setter={setE} title='אימון C' />
+                            <ExcerciseInput options={excercises} setter={setE} title='אימון D' />
+                            <ExcerciseInput options={excercises} setter={setE} title='אימון E' />
+                            <ExcerciseInput options={excercises} setter={setE} title='אימון F' />
                         </div>
                     }
                     <SheetFooter>

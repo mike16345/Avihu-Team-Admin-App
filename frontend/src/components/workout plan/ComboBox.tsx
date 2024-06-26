@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Check, ChevronsUpDown } from "lucide-react"
+import { ChevronsUpDown } from "lucide-react"
 import {
     Command,
     CommandEmpty,
