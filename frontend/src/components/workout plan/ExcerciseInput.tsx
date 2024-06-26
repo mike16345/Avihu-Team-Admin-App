@@ -16,7 +16,7 @@ import { Button } from '../ui/button'
 const ExcerciseInput = ({ options, setter, title }) => {
     const [excercisesLength, setExcercisesLength] = useState(2)
     return (
-        <div className='border-b-2 py-2'>
+        <div className='border-b-2 py-2 w-[70%]'>
             <Collapsible>
                 <CollapsibleTrigger className='flex items-center'>
                     {title}
@@ -24,22 +24,28 @@ const ExcerciseInput = ({ options, setter, title }) => {
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                     {Array.from({ length: excercisesLength }).map((item, index) => (
-                        <div className='py-5 flex' key={index}>
+                        <div className='py-5 flex items-end gap-5' key={index}>
                             <ComboBox options={options} setter={setter} />
-                            <div className='flex'>
-                                <Label>סטים</Label>
-                                <Input
-                                    placeholder='1/2/3/4...'
-                                />
-                                <Label>חזרות</Label>
-                                <Input
-                                    placeholder='8/10/12...'
-                                />
-                                <Label>משקל</Label>
-                                <Input
-                                    placeholder='KG'
-                                />
-                                <Button>הסר</Button>
+                            <div className='flex gap-5 items-end '>
+                                <div>
+                                    <Label>סטים</Label>
+                                    <Input
+                                        placeholder='1/2/3/4...'
+                                    />
+                                </div>
+                                <div>
+                                    <Label>חזרות</Label>
+                                    <Input
+                                        placeholder='8/10/12...'
+                                    />
+                                </div>
+                                <div>
+                                    <Label>משקל</Label>
+                                    <Input
+                                        placeholder='KG'
+                                    />
+                                </div>
+                                <Button >הסר</Button>
                             </div>
                         </div>
                     ))}
