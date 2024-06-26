@@ -45,7 +45,7 @@ const ExcerciseInput = ({ options, setter, title }) => {
                                         placeholder='KG'
                                     />
                                 </div>
-                                <Button >הסר</Button>
+                                <Button >שמור</Button>
                             </div>
                         </div>
                     ))}
