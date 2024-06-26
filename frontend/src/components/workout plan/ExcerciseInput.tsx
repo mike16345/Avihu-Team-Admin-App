@@ -10,10 +10,14 @@ import {
 import { ChevronsUpDown } from "lucide-react"
 import { Button } from '../ui/button'
 
+interface ExcerciseInputProps {
+    options: string[];
+    setter: React.Dispatch<React.SetStateAction<string[]>>;
+    title: string;
+}
 
 
-
-const ExcerciseInput = ({ options, setter, title }) => {
+const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, setter, title }) => {
     const [excercisesLength, setExcercisesLength] = useState(2)
     return (
         <div className='border-b-2 py-2 w-[70%]'>

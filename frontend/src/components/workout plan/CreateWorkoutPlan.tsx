@@ -15,12 +15,12 @@ import ExcerciseInput from './ExcerciseInput'
 
 
 
-const CreateWorkoutPlan = () => {
+const CreateWorkoutPlan: React.FC = () => {
 
-    const workoutTemp = [`AB`, `ABC`, `Daily`, `Custom`];
-    const excercises = [`לחיצת חזה`, `פרפר`, `תחתונים`, `סקוואט`];
+    const workoutTemp: string[] = [`AB`, `ABC`, `Daily`, `Custom`];
+    const excercises: string[] = [`לחיצת חזה`, `פרפר`, `תחתונים`, `סקוואט`];
 
-    const [workoutPlan, setWorkoutPlan] = useState(`AB`);
+    const [workoutPlan, setWorkoutPlan] = useState<string>(`AB`);
     const [e, setE] = useState()
 
     return (

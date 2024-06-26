@@ -15,7 +15,12 @@ import {
 } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
 
-const ComboBox = ({ options, setter }) => {
+interface ComboBoxProps {
+    options: string[],
+    setter: React.Dispatch<React.SetStateAction<string[]>>
+}
+
+const ComboBox: React.FC<ComboBoxProps> = ({ options, setter }) => {
     const [open, setOpen] = useState(false)
     const [value, setValue] = useState(options[0])
 
