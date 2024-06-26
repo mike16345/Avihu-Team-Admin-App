@@ -21,8 +21,8 @@ interface ComboBoxProps {
 }
 
 const ComboBox: React.FC<ComboBoxProps> = ({ options, setter }) => {
-    const [open, setOpen] = useState(false)
-    const [value, setValue] = useState(options[0])
+    const [open, setOpen] = useState<boolean>(false)
+    const [value, setValue] = useState<string>(options[0])
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
