@@ -40,7 +40,7 @@ const CreateWorkoutPlan: React.FC = () => {
   };
 
   useEffect(() => {
-    let initalWorkoutPlan = [];
+    const initalWorkoutPlan = [];
     let iterater = 1;
 
     switch (workoutSplit) {

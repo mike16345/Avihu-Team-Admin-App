@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import ComboBox from "./ComboBox";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronsUpDown } from "lucide-react";
 import { Button } from "../ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { IWorkout } from "@/interfaces/IWorkoutPlan";
+import SetsInput from "./SetsInput";
 
 interface ExcerciseInputProps {
   options: string[];
@@ -66,30 +66,12 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, handleSave, ti
           {workoutObjs.map((item) => (
             <div className="py-5 flex items-center gap-5 border-b-4" key={item.id}>
               <div className="flex flex-col gap-5">
-                <div className="flex gap-5 items-end">
                   <ComboBox
                     options={options}
                     handleChange={(currentValue) => handleChange(currentValue, item.id)}
                   />
-
-                  <div>
-                    <Label>סטים</Label>
-                    <Input
-                      placeholder="1-10"
-                      name="setToDo"
-                      onChange={(e) => handleChange(e, item.id)}
-                    />
-                  </div>
-
-                  <div>
-                    <Label>חזרות</Label>
-                    <Input
-                      name="repsToDo"
-                      placeholder="8/10/12..."
-                      onChange={(e) => handleChange(e, item.id)}
-                    />
-                  </div>
-                </div>
+                  <SetsInput/>
+                  
                 <div>
                   <Label>דגשים</Label>
                   <Textarea
