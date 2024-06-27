@@ -17,12 +17,21 @@ import { Button } from "@/components/ui/button"
 
 interface ComboBoxProps {
     options: string[],
-    setter: React.Dispatch<React.SetStateAction<string[]>>
+    setter: React.Dispatch<React.SetStateAction<string[]>>,
+    index: number,
+    handleChange: Function
 }
 
-const ComboBox: React.FC<ComboBoxProps> = ({ options, setter }) => {
+const ComboBox: React.FC<ComboBoxProps> = ({ options, setter, handleChange, index }) => {
     const [open, setOpen] = useState<boolean>(false)
     const [value, setValue] = useState<string>(options[0])
+
+    const handleSelect = (currentValue) => {
+        setValue(currentValue)
+        setter(currentValue)
+        setOpen(false)
+        handleChange(currentValue, index)
+    }
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
@@ -47,11 +56,7 @@ const ComboBox: React.FC<ComboBoxProps> = ({ options, setter }) => {
                                 <CommandItem
                                     key={option}
                                     value={option}
-                                    onSelect={(currentValue) => {
-                                        setValue(currentValue)
-                                        setter(currentValue)
-                                        setOpen(false)
-                                    }}
+                                    onSelect={handleSelect}
                                 >
                                     {option}
                                 </CommandItem>
