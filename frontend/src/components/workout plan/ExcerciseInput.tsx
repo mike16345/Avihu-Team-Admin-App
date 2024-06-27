@@ -22,7 +22,7 @@ interface IExcercise {
     name: string,
     setToDo: number,
     repsToDo: number,
-    weight?: string
+    tipFromTrainer?: string
 }
 
 
@@ -83,10 +83,10 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, handleSave, ti
                                     />
                                 </div>
                                 <div>
-                                    <Label>משקל</Label>
+                                    <Label>דגשים</Label>
                                     <Input
-                                        placeholder='KG'
-                                        name='weight'
+                                        placeholder='תלבש מכנסיים..'
+                                        name='tipFromTrainer'
                                         onChange={(e) => handleChange(e, index)}
                                     />
                                 </div>
