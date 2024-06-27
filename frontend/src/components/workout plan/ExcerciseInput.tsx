@@ -9,7 +9,8 @@ import {
 } from "@/components/ui/collapsible"
 import { ChevronsUpDown } from "lucide-react"
 import { Button } from '../ui/button'
-import { log } from 'console'
+import { Textarea } from "@/components/ui/textarea"
+
 
 interface ExcerciseInputProps {
     options: string[];
@@ -58,43 +59,48 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, handleSave, ti
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                     {Array.from({ length: excercisesLength }).map((item, index) => (
-                        <div className='py-5 flex items-end gap-5' key={index}>
-                            <ComboBox
-                                options={options}
-                                setter={setS}
-                                handleChange={handleChange}
-                                index={index}
-                            />
-                            <div className='flex gap-5 items-end '>
-                                <div>
-                                    <Label>סטים</Label>
-                                    <Input
-                                        placeholder='1-10'
-                                        name='setToDo'
-                                        onChange={(e) => handleChange(e, index)}
+                        <div className='py-5 flex items-center gap-5 border-b-4' key={index}>
+                            <div className='flex flex-col gap-5'>
+                                <div className='flex gap-5 items-end'>
+                                    <ComboBox
+                                        options={options}
+                                        setter={setS}
+                                        handleChange={handleChange}
+                                        index={index}
                                     />
-                                </div>
-                                <div>
-                                    <Label>חזרות</Label>
-                                    <Input
-                                        name='repsToDo'
-                                        placeholder='8/10/12...'
-                                        onChange={(e) => handleChange(e, index)}
-                                    />
+
+                                    <div>
+                                        <Label>סטים</Label>
+                                        <Input
+                                            placeholder='1-10'
+                                            name='setToDo'
+                                            onChange={(e) => handleChange(e, index)}
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label>חזרות</Label>
+                                        <Input
+                                            name='repsToDo'
+                                            placeholder='8/10/12...'
+                                            onChange={(e) => handleChange(e, index)}
+                                        />
+                                    </div>
                                 </div>
                                 <div>
                                     <Label>דגשים</Label>
-                                    <Input
+                                    <Textarea
                                         placeholder='תלבש מכנסיים..'
                                         name='tipFromTrainer'
                                         onChange={(e) => handleChange(e, index)}
                                     />
                                 </div>
-                                <Button >מחק</Button>
                             </div>
+
+                            <Button className='mr-5'>מחק</Button>
                         </div>
                     ))}
                     <Button
+                        className='mt-2'
                         onClick={() => setExcercisesLength(excercisesLength + 1)}
                     >הוסף תרגיל</Button>
                     <Button
