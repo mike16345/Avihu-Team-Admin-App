@@ -26,9 +26,10 @@ interface IExcercise {
 }
 
 
-const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, setter, title }) => {
+const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, handleSave, title }) => {
     const [excercisesLength, setExcercisesLength] = useState(2)
     const [workoutObjs, setWorkoutObjs] = useState<IExcercise[]>([])
+    const [s, setS] = useState()
 
     const handleChange = (e, index) => {
         let name: string;
@@ -60,7 +61,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, setter, title 
                         <div className='py-5 flex items-end gap-5' key={index}>
                             <ComboBox
                                 options={options}
-                                setter={setter}
+                                setter={setS}
                                 handleChange={handleChange}
                                 index={index}
                             />
@@ -68,7 +69,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, setter, title 
                                 <div>
                                     <Label>סטים</Label>
                                     <Input
-                                        placeholder='1/2/3/4...'
+                                        placeholder='1-10'
                                         name='setToDo'
                                         onChange={(e) => handleChange(e, index)}
                                     />
@@ -89,13 +90,17 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, setter, title 
                                         onChange={(e) => handleChange(e, index)}
                                     />
                                 </div>
-                                <Button >שמור</Button>
+                                <Button >מחק</Button>
                             </div>
                         </div>
                     ))}
                     <Button
                         onClick={() => setExcercisesLength(excercisesLength + 1)}
                     >הוסף תרגיל</Button>
+                    <Button
+                        className='mr-2'
+                        onClick={() => handleSave(title, workoutObjs)}
+                    >שמור</Button>
 
                 </CollapsibleContent>
             </Collapsible>
