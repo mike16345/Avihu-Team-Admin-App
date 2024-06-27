@@ -23,6 +23,21 @@ const CreateWorkoutPlan: React.FC = () => {
     const [workoutSplit, setWorkoutSplit] = useState<string>(`AB`);
     const [workoutPlan, setWorkoutPlan] = useState([])
 
+    const handleAddWorkout = () => {
+        const newObject = { name: `אימון ${workoutPlan.length + 1}`, workouts: undefined }
+
+        setWorkoutPlan([...workoutPlan, newObject]);
+    }
+
+    const handleDeleteWorkout = (name) => {
+        const filteredArr = workoutPlan.filter(workout => workout.name !== name)
+        const newArr = filteredArr.map((workout, i) => ({ ...workout, name: `אימון ${i + 1}` }
+        ))
+
+        setWorkoutPlan(newArr)
+    }
+
+
     const handleSave = (split, workouts) => {
 
         setWorkoutPlan(prevWorkoutPlan => {
@@ -39,7 +54,31 @@ const CreateWorkoutPlan: React.FC = () => {
     }
 
     useEffect(() => {
-        setWorkoutPlan([]);
+        let initalWorkoutPlan = [];
+        let iterater;
+        switch (workoutSplit) {
+            case `AB`:
+                iterater = 2
+                break;
+            case `ABC`:
+                iterater = 3
+                break;
+            case `Daily`:
+                iterater = 7
+                break;
+            case `Custom`:
+                iterater = 1
+                break;
+        }
+
+        for (let index = 1; index <= iterater; index++) {
+            initalWorkoutPlan.push({
+                name: `אימון ${index}`, workouts: undefined
+            });
+        }
+
+        setWorkoutPlan(initalWorkoutPlan)
+
     }, [workoutSplit])
 
     return (
@@ -50,28 +89,22 @@ const CreateWorkoutPlan: React.FC = () => {
             </p>
             <div className='p-2'>
                 <ComboBox options={workoutTemp} setter={setWorkoutSplit} />
-                {workoutSplit === `AB` &&
-                    <div >
-                        <ExcerciseInput options={excercises} handleSave={handleSave} title='אימון A' />
-                        <ExcerciseInput options={excercises} handleSave={handleSave} title='אימון B' />
+
+                {workoutPlan.map(workout => (
+                    <div
+                        key={workout.name}
+                        className='flex'
+                    >
+                        <ExcerciseInput options={excercises} handleSave={handleSave} title={workout.name} />
+                        <Button
+                            onClick={() => handleDeleteWorkout(workout.name)}
+                        >הסר</Button>
                     </div>
-                }
-                {workoutSplit === `ABC` &&
-                    <div >
-                        <ExcerciseInput options={excercises} handleSave={handleSave} title='אימון A' />
-                        <ExcerciseInput options={excercises} handleSave={handleSave} title='אימון B' />
-                        <ExcerciseInput options={excercises} handleSave={handleSave} title='אימון C' />
-                    </div>
-                }
-                {workoutSplit === `Daily` &&
-                    <div >
-                        <ExcerciseInput options={excercises} handleSave={handleSave} title='אימון A' />
-                        <ExcerciseInput options={excercises} handleSave={handleSave} title='אימון B' />
-                        <ExcerciseInput options={excercises} handleSave={handleSave} title='אימון C' />
-                        <ExcerciseInput options={excercises} handleSave={handleSave} title='אימון D' />
-                        <ExcerciseInput options={excercises} handleSave={handleSave} title='אימון E' />
-                        <ExcerciseInput options={excercises} handleSave={handleSave} title='אימון F' />
-                    </div>
+                ))}
+                {workoutSplit === `Custom` &&
+                    <Button
+                        onClick={handleAddWorkout}
+                    >הוסף עוד אימון</Button>
                 }
             </div>
 
