@@ -1,7 +1,6 @@
 import { FC, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { FaChevronDown, FaTrash } from "react-icons/fa";
 import { Button } from "../ui/button";
 import { Collapsible, CollapsibleContent } from "../ui/collapsible";
@@ -18,29 +17,14 @@ import { CustomInstructionsRadio } from "./CustomInstructionsRadio";
 import { DietItemUnit, IMeal } from "@/interfaces/IDietPlan";
 import { CustomItemSelection } from "./CustomItemSelection";
 import { DietItemUnitRadio } from "./DietItemUnitRadio";
+import { mealSchema } from "./DietPlanSchema";
 
-const mealSchema = z.object({
-  totalProtein: z.object({
-    quantity: z.coerce.number().min(0, { message: "Protein must be 0 or more." }),
-    unit: z.enum(["grams", "spoons"]),
-  }),
-  totalCarbs: z.object({
-    quantity: z.coerce.number().min(0, { message: "Carbs must be 0 or more." }),
-    unit: z.enum(["grams", "spoons"]),
-  }),
-  totalFats: z
-    .object({
-      quantity: z.coerce.number().min(0, { message: "Fats must be 0 or more." }),
-      unit: z.enum(["grams", "spoons"]),
-    })
-    .optional(),
-  totalVeggies: z
-    .object({
-      quantity: z.coerce.number().min(0, { message: "Veggies must be 0 or more." }),
-      unit: z.enum(["grams", "spoons"]),
-    })
-    .optional(),
-});
+type ShowCustomSelectionType = {
+  totalProtein: boolean;
+  totalCarbs: boolean;
+  totalFats: boolean;
+  totalVeggies: boolean;
+};
 
 type DietPlanDropDownProps = {
   mealNumber: number;
@@ -53,12 +37,6 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
   onDelete,
   setDietPlan,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [showCustomProtein, setShowCustomProtein] = useState(false);
-  const [showCustomCarbs, setShowCustomCarbs] = useState(false);
-  const [showCustomFats, setShowCustomFats] = useState(false);
-  const [showCustomVeggies, setShowCustomVeggies] = useState(false);
-
   const form = useForm<IMeal>({
     resolver: zodResolver(mealSchema),
     defaultValues: {
@@ -75,9 +53,30 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
     formState: { errors },
   } = form;
 
-  const onSubmit = async (values: IMeal) => {
-    console.log("values", values);
-    setDietPlan(values);
+  const [isOpen, setIsOpen] = useState(false);
+  const [showCustomSelection, setShowCustomSelection] = useState<ShowCustomSelectionType>({
+    totalProtein: false,
+    totalCarbs: false,
+    totalFats: false,
+    totalVeggies: false,
+  });
+
+  const onSubmit = async (meal: IMeal) => {
+    const newMeal = Object.keys(meal).reduce((acc, key) => {
+      const accessKey = key as keyof IMeal;
+
+      acc[accessKey] = {
+        ...meal[accessKey],
+        customInstructions: showCustomSelection[accessKey]
+          ? meal[accessKey]?.customInstructions || []
+          : [],
+      };
+
+      return acc;
+    }, {} as IMeal);
+
+    console.log("new meal", newMeal);
+    setDietPlan(newMeal);
   };
 
   const handleToggleCustomItem = (selectedItems: string[], type: keyof IMeal) => {
@@ -88,7 +87,6 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
     });
 
     form.setValue(type, { ...item, customInstructions: customInstructions });
-    console.log("form", form.getValues());
   };
 
   const handleSetUnit = (unit: DietItemUnit, type: keyof IMeal) => {
@@ -99,14 +97,15 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
   };
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full space-y-2">
-      <div className="flex items-center justify-between space-x-4 px-4">
-        <h4 className="text-sm font-semibold">Meal {mealNumber}</h4>
-        <div>
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full space-y-2  ">
+      <div className="flex items-center justify-between ">
+        <h4 className="text-sm font-bold">ארוחה {mealNumber}</h4>
+        <div className="flex items-center">
           <Button onClick={onDelete} variant="ghost" size="sm" className="w-9 p-0">
             <FaTrash className="h-4 w-4" />
             <span className="sr-only">Delete</span>
           </Button>
+
           <Button
             onClick={() => setIsOpen((state) => !state)}
             variant="ghost"
@@ -120,15 +119,15 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
       </div>
       <Form {...form}>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <CollapsibleContent className={`flex flex-col gap-4 ${isOpen && "p-4"}`}>
+          <CollapsibleContent className={`flex flex-col  gap-4 ${isOpen && "px-2 py-4"}`}>
             <FormField
               control={control}
               name="totalProtein.quantity"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Protein Quantity</FormLabel>
+                <FormItem className="text-right font-bold">
+                  <FormLabel className="text-right font-bold">כמות חלבון</FormLabel>
                   <FormControl>
-                    <Input type="number" {...field} />
+                    <Input dir="rtl" type="number" {...field} />
                   </FormControl>
                   {errors.totalProtein?.quantity && (
                     <FormMessage>{errors.totalProtein.quantity.message}</FormMessage>
@@ -136,13 +135,18 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
 
                   <div className="flex items-center justify-between">
                     <CustomInstructionsRadio
-                      onChangeSelection={(val: string) => setShowCustomProtein(val === "Custom")}
+                      onChangeSelection={(val: string) =>
+                        setShowCustomSelection({
+                          ...showCustomSelection,
+                          totalProtein: val == "Custom",
+                        })
+                      }
                     />
                     <DietItemUnitRadio
                       onChangeSelection={(val: DietItemUnit) => handleSetUnit(val, "totalProtein")}
                     />
                   </div>
-                  {showCustomProtein && (
+                  {showCustomSelection.totalProtein && (
                     <CustomItemSelection
                       selectedItems={form
                         ?.getValues("totalProtein.customInstructions")
@@ -159,10 +163,10 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
               control={control}
               name="totalCarbs.quantity"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Carbs Quantity</FormLabel>
+                <FormItem className="text-right font-bold">
+                  <FormLabel className="text-right font-bold">כמות פחמימות</FormLabel>
                   <FormControl>
-                    <Input type="number" {...field} />
+                    <Input dir="rtl" type="number" {...field} />
                   </FormControl>
                   {errors.totalCarbs?.quantity && (
                     <FormMessage>{errors.totalCarbs.quantity.message}</FormMessage>
@@ -170,14 +174,19 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
 
                   <div className="flex items-center justify-between">
                     <CustomInstructionsRadio
-                      onChangeSelection={(val: string) => setShowCustomCarbs(val === "Custom")}
+                      onChangeSelection={(val: string) =>
+                        setShowCustomSelection({
+                          ...showCustomSelection,
+                          totalCarbs: val == "Custom",
+                        })
+                      }
                     />
                     <DietItemUnitRadio
                       onChangeSelection={(val: DietItemUnit) => handleSetUnit(val, "totalProtein")}
                     />
                   </div>
 
-                  {showCustomCarbs && (
+                  {showCustomSelection.totalCarbs && (
                     <CustomItemSelection
                       selectedItems={form
                         ?.getValues("totalCarbs.customInstructions")
@@ -194,10 +203,10 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
               control={control}
               name="totalFats.quantity"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Fats Quantity</FormLabel>
+                <FormItem className="text-right font-bold">
+                  <FormLabel className="text-right font-bold">כמות שומנים</FormLabel>
                   <FormControl>
-                    <Input type="number" {...field} />
+                    <Input dir="rtl" type="number" {...field} />
                   </FormControl>
                   {errors.totalFats?.quantity && (
                     <FormMessage>{errors.totalFats.quantity.message}</FormMessage>
@@ -207,9 +216,11 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
                     <FormMessage>{errors.totalFats.unit.message}</FormMessage>
                   )}
                   <CustomInstructionsRadio
-                    onChangeSelection={(val: string) => setShowCustomFats(val === "Custom")}
+                    onChangeSelection={(val: string) =>
+                      setShowCustomSelection({ ...showCustomSelection, totalFats: val == "Custom" })
+                    }
                   />
-                  {showCustomFats && (
+                  {showCustomSelection.totalFats && (
                     <CustomItemSelection
                       selectedItems={form
                         ?.getValues("totalFats.customInstructions")
@@ -226,10 +237,10 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
               control={control}
               name="totalVeggies.quantity"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Vegetables Quantity</FormLabel>
+                <FormItem className="text-right font-bold">
+                  <FormLabel className="text-right font-bold">כמות ירקות</FormLabel>
                   <FormControl>
-                    <Input type="number" {...field} />
+                    <Input dir="rtl" type="number" {...field} />
                   </FormControl>
                   {errors.totalVeggies?.quantity && (
                     <FormMessage>{errors.totalVeggies.quantity.message}</FormMessage>
@@ -239,10 +250,15 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
                   )}
 
                   <CustomInstructionsRadio
-                    onChangeSelection={(val: string) => setShowCustomVeggies(val === "Custom")}
+                    onChangeSelection={(val: string) =>
+                      setShowCustomSelection({
+                        ...showCustomSelection,
+                        totalVeggies: val == "Custom",
+                      })
+                    }
                   />
 
-                  {showCustomVeggies && (
+                  {showCustomSelection.totalVeggies && (
                     <CustomItemSelection
                       selectedItems={form
                         ?.getValues("totalVeggies.customInstructions")
@@ -255,10 +271,12 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
                 </FormItem>
               )}
             />
+            <div className="flex rtl:justify-end">
+              <Button type="submit" className="mt-4 font-bold">
+                שמור ארוחה
+              </Button>
+            </div>
           </CollapsibleContent>
-          <Button type="submit" className="mt-4">
-            Save Meal
-          </Button>
         </form>
       </Form>
     </Collapsible>
