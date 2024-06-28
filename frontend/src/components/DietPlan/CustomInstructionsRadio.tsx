@@ -17,11 +17,11 @@ export const CustomInstructionsRadio: FC<CustomInstructionsRadioProps> = ({
     >
       <div className="flex items-center space-x-2">
         <RadioGroupItem value="Custom" id="Custom" />
-        <Label htmlFor="Custom">Custom Instructions</Label>
+        <Label htmlFor="Custom">בחירה</Label>
       </div>
       <div className="flex items-center space-x-2">
         <RadioGroupItem value="Fixed" id="Fixed" />
-        <Label htmlFor="Fixed">Fixed Amount</Label>
+        <Label htmlFor="Fixed">קבוע</Label>
       </div>
     </RadioGroup>
   );

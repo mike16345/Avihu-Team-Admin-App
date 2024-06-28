@@ -15,11 +15,11 @@ export const DietItemUnitRadio: FC<DietItemUnitRadioProps> = ({ onChangeSelectio
     >
       <div className="flex items-center space-x-2">
         <RadioGroupItem value="grams" id="Grams" />
-        <Label htmlFor="Grams">Grams</Label>
+        <Label htmlFor="Grams">גרם</Label>
       </div>
       <div className="flex items-center space-x-2">
         <RadioGroupItem value="spoons" id="Spoons" />
-        <Label htmlFor="spoons">Spoons</Label>
+        <Label htmlFor="spoons">כפות</Label>
       </div>
     </RadioGroup>
   );
