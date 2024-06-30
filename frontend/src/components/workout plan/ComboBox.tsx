@@ -44,7 +44,7 @@ const ComboBox: React.FC<ComboBoxProps> = ({ options, handleChange }) => {
           <CommandInput dir="rtl" placeholder="בחר סוג תוכנית..." />
           <CommandList>
             <CommandEmpty>No framework found.</CommandEmpty>
-            <CommandGroup>
+            <CommandGroup dir="rtl">
               {options.map((option) => (
                 <CommandItem key={option} value={option} onSelect={handleSelect}>
                   {option}

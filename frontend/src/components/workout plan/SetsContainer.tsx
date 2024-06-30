@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react'
 import SetsInput from './SetsInput'
 import { Button } from "../ui/button";
 import { ISet } from '@/interfaces/IWorkoutPlan';
+import AddButton from './buttons/AddButton';
+import DeleteButton from './buttons/DeleteButton';
 
 interface SetContainerProps {
     updateSets: (componentSets: ISet[]) => void;
@@ -62,7 +64,7 @@ const SetsContainer: React.FC<SetContainerProps> = ({ updateSets }) => {
             {componentSets.map(set => (
                 <div
                     key={set.id}
-                    className='flex gap-5 items-end'
+                    className='flex gap-5 p-2 border-t-2 items-end'
                 >
                     <SetsInput
                         setNumber={set.id}
@@ -70,18 +72,10 @@ const SetsContainer: React.FC<SetContainerProps> = ({ updateSets }) => {
                         maxReps={set.maxReps}
                         minReps={set.minReps}
                     />
-                    <Button
-                        onClick={() => removeSet(set.id)}
-                    >-</Button>
+                    <DeleteButton tip='הסר סט' clickFunction={() => removeSet(set.id)} />
                 </div>
             ))}
-            <div>
-                <Button
-                    onClick={createSet}
-                >
-                    +
-                </Button>
-            </div>
+            <AddButton tip='הוסף סט' clickFunction={createSet} />
         </div>
     )
 }

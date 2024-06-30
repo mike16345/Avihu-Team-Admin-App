@@ -12,7 +12,7 @@ interface SetInputProps {
 
 const SetsInput: React.FC<SetInputProps> = ({ setNumber, handleChange, maxReps, minReps }) => {
     return (
-        <div className='flex items-center gap-5'>
+        <div className='flex items-end gap-5'>
             <div>
                 סט {setNumber}
             </div >

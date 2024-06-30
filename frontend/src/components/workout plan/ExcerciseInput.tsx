@@ -6,8 +6,9 @@ import { ChevronsUpDown } from "lucide-react";
 import { Button } from "../ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ISet, IWorkout } from "@/interfaces/IWorkoutPlan";
-import SetsInput from "./SetsInput";
 import SetsContainer from "./SetsContainer";
+import AddButton from "./buttons/AddButton";
+import DeleteButton from "./buttons/DeleteButton";
 
 interface ExcerciseInputProps {
   options: string[];
@@ -76,15 +77,15 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, handleSave, ti
 
 
   return (
-    <div className="border-b-2 py-2 w-[80%]">
+    <div className="border-b-2 py-4 w-[80%]">
       <Collapsible>
-        <CollapsibleTrigger className="flex items-center">
+        <CollapsibleTrigger className="flex items-center font-bold text-lg">
           {title}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </CollapsibleTrigger>
         <CollapsibleContent>
           {workoutObjs.map((item) => (
-            <div className="py-5 flex items-center gap-5 border-b-4" key={item.id}>
+            <div className="py-5 flex items-start gap-5 border-b-4" key={item.id}>
               <div className="flex flex-col gap-5">
                 <ComboBox
                   options={options}
@@ -104,15 +105,10 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, handleSave, ti
                   />
                 </div>
               </div>
-
-              <Button className="mr-5" onClick={() => handleDeleteExcercise(item.id)}>
-                מחק
-              </Button>
+              <DeleteButton tip="הסר תרגיל" clickFunction={() => handleDeleteExcercise(item.id)} />
             </div>
           ))}
-          <Button className="mt-2" onClick={handleAddExcercise}>
-            הוסף תרגיל
-          </Button>
+          <AddButton tip="הוסף תרגיל" clickFunction={handleAddExcercise} />
           <Button className="mr-2" onClick={() => handleSave(workoutObjs)}>
             שמור
           </Button>
