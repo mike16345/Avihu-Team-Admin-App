@@ -5,8 +5,9 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ChevronsUpDown } from "lucide-react";
 import { Button } from "../ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { IWorkout } from "@/interfaces/IWorkoutPlan";
+import { ISet, IWorkout } from "@/interfaces/IWorkoutPlan";
 import SetsInput from "./SetsInput";
+import SetsContainer from "./SetsContainer";
 
 interface ExcerciseInputProps {
   options: string[];
@@ -38,6 +39,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, handleSave, ti
     });
   };
 
+
   const handleAddExcercise = () => {
     const newObject: IWorkout = {
       id: (workoutObjs.length + 1).toString(),
@@ -55,8 +57,26 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, handleSave, ti
     setWorkoutObjs(newArr);
   };
 
+
+
+  const updateSets = (setsArr: ISet[], workoutId: string) => {
+    setWorkoutObjs((prevWorkouts) => {
+      return prevWorkouts.map((workout) => {
+        if (workout.id === workoutId) {
+          return {
+            ...workout,
+            sets: setsArr
+          };
+        }
+        return workout;
+      });
+    });
+  }
+
+
+
   return (
-    <div className="border-b-2 py-2 w-[70%]">
+    <div className="border-b-2 py-2 w-[80%]">
       <Collapsible>
         <CollapsibleTrigger className="flex items-center">
           {title}
@@ -66,12 +86,14 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, handleSave, ti
           {workoutObjs.map((item) => (
             <div className="py-5 flex items-center gap-5 border-b-4" key={item.id}>
               <div className="flex flex-col gap-5">
-                  <ComboBox
-                    options={options}
-                    handleChange={(currentValue) => handleChange(currentValue, item.id)}
-                  />
-                  <SetsInput/>
-                  
+                <ComboBox
+                  options={options}
+                  handleChange={(currentValue) => handleChange(currentValue, item.id)}
+                />
+                <SetsContainer
+                  updateSets={(setsArr: ISet[]) => updateSets(setsArr, item.id)}
+                />
+
                 <div>
                   <Label>דגשים</Label>
                   <Textarea

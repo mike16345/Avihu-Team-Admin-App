@@ -6,9 +6,10 @@ export interface IWorkoutPlan {
 }
 
 export interface ISet {
+  id: number;
   minReps: number;
   maxReps?: number;
-  restTime: number;
+  restTime?: number;
 }
 
 export interface IWorkout {
