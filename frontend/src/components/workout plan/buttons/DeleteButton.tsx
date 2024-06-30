@@ -7,12 +7,15 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip"
 
+{/* CR: clickFunction is not the best practice naming convention. Use onClick instead or onDelete. */}
 interface DeleteButtonProps {
     clickFunction: any
     tip: string
 }
 
 const DeleteButton: React.FC<DeleteButtonProps> = ({ clickFunction, tip }) => {
+    {/* CR: My issue here is more the styling. */}
+
     return (
         <div>
             <TooltipProvider>

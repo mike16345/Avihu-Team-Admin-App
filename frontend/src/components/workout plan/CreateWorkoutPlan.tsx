@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 
+// CR: Make sure to delete unused imports. 
 import { Button } from "@/components/ui/button";
 import ComboBox from "./ComboBox";
 import ExcerciseInput from "./ExcerciseInput";
@@ -39,8 +40,10 @@ const CreateWorkoutPlan: React.FC = () => {
                 return [...prevWorkoutPlan, { name: split, workouts: workouts }];
             }
         });
-    };
+    }
 
+
+    // CR: This should be a handler that runs when you select a workout preset. 
     useEffect(() => {
         const initalWorkoutPlan = [];
         let iterater = 1;
