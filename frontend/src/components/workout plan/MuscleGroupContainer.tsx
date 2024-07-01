@@ -86,7 +86,7 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({ handleSave,
                             </div>
                         </div>
                     ))}
-                    <AddButton onClick={addWorkout} />
+                    <AddButton tip='הוסף שריר' onClick={addWorkout} />
                 </CollapsibleContent>
             </Collapsible>
         </div>

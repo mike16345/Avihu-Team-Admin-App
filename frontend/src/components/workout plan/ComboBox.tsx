@@ -18,7 +18,7 @@ interface ComboBoxProps {
 
 const ComboBox: React.FC<ComboBoxProps> = ({ options, handleChange }) => {
   const [open, setOpen] = useState<boolean>(false);
-  const [value, setValue] = useState<string>(`בחר`);
+  const [value, setValue] = useState<string>();
 
   const handleSelect = (currentValue: string) => {
     setValue(currentValue);
@@ -35,7 +35,7 @@ const ComboBox: React.FC<ComboBoxProps> = ({ options, handleChange }) => {
           aria-expanded={open}
           className="w-[200px] justify-between"
         >
-          {value}
+          {value ? value : `בחר`}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
