@@ -17,44 +17,52 @@ interface MuscleGroupContainerProps {
     title: string
 }
 
+interface IMuscleGroupWorkouts {
+    muscleGroup: string;
+    workoutsArr: IWorkout[]
+}
+
 
 const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({ handleSave, title }) => {
 
-    const [workouts, setWorkouts] = useState<string[]>([`1`])
-    const [selectedMuscleGroup, setSelectedMuscleGroup] = useState<string>();
-    const [exercises, setExercises] = useState<string[] | undefined>()
+    const [workouts, setWorkouts] = useState<IMuscleGroupWorkouts[]>([
+        { muscleGroup: ``, workoutsArr: [] }
+    ])
 
-    /*   const updateWorkouts = (workoutId: string, workoutObjects) => {
-          setWorkouts(prevWorkouts => {
-              return prevWorkouts.map(workout => {
-                  if (workout.id == workoutId) {
-                      return workoutObjects
-                  }
-                  return workout
-              })
-          })
-      } */
+    const addWorkout = () => {
+        const newObject: IMuscleGroupWorkouts = {
+            muscleGroup: ``,
+            workoutsArr: []
+        }
+        setWorkouts([...workouts, newObject])
+    }
+
+    const updateWorkouts = (i: number, workoutsObject: IWorkout[]) => {
+
+        const updatedWorkouts = [...workouts]
+        updatedWorkouts[i] = {
+            ...workouts[i],
+            workoutsArr: workoutsObject
+        }
+
+        setWorkouts(updatedWorkouts);
+    }
+
+    const updateMuscleGroup = (i: number, value: string) => {
+
+        const updatedWorkouts = [...workouts]
+        updatedWorkouts[i] = {
+            ...workouts[i],
+            muscleGroup: value
+        }
+
+        setWorkouts(updatedWorkouts);
+    }
+
 
     useEffect(() => {
-        if (selectedMuscleGroup) {
-            switch (selectedMuscleGroup) {
-                case `חזה`:
-                    setExercises(chestExercises)
-                    break;
-                case `כתפיים`:
-                    setExercises(shoulderExercises)
-                    break;
-                case `יד אחורית`:
-                    setExercises(tricepExercises)
-                    break;
-
-            }
-        }
-    }, [selectedMuscleGroup])
-
-    /*  useEffect(() => {
-         handleSave(workouts)
-     }, [workouts]) */
+        handleSave(workouts)
+    }, [workouts])
 
 
     return (
@@ -65,22 +73,20 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({ handleSave,
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                    {workouts.map(workout => (
-                        <div className='border-y-4'>
+                    {workouts.map((workout, i) => (
+                        <div key={workout.muscleGroup} className='border-y-4'>
                             <h1 className='underline font-bold py-2'>בחר שריר:</h1>
-                            <ComboBox options={muscleGroups} handleChange={setSelectedMuscleGroup} />
-                            {exercises &&
-                                <div className='border-y-2 my-2'>
-                                    <ExcerciseInput
-                                        options={exercises}
-                                        updateWorkouts={(workouts) => handleSave(workouts)}
-                                        title={selectedMuscleGroup}
-                                    />
-                                </div>
-                            }
+                            <ComboBox options={muscleGroups} handleChange={(value) => updateMuscleGroup(i, value)} />
+                            <div className='border-y-2 my-2'>
+                                <ExcerciseInput
+                                    options={workout.muscleGroup === `חזה` ? chestExercises : shoulderExercises}
+                                    updateWorkouts={(workouts) => updateWorkouts(i, workouts)}
+                                    title={workout.muscleGroup}
+                                />
+                            </div>
                         </div>
                     ))}
-                    <AddButton onClick={() => setWorkouts([...workouts, (workouts.length + 1).toString()])} />
+                    <AddButton onClick={addWorkout} />
                 </CollapsibleContent>
             </Collapsible>
         </div>
