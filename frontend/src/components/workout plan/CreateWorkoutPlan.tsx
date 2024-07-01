@@ -5,6 +5,7 @@ import ExcerciseInput from "./ExcerciseInput";
 import { IWorkout, IWorkoutPlan } from "@/interfaces/IWorkoutPlan";
 import DeleteButton from "./buttons/DeleteButton";
 import AddButton from "./buttons/AddButton";
+import MuscleGroupContainer from "./MuscleGroupContainer";
 
 const CreateWorkoutPlan: React.FC = () => {
     const workoutTemp: string[] = [`AB`, `ABC`, `Daily`, `Custom`];
@@ -92,8 +93,7 @@ const CreateWorkoutPlan: React.FC = () => {
 
                 {workoutPlan.map((workout) => (
                     <div key={workout.name} className="flex items-start">
-                        <ExcerciseInput
-                            options={excercises}
+                        <MuscleGroupContainer
                             handleSave={(workouts) => handleSave(workout.name, workouts)}
                             title={workout.name}
                         />

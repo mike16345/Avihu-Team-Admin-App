@@ -1,9 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ComboBox from "./ComboBox";
 import { Label } from "@/components/ui/label";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronsUpDown } from "lucide-react";
-import { Button } from "../ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ISet, IWorkout } from "@/interfaces/IWorkoutPlan";
 import SetsContainer from "./SetsContainer";
@@ -12,12 +9,12 @@ import DeleteButton from "./buttons/DeleteButton";
 import { Input } from "../ui/input";
 
 interface ExcerciseInputProps {
-  options: string[];
-  handleSave: (workouts: IWorkout[]) => void;
+  options: string[] | undefined;
+  updateWorkouts: (workouts: IWorkout[]) => void;
   title: string;
 }
 
-const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, handleSave, title }) => {
+const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts, title }) => {
   const [workoutObjs, setWorkoutObjs] = useState<IWorkout[]>([
     {
       id: `1`,
@@ -76,55 +73,48 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, handleSave, ti
     });
   }
 
+  useEffect(() => {
+    updateWorkouts(workoutObjs)
+  }, [workoutObjs])
 
 
   return (
-    <div className="border-b-2 py-4 w-[90%]">
-      <Collapsible>
-        <CollapsibleTrigger className="flex items-center font-bold text-lg">
-          {title}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          {workoutObjs.map((item) => (
-            <div className="py-5 flex items-start gap-5 border-b-4" key={item.id}>
-              <div className="flex flex-col gap-5">
-                <ComboBox
-                  options={options}
-                  handleChange={(currentValue) => handleChange(currentValue, item.id)}
-                />
-                <SetsContainer
-                  updateSets={(setsArr: ISet[]) => updateSets(setsArr, item.id)}
-                />
+    <div className="w-full">
+      <h1 className="font-bold underline">{title}</h1>
+      {workoutObjs.map((item) => (
+        <div className="py-5 flex items-start gap-5 border-b-2" key={item.id}>
+          <div className="flex flex-col gap-5">
+            <ComboBox
+              options={options}
+              handleChange={(currentValue) => handleChange(currentValue, item.id)}
+            />
+            <SetsContainer
+              updateSets={(setsArr: ISet[]) => updateSets(setsArr, item.id)}
+            />
 
-                <div>
-                  <Label>לינק לסרטון</Label>
-                  <Input
-                    placeholder="הכנס לינק כאן..."
-                    name="linkToVideo"
-                    value={item.linkToVideo}
-                    onChange={(e) => handleChange(e, item.id)}
-                  />
-                </div>
-                <div>
-                  <Label>דגשים</Label>
-                  <Textarea
-                    placeholder="תלבש מכנסיים.."
-                    name="tipFromTrainer"
-                    value={item.tipFromTrainer}
-                    onChange={(e) => handleChange(e, item.id)}
-                  />
-                </div>
-              </div>
-              <DeleteButton tip="הסר תרגיל" onClick={() => handleDeleteExcercise(item.id)} />
+            <div>
+              <Label>לינק לסרטון</Label>
+              <Input
+                placeholder="הכנס לינק כאן..."
+                name="linkToVideo"
+                value={item.linkToVideo}
+                onChange={(e) => handleChange(e, item.id)}
+              />
             </div>
-          ))}
-          <AddButton tip="הוסף תרגיל" onClick={handleAddExcercise} />
-          <Button className="mr-2" onClick={() => handleSave(workoutObjs)}>
-            שמור
-          </Button>
-        </CollapsibleContent>
-      </Collapsible>
+            <div>
+              <Label>דגשים</Label>
+              <Textarea
+                placeholder="תלבש מכנסיים.."
+                name="tipFromTrainer"
+                value={item.tipFromTrainer}
+                onChange={(e) => handleChange(e, item.id)}
+              />
+            </div>
+          </div>
+          <DeleteButton tip="הסר תרגיל" onClick={() => handleDeleteExcercise(item.id)} />
+        </div>
+      ))}
+      <AddButton tip="הוסף תרגיל" onClick={handleAddExcercise} />
     </div>
   );
 };
