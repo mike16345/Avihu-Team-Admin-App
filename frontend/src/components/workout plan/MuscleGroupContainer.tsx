@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import ComboBox from './ComboBox'
 import ExcerciseInput from './ExcerciseInput'
-import { IWorkout } from '@/interfaces/IWorkoutPlan'
+import { IMuscleGroupWorkouts, IWorkout } from '@/interfaces/IWorkoutPlan'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronsUpDown } from "lucide-react";
 import AddButton from './buttons/AddButton';
@@ -9,7 +9,6 @@ import AddButton from './buttons/AddButton';
 const muscleGroups: string[] = ["חזה", "כתפיים", "יד אחורית", "גב", "יד קידמית", "רגליים", "בטן", "אירובי",];
 const chestExercises: string[] = ["פרפר", "מקבילים", "לחיצת חזה בשיפוע שלילי", "לחיצת חזה בשיפוע חיובי", "לחיצת חזה",];
 const shoulderExercises: string[] = ["כתפיים"];
-const tricepExercises: string[] = ["יד אחורית"];
 
 
 interface MuscleGroupContainerProps {
@@ -17,10 +16,6 @@ interface MuscleGroupContainerProps {
     title: string
 }
 
-interface IMuscleGroupWorkouts {
-    muscleGroup: string;
-    workoutsArr: IWorkout[]
-}
 
 
 const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({ handleSave, title }) => {

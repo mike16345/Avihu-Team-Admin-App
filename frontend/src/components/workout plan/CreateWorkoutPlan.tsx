@@ -1,15 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 import ComboBox from "./ComboBox";
-import ExcerciseInput from "./ExcerciseInput";
-import { IWorkout, IWorkoutPlan } from "@/interfaces/IWorkoutPlan";
+import { IMuscleGroupWorkouts, IWorkoutPlan } from "@/interfaces/IWorkoutPlan";
 import DeleteButton from "./buttons/DeleteButton";
 import AddButton from "./buttons/AddButton";
 import MuscleGroupContainer from "./MuscleGroupContainer";
 
 const CreateWorkoutPlan: React.FC = () => {
     const workoutTemp: string[] = [`AB`, `ABC`, `Daily`, `Custom`];
-    const excercises: string[] = [`לחיצת חזה`, `פרפר`, `תחתונים`, `סקוואט`];
 
     const [workoutSplit, setWorkoutSplit] = useState<string>(`AB`);
     const [workoutPlan, setWorkoutPlan] = useState<IWorkoutPlan[]>([]);
@@ -27,7 +25,7 @@ const CreateWorkoutPlan: React.FC = () => {
         setWorkoutPlan(newArr);
     };
 
-    const handleSave = (split: string, workouts: IWorkout[]) => {
+    const handleSave = (split: string, workouts: IMuscleGroupWorkouts[]) => {
         setWorkoutPlan((prevWorkoutPlan) => {
             const workoutExists = prevWorkoutPlan.find((workout) => workout.name === split);
 

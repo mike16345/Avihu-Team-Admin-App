@@ -2,7 +2,7 @@ export interface IWorkoutPlan {
   id?: string;
   userId?: string;
   name: string;
-  workouts: IWorkout[];
+  workouts: IMuscleGroupWorkouts[];
 }
 
 export interface ISet {
@@ -18,4 +18,9 @@ export interface IWorkout {
   linkToVideo?: string;
   name: string;
   sets: ISet[];
+}
+
+export interface IMuscleGroupWorkouts {
+  muscleGroup: string;
+  workoutsArr: IWorkout[]
 }
