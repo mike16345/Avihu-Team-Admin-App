@@ -9,6 +9,7 @@ import { ISet, IWorkout } from "@/interfaces/IWorkoutPlan";
 import SetsContainer from "./SetsContainer";
 import AddButton from "./buttons/AddButton";
 import DeleteButton from "./buttons/DeleteButton";
+import { Input } from "../ui/input";
 
 interface ExcerciseInputProps {
   options: string[];
@@ -46,6 +47,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, handleSave, ti
       id: (workoutObjs.length + 1).toString(),
       name: ``,
       tipFromTrainer: ``,
+      linkToVideo: ``,
       sets: [],
     };
 
@@ -77,7 +79,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, handleSave, ti
 
 
   return (
-    <div className="border-b-2 py-4 w-[80%]">
+    <div className="border-b-2 py-4 w-[90%]">
       <Collapsible>
         <CollapsibleTrigger className="flex items-center font-bold text-lg">
           {title}
@@ -96,6 +98,15 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, handleSave, ti
                 />
 
                 <div>
+                  <Label>לינק לסרטון</Label>
+                  <Input
+                    placeholder="הכנס לינק כאן..."
+                    name="linkToVideo"
+                    value={item.linkToVideo}
+                    onChange={(e) => handleChange(e, item.id)}
+                  />
+                </div>
+                <div>
                   <Label>דגשים</Label>
                   <Textarea
                     placeholder="תלבש מכנסיים.."
@@ -105,10 +116,10 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, handleSave, ti
                   />
                 </div>
               </div>
-              <DeleteButton tip="הסר תרגיל" clickFunction={() => handleDeleteExcercise(item.id)} />
+              <DeleteButton tip="הסר תרגיל" onClick={() => handleDeleteExcercise(item.id)} />
             </div>
           ))}
-          <AddButton tip="הוסף תרגיל" clickFunction={handleAddExcercise} />
+          <AddButton tip="הוסף תרגיל" onClick={handleAddExcercise} />
           <Button className="mr-2" onClick={() => handleSave(workoutObjs)}>
             שמור
           </Button>

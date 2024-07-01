@@ -18,7 +18,7 @@ interface ComboBoxProps {
 
 const ComboBox: React.FC<ComboBoxProps> = ({ options, handleChange }) => {
   const [open, setOpen] = useState<boolean>(false);
-  const [value, setValue] = useState<string>(options[0]);
+  const [value, setValue] = useState<string>(`בחר`);
 
   const handleSelect = (currentValue: string) => {
     setValue(currentValue);

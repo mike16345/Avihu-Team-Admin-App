@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 
-// CR: Make sure to delete unused imports. 
-import { Button } from "@/components/ui/button";
 import ComboBox from "./ComboBox";
 import ExcerciseInput from "./ExcerciseInput";
 import { IWorkout, IWorkoutPlan } from "@/interfaces/IWorkoutPlan";
@@ -42,13 +40,11 @@ const CreateWorkoutPlan: React.FC = () => {
         });
     }
 
-
-    // CR: This should be a handler that runs when you select a workout preset. 
-    useEffect(() => {
+    const handleSelect = (splitVal: string) => {
         const initalWorkoutPlan = [];
         let iterater = 1;
 
-        switch (workoutSplit) {
+        switch (splitVal) {
             case `AB`:
                 iterater = 2;
                 break;
@@ -64,9 +60,9 @@ const CreateWorkoutPlan: React.FC = () => {
         }
 
         for (let index = 1; index <= iterater; index++) {
-            if (workoutSplit === `AB` || workoutSplit === `ABC`) {
+            if (splitVal === `AB` || splitVal === `ABC`) {
                 initalWorkoutPlan.push({
-                    name: `אימון ${workoutSplit[index - 1]}`,
+                    name: `אימון ${splitVal[index - 1]}`,
                     workouts: [],
                 });
             } else {
@@ -77,8 +73,12 @@ const CreateWorkoutPlan: React.FC = () => {
             }
         }
 
+        setWorkoutSplit(splitVal)
         setWorkoutPlan(initalWorkoutPlan);
-    }, [workoutSplit]);
+    }
+
+
+
 
     return (
         <div className="p-5 overflow-y-scroll max-h-[95vh] w-full">
@@ -87,7 +87,7 @@ const CreateWorkoutPlan: React.FC = () => {
             <div className="p-2">
                 <ComboBox
                     options={workoutTemp}
-                    handleChange={(currentValue) => setWorkoutSplit(currentValue)}
+                    handleChange={(currentValue) => handleSelect(currentValue)}
                 />
 
                 {workoutPlan.map((workout) => (
@@ -98,11 +98,11 @@ const CreateWorkoutPlan: React.FC = () => {
                             title={workout.name}
                         />
                         {workoutSplit === `Custom` &&
-                            <DeleteButton tip="הסר אימון" clickFunction={() => handleDeleteWorkout(workout.name)} />
+                            <DeleteButton tip="הסר אימון" onClick={() => handleDeleteWorkout(workout.name)} />
                         }
                     </div>
                 ))}
-                {workoutSplit === `Custom` && <AddButton tip="הוסף אימון" clickFunction={handleAddWorkout} />}
+                {workoutSplit === `Custom` && <AddButton tip="הוסף אימון" onClick={handleAddWorkout} />}
             </div>
         </div>
     );

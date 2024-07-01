@@ -7,14 +7,13 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-{/* CR: clickFunction is not the best practice naming convention. Use onClick instead or onAdd. */}
 interface AddButtonProps {
-    clickFunction: any
+    onClick: any
     tip: string
 }
 
-const AddButton: React.FC<AddButtonProps> = ({ clickFunction, tip }) => {
-    {/* CR: My issue here is more the styling. */}
+const AddButton: React.FC<AddButtonProps> = ({ onClick, tip }) => {
+    {/* CR: My issue here is more the styling. */ }
     return (
         <div className=' bg-slate-100 rounded border-t-2 flex justify-center p-1 my-2'>
             <TooltipProvider>
@@ -22,7 +21,7 @@ const AddButton: React.FC<AddButtonProps> = ({ clickFunction, tip }) => {
                     <TooltipTrigger>
                         <Button
                             className="text-sm rounded-full h-5 bg-green-500"
-                            onClick={clickFunction}
+                            onClick={onClick}
                         >
                             +
                         </Button>
