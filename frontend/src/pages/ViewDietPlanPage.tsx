@@ -23,7 +23,12 @@ export const ViewDietPlanPage = () => {
   const [dietPlan, setDietPlan] = useState<IDietPlan>({ meals: [] });
 
   const handleSaveDietPlan = async () => {
-    await addDietPlan("665f0b0b00b1a04e8f1c4478", dietPlan)
+    const dietPlanToAdd = {
+      ...dietPlan,
+      userId: "665f0b0b00b1a04e8f1c4478",
+    };
+
+    await addDietPlan(dietPlanToAdd)
       .then(() => {
         toast.success("תפריט נשמר בהצלחה!");
       })
