@@ -21,13 +21,13 @@ interface MuscleGroupContainerProps {
 const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({ handleSave, title }) => {
 
     const [workouts, setWorkouts] = useState<IMuscleGroupWorkouts[]>([
-        { muscleGroup: ``, workoutsArr: [] }
+        { muscleGroup: ``, exercises: [] }
     ])
 
     const addWorkout = () => {
         const newObject: IMuscleGroupWorkouts = {
             muscleGroup: ``,
-            workoutsArr: []
+            exercises: []
         }
         setWorkouts([...workouts, newObject])
     }
@@ -37,7 +37,7 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({ handleSave,
         const updatedWorkouts = [...workouts]
         updatedWorkouts[i] = {
             ...workouts[i],
-            workoutsArr: workoutsObject
+            exercises: workoutsObject
         }
 
         setWorkouts(updatedWorkouts);

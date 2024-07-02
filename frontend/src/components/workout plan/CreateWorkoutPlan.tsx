@@ -13,28 +13,28 @@ const CreateWorkoutPlan: React.FC = () => {
     const [workoutPlan, setWorkoutPlan] = useState<IWorkoutPlan[]>([]);
 
     const handleAddWorkout = () => {
-        const newObject = { name: `אימון ${workoutPlan.length + 1}`, workouts: [] };
+        const newObject = { planName: `אימון ${workoutPlan.length + 1}`, workouts: [] };
 
         setWorkoutPlan([...workoutPlan, newObject]);
     };
 
     const handleDeleteWorkout = (name: string) => {
-        const filteredArr = workoutPlan.filter((workout) => workout.name !== name);
-        const newArr = filteredArr.map((workout, i) => ({ ...workout, name: `אימון ${i + 1}` }));
+        const filteredArr = workoutPlan.filter((workout) => workout.planName !== name);
+        const newArr = filteredArr.map((workout, i) => ({ ...workout, planName: `אימון ${i + 1}` }));
 
         setWorkoutPlan(newArr);
     };
 
     const handleSave = (split: string, workouts: IMuscleGroupWorkouts[]) => {
         setWorkoutPlan((prevWorkoutPlan) => {
-            const workoutExists = prevWorkoutPlan.find((workout) => workout.name === split);
+            const workoutExists = prevWorkoutPlan.find((workout) => workout.planName === split);
 
             if (workoutExists) {
                 return prevWorkoutPlan.map((workout) =>
-                    workout.name === split ? { ...workout, workouts: workouts } : workout
+                    workout.planName === split ? { ...workout, workouts: workouts } : workout
                 );
             } else {
-                return [...prevWorkoutPlan, { name: split, workouts: workouts }];
+                return [...prevWorkoutPlan, { planName: split, workouts: workouts }];
             }
         });
     }
@@ -61,12 +61,12 @@ const CreateWorkoutPlan: React.FC = () => {
         for (let index = 1; index <= iterater; index++) {
             if (splitVal === `AB` || splitVal === `ABC`) {
                 initalWorkoutPlan.push({
-                    name: `אימון ${splitVal[index - 1]}`,
+                    planName: `אימון ${splitVal[index - 1]}`,
                     workouts: [],
                 });
             } else {
                 initalWorkoutPlan.push({
-                    name: `אימון ${index}`,
+                    planName: `אימון ${index}`,
                     workouts: [],
                 });
             }
@@ -90,13 +90,13 @@ const CreateWorkoutPlan: React.FC = () => {
                 />
 
                 {workoutPlan.map((workout) => (
-                    <div key={workout.name} className="flex items-start">
+                    <div key={workout.planName} className="flex items-start">
                         <MuscleGroupContainer
-                            handleSave={(workouts) => handleSave(workout.name, workouts)}
-                            title={workout.name}
+                            handleSave={(workouts) => handleSave(workout.planName, workouts)}
+                            title={workout.planName}
                         />
                         {workoutSplit === `Custom` &&
-                            <DeleteButton tip="הסר אימון" onClick={() => handleDeleteWorkout(workout.name)} />
+                            <DeleteButton tip="הסר אימון" onClick={() => handleDeleteWorkout(workout.planName)} />
                         }
                     </div>
                 ))}

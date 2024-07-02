@@ -1,7 +1,7 @@
 export interface IWorkoutPlan {
   id?: string;
   userId?: string;
-  name: string;
+  planName: string;
   workouts: IMuscleGroupWorkouts[];
 }
 
@@ -22,5 +22,5 @@ export interface IWorkout {
 
 export interface IMuscleGroupWorkouts {
   muscleGroup: string;
-  workoutsArr: IWorkout[]
+  exercises: IWorkout[]
 }
