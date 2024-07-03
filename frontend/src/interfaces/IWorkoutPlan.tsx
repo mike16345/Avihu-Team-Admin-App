@@ -4,6 +4,10 @@ export interface IWorkoutPlan {
   planName: string;
   workouts: IMuscleGroupWorkouts[];
 }
+export interface ICompleteWorkoutPlan {
+  userId?: string;
+  workoutPlans: IWorkoutPlan[];
+}
 
 export interface ISet {
   id: number;

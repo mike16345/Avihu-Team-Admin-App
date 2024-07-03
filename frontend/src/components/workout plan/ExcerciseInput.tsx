@@ -19,7 +19,6 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
     {
       id: `1`,
       name: ``,
-      tipFromTrainer: ``,
       sets: [],
     },
   ]);
@@ -43,8 +42,6 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
     const newObject: IWorkout = {
       id: (workoutObjs.length + 1).toString(),
       name: ``,
-      tipFromTrainer: ``,
-      linkToVideo: ``,
       sets: [],
     };
 

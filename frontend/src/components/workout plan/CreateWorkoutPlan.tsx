@@ -1,12 +1,16 @@
 import React, { useState } from "react";
 
 import ComboBox from "./ComboBox";
-import { IMuscleGroupWorkouts, IWorkoutPlan } from "@/interfaces/IWorkoutPlan";
+import { ICompleteWorkoutPlan, IMuscleGroupWorkouts, IWorkoutPlan } from "@/interfaces/IWorkoutPlan";
 import DeleteButton from "./buttons/DeleteButton";
 import AddButton from "./buttons/AddButton";
 import MuscleGroupContainer from "./MuscleGroupContainer";
+import { useWorkoutPlanApi } from "@/hooks/useWorkoutPlanApi";
+import { cleanObject } from "@/utils/workoutPlanUtils";
+import { Button } from "../ui/button";
 
 const CreateWorkoutPlan: React.FC = () => {
+    const { addWorkoutPlan } = useWorkoutPlanApi()
     const workoutTemp: string[] = [`AB`, `ABC`, `Daily`, `Custom`];
 
     const [workoutSplit, setWorkoutSplit] = useState<string>(`AB`);
@@ -77,6 +81,19 @@ const CreateWorkoutPlan: React.FC = () => {
     }
 
 
+    const hanldeSubmit = () => {
+        const postObject: ICompleteWorkoutPlan = {
+            userId: `665f0b0b00b1a04e8f1c4478`,
+            workoutPlans: [...workoutPlan]
+        }
+
+        const cleanedPostObject = cleanObject(postObject)
+
+        addWorkoutPlan(cleanedPostObject);
+
+    }
+
+
 
 
     return (
@@ -102,7 +119,8 @@ const CreateWorkoutPlan: React.FC = () => {
                 ))}
                 {workoutSplit === `Custom` && <AddButton tip="הוסף אימון" onClick={handleAddWorkout} />}
             </div>
-        </div>
+            <Button onClick={hanldeSubmit}>שמור אימון</Button>
+        </div >
     );
 };
 
