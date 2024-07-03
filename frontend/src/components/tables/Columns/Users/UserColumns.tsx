@@ -1,4 +1,3 @@
-import { IUser } from "@/interfaces/interfaces";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,12 +10,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { IUser } from "@/interfaces/IUser";
 
 export const columns: ColumnDef<IUser>[] = [
   {
     id: "select",
     header: ({ table }) => (
       <Checkbox
+        className="mr-4"
         checked={
           table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")
         }
@@ -26,6 +27,7 @@ export const columns: ColumnDef<IUser>[] = [
     ),
     cell: ({ row }) => (
       <Checkbox
+        className="mr-4"
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
         aria-label="Select row"
@@ -34,40 +36,36 @@ export const columns: ColumnDef<IUser>[] = [
     enableSorting: false,
     enableHiding: false,
   },
+
   {
     accessorKey: "name",
-
     header: ({ column }) => {
       return (
         <Button
+          className="m-0 px-1 py-1"
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Name
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          שם
+          <ArrowUpDown className="h-4 w-4" />
         </Button>
       );
     },
   },
+
   {
     accessorKey: "email",
-    header: "Email",
+    header: "מייל",
   },
+
   {
-    accessorKey: "type",
-    header: "Type",
-  },
-  {
-    accessorKey: "isAdmin",
-    header: "Admin",
-  },
-  {
-    accessorKey: "date_created",
-    header: "Date Created",
+    accessorKey: "createdAt",
+    header: "תאריך נוצר",
     cell: ({ row }) => {
       const user = row.original;
+      console.log("user", user);
 
-      return user.createdAt.toDateString().slice(0, 10);
+      return "24/06/202";
     },
   },
   {
@@ -76,7 +74,6 @@ export const columns: ColumnDef<IUser>[] = [
       const user = row.original;
       const handleDeleteUser = table.options.meta?.handleDeleteData;
       const handleViewUser = table.options.meta?.handleViewData;
-      const handleViewUserProjects = table.options.meta?.handleViewNestedData;
 
       return (
         <DropdownMenu>
@@ -92,11 +89,6 @@ export const columns: ColumnDef<IUser>[] = [
 
             <DropdownMenuItem onClick={() => handleViewUser && handleViewUser(user)}>
               View user
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => handleViewUserProjects && handleViewUserProjects(user, user.id)}
-            >
-              View projects
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleDeleteUser && handleDeleteUser(user)}>
               Delete User

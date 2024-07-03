@@ -2,6 +2,7 @@ import "./App.css";
 import { ModeToggle } from "./components/theme/mode-toggle";
 import { ThemeProvider } from "./components/theme/theme-provider";
 import { Toaster } from "./components/ui/sonner";
+import { UsersPage } from "./pages/UsersPage";
 import { ViewDietPlanPage } from "./pages/ViewDietPlanPage";
 
 function App() {
@@ -12,7 +13,8 @@ function App() {
           <ModeToggle />
         </div>
         <div className="w-3/4 h-full p-8 ">
-          <ViewDietPlanPage />
+          <UsersPage />
+          {/* <ViewDietPlanPage /> */}
         </div>
       </div>
       <Toaster dir="rtl" richColors />
