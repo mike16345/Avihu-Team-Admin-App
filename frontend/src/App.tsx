@@ -1,14 +1,13 @@
 import "./App.css";
-import { HelloWorld } from "./components/HelloWorld";
 import Nav from "./components/Nav";
-import CreateWorkoutPlan from "./components/workout plan/CreateWorkoutPlan";
+import ViewWorkoutPlan from "./components/workout plan/ViewWorkoutPlan";
 
 function App() {
 
   return (
     <div dir="rtl" className="flex">
       <Nav />
-      <CreateWorkoutPlan />
+      <ViewWorkoutPlan />
     </div>
   );
 }

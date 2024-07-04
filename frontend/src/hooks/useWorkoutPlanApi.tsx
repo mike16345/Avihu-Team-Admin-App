@@ -2,7 +2,7 @@ import { deleteItem, fetchData, sendData, updateItem } from "@/API/api";
 import { ICompleteWorkoutPlan } from "@/interfaces/IWorkoutPlan";
 
 
-const WORKOUT_PLAN_ENDPOINT = "http://localhost:3002/workoutPlans";
+const WORKOUT_PLAN_ENDPOINT = "http://localhost:3002/workoutPlans/";
 
 export const useWorkoutPlanApi = () => {
     const addWorkoutPlan = (workoutPlan: ICompleteWorkoutPlan) => sendData<ICompleteWorkoutPlan>(WORKOUT_PLAN_ENDPOINT, workoutPlan);
