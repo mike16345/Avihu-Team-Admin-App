@@ -92,17 +92,13 @@ const CreateWorkoutPlan: React.FC = () => {
 
         const cleanedPostObject = cleanObject(postObject)
         const date = new Date().toLocaleTimeString()
-        try {
-            const response = await addWorkoutPlan(cleanedPostObject);
-
-            toast(`Workout Plan Saved Succesfully!`, {
+        addWorkoutPlan(cleanedPostObject).
+            then(() => toast(`Workout Plan Saved Succesfully!`, {
                 description: `${date}`
-            })
-        } catch (error) {
-            toast(`${error.message}`, {
+            }))
+            .catch((error) => toast(`${error.message}`, {
                 description: `${error.response.data.message}`
-            })
-        }
+            }))
 
     }
 
