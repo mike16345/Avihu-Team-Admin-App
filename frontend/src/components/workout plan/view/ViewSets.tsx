@@ -3,10 +3,11 @@ import React from 'react'
 
 interface ViewSetsProps {
     set: ISet,
-    num: number
+    num: number,
+    editable: boolean
 }
 
-const ViewSets: React.FC<ViewSetsProps> = ({ set, num }) => {
+const ViewSets: React.FC<ViewSetsProps> = ({ set, num, editable }) => {
     const { minReps, maxReps } = set
     return (
         <div>
@@ -20,9 +21,18 @@ const ViewSets: React.FC<ViewSetsProps> = ({ set, num }) => {
                 </thead>
                 <tbody>
                     <tr>
-                        <td className='td'>סט {num + 1}</td>
-                        <td className='td'>{minReps}</td>
-                        <td className='td'>{maxReps}</td>
+                        <td
+                            className='td'
+                            contentEditable={editable}
+                        >סט {num + 1}</td>
+                        <td
+                            className='td'
+                            contentEditable={editable}
+                        >{minReps}</td>
+                        <td
+                            className='td'
+                            contentEditable={editable}
+                        >{maxReps}</td>
                     </tr>
                 </tbody>
             </table>
