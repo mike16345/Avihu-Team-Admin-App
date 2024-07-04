@@ -15,7 +15,7 @@ export const useDietPlanApi = () => {
   const deleteDietPlan = (userID: string) => deleteItem(`${DIET_PLAN_ENDPOINT}`, userID);
 
   const getDietPlanByUserId = (userID: string) =>
-    fetchData<IDietPlan>(`${DIET_PLAN_ENDPOINT}${userID}`);
+    fetchData<IDietPlan>(`${DIET_PLAN_ENDPOINT}/user/${userID}`);
 
   const getDietPlan = (id: string) => fetchData<IDietPlan>(DIET_PLAN_ENDPOINT + id);
 
