@@ -1,6 +1,6 @@
 import "./App.css";
 import Nav from "./components/Nav";
-import ViewWorkoutPlan from "./components/workout plan/ViewWorkoutPlan";
+import ViewWorkoutPlan from "./components/workout plan/view/ViewWorkoutPlan";
 
 function App() {
 

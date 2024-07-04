@@ -1,7 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
 /* @layer base {
   :root {
     --background: 0 0% 100%;
@@ -113,12 +113,21 @@
   }
 }
 
- 
+
 @layer base {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.th {
+  @apply border-2 text-center px-6 font-bold;
+}
+
+.td {
+  @apply border-2 text-center px-6;
 }
