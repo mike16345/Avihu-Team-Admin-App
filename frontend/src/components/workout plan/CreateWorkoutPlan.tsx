@@ -8,6 +8,9 @@ import MuscleGroupContainer from "./MuscleGroupContainer";
 import { useWorkoutPlanApi } from "@/hooks/useWorkoutPlanApi";
 import { cleanObject } from "@/utils/workoutPlanUtils";
 import { Button } from "../ui/button";
+import { Toaster } from "@/components/ui/sonner"
+import { toast } from "sonner";
+
 
 const CreateWorkoutPlan: React.FC = () => {
     const { addWorkoutPlan } = useWorkoutPlanApi()
@@ -81,15 +84,25 @@ const CreateWorkoutPlan: React.FC = () => {
     }
 
 
-    const hanldeSubmit = () => {
+    const hanldeSubmit = async () => {
         const postObject: ICompleteWorkoutPlan = {
             userId: `665f0b0b00b1a04e8f1c4478`,
             workoutPlans: [...workoutPlan]
         }
 
         const cleanedPostObject = cleanObject(postObject)
+        const date = new Date().toLocaleTimeString()
+        try {
+            const response = await addWorkoutPlan(cleanedPostObject);
 
-        addWorkoutPlan(cleanedPostObject);
+            toast(`Workout Plan Saved Succesfully!`, {
+                description: `${date}`
+            })
+        } catch (error) {
+            toast(`${error.message}`, {
+                description: `${error.response.data.message}`
+            })
+        }
 
     }
 
@@ -119,6 +132,7 @@ const CreateWorkoutPlan: React.FC = () => {
                 ))}
                 {workoutSplit === `Custom` && <AddButton tip="הוסף אימון" onClick={handleAddWorkout} />}
             </div>
+            <Toaster />
             <Button onClick={hanldeSubmit}>שמור אימון</Button>
         </div >
     );
