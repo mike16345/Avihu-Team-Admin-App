@@ -1,21 +1,15 @@
 import { DietPlanDropDown } from "@/components/DietPlan/DietPlanDropDown";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useDietPlanApi } from "@/hooks/useDietPlanApi";
 import { IDietPlan, IMeal } from "@/interfaces/IDietPlan";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useParams } from "react-router";
+import CustomAlertDialog from "@/components/Alerts/DialogAlert/CustomAlertDialog";
 
 export const ViewDietPlanPage = () => {
-  const { addDietPlan } = useDietPlanApi();
+  const { id } = useParams();
+  const { addDietPlan, getDietPlanByUserId } = useDietPlanApi();
 
   const [totalMeals, setTotalMeals] = useState<number[]>([]);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
@@ -25,7 +19,7 @@ export const ViewDietPlanPage = () => {
   const handleSaveDietPlan = async () => {
     const dietPlanToAdd = {
       ...dietPlan,
-      userId: "665f0b0b00b1a04e8f1c4478",
+      userId: id,
     };
 
     await addDietPlan(dietPlanToAdd)
@@ -57,7 +51,7 @@ export const ViewDietPlanPage = () => {
   };
 
   return (
-    <div className=" flex flex-col gap-4 size-full hide-scrollbar overflow-y-auto">
+    <div className=" flex flex-col gap-4 w-3/4 h-full hide-scrollbar overflow-y-auto">
       <h1 className="text-2xl font-semidbold mb-4">עריכת תפריט תזונה</h1>
       <div>
         <Button className="font-bold" onClick={handleAddMeal}>
@@ -83,26 +77,27 @@ export const ViewDietPlanPage = () => {
             </div>
           );
         })}
-        {dietPlan.meals.length > 0 && <Button onClick={handleSaveDietPlan}>שמור תפריט</Button>}
+        {dietPlan.meals.length > 0 && (
+          <div>
+            <Button className="font-bold" variant="success" onClick={handleSaveDietPlan}>
+              שמור תפריט
+            </Button>
+          </div>
+        )}
       </div>
-      <AlertDialog open={openDeleteModal} onOpenChange={setOpenDeleteModal}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-right">האם אתה בטוח?</AlertDialogTitle>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="gap-2">
-            <AlertDialogCancel
-              onClick={() => {
-                setMealToDelete(null);
-                setOpenDeleteModal(false);
-              }}
-            >
-              בטל
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={() => handleDeleteMeal()}>אשר</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      
+      <CustomAlertDialog
+        alertDialogProps={{ open: openDeleteModal, onOpenChange: setOpenDeleteModal }}
+        alertDialogCancelProps={{
+          onClick: () => {
+            setMealToDelete(null);
+            setOpenDeleteModal(false);
+          },
+          children: "בטל",
+        }}
+        alertDialogActionProps={{ onClick: handleDeleteMeal, children: "אשר" }}
+        alertDialogTitleProps={{ children: "האם אתה בטוח?" }}
+      />
     </div>
   );
 };
