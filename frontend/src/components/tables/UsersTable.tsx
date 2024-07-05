@@ -4,10 +4,12 @@ import { useEffect, useState } from "react";
 import { columns as userColumns } from "./Columns/Users/UserColumns";
 import { DataTableHebrew } from "./DataTableHebrew";
 import { useNavigate } from "react-router";
+import { useDietPlanApi } from "@/hooks/useDietPlanApi";
 
 export const UsersTable = () => {
   const navigate = useNavigate();
   const { getAllUsers } = useUsersApi();
+  const { getDietPlanByUserId } = useDietPlanApi();
 
   const [users, setUsers] = useState<IUser[] | null>(null);
 
@@ -23,8 +25,16 @@ export const UsersTable = () => {
     return "Loading...";
   }
 
+  // Add route for diet plan without user id. For creating a new plan
   const handleViewUserDietPlan = (user: IUser) => {
-    navigate(`/diet-plans/${user._id}`);
+    getDietPlanByUserId(user._id)
+      .then((dietPlan) => {
+        console.log("found diet plan", dietPlan);
+        navigate(`/diet-plans/${user._id}`, { state: { dietPlan } });
+      })
+      .catch((err: Error) => {
+        console.error(err);
+      });
   };
 
   return (

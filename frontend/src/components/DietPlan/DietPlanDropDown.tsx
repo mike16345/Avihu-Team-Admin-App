@@ -18,6 +18,7 @@ import { DietItemUnit, IMeal } from "@/interfaces/IDietPlan";
 import { CustomItemSelection } from "./CustomItemSelection";
 import { DietItemUnitRadio } from "./DietItemUnitRadio";
 import { mealSchema } from "./DietPlanSchema";
+import { defaultMeal } from "@/constants/DietPlanConsts";
 
 type ShowCustomSelectionType = {
   totalProtein: boolean;
@@ -28,23 +29,20 @@ type ShowCustomSelectionType = {
 
 type DietPlanDropDownProps = {
   mealNumber: number;
+  meal?: IMeal;
   onDelete: () => void;
   setDietPlan: (meal: IMeal) => void;
 };
 
 export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
   mealNumber,
+  meal,
   onDelete,
   setDietPlan,
 }) => {
   const form = useForm<IMeal>({
     resolver: zodResolver(mealSchema),
-    defaultValues: {
-      totalProtein: { quantity: 1, unit: "grams", customInstructions: [] },
-      totalCarbs: { quantity: 1, unit: "grams", customInstructions: [] },
-      totalFats: { quantity: 0, unit: "grams", customInstructions: [] },
-      totalVeggies: { quantity: 0, unit: "grams", customInstructions: [] },
-    },
+    defaultValues: meal || defaultMeal,
   });
 
   const {
@@ -75,7 +73,6 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
       return acc;
     }, {} as IMeal);
 
-    console.log("new meal", newMeal);
     setDietPlan(newMeal);
   };
 
@@ -110,7 +107,7 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
             onClick={() => setIsOpen((state) => !state)}
             variant="ghost"
             size="sm"
-            className={`w-9 p-0 transition ${isOpen ? "-rotate-180" : "rotate-0"}`}
+            className={`w-9 p-0 transition ${isOpen ? "rotate-180" : "rotate-0"}`}
           >
             <FaChevronDown className="h-4 w-4" />
             <span className="sr-only">Toggle</span>
