@@ -42,8 +42,10 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
 }) => {
   const form = useForm<IMeal>({
     resolver: zodResolver(mealSchema),
-    defaultValues: meal || defaultMeal,
+    values: meal || defaultMeal,
   });
+
+  const formValues = form.getValues();
 
   const {
     control,
@@ -53,11 +55,15 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
 
   const [isOpen, setIsOpen] = useState(false);
   const [showCustomSelection, setShowCustomSelection] = useState<ShowCustomSelectionType>({
-    totalProtein: false,
-    totalCarbs: false,
-    totalFats: false,
-    totalVeggies: false,
+    totalProtein: !!meal?.totalProtein.customInstructions?.length,
+    totalCarbs: !!meal?.totalCarbs.customInstructions?.length,
+    totalFats: !!meal?.totalFats.customInstructions?.length,
+    totalVeggies: !!meal?.totalVeggies.customInstructions?.length,
   });
+
+  console.log("meal " + mealNumber + " :", formValues);
+
+  console.log("show custom selection meal " + mealNumber + " ", showCustomSelection);
 
   const onSubmit = async (meal: IMeal) => {
     const newMeal = Object.keys(meal).reduce((acc, key) => {
@@ -132,6 +138,7 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
 
                   <div className="flex items-center justify-between">
                     <CustomInstructionsRadio
+                      defaultValue={showCustomSelection.totalProtein ? "Custom" : "Fixed"}
                       onChangeSelection={(val: string) =>
                         setShowCustomSelection({
                           ...showCustomSelection,
@@ -171,6 +178,7 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
 
                   <div className="flex items-center justify-between">
                     <CustomInstructionsRadio
+                      defaultValue={showCustomSelection.totalCarbs ? "Custom" : "Fixed"}
                       onChangeSelection={(val: string) =>
                         setShowCustomSelection({
                           ...showCustomSelection,
@@ -213,6 +221,7 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
                     <FormMessage>{errors.totalFats.unit.message}</FormMessage>
                   )}
                   <CustomInstructionsRadio
+                    defaultValue={showCustomSelection.totalFats ? "Custom" : "Fixed"}
                     onChangeSelection={(val: string) =>
                       setShowCustomSelection({ ...showCustomSelection, totalFats: val == "Custom" })
                     }
@@ -247,6 +256,7 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
                   )}
 
                   <CustomInstructionsRadio
+                    defaultValue={showCustomSelection.totalVeggies ? "Custom" : "Fixed"}
                     onChangeSelection={(val: string) =>
                       setShowCustomSelection({
                         ...showCustomSelection,

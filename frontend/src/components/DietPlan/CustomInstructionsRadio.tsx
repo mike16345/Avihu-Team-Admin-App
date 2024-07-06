@@ -2,18 +2,21 @@ import { FC } from "react";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Label } from "../ui/label";
 
+type CustomInstructionsRadioChoices = "Fixed" | "Custom";
 type CustomInstructionsRadioProps = {
+  defaultValue: CustomInstructionsRadioChoices;
   onChangeSelection: Function;
 };
 
 export const CustomInstructionsRadio: FC<CustomInstructionsRadioProps> = ({
+  defaultValue,
   onChangeSelection,
 }) => {
   return (
     <RadioGroup
       onValueChange={(val) => onChangeSelection(val)}
       className="flex flex-col "
-      defaultValue="Fixed"
+      defaultValue={defaultValue}
     >
       <div className="flex items-center space-x-2">
         <RadioGroupItem value="Custom" id="Custom" />

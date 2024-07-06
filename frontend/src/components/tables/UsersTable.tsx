@@ -5,6 +5,7 @@ import { columns as userColumns } from "./Columns/Users/UserColumns";
 import { DataTableHebrew } from "./DataTableHebrew";
 import { useNavigate } from "react-router";
 import { useDietPlanApi } from "@/hooks/useDietPlanApi";
+import { IDietPlan } from "@/interfaces/IDietPlan";
 
 export const UsersTable = () => {
   const navigate = useNavigate();
@@ -30,11 +31,16 @@ export const UsersTable = () => {
     getDietPlanByUserId(user._id)
       .then((dietPlan) => {
         console.log("found diet plan", dietPlan);
-        navigate(`/diet-plans/${user._id}`, { state: { dietPlan } });
+
+        handleNavigateToDietPlanPage(user._id, dietPlan);
       })
       .catch((err: Error) => {
         console.error(err);
       });
+  };
+
+  const handleNavigateToDietPlanPage = (userId: string, dietPlan: IDietPlan | null) => {
+    navigate(`/diet-plans/${userId}/`, { state: { dietPlan } });
   };
 
   return (

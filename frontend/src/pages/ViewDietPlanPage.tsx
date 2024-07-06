@@ -2,31 +2,31 @@ import { DietPlanDropDown } from "@/components/DietPlan/DietPlanDropDown";
 import { Button } from "@/components/ui/button";
 import { useDietPlanApi } from "@/hooks/useDietPlanApi";
 import { IDietPlan, IMeal } from "@/interfaces/IDietPlan";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { useLocation, useParams } from "react-router";
+import { useParams } from "react-router";
 import CustomAlertDialog from "@/components/Alerts/DialogAlert/CustomAlertDialog";
-import { defaultMeal } from "@/constants/DietPlanConsts";
+import { defaultDietPlan, defaultMeal } from "@/constants/DietPlanConsts";
 
 export const ViewDietPlanPage = () => {
   const { id } = useParams();
-  const currentDietPlan: IDietPlan | undefined = useLocation().state.dietPlan;
 
-  const { addDietPlan, updateDietPlanByUserId } = useDietPlanApi();
-
-  console.log("current diet plan", currentDietPlan);
+  const { addDietPlan, updateDietPlanByUserId, getDietPlanByUserId } = useDietPlanApi();
 
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [isNewPlan, setIsNewPlan] = useState(true);
   const [mealToDelete, setMealToDelete] = useState<number | null>(null);
-  const [dietPlan, setDietPlan] = useState<IDietPlan>(currentDietPlan || { meals: [] });
 
+  const [dietPlan, setDietPlan] = useState<IDietPlan>(defaultDietPlan);
+
+  console.log("diet plan", dietPlan);
   const handleSaveDietPlan = async () => {
     const dietPlanToAdd = {
       ...dietPlan,
       userId: id,
     };
 
-    if (currentDietPlan && id) {
+    if (id && !isNewPlan) {
       await updateDietPlanByUserId(id, dietPlanToAdd)
         .then(() => {
           toast.success("תפריט עודכנה בהצלחה!");
@@ -39,11 +39,13 @@ export const ViewDietPlanPage = () => {
         });
     } else {
       await addDietPlan(dietPlanToAdd)
-        .then(() => {
+        .then((res) => {
           toast.success("תפריט נשמר בהצלחה!");
+          setDietPlan(res);
+          setIsNewPlan(false);
         })
         .catch((err) => {
-          toast.error("היה בעיה בשמירה");
+          toast.error("הייתה בעיה בשמירה");
           console.error("error", err);
         });
     }
@@ -67,6 +69,26 @@ export const ViewDietPlanPage = () => {
     setDietPlan({ ...dietPlan, meals: newMeals });
   };
 
+  useEffect(() => {
+    if (!id) return;
+
+    getDietPlanByUserId(id)
+      .then((dietPlan) => {
+        if (dietPlan) {
+          console.log("found plan");
+          setIsNewPlan(false);
+          setDietPlan(dietPlan);
+        } else {
+          console.log("setting default plan");
+          setIsNewPlan(true);
+          setDietPlan(defaultDietPlan);
+        }
+      })
+      .catch((err: Error) => {
+        console.error(err);
+      });
+  }, []);
+
   return (
     <div className=" flex flex-col gap-4 w-3/4 h-full hide-scrollbar overflow-y-auto">
       <h1 className="text-2xl font-semibold mb-4">עריכת תפריט תזונה</h1>
@@ -76,7 +98,9 @@ export const ViewDietPlanPage = () => {
         </Button>
       </div>
       <div className="flex flex-col gap-4 ">
-        {dietPlan.meals.map((_, index) => {
+        {dietPlan.meals.map((meal, index) => {
+          console.log("meal num", index);
+
           return (
             <div
               key={index}
@@ -85,6 +109,7 @@ export const ViewDietPlanPage = () => {
             >
               <DietPlanDropDown
                 mealNumber={index + 1}
+                meal={meal}
                 setDietPlan={(meal: IMeal) => handleSetMeal(meal, index)}
                 onDelete={() => {
                   setMealToDelete(index);
