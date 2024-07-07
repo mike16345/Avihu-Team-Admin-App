@@ -1,6 +1,6 @@
-export function cleanObject(obj: any): any {
+export function cleanWorkoutObject(obj: any): any {
     if (Array.isArray(obj)) {
-        return obj.map(item => cleanObject(item));
+        return obj.map(item => cleanWorkoutObject(item));
     } else if (typeof obj === 'object' && obj !== null) {
         const cleanedObject: any = {};
         for (const key in obj) {
@@ -10,7 +10,7 @@ export function cleanObject(obj: any): any {
                 } else if (key === 'maxReps' && obj[key] === 0) {
                     cleanedObject[key] = undefined;
                 } else {
-                    cleanedObject[key] = cleanObject(obj[key]);
+                    cleanedObject[key] = cleanWorkoutObject(obj[key]);
                 }
             }
         }

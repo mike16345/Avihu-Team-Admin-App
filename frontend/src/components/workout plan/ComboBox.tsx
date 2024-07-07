@@ -12,7 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button";
 
 interface ComboBoxProps {
-  options: string[];
+  options: string[] | undefined;
   handleChange: (value: string) => void;
 }
 
@@ -45,7 +45,7 @@ const ComboBox: React.FC<ComboBoxProps> = ({ options, handleChange }) => {
           <CommandList>
             <CommandEmpty>No framework found.</CommandEmpty>
             <CommandGroup dir="rtl">
-              {options.map((option) => (
+              {options?.map((option) => (
                 <CommandItem key={option} value={option} onSelect={handleSelect}>
                   {option}
                 </CommandItem>

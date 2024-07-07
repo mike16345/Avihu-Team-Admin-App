@@ -4,9 +4,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ISet, IWorkout } from "@/interfaces/IWorkoutPlan";
 import SetsContainer from "./SetsContainer";
-import AddButton from "./buttons/AddButton";
 import DeleteButton from "./buttons/DeleteButton";
 import { Input } from "../ui/input";
+import { Button } from "../ui/button";
 
 interface ExcerciseInputProps {
   options: string[] | undefined;
@@ -79,8 +79,9 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
     <div className="w-full">
       <h1 className="font-bold underline">{title}</h1>
       {workoutObjs.map((item) => (
-        <div className="py-5 flex items-start gap-5 border-b-2" key={item.id}>
-          <div className="flex flex-col gap-5">
+        <div className="py-5 flex  gap-2 border-b-2 " key={item.id}>
+          <DeleteButton tip="הסר תרגיל" onClick={() => handleDeleteExcercise(item.id)} />
+          <div className="flex flex-col gap-5 border-r-2 p-2">
             <ComboBox
               options={options}
               handleChange={(currentValue) => handleChange(currentValue, item.id)}
@@ -108,10 +109,12 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
               />
             </div>
           </div>
-          <DeleteButton tip="הסר תרגיל" onClick={() => handleDeleteExcercise(item.id)} />
         </div>
       ))}
-      <AddButton tip="הוסף תרגיל" onClick={handleAddExcercise} />
+      <Button
+        className="text-[12px] p-1 mr-5 my-2"
+        onClick={handleAddExcercise}
+      >הוסף תרגיל</Button>
     </div>
   );
 };
