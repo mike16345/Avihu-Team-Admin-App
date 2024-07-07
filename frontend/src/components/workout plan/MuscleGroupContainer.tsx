@@ -6,7 +6,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ChevronsUpDown } from "lucide-react";
 import { Button } from '../ui/button';
 import DeleteButton from './buttons/DeleteButton';
-import { editableContext } from './CreateWorkoutPlan';
+import { EditableContext } from './CreateWorkoutPlan';
 
 const muscleGroups: string[] = ["חזה", "כתפיים", "יד אחורית", "גב", "יד קידמית", "רגליים", "בטן", "אירובי",];
 const chestExercises: string[] = ["פרפר", "מקבילים", "לחיצת חזה בשיפוע שלילי", "לחיצת חזה בשיפוע חיובי", "לחיצת חזה",];
@@ -24,7 +24,7 @@ interface MuscleGroupContainerProps {
 const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({ handleSave, title, workout }) => {
 
     const [workouts, setWorkouts] = useState<IMuscleGroupWorkouts[]>(workout)
-    const { isEdit } = useContext(editableContext)
+    const { isEdit } = useContext(EditableContext)
 
     const addWorkout = () => {
         const newObject: IMuscleGroupWorkouts = {

@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { editableContext } from "./CreateWorkoutPlan";
+import { EditableContext } from "./CreateWorkoutPlan";
 
 interface ComboBoxProps {
   options: string[] | undefined;
@@ -20,7 +20,7 @@ interface ComboBoxProps {
 
 const ComboBox: React.FC<ComboBoxProps> = ({ options, handleChange, existingValue }) => {
 
-  const { isEdit } = useContext(editableContext)
+  const { isEdit } = useContext(EditableContext)
 
   const [open, setOpen] = useState<boolean>(false);
   const [value, setValue] = useState<string | undefined>(existingValue ? existingValue : undefined);

@@ -3,7 +3,7 @@ import SetsInput from './SetsInput'
 import { ISet } from '@/interfaces/IWorkoutPlan';
 import AddButton from './buttons/AddButton';
 import DeleteButton from './buttons/DeleteButton';
-import { editableContext } from './CreateWorkoutPlan';
+import { EditableContext } from './CreateWorkoutPlan';
 
 interface SetContainerProps {
     updateSets: (componentSets: ISet[]) => void;
@@ -12,7 +12,7 @@ interface SetContainerProps {
 
 const SetsContainer: React.FC<SetContainerProps> = ({ updateSets, existingSets }) => {
 
-    const { isEdit } = useContext(editableContext)
+    const { isEdit } = useContext(EditableContext)
 
     const [componentSets, setComponentSets] = useState<ISet[]>(existingSets ? existingSets : [{
         id: 1,

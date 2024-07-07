@@ -7,7 +7,7 @@ import SetsContainer from "./SetsContainer";
 import DeleteButton from "./buttons/DeleteButton";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { editableContext } from "./CreateWorkoutPlan";
+import { EditableContext } from "./CreateWorkoutPlan";
 
 interface ExcerciseInputProps {
   options: string[] | undefined;
@@ -17,7 +17,7 @@ interface ExcerciseInputProps {
 }
 
 const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts, title, exercises }) => {
-  const { isEdit } = useContext(editableContext)
+  const { isEdit } = useContext(EditableContext)
   const [workoutObjs, setWorkoutObjs] = useState<IWorkout[]>(exercises ? exercises : [
     {
       id: `1`,
