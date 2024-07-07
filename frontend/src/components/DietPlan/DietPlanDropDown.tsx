@@ -18,7 +18,6 @@ import { DietItemUnit, IMeal } from "@/interfaces/IDietPlan";
 import { CustomItemSelection } from "./CustomItemSelection";
 import { DietItemUnitRadio } from "./DietItemUnitRadio";
 import { mealSchema } from "./DietPlanSchema";
-import { defaultMeal } from "@/constants/DietPlanConsts";
 
 type ShowCustomSelectionType = {
   totalProtein: boolean;
@@ -29,7 +28,7 @@ type ShowCustomSelectionType = {
 
 type DietPlanDropDownProps = {
   mealNumber: number;
-  meal?: IMeal;
+  meal: IMeal;
   onDelete: () => void;
   setDietPlan: (meal: IMeal) => void;
 };
@@ -42,7 +41,7 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
 }) => {
   const form = useForm<IMeal>({
     resolver: zodResolver(mealSchema),
-    values: meal || defaultMeal,
+    values: meal,
   });
 
   const formValues = form.getValues();
@@ -54,16 +53,18 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
   } = form;
 
   const [isOpen, setIsOpen] = useState(false);
+
+  const showProtein = !!meal.totalProtein.customInstructions?.length;
+  const showCarbs = !!meal.totalCarbs.customInstructions?.length;
+  const showFats = !!meal.totalFats.customInstructions?.length;
+  const showVeggies = !!meal.totalVeggies.customInstructions?.length;
+
   const [showCustomSelection, setShowCustomSelection] = useState<ShowCustomSelectionType>({
-    totalProtein: !!meal?.totalProtein.customInstructions?.length,
-    totalCarbs: !!meal?.totalCarbs.customInstructions?.length,
-    totalFats: !!meal?.totalFats.customInstructions?.length,
-    totalVeggies: !!meal?.totalVeggies.customInstructions?.length,
+    totalProtein: showProtein,
+    totalCarbs: showCarbs,
+    totalFats: showFats,
+    totalVeggies: showVeggies,
   });
-
-  console.log("meal " + mealNumber + " :", formValues);
-
-  console.log("show custom selection meal " + mealNumber + " ", showCustomSelection);
 
   const onSubmit = async (meal: IMeal) => {
     const newMeal = Object.keys(meal).reduce((acc, key) => {

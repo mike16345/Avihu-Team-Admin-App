@@ -17,10 +17,12 @@ export const ViewDietPlanPage = () => {
   const [isNewPlan, setIsNewPlan] = useState(true);
   const [mealToDelete, setMealToDelete] = useState<number | null>(null);
 
-  const [dietPlan, setDietPlan] = useState<IDietPlan>(defaultDietPlan);
+  const [dietPlan, setDietPlan] = useState<IDietPlan | null>(null);
 
   console.log("diet plan", dietPlan);
   const handleSaveDietPlan = async () => {
+    if (!dietPlan) return;
+    
     const dietPlanToAdd = {
       ...dietPlan,
       userId: id,
@@ -52,17 +54,21 @@ export const ViewDietPlanPage = () => {
   };
 
   const handleAddMeal = () => {
+    if (!dietPlan) return;
+
     setDietPlan({ ...dietPlan, meals: [...dietPlan.meals, defaultMeal] });
   };
 
   const handleDeleteMeal = () => {
-    if (mealToDelete == null) return;
+    if (mealToDelete == null || !dietPlan) return;
 
     setDietPlan({ ...dietPlan, meals: dietPlan.meals.filter((_, i) => i !== mealToDelete) });
     setMealToDelete(null);
   };
 
   const handleSetMeal = (meal: IMeal, mealNumber: number) => {
+    if (!dietPlan) return;
+
     const newMeals = [...dietPlan.meals];
 
     newMeals[mealNumber] = meal;
@@ -75,11 +81,9 @@ export const ViewDietPlanPage = () => {
     getDietPlanByUserId(id)
       .then((dietPlan) => {
         if (dietPlan) {
-          console.log("found plan");
           setIsNewPlan(false);
           setDietPlan(dietPlan);
         } else {
-          console.log("setting default plan");
           setIsNewPlan(true);
           setDietPlan(defaultDietPlan);
         }
@@ -97,36 +101,32 @@ export const ViewDietPlanPage = () => {
           הוסף ארוחה
         </Button>
       </div>
-      <div className="flex flex-col gap-4 ">
-        {dietPlan.meals.map((meal, index) => {
-          console.log("meal num", index);
-
-          return (
-            <div
-              key={index}
-              className={`
-              ${index !== dietPlan.meals.length - 1 && "border-b"}`}
-            >
-              <DietPlanDropDown
-                mealNumber={index + 1}
-                meal={meal}
-                setDietPlan={(meal: IMeal) => handleSetMeal(meal, index)}
-                onDelete={() => {
-                  setMealToDelete(index);
-                  setOpenDeleteModal(true);
-                }}
-              />
+      {dietPlan && (
+        <div className="flex flex-col gap-4 ">
+          {dietPlan.meals.map((meal, index) => {
+            return (
+              <div key={index} className={`${index !== dietPlan.meals.length - 1 && "border-b"}`}>
+                <DietPlanDropDown
+                  mealNumber={index + 1}
+                  meal={meal}
+                  setDietPlan={(meal: IMeal) => handleSetMeal(meal, index)}
+                  onDelete={() => {
+                    setMealToDelete(index);
+                    setOpenDeleteModal(true);
+                  }}
+                />
+              </div>
+            );
+          })}
+          {dietPlan.meals.length > 0 && (
+            <div>
+              <Button className="font-bold" variant="success" onClick={handleSaveDietPlan}>
+                שמור תפריט
+              </Button>
             </div>
-          );
-        })}
-        {dietPlan.meals.length > 0 && (
-          <div>
-            <Button className="font-bold" variant="success" onClick={handleSaveDietPlan}>
-              שמור תפריט
-            </Button>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       <CustomAlertDialog
         alertDialogProps={{ open: openDeleteModal, onOpenChange: setOpenDeleteModal }}
