@@ -44,8 +44,6 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
     values: meal,
   });
 
-  const formValues = form.getValues();
-
   const {
     control,
     handleSubmit,
@@ -56,8 +54,8 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
 
   const showProtein = !!meal.totalProtein.customInstructions?.length;
   const showCarbs = !!meal.totalCarbs.customInstructions?.length;
-  const showFats = !!meal.totalFats.customInstructions?.length;
-  const showVeggies = !!meal.totalVeggies.customInstructions?.length;
+  const showFats = !!meal?.totalFats?.customInstructions?.length;
+  const showVeggies = !!meal?.totalVeggies?.customInstructions?.length;
 
   const [showCustomSelection, setShowCustomSelection] = useState<ShowCustomSelectionType>({
     totalProtein: showProtein,
