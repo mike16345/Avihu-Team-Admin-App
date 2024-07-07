@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 import ComboBox from "./ComboBox";
 import { ICompleteWorkoutPlan, IMuscleGroupWorkouts, IWorkoutPlan } from "@/interfaces/IWorkoutPlan";
 import DeleteButton from "./buttons/DeleteButton";
@@ -9,7 +9,9 @@ import { cleanWorkoutObject } from "@/utils/workoutPlanUtils";
 import { Button } from "../ui/button";
 import { Toaster } from "@/components/ui/sonner"
 import { toast } from "sonner";
+import { BsFillPencilFill } from "react-icons/bs";
 
+export const editableContext = createContext<boolean>();
 
 const CreateWorkoutPlan: React.FC = () => {
     const { addWorkoutPlan, getWorkoutPlan } = useWorkoutPlanApi()
@@ -114,34 +116,45 @@ const CreateWorkoutPlan: React.FC = () => {
 
 
     return (
-        <div className="p-5 overflow-y-scroll max-h-[95vh] w-full">
-            <h1 className="text-4xl">תוכנית אימון</h1>
-            <p>כאן תוכל לייתר תוכנית אימון ללקוחות שלך</p>
-            <div className="p-2">
-                <ComboBox
-                    options={workoutTemp}
-                    handleChange={(currentValue) => handleSelect(currentValue)}
-                />
-
-                {workoutPlan.map((workout) => (
-                    <div key={workout.planName} className="flex items-start">
-                        <MuscleGroupContainer
-                            workout={workout.workouts}
-                            handleSave={(workouts) => handleSave(workout.planName, workouts)}
-                            title={workout.planName}
+        <editableContext.Provider value={{ isEdit }}>
+            <div className="p-5 overflow-y-scroll max-h-[95vh] w-full">
+                <h1 className="text-4xl">תוכנית אימון</h1>
+                <p>כאן תוכל לייצר תוכנית אימון ללקוחות שלך</p>
+                <div className="p-2">
+                    <div className="flex justify-between">
+                        <ComboBox
+                            options={workoutTemp}
+                            handleChange={(currentValue) => handleSelect(currentValue)}
                         />
-                        {workoutSplit === `התאמה אישית` &&
-                            <div className="mt-5 ">
-                                <DeleteButton tip="הסר אימון" onClick={() => handleDeleteWorkout(workout.planName)} />
-                            </div>
-                        }
+                        <div
+                            onClick={() => setIsEdit(!isEdit)}
+                            className="flex items-center px-2 rounded cursor-pointer hover:bg-blue-200 bg-blue-100">
+                            <BsFillPencilFill />
+                        </div>
                     </div>
-                ))}
-                {workoutSplit === `התאמה אישית` && <AddButton tip="הוסף אימון" onClick={handleAddWorkout} />}
-            </div>
-            <Toaster />
-            <Button onClick={hanldeSubmit}>שמור אימון</Button>
-        </div >
+
+                    {workoutPlan.map((workout) => (
+                        <div key={workout.planName} className="flex items-start">
+                            <MuscleGroupContainer
+                                workout={workout.workouts}
+                                handleSave={(workouts) => handleSave(workout.planName, workouts)}
+                                title={workout.planName}
+                            />
+                            {workoutSplit === `התאמה אישית` &&
+                                <div className="mt-5 ">
+                                    <DeleteButton tip="הסר אימון" onClick={() => handleDeleteWorkout(workout.planName)} />
+                                </div>
+                            }
+                        </div>
+                    ))}
+                    {workoutSplit === `התאמה אישית` && <AddButton tip="הוסף אימון" onClick={handleAddWorkout} />}
+                </div>
+                <Toaster />
+                {isEdit &&
+                    <Button onClick={hanldeSubmit}>שמור אימון</Button>
+                }
+            </div >
+        </editableContext.Provider>
     );
 };
 

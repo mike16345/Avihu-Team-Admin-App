@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import ComboBox from './ComboBox'
 import ExcerciseInput from './ExcerciseInput'
 import { IMuscleGroupWorkouts, IWorkout, IWorkoutPlan } from '@/interfaces/IWorkoutPlan'
@@ -6,6 +6,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ChevronsUpDown } from "lucide-react";
 import { Button } from '../ui/button';
 import DeleteButton from './buttons/DeleteButton';
+import { editableContext } from './CreateWorkoutPlan';
 
 const muscleGroups: string[] = ["חזה", "כתפיים", "יד אחורית", "גב", "יד קידמית", "רגליים", "בטן", "אירובי",];
 const chestExercises: string[] = ["פרפר", "מקבילים", "לחיצת חזה בשיפוע שלילי", "לחיצת חזה בשיפוע חיובי", "לחיצת חזה",];
@@ -23,6 +24,7 @@ interface MuscleGroupContainerProps {
 const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({ handleSave, title, workout }) => {
 
     const [workouts, setWorkouts] = useState<IMuscleGroupWorkouts[]>(workout)
+    const { isEdit } = useContext(editableContext)
 
     const addWorkout = () => {
         const newObject: IMuscleGroupWorkouts = {
@@ -82,11 +84,20 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({ handleSave,
                 <CollapsibleContent>
                     {workouts.map((workout, i) => (
                         <div key={i} className='border-y-4'>
-                            <div className='flex gap-7 py-2 items-center'>
-                                <h1 className='underline font-bold py-2'>בחר קבוצת שריר:</h1>
-                                <DeleteButton tip='מחק קבוצת שריר' onClick={() => deleteMuscleGroup(i)} />
-                            </div>
-                            <ComboBox options={muscleGroups} existingValue={workout.muscleGroup} handleChange={(value) => updateMuscleGroup(i, value)} />
+                            {isEdit &&
+                                <div>
+                                    <div className='flex gap-7 py-2 items-center'>
+                                        <h1 className='underline font-bold py-2'>בחר קבוצת שריר:</h1>
+                                        <DeleteButton tip='מחק קבוצת שריר' onClick={() => deleteMuscleGroup(i)} />
+                                    </div>
+
+                                    <ComboBox
+                                        options={muscleGroups}
+                                        existingValue={workout.muscleGroup}
+                                        handleChange={(value) => updateMuscleGroup(i, value)}
+                                    />
+                                </div>
+                            }
                             <div className='my-2'>
                                 <ExcerciseInput
                                     exercises={workout.exercises}
@@ -97,12 +108,14 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({ handleSave,
                             </div>
                         </div>
                     ))}
-                    <Button
-                        onClick={addWorkout}
-                        className='my-2'
-                    >
-                        הוסף קבוצת שריר
-                    </Button>
+                    {isEdit &&
+                        <Button
+                            onClick={addWorkout}
+                            className='my-2'
+                        >
+                            הוסף קבוצת שריר
+                        </Button>
+                    }
                 </CollapsibleContent>
             </Collapsible>
         </div>

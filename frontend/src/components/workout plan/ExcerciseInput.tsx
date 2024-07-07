@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import ComboBox from "./ComboBox";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,6 +7,7 @@ import SetsContainer from "./SetsContainer";
 import DeleteButton from "./buttons/DeleteButton";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
+import { editableContext } from "./CreateWorkoutPlan";
 
 interface ExcerciseInputProps {
   options: string[] | undefined;
@@ -16,6 +17,7 @@ interface ExcerciseInputProps {
 }
 
 const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts, title, exercises }) => {
+  const { isEdit } = useContext(editableContext)
   const [workoutObjs, setWorkoutObjs] = useState<IWorkout[]>(exercises ? exercises : [
     {
       id: `1`,
@@ -81,7 +83,9 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
       <h1 className="font-bold underline">{title}</h1>
       {workoutObjs.map((item) => (
         <div className="py-5 flex  gap-2 border-b-2 " key={item.id}>
-          <DeleteButton tip="הסר תרגיל" onClick={() => handleDeleteExcercise(item.id)} />
+          {isEdit &&
+            <DeleteButton tip="הסר תרגיל" onClick={() => handleDeleteExcercise(item.id)} />
+          }
           <div className="flex flex-col gap-5 border-r-2 p-2">
             <ComboBox
               options={options}
@@ -95,29 +99,45 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
 
             <div>
               <Label>לינק לסרטון</Label>
-              <Input
-                placeholder="הכנס לינק כאן..."
-                name="linkToVideo"
-                value={item.linkToVideo}
-                onChange={(e) => handleChange(e, item.id)}
-              />
+              {isEdit ?
+                <Input
+                  readOnly={!isEdit}
+                  placeholder="הכנס לינק כאן..."
+                  name="linkToVideo"
+                  value={item.linkToVideo}
+                  onChange={(e) => handleChange(e, item.id)}
+                />
+                :
+                <p
+                  className="py-1 border-b-2"
+                >{item.linkToVideo == `` ? `לא קיים` : item.linkToVideo}</p>
+              }
             </div>
             <div>
               <Label>דגשים</Label>
-              <Textarea
-                placeholder="תלבש מכנסיים.."
-                name="tipFromTrainer"
-                value={item.tipFromTrainer}
-                onChange={(e) => handleChange(e, item.id)}
-              />
+              {isEdit ?
+                <Textarea
+                  readOnly={!isEdit}
+                  placeholder="תלבש מכנסיים.."
+                  name="tipFromTrainer"
+                  value={item.tipFromTrainer}
+                  onChange={(e) => handleChange(e, item.id)}
+                />
+                :
+                <p
+                  className="py-1 border-b-2"
+                >{item.tipFromTrainer == `` ? `לא קיים` : item.tipFromTrainer}</p>
+              }
             </div>
           </div>
         </div>
       ))}
-      <Button
-        className="text-[12px] p-1 mr-5 my-2"
-        onClick={handleAddExcercise}
-      >הוסף תרגיל</Button>
+      {isEdit &&
+        <Button
+          className="text-[12px] p-1 mr-5 my-2"
+          onClick={handleAddExcercise}
+        >הוסף תרגיל</Button>
+      }
     </div>
   );
 };

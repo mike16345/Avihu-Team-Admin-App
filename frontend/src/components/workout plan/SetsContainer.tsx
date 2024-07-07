@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import SetsInput from './SetsInput'
 import { ISet } from '@/interfaces/IWorkoutPlan';
 import AddButton from './buttons/AddButton';
 import DeleteButton from './buttons/DeleteButton';
+import { editableContext } from './CreateWorkoutPlan';
 
 interface SetContainerProps {
     updateSets: (componentSets: ISet[]) => void;
@@ -10,6 +11,8 @@ interface SetContainerProps {
 }
 
 const SetsContainer: React.FC<SetContainerProps> = ({ updateSets, existingSets }) => {
+
+    const { isEdit } = useContext(editableContext)
 
     const [componentSets, setComponentSets] = useState<ISet[]>(existingSets ? existingSets : [{
         id: 1,
@@ -61,21 +64,25 @@ const SetsContainer: React.FC<SetContainerProps> = ({ updateSets, existingSets }
 
     return (
         <div>
-            {componentSets.map(set => (
+            {componentSets.map((set, i) => (
                 <div
                     key={set.id}
                     className='flex gap-5  p-2 border-t-2 items-end'
                 >
                     <SetsInput
-                        setNumber={set.id}
+                        setNumber={i + 1}
                         handleChange={(e) => handleChange(e, set.id)}
                         maxReps={set.maxReps}
                         minReps={set.minReps}
                     />
-                    <DeleteButton tip='הסר סט' onClick={() => removeSet(set.id)} />
+                    {isEdit &&
+                        <DeleteButton tip='הסר סט' onClick={() => removeSet(set.id)} />
+                    }
                 </div>
             ))}
-            <AddButton tip='הוסף סט' onClick={createSet} />
+            {isEdit &&
+                <AddButton tip='הוסף סט' onClick={createSet} />
+            }
         </div>
     )
 }

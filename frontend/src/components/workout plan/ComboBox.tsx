@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { ChevronsUpDown } from "lucide-react";
 import {
   Command,
@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import { editableContext } from "./CreateWorkoutPlan";
 
 interface ComboBoxProps {
   options: string[] | undefined;
@@ -18,6 +19,9 @@ interface ComboBoxProps {
 }
 
 const ComboBox: React.FC<ComboBoxProps> = ({ options, handleChange, existingValue }) => {
+
+  const { isEdit } = useContext(editableContext)
+
   const [open, setOpen] = useState<boolean>(false);
   const [value, setValue] = useState<string | undefined>(existingValue ? existingValue : undefined);
 
@@ -31,7 +35,7 @@ const ComboBox: React.FC<ComboBoxProps> = ({ options, handleChange, existingValu
   }, [value])
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={isEdit ? open : false} onOpenChange={isEdit ? setOpen : false}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
