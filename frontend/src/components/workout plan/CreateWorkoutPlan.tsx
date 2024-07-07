@@ -14,10 +14,10 @@ import { BsFillPencilFill } from "react-icons/bs";
 export const EditableContext = createContext<boolean>(false);
 
 const CreateWorkoutPlan: React.FC = () => {
-    const { addWorkoutPlan, getWorkoutPlan } = useWorkoutPlanApi()
+    const { addWorkoutPlan, getWorkoutPlan, updateWorkoutPlan } = useWorkoutPlanApi()
     const workoutTemp: string[] = [`AB`, `ABC`, `יומי`, `התאמה אישית`];
     const [isView, setIsView] = useState<boolean>(true)
-    const [isEdit, setIsEdit] = useState<boolean>(false)
+    const [isEdit, setIsEdit] = useState<boolean>(isView ? false : true)
 
     const [workoutSplit, setWorkoutSplit] = useState<string>(`AB`);
     const [workoutPlan, setWorkoutPlan] = useState<IWorkoutPlan[]>([]);
@@ -92,9 +92,26 @@ const CreateWorkoutPlan: React.FC = () => {
             userId: `665f0b0b00b1a04e8f1c4478`,
             workoutPlans: [...workoutPlan]
         }
+        console.log(postObject);
+
 
         const cleanedPostObject = cleanWorkoutObject(postObject)
+        console.log(cleanedPostObject);
+
         const date = new Date().toLocaleTimeString()
+
+        if (isView) {
+
+            updateWorkoutPlan(`665f0b0b00b1a04e8f1c4478`, cleanedPostObject)
+                .then(() => toast(`Workout Plan Saved Succesfully!`, {
+                    description: `${date}`
+                }))
+                .catch((error) => toast(`${error.message}`, {
+                    description: `${error.response.data.message}`
+                }))
+            return
+        }
+
         addWorkoutPlan(cleanedPostObject).
             then(() => toast(`Workout Plan Saved Succesfully!`, {
                 description: `${date}`
@@ -126,11 +143,13 @@ const CreateWorkoutPlan: React.FC = () => {
                             options={workoutTemp}
                             handleChange={(currentValue) => handleSelect(currentValue)}
                         />
-                        <div
-                            onClick={() => setIsEdit(!isEdit)}
-                            className="flex items-center px-2 rounded cursor-pointer hover:bg-blue-200 bg-blue-100">
-                            <BsFillPencilFill />
-                        </div>
+                        {isView &&
+                            <div
+                                onClick={() => setIsEdit(!isEdit)}
+                                className="flex items-center px-2 rounded cursor-pointer hover:bg-blue-200 bg-blue-100">
+                                <BsFillPencilFill />
+                            </div>
+                        }
                     </div>
 
                     {workoutPlan.map((workout) => (
