@@ -6,6 +6,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { BsFillTrash3Fill } from "react-icons/bs";
 
 interface DeleteButtonProps {
     onClick: any
@@ -19,11 +20,13 @@ const DeleteButton: React.FC<DeleteButtonProps> = ({ onClick, tip }) => {
         <div>
             <TooltipProvider>
                 <Tooltip>
-                    <TooltipTrigger>
-                        <Button
+                    <TooltipTrigger className='h-full'>
+                        <div
                             onClick={onClick}
-                            className='rounded-full h-6 bg-red-500'
-                        >-</Button>
+                            className='flex rounded items-center justify-center w-full h-full m-1 bg-red-50 hover:bg-red-200'
+                        >
+                            <BsFillTrash3Fill />
+                        </div>
                     </TooltipTrigger>
                     <TooltipContent>
                         <p>{tip}</p>

@@ -4,7 +4,8 @@ import ExcerciseInput from './ExcerciseInput'
 import { IMuscleGroupWorkouts, IWorkout } from '@/interfaces/IWorkoutPlan'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronsUpDown } from "lucide-react";
-import AddButton from './buttons/AddButton';
+import { Button } from '../ui/button';
+import DeleteButton from './buttons/DeleteButton';
 
 const muscleGroups: string[] = ["חזה", "כתפיים", "יד אחורית", "גב", "יד קידמית", "רגליים", "בטן", "אירובי",];
 const chestExercises: string[] = ["פרפר", "מקבילים", "לחיצת חזה בשיפוע שלילי", "לחיצת חזה בשיפוע חיובי", "לחיצת חזה",];
@@ -28,6 +29,11 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({ handleSave,
         const newObject: IMuscleGroupWorkouts = {
             muscleGroup: ``,
             exercises: []
+        }
+
+        if (workouts[0] == undefined) {
+            setWorkouts([newObject])
+            return
         }
         setWorkouts([...workouts, newObject])
     }
@@ -54,6 +60,13 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({ handleSave,
         setWorkouts(updatedWorkouts);
     }
 
+    const deleteMuscleGroup = (index: number) => {
+
+        const muscleGroupCopy = workouts.filter((_, i) => i !== index);
+
+        setWorkouts(muscleGroupCopy)
+    }
+
 
     useEffect(() => {
         handleSave(workouts)
@@ -61,7 +74,7 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({ handleSave,
 
 
     return (
-        <div className='border-y-8 py-2 my-1 w-full'>
+        <div className='border-y-8 rounded py-2 my-1 w-full'>
             <Collapsible>
                 <CollapsibleTrigger className="flex items-center font-bold text-lg pr-5">
                     {title}
@@ -69,19 +82,27 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({ handleSave,
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                     {workouts.map((workout, i) => (
-                        <div key={workout.muscleGroup} className='border-y-4'>
-                            <h1 className='underline font-bold py-2'>בחר שריר:</h1>
+                        <div key={i} className='border-y-4'>
+                            <div className='flex gap-7 py-2 items-center'>
+                                <h1 className='underline font-bold py-2'>בחר קבוצת שריר:</h1>
+                                <DeleteButton tip='מחק קבוצת שריר' onClick={() => deleteMuscleGroup(i)} />
+                            </div>
                             <ComboBox options={muscleGroups} handleChange={(value) => updateMuscleGroup(i, value)} />
-                            <div className='border-y-2 my-2'>
+                            <div className='my-2'>
                                 <ExcerciseInput
-                                    options={workout.muscleGroup === `חזה` ? chestExercises : shoulderExercises}
+                                    options={workout?.muscleGroup === `חזה` ? chestExercises : shoulderExercises}
                                     updateWorkouts={(workouts) => updateWorkouts(i, workouts)}
-                                    title={workout.muscleGroup}
+                                    title={workout?.muscleGroup}
                                 />
                             </div>
                         </div>
                     ))}
-                    <AddButton tip='הוסף שריר' onClick={addWorkout} />
+                    <Button
+                        onClick={addWorkout}
+                        className='my-2'
+                    >
+                        הוסף קבוצת שריר
+                    </Button>
                 </CollapsibleContent>
             </Collapsible>
         </div>

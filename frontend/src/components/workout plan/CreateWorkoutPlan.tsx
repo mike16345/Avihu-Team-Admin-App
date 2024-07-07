@@ -122,7 +122,9 @@ const CreateWorkoutPlan: React.FC = () => {
                             title={workout.planName}
                         />
                         {workoutSplit === `Custom` &&
-                            <DeleteButton tip="הסר אימון" onClick={() => handleDeleteWorkout(workout.planName)} />
+                            <div className="mt-5 ">
+                                <DeleteButton tip="הסר אימון" onClick={() => handleDeleteWorkout(workout.planName)} />
+                            </div>
                         }
                     </div>
                 ))}
