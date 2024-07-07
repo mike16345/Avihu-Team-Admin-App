@@ -19,40 +19,6 @@ export const ViewDietPlanPage = () => {
 
   const [dietPlan, setDietPlan] = useState<IDietPlan | null>(null);
 
-  console.log("diet plan", dietPlan);
-  const handleSaveDietPlan = async () => {
-    if (!dietPlan) return;
-    
-    const dietPlanToAdd = {
-      ...dietPlan,
-      userId: id,
-    };
-
-    if (id && !isNewPlan) {
-      await updateDietPlanByUserId(id, dietPlanToAdd)
-        .then(() => {
-          toast.success("תפריט עודכנה בהצלחה!");
-          setOpenDeleteModal(false);
-          setMealToDelete(null);
-        })
-        .catch((err) => {
-          toast.error("הייתה בעיה בעדכון!");
-          console.error("error", err);
-        });
-    } else {
-      await addDietPlan(dietPlanToAdd)
-        .then((res) => {
-          toast.success("תפריט נשמר בהצלחה!");
-          setDietPlan(res);
-          setIsNewPlan(false);
-        })
-        .catch((err) => {
-          toast.error("הייתה בעיה בשמירה");
-          console.error("error", err);
-        });
-    }
-  };
-
   const handleAddMeal = () => {
     if (!dietPlan) return;
 
@@ -73,6 +39,40 @@ export const ViewDietPlanPage = () => {
 
     newMeals[mealNumber] = meal;
     setDietPlan({ ...dietPlan, meals: newMeals });
+    toast.success("ארוחה נשמרה בהצלחה!");
+  };
+
+  const handleSaveDietPlan = async () => {
+    if (!dietPlan) return;
+
+    const dietPlanToAdd = {
+      ...dietPlan,
+      userId: id,
+    };
+
+    if (id && !isNewPlan) {
+      await updateDietPlanByUserId(id, dietPlanToAdd)
+        .then(() => {
+          toast.success("תפריט עודכנה בהצלחה!");
+          setOpenDeleteModal(false);
+          setMealToDelete(null);
+        })
+        .catch((err) => {
+          toast.error("הייתה בעיה בעדכון!", { description: err.message });
+          console.error("error", err);
+        });
+    } else {
+      await addDietPlan(dietPlanToAdd)
+        .then((res) => {
+          toast.success("תפריט נשמר בהצלחה!");
+          setDietPlan(res);
+          setIsNewPlan(false);
+        })
+        .catch((err) => {
+          toast.error("הייתה בעיה בשמירה", { description: err.message });
+          console.error("error", err);
+        });
+    }
   };
 
   useEffect(() => {
