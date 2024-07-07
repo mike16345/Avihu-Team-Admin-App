@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ComboBox from "./ComboBox";
 import { ICompleteWorkoutPlan, IMuscleGroupWorkouts, IWorkoutPlan } from "@/interfaces/IWorkoutPlan";
 import DeleteButton from "./buttons/DeleteButton";
@@ -12,8 +12,10 @@ import { toast } from "sonner";
 
 
 const CreateWorkoutPlan: React.FC = () => {
-    const { addWorkoutPlan } = useWorkoutPlanApi()
+    const { addWorkoutPlan, getWorkoutPlan } = useWorkoutPlanApi()
     const workoutTemp: string[] = [`AB`, `ABC`, `יומי`, `התאמה אישית`];
+    const [isView, setIsView] = useState<boolean>(true)
+    const [isEdit, setIsEdit] = useState<boolean>(false)
 
     const [workoutSplit, setWorkoutSplit] = useState<string>(`AB`);
     const [workoutPlan, setWorkoutPlan] = useState<IWorkoutPlan[]>([]);
@@ -98,8 +100,15 @@ const CreateWorkoutPlan: React.FC = () => {
             .catch((error) => toast(`${error.message}`, {
                 description: `${error.response.data.message}`
             }))
-
     }
+
+    useEffect(() => {
+        if (isView) {
+            getWorkoutPlan(`668a6d535eeb5c9aeff7a952`)
+                .then(data => setWorkoutPlan(data.workoutPlans)
+                )
+        }
+    }, [])
 
 
 
@@ -117,6 +126,7 @@ const CreateWorkoutPlan: React.FC = () => {
                 {workoutPlan.map((workout) => (
                     <div key={workout.planName} className="flex items-start">
                         <MuscleGroupContainer
+                            workout={workout.workouts}
                             handleSave={(workouts) => handleSave(workout.planName, workouts)}
                             title={workout.planName}
                         />

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import ComboBox from './ComboBox'
 import ExcerciseInput from './ExcerciseInput'
-import { IMuscleGroupWorkouts, IWorkout } from '@/interfaces/IWorkoutPlan'
+import { IMuscleGroupWorkouts, IWorkout, IWorkoutPlan } from '@/interfaces/IWorkoutPlan'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronsUpDown } from "lucide-react";
 import { Button } from '../ui/button';
@@ -14,16 +14,15 @@ const shoulderExercises: string[] = ["כתפיים"];
 
 interface MuscleGroupContainerProps {
     handleSave: (workouts: IMuscleGroupWorkouts[]) => void
-    title: string
+    title: string,
+    workout: IMuscleGroupWorkouts[]
 }
 
 
 
-const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({ handleSave, title }) => {
+const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({ handleSave, title, workout }) => {
 
-    const [workouts, setWorkouts] = useState<IMuscleGroupWorkouts[]>([
-        { muscleGroup: ``, exercises: [] }
-    ])
+    const [workouts, setWorkouts] = useState<IMuscleGroupWorkouts[]>(workout)
 
     const addWorkout = () => {
         const newObject: IMuscleGroupWorkouts = {
@@ -87,9 +86,10 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({ handleSave,
                                 <h1 className='underline font-bold py-2'>בחר קבוצת שריר:</h1>
                                 <DeleteButton tip='מחק קבוצת שריר' onClick={() => deleteMuscleGroup(i)} />
                             </div>
-                            <ComboBox options={muscleGroups} handleChange={(value) => updateMuscleGroup(i, value)} />
+                            <ComboBox options={muscleGroups} existingValue={workout.muscleGroup} handleChange={(value) => updateMuscleGroup(i, value)} />
                             <div className='my-2'>
                                 <ExcerciseInput
+                                    exercises={workout.exercises}
                                     options={workout?.muscleGroup === `חזה` ? chestExercises : shoulderExercises}
                                     updateWorkouts={(workouts) => updateWorkouts(i, workouts)}
                                     title={workout?.muscleGroup}

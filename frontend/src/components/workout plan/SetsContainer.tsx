@@ -6,11 +6,12 @@ import DeleteButton from './buttons/DeleteButton';
 
 interface SetContainerProps {
     updateSets: (componentSets: ISet[]) => void;
+    existingSets?: ISet[]
 }
 
-const SetsContainer: React.FC<SetContainerProps> = ({ updateSets }) => {
+const SetsContainer: React.FC<SetContainerProps> = ({ updateSets, existingSets }) => {
 
-    const [componentSets, setComponentSets] = useState<ISet[]>([{
+    const [componentSets, setComponentSets] = useState<ISet[]>(existingSets ? existingSets : [{
         id: 1,
         minReps: 0,
         maxReps: 0,

@@ -1,13 +1,13 @@
 import "./App.css";
 import Nav from "./components/Nav";
-import ViewWorkoutPlan from "./components/workout plan/view/ViewWorkoutPlan";
+import CreateWorkoutPlan from "./components/workout plan/CreateWorkoutPlan";
 
 function App() {
 
   return (
     <div dir="rtl" className="flex">
       <Nav />
-      <ViewWorkoutPlan />
+      <CreateWorkoutPlan />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ChevronsUpDown } from "lucide-react";
 import {
   Command,
@@ -14,17 +14,21 @@ import { Button } from "@/components/ui/button";
 interface ComboBoxProps {
   options: string[] | undefined;
   handleChange: (value: string) => void;
+  existingValue?: string
 }
 
-const ComboBox: React.FC<ComboBoxProps> = ({ options, handleChange }) => {
+const ComboBox: React.FC<ComboBoxProps> = ({ options, handleChange, existingValue }) => {
   const [open, setOpen] = useState<boolean>(false);
-  const [value, setValue] = useState<string>();
+  const [value, setValue] = useState<string | undefined>(existingValue ? existingValue : undefined);
 
-  const handleSelect = (currentValue: string) => {
-    setValue(currentValue);
-    setOpen(false);
-    handleChange(currentValue);
-  };
+
+
+  useEffect(() => {
+    if (value) {
+      setOpen(false);
+      handleChange(value);
+    }
+  }, [value])
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -46,7 +50,7 @@ const ComboBox: React.FC<ComboBoxProps> = ({ options, handleChange }) => {
             <CommandEmpty>No framework found.</CommandEmpty>
             <CommandGroup dir="rtl">
               {options?.map((option) => (
-                <CommandItem key={option} value={option} onSelect={handleSelect}>
+                <CommandItem key={option} value={option} onSelect={(val) => setValue(val)}>
                   {option}
                 </CommandItem>
               ))}

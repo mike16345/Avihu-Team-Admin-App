@@ -12,10 +12,11 @@ interface ExcerciseInputProps {
   options: string[] | undefined;
   updateWorkouts: (workouts: IWorkout[]) => void;
   title: string;
+  exercises?: IWorkout[]
 }
 
-const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts, title }) => {
-  const [workoutObjs, setWorkoutObjs] = useState<IWorkout[]>([
+const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts, title, exercises }) => {
+  const [workoutObjs, setWorkoutObjs] = useState<IWorkout[]>(exercises ? exercises : [
     {
       id: `1`,
       name: ``,
@@ -84,9 +85,11 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
           <div className="flex flex-col gap-5 border-r-2 p-2">
             <ComboBox
               options={options}
+              existingValue={item.name}
               handleChange={(currentValue) => handleChange(currentValue, item.id)}
             />
             <SetsContainer
+              existingSets={item.sets}
               updateSets={(setsArr: ISet[]) => updateSets(setsArr, item.id)}
             />
 
