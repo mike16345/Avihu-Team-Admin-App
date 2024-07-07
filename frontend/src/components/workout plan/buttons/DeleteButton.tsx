@@ -1,5 +1,4 @@
 import React from 'react'
-import { Button } from "../../ui/button";
 import {
     Tooltip,
     TooltipContent,
@@ -14,7 +13,6 @@ interface DeleteButtonProps {
 }
 
 const DeleteButton: React.FC<DeleteButtonProps> = ({ onClick, tip }) => {
-    {/* CR: My issue here is more the styling. */ }
 
     return (
         <div>
@@ -33,8 +31,6 @@ const DeleteButton: React.FC<DeleteButtonProps> = ({ onClick, tip }) => {
                     </TooltipContent>
                 </Tooltip>
             </TooltipProvider>
-
-
         </div>
     )
 }

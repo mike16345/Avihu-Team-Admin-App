@@ -13,7 +13,7 @@ const shoulderExercises: string[] = ["כתפיים"];
 
 
 interface MuscleGroupContainerProps {
-    handleSave: (workouts: IWorkout[]) => void
+    handleSave: (workouts: IMuscleGroupWorkouts[]) => void
     title: string
 }
 

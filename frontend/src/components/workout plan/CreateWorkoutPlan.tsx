@@ -1,12 +1,11 @@
 import React, { useState } from "react";
-
 import ComboBox from "./ComboBox";
 import { ICompleteWorkoutPlan, IMuscleGroupWorkouts, IWorkoutPlan } from "@/interfaces/IWorkoutPlan";
 import DeleteButton from "./buttons/DeleteButton";
 import AddButton from "./buttons/AddButton";
 import MuscleGroupContainer from "./MuscleGroupContainer";
 import { useWorkoutPlanApi } from "@/hooks/useWorkoutPlanApi";
-import { cleanObject } from "@/utils/workoutPlanUtils";
+import { cleanWorkoutObject } from "@/utils/workoutPlanUtils";
 import { Button } from "../ui/button";
 import { Toaster } from "@/components/ui/sonner"
 import { toast } from "sonner";
@@ -14,7 +13,7 @@ import { toast } from "sonner";
 
 const CreateWorkoutPlan: React.FC = () => {
     const { addWorkoutPlan } = useWorkoutPlanApi()
-    const workoutTemp: string[] = [`AB`, `ABC`, `Daily`, `Custom`];
+    const workoutTemp: string[] = [`AB`, `ABC`, `יומי`, `התאמה אישית`];
 
     const [workoutSplit, setWorkoutSplit] = useState<string>(`AB`);
     const [workoutPlan, setWorkoutPlan] = useState<IWorkoutPlan[]>([]);
@@ -57,10 +56,10 @@ const CreateWorkoutPlan: React.FC = () => {
             case `ABC`:
                 iterater = 3;
                 break;
-            case `Daily`:
+            case `יומי`:
                 iterater = 7;
                 break;
-            case `Custom`:
+            case `התאמה אישית`:
                 iterater = 1;
                 break;
         }
@@ -90,7 +89,7 @@ const CreateWorkoutPlan: React.FC = () => {
             workoutPlans: [...workoutPlan]
         }
 
-        const cleanedPostObject = cleanObject(postObject)
+        const cleanedPostObject = cleanWorkoutObject(postObject)
         const date = new Date().toLocaleTimeString()
         addWorkoutPlan(cleanedPostObject).
             then(() => toast(`Workout Plan Saved Succesfully!`, {
@@ -121,14 +120,14 @@ const CreateWorkoutPlan: React.FC = () => {
                             handleSave={(workouts) => handleSave(workout.planName, workouts)}
                             title={workout.planName}
                         />
-                        {workoutSplit === `Custom` &&
+                        {workoutSplit === `התאמה אישית` &&
                             <div className="mt-5 ">
                                 <DeleteButton tip="הסר אימון" onClick={() => handleDeleteWorkout(workout.planName)} />
                             </div>
                         }
                     </div>
                 ))}
-                {workoutSplit === `Custom` && <AddButton tip="הוסף אימון" onClick={handleAddWorkout} />}
+                {workoutSplit === `התאמה אישית` && <AddButton tip="הוסף אימון" onClick={handleAddWorkout} />}
             </div>
             <Toaster />
             <Button onClick={hanldeSubmit}>שמור אימון</Button>

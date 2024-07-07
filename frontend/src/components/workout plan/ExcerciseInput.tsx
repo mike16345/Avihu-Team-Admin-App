@@ -4,7 +4,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ISet, IWorkout } from "@/interfaces/IWorkoutPlan";
 import SetsContainer from "./SetsContainer";
-import AddButton from "./buttons/AddButton";
 import DeleteButton from "./buttons/DeleteButton";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
