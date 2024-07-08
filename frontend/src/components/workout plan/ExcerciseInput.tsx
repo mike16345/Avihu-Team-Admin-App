@@ -11,10 +11,9 @@ import { Button } from "../ui/button";
 interface ExcerciseInputProps {
   options: string[] | undefined;
   updateWorkouts: (workouts: IWorkout[]) => void;
-  title: string;
 }
 
-const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts, title }) => {
+const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts }) => {
   const [workoutObjs, setWorkoutObjs] = useState<IWorkout[]>([
     {
       id: `1`,
@@ -77,11 +76,13 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
 
   return (
     <div className="w-full">
-      <h1 className="font-bold underline">{title}</h1>
       {workoutObjs.map((item) => (
-        <div className="py-5 flex  gap-2 border-b-2 " key={item.id}>
+        <div className="py-5 flex  gap-2 " key={item.id}>
           <DeleteButton tip="הסר תרגיל" onClick={() => handleDeleteExcercise(item.id)} />
           <div className="flex flex-col gap-5 border-r-2 p-2">
+            <h2
+              className="font-bold underline"
+            >בחר תרגיל:</h2>
             <ComboBox
               options={options}
               handleChange={(currentValue) => handleChange(currentValue, item.id)}
