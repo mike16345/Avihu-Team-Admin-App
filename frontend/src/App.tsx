@@ -1,14 +1,14 @@
 import "./App.css";
-import { ModeToggle } from "./components/theme/mode-toggle";
+import { Sidebar } from "./components/Navbar/Sidebar";
 import { AppRoutes } from "./routes/AppRoutes";
 
 function App() {
   return (
     <div className="flex size-full">
-      <div className="w-1/4 h-full bg-secondary border-r-2 p-2">
-        <ModeToggle />
+      <div className="w-1/6 h-full bg-secondary border-l-2">
+        <Sidebar />
       </div>
-      <div className="w-3/4 h-full p-8 ">
+      <div className="w-5/6 h-full p-8 ">
         <AppRoutes />
       </div>
     </div>

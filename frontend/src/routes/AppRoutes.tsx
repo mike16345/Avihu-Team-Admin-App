@@ -7,6 +7,7 @@ export const AppRoutes = () => {
     <>
       <Routes>
         <Route path="/" element={<UsersTable />} />
+        <Route path="/users" element={<UsersTable />} />
         <Route path="/diet-plans/:id" element={<ViewDietPlanPage />} />
       </Routes>
     </>
