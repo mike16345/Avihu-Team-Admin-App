@@ -36,7 +36,7 @@ const ComboBox: React.FC<ComboBoxProps> = ({ options, handleChange, existingValu
 
   return (
     <Popover open={isEdit ? open : false} onOpenChange={isEdit ? setOpen : false}>
-      <PopoverTrigger asChild>
+      <PopoverTrigger dir="rtl" asChild>
         <Button
           variant="outline"
           role="combobox"

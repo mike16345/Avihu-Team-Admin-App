@@ -2,7 +2,6 @@ import React, { createContext, useEffect, useState } from "react";
 import ComboBox from "./ComboBox";
 import { ICompleteWorkoutPlan, IMuscleGroupWorkouts, IWorkoutPlan } from "@/interfaces/IWorkoutPlan";
 import DeleteButton from "./buttons/DeleteButton";
-import AddButton from "./buttons/AddButton";
 import MuscleGroupContainer from "./MuscleGroupContainer";
 import { useWorkoutPlanApi } from "@/hooks/useWorkoutPlanApi";
 import { cleanWorkoutObject } from "@/utils/workoutPlanUtils";
@@ -10,6 +9,7 @@ import { Button } from "../ui/button";
 import { Toaster } from "@/components/ui/sonner"
 import { toast } from "sonner";
 import { BsFillPencilFill } from "react-icons/bs";
+import { BsPlusCircleFill } from "react-icons/bs";
 
 export const EditableContext = createContext<boolean>(false);
 
@@ -19,8 +19,13 @@ const CreateWorkoutPlan: React.FC = () => {
     const [isView, setIsView] = useState<boolean>(true)
     const [isEdit, setIsEdit] = useState<boolean>(isView ? false : true)
 
-    const [workoutSplit, setWorkoutSplit] = useState<string>(`AB`);
+    const [workoutSplit, setWorkoutSplit] = useState<string>();
     const [workoutPlan, setWorkoutPlan] = useState<IWorkoutPlan[]>([]);
+
+    const handlePlanNameChange = (newName: string, index: number) => {
+        const newWorkoutPlan = workoutPlan.map((workout, i) => i == index ? { ...workout, planName: newName } : workout);
+        setWorkoutPlan(newWorkoutPlan);
+    }
 
     const handleAddWorkout = () => {
         const newObject = { planName: `אימון ${workoutPlan.length + 1}`, workouts: [] };
@@ -152,25 +157,37 @@ const CreateWorkoutPlan: React.FC = () => {
                         }
                     </div>
 
-                    {workoutPlan.map((workout) => (
+                    {workoutPlan.map((workout, i) => (
                         <div key={workout.planName} className="flex items-start">
                             <MuscleGroupContainer
                                 workout={workout.workouts}
                                 handleSave={(workouts) => handleSave(workout.planName, workouts)}
                                 title={workout.planName}
+                                handlePlanNameChange={(newName) => handlePlanNameChange(newName, i)}
                             />
-                            {workoutSplit === `התאמה אישית` &&
-                                <div className="mt-5 ">
-                                    <DeleteButton tip="הסר אימון" onClick={() => handleDeleteWorkout(workout.planName)} />
-                                </div>
-                            }
+                            <div className="mt-5 ">
+                                <DeleteButton tip="הסר אימון" onClick={() => handleDeleteWorkout(workout.planName)} />
+                            </div>
                         </div>
                     ))}
-                    {workoutSplit === `התאמה אישית` && <AddButton tip="הוסף אימון" onClick={handleAddWorkout} />}
+                    <div className="w-full flex justify-center">
+                        {workoutSplit &&
+                            <Button
+                                onClick={handleAddWorkout}
+                            >
+                                <div className="flex flex-col items-center">
+                                    הוסף אימון
+                                    <BsPlusCircleFill />
+                                </div>
+                            </Button>
+                        }
+                    </div>
                 </div>
                 <Toaster />
                 {isEdit &&
-                    <Button onClick={hanldeSubmit}>שמור אימון</Button>
+                    { workoutSplit &&
+                    <Button onClick={hanldeSubmit}>שמור תוכנית אימון</Button>
+                }
                 }
             </div >
         </EditableContext.Provider>

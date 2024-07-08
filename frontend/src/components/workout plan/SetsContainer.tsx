@@ -63,11 +63,14 @@ const SetsContainer: React.FC<SetContainerProps> = ({ updateSets, existingSets }
     }, [componentSets])
 
     return (
-        <div>
+        <div className='border-y-2'>
+            <h2
+                className='underline font-bold pr-4 pt-2'
+            >סטים:</h2>
             {componentSets.map((set, i) => (
                 <div
                     key={set.id}
-                    className='flex gap-5  p-2 border-t-2 items-end'
+                    className='flex gap-5  p-2 items-end'
                 >
                     <SetsInput
                         setNumber={i + 1}
