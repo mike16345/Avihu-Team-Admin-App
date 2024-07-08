@@ -166,12 +166,14 @@ const CreateWorkoutPlan: React.FC = () => {
                                 handlePlanNameChange={(newName) => handlePlanNameChange(newName, i)}
                             />
                             <div className="mt-5 ">
-                                <DeleteButton tip="הסר אימון" onClick={() => handleDeleteWorkout(workout.planName)} />
+                                {isEdit &&
+                                    <DeleteButton tip="הסר אימון" onClick={() => handleDeleteWorkout(workout.planName)} />
+                                }
                             </div>
                         </div>
                     ))}
                     <div className="w-full flex justify-center">
-                        {workoutSplit &&
+                        {isEdit &&
                             <Button
                                 onClick={handleAddWorkout}
                             >
@@ -185,9 +187,7 @@ const CreateWorkoutPlan: React.FC = () => {
                 </div>
                 <Toaster />
                 {isEdit &&
-                    { workoutSplit &&
                     <Button onClick={hanldeSubmit}>שמור תוכנית אימון</Button>
-                }
                 }
             </div >
         </EditableContext.Provider>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import {
     Dialog,
     DialogContent,
@@ -20,6 +20,8 @@ interface MuscleGroupSelectorProps {
 
 const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({ options, handleChange, existingMuscleGroup }) => {
     const [value, setValue] = useState<string>(existingMuscleGroup ? existingMuscleGroup : ``)
+
+
     return (
         <Dialog defaultOpen={value ? false : true}>
             <DialogTrigger
