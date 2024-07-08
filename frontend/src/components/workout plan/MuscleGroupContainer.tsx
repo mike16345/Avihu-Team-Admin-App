@@ -101,6 +101,7 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({ handleSave,
                     {workouts.map((workout, i) => (
                         <Collapsible className='border-2 rounded p-3 my-2'>
                             <div key={i}>
+                                {!isEdit && <h2 className='font-bold underline'>קבוצת שריר:</h2>}
                                 <CollapsibleTrigger onClick={() => setIsOpen(!isOpen)} className='flex w-full items-center border-b-2 gap-3'>
                                     <div className='flex gap-7 py-2 items-center w-full justify-between'>
                                         <div className='flex items-center gap-7'>

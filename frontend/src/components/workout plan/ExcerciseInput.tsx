@@ -87,7 +87,9 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
           <div className="flex flex-col gap-5 border-r-2 p-2">
             <h2
               className="font-bold underline"
-            >בחר תרגיל:</h2>
+            >{isEdit ? ` בחר תרגיל:` : `שם התרגיל:`}
+
+            </h2>
             <ComboBox
               options={options}
               existingValue={item.name}
