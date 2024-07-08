@@ -146,7 +146,7 @@ const CreateWorkoutPlan: React.FC = () => {
             </div>
             <Toaster />
             {workoutSplit &&
-                <Button onClick={hanldeSubmit}>שמור אימון</Button>
+                <Button onClick={hanldeSubmit}>שמור תוכנית אימון</Button>
             }
         </div >
     );

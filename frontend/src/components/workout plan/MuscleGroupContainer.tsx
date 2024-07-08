@@ -23,9 +23,7 @@ interface MuscleGroupContainerProps {
 
 const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({ handleSave, title, handlePlanNameChange }) => {
 
-    const [workouts, setWorkouts] = useState<IMuscleGroupWorkouts[]>([
-        { muscleGroup: ``, exercises: [] }
-    ])
+    const [workouts, setWorkouts] = useState<IMuscleGroupWorkouts[]>([])
     const [planeName, setPlanName] = useState<string | undefined>();
     const [isOpen, setIsOpen] = useState<boolean>(false);
 
@@ -80,7 +78,7 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({ handleSave,
 
 
     return (
-        <div className='border-y-8 rounded py-2 my-1 w-full'>
+        <div className='border-y-4 rounded py-2 my-1 w-full'>
             <Collapsible>
                 <CollapsibleTrigger className="flex items-center gap-4 w-full font-bold text-lg pr-5">
                     <Input
@@ -97,23 +95,22 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({ handleSave,
                         <Collapsible className='border-2 rounded p-3 my-2'>
                             <div key={i}>
                                 <CollapsibleTrigger onClick={() => setIsOpen(!isOpen)} className='flex w-full items-center border-b-2 gap-3'>
-                                    <div className='flex gap-7 py-2 items-center'>
-                                        <h1 className='underline font-bold py-2'>בחר קבוצת שריר:</h1>
-                                        {!isOpen ?
-                                            <ChevronDown />
-                                            :
-                                            <ChevronUp />
-                                        }
+                                    <div className='flex gap-7 py-2 items-center w-full justify-between'>
+                                        <div className='flex items-center gap-7'>
+                                            <MuscleGroupSelector
+                                                options={muscleGroups}
+                                                handleChange={(value) => updateMuscleGroup(i, value)}
+                                                existingMuscleGroup={workout.muscleGroup}
+                                            />
+                                            {!isOpen ?
+                                                <ChevronDown />
+                                                :
+                                                <ChevronUp />
+                                            }
+                                        </div>
                                         <DeleteButton tip='מחק קבוצת שריר' onClick={() => deleteMuscleGroup(i)} />
                                     </div>
                                 </CollapsibleTrigger>
-                                <div className='pt-2'>
-                                    <MuscleGroupSelector
-                                        options={muscleGroups}
-                                        handleChange={(value) => updateMuscleGroup(i, value)}
-                                        existingMuscleGroup={workout.muscleGroup}
-                                    />
-                                </div>
                                 <CollapsibleContent>
                                     <div className='my-2'>
                                         <ExcerciseInput
