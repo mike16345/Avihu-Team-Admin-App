@@ -1,7 +1,6 @@
 #root {
   width: 100%;
   height: 100%;
-  overflow: hidden;
   -webkit-touch-callout: none;
   /* iOS Safari */
   -webkit-user-select: none;
@@ -165,3 +164,60 @@ body {
   border-radius: 10px;
   border: 2px solid rgba(255, 255, 255, 0.18);
 }
+
+/* Hide scrollbars for WebKit browsers (Chrome, Safari) */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbars for Firefox */
+.hide-scrollbar {
+  scrollbar-width: none; /* Firefox */
+}
+
+/* General styling */
+.hide-scrollbar {
+  overflow: auto;
+}
+
+/* CustomScrollbar.css */
+.custom-scrollbar {
+  max-height: 400px; /* Adjust the height as needed */
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #ccc transparent; /* Light color thumb, no background */
+}
+
+/* For Webkit browsers (e.g., Chrome, Safari) */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 12px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent; /* No background */
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #ccc; /* Light color thumb */
+  border-radius: 10px;
+  border: 3px solid transparent; /* No border, makes it look lighter */
+}
+
+/* For Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #ccc transparent; /* Light color thumb, no background */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #ccc; /* Light color thumb */
+  border-radius: 10px;
+  border: 3px solid transparent; /* No border, makes it look lighter */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent; /* No background */
+  border-radius: 10px;
+}
+
