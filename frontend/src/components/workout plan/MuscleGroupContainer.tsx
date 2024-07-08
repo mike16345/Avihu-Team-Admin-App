@@ -86,7 +86,7 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({ handleSave,
                         onClick={(e) => e.stopPropagation()}
                         onChange={(e) => setPlanName(e.target.value)}
                         onBlur={planeName ? () => handlePlanNameChange(planeName) : () => { }}
-                        value={planeName ? planeName : title}
+                        value={planeName ? planeName : planeName == `` ? planeName : title}
                     />
                     <ChevronsUpDown className="ml-2 h-4 w-4  opacity-50" />
                 </CollapsibleTrigger>
