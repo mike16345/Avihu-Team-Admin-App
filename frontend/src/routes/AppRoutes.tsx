@@ -8,9 +8,9 @@ export const AppRoutes = () => {
     <>
       <Routes>
         <Route path="/" element={<UsersTable />} />
-        <Route path="/users" element={<UsersTable />} />
+        <Route path="/users/*" element={<UsersTable />} />
+        <Route path="/users/:id" element={<UserDashboard />} />
         <Route path="/diet-plans/:id" element={<ViewDietPlanPage />} />
-        <Route path="/user-dashboard/:id" element={<UserDashboard />} />
       </Routes>
     </>
   );

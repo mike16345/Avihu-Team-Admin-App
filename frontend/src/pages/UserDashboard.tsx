@@ -8,7 +8,7 @@ export const UserDashboard = () => {
   return (
     <div className="size-full flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl">אביהו בושרי</h1>
+        <h1 className="text-2xl font-bold">אביהו בושרי</h1>
         <ul className="flex flex-col text-sm ">
           <Link className=" hover:underline" to={"/diet-plans/" + id}>
             עריכה תפריט

@@ -4,16 +4,16 @@ import { Card, CardContent } from "../ui/card";
 
 export const WeightProgression = () => {
   return (
-    <div className="flex flex-col gap-2">
-      <div className="size-full flex items-center gap-12">
+    <div className="flex flex-col gap-8">
+      <div className="w-full h-[400px] flex items-center gap-12">
         <WeightCalendar />
         <WeightChart />
       </div>
       <div className="flex flex-col">
-        <h1 className="text-lg">תמונות</h1>
+        <h1 className="text-lg font-semibold">תמונות</h1>
         <div className="flex items-center gap-8 border p-4">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <Card>
+          {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+            <Card key={i}>
               <CardContent>
                 <img
                   className="object-cover w-full h-48"

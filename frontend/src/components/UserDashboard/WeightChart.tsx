@@ -39,8 +39,8 @@ const chartConfig = {
 
 export const WeightChart = () => {
   return (
-    <div className="size-full">
-      <ChartContainer config={chartConfig}>
+    <div className=" size-full">
+      <ChartContainer className="max-h-[400px] w-full" config={chartConfig}>
         <LineChart
           accessibilityLayer
           data={chartData}
