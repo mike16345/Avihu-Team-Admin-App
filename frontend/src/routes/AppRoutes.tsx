@@ -1,4 +1,5 @@
 import { UsersTable } from "@/components/tables/UsersTable";
+import { UserDashboard } from "@/pages/UserDashboard";
 import { ViewDietPlanPage } from "@/pages/ViewDietPlanPage";
 import { Route, Routes } from "react-router";
 
@@ -9,6 +10,7 @@ export const AppRoutes = () => {
         <Route path="/" element={<UsersTable />} />
         <Route path="/users" element={<UsersTable />} />
         <Route path="/diet-plans/:id" element={<ViewDietPlanPage />} />
+        <Route path="/user-dashboard/:id" element={<UserDashboard />} />
       </Routes>
     </>
   );
