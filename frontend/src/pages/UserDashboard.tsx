@@ -10,10 +10,16 @@ export const UserDashboard = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">אביהו בושרי</h1>
         <ul className="flex flex-col text-sm ">
-          <Link className=" hover:underline" to={"/diet-plans/" + id}>
+          <Link
+            className=" hover:bg-secondary font-bold px-2 py-0.5 rounded-md"
+            to={"/diet-plans/" + id}
+          >
             עריכה תפריט
           </Link>
-          <Link className=" hover:underline" to={"/workout-plans/" + id}>
+          <Link
+            className="  hover:bg-secondary font-bold px-2 py-0.5 rounded-md"
+            to={"/workout-plans/" + id}
+          >
             עריכה תוכנית אימון
           </Link>
         </ul>

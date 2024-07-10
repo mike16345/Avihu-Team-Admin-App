@@ -1,30 +1,16 @@
 "use client";
 
-import { TrendingUp } from "lucide-react";
-import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-const chartData = [
-  { month: "January", desktop: 186, mobile: 80 },
-  { month: "February", desktop: 305, mobile: 200 },
-  { month: "March", desktop: 237, mobile: 120 },
-  { month: "April", desktop: 73, mobile: 190 },
-  { month: "May", desktop: 209, mobile: 130 },
-  { month: "June", desktop: 214, mobile: 140 },
-];
+import { IWeighIns } from "@/interfaces/IWeighIns";
+import { FC } from "react";
+import DateUtils from "@/lib/dateUtils";
 
 const chartConfig = {
   desktop: {
@@ -37,13 +23,17 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export const WeightChart = () => {
+type WeighChartProps = {
+  weighIns: IWeighIns;
+};
+
+export const WeightChart: FC<WeighChartProps> = ({ weighIns }) => {
   return (
     <div className=" size-full">
-      <ChartContainer className="max-h-[400px] w-full" config={chartConfig}>
+      <ChartContainer className=" max-h-[400px] w-full" config={chartConfig}>
         <LineChart
           accessibilityLayer
-          data={chartData}
+          data={weighIns.weighIns}
           margin={{
             left: 12,
             right: 12,
@@ -51,15 +41,30 @@ export const WeightChart = () => {
         >
           <CartesianGrid vertical={false} />
           <XAxis
-            dataKey="month"
-            tickLine={false}
+            dataKey="date"
             axisLine={false}
-            tickMargin={8}
-            tickFormatter={(value) => value.slice(0, 3)}
+            tickFormatter={(value: string) => {
+              const date = DateUtils.convertToDate(value);
+              const month = DateUtils.formatDate(date, "DD/MM");
+
+              return month;
+            }}
           />
-          <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+          <YAxis dataKey={"weight"} axisLine={false} />
+          <ChartTooltip
+            cursor={true}
+            content={
+              <ChartTooltipContent
+                labelFormatter={(date: string) => {
+                  const convertedDate = DateUtils.convertToDate(date);
+
+                  return DateUtils.formatDate(convertedDate, "DD/MM/YYYY");
+                }}
+              />
+            }
+          />
           <Line
-            dataKey="desktop"
+            dataKey="weight"
             type="natural"
             stroke="var(--color-desktop)"
             strokeWidth={2}
