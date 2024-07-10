@@ -141,21 +141,27 @@ const CreateWorkoutPlan: React.FC = () => {
         <EditableContext.Provider value={{ isEdit }}>
             <div className="p-5 overflow-y-scroll max-h-[95vh] w-full">
                 <h1 className="text-4xl">תוכנית אימון</h1>
-                <p>כאן תוכל לייצר תוכנית אימון ללקוחות שלך</p>
+                <p>
+                    {isEdit ?
+                        `כאן תוכל לערוך תוכנית אימון קיימת ללקוח שלך`
+                        :
+                        `כאן תוכל לצפות בתוכנית האימון הקיימת של לקוח זה`
+                    }
+                </p>
                 <div className="p-2">
-                    <div className="flex justify-between">
+                    {isEdit &&
                         <ComboBox
                             options={workoutTemp}
                             handleChange={(currentValue) => handleSelect(currentValue)}
                         />
-                        {isView &&
-                            <div
-                                onClick={() => setIsEdit(!isEdit)}
-                                className="flex items-center px-2 rounded cursor-pointer hover:bg-blue-200 bg-blue-100">
-                                <BsFillPencilFill />
-                            </div>
-                        }
-                    </div>
+                    }
+                    {isView &&
+                        <div
+                            onClick={() => setIsEdit(!isEdit)}
+                            className="absolute left-10 top-10 h-10 flex items-center px-2 rounded cursor-pointer hover:bg-blue-200 bg-blue-100">
+                            <BsFillPencilFill />
+                        </div>
+                    }
 
                     {workoutPlan.map((workout, i) => (
                         <div key={workout.planName} className="flex items-start">

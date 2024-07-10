@@ -99,8 +99,8 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({ handleSave,
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                     {workouts.map((workout, i) => (
-                        <Collapsible className='border-2 rounded p-3 my-2'>
-                            <div key={i}>
+                        <Collapsible key={i} className='border-2 rounded p-3 my-2'>
+                            <div>
                                 {!isEdit && <h2 className='font-bold underline'>קבוצת שריר:</h2>}
                                 <CollapsibleTrigger onClick={() => setIsOpen(!isOpen)} className='flex w-full items-center border-b-2 gap-3'>
                                     <div className='flex gap-7 py-2 items-center w-full justify-between'>
@@ -116,11 +116,7 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({ handleSave,
                                                     className='font-bold text-lg pr-5'
                                                 >{workout.muscleGroup}</p>
                                             }
-                                            {!isOpen ?
-                                                <ChevronDown />
-                                                :
-                                                <ChevronUp />
-                                            }
+                                            <ChevronsUpDown className="ml-2 h-4 w-4  opacity-50" />
                                         </div>
                                         {isEdit &&
                                             <DeleteButton tip='מחק קבוצת שריר' onClick={() => deleteMuscleGroup(i)} />

@@ -69,7 +69,7 @@ const SetsContainer: React.FC<SetContainerProps> = ({ updateSets, existingSets }
             >סטים:</h2>
             {componentSets.map((set, i) => (
                 <div
-                    key={set.id}
+                    key={i}
                     className='flex gap-5  p-2 items-end'
                 >
                     <SetsInput

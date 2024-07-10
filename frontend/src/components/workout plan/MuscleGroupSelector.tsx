@@ -38,7 +38,7 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({ options, hand
                     </p>
                 </div>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent onClick={(e) => e.stopPropagation()}>
                 <DialogHeader >
                     <DialogTitle dir='rtl' className='text-center underline pb-6'>בחר קבוצת שריר:</DialogTitle>
                     <DialogDescription className='flex justify-center py-4'>
