@@ -1,9 +1,9 @@
 import { IWeighIns } from "@/interfaces/IWeighIns";
-import { Card, CardContent } from "../ui/card";
+import { Card, CardContent } from "../../ui/card";
 import { FC } from "react";
 import { type DayContentProps } from "react-day-picker";
 
-import { Calendar } from "../ui/calendar";
+import { Calendar } from "../../ui/calendar";
 
 type WeighCalendarProps = {
   weighIns: IWeighIns;
@@ -22,6 +22,8 @@ export const WeightCalendar: FC<WeighCalendarProps> = ({ weighIns }) => {
   function CustomDayContent({ date }: DayContentProps) {
     const dateString = formatDate(date);
     const weight = weighInLookup[dateString];
+    console.log("weight: ", weight);
+    console.log("date: ", dateString);
 
     return (
       <div className="relative ">

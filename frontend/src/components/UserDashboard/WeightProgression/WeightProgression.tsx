@@ -1,6 +1,6 @@
 import { WeightChart } from "./WeightChart";
 import { WeightCalendar } from "./WeightCalendar";
-import { Card, CardContent } from "../ui/card";
+import { Card, CardContent } from "../../ui/card";
 import { useEffect, useState } from "react";
 import { IWeighIns } from "@/interfaces/IWeighIns";
 import { useWeighInsApi } from "@/hooks/useWeighInsApi";
