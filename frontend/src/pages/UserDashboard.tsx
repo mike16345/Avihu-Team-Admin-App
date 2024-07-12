@@ -1,4 +1,5 @@
-import { WeightProgression } from "@/components/UserDashboard/WeightProgression";
+import { WeightProgression } from "@/components/UserDashboard/WeightProgression/WeightProgression";
+import { WorkoutProgression } from "@/components/UserDashboard/WorkoutProgression/WorkoutProgression";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link, useParams } from "react-router-dom";
 
@@ -33,7 +34,9 @@ export const UserDashboard = () => {
           <TabsContent value="מעקב שקילה">
             <WeightProgression />
           </TabsContent>
-          <TabsContent value="מעקב אימון">מעקב אימון</TabsContent>
+          <TabsContent value="מעקב אימון">
+            <WorkoutProgression />
+          </TabsContent>
         </Tabs>
       </div>
     </div>
