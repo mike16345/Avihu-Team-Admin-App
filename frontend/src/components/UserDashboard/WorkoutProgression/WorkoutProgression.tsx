@@ -4,6 +4,8 @@ import { useParams } from "react-router";
 import { MuscleGroupCombobox } from "./MuscleGroupCombobox";
 import { Label } from "@/components/ui/label";
 import { RecordedSetsList } from "./RecordedSetsList";
+import { ExerciseComboBox } from "./ExerciseComboBox";
+import { MuscleExerciseSelector } from "./MuscleExerciseSelector";
 
 export const WorkoutProgression = () => {
   const { id } = useParams();
@@ -14,16 +16,7 @@ export const WorkoutProgression = () => {
 
   return (
     <div className="size-full flex flex-col gap-4 p-4">
-      <div className="flex items-center gap-8">
-        <div className="flex flex-col gap-1">
-          <Label>קבוצת שריר</Label>
-          <MuscleGroupCombobox />
-        </div>
-        <div className="flex flex-col gap-1">
-          <Label>תרגיל</Label>
-          <MuscleGroupCombobox />
-        </div>
-      </div>
+      <MuscleExerciseSelector />
       <div className="w-full flex gap-4">
         <div className="w-4/6">
           <ExerciseProgressChart />

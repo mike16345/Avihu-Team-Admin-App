@@ -22,6 +22,8 @@ export const UserDashboard = () => {
       .catch((error) => console.error(error));
   }, []);
 
+  // TODO: Display plan type. 
+
   return (
     <div className="size-full flex flex-col gap-2">
       <div className="flex items-center justify-between">

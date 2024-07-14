@@ -15,34 +15,91 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { FaCheck, FaSort } from "react-icons/fa";
 
-const frameworks = [
+const muscleGroups = [
   {
-    value: "next.js",
-    label: "Next.js",
+    value: "קרסוליים",
+    label: "קרסוליים",
   },
   {
-    value: "sveltekit",
-    label: "SvelteKit",
+    value: "שרירי עקב",
+    label: "שרירי עקב",
   },
   {
-    value: "nuxt.js",
-    label: "Nuxt.js",
+    value: "שרירי רגל",
+    label: "שרירי רגל",
   },
   {
-    value: "remix",
-    label: "Remix",
+    value: "שרירי הירך",
+    label: "שרירי הירך",
   },
   {
-    value: "astro",
-    label: "Astro",
+    value: "שרירי הבטן",
+    label: "שרירי הבטן",
+  },
+  {
+    value: "שרירי הצדדים",
+    label: "שרירי הצדדים",
+  },
+  {
+    value: "שרירי החזה",
+    label: "שרירי החזה",
+  },
+  {
+    value: "שרירי הכתפיים",
+    label: "שרירי הכתפיים",
+  },
+  {
+    value: "שריר חולמי",
+    label: "שריר חולמי",
+  },
+  {
+    value: "שריר הגב",
+    label: "שריר הגב",
+  },
+  {
+    value: "שרירי הזרוע",
+    label: "שרירי הזרוע",
+  },
+  {
+    value: "שרירי היד",
+    label: "שרירי היד",
+  },
+  {
+    value: "שרירי הידיים",
+    label: "שרירי הידיים",
+  },
+  {
+    value: "שרירי הגב הקשר",
+    label: "שרירי הגב הקשר",
+  },
+  {
+    value: "שרירי הירך הסטרי",
+    label: "שרירי הירך הסטרי",
+  },
+  {
+    value: "שרירי הירך הכניסי",
+    label: "שרירי הירך הכניסי",
+  },
+  {
+    value: "שריר הכף הגדולה",
+    label: "שריר הכף הגדולה",
+  },
+  {
+    value: "שריר הכף הקטנה",
+    label: "שריר הכף הקטנה",
   },
 ];
 
-export function MuscleGroupCombobox() {
-  const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState("");
+interface ComboBoxProps {
+  value: string;
+  onChange: (value: string) => void;
+}
 
-  console.log("framworks", frameworks);
+export function MuscleGroupCombobox({ value, onChange }: ComboBoxProps) {
+  const [open, setOpen] = React.useState(false);
+  const [currentValue, setValue] = React.useState(value);
+
+  console.log("framworks", muscleGroups);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -53,24 +110,25 @@ export function MuscleGroupCombobox() {
           aria-expanded={open}
           className="w-[200px] justify-between"
         >
-          {value
-            ? frameworks.find((framework) => framework.value === value)?.label
-            : "Select framework..."}
+          {currentValue
+            ? muscleGroups.find((framework) => framework.value === currentValue)?.label
+            : "בחר קבוצת שריר..."}
           <FaSort className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
         <Command>
-          <CommandInput placeholder="Search framework..." className="h-9" />
+          <CommandInput placeholder="חפש קבוצת שריר..." className="h-9" />
           <CommandList>
             <CommandEmpty>No framework found.</CommandEmpty>
             <CommandGroup>
-              {frameworks.map((framework) => (
+              {muscleGroups.map((framework) => (
                 <CommandItem
                   key={framework.value}
                   value={framework.value}
-                  onSelect={(currentValue) => {
-                    setValue(currentValue === value ? "" : currentValue);
+                  onSelect={(val) => {
+                    setValue(val === currentValue ? "" : val);
+                    onChange(val === currentValue ? "" : val);
                     setOpen(false);
                   }}
                 >
@@ -78,7 +136,7 @@ export function MuscleGroupCombobox() {
                   <FaCheck
                     className={cn(
                       "ml-auto h-4 w-4",
-                      value === framework.value ? "opacity-100" : "opacity-0"
+                      currentValue === framework.value ? "opacity-100" : "opacity-0"
                     )}
                   />
                 </CommandItem>

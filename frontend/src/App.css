@@ -182,7 +182,6 @@ body {
 
 /* CustomScrollbar.css */
 .custom-scrollbar {
-  max-height: 400px; /* Adjust the height as needed */
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: #ccc transparent; /* Light color thumb, no background */
