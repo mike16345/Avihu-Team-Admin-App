@@ -1,5 +1,7 @@
-interface IRecordedSet {
-  workoutPlan: number;
+import { WorkoutPlan } from "@/enums/WorkoutPlans";
+
+export interface IRecordedSet {
+  workoutPlan: WorkoutPlan;
   weight: number;
   repsDone: number;
   date: Date;

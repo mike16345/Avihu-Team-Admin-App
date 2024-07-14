@@ -2,42 +2,9 @@ import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { useState } from "react";
 import { FaChevronDown } from "react-icons/fa";
-
-interface IRecordedSet {
-  workoutPlan: WorkoutPlan;
-  weight: number;
-  repsDone: number;
-  date: Date;
-  note: string;
-}
-
-enum WorkoutPlan {
-  WorkoutABeginner = 1,
-  WorkoutAAdvanced,
-  WorkoutAPro,
-  WorkoutBBeginner,
-  WorkoutBAdvanced,
-  WorkoutBPro,
-  WorkoutCBeginner,
-  WorkoutCAdvanced,
-  WorkoutCPro,
-}
-
-const workoutPlanNames = {
-  [WorkoutPlan.WorkoutABeginner]: "Workout A - Beginner",
-  [WorkoutPlan.WorkoutAAdvanced]: "Workout A - Advanced",
-  [WorkoutPlan.WorkoutAPro]: "Workout A - Pro",
-  [WorkoutPlan.WorkoutBBeginner]: "Workout B - Beginner",
-  [WorkoutPlan.WorkoutBAdvanced]: "Workout B - Advanced",
-  [WorkoutPlan.WorkoutBPro]: "Workout B - Pro",
-  [WorkoutPlan.WorkoutCBeginner]: "Workout C - Beginner",
-  [WorkoutPlan.WorkoutCAdvanced]: "Workout C - Advanced",
-  [WorkoutPlan.WorkoutCPro]: "Workout C - Pro",
-};
-
-const getWorkoutPlanName = (plan: WorkoutPlan): string => {
-  return workoutPlanNames[plan];
-};
+import { SetDetails } from "./SetDetails";
+import { WorkoutPlan } from "@/enums/WorkoutPlans";
+import { IRecordedSet } from "@/interfaces/IWorkout";
 
 const recordedSetsByDate: { [date: string]: IRecordedSet[] } = {
   "2024-07-01": [
@@ -157,28 +124,7 @@ export const RecordedSetsList = () => {
           {recordedSetsByDate[date].length > 0 && (
             <CollapsibleContent className="flex flex-col gap-3 mt-2">
               {recordedSetsByDate[date].map((set, index) => (
-                <div key={index} className="flex flex-col gap-1">
-                  <h3 className="font-semibold mb-1">Set {index + 1}</h3>
-                  <p>
-                    Weight:
-                    <span className="font-normal text-muted-foreground ms-1">{set.weight} kg</span>
-                  </p>
-
-                  <p>
-                    Reps Done:
-                    <span className="font-normal text-muted-foreground ms-1"> {set.repsDone}</span>
-                  </p>
-                  <p>
-                    Workout Plan:
-                    <span className="font-normal text-muted-foreground ms-1">
-                      {getWorkoutPlanName(set.workoutPlan)}
-                    </span>
-                  </p>
-                  <p>
-                    Note:
-                    <span className="font-normal text-muted-foreground ms-1">{set.note}</span>
-                  </p>
-                </div>
+                <SetDetails set={set} index={index} key={index} />
               ))}
             </CollapsibleContent>
           )}
