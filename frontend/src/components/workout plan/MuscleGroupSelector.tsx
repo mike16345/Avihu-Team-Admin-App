@@ -25,7 +25,7 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({ options, hand
     return (
         <Dialog defaultOpen={value ? false : true}>
             <DialogTrigger
-                className='border-2 hover:border-black rounded py-1 px-2'
+                className='border-2 hover:border-secondary-foreground rounded py-1 px-2'
             >
                 <div className='flex items-center gap-2'>
                     <p

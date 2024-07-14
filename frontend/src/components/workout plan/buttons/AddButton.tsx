@@ -15,14 +15,14 @@ interface AddButtonProps {
 const AddButton: React.FC<AddButtonProps> = ({ onClick, tip }) => {
     return (
         <div
-            className=' bg-slate-100 rounded border-t-2 flex justify-center p-1 my-2 cursor-pointer'
+            className=' bg-accent rounded border-t-2  flex justify-center p-1 my-2 cursor-pointer'
             onClick={onClick}
         >
             <TooltipProvider>
                 <Tooltip>
                     <TooltipTrigger>
                         <Button
-                            className="text-sm rounded-full h-5 bg-green-500"
+                            className="text-sm rounded-full h-5 bg-success hover:bg-success hover:font-bold  text-secondary-foreground"
 
                         >
                             +
