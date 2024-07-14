@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import ComboBox from "./ComboBox";
 import { ICompleteWorkoutPlan, IMuscleGroupWorkouts, IWorkoutPlan } from "@/interfaces/IWorkoutPlan";
 import DeleteButton from "./buttons/DeleteButton";
@@ -11,12 +11,14 @@ import { toast } from "sonner";
 import { BsFillPencilFill } from "react-icons/bs";
 import { BsPlusCircleFill } from "react-icons/bs";
 import { useIsWorkoutEditable } from "@/store/isWorkoutEditableStore";
+import { useParams } from "react-router-dom";
 
 
 const CreateWorkoutPlan: React.FC = () => {
-    const { addWorkoutPlan, getWorkoutPlan, updateWorkoutPlan } = useWorkoutPlanApi()
+    const { id } = useParams()
+    const { addWorkoutPlan, getWorkoutPlanByUserId, updateWorkoutPlanByUserId } = useWorkoutPlanApi()
     const workoutTemp: string[] = [`AB`, `ABC`, `יומי`, `התאמה אישית`];
-    const [isView, setIsView] = useState<boolean>(true)
+    const [isView, setIsView] = useState<boolean>(id ? true : false)
     const isEditable = useIsWorkoutEditable((state) => state.isEditable);
     const changeIsEditable = useIsWorkoutEditable((state) => state.changeIsEditable);
     const [workoutSplit, setWorkoutSplit] = useState<string>();
@@ -94,7 +96,7 @@ const CreateWorkoutPlan: React.FC = () => {
 
     const hanldeSubmit = async () => {
         const postObject: ICompleteWorkoutPlan = {
-            userId: `665f0b0b00b1a04e8f1c4478`,
+            userId: id,
             workoutPlans: [...workoutPlan]
         }
         console.log(postObject);
@@ -107,7 +109,7 @@ const CreateWorkoutPlan: React.FC = () => {
 
         if (isView) {
 
-            updateWorkoutPlan(`665f0b0b00b1a04e8f1c4478`, cleanedPostObject)
+            updateWorkoutPlanByUserId(id, cleanedPostObject)
                 .then(() => toast(`Workout Plan Saved Succesfully!`, {
                     description: `${date}`
                 }))
@@ -128,7 +130,7 @@ const CreateWorkoutPlan: React.FC = () => {
 
     useEffect(() => {
         if (isView) {
-            getWorkoutPlan(`668a6d535eeb5c9aeff7a952`)
+            getWorkoutPlanByUserId(id)
                 .then(data => setWorkoutPlan(data.workoutPlans)
                 )
         }

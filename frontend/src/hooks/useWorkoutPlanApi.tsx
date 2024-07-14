@@ -2,7 +2,7 @@ import { deleteItem, fetchData, sendData, updateItem } from "@/API/api";
 import { ICompleteWorkoutPlan } from "@/interfaces/IWorkoutPlan";
 
 
-const WORKOUT_PLAN_ENDPOINT = "http://localhost:3002/workoutPlans/";
+const WORKOUT_PLAN_ENDPOINT = "workoutPlans/";
 
 export const useWorkoutPlanApi = () => {
     const addWorkoutPlan = (workoutPlan: ICompleteWorkoutPlan) => sendData<ICompleteWorkoutPlan>(WORKOUT_PLAN_ENDPOINT, workoutPlan);
@@ -11,12 +11,12 @@ export const useWorkoutPlanApi = () => {
         updateItem(`${WORKOUT_PLAN_ENDPOINT}${userID}`, workoutPlan);
 
     const updateWorkoutPlanByUserId = (userID: string, workoutPlan: ICompleteWorkoutPlan) =>
-        updateItem(`${WORKOUT_PLAN_ENDPOINT}${userID}`, workoutPlan);
+        updateItem(`${WORKOUT_PLAN_ENDPOINT}user/${userID}`, workoutPlan);
 
     const deleteWorkoutPlan = (userID: string) => deleteItem(`${WORKOUT_PLAN_ENDPOINT}`, userID);
 
     const getWorkoutPlanByUserId = (userID: string) =>
-        fetchData<ICompleteWorkoutPlan>(`${WORKOUT_PLAN_ENDPOINT}${userID}`);
+        fetchData<ICompleteWorkoutPlan>(`${WORKOUT_PLAN_ENDPOINT}user/${userID}`);
 
     const getWorkoutPlan = (id: string) => fetchData<ICompleteWorkoutPlan>(WORKOUT_PLAN_ENDPOINT + id);
 

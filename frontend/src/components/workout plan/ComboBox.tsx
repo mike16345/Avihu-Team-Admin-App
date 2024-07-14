@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ChevronsUpDown } from "lucide-react";
 import {
   Command,
@@ -51,7 +51,6 @@ const ComboBox: React.FC<ComboBoxProps> = ({ options, handleChange, existingValu
         <Command>
           <CommandInput dir="rtl" placeholder="בחר סוג תוכנית..." />
           <CommandList>
-            <CommandEmpty>No framework found.</CommandEmpty>
             <CommandGroup dir="rtl">
               {options?.map((option) => (
                 <CommandItem key={option} value={option} onSelect={(val) => setValue(val)}>
