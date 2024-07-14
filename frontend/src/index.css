@@ -75,7 +75,7 @@
     --radius: 0.5rem;
   }
 
-  .dark {
+  /*  .dark {
     --background: 215 50% 4%;
     --foreground: 215 23% 97%;
     --muted: 185 23% 14%;
@@ -95,7 +95,7 @@
     --destructive: 3 82% 58%;
     --destructive-foreground: 0 0% 100%;
     --ring: 215 54% 53%;
-  }
+  } */
 }
 
 

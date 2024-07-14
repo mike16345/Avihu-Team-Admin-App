@@ -10,15 +10,15 @@ import { Toaster } from "@/components/ui/sonner"
 import { toast } from "sonner";
 import { BsFillPencilFill } from "react-icons/bs";
 import { BsPlusCircleFill } from "react-icons/bs";
+import { useIsWorkoutEditable } from "@/store/isWorkoutEditableStore";
 
-export const EditableContext = createContext<boolean>(false);
 
 const CreateWorkoutPlan: React.FC = () => {
     const { addWorkoutPlan, getWorkoutPlan, updateWorkoutPlan } = useWorkoutPlanApi()
     const workoutTemp: string[] = [`AB`, `ABC`, `יומי`, `התאמה אישית`];
     const [isView, setIsView] = useState<boolean>(true)
-    const [isEdit, setIsEdit] = useState<boolean>(isView ? false : true)
-
+    const isEditable = useIsWorkoutEditable((state) => state.isEditable);
+    const changeIsEditable = useIsWorkoutEditable((state) => state.changeIsEditable);
     const [workoutSplit, setWorkoutSplit] = useState<string>();
     const [workoutPlan, setWorkoutPlan] = useState<IWorkoutPlan[]>([]);
 
@@ -138,65 +138,63 @@ const CreateWorkoutPlan: React.FC = () => {
 
 
     return (
-        <EditableContext.Provider value={{ isEdit }}>
-            <div className="p-5 overflow-y-scroll max-h-[95vh] w-full">
-                <h1 className="text-4xl">תוכנית אימון</h1>
-                <p>
-                    {isEdit ?
-                        `כאן תוכל לערוך תוכנית אימון קיימת ללקוח שלך`
-                        :
-                        `כאן תוכל לצפות בתוכנית האימון הקיימת של לקוח זה`
-                    }
-                </p>
-                <div className="p-2">
-                    {isEdit &&
-                        <ComboBox
-                            options={workoutTemp}
-                            handleChange={(currentValue) => handleSelect(currentValue)}
-                        />
-                    }
-                    {isView &&
-                        <div
-                            onClick={() => setIsEdit(!isEdit)}
-                            className="absolute left-10 top-10 h-10 flex items-center px-2 rounded cursor-pointer hover:bg-blue-200 bg-blue-100">
-                            <BsFillPencilFill />
-                        </div>
-                    }
-
-                    {workoutPlan.map((workout, i) => (
-                        <div key={workout.planName} className="flex items-start">
-                            <MuscleGroupContainer
-                                workout={workout.workouts}
-                                handleSave={(workouts) => handleSave(workout.planName, workouts)}
-                                title={workout.planName}
-                                handlePlanNameChange={(newName) => handlePlanNameChange(newName, i)}
-                            />
-                            <div className="mt-5 ">
-                                {isEdit &&
-                                    <DeleteButton tip="הסר אימון" onClick={() => handleDeleteWorkout(workout.planName)} />
-                                }
-                            </div>
-                        </div>
-                    ))}
-                    <div className="w-full flex justify-center">
-                        {isEdit &&
-                            <Button
-                                onClick={handleAddWorkout}
-                            >
-                                <div className="flex flex-col items-center">
-                                    הוסף אימון
-                                    <BsPlusCircleFill />
-                                </div>
-                            </Button>
-                        }
-                    </div>
-                </div>
-                <Toaster />
-                {isEdit &&
-                    <Button onClick={hanldeSubmit}>שמור תוכנית אימון</Button>
+        <div className="p-5 overflow-y-scroll max-h-[95vh] w-full">
+            <h1 className="text-4xl">תוכנית אימון</h1>
+            <p>
+                {isEditable ?
+                    `כאן תוכל לערוך תוכנית אימון קיימת ללקוח שלך`
+                    :
+                    `כאן תוכל לצפות בתוכנית האימון הקיימת של לקוח זה`
                 }
-            </div >
-        </EditableContext.Provider>
+            </p>
+            <div className="p-2">
+                {isEditable &&
+                    <ComboBox
+                        options={workoutTemp}
+                        handleChange={(currentValue) => handleSelect(currentValue)}
+                    />
+                }
+                {isView &&
+                    <div
+                        onClick={() => changeIsEditable(!isEditable)}
+                        className="absolute left-14 top-10 h-10 flex items-center px-2 rounded cursor-pointer bg-primary">
+                        <BsFillPencilFill />
+                    </div>
+                }
+
+                {workoutPlan.map((workout, i) => (
+                    <div key={workout.planName} className="flex items-start">
+                        <MuscleGroupContainer
+                            workout={workout.workouts}
+                            handleSave={(workouts) => handleSave(workout.planName, workouts)}
+                            title={workout.planName}
+                            handlePlanNameChange={(newName) => handlePlanNameChange(newName, i)}
+                        />
+                        <div className="mt-5 ">
+                            {isEditable &&
+                                <DeleteButton tip="הסר אימון" onClick={() => handleDeleteWorkout(workout.planName)} />
+                            }
+                        </div>
+                    </div>
+                ))}
+                <div className="w-full flex justify-center">
+                    {isEditable &&
+                        <Button
+                            onClick={handleAddWorkout}
+                        >
+                            <div className="flex flex-col items-center">
+                                הוסף אימון
+                                <BsPlusCircleFill />
+                            </div>
+                        </Button>
+                    }
+                </div>
+            </div>
+            <Toaster />
+            {isEditable &&
+                <Button onClick={hanldeSubmit}>שמור תוכנית אימון</Button>
+            }
+        </div >
     );
 };
 

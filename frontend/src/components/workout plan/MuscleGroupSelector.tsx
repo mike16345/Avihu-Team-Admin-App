@@ -42,7 +42,7 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({ options, hand
                 <DialogHeader >
                     <DialogTitle dir='rtl' className='text-center underline pb-6'>בחר קבוצת שריר:</DialogTitle>
                     <DialogDescription className='flex justify-center py-4'>
-                        <ComboBox options={options} handleChange={(val) => setValue(val)} />
+                        <ComboBox existingValue={value} options={options} handleChange={(val) => setValue(val)} />
                     </DialogDescription>
                 </DialogHeader>
                 <DialogClose>

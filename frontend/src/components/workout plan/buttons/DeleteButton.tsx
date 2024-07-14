@@ -18,7 +18,6 @@ import {
 import { BsFillTrash3Fill } from "react-icons/bs";
 import { BsTrash3 } from "react-icons/bs";
 import { Button } from '@/components/ui/button';
-import { error } from 'console';
 import { DialogClose } from '@radix-ui/react-dialog';
 
 interface DeleteButtonProps {
@@ -39,7 +38,7 @@ const DeleteButton: React.FC<DeleteButtonProps> = ({ onClick, tip }) => {
                                 <div
                                     onMouseEnter={(() => setIsHovered(true))}
                                     onMouseLeave={(() => setIsHovered(false))}
-                                    className='flex rounded items-center justify-center w-full h-full p-1 bg-red-50'
+                                    className='flex rounded items-center justify-center w-full h-full p-1 bg-destructive '
                                 >
                                     {isHovered ?
                                         <BsFillTrash3Fill />

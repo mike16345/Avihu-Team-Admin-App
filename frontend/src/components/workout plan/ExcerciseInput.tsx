@@ -7,7 +7,7 @@ import SetsContainer from "./SetsContainer";
 import DeleteButton from "./buttons/DeleteButton";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { EditableContext } from "./CreateWorkoutPlan";
+import { useIsWorkoutEditable } from "@/store/isWorkoutEditableStore";
 
 interface ExcerciseInputProps {
   options: string[] | undefined;
@@ -16,7 +16,6 @@ interface ExcerciseInputProps {
 }
 
 const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts, exercises }) => {
-  const { isEdit } = useContext(EditableContext)
   const [workoutObjs, setWorkoutObjs] = useState<IWorkout[]>(exercises ? exercises : [
     {
       id: `1`,
@@ -24,6 +23,8 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
       sets: [],
     },
   ]);
+
+  const isEditable = useIsWorkoutEditable((state) => state.isEditable)
 
   const handleChange = (
     e: string | React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
@@ -81,13 +82,13 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
     <div className="w-full">
       {workoutObjs.map((item) => (
         <div className="py-5 flex  gap-2 " key={item.id}>
-          {isEdit &&
+          {isEditable &&
             <DeleteButton tip="הסר תרגיל" onClick={() => handleDeleteExcercise(item.id)} />
           }
           <div className="flex flex-col gap-5 border-r-2 p-2">
             <h2
               className="font-bold underline"
-            >{isEdit ? ` בחר תרגיל:` : `שם התרגיל:`}
+            >{isEditable ? ` בחר תרגיל:` : `שם התרגיל:`}
 
             </h2>
             <ComboBox
@@ -101,10 +102,10 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
             />
 
             <div>
-              <Label>לינק לסרטון</Label>
-              {isEdit ?
+              <Label className="font-bold underline">לינק לסרטון</Label>
+              {isEditable ?
                 <Input
-                  readOnly={!isEdit}
+                  readOnly={!isEditable}
                   placeholder="הכנס לינק כאן..."
                   name="linkToVideo"
                   value={item.linkToVideo}
@@ -117,10 +118,10 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
               }
             </div>
             <div>
-              <Label>דגשים</Label>
-              {isEdit ?
+              <Label className="font-bold underline">דגשים</Label>
+              {isEditable ?
                 <Textarea
-                  readOnly={!isEdit}
+                  readOnly={!isEditable}
                   placeholder="תלבש מכנסיים.."
                   name="tipFromTrainer"
                   value={item.tipFromTrainer}
@@ -135,7 +136,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
           </div>
         </div>
       ))}
-      {isEdit &&
+      {isEditable &&
         <Button
           className="text-[12px] p-1 mr-5 my-2"
           onClick={handleAddExcercise}

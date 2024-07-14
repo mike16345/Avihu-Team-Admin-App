@@ -5,9 +5,9 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ChevronsUpDown, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from '../ui/button';
 import DeleteButton from './buttons/DeleteButton';
-import { EditableContext } from './CreateWorkoutPlan';
 import MuscleGroupSelector from './MuscleGroupSelector';
 import { Input } from '../ui/input';
+import { useIsWorkoutEditable } from '@/store/isWorkoutEditableStore';
 
 const muscleGroups: string[] = ["חזה", "כתפיים", "יד אחורית", "גב", "יד קידמית", "רגליים", "בטן", "אירובי",];
 const chestExercises: string[] = ["פרפר", "מקבילים", "לחיצת חזה בשיפוע שלילי", "לחיצת חזה בשיפוע חיובי", "לחיצת חזה",];
@@ -28,7 +28,8 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({ handleSave,
     const [planeName, setPlanName] = useState<string | undefined>();
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [workouts, setWorkouts] = useState<IMuscleGroupWorkouts[]>(workout)
-    const { isEdit } = useContext(EditableContext)
+
+    const isEditable = useIsWorkoutEditable((state) => state.isEditable)
 
     const addWorkout = () => {
         const newObject: IMuscleGroupWorkouts = {
@@ -84,7 +85,7 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({ handleSave,
         <div className='border-y-4 rounded py-2 my-1 w-full'>
             <Collapsible>
                 <CollapsibleTrigger className="flex items-center gap-4 w-full font-bold text-lg pr-5">
-                    {isEdit ?
+                    {isEditable ?
                         <Input
                             className='w-64'
                             onClick={(e) => e.stopPropagation()}
@@ -101,11 +102,14 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({ handleSave,
                     {workouts.map((workout, i) => (
                         <Collapsible key={i} className='border-2 rounded p-3 my-2'>
                             <div>
-                                {!isEdit && <h2 className='font-bold underline'>קבוצת שריר:</h2>}
-                                <CollapsibleTrigger onClick={() => setIsOpen(!isOpen)} className='flex w-full items-center border-b-2 gap-3'>
+                                {!isEditable && <h2 className='font-bold underline'>קבוצת שריר:</h2>}
+                                <CollapsibleTrigger
+                                    onClick={() => setIsOpen(prevState => !prevState)}
+                                    className='flex w-full items-center border-b-2 gap-3'
+                                >
                                     <div className='flex gap-7 py-2 items-center w-full justify-between'>
                                         <div className='flex items-center gap-7'>
-                                            {isEdit ?
+                                            {isEditable ?
                                                 <MuscleGroupSelector
                                                     options={muscleGroups}
                                                     handleChange={(value) => updateMuscleGroup(i, value)}
@@ -118,7 +122,7 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({ handleSave,
                                             }
                                             <ChevronsUpDown className="ml-2 h-4 w-4  opacity-50" />
                                         </div>
-                                        {isEdit &&
+                                        {isEditable &&
                                             <DeleteButton tip='מחק קבוצת שריר' onClick={() => deleteMuscleGroup(i)} />
                                         }
                                     </div>
@@ -135,7 +139,7 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({ handleSave,
                             </div>
                         </Collapsible>
                     ))}
-                    {isEdit &&
+                    {isEditable &&
                         <Button
                             onClick={addWorkout}
                             className='my-2'

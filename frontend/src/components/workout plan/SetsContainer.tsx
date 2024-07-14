@@ -3,7 +3,7 @@ import SetsInput from './SetsInput'
 import { ISet } from '@/interfaces/IWorkoutPlan';
 import AddButton from './buttons/AddButton';
 import DeleteButton from './buttons/DeleteButton';
-import { EditableContext } from './CreateWorkoutPlan';
+import { useIsWorkoutEditable } from '@/store/isWorkoutEditableStore';
 
 interface SetContainerProps {
     updateSets: (componentSets: ISet[]) => void;
@@ -12,7 +12,8 @@ interface SetContainerProps {
 
 const SetsContainer: React.FC<SetContainerProps> = ({ updateSets, existingSets }) => {
 
-    const { isEdit } = useContext(EditableContext)
+    const isEditable = useIsWorkoutEditable((state) => state.isEditable)
+
 
     const [componentSets, setComponentSets] = useState<ISet[]>(existingSets ? existingSets : [{
         id: 1,
@@ -78,12 +79,12 @@ const SetsContainer: React.FC<SetContainerProps> = ({ updateSets, existingSets }
                         maxReps={set.maxReps}
                         minReps={set.minReps}
                     />
-                    {isEdit &&
+                    {isEditable &&
                         <DeleteButton tip='הסר סט' onClick={() => removeSet(set.id)} />
                     }
                 </div>
             ))}
-            {isEdit &&
+            {isEditable &&
                 <AddButton tip='הוסף סט' onClick={createSet} />
             }
         </div>
