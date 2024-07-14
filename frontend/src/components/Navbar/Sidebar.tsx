@@ -18,15 +18,16 @@ export const Sidebar = () => {
       icon: <FaHome />,
     },
     {
-      to: "/users",
-      linkName: "יוזרים",
-      icon: <FaUser />,
-    },
-    {
       to: "/blogs",
       linkName: "בלוגים",
       icon: <FaEdit />,
     },
+    {
+      to: "/users",
+      linkName: "לקוחות",
+      icon: <FaUser />,
+    },
+
     {
       to: "/dietPlans",
       linkName: "תפריטים",
