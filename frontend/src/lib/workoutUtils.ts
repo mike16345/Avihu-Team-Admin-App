@@ -13,5 +13,5 @@ const workoutPlanNames = {
 };
 
 export function getWorkoutPlanName(plan: WorkoutPlan): string {
-  return workoutPlanNames[plan];
+  return workoutPlanNames[plan] || "";
 }
