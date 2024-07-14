@@ -99,7 +99,7 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
   };
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full space-y-2  ">
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full gap-2 ">
       <div className="flex items-center justify-between ">
         <h4 className="text-sm font-bold">ארוחה {mealNumber}</h4>
         <div className="flex items-center">

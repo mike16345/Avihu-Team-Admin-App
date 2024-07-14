@@ -27,7 +27,7 @@
     "axios": "^1.7.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
-    "cmdk": "^1.0.0",
+    "cmdk": "0.2.1",
     "date-fns": "^3.6.0",
     "electron-log": "^5.1.2",
     "lucide-react": "^0.331.0",
