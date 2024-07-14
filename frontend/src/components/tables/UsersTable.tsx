@@ -12,7 +12,7 @@ export const UsersTable = () => {
   const [users, setUsers] = useState<IUser[] | null>(null);
 
   const handleViewUser = (user: IUser) => {
-    navigate(`/users/${user._id}`);
+    navigate(`/users/${user._id}`, { state: user });
   };
 
   useEffect(() => {

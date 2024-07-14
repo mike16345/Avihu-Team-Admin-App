@@ -28,7 +28,7 @@ export const WorkoutProgression = () => {
         <div className="w-4/6">
           <ExerciseProgressChart />
         </div>
-        <div className="w-2/6 border">
+        <div className="w-2/6 border rounded-lg ">
           <RecordedSetsList />
         </div>
       </div>
