@@ -17,7 +17,6 @@ export const WeightProgression = () => {
 
     getWeighInsByUserId(id)
       .then((res) => {
-        console.log("response ", res);
         setWeighIns(res);
       })
       .catch((err) => console.error("err", err));

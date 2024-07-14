@@ -22,8 +22,6 @@ export const WeightCalendar: FC<WeighCalendarProps> = ({ weighIns }) => {
   function CustomDayContent({ date }: DayContentProps) {
     const dateString = formatDate(date);
     const weight = weighInLookup[dateString];
-    console.log("weight: ", weight);
-    console.log("date: ", dateString);
 
     return (
       <div className="relative ">
