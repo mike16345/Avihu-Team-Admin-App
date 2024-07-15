@@ -14,24 +14,19 @@ import { useIsWorkoutEditable } from "@/store/isWorkoutEditableStore";
 interface ComboBoxProps {
   options: string[] | undefined;
   handleChange: (value: string) => void;
-  existingValue?: string
+  existingValue?: string;
 }
 
 const ComboBox: React.FC<ComboBoxProps> = ({ options, handleChange, existingValue }) => {
-
-
   const [open, setOpen] = useState<boolean>(false);
   const [value, setValue] = useState<string | undefined>(existingValue ? existingValue : undefined);
-  const isEditable = useIsWorkoutEditable((state) => state.isEditable)
+  const isEditable = useIsWorkoutEditable((state) => state.isEditable);
 
-
-
-  useEffect(() => {
-    if (value) {
-      setOpen(false);
-      handleChange(value);
-    }
-  }, [value])
+  const onChange = (val: string) => {
+    setValue(val);
+    setOpen(false);
+    handleChange(val);
+  };
 
   return (
     <Popover open={isEditable ? open : false} onOpenChange={setOpen}>
@@ -52,7 +47,7 @@ const ComboBox: React.FC<ComboBoxProps> = ({ options, handleChange, existingValu
           <CommandList>
             <CommandGroup dir="rtl">
               {options?.map((option) => (
-                <CommandItem key={option} value={option} onSelect={(val) => setValue(val)}>
+                <CommandItem key={option} value={option} onSelect={(val) => onChange(val)}>
                   {option}
                 </CommandItem>
               ))}
