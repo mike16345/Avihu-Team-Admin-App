@@ -19,11 +19,11 @@ interface MuscleGroupSelectorProps {
 }
 
 const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({ options, handleChange, existingMuscleGroup }) => {
-    const [value, setValue] = useState<string>(existingMuscleGroup ? existingMuscleGroup : ``)
+    const [value, setValue] = useState<string>(existingMuscleGroup|| ``)
 
 
     return (
-        <Dialog defaultOpen={value ? false : true}>
+        <Dialog defaultOpen={!Boolean(value)}>
             <DialogTrigger
                 className='border-2 hover:border-secondary-foreground rounded py-1 px-2'
             >
@@ -31,7 +31,7 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({ options, hand
                     <p
                         className='font-bold text-md'
                     >
-                        {value ? value : `לא נבחר`}
+                        {value || `לא נבחר`}
                     </p>
                     <p className='text-sm'>
                         <BiPencil />

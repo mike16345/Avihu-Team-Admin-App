@@ -1,8 +1,8 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, {  useEffect, useState } from 'react'
 import ExcerciseInput from './ExcerciseInput'
-import { IMuscleGroupWorkouts, IWorkout, IWorkoutPlan } from '@/interfaces/IWorkoutPlan'
+import { IMuscleGroupWorkouts, IWorkout } from '@/interfaces/IWorkoutPlan'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronsUpDown, ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronsUpDown } from "lucide-react";
 import { Button } from '../ui/button';
 import DeleteButton from './buttons/DeleteButton';
 import MuscleGroupSelector from './MuscleGroupSelector';

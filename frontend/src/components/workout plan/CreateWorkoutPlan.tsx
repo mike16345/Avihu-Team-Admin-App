@@ -24,7 +24,6 @@ const CreateWorkoutPlan: React.FC = () => {
 
     //temp states
     const workoutTemp: string[] = [`AB`, `ABC`, `יומי`, `התאמה אישית`];
-    const [workoutSplit, setWorkoutSplit] = useState<string>();
 
     const [isCreate, setIsCreate] = useState<boolean>(false)
     const [workoutPlan, setWorkoutPlan] = useState<IWorkoutPlan[]>([]);
@@ -93,7 +92,6 @@ const CreateWorkoutPlan: React.FC = () => {
             }
         }
 
-        setWorkoutSplit(splitVal)
         setWorkoutPlan(initalWorkoutPlan);
     }
 
@@ -200,7 +198,6 @@ const CreateWorkoutPlan: React.FC = () => {
                     }
                 </div>
             </div>
-            <Toaster />
             {isEditable &&
                 <Button onClick={hanldeSubmit}>שמור תוכנית אימון</Button>
             }

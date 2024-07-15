@@ -15,7 +15,7 @@ const SetsContainer: React.FC<SetContainerProps> = ({ updateSets, existingSets }
     const isEditable = useIsWorkoutEditable((state) => state.isEditable)
 
 
-    const [componentSets, setComponentSets] = useState<ISet[]>(existingSets ? existingSets : [{
+    const [componentSets, setComponentSets] = useState<ISet[]>(existingSets || [{
         id: 1,
         minReps: 0,
         maxReps: 0,
@@ -28,8 +28,8 @@ const SetsContainer: React.FC<SetContainerProps> = ({ updateSets, existingSets }
         const { name, value } = e.target;
 
         setComponentSets((prevSets: ISet[]) => {
-            return prevSets.map(set => {
-                if (set.id == index) {
+            return prevSets.map((set,i) => {
+                if (i == index) {
                     return {
                         ...set,
                         [name]: value
@@ -75,7 +75,7 @@ const SetsContainer: React.FC<SetContainerProps> = ({ updateSets, existingSets }
                 >
                     <SetsInput
                         setNumber={i + 1}
-                        handleChange={(e) => handleChange(e, set.id)}
+                        handleChange={(e) => handleChange(e, i)}
                         maxReps={set.maxReps}
                         minReps={set.minReps}
                     />

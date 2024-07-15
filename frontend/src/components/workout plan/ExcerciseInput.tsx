@@ -16,7 +16,7 @@ interface ExcerciseInputProps {
 }
 
 const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts, exercises }) => {
-  const [workoutObjs, setWorkoutObjs] = useState<IWorkout[]>(exercises ? exercises : [
+  const [workoutObjs, setWorkoutObjs] = useState<IWorkout[]>(exercises || [
     {
       id: `1`,
       name: ``,
