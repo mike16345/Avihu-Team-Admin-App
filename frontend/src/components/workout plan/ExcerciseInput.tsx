@@ -85,7 +85,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
           {isEditable &&
             <DeleteButton tip="הסר תרגיל" onClick={() => handleDeleteExcercise(item.id)} />
           }
-          <div className="flex flex-col gap-5 border-r-2 p-2">
+          <div className="flex flex-col gap-5 border-r-2 w-[50%] p-2">
             <h2
               className="font-bold underline"
             >{isEditable ? ` בחר תרגיל:` : `שם התרגיל:`}
@@ -122,7 +122,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
               {isEditable ?
                 <Textarea
                   readOnly={!isEditable}
-                  placeholder="תלבש מכנסיים.."
+                  placeholder="דגשים למתאמן..."
                   name="tipFromTrainer"
                   value={item.tipFromTrainer}
                   onChange={(e) => handleChange(e, item.id)}

@@ -16,12 +16,17 @@ import { useParams } from "react-router-dom";
 
 const CreateWorkoutPlan: React.FC = () => {
     const { id } = useParams()
-    const { addWorkoutPlan, getWorkoutPlanByUserId, updateWorkoutPlanByUserId } = useWorkoutPlanApi()
-    const workoutTemp: string[] = [`AB`, `ABC`, `יומי`, `התאמה אישית`];
-    const [isView, setIsView] = useState<boolean>(id ? true : false)
+    const { addWorkoutPlan, getWorkoutPlanByUserId, updateWorkoutPlanByUserId } = useWorkoutPlanApi();
+
+    //global
     const isEditable = useIsWorkoutEditable((state) => state.isEditable);
     const changeIsEditable = useIsWorkoutEditable((state) => state.changeIsEditable);
+
+    //temp states
+    const workoutTemp: string[] = [`AB`, `ABC`, `יומי`, `התאמה אישית`];
     const [workoutSplit, setWorkoutSplit] = useState<string>();
+
+    const [isCreate, setIsCreate] = useState<boolean>(false)
     const [workoutPlan, setWorkoutPlan] = useState<IWorkoutPlan[]>([]);
 
     const handlePlanNameChange = (newName: string, index: number) => {
@@ -35,23 +40,22 @@ const CreateWorkoutPlan: React.FC = () => {
         setWorkoutPlan([...workoutPlan, newObject]);
     };
 
-    const handleDeleteWorkout = (name: string) => {
-        const filteredArr = workoutPlan.filter((workout) => workout.planName !== name);
-        const newArr = filteredArr.map((workout, i) => ({ ...workout, planName: `אימון ${i + 1}` }));
+    const handleDeleteWorkout = (index: number) => {
+        const filteredArr = workoutPlan.filter((_, i) => i !== index);
 
-        setWorkoutPlan(newArr);
+        setWorkoutPlan(filteredArr);
     };
 
-    const handleSave = (split: string, workouts: IMuscleGroupWorkouts[]) => {
+    const handleSave = (index: number, workouts: IMuscleGroupWorkouts[]) => {
         setWorkoutPlan((prevWorkoutPlan) => {
-            const workoutExists = prevWorkoutPlan.find((workout) => workout.planName === split);
+            const workoutExists = prevWorkoutPlan[index];
 
             if (workoutExists) {
-                return prevWorkoutPlan.map((workout) =>
-                    workout.planName === split ? { ...workout, workouts: workouts } : workout
+                return prevWorkoutPlan.map((workout, i) =>
+                    i === index ? { ...workout, workouts: workouts } : workout
                 );
             } else {
-                return [...prevWorkoutPlan, { planName: split, workouts: workouts }];
+                return [...prevWorkoutPlan, { planName: `אימון ${workoutPlan.length + 1}`, workouts: workouts }];
             }
         });
     }
@@ -99,15 +103,13 @@ const CreateWorkoutPlan: React.FC = () => {
             userId: id,
             workoutPlans: [...workoutPlan]
         }
-        console.log(postObject);
 
 
         const cleanedPostObject = cleanWorkoutObject(postObject)
-        console.log(cleanedPostObject);
 
         const date = new Date().toLocaleTimeString()
 
-        if (isView) {
+        if (!isCreate) {
 
             updateWorkoutPlanByUserId(id, cleanedPostObject)
                 .then(() => toast(`Workout Plan Saved Succesfully!`, {
@@ -129,12 +131,18 @@ const CreateWorkoutPlan: React.FC = () => {
     }
 
     useEffect(() => {
-        if (isView) {
-            getWorkoutPlanByUserId(id)
-                .then(data => setWorkoutPlan(data.workoutPlans)
-                )
-        }
+        getWorkoutPlanByUserId(id)
+            .then(data => setWorkoutPlan(data.workoutPlans))
+            .catch((err) => {
+                if (err.response.data.message == `Workout plan not found.`) {
+                    setIsCreate(true);
+                }
+            })
     }, [])
+
+    useEffect(() => {
+        if (isCreate) changeIsEditable(true)
+    }, [isCreate])
 
 
 
@@ -156,7 +164,7 @@ const CreateWorkoutPlan: React.FC = () => {
                         handleChange={(currentValue) => handleSelect(currentValue)}
                     />
                 }
-                {isView &&
+                {workoutPlan[0] &&
                     <div
                         onClick={() => changeIsEditable(!isEditable)}
                         className="absolute left-14 top-10 h-10 flex items-center px-2 rounded cursor-pointer bg-primary">
@@ -165,16 +173,16 @@ const CreateWorkoutPlan: React.FC = () => {
                 }
 
                 {workoutPlan.map((workout, i) => (
-                    <div key={workout.planName} className="flex items-start">
+                    <div key={i} className="flex items-start">
                         <MuscleGroupContainer
                             workout={workout.workouts}
-                            handleSave={(workouts) => handleSave(workout.planName, workouts)}
+                            handleSave={(workouts) => handleSave(i, workouts)}
                             title={workout.planName}
                             handlePlanNameChange={(newName) => handlePlanNameChange(newName, i)}
                         />
                         <div className="mt-5 ">
                             {isEditable &&
-                                <DeleteButton tip="הסר אימון" onClick={() => handleDeleteWorkout(workout.planName)} />
+                                <DeleteButton tip="הסר אימון" onClick={() => handleDeleteWorkout(i)} />
                             }
                         </div>
                     </div>

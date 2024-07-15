@@ -26,7 +26,6 @@ interface MuscleGroupContainerProps {
 const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({ handleSave, title, workout, handlePlanNameChange }) => {
 
     const [planeName, setPlanName] = useState<string | undefined>();
-    const [isOpen, setIsOpen] = useState<boolean>(false);
     const [workouts, setWorkouts] = useState<IMuscleGroupWorkouts[]>(workout)
 
     const isEditable = useIsWorkoutEditable((state) => state.isEditable)
@@ -100,11 +99,10 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({ handleSave,
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                     {workouts.map((workout, i) => (
-                        <Collapsible key={i} className='border-2 rounded p-3 my-2'>
+                        <Collapsible defaultOpen key={i} className='border-2 rounded p-3 my-2'>
                             <div>
                                 {!isEditable && <h2 className='font-bold underline'>קבוצת שריר:</h2>}
                                 <CollapsibleTrigger
-                                    onClick={() => setIsOpen(prevState => !prevState)}
                                     className='flex w-full items-center border-b-2 gap-3'
                                 >
                                     <div className='flex gap-7 py-2 items-center w-full justify-between'>
@@ -128,7 +126,7 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({ handleSave,
                                     </div>
                                 </CollapsibleTrigger>
                                 <CollapsibleContent>
-                                    <div className='my-2'>
+                                    <div className='my-2 w-full'>
                                         <ExcerciseInput
                                             options={workout?.muscleGroup === `חזה` ? chestExercises : shoulderExercises}
                                             exercises={workout.exercises}
