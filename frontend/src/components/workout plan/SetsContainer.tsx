@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import SetsInput from './SetsInput'
 import { ISet } from '@/interfaces/IWorkoutPlan';
 import AddButton from './buttons/AddButton';

@@ -157,7 +157,7 @@ const CreateWorkoutPlan: React.FC = () => {
                     `כאן תוכל לצפות בתוכנית האימון הקיימת של לקוח זה`
                 }
             </p>
-            <div className="p-2">
+            <div className="p-2 py-4">
                 {isEditable &&
                     <ComboBox
                         options={workoutTemp}
@@ -167,7 +167,7 @@ const CreateWorkoutPlan: React.FC = () => {
                 {workoutPlan[0] &&
                     <div
                         onClick={() => changeIsEditable(!isEditable)}
-                        className="absolute left-14 top-10 h-10 flex items-center px-2 rounded cursor-pointer bg-primary">
+                        className="absolute left-20 top-10 h-10 flex items-center px-2 rounded cursor-pointer bg-primary">
                         <BsFillPencilFill />
                     </div>
                 }

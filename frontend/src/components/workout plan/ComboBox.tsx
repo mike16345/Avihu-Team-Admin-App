@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { ChevronsUpDown } from "lucide-react";
 import {
   Command,
-  CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,

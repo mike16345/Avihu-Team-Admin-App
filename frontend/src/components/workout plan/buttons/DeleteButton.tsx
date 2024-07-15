@@ -32,7 +32,7 @@ const DeleteButton: React.FC<DeleteButtonProps> = ({ onClick, tip }) => {
         <div>
             <Dialog>
                 <DialogTrigger className=' flex items-center justify-center  w-8  h-full p-0'>
-                    <TooltipProvider>
+                    <TooltipProvider delayDuration={100}>
                         <Tooltip>
                             <TooltipTrigger className='h-full'>
                                 <div
