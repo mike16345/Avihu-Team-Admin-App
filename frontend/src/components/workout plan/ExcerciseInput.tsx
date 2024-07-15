@@ -12,19 +12,23 @@ import { useIsWorkoutEditable } from "@/store/isWorkoutEditableStore";
 interface ExcerciseInputProps {
   options: string[] | undefined;
   updateWorkouts: (workouts: IWorkout[]) => void;
-  exercises?: IWorkout[]
+  exercises?: IWorkout[];
 }
 
 const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts, exercises }) => {
-  const [workoutObjs, setWorkoutObjs] = useState<IWorkout[]>(exercises ? exercises : [
-    {
-      id: `1`,
-      name: ``,
-      sets: [],
-    },
-  ]);
+  const [workoutObjs, setWorkoutObjs] = useState<IWorkout[]>(
+    exercises
+      ? exercises
+      : [
+          {
+            id: `1`,
+            name: ``,
+            sets: [],
+          },
+        ]
+  );
 
-  const isEditable = useIsWorkoutEditable((state) => state.isEditable)
+  const isEditable = useIsWorkoutEditable((state) => state.isEditable);
 
   const handleChange = (
     e: string | React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
@@ -40,7 +44,6 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
     });
   };
 
-
   const handleAddExcercise = () => {
     const newObject: IWorkout = {
       id: (workoutObjs.length + 1).toString(),
@@ -48,16 +51,18 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
       sets: [],
     };
 
-    setWorkoutObjs([...workoutObjs, newObject]);
+    const newArr = [...workoutObjs, newObject];
+
+    setWorkoutObjs(newArr);
+    updateWorkouts(newArr);
   };
 
   const handleDeleteExcercise = (workoutId: string) => {
     const newArr = workoutObjs.filter((workout) => workout.id !== workoutId);
 
     setWorkoutObjs(newArr);
+    updateWorkouts(newArr);
   };
-
-
 
   const updateSets = (setsArr: ISet[], workoutId: string) => {
     setWorkoutObjs((prevWorkouts) => {
@@ -65,32 +70,27 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
         if (workout.id === workoutId) {
           return {
             ...workout,
-            sets: setsArr
+            sets: setsArr,
           };
         }
         return workout;
       });
     });
-  }
+  };
 
   useEffect(() => {
-    updateWorkouts(workoutObjs)
-  }, [workoutObjs])
-
+    updateWorkouts(workoutObjs);
+  }, [workoutObjs]);
 
   return (
     <div className="w-full">
       {workoutObjs.map((item) => (
         <div className="py-5 flex  gap-2 " key={item.id}>
-          {isEditable &&
+          {isEditable && (
             <DeleteButton tip="הסר תרגיל" onClick={() => handleDeleteExcercise(item.id)} />
-          }
+          )}
           <div className="flex flex-col gap-5 border-r-2 w-[50%] p-2">
-            <h2
-              className="font-bold underline"
-            >{isEditable ? ` בחר תרגיל:` : `שם התרגיל:`}
-
-            </h2>
+            <h2 className="font-bold underline">{isEditable ? ` בחר תרגיל:` : `שם התרגיל:`}</h2>
             <ComboBox
               options={options}
               existingValue={item.name}
@@ -103,7 +103,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
 
             <div>
               <Label className="font-bold underline">לינק לסרטון</Label>
-              {isEditable ?
+              {isEditable ? (
                 <Input
                   readOnly={!isEditable}
                   placeholder="הכנס לינק כאן..."
@@ -111,15 +111,15 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
                   value={item.linkToVideo}
                   onChange={(e) => handleChange(e, item.id)}
                 />
-                :
-                <p
-                  className="py-1 border-b-2"
-                >{item.linkToVideo == `` ? `לא קיים` : item.linkToVideo}</p>
-              }
+              ) : (
+                <p className="py-1 border-b-2">
+                  {item.linkToVideo == `` ? `לא קיים` : item.linkToVideo}
+                </p>
+              )}
             </div>
             <div>
               <Label className="font-bold underline">דגשים</Label>
-              {isEditable ?
+              {isEditable ? (
                 <Textarea
                   readOnly={!isEditable}
                   placeholder="דגשים למתאמן..."
@@ -127,21 +127,20 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
                   value={item.tipFromTrainer}
                   onChange={(e) => handleChange(e, item.id)}
                 />
-                :
-                <p
-                  className="py-1 border-b-2"
-                >{item.tipFromTrainer == `` ? `לא קיים` : item.tipFromTrainer}</p>
-              }
+              ) : (
+                <p className="py-1 border-b-2">
+                  {item.tipFromTrainer == `` ? `לא קיים` : item.tipFromTrainer}
+                </p>
+              )}
             </div>
           </div>
         </div>
       ))}
-      {isEditable &&
-        <Button
-          className="text-[12px] p-1 mr-5 my-2"
-          onClick={handleAddExcercise}
-        >הוסף תרגיל</Button>
-      }
+      {isEditable && (
+        <Button className="text-[12px] p-1 mr-5 my-2" onClick={handleAddExcercise}>
+          הוסף תרגיל
+        </Button>
+      )}
     </div>
   );
 };
