@@ -15,7 +15,7 @@ interface AddButtonProps {
 const AddButton: React.FC<AddButtonProps> = ({ onClick, tip }) => {
     return (
         <div
-            className=' bg-accent rounded border-t-2  flex justify-center p-1 my-2 cursor-pointer'
+            className=' bg-accent rounded border-t-2 w-[50%]  flex justify-center p-1 my-2 cursor-pointer'
             onClick={onClick}
         >
             <TooltipProvider delayDuration={100}>

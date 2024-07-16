@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useState } from 'react'
 import SetsInput from './SetsInput'
 import { ISet } from '@/interfaces/IWorkoutPlan';
 import AddButton from './buttons/AddButton';
 import DeleteButton from './buttons/DeleteButton';
-import { useIsWorkoutEditable } from '@/store/isWorkoutEditableStore';
+import { isEditableContext } from './CreateWorkoutPlan';
 
 interface SetContainerProps {
     updateSets: (componentSets: ISet[]) => void;
@@ -12,7 +12,7 @@ interface SetContainerProps {
 
 const SetsContainer: React.FC<SetContainerProps> = ({ updateSets, existingSets }) => {
 
-    const isEditable = useIsWorkoutEditable((state) => state.isEditable)
+    const isEditable = useContext(isEditableContext);
 
 
     const [componentSets, setComponentSets] = useState<ISet[]>(existingSets || [{
@@ -27,17 +27,18 @@ const SetsContainer: React.FC<SetContainerProps> = ({ updateSets, existingSets }
     ) => {
         const { name, value } = e.target;
 
-        setComponentSets((prevSets: ISet[]) => {
-            return prevSets.map((set,i) => {
-                if (i == index) {
-                    return {
-                        ...set,
-                        [name]: value
-                    }
+        const updatedSets = componentSets.map((set, i) => {
+            if (i === index) {
+                return {
+                    ...set,
+                    [name]: value
                 }
-                return set
-            })
+            }
+            return set
         })
+
+        setComponentSets(updatedSets)
+        updateSets(updatedSets)
     }
 
     const createSet = () => {
@@ -47,21 +48,19 @@ const SetsContainer: React.FC<SetContainerProps> = ({ updateSets, existingSets }
             maxReps: 0
         }
         setComponentSets([...componentSets, newSet])
+        updateSets([...componentSets, newSet])
     }
 
-    const removeSet = (setId: number) => {
-        console.log(setId);
+    const removeSet = (index: number) => {
 
-        const filteredArr = componentSets.filter(set => set.id !== setId);
+        const filteredArr = componentSets.filter((_, i) => i !== index);
         const newArr = filteredArr.map((set, i) => ({ ...set, id: i + 1 }));
 
         setComponentSets(newArr)
+        updateSets(newArr)
 
     }
 
-    useEffect(() => {
-        updateSets(componentSets)
-    }, [componentSets])
 
     return (
         <div className='border-y-2'>
@@ -71,7 +70,7 @@ const SetsContainer: React.FC<SetContainerProps> = ({ updateSets, existingSets }
             {componentSets.map((set, i) => (
                 <div
                     key={i}
-                    className='flex gap-5  p-2 items-end'
+                    className='flex gap-5 w-[50%] p-2 items-end'
                 >
                     <SetsInput
                         setNumber={i + 1}
@@ -80,7 +79,9 @@ const SetsContainer: React.FC<SetContainerProps> = ({ updateSets, existingSets }
                         minReps={set.minReps}
                     />
                     {isEditable &&
-                        <DeleteButton tip='הסר סט' onClick={() => removeSet(set.id)} />
+                        <div onClick={() => removeSet(i)}>
+                            <DeleteButton tip='הסר סט' />
+                        </div>
                     }
                 </div>
             ))}

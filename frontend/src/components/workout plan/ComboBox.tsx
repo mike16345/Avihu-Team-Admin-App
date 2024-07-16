@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { useIsWorkoutEditable } from "@/store/isWorkoutEditableStore";
 
 interface ComboBoxProps {
   options: string[] | undefined;
@@ -20,7 +19,6 @@ interface ComboBoxProps {
 const ComboBox: React.FC<ComboBoxProps> = ({ options, handleChange, existingValue }) => {
   const [open, setOpen] = useState<boolean>(false);
   const [value, setValue] = useState<string | undefined>(existingValue ? existingValue : undefined);
-  const isEditable = useIsWorkoutEditable((state) => state.isEditable);
 
   const onChange = (val: string) => {
     setValue(val);
@@ -29,7 +27,7 @@ const ComboBox: React.FC<ComboBoxProps> = ({ options, handleChange, existingValu
   };
 
   return (
-    <Popover open={isEditable ? open : false} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger dir="rtl" asChild>
         <Button
           variant="outline"

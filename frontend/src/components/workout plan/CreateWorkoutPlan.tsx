@@ -1,28 +1,31 @@
-import React, { useEffect, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 import ComboBox from "./ComboBox";
 import {
   ICompleteWorkoutPlan,
   IMuscleGroupWorkouts,
   IWorkoutPlan,
 } from "@/interfaces/IWorkoutPlan";
-import DeleteButton from "./buttons/DeleteButton";
 import MuscleGroupContainer from "./MuscleGroupContainer";
 import { useWorkoutPlanApi } from "@/hooks/useWorkoutPlanApi";
 import { cleanWorkoutObject } from "@/utils/workoutPlanUtils";
 import { Button } from "../ui/button";
-import { toast } from "sonner";
 import { BsFillPencilFill } from "react-icons/bs";
 import { BsPlusCircleFill } from "react-icons/bs";
-import { useIsWorkoutEditable } from "@/store/isWorkoutEditableStore";
 import { useParams } from "react-router-dom";
+import { Toggle } from "@/components/ui/toggle"
+
+
+
+export const isEditableContext = createContext<boolean>(false);
+
 
 const CreateWorkoutPlan: React.FC = () => {
   const { id } = useParams();
   const { addWorkoutPlan, getWorkoutPlanByUserId, updateWorkoutPlanByUserId } = useWorkoutPlanApi();
 
   // global
-  const isEditable = useIsWorkoutEditable((state) => state.isEditable);
-  const changeIsEditable = useIsWorkoutEditable((state) => state.changeIsEditable);
+  const [isEditable, setIsEditable] = useState<boolean>(false)
+
 
   //temp states
   const workoutTemp: string[] = [`AB`, `ABC`, `יומי`, `התאמה אישית`];
@@ -112,32 +115,11 @@ const CreateWorkoutPlan: React.FC = () => {
 
     const cleanedPostObject = cleanWorkoutObject(postObject);
 
-    const date = new Date().toLocaleTimeString();
 
     if (isCreate) {
       addWorkoutPlan(cleanedPostObject)
-        .then(() =>
-          toast(`Workout Plan Saved Succesfully!`, {
-            description: `${date}`,
-          })
-        )
-        .catch((error) =>
-          toast(`${error.message}`, {
-            description: `${error.response.data.message}`,
-          })
-        );
     } else {
       updateWorkoutPlanByUserId(id, cleanedPostObject)
-        .then(() =>
-          toast(`Workout Plan Saved Succesfully!`, {
-            description: `${date}`,
-          })
-        )
-        .catch((error) =>
-          toast(`${error.message}`, {
-            description: `${error.response.data.message}`,
-          })
-        );
     }
   };
 
@@ -149,63 +131,61 @@ const CreateWorkoutPlan: React.FC = () => {
       .catch((err) => {
         if (err.response.data.message == `Workout plan not found.`) {
           setIsCreate(true);
-          changeIsEditable(true);
+          setIsEditable(true);
         }
       });
   }, []);
 
   return (
-    <div className="p-5 overflow-y-scroll max-h-[95vh] w-full">
-      <h1 className="text-4xl">תוכנית אימון</h1>
-      <p>
-        {isEditable
-          ? `כאן תוכל לערוך תוכנית אימון קיימת ללקוח שלך`
-          : `כאן תוכל לצפות בתוכנית האימון הקיימת של לקוח זה`}
-      </p>
-      <div className="p-2 py-4">
-        {isEditable && (
-          <ComboBox
-            options={workoutTemp}
-            handleChange={(currentValue) => handleSelect(currentValue)}
-          />
-        )}
-        {workoutPlan[0] && (
-          <div
-            onClick={() => changeIsEditable(!isEditable)}
-            className="absolute left-20 top-10 h-10 flex items-center px-2 rounded cursor-pointer bg-primary"
-          >
-            <BsFillPencilFill />
-          </div>
-        )}
-
-        {workoutPlan.map((workout, i) => (
-          <div key={i} className="flex items-start">
-            <MuscleGroupContainer
-              workout={workout.workouts}
-              handleSave={(workouts) => handleSave(i, workouts)}
-              title={workout.planName}
-              handlePlanNameChange={(newName) => handlePlanNameChange(newName, i)}
-            />
-            <div className="mt-5 ">
-              {isEditable && (
-                <DeleteButton tip="הסר אימון" onClick={() => handleDeleteWorkout(i)} />
-              )}
-            </div>
-          </div>
-        ))}
-        <div className="w-full flex justify-center">
+    <isEditableContext.Provider value={isEditable}>
+      <div className="p-5 overflow-y-scroll hide-scrollbar max-h-[95vh] w-full">
+        <h1 className="text-4xl">תוכנית אימון</h1>
+        <p>
+          {isEditable
+            ? `כאן תוכל לערוך תוכנית אימון קיימת ללקוח שלך`
+            : `כאן תוכל לצפות בתוכנית האימון הקיימת של לקוח זה`}
+        </p>
+        <div className="p-2 py-4">
           {isEditable && (
-            <Button onClick={handleAddWorkout}>
-              <div className="flex flex-col items-center">
-                הוסף אימון
-                <BsPlusCircleFill />
-              </div>
-            </Button>
+            <ComboBox
+              options={workoutTemp}
+              handleChange={(currentValue) => handleSelect(currentValue)}
+            />
           )}
+          {workoutPlan[0] && (
+            <Toggle color="bg-primary"
+              onClick={() => setIsEditable(!isEditable)}
+              className="absolute left-20 top-10 h-10 flex items-center px-2 rounded cursor-pointer "
+            >
+              <BsFillPencilFill />
+            </Toggle>
+          )}
+
+          {workoutPlan.map((workout, i) => (
+            <div key={i} className="flex items-start">
+              <MuscleGroupContainer
+                workout={workout.workouts}
+                handleSave={(workouts) => handleSave(i, workouts)}
+                title={workout.planName}
+                handlePlanNameChange={(newName) => handlePlanNameChange(newName, i)}
+                handleDeleteWorkout={() => handleDeleteWorkout(i)}
+              />
+            </div>
+          ))}
+          <div className="w-full flex justify-center">
+            {isEditable && (
+              <Button onClick={handleAddWorkout}>
+                <div className="flex flex-col items-center">
+                  הוסף אימון
+                  <BsPlusCircleFill />
+                </div>
+              </Button>
+            )}
+          </div>
         </div>
+        {isEditable && <Button onClick={hanldeSubmit}>שמור תוכנית אימון</Button>}
       </div>
-      {isEditable && <Button onClick={hanldeSubmit}>שמור תוכנית אימון</Button>}
-    </div>
+    </isEditableContext.Provider>
   );
 };
 

@@ -1,4 +1,4 @@
-import React, {  useEffect, useState } from 'react'
+import React, { useContext, useState } from 'react'
 import ExcerciseInput from './ExcerciseInput'
 import { IMuscleGroupWorkouts, IWorkout } from '@/interfaces/IWorkoutPlan'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -7,7 +7,8 @@ import { Button } from '../ui/button';
 import DeleteButton from './buttons/DeleteButton';
 import MuscleGroupSelector from './MuscleGroupSelector';
 import { Input } from '../ui/input';
-import { useIsWorkoutEditable } from '@/store/isWorkoutEditableStore';
+import DeleteModal from './DeleteModal';
+import { isEditableContext } from './CreateWorkoutPlan';
 
 const muscleGroups: string[] = [
   "חזה",
@@ -33,6 +34,7 @@ interface MuscleGroupContainerProps {
   title: string;
   workout: IMuscleGroupWorkouts[];
   handlePlanNameChange: (newName: string) => void;
+  handleDeleteWorkout: () => void
 }
 
 const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({
@@ -40,11 +42,12 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({
   title,
   workout,
   handlePlanNameChange,
+  handleDeleteWorkout
 }) => {
   const [planeName, setPlanName] = useState<string | undefined>();
   const [workouts, setWorkouts] = useState<IMuscleGroupWorkouts[]>(workout);
 
-  const isEditable = useIsWorkoutEditable((state) => state.isEditable);
+  const isEditable = useContext(isEditableContext);
 
   const addWorkout = () => {
     const newObject: IMuscleGroupWorkouts = {
@@ -54,9 +57,11 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({
 
     if (workouts[0] == undefined) {
       setWorkouts([newObject]);
+      handleSave([newObject]);
       return;
     }
     setWorkouts([...workouts, newObject]);
+    handleSave([...workouts, newObject]);
   };
 
   const updateWorkouts = (i: number, workoutsObject: IWorkout[]) => {
@@ -67,6 +72,7 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({
     };
 
     setWorkouts(updatedWorkouts);
+    handleSave(updatedWorkouts);
   };
 
   const updateMuscleGroup = (i: number, value: string) => {
@@ -77,34 +83,42 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({
     };
 
     setWorkouts(updatedWorkouts);
+    handleSave(updatedWorkouts);
   };
 
   const deleteMuscleGroup = (index: number) => {
     const muscleGroupCopy = workouts.filter((_, i) => i !== index);
 
     setWorkouts(muscleGroupCopy);
+    handleSave(muscleGroupCopy);
   };
 
-  useEffect(() => {
-    handleSave(workouts);
-  }, [workouts]);
+
 
   return (
-    <div className="border-b-2 last:border-b-0 rounded py-2 my-1 w-full">
+    <div className="border-b-2  rounded py-2 my-1 w-full">
       <Collapsible>
-        <CollapsibleTrigger className="flex items-center gap-4 w-full font-bold text-lg pr-5">
+        <CollapsibleTrigger className="flex items-center justify-between gap-4 w-full font-bold text-lg pr-5">
           {isEditable ? (
             <Input
               className="w-64"
               onClick={(e) => e.stopPropagation()}
               onChange={(e) => setPlanName(e.target.value)}
-              onBlur={planeName ? () => handlePlanNameChange(planeName) : () => {}}
+              onBlur={planeName ? () => handlePlanNameChange(planeName) : () => { }}
               value={planeName ? planeName : planeName == `` ? planeName : title}
             />
           ) : (
             <p>{title}</p>
           )}
-          <ChevronsUpDown className="ml-2 h-4 w-4  opacity-50" />
+          <div className='flex items-center gap-4'>
+            {isEditable && (
+              <DeleteModal
+                child={<DeleteButton tip="הסר אימון" />}
+                onClick={handleDeleteWorkout}
+              />
+            )}
+            < ChevronsUpDown className="ml-2 h-4 w-4  opacity-50" />
+          </div>
         </CollapsibleTrigger>
         <CollapsibleContent>
           {workouts.map((workout, i) => (
@@ -113,21 +127,25 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({
                 {!isEditable && <h2 className="font-bold underline">קבוצת שריר:</h2>}
                 <CollapsibleTrigger className="flex w-full items-center border-b-2 last:border-b-0 gap-3">
                   <div className="flex gap-7 py-2 items-center w-full justify-between">
-                    <div className="flex items-center gap-7">
-                      {isEditable ? (
-                        <MuscleGroupSelector
-                          options={muscleGroups}
-                          handleChange={(value) => updateMuscleGroup(i, value)}
-                          existingMuscleGroup={workout.muscleGroup}
+                    {isEditable ? (
+                      <MuscleGroupSelector
+                        options={muscleGroups}
+                        handleChange={(value) => updateMuscleGroup(i, value)}
+                        existingMuscleGroup={workout.muscleGroup}
+                      />
+                    ) : (
+                      <p className="font-bold text-lg pr-5">{workout.muscleGroup}</p>
+                    )}
+                    <div className="flex items-center justify-between gap-4">
+                      {isEditable && (
+                        <DeleteModal
+                          child={<DeleteButton tip="מחק קבוצת שריר" />}
+                          onClick={() => deleteMuscleGroup(i)}
                         />
-                      ) : (
-                        <p className="font-bold text-lg pr-5">{workout.muscleGroup}</p>
                       )}
                       <ChevronsUpDown className="ml-2 h-4 w-4  opacity-50" />
+
                     </div>
-                    {isEditable && (
-                      <DeleteButton tip="מחק קבוצת שריר" onClick={() => deleteMuscleGroup(i)} />
-                    )}
                   </div>
                 </CollapsibleTrigger>
                 <CollapsibleContent>

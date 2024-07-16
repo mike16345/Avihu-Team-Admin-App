@@ -19,7 +19,13 @@ interface MuscleGroupSelectorProps {
 }
 
 const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({ options, handleChange, existingMuscleGroup }) => {
-    const [value, setValue] = useState<string>(existingMuscleGroup|| ``)
+    const [value, setValue] = useState<string>(existingMuscleGroup || ``)
+    const [tempValue, setTempValue] = useState<string>()
+
+    const updateSelection = (selection: string) => {
+        handleChange(selection)
+        setValue(selection)
+    }
 
 
     return (
@@ -42,13 +48,13 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({ options, hand
                 <DialogHeader >
                     <DialogTitle dir='rtl' className='text-center underline pb-6'>בחר קבוצת שריר:</DialogTitle>
                     <DialogDescription className='flex justify-center py-4 z-50'>
-                        <ComboBox existingValue={value} options={options} handleChange={(val) => setValue(val)} />
+                        <ComboBox existingValue={value} options={options} handleChange={(val) => setTempValue(val)} />
                     </DialogDescription>
                 </DialogHeader>
                 <DialogClose>
                     <Button
                         className='w-full'
-                        onClick={value ? () => handleChange(value) : () => { }}
+                        onClick={tempValue ? () => updateSelection(tempValue) : () => { }}
                     >אישור</Button>
                 </DialogClose>
             </DialogContent>

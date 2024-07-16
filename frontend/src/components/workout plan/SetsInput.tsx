@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { useIsWorkoutEditable } from '@/store/isWorkoutEditableStore';
+import { isEditableContext } from './CreateWorkoutPlan';
 
 interface SetInputProps {
     setNumber: number;
@@ -13,7 +13,7 @@ interface SetInputProps {
 
 const SetsInput: React.FC<SetInputProps> = ({ setNumber, handleChange, maxReps, minReps }) => {
 
-    const isEditable = useIsWorkoutEditable((state) => state.isEditable)
+    const isEditable = useContext(isEditableContext);
 
     return (
         <div className='flex items-end gap-5'>
@@ -53,7 +53,7 @@ const SetsInput: React.FC<SetInputProps> = ({ setNumber, handleChange, maxReps, 
                     /> :
                     <p
                         className="py-1 border-b-2 text-center"
-                    >{maxReps == undefined ? `לא קיים` : maxReps}</p>
+                    >{maxReps || `לא קיים`}</p>
                 }
             </div>
         </div>
