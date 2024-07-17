@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import WorkoutPresetTable from '@/components/tables/WorkoutPresetTable'
 import { Button } from '@/components/ui/button';
 import AddSheet from './AddSheet';
+import { useNavigate } from 'react-router-dom';
 
 const tempPresetArr = [
     'ABC-מתחיל', 'ABC-בינוני', 'ABC-מתקדם',
@@ -50,6 +51,8 @@ const WorkoutTemplatesHome = () => {
     const [tempMusclegroupState, setTempMusclegroupState] = useState<string[]>(tempMusclegroupArr)
     const [tempExerciseState, setTempExerciseState] = useState<string[]>(tempExercisesArr)
 
+    const navigate = useNavigate()
+
     const addItem = (
         item: string,
         arr: string[],
@@ -92,6 +95,7 @@ const WorkoutTemplatesHome = () => {
                 </TabsList>
                 <TabsContent value="WorkoutPlans">
                     <Button
+                        onClick={() => navigate(`/workoutPlans/presets/workout-template`)}
                         className='my-4'
                     >הוסף תבנית</Button>
                     <WorkoutPresetTable
@@ -100,20 +104,20 @@ const WorkoutTemplatesHome = () => {
                     />
                 </TabsContent>
                 <TabsContent value="muscleGroups">
-                    <AddSheet
-                        prompt='הוסף קבוצת שריר'
-                        saveItem={(item) => addItem(item, tempMusclegroupState, setTempMusclegroupState)}
-                    />
+                    <Button
+                        onClick={() => navigate(`/workoutPlans/presets/muscleGroups`)}
+                        className='my-4'
+                    >הוסף קבוצת שריר</Button>
                     <WorkoutPresetTable
                         tempData={tempMusclegroupState}
                         handleDelete={(i) => deleteItem(i, tempMusclegroupState, setTempMusclegroupState)}
                     />
                 </TabsContent>
                 <TabsContent value="exercises">
-                    <AddSheet
-                        prompt='הוסף תרגיל'
-                        saveItem={(item) => addItem(item, tempExerciseState, setTempExerciseState)}
-                    />
+                    <Button
+                        onClick={() => navigate(`/workoutPlans/presets/exercises`)}
+                        className='my-4'
+                    >הוסף תרגיל</Button>
                     <WorkoutPresetTable
                         tempData={tempExerciseState}
                         handleDelete={(i) => deleteItem(i, tempExerciseState, setTempExerciseState)}

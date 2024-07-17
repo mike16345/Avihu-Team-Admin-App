@@ -6,34 +6,33 @@ import {
     SheetDescription,
     SheetHeader,
     SheetTitle,
-    SheetTrigger,
 } from "@/components/ui/sheet"
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { useNavigate, useParams } from 'react-router-dom'
 
-interface AddSheetProps {
-    prompt?: string
-    saveItem: (item: string) => void
-}
 
-const AddSheet: React.FC<AddSheetProps> = ({ prompt, saveItem }) => {
+
+const AddSheet = () => {
+    const navigate = useNavigate()
+    const { type } = useParams()
 
     const [newItem, setNewItem] = useState<string | undefined>()
 
-    const saveChange = () => {
-        if (!newItem) return
-        saveItem(newItem)
-        setNewItem(undefined)
-    }
+
+    /*  const saveChange = () => {
+         if (!newItem) return
+         saveItem(newItem)
+         setNewItem(undefined)
+     } */
 
     return (
-        <Sheet>
-            <SheetTrigger
-                className='bg-primary my-2 p-1 px-2 rounded hover:bg-accent hover:text-primary text-accent border-2 border-primary'
-            >{prompt}</SheetTrigger>
+        <Sheet defaultOpen onOpenChange={() => navigate(`/workoutPlans`)}>
             <SheetContent side='left' dir='rtl'>
                 <SheetHeader>
-                    <SheetTitle className='text-center text-3xl'>{prompt}</SheetTitle>
+                    <SheetTitle className='text-center text-3xl'>
+                        {type === `muscleGroups` ? `הוסף קבוצת שריר` : `הוסף תרגיל`}
+                    </SheetTitle>
                     <SheetDescription className='pt-3 text-right'>
                         כאן ניתן להוסיף פריטים לרשימה הקיימת במערכת.
                     </SheetDescription>
@@ -47,7 +46,7 @@ const AddSheet: React.FC<AddSheetProps> = ({ prompt, saveItem }) => {
                         >
                             <Button
                                 disabled={!Boolean(newItem)}
-                                onClick={saveChange}
+                                /* onClick={saveChange} */
                                 className='w-full'
                             >שמירה</Button>
                         </SheetClose>
