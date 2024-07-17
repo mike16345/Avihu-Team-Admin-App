@@ -31,11 +31,12 @@ import { Input } from "@/components/ui/input"
 interface WorkoutPresetTableProps {
     tempData: string[];
     handleDelete: (i: number) => void
+    endPoint: string
 }
 
 
 
-const WorkoutPresetTable: React.FC<WorkoutPresetTableProps> = ({ tempData, handleDelete }) => {
+const WorkoutPresetTable: React.FC<WorkoutPresetTableProps> = ({ tempData, handleDelete, endPoint }) => {
     const [displayData, setDisplayData] = useState<string[]>(tempData)
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(5);
@@ -108,6 +109,7 @@ const WorkoutPresetTable: React.FC<WorkoutPresetTableProps> = ({ tempData, handl
                                 <div>
                                     <TableActions
                                         handleDelete={() => handleDelete(i)}
+                                        endPoint={`${endPoint}/${i}`}
                                     />
                                 </div>
                             </TableCell>

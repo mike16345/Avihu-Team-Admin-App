@@ -8,13 +8,18 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { BsThreeDots } from "react-icons/bs";
+import { useNavigate } from 'react-router-dom';
 
 interface TableActionsProps {
     handleDelete: () => void;
+    endPoint: string
 }
 
 
-const TableActions: React.FC<TableActionsProps> = ({ handleDelete }) => {
+const TableActions: React.FC<TableActionsProps> = ({ handleDelete, endPoint }) => {
+
+    const navigate = useNavigate();
+
     return (
         <DropdownMenu dir='rtl'>
             <DropdownMenuTrigger className='hover:bg-accent p-2 rounded-lg'>
@@ -24,6 +29,7 @@ const TableActions: React.FC<TableActionsProps> = ({ handleDelete }) => {
                 <DropdownMenuLabel className='font-bold'>פעולות</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
+                    onClick={() => navigate(endPoint)}
                 >עריכה</DropdownMenuItem>
                 <DropdownMenuItem
                     onClick={handleDelete}

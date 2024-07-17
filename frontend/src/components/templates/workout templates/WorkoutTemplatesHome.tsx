@@ -101,6 +101,7 @@ const WorkoutTemplatesHome = () => {
                     <WorkoutPresetTable
                         tempData={tempPresetState}
                         handleDelete={(i) => deleteItem(i, tempPresetState, setTempPresetState)}
+                        endPoint='/workoutPlans/presets/workout-template'
                     />
                 </TabsContent>
                 <TabsContent value="muscleGroups">
@@ -111,6 +112,7 @@ const WorkoutTemplatesHome = () => {
                     <WorkoutPresetTable
                         tempData={tempMusclegroupState}
                         handleDelete={(i) => deleteItem(i, tempMusclegroupState, setTempMusclegroupState)}
+                        endPoint='/workoutPlans/presets/muscleGroups'
                     />
                 </TabsContent>
                 <TabsContent value="exercises">
@@ -121,6 +123,7 @@ const WorkoutTemplatesHome = () => {
                     <WorkoutPresetTable
                         tempData={tempExerciseState}
                         handleDelete={(i) => deleteItem(i, tempExerciseState, setTempExerciseState)}
+                        endPoint='/workoutPlans/presets/exercises'
                     />
                 </TabsContent>
             </Tabs>

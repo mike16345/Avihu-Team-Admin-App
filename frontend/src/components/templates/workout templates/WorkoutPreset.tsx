@@ -4,11 +4,16 @@ import React, { useState } from 'react'
 import { BsPlusCircleFill } from 'react-icons/bs';
 import MuscleGroupPreset from './MuscleGroupPreset';
 import { Input } from '@/components/ui/input';
+import { useParams } from 'react-router-dom';
+import { toast } from 'sonner';
 
 const WorkoutPreset = () => {
+    const { id } = useParams()
 
     const [workoutPlan, setWorkoutPlan] = useState<IWorkoutPlan[]>([]);
     const [presetName, setPresetName] = useState<string>()
+    const [isEdit, SetIsEdit] = useState<boolean>(Boolean(id))
+
 
 
     const handlePlanNameChange = (newName: string, index: number) => {
@@ -47,14 +52,24 @@ const WorkoutPreset = () => {
         });
     };
 
-    const hanldeSubmit = () => { }
+    const hanldeSubmit = () => {
+        if (isEdit) {
+            toast(`this is a Put`)
+        } else {
+            toast(`this is a Post`)
+        }
+    }
 
 
     return (
         <div className="p-5 overflow-y-scroll hide-scrollbar max-h-[95vh] w-full">
             <h1 className="text-5xl">תבנית אימון</h1>
             <p>
-                כאן תוכל לערוך תבנית אימון
+                {isEdit ?
+                    `כאן תוכל לערוך תבנית אימון קיימת`
+                    :
+                    `  כאן תוכל ליצור תבנית אימון חדשה`
+                }
             </p>
             <div className="p-2 py-4">
                 <div className='w-72 py-4 border-b-2 mb-2'>
@@ -63,6 +78,7 @@ const WorkoutPreset = () => {
                     >שם התבנית:</h2>
                     <Input
                         placeholder='שם...'
+                        value={presetName}
                         onChange={(e) => setPresetName(e.target.value)}
                     />
                 </div>
