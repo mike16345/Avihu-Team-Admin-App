@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
     Table,
     TableBody,
@@ -8,7 +8,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import TableActions from '../templates/TableActions'
+import TableActions from '../templates/workout templates/TableActions'
 import {
     Pagination,
     PaginationLink,
@@ -29,16 +29,18 @@ import { Input } from "@/components/ui/input"
 
 
 interface WorkoutPresetTableProps {
-    tempData: string[]
+    tempData: string[];
+    handleDelete: (i: number) => void
 }
 
 
-const WorkoutPresetTable: React.FC<WorkoutPresetTableProps> = ({ tempData }) => {
+
+const WorkoutPresetTable: React.FC<WorkoutPresetTableProps> = ({ tempData, handleDelete }) => {
     const [displayData, setDisplayData] = useState<string[]>(tempData)
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(5);
 
-    const totalPages = Math.ceil(tempData.length / itemsPerPage);
+    const totalPages = Math.ceil(displayData.length / itemsPerPage);
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
@@ -75,6 +77,10 @@ const WorkoutPresetTable: React.FC<WorkoutPresetTableProps> = ({ tempData }) => 
         setDisplayData(filteredArr)
     }
 
+    useEffect(() => {
+        setDisplayData(tempData)
+    }, [tempData])
+
     return (
         <div>
             <div className='my-2 w-[300px]'>
@@ -90,11 +96,20 @@ const WorkoutPresetTable: React.FC<WorkoutPresetTableProps> = ({ tempData }) => 
                     </TableRow>
                 </TableHeader>
                 <TableBody >
+                    {paginatedData.length == 0 && (
+                        <TableRow className='font-bold text-center'>
+                            <TableCell>לא נמצאו תוצאות</TableCell>
+                        </TableRow>
+                    )}
                     {paginatedData.map((data, i) => (
                         <TableRow key={i}>
                             <TableCell className='flex justify-between items-center px-3'>
                                 <div className='pr-4'>{data}</div>
-                                <div><TableActions /></div>
+                                <div>
+                                    <TableActions
+                                        handleDelete={() => handleDelete(i)}
+                                    />
+                                </div>
                             </TableCell>
                         </TableRow>
                     ))}
