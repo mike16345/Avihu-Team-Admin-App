@@ -18,6 +18,7 @@ export const AppRoutes = () => {
         <Route path="/workout-plans/:id" element={<CreateWorkoutPlan />} />
         <Route path="/workoutPlans" element={<WorkoutTemplatesHome />} />
         <Route path="/workoutPlans/presets/:type" element={<AddSheet />} />
+        <Route path="/workoutPlans/presets/:type/:id" element={<AddSheet />} />
         <Route path="/workoutPlans/presets/workout-template" element={<WorkoutPreset />} />
         <Route path="/workoutPlans/presets/workout-template/:id" element={<WorkoutPreset />} />
       </Routes>
