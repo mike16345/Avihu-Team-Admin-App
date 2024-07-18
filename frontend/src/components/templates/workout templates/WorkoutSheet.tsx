@@ -14,7 +14,7 @@ import { toast } from 'sonner'
 
 
 
-const AddSheet = () => {
+const WorkoutSheet = () => {
     const navigate = useNavigate()
     const { type, id } = useParams()
 
@@ -70,4 +70,4 @@ const AddSheet = () => {
     )
 }
 
-export default AddSheet
+export default WorkoutSheet

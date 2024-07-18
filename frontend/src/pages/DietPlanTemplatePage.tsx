@@ -36,35 +36,35 @@ const DietPlanTemplatePage = () => {
         tabContent: [
             {
                 value: `proteinItems`,
-                navURL: `/workoutPlans/presets/workout-template`,
+                navURL: `/dietPlans/presets/protein`,
                 btnPrompt: `הוסף חלבון`,
                 state: proteinMenuState,
                 setter: setProteinMenuState,
-                endPoint: `/workoutPlans/presets/workout-template`
+                endPoint: `/dietPlans/presets/protein`
             },
             {
                 value: `carbItems`,
-                navURL: `/workoutPlans/presets/workout-template`,
+                navURL: `/dietPlans/presets/carbs`,
                 btnPrompt: `הוסף פחמימה`,
                 state: carbsMenuState,
                 setter: setCarbsMenuState,
-                endPoint: `/workoutPlans/presets/workout-template`
+                endPoint: `/dietPlans/presets/carbs`
             },
             {
                 value: `vegetableItems`,
-                navURL: `/workoutPlans/presets/workout-template`,
+                navURL: `/dietPlans/presets/vegetables`,
                 btnPrompt: `הוסף ירקות`,
                 state: VegetableMenuState,
                 setter: setVegetableMenuState,
-                endPoint: `/workoutPlans/presets/workout-template`
+                endPoint: `/dietPlans/presets/vegetables`
             },
             {
                 value: `fatsItems`,
-                navURL: `/workoutPlans/presets/workout-template`,
+                navURL: `/dietPlans/presets/vegetables`,
                 btnPrompt: `הוסף שומנים`,
                 state: fatsMenueState,
                 setter: setFatsMenueState,
-                endPoint: `/workoutPlans/presets/workout-template`
+                endPoint: `/dietPlans/presets/vegetables`
             },
         ]
     }
@@ -72,6 +72,7 @@ const DietPlanTemplatePage = () => {
 
     return (
         <div>
+            <h1 className='text-2xl pb-5'>תפריטים</h1>
             <TemplateTabs tabs={tabs} />
         </div>
     )

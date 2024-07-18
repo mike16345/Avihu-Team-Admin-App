@@ -52,6 +52,7 @@ const WorkoutsTemplatePage = () => {
 
     return (
         <div>
+            <h1 className='text-2xl pb-5'>תבניות אימון</h1>
             <TemplateTabs tabs={tabs} />
         </div>
     )
