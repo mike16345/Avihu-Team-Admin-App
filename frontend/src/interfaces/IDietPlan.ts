@@ -22,3 +22,18 @@ export interface IDietPlan {
 }
 
 export type DietItemUnit = "grams" | "spoons";
+
+export interface IServingItem {
+  spoons: number;
+  grams: number
+}
+
+export interface IMenuItem {
+  itemName: string;
+  oneServing: IServingItem;
+}
+
+export interface IMenue {
+  menuName: string;
+  menuItems: IMenuItem[]
+}

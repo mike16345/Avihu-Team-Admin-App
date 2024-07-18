@@ -53,10 +53,14 @@ const WorkoutPreset = () => {
     };
 
     const hanldeSubmit = () => {
+        const postObject = {
+            itemName: presetName,
+            workoutPlan
+        }
         if (isEdit) {
-            toast(`this is a Put`)
+            toast(`this will edit ${postObject.itemName} Template`)
         } else {
-            toast(`this is a Post`)
+            toast(`this will Post ${postObject.itemName} Template`)
         }
     }
 

@@ -28,16 +28,16 @@ import { Input } from "@/components/ui/input"
 
 
 
-interface WorkoutPresetTableProps {
-    tempData: string[];
+interface PresetTableProps {
+    tempData: any[];
     handleDelete: (i: number) => void
     endPoint: string
 }
 
 
 
-const WorkoutPresetTable: React.FC<WorkoutPresetTableProps> = ({ tempData, handleDelete, endPoint }) => {
-    const [displayData, setDisplayData] = useState<string[]>(tempData)
+const PresetTable: React.FC<PresetTableProps> = ({ tempData, handleDelete, endPoint }) => {
+    const [displayData, setDisplayData] = useState<any[]>(tempData)
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(5);
 
@@ -73,7 +73,7 @@ const WorkoutPresetTable: React.FC<WorkoutPresetTableProps> = ({ tempData, handl
         if (!value) {
             setDisplayData(tempData)
         }
-        const filteredArr = tempData.filter(item => item.includes(value))
+        const filteredArr = tempData.filter(item => item.itemName.includes(value))
 
         setDisplayData(filteredArr)
     }
@@ -90,7 +90,7 @@ const WorkoutPresetTable: React.FC<WorkoutPresetTableProps> = ({ tempData, handl
                     onChange={handleSearch}
                 />
             </div>
-            <Table dir='rtl'>
+            <Table dir='rtl' className='w-auto min-w-[600px]'>
                 <TableHeader>
                     <TableRow>
                         <TableHead className='text-right'>שם</TableHead>
@@ -105,7 +105,7 @@ const WorkoutPresetTable: React.FC<WorkoutPresetTableProps> = ({ tempData, handl
                     {paginatedData.map((data, i) => (
                         <TableRow key={i}>
                             <TableCell className='flex justify-between items-center px-3'>
-                                <div className='pr-4'>{data}</div>
+                                <div className='pr-4'>{data.itemName}</div>
                                 <div>
                                     <TableActions
                                         handleDelete={() => handleDelete(i)}
@@ -154,4 +154,4 @@ const WorkoutPresetTable: React.FC<WorkoutPresetTableProps> = ({ tempData, handl
 };
 
 
-export default WorkoutPresetTable
+export default PresetTable

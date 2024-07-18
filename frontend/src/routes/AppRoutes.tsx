@@ -1,11 +1,12 @@
 import { UsersTable } from "@/components/tables/UsersTable";
 import AddSheet from "@/components/templates/workout templates/AddSheet";
 import WorkoutPreset from "@/components/templates/workout templates/WorkoutPreset";
-import WorkoutTemplatesHome from "@/components/templates/workout templates/WorkoutTemplatesHome";
 import CreateWorkoutPlan from "@/components/workout plan/CreateWorkoutPlan";
 import { UserDashboard } from "@/pages/UserDashboard";
 import { ViewDietPlanPage } from "@/pages/ViewDietPlanPage";
 import { Route, Routes } from "react-router";
+import DietPlanTemplatePage from "@/pages/DietPlanTemplatePage";
+import WorkoutsTemplatePage from "@/pages/WorkoutsTemplatePage";
 
 export const AppRoutes = () => {
   return (
@@ -16,11 +17,12 @@ export const AppRoutes = () => {
         <Route path="/users/:id" element={<UserDashboard />} />
         <Route path="/diet-plans/:id" element={<ViewDietPlanPage />} />
         <Route path="/workout-plans/:id" element={<CreateWorkoutPlan />} />
-        <Route path="/workoutPlans" element={<WorkoutTemplatesHome />} />
+        <Route path="/workoutPlans" element={<WorkoutsTemplatePage />} />
         <Route path="/workoutPlans/presets/:type" element={<AddSheet />} />
         <Route path="/workoutPlans/presets/:type/:id" element={<AddSheet />} />
         <Route path="/workoutPlans/presets/workout-template" element={<WorkoutPreset />} />
         <Route path="/workoutPlans/presets/workout-template/:id" element={<WorkoutPreset />} />
+        <Route path="/dietPlans" element={<DietPlanTemplatePage />} />
       </Routes>
     </>
   );
