@@ -35,9 +35,9 @@ const WorkoutSheet = () => {
 
     return (
         <Sheet defaultOpen onOpenChange={() => navigate(`/workoutPlans`)}>
-            <SheetContent side='left' dir='rtl'>
+            <SheetContent dir='rtl'>
                 <SheetHeader>
-                    <SheetTitle className='text-center text-3xl'>
+                    <SheetTitle className='text-right text-3xl pt-4'>
                         {type === `muscleGroups` ? `קבוצת שריר` : `תרגיל`}
                     </SheetTitle>
                     <SheetDescription className='pt-3 text-right'>

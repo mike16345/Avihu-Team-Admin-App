@@ -50,9 +50,9 @@ const DietPlanSheet = () => {
 
     return (
         <Sheet defaultOpen onOpenChange={() => navigate(`/dietPlans`)}>
-            <SheetContent side='left' dir='rtl'>
+            <SheetContent dir='rtl'>
                 <SheetHeader>
-                    <SheetTitle className='text-center text-3xl pb-4'>הוסף פריט</SheetTitle>
+                    <SheetTitle className='text-right text-3xl py-4'>הוסף פריט</SheetTitle>
                     <SheetDescription className='text-center'>
                         כאן תוכל להוסיף פריטים לרשימה הקיימת במערכת.
                     </SheetDescription>
