@@ -27,9 +27,9 @@ const AddSheet = () => {
         /* saveItem(newItem)
         setNewItem(undefined) */
         if (isEdit) {
-            toast(`this will be a PUT to endpoint: ${type}`)
+            toast.info(`this will PUT ${newItem} to endpoint: ${type}`)
         } else {
-            toast(`this will be a POST to endpoint: ${type}`)
+            toast(`this will be POST ${newItem} to endpoint: ${type}`)
         }
     }
 

@@ -13,6 +13,7 @@ import { BsFillPencilFill } from "react-icons/bs";
 import { BsPlusCircleFill } from "react-icons/bs";
 import { useParams } from "react-router-dom";
 import { Toggle } from "@/components/ui/toggle"
+import { toast } from "sonner";
 
 
 
@@ -118,8 +119,16 @@ const CreateWorkoutPlan: React.FC = () => {
 
     if (isCreate) {
       addWorkoutPlan(cleanedPostObject)
+        .then(res => toast.success(`תוכנית אימון נשמרה בהצלחה!`))
+        .catch(err => toast.error(`אופס, נתקלנו בבעיה!`, {
+          description: `${err.response.data.message}`,
+        }))
     } else {
       updateWorkoutPlanByUserId(id, cleanedPostObject)
+        .then(res => toast.success(`תוכנית אימון נשמרה בהצלחה!`))
+        .catch(err => toast.error(`אופס, נתקלנו בבעיה!`, {
+          description: `${err.response.data.message}`
+        }))
     }
   };
 
