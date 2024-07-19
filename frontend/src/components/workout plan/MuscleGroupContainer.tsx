@@ -1,40 +1,20 @@
-import React, { useContext, useState } from 'react'
-import ExcerciseInput from './ExcerciseInput'
-import { IMuscleGroupWorkouts, IWorkout } from '@/interfaces/IWorkoutPlan'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronsUpDown } from "lucide-react";
-import { Button } from '../ui/button';
-import DeleteButton from './buttons/DeleteButton';
-import MuscleGroupSelector from './MuscleGroupSelector';
-import { Input } from '../ui/input';
-import DeleteModal from './DeleteModal';
-import { isEditableContext } from './CreateWorkoutPlan';
-
-const muscleGroups: string[] = [
-  "חזה",
-  "כתפיים",
-  "יד אחורית",
-  "גב",
-  "יד קידמית",
-  "רגליים",
-  "בטן",
-  "אירובי",
-];
-const chestExercises: string[] = [
-  "פרפר",
-  "מקבילים",
-  "לחיצת חזה בשיפוע שלילי",
-  "לחיצת חזה בשיפוע חיובי",
-  "לחיצת חזה",
-];
-const shoulderExercises: string[] = ["כתפיים"];
+import React, { useContext, useState } from "react";
+import { IMuscleGroupWorkouts, IWorkout } from "@/interfaces/IWorkoutPlan";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+import { Button } from "../ui/button";
+import DeleteButton from "./buttons/DeleteButton";
+import { Input } from "../ui/input";
+import { isEditableContext } from "./CreateWorkoutPlan";
+import { FaChevronDown } from "react-icons/fa";
+import CustomAlertDialog from "../Alerts/DialogAlert/CustomAlertDialog";
+import { WorkoutContainer } from "./WorkoutContainer";
 
 interface MuscleGroupContainerProps {
-  handleSave: (workouts: IMuscleGroupWorkouts[]) => void;
   title: string;
   workout: IMuscleGroupWorkouts[];
+  handleSave: (workouts: IMuscleGroupWorkouts[]) => void;
   handlePlanNameChange: (newName: string) => void;
-  handleDeleteWorkout: () => void
+  handleDeleteWorkout: () => void;
 }
 
 const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({
@@ -42,10 +22,13 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({
   title,
   workout,
   handlePlanNameChange,
-  handleDeleteWorkout
+  handleDeleteWorkout,
 }) => {
   const [planeName, setPlanName] = useState<string | undefined>();
   const [workouts, setWorkouts] = useState<IMuscleGroupWorkouts[]>(workout);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleteMuscleGroupModalOpen, setIsMuscleGroupModalOpen] = useState(false);
 
   const isEditable = useContext(isEditableContext);
 
@@ -93,81 +76,76 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({
     handleSave(muscleGroupCopy);
   };
 
-
-
   return (
-    <div className="border-b-2  rounded py-2 my-1 w-full">
-      <Collapsible>
-        <CollapsibleTrigger className="flex items-center justify-between gap-4 w-full font-bold text-lg pr-5">
-          {isEditable ? (
-            <Input
-              className="w-64"
-              onClick={(e) => e.stopPropagation()}
-              onChange={(e) => setPlanName(e.target.value)}
-              onBlur={planeName ? () => handlePlanNameChange(planeName) : () => { }}
-              value={planeName ? planeName : planeName == `` ? planeName : title}
-            />
-          ) : (
-            <p>{title}</p>
-          )}
-          <div className='flex items-center gap-4'>
-            {isEditable && (
-              <DeleteModal
-                child={<DeleteButton tip="הסר אימון" />}
-                onClick={handleDeleteWorkout}
+    <>
+      <div className="border-b-2 last:border-b-0  rounded py-2 ">
+        <Collapsible defaultOpen={isOpen} open={isOpen} onOpenChange={setIsOpen}>
+          <div className="flex items-center justify-between gap-4 w-full font-bold text-lg ">
+            {isEditable ? (
+              <Input
+                className="w-64"
+                onClick={(e) => e.stopPropagation()}
+                onChange={(e) => setPlanName(e.target.value)}
+                onBlur={planeName ? () => handlePlanNameChange(planeName) : () => {}}
+                value={planeName ? planeName : planeName == `` ? planeName : title}
               />
+            ) : (
+              <p>{title}</p>
             )}
-            < ChevronsUpDown className="ml-2 h-4 w-4  opacity-50" />
+            <div className="flex items-center gap-4">
+              <DeleteButton tip="הסר אימון" onClick={() => setIsDeleteModalOpen(true)} />
+              <Button
+                onClick={() => setIsOpen((state) => !state)}
+                variant="ghost"
+                size="sm"
+                className={`w-9 p-0 transition ${isOpen ? "rotate-180" : "rotate-0"}`}
+              >
+                <FaChevronDown className="h-4 w-4" />
+                <span className="sr-only">Toggle</span>
+              </Button>
+            </div>
           </div>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          {workouts.map((workout, i) => (
-            <Collapsible defaultOpen key={i} className="border-2 rounded p-3 my-2">
-              <div>
-                {!isEditable && <h2 className="font-bold underline">קבוצת שריר:</h2>}
-                <CollapsibleTrigger className="flex w-full items-center border-b-2 last:border-b-0 gap-3">
-                  <div className="flex gap-7 py-2 items-center w-full justify-between">
-                    {isEditable ? (
-                      <MuscleGroupSelector
-                        options={muscleGroups}
-                        handleChange={(value) => updateMuscleGroup(i, value)}
-                        existingMuscleGroup={workout.muscleGroup}
-                      />
-                    ) : (
-                      <p className="font-bold text-lg pr-5">{workout.muscleGroup}</p>
-                    )}
-                    <div className="flex items-center justify-between gap-4">
-                      {isEditable && (
-                        <DeleteModal
-                          child={<DeleteButton tip="מחק קבוצת שריר" />}
-                          onClick={() => deleteMuscleGroup(i)}
-                        />
-                      )}
-                      <ChevronsUpDown className="ml-2 h-4 w-4  opacity-50" />
+          <CollapsibleContent>
+            {workouts.map((workout, i) => (
+              <WorkoutContainer
+                key={i}
+                muscleGroup={workout}
+                handleUpdateWorkouts={(workouts) => updateWorkouts(i, workouts)}
+                handleUpdateMuscleGroup={(value) => updateMuscleGroup(i, value)}
+                handleDeleteMuscleGroup={() => deleteMuscleGroup(i)}
+              />
+            ))}
+            {isEditable && (
+              <Button onClick={addWorkout} className="my-2">
+                הוסף קבוצת שריר
+              </Button>
+            )}
+          </CollapsibleContent>
+        </Collapsible>
+      </div>
 
-                    </div>
-                  </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <div className="my-2 w-full">
-                    <ExcerciseInput
-                      options={workout?.muscleGroup === `חזה` ? chestExercises : shoulderExercises}
-                      exercises={workout.exercises}
-                      updateWorkouts={(workouts) => updateWorkouts(i, workouts)}
-                    />
-                  </div>
-                </CollapsibleContent>
-              </div>
-            </Collapsible>
-          ))}
-          {isEditable && (
-            <Button onClick={addWorkout} className="my-2">
-              הוסף קבוצת שריר
-            </Button>
-          )}
-        </CollapsibleContent>
-      </Collapsible>
-    </div>
+      <CustomAlertDialog
+        alertDialogProps={{ open: isDeleteModalOpen, onOpenChange: setIsDeleteModalOpen }}
+        alertDialogContentProps={{
+          children: (
+            <>
+              פעולה זו אינה ניתנת לביטול.<br></br> פעולה זו תמחק את המוצר לצמיתות ותסיר את נתוניו
+              מהשרתים שלנו.<br></br>האם אתה בטוח שאתה רוצה להמשיך?
+            </>
+          ),
+        }}
+        alertDialogCancelProps={{
+          onClick: () => {
+            setIsDeleteModalOpen(false);
+          },
+          children: "בטל",
+        }}
+        alertDialogActionProps={{
+          onClick: handleDeleteWorkout,
+          children: "אשר",
+        }}
+      />
+    </>
   );
 };
 
