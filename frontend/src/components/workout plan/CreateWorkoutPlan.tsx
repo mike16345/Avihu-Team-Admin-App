@@ -13,6 +13,7 @@ import { BsFillPencilFill } from "react-icons/bs";
 import { BsPlusCircleFill } from "react-icons/bs";
 import { useParams } from "react-router-dom";
 import { Toggle } from "@/components/ui/toggle";
+import { toast } from "sonner";
 
 export const isEditableContext = createContext<boolean>(false);
 
@@ -115,6 +116,20 @@ const CreateWorkoutPlan: React.FC = () => {
       addWorkoutPlan(id, cleanedPostObject);
     } else {
       updateWorkoutPlanByUserId(id, cleanedPostObject);
+    }
+
+      if (isCreate) {
+      addWorkoutPlan(id,cleanedPostObject)
+        .then(() => toast.success(`תוכנית אימון נשמרה בהצלחה!`))
+        .catch(err => toast.error(`אופס, נתקלנו בבעיה!`, {
+          description: `${err.response.data.message}`,
+        }))
+    } else {
+      updateWorkoutPlanByUserId(id, cleanedPostObject)
+        .then(() => toast.success(`תוכנית אימון נשמרה בהצלחה!`))
+        .catch(err => toast.error(`אופס, נתקלנו בבעיה!`, {
+          description: `${err.response.data.message}`
+        }))
     }
   };
 
