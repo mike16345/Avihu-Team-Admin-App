@@ -112,11 +112,6 @@ const CreateWorkoutPlan: React.FC = () => {
 
     const cleanedPostObject = cleanWorkoutObject(postObject);
 
-    if (isCreate) {
-      addWorkoutPlan(id, cleanedPostObject);
-    } else {
-      updateWorkoutPlanByUserId(id, cleanedPostObject);
-    }
 
       if (isCreate) {
       addWorkoutPlan(id,cleanedPostObject)
