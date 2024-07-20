@@ -119,13 +119,13 @@ const CreateWorkoutPlan: React.FC = () => {
 
     if (isCreate) {
       addWorkoutPlan(cleanedPostObject)
-        .then(res => toast.success(`תוכנית אימון נשמרה בהצלחה!`))
+        .then(() => toast.success(`תוכנית אימון נשמרה בהצלחה!`))
         .catch(err => toast.error(`אופס, נתקלנו בבעיה!`, {
           description: `${err.response.data.message}`,
         }))
     } else {
       updateWorkoutPlanByUserId(id, cleanedPostObject)
-        .then(res => toast.success(`תוכנית אימון נשמרה בהצלחה!`))
+        .then(() => toast.success(`תוכנית אימון נשמרה בהצלחה!`))
         .catch(err => toast.error(`אופס, נתקלנו בבעיה!`, {
           description: `${err.response.data.message}`
         }))
