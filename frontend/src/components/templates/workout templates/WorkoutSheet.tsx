@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
     Sheet,
     SheetClose,
@@ -11,26 +11,53 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
+import useExercisePresetApi from '@/hooks/useExercisePresetApi'
+
 
 
 
 const WorkoutSheet = () => {
     const navigate = useNavigate()
     const { type, id } = useParams()
+    const { getExerciseById, updateExercise, addExercise } = useExercisePresetApi()
 
-    const [newItem, setNewItem] = useState<string | undefined>(id)
+    const [newItem, setNewItem] = useState<string | undefined>()
     const [isEdit, setIsEdit] = useState<boolean>(Boolean(id))
+
+    useEffect(() => {
+        if (!id) return
+        if (type === `exercises`) {
+            getExerciseById(id)
+                .then(res => setNewItem(res.itemName))
+                .catch(err => console.log(err))
+        }
+
+    }, [])
 
 
     const saveChange = () => {
         if (!newItem) return
-        /* saveItem(newItem)
-        setNewItem(undefined) */
-        if (isEdit) {
-            toast.info(`this will PUT ${newItem} to endpoint: ${type}`)
-        } else {
-            toast(`this will be POST ${newItem} to endpoint: ${type}`)
+        const workoutItem = { itemName: newItem }
+
+        if (type === `exercises`) {
+            if (isEdit) {
+                if (!id) return
+
+                updateExercise(id, workoutItem)
+                    .then(() => toast.success(`פריט עודכן בהצלחה!`))
+                    .catch(err => toast.error(`אופס! נתקלנו בבעיה`,
+                        { description: err.response.data }
+                    ))
+
+            } else {
+                addExercise(workoutItem)
+                    .then(() => toast.success(`פריט נשמר בהצלחה!`))
+                    .catch(err => toast.error(`אופס! נתקלנו בבעיה`,
+                        { description: err.response.data }
+                    ))
+            }
         }
+
     }
 
     return (

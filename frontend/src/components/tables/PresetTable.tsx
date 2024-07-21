@@ -30,13 +30,13 @@ import { Input } from "@/components/ui/input"
 
 interface PresetTableProps {
     tempData: any[];
-    handleDelete: (i: number) => void
-    endPoint: string
+    handleDelete: (id: string) => void
+    navURL: string
 }
 
 
 
-const PresetTable: React.FC<PresetTableProps> = ({ tempData, handleDelete, endPoint }) => {
+const PresetTable: React.FC<PresetTableProps> = ({ tempData, handleDelete, navURL }) => {
     const [displayData, setDisplayData] = useState<any[]>(tempData)
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(5);
@@ -108,8 +108,8 @@ const PresetTable: React.FC<PresetTableProps> = ({ tempData, handleDelete, endPo
                                 <div className='pr-4'>{data.itemName}</div>
                                 <div>
                                     <TableActions
-                                        handleDelete={() => handleDelete(i)}
-                                        endPoint={`${endPoint}/${i}`}
+                                        handleDelete={() => handleDelete(data._id)}
+                                        endPoint={`${navURL}/${data._id}`}
                                     />
                                 </div>
                             </TableCell>

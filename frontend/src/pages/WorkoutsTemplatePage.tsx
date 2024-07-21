@@ -1,13 +1,16 @@
 import TemplateTabs from '@/components/templates/TemplateTabs'
 import { tempExercisesArr, tempMusclegroupArr, tempPresetArr } from '@/constants/TempWorkoutPresetConsts'
+import useExercisePresetApi from '@/hooks/useExercisePresetApi'
 import { IWorkoutItem } from '@/interfaces/IWorkoutPlan'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 const WorkoutsTemplatePage = () => {
 
+    const { getExercisePresets, deleteExercise } = useExercisePresetApi()
+
     const [tempPresetState, setTempPresetState] = useState<IWorkoutItem[]>(tempPresetArr)
     const [tempMusclegroupState, setTempMusclegroupState] = useState<IWorkoutItem[]>(tempMusclegroupArr)
-    const [tempExerciseState, setTempExerciseState] = useState<IWorkoutItem[]>(tempExercisesArr)
+    const [exercisePresets, setExercisePresets] = useState<IWorkoutItem[]>()
 
     const tabs: ITabs = {
         tabHeaders: [
@@ -42,18 +45,26 @@ const WorkoutsTemplatePage = () => {
                 value: `exercises`,
                 navURL: `/workoutPlans/presets/exercises`,
                 btnPrompt: `הוסף תרגיל`,
-                state: tempExerciseState,
-                setter: setTempExerciseState,
-                endPoint: `/workoutPlans/presets/exercises`
+                state: exercisePresets,
+                setter: deleteExercise,
+                endPoint: `/presets/exercises`
             }
         ]
     }
+
+    useEffect(() => {
+        getExercisePresets()
+            .then(res => setExercisePresets(res))
+            .catch(err => console.log(err))
+    }, [])
 
 
     return (
         <div>
             <h1 className='text-2xl pb-5'>תבניות אימון</h1>
-            <TemplateTabs tabs={tabs} />
+            {exercisePresets &&
+                <TemplateTabs tabs={tabs} />
+            }
         </div>
     )
 }

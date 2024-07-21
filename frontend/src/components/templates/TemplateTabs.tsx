@@ -3,6 +3,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import PresetTable from '@/components/tables/PresetTable'
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import useExercisePresetApi from '@/hooks/useExercisePresetApi';
+import { toast } from 'sonner';
 
 
 
@@ -12,6 +14,9 @@ interface TemplateTabsProps {
 
 
 const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
+
+    const { deleteExercise } = useExercisePresetApi()
+
 
 
     const navigate = useNavigate()
@@ -27,14 +32,14 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
     }
 
     const deleteItem = (
-        index: number,
-        arr: string[],
-        arrSetter: React.Dispatch<React.SetStateAction<string[]>>
+        id: string,
+        deleter: (id: string) => Promise<unknown>,
     ) => {
-
-        const filteredArr = arr.filter((_, i) => i !== index);
-        arrSetter(filteredArr)
-
+        deleter(id)
+            .then(() => toast.success(`פריט נמחק בהצלחה!`))
+            .catch(err => toast.error(`אופס! נתקלנו בבעיה`,
+                { description: err.response.data }
+            ))
     }
     const editItem = (
         index: number,
@@ -64,8 +69,8 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
                         >{tab.btnPrompt}</Button>
                         <PresetTable
                             tempData={tab.state}
-                            handleDelete={(i) => deleteItem(i, tab.state, tab.setter)}
-                            endPoint={tab.endPoint}
+                            handleDelete={(id) => deleteItem(id, tab.setter)}
+                            navURL={tab.navURL}
                         />
                     </TabsContent>
                 ))}
