@@ -63,7 +63,6 @@ export const columns: ColumnDef<IUser>[] = [
     header: "תאריך נוצר",
     cell: ({ row }) => {
       const user = row.original;
-      console.log("user", user);
 
       return "24/06/202";
     },

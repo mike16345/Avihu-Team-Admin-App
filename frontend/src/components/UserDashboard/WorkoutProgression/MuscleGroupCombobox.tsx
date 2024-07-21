@@ -93,13 +93,11 @@ const muscleGroups = [
 interface ComboBoxProps {
   value: string;
   onChange: (value: string) => void;
-}
+} 
 
 export function MuscleGroupCombobox({ value, onChange }: ComboBoxProps) {
   const [open, setOpen] = React.useState(false);
   const [currentValue, setValue] = React.useState(value);
-
-  console.log("framworks", muscleGroups);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

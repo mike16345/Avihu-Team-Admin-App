@@ -121,7 +121,6 @@ export function DataTableHebrew<TData, TValue>({
                 .getAllColumns()
                 .filter((column) => column.getCanHide())
                 .map((column) => {
-                  console.log("columns", column.columnDef.header);
                   return (
                     <DropdownMenuCheckboxItem
                       onSelect={(e) => e.preventDefault()}
