@@ -6,8 +6,8 @@ import DeleteButton from "./buttons/DeleteButton";
 import { Input } from "../ui/input";
 import { isEditableContext } from "./CreateWorkoutPlan";
 import { FaChevronDown } from "react-icons/fa";
-import CustomAlertDialog from "../Alerts/DialogAlert/CustomAlertDialog";
 import { WorkoutContainer } from "./WorkoutContainer";
+import DeleteModal from "./DeleteModal";
 
 interface MuscleGroupContainerProps {
   title: string;
@@ -28,7 +28,6 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({
   const [workouts, setWorkouts] = useState<IMuscleGroupWorkouts[]>(workout);
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isDeleteMuscleGroupModalOpen, setIsMuscleGroupModalOpen] = useState(false);
 
   const isEditable = useContext(isEditableContext);
 
@@ -93,7 +92,9 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({
               <p>{title}</p>
             )}
             <div className="flex items-center gap-4">
-              <DeleteButton tip="הסר אימון" onClick={() => setIsDeleteModalOpen(true)} />
+              {isEditable && (
+                <DeleteButton tip="הסר אימון" onClick={() => setIsDeleteModalOpen(true)} />
+              )}
               <Button
                 onClick={() => setIsOpen((state) => !state)}
                 variant="ghost"
@@ -115,35 +116,15 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({
                 handleDeleteMuscleGroup={() => deleteMuscleGroup(i)}
               />
             ))}
-            {isEditable && (
-              <Button onClick={addWorkout} className="my-2">
-                הוסף קבוצת שריר
-              </Button>
-            )}
+            {isEditable && <Button onClick={addWorkout}>הוסף קבוצת שריר</Button>}
           </CollapsibleContent>
         </Collapsible>
       </div>
 
-      <CustomAlertDialog
-        alertDialogProps={{ open: isDeleteModalOpen, onOpenChange: setIsDeleteModalOpen }}
-        alertDialogContentProps={{
-          children: (
-            <>
-              פעולה זו אינה ניתנת לביטול.<br></br> פעולה זו תמחק את המוצר לצמיתות ותסיר את נתוניו
-              מהשרתים שלנו.<br></br>האם אתה בטוח שאתה רוצה להמשיך?
-            </>
-          ),
-        }}
-        alertDialogCancelProps={{
-          onClick: () => {
-            setIsDeleteModalOpen(false);
-          },
-          children: "בטל",
-        }}
-        alertDialogActionProps={{
-          onClick: handleDeleteWorkout,
-          children: "אשר",
-        }}
+      <DeleteModal
+        isModalOpen={isDeleteModalOpen}
+        setIsModalOpen={setIsDeleteModalOpen}
+        onConfirm={handleDeleteWorkout}
       />
     </>
   );

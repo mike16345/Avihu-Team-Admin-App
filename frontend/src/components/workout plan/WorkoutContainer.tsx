@@ -2,11 +2,11 @@ import { IMuscleGroupWorkouts, IWorkout } from "@/interfaces/IWorkoutPlan";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { FC, useContext, useState } from "react";
 import { ChevronsUpDown } from "lucide-react";
-import CustomAlertDialog from "../Alerts/DialogAlert/CustomAlertDialog";
 import DeleteButton from "./buttons/DeleteButton";
 import ExcerciseInput from "./ExcerciseInput";
 import MuscleGroupSelector from "./MuscleGroupSelector";
 import { isEditableContext } from "./CreateWorkoutPlan";
+import DeleteModal from "./DeleteModal";
 
 const muscleGroups: string[] = [
   "חזה",
@@ -68,10 +68,12 @@ export const WorkoutContainer: FC<IWorkoutContainerProps> = ({
               )}
             </div>
             <div className="flex items-center justify-between gap-4">
-              <DeleteButton
-                tip="הסר קבוצת שריר"
-                onClick={() => setIsDeleteMuscleGroupModalOpen(true)}
-              />
+              {isEditable && (
+                <DeleteButton
+                  tip="הסר קבוצת שריר"
+                  onClick={() => setIsDeleteMuscleGroupModalOpen(true)}
+                />
+              )}
               <ChevronsUpDown
                 onClick={() => setOpenMuscleGroupContainer((open) => !open)}
                 className="ml-2 h-4 w-4 hover:cursor-pointer opacity-50"
@@ -88,31 +90,13 @@ export const WorkoutContainer: FC<IWorkoutContainerProps> = ({
             />
           </>
         </CollapsibleContent>
-        <CustomAlertDialog
-          alertDialogProps={{
-            open: isDeleteMuscleGroupModalOpen,
-            onOpenChange: setIsDeleteMuscleGroupModalOpen,
-          }}
-          alertDialogContentProps={{
-            children: (
-              <>
-                פעולה זו אינה ניתנת לביטול.<br></br> פעולה זו תמחק את המוצר לצמיתות ותסיר את נתוניו
-                מהשרתים שלנו.<br></br>האם אתה בטוח שאתה רוצה להמשיך?
-              </>
-            ),
-          }}
-          alertDialogCancelProps={{
-            onClick: () => {
-              setIsDeleteMuscleGroupModalOpen(false);
-            },
-            children: "בטל",
-          }}
-          alertDialogActionProps={{
-            onClick: () => {
-              setIsDeleteMuscleGroupModalOpen(false);
-              handleDeleteMuscleGroup();
-            },
-            children: "אשר",
+
+        <DeleteModal
+          isModalOpen={isDeleteMuscleGroupModalOpen}
+          setIsModalOpen={setIsDeleteMuscleGroupModalOpen}
+          onConfirm={() => {
+            setIsDeleteMuscleGroupModalOpen(false);
+            handleDeleteMuscleGroup();
           }}
         />
       </>

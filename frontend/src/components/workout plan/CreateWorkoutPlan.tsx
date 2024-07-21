@@ -177,7 +177,7 @@ const CreateWorkoutPlan: React.FC = () => {
               />
             </Fragment>
           ))}
-          <div className="w-full flex items-center">
+          <div className="w-full flex items-center justify-center">
             {isEditable && (
               <Button onClick={handleAddWorkout}>
                 <div className="flex flex-col items-center font-bold">
