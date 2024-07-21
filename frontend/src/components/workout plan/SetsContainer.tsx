@@ -60,7 +60,7 @@ const SetsContainer: React.FC<SetContainerProps> = ({ updateSets, existingSets }
 
   return (
     <div className="flex flex-col gap-2 w-fit">
-      <h2 className="underline font-bold pr-4 pt-2">סטים:</h2>
+      <h2 className="underline font-bold pt-2">סטים:</h2>
       <div className="flex flex-col gap-2">
         {componentSets.map((set, i) => (
           <div key={i} className="flex gap-4 justify-center items-center w-fit">
@@ -72,7 +72,11 @@ const SetsContainer: React.FC<SetContainerProps> = ({ updateSets, existingSets }
             />
             {isEditable && (
               <div className="mt-5">
-                <DeleteButton tip="הסר סט" onClick={() => removeSet(i)} />
+                <DeleteButton
+                  disabled={componentSets.length == 1}
+                  tip="הסר סט"
+                  onClick={() => removeSet(i)}
+                />
               </div>
             )}
           </div>

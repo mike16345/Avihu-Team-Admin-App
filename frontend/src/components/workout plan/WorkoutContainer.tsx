@@ -1,5 +1,5 @@
 import { IMuscleGroupWorkouts, IWorkout } from "@/interfaces/IWorkoutPlan";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { FC, useContext, useState } from "react";
 import { ChevronsUpDown } from "lucide-react";
 import CustomAlertDialog from "../Alerts/DialogAlert/CustomAlertDialog";
@@ -49,7 +49,7 @@ export const WorkoutContainer: FC<IWorkoutContainerProps> = ({
     <Collapsible
       open={openMuscleGroupContainer}
       onOpenChange={setOpenMuscleGroupContainer}
-      className=" rounded p-3 my-2"
+      className=" rounded px-3 py-4 "
     >
       <>
         <div className="flex w-full items-center border-b-2 last:border-b-0 ">
