@@ -78,7 +78,7 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({
 
   return (
     <>
-      <div className="border-b-2 last:border-b-0  rounded py-2 ">
+      <div className={`${isEditable && "border-b-2"} last:border-b-0  rounded py-2 `}>
         <Collapsible defaultOpen={isOpen} open={isOpen} onOpenChange={setIsOpen}>
           <div className="flex items-center justify-between gap-4 w-full font-bold text-lg ">
             {isEditable ? (

@@ -119,7 +119,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
                 existingSets={item.sets}
                 updateSets={(setsArr: ISet[]) => updateSets(setsArr, i)}
               />
-              <div className="w-[50%] flex flex-col gap-1">
+              <div className=" flex flex-col gap-1">
                 <div>
                   <Label className="font-bold underline">לינק לסרטון</Label>
                   {isEditable ? (
