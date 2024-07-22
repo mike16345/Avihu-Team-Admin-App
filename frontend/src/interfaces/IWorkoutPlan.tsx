@@ -30,8 +30,8 @@ export interface IMuscleGroupWorkouts {
 }
 
 export interface IWorkoutPlanPreset {
-  itemName: string;
-  workoutPlan: ICompleteWorkoutPlan
+  planName: string;
+  workoutPlan: IWorkoutPlan[]
 }
 
 export interface IWorkoutItem {

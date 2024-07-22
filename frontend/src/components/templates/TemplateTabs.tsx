@@ -3,7 +3,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import PresetTable from '@/components/tables/PresetTable'
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import useExercisePresetApi from '@/hooks/useExercisePresetApi';
 import { toast } from 'sonner';
 
 
@@ -15,21 +14,10 @@ interface TemplateTabsProps {
 
 const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
 
-    const { deleteExercise } = useExercisePresetApi()
-
-
 
     const navigate = useNavigate()
 
-    const addItem = (
-        item: string,
-        arr: string[],
-        arrSetter: React.Dispatch<React.SetStateAction<string[]>>
-    ) => {
-        const newArr = [...arr];
-        newArr.push(item);
-        arrSetter(newArr)
-    }
+    
 
     const deleteItem = (
         id: string,
@@ -41,17 +29,7 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
                 { description: err.response.data }
             ))
     }
-    const editItem = (
-        index: number,
-        item: string,
-        arr: string[],
-        arrSetter: React.Dispatch<React.SetStateAction<string[]>>
-    ) => {
-
-        const newArr = arr.map((arrItem, i) => i === index ? item : arrItem);
-        arrSetter(newArr)
-
-    }
+    
 
     return (
         <div>

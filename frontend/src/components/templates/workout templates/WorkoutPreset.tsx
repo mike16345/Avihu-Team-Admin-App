@@ -1,18 +1,21 @@
 import { Button } from '@/components/ui/button'
 import { IMuscleGroupWorkouts, IWorkoutPlan } from '@/interfaces/IWorkoutPlan';
-import React, { useState } from 'react'
+import React, { Fragment, useState } from 'react'
 import { BsPlusCircleFill } from 'react-icons/bs';
 import MuscleGroupPreset from './MuscleGroupPreset';
 import { Input } from '@/components/ui/input';
 import { useParams } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useWorkoutPlanPresetApi } from '@/hooks/useWorkoutPlanPresetsApi';
 
 const WorkoutPreset = () => {
     const { id } = useParams()
 
+    const {addWorkoutPlanPreset}=useWorkoutPlanPresetApi()
+
     const [workoutPlan, setWorkoutPlan] = useState<IWorkoutPlan[]>([]);
     const [presetName, setPresetName] = useState<string>()
-    const [isEdit, SetIsEdit] = useState<boolean>(Boolean(id))
+    const [isEdit] = useState<boolean>(Boolean(id))
 
 
 
@@ -53,20 +56,24 @@ const WorkoutPreset = () => {
     };
 
     const hanldeSubmit = () => {
+        if (!presetName) return
         const postObject = {
-            itemName: presetName,
+            planName: presetName,
             workoutPlan
         }
         if (isEdit) {
-            toast(`this will edit ${postObject.itemName} Template`)
         } else {
-            toast(`this will Post ${postObject.itemName} Template`)
+            addWorkoutPlanPreset(postObject)
+            .then(()=>toast.success(`תבנית אימון נשמרה בהצלחה!`))
+            .catch(err=>toast.error(`אופס! נתקלנו בבעיה..`,{
+                description:err.response.data
+            }))
         }
     }
 
 
     return (
-        <div className="p-5 overflow-y-scroll hide-scrollbar max-h-[95vh] w-full">
+        <div className="flex flex-col gap-4 p-5 overflow-y-scroll hide-scrollbar w-5/6 max-h-[95vh] ">
             <h1 className="text-5xl">תבנית אימון</h1>
             <p>
                 {isEdit ?
@@ -89,7 +96,7 @@ const WorkoutPreset = () => {
 
 
                 {workoutPlan.map((workout, i) => (
-                    <div key={i} className="flex items-start">
+                    <Fragment key={i} >
                         <MuscleGroupPreset
                             workout={workout.workouts}
                             handleSave={(workouts) => handleSave(i, workouts)}
@@ -97,18 +104,23 @@ const WorkoutPreset = () => {
                             handlePlanNameChange={(newName) => handlePlanNameChange(newName, i)}
                             handleDeleteWorkout={() => handleDeleteWorkout(i)}
                         />
-                    </div>
+                    </Fragment>
                 ))}
-                <div className="w-full flex justify-center">
+                <div className="w-full flex items-center justify-center">
                     <Button onClick={handleAddWorkout}>
-                        <div className="flex flex-col items-center">
+                        <div className="flex flex-col items-center font-bold">
                             הוסף אימון
                             <BsPlusCircleFill />
                         </div>
                     </Button>
                 </div>
             </div>
-            <Button onClick={hanldeSubmit}>שמור תוכנית אימון</Button>
+            <div className='flex justify-end'>
+                <Button
+                    onClick={hanldeSubmit}
+                    variant='success'    
+                >שמור תוכנית אימון</Button>
+            </div>
         </div>
     )
 }

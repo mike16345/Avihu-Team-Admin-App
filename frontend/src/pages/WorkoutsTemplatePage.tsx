@@ -1,14 +1,16 @@
 import TemplateTabs from '@/components/templates/TemplateTabs'
-import { tempExercisesArr, tempMusclegroupArr, tempPresetArr } from '@/constants/TempWorkoutPresetConsts'
+import {  tempMusclegroupArr, tempPresetArr } from '@/constants/TempWorkoutPresetConsts'
 import useExercisePresetApi from '@/hooks/useExercisePresetApi'
-import { IWorkoutItem } from '@/interfaces/IWorkoutPlan'
+import { useWorkoutPlanPresetApi } from '@/hooks/useWorkoutPlanPresetsApi'
+import { ICompleteWorkoutPlan, IWorkoutItem } from '@/interfaces/IWorkoutPlan'
 import React, { useEffect, useState } from 'react'
 
 const WorkoutsTemplatePage = () => {
 
     const { getExercisePresets, deleteExercise } = useExercisePresetApi()
+    const {getAllWorkoutPlanPresets}=useWorkoutPlanPresetApi()
 
-    const [tempPresetState, setTempPresetState] = useState<IWorkoutItem[]>(tempPresetArr)
+    const [workoutPlanPresets, setWorkoutPlanPresets] = useState<ICompleteWorkoutPlan[]>()
     const [tempMusclegroupState, setTempMusclegroupState] = useState<IWorkoutItem[]>(tempMusclegroupArr)
     const [exercisePresets, setExercisePresets] = useState<IWorkoutItem[]>()
 
@@ -29,8 +31,8 @@ const WorkoutsTemplatePage = () => {
                 value: `WorkoutPlans`,
                 navURL: `/workoutPlans/presets/workout-template`,
                 btnPrompt: `הוסף תבנית`,
-                state: tempPresetState,
-                setter: setTempPresetState,
+                state: workoutPlanPresets,
+                setter: setWorkoutPlanPresets,
                 endPoint: `/workoutPlans/presets/workout-template`
             },
             {
@@ -56,13 +58,17 @@ const WorkoutsTemplatePage = () => {
         getExercisePresets()
             .then(res => setExercisePresets(res))
             .catch(err => console.log(err))
+
+        getAllWorkoutPlanPresets()
+        .then(res=>setWorkoutPlanPresets(res))
+        .catch(err=>console.log(err))
     }, [])
 
 
     return (
         <div>
             <h1 className='text-2xl pb-5'>תבניות אימון</h1>
-            {exercisePresets &&
+            {exercisePresets && workoutPlanPresets &&
                 <TemplateTabs tabs={tabs} />
             }
         </div>
