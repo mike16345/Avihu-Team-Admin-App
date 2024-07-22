@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, Fragment, useEffect, useState } from "react";
 import ComboBox from "./ComboBox";
 import {
   ICompleteWorkoutPlan,
@@ -12,21 +12,17 @@ import { Button } from "../ui/button";
 import { BsFillPencilFill } from "react-icons/bs";
 import { BsPlusCircleFill } from "react-icons/bs";
 import { useParams } from "react-router-dom";
-import { Toggle } from "@/components/ui/toggle"
+import { Toggle } from "@/components/ui/toggle";
 import { toast } from "sonner";
 
-
-
 export const isEditableContext = createContext<boolean>(false);
-
 
 const CreateWorkoutPlan: React.FC = () => {
   const { id } = useParams();
   const { addWorkoutPlan, getWorkoutPlanByUserId, updateWorkoutPlanByUserId } = useWorkoutPlanApi();
 
   // global
-  const [isEditable, setIsEditable] = useState<boolean>(false)
-
+  const [isEditable, setIsEditable] = useState<boolean>(false);
 
   //temp states
   const workoutTemp: string[] = [`AB`, `ABC`, `יומי`, `התאמה אישית`];
@@ -106,7 +102,7 @@ const CreateWorkoutPlan: React.FC = () => {
     setWorkoutPlan(initalWorkoutPlan);
   };
 
-  const hanldeSubmit = async () => {
+  const handleSubmit = async () => {
     if (!id) return;
 
     const postObject: ICompleteWorkoutPlan = {
@@ -117,8 +113,8 @@ const CreateWorkoutPlan: React.FC = () => {
     const cleanedPostObject = cleanWorkoutObject(postObject);
 
 
-    if (isCreate) {
-      addWorkoutPlan(cleanedPostObject)
+      if (isCreate) {
+      addWorkoutPlan(id,cleanedPostObject)
         .then(() => toast.success(`תוכנית אימון נשמרה בהצלחה!`))
         .catch(err => toast.error(`אופס, נתקלנו בבעיה!`, {
           description: `${err.response.data.message}`,
@@ -147,31 +143,31 @@ const CreateWorkoutPlan: React.FC = () => {
 
   return (
     <isEditableContext.Provider value={isEditable}>
-      <div className="p-5 overflow-y-scroll hide-scrollbar max-h-[95vh] w-full">
-        <h1 className="text-4xl">תוכנית אימון</h1>
+      <div className="flex flex-col gap-4 p-5 overflow-y-scroll hide-scrollbar w-5/6 max-h-[95vh] ">
+        <div className=" w-full flex justify-between items-center">
+          <h1 className="text-4xl">תוכנית אימון</h1>
+          <Toggle
+            onClick={() => setIsEditable(!isEditable)}
+            className="px-3 rounded cursor-pointer "
+          >
+            <BsFillPencilFill />
+          </Toggle>
+        </div>
         <p>
           {isEditable
             ? `כאן תוכל לערוך תוכנית אימון קיימת ללקוח שלך`
             : `כאן תוכל לצפות בתוכנית האימון הקיימת של לקוח זה`}
         </p>
-        <div className="p-2 py-4">
+        <div className="flex flex-col gap-4">
           {isEditable && (
             <ComboBox
               options={workoutTemp}
               handleChange={(currentValue) => handleSelect(currentValue)}
             />
           )}
-          {workoutPlan[0] && (
-            <Toggle color="bg-primary"
-              onClick={() => setIsEditable(!isEditable)}
-              className="absolute left-20 top-10 h-10 flex items-center px-2 rounded cursor-pointer "
-            >
-              <BsFillPencilFill />
-            </Toggle>
-          )}
 
           {workoutPlan.map((workout, i) => (
-            <div key={i} className="flex items-start">
+            <Fragment key={i}>
               <MuscleGroupContainer
                 workout={workout.workouts}
                 handleSave={(workouts) => handleSave(i, workouts)}
@@ -179,12 +175,12 @@ const CreateWorkoutPlan: React.FC = () => {
                 handlePlanNameChange={(newName) => handlePlanNameChange(newName, i)}
                 handleDeleteWorkout={() => handleDeleteWorkout(i)}
               />
-            </div>
+            </Fragment>
           ))}
-          <div className="w-full flex justify-center">
+          <div className="w-full flex items-center justify-center">
             {isEditable && (
               <Button onClick={handleAddWorkout}>
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col items-center font-bold">
                   הוסף אימון
                   <BsPlusCircleFill />
                 </div>
@@ -192,7 +188,13 @@ const CreateWorkoutPlan: React.FC = () => {
             )}
           </div>
         </div>
-        {isEditable && <Button onClick={hanldeSubmit}>שמור תוכנית אימון</Button>}
+        {isEditable && (
+          <div className="flex justify-end">
+            <Button variant={"success"} onClick={handleSubmit}>
+              שמור תוכנית אימון
+            </Button>
+          </div>
+        )}
       </div>
     </isEditableContext.Provider>
   );

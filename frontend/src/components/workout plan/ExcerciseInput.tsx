@@ -1,13 +1,15 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import ComboBox from "./ComboBox";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ISet, IWorkout } from "@/interfaces/IWorkoutPlan";
 import SetsContainer from "./SetsContainer";
 import { Input } from "../ui/input";
-import { Button } from "../ui/button";
-import DeleteModal from "./DeleteModal";
 import { isEditableContext } from "./CreateWorkoutPlan";
+import { IoClose } from "react-icons/io5";
+import { Card, CardContent, CardHeader } from "../ui/card";
+import { AddWorkoutPlanCard } from "./AddWorkoutPlanCard";
+import DeleteModal from "./DeleteModal";
 
 interface ExcerciseInputProps {
   options: string[] | undefined;
@@ -16,36 +18,45 @@ interface ExcerciseInputProps {
 }
 
 const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts, exercises }) => {
-  const [workoutObjs, setWorkoutObjs] = useState<IWorkout[]>(exercises || [
-    {
-      id: `1`,
-      name: ``,
-      sets: [],
-    },
-  ]);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const exerciseIndexToDelete = useRef<number | null>(null);
+
+  const [workoutObjs, setWorkoutObjs] = useState<IWorkout[]>(
+    exercises || [
+      {
+        id: `1`,
+        name: ``,
+        sets: [],
+      },
+    ]
+  );
 
   const isEditable = useContext(isEditableContext);
 
-  const handleChange = (
-    e: string | React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
+  const handleUpdateWorkoutObject = <K extends keyof IWorkout>(
+    key: K,
+    value: IWorkout[K],
     index: number
   ) => {
-    const name = typeof e === `string` ? `name` : e.target.name;
-    const value = typeof e === `string` ? e : e.target.value;
-
     const updatedWorkouts = workoutObjs.map((workout, i) =>
-      i === index ? { ...workout, [name]: value } : workout
+      i === index ? { ...workout, [key]: value } : workout
     );
 
     setWorkoutObjs(updatedWorkouts);
-    updateWorkouts(updatedWorkouts)
+    updateWorkouts(updatedWorkouts);
   };
 
   const handleAddExcercise = () => {
     const newObject: IWorkout = {
       id: (workoutObjs.length + 1).toString(),
       name: ``,
-      sets: [],
+      sets: [
+        {
+          id: 1,
+          minReps: 0,
+          maxReps: 0,
+        },
+      ],
     };
 
     const newArr = [...workoutObjs, newObject];
@@ -54,114 +65,129 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
     updateWorkouts(newArr);
   };
 
-  const handleDeleteExcercise = (index: number) => {
-    const newArr = workoutObjs.filter((_, i) => i !== index);
+  const handleDeleteExcercise = () => {
+    if (exerciseIndexToDelete.current === null) return;
+
+    const newArr = workoutObjs.filter((_, i) => i !== exerciseIndexToDelete.current);
 
     setWorkoutObjs(newArr);
     updateWorkouts(newArr);
+    exerciseIndexToDelete.current = null;
   };
 
   const updateSets = (setsArr: ISet[], index: number) => {
-
     const updatedWorkouts = workoutObjs.map((workout, i) => {
-
       if (i === index) {
         return {
           ...workout,
-          sets: setsArr
+          sets: setsArr,
         };
       }
       return workout;
     });
 
-    setWorkoutObjs(updatedWorkouts)
-    updateWorkouts(updatedWorkouts)
-
+    setWorkoutObjs(updatedWorkouts);
+    updateWorkouts(updatedWorkouts);
   };
 
-
-
   return (
-    <div className="w-full">
-      {workoutObjs.map((item, i) => (
-        <div className="py-5 flex  gap-2 " key={i}>
-
-          <div className="flex flex-col gap-5 border-b-2 w-full p-2">
-            <div className="flex justify-between items-end">
-              <h2 className="font-bold underline">{isEditable ? ` בחר תרגיל:` : `שם התרגיל:`}</h2>
-              {isEditable &&
-                <DeleteModal
-                  child={
-                    <Button
-                      variant="outline"
-                      className=" hover:border-destructive h-0 py-4"
-                    > מחק תרגיל</Button>
-                  }
-                  onClick={() => handleDeleteExcercise(i)}
-                />
-
-              }
+    <>
+      <div className="w-full flex flex-col gap-3 px-2 py-4">
+        <div className="grid grid-cols-2 gap-4">
+          {workoutObjs.map((item, i) => (
+            <>
+              <Card
+                key={i}
+                className=" px-3 py-2 border-b-2 last:border-b-0  max-h-[550px] overflow-y-auto custom-scrollbar"
+              >
+                <CardHeader className="">
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center justify-between">
+                      <h2 className="font-bold underline">תרגיל:</h2>
+                      {isEditable && (
+                        <div
+                          onClick={() => {
+                            exerciseIndexToDelete.current = i;
+                            setIsDeleteModalOpen(true);
+                          }}
+                        >
+                          <IoClose className="hover:scale-105  cursor-pointer" size={22} />
+                        </div>
+                      )}
+                    </div>
+                    {isEditable ? (
+                      <ComboBox
+                        options={options}
+                        existingValue={item.name}
+                        handleChange={(currentValue) =>
+                          handleUpdateWorkoutObject("name", currentValue, i)
+                        }
+                      />
+                    ) : (
+                      <p className="font-bold">{item.name}</p>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent className="flex flex-col gap-2 ">
+                  <SetsContainer
+                    existingSets={item.sets}
+                    updateSets={(setsArr: ISet[]) => updateSets(setsArr, i)}
+                  />
+                  <div className=" flex flex-col gap-1">
+                    <div>
+                      <Label className="font-bold underline">לינק לסרטון</Label>
+                      {isEditable ? (
+                        <Input
+                          readOnly={!isEditable}
+                          placeholder="הכנס לינק כאן..."
+                          name="linkToVideo"
+                          value={item.linkToVideo}
+                          onChange={(e) =>
+                            handleUpdateWorkoutObject("linkToVideo", e.target.value, i)
+                          }
+                        />
+                      ) : (
+                        <p className="py-1 border-b-2">
+                          {item.linkToVideo == `` ? `לא קיים` : item.linkToVideo}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <Label className="font-bold underline">דגשים</Label>
+                      {isEditable ? (
+                        <Textarea
+                          readOnly={!isEditable}
+                          placeholder="דגשים למתאמן..."
+                          name="tipFromTrainer"
+                          value={item.tipFromTrainer}
+                          onChange={(e) =>
+                            handleUpdateWorkoutObject("tipFromTrainer", e.target.value, i)
+                          }
+                        />
+                      ) : (
+                        <p className="border-b-2">
+                          {item.tipFromTrainer == `` ? `לא קיים` : item.tipFromTrainer}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          ))}
+          {isEditable && (
+            <div className="h-[550px]">
+              <AddWorkoutPlanCard onClick={() => handleAddExcercise()} />
             </div>
-            {isEditable ?
-              <ComboBox
-                options={options}
-                existingValue={item.name}
-                handleChange={(currentValue) => handleChange(currentValue, i)}
-              />
-              :
-              <p className="font-bold">
-                {item.name}
-              </p>
-            }
-            <SetsContainer
-              existingSets={item.sets}
-              updateSets={(setsArr: ISet[]) => updateSets(setsArr, i)}
-            />
-
-            <div className="w-[40%]">
-              <Label className="font-bold underline">לינק לסרטון</Label>
-              {isEditable ? (
-                <Input
-                  readOnly={!isEditable}
-                  placeholder="הכנס לינק כאן..."
-                  name="linkToVideo"
-                  value={item.linkToVideo}
-                  onChange={(e) => handleChange(e, i)}
-                />
-              ) : (
-                <p className="py-1 border-b-2">
-                  {item.linkToVideo == `` ? `לא קיים` : item.linkToVideo}
-                </p>
-              )}
-            </div>
-            <div className="w-[40%]">
-              <Label className="font-bold underline">דגשים</Label>
-              {isEditable ? (
-                <Textarea
-                  readOnly={!isEditable}
-                  placeholder="דגשים למתאמן..."
-                  name="tipFromTrainer"
-                  value={item.tipFromTrainer}
-                  onChange={(e) => handleChange(e, i)}
-                />
-              ) : (
-                <p className="py-1 border-b-2">
-                  {item.tipFromTrainer == `` ? `לא קיים` : item.tipFromTrainer}
-                </p>
-              )}
-            </div>
-          </div>
+          )}
         </div>
-      ))
-      }
-      {
-        isEditable && (
-          <Button className="text-[12px] p-1 mr-5 my-2" onClick={handleAddExcercise}>
-            הוסף תרגיל
-          </Button>
-        )
-      }
-    </div >
+      </div>
+      <DeleteModal
+        isModalOpen={isDeleteModalOpen}
+        setIsModalOpen={setIsDeleteModalOpen}
+        onConfirm={() => handleDeleteExcercise()}
+      />
+    </>
   );
 };
 
