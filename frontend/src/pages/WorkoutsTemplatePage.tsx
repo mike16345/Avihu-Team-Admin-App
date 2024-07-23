@@ -1,5 +1,5 @@
 import TemplateTabs from '@/components/templates/TemplateTabs'
-import {  tempMusclegroupArr, tempPresetArr } from '@/constants/TempWorkoutPresetConsts'
+import { tempMusclegroupArr, tempPresetArr } from '@/constants/TempWorkoutPresetConsts'
 import useExercisePresetApi from '@/hooks/useExercisePresetApi'
 import { useWorkoutPlanPresetApi } from '@/hooks/useWorkoutPlanPresetsApi'
 import { ICompleteWorkoutPlan, IWorkoutItem } from '@/interfaces/IWorkoutPlan'
@@ -8,7 +8,7 @@ import React, { useEffect, useState } from 'react'
 const WorkoutsTemplatePage = () => {
 
     const { getExercisePresets, deleteExercise } = useExercisePresetApi()
-    const {getAllWorkoutPlanPresets}=useWorkoutPlanPresetApi()
+    const { getAllWorkoutPlanPresets, addWorkoutPlanPreset } = useWorkoutPlanPresetApi()
 
     const [workoutPlanPresets, setWorkoutPlanPresets] = useState<ICompleteWorkoutPlan[]>()
     const [tempMusclegroupState, setTempMusclegroupState] = useState<IWorkoutItem[]>(tempMusclegroupArr)
@@ -33,7 +33,6 @@ const WorkoutsTemplatePage = () => {
                 btnPrompt: `הוסף תבנית`,
                 state: workoutPlanPresets,
                 setter: setWorkoutPlanPresets,
-                endPoint: `/workoutPlans/presets/workout-template`
             },
             {
                 value: `muscleGroups`,
@@ -41,7 +40,6 @@ const WorkoutsTemplatePage = () => {
                 btnPrompt: `הוסף קבוצת שריר`,
                 state: tempMusclegroupState,
                 setter: setTempMusclegroupState,
-                endPoint: `/workoutPlans/presets/muscleGroups`
             },
             {
                 value: `exercises`,
@@ -49,7 +47,6 @@ const WorkoutsTemplatePage = () => {
                 btnPrompt: `הוסף תרגיל`,
                 state: exercisePresets,
                 setter: deleteExercise,
-                endPoint: `/presets/exercises`
             }
         ]
     }
@@ -60,8 +57,8 @@ const WorkoutsTemplatePage = () => {
             .catch(err => console.log(err))
 
         getAllWorkoutPlanPresets()
-        .then(res=>setWorkoutPlanPresets(res))
-        .catch(err=>console.log(err))
+            .then(res => setWorkoutPlanPresets(res))
+            .catch(err => console.log(err))
     }, [])
 
 

@@ -7,11 +7,12 @@ import { Input } from '@/components/ui/input';
 import { useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useWorkoutPlanPresetApi } from '@/hooks/useWorkoutPlanPresetsApi';
+import { cleanWorkoutObject } from '@/utils/workoutPlanUtils';
 
 const WorkoutPreset = () => {
     const { id } = useParams()
 
-    const {addWorkoutPlanPreset}=useWorkoutPlanPresetApi()
+    const { addWorkoutPlanPreset } = useWorkoutPlanPresetApi()
 
     const [workoutPlan, setWorkoutPlan] = useState<IWorkoutPlan[]>([]);
     const [presetName, setPresetName] = useState<string>()
@@ -58,16 +59,21 @@ const WorkoutPreset = () => {
     const hanldeSubmit = () => {
         if (!presetName) return
         const postObject = {
-            planName: presetName,
-            workoutPlan
+            presetName,
+            workoutPlans: [...workoutPlan]
         }
+
+        const cleanedObject = cleanWorkoutObject(postObject)
+        console.log(cleanedObject);
+
+
         if (isEdit) {
         } else {
-            addWorkoutPlanPreset(postObject)
-            .then(()=>toast.success(`תבנית אימון נשמרה בהצלחה!`))
-            .catch(err=>toast.error(`אופס! נתקלנו בבעיה..`,{
-                description:err.response.data
-            }))
+            addWorkoutPlanPreset(cleanedObject)
+                .then(() => toast.success(`תבנית אימון נשמרה בהצלחה!`))
+                .catch(err => toast.error(`אופס! נתקלנו בבעיה..`, {
+                    description: err.response.data.message
+                }))
         }
     }
 
@@ -118,7 +124,7 @@ const WorkoutPreset = () => {
             <div className='flex justify-end'>
                 <Button
                     onClick={hanldeSubmit}
-                    variant='success'    
+                    variant='success'
                 >שמור תוכנית אימון</Button>
             </div>
         </div>

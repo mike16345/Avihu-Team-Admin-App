@@ -20,13 +20,10 @@ export const useWorkoutPlanPresetApi = () => {/*
   const getWorkoutPlan = (id: string) =>
     fetchData<ICompleteWorkoutPlan>(WORKOUT_PLAN_ENDPOINT + id); */
 
-  const getAllWorkoutPlanPresets=()=> fetchData<IWorkoutPlanPreset[]>(WORKOUT_PLAN_ENDPOINT);
+  const getAllWorkoutPlanPresets = () => fetchData<IWorkoutPlanPreset[]>(WORKOUT_PLAN_ENDPOINT);
 
-  const addWorkoutPlanPreset = (workoutPlan: IWorkoutPlanPreset) => {
-    const endpoint = WORKOUT_PLAN_ENDPOINT;
+  const addWorkoutPlanPreset = (workoutPlan: IWorkoutPlanPreset) => sendData<IWorkoutPlanPreset>(WORKOUT_PLAN_ENDPOINT, workoutPlan);
 
-    return sendData<IWorkoutPlanPreset>(endpoint, workoutPlan);
-  };
 
   return {
     getAllWorkoutPlanPresets,
