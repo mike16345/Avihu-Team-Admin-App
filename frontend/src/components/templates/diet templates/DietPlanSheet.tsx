@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
     Sheet,
     SheetContent,
@@ -21,12 +21,18 @@ import {
 } from "@/components/ui/form"
 import { z } from 'zod'
 import { useNavigate, useParams } from 'react-router-dom'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import useMenuItemApi from '@/hooks/useMenuItemApi'
+import { toast } from 'sonner'
+import { IMenuItem } from '@/interfaces/IDietPlan'
 
 
 const DietPlanSheet = () => {
 
     const navigate = useNavigate()
     const { type, id } = useParams()
+    const { addMenuItem, getOneMenuItem, editMenuItem } = useMenuItemApi()
+    const [existingMenuItem, setExistingMenuItem] = useState<IMenuItem>()
 
     const [isEdit] = useState<boolean>(Boolean(id));
 
@@ -34,19 +40,52 @@ const DietPlanSheet = () => {
         resolver: zodResolver(menuItemSchema),
         defaultValues: {
             itemName: "",
-            oneServing: {
+            dietaryType: "Standard",
+            oneServing:
+            {
                 spoons: 0,
                 grams: 0
             }
         },
+        values: existingMenuItem
     })
 
+    const { reset } = menuItemForm;
+
     const onSubmit = (values: z.infer<typeof menuItemSchema>) => {
-        // Do something with the form values.
-        // ✅ This will be type-safe and validated.
-        console.log(values)
+        if (!type) return
+
+        const newMenuItem = {
+            ...values,
+            foodGroup: type
+        }
+        if (isEdit) {
+            if (!id) return
+            editMenuItem(newMenuItem, id)
+                .then(() => toast.success(`פריט עודכן בהצלחה!`))
+                .catch(err => toast.error(`אופס, נתקלנו בבעיה!`, {
+                    description: err.response.data.message
+                }))
+        } else {
+            addMenuItem(newMenuItem)
+                .then(() => toast.success(`פריט נשמר בהצלחה!`))
+                .catch(err => toast.error(`אופס, נתקלנו בבעיה!`, {
+                    description: err.response.data.message
+                }))
+        }
+
         navigate(`/dietPlans`)
     }
+
+    useEffect(() => {
+        if (isEdit) {
+            if (!id) return
+            if (!type) return
+            getOneMenuItem(type, id)
+                .then(res => reset(res))
+                .catch(err => console.log(err))
+        }
+    }, [])
 
     return (
         <Sheet defaultOpen onOpenChange={() => navigate(`/dietPlans`)}>
@@ -72,19 +111,7 @@ const DietPlanSheet = () => {
                                 )}
                             />
                             <div className='flex gap-5'>
-                                <FormField
-                                    control={menuItemForm.control}
-                                    name="oneServing.spoons"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>כפות במנה</FormLabel>
-                                            <FormControl>
-                                                <Input type='number' placeholder="1-2-3-4" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+
                                 <FormField
                                     control={menuItemForm.control}
                                     name="oneServing.grams"
@@ -98,13 +125,49 @@ const DietPlanSheet = () => {
                                         </FormItem>
                                     )}
                                 />
+                                <FormField
+                                    control={menuItemForm.control}
+                                    name="oneServing.spoons"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>כפות במנה</FormLabel>
+                                            <FormControl>
+                                                <Input type='number' placeholder="1" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
                             </div>
+                            <FormField
+                                control={menuItemForm.control}
+                                name="dietaryType"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>הגבלות תזונה</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger dir='rtl'>
+                                                    <SelectValue placeholder='sss' />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent dir='rtl'>
+                                                <SelectItem value="Standard">ללא</SelectItem>
+                                                <SelectItem value="vegan">טבעוני</SelectItem>
+                                                <SelectItem value="vegetarian">צמחוני</SelectItem>
+                                                <SelectItem value="pescetarian">פסקטריאן</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
                             <Button className='w-full' type="submit">שמור</Button>
                         </form>
                     </Form>
                 </SheetHeader>
             </SheetContent>
-        </Sheet>
+        </Sheet >
 
     )
 }

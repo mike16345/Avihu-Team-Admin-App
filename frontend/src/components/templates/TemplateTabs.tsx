@@ -17,7 +17,7 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
 
     const navigate = useNavigate()
 
-    
+
 
     const deleteItem = (
         id: string,
@@ -26,10 +26,10 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
         deleter(id)
             .then(() => toast.success(`פריט נמחק בהצלחה!`))
             .catch(err => toast.error(`אופס! נתקלנו בבעיה`,
-                { description: err.response.data }
+                { description: err.response.data.message }
             ))
     }
-    
+
 
     return (
         <div>
@@ -39,6 +39,7 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
                         <TabsTrigger value={tab.value}>{tab.name}</TabsTrigger>
                     ))}
                 </TabsList>
+
                 {tabs.tabContent.map(tab => (
                     <TabsContent value={tab.value}>
                         <Button
@@ -46,8 +47,8 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
                             className='my-4'
                         >{tab.btnPrompt}</Button>
                         <PresetTable
-                            tempData={tab.state}
-                            handleDelete={(id) => deleteItem(id, tab.setter)}
+                            data={tab.state}
+                            handleDelete={(id) => deleteItem(id, tab.deleter)}
                             navURL={tab.navURL}
                         />
                     </TabsContent>

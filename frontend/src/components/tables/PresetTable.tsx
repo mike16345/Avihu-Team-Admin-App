@@ -29,15 +29,15 @@ import { Input } from "@/components/ui/input"
 
 
 interface PresetTableProps {
-    tempData: any[];
+    data: any[];
     handleDelete: (id: string) => void
     navURL: string
 }
 
 
 
-const PresetTable: React.FC<PresetTableProps> = ({ tempData, handleDelete, navURL }) => {
-    const [displayData, setDisplayData] = useState<any[]>(tempData)
+const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, navURL }) => {
+    const [displayData, setDisplayData] = useState<any[]>(data)
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(5);
 
@@ -71,16 +71,16 @@ const PresetTable: React.FC<PresetTableProps> = ({ tempData, handleDelete, navUR
         const { value } = e.target;
 
         if (!value) {
-            setDisplayData(tempData)
+            setDisplayData(data)
         }
-        const filteredArr = tempData.filter(item => item.itemName.includes(value))
+        const filteredArr = data.filter(item => item.itemName.includes(value))
 
         setDisplayData(filteredArr)
     }
 
     useEffect(() => {
-        setDisplayData(tempData)
-    }, [tempData])
+        setDisplayData(data)
+    }, [data])
 
     return (
         <div>

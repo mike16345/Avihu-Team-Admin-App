@@ -1,7 +1,8 @@
 import TemplateTabs from '@/components/templates/TemplateTabs';
 import { carbMenuItems, fatsMenuItems, proteinMenuItems, veggatableMenuItems } from '@/constants/TempDietPresetConsts';
+import useMenuItemApi from '@/hooks/useMenuItemApi';
 import { IMenue, IMenuItem } from '@/interfaces/IDietPlan';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 
 
@@ -9,10 +10,12 @@ import React, { useState } from 'react'
 
 const DietPlanTemplatePage = () => {
 
-    const [proteinMenuState, setProteinMenuState] = useState<IMenuItem[]>(proteinMenuItems);
-    const [carbsMenuState, setCarbsMenuState] = useState<IMenuItem[]>(carbMenuItems);
-    const [VegetableMenuState, setVegetableMenuState] = useState<IMenuItem[]>(veggatableMenuItems);
-    const [fatsMenueState, setFatsMenueState] = useState<IMenuItem[]>(fatsMenuItems);
+    const { getMenuItems, deleteMenuItem } = useMenuItemApi()
+
+    const [proteinMenuState, setProteinMenuState] = useState<IMenuItem[]>();
+    const [carbsMenuState, setCarbsMenuState] = useState<IMenuItem[]>();
+    const [VegetableMenuState, setVegetableMenuState] = useState<IMenuItem[]>();
+    const [fatsMenueState, setFatsMenueState] = useState<IMenuItem[]>();
 
     const tabs: ITabs = {
         tabHeaders: [
@@ -38,42 +41,57 @@ const DietPlanTemplatePage = () => {
                 value: `proteinItems`,
                 navURL: `/dietPlans/presets/protein`,
                 btnPrompt: `הוסף חלבון`,
-                state: proteinMenuState,
-                setter: setProteinMenuState,
-                endPoint: `/dietPlans/presets/protein`
+                state: proteinMenuState || [],
+                deleter: deleteMenuItem,
             },
             {
                 value: `carbItems`,
                 navURL: `/dietPlans/presets/carbs`,
                 btnPrompt: `הוסף פחמימה`,
-                state: carbsMenuState,
-                setter: setCarbsMenuState,
-                endPoint: `/dietPlans/presets/carbs`
+                state: carbsMenuState || [],
+                deleter: deleteMenuItem,
             },
             {
                 value: `vegetableItems`,
                 navURL: `/dietPlans/presets/vegetables`,
                 btnPrompt: `הוסף ירקות`,
-                state: VegetableMenuState,
-                setter: setVegetableMenuState,
-                endPoint: `/dietPlans/presets/vegetables`
+                state: VegetableMenuState || [],
+                deleter: deleteMenuItem,
             },
             {
                 value: `fatsItems`,
-                navURL: `/dietPlans/presets/vegetables`,
+                navURL: `/dietPlans/presets/fats`,
                 btnPrompt: `הוסף שומנים`,
-                state: fatsMenueState,
-                setter: setFatsMenueState,
-                endPoint: `/dietPlans/presets/vegetables`
+                state: fatsMenueState || [],
+                deleter: deleteMenuItem,
             },
         ]
     }
+
+    useEffect(() => {
+        getMenuItems(`protein`)
+            .then(res => setProteinMenuState(res))
+            .catch(err => console.log(err))
+        getMenuItems(`carbs`)
+            .then(res => setCarbsMenuState(res))
+            .catch(err => console.log(err))
+        getMenuItems(`vegetables`)
+            .then(res => setVegetableMenuState(res))
+            .catch(err => console.log(err))
+        getMenuItems(`fats`)
+            .then(res => setFatsMenueState(res))
+            .catch(err => console.log(err))
+    }, [])
+
+
 
 
     return (
         <div>
             <h1 className='text-2xl pb-5'>תפריטים</h1>
-            <TemplateTabs tabs={tabs} />
+            {fatsMenuItems && proteinMenuState && carbsMenuState && VegetableMenuState &&
+                <TemplateTabs tabs={tabs} />
+            }
         </div>
     )
 }

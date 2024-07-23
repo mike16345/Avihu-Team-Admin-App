@@ -8,8 +8,7 @@ interface ITabContent {
     navURL: string;
     btnPrompt: string;
     state: any[];
-    setter: React.Dispatch<React.SetStateAction<any[]>>;
-    endPoint: string
+    deleter: (id: string) => Promise<unknown>;
 }
 
 interface ITabs {
