@@ -55,7 +55,7 @@ const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, retrieveO
   const handleItemsPerPageChange = (itemsPerPage: number) => {
     setItemsPerPage(itemsPerPage);
     setCurrentPage(1);
-  };
+  }; 
 
   const paginatedData = displayData.slice(
     (currentPage - 1) * itemsPerPage,
