@@ -12,11 +12,11 @@ import { useNavigate } from 'react-router-dom';
 
 interface TableActionsProps {
     handleDelete: () => void;
-    endPoint: string
+    handleEdit: () => void
 }
 
 
-const TableActions: React.FC<TableActionsProps> = ({ handleDelete, endPoint }) => {
+const TableActions: React.FC<TableActionsProps> = ({ handleDelete, handleEdit }) => {
 
     const navigate = useNavigate();
 
@@ -29,7 +29,7 @@ const TableActions: React.FC<TableActionsProps> = ({ handleDelete, endPoint }) =
                 <DropdownMenuLabel className='font-bold'>פעולות</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                    onClick={() => navigate(endPoint)}
+                    onClick={handleEdit}
                 >עריכה</DropdownMenuItem>
                 <DropdownMenuItem
                     onClick={handleDelete}

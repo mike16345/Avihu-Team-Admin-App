@@ -2,17 +2,17 @@ import TemplateTabs from '@/components/templates/TemplateTabs'
 import { tempMusclegroupArr, tempPresetArr } from '@/constants/TempWorkoutPresetConsts'
 import useExercisePresetApi from '@/hooks/useExercisePresetApi'
 import { useWorkoutPlanPresetApi } from '@/hooks/useWorkoutPlanPresetsApi'
-import { ICompleteWorkoutPlan, IWorkoutItem } from '@/interfaces/IWorkoutPlan'
+import { ICompleteWorkoutPlan, IExercisePresetItem, } from '@/interfaces/IWorkoutPlan'
 import React, { useEffect, useState } from 'react'
 
 const WorkoutsTemplatePage = () => {
 
     const { getExercisePresets, deleteExercise } = useExercisePresetApi()
-    const { getAllWorkoutPlanPresets, addWorkoutPlanPreset } = useWorkoutPlanPresetApi()
 
-    const [workoutPlanPresets, setWorkoutPlanPresets] = useState<ICompleteWorkoutPlan[]>()
-    const [tempMusclegroupState, setTempMusclegroupState] = useState<IWorkoutItem[]>(tempMusclegroupArr)
-    const [exercisePresets, setExercisePresets] = useState<IWorkoutItem[]>()
+    /*  const [workoutPlanPresets, setWorkoutPlanPresets] = useState<IWorkoutItem[]>(tempPresetArr)
+     const [tempMusclegroupState, setTempMusclegroupState] = useState<IWorkoutItem[]>(tempMusclegroupArr) */
+    const [exercisePresets, setExercisePresets] = useState<IExercisePresetItem[]>()
+
 
     const tabs: ITabs = {
         tabHeaders: [
@@ -27,26 +27,26 @@ const WorkoutsTemplatePage = () => {
                 value: `exercises`
             }],
         tabContent: [
-            {
-                value: `WorkoutPlans`,
-                navURL: `/workoutPlans/presets/workout-template`,
-                btnPrompt: `הוסף תבנית`,
-                state: workoutPlanPresets,
-                setter: setWorkoutPlanPresets,
-            },
-            {
-                value: `muscleGroups`,
-                navURL: `/workoutPlans/presets/muscleGroups`,
-                btnPrompt: `הוסף קבוצת שריר`,
-                state: tempMusclegroupState,
-                setter: setTempMusclegroupState,
-            },
+            /*   {
+                  value: `WorkoutPlans`,
+                  navURL: `/workoutPlans/presets/workout-template`,
+                  btnPrompt: `הוסף תבנית`,
+                  state: workoutPlanPresets,
+                  setter: setWorkoutPlanPresets,
+              },
+              {
+                  value: `muscleGroups`,
+                  navURL: `/workoutPlans/presets/muscleGroups`,
+                  btnPrompt: `הוסף קבוצת שריר`,
+                  state: tempMusclegroupState,
+                  setter: setTempMusclegroupState,
+              }, */
             {
                 value: `exercises`,
-                navURL: `/workoutPlans/presets/exercises`,
                 btnPrompt: `הוסף תרגיל`,
                 state: exercisePresets,
-                setter: deleteExercise,
+                sheetForm: `Exercise`,
+                deleteFunc: deleteExercise
             }
         ]
     }
@@ -56,19 +56,22 @@ const WorkoutsTemplatePage = () => {
             .then(res => setExercisePresets(res))
             .catch(err => console.log(err))
 
-        getAllWorkoutPlanPresets()
-            .then(res => setWorkoutPlanPresets(res))
-            .catch(err => console.log(err))
+        /*  getAllWorkoutPlanPresets()
+             .then(res => setWorkoutPlanPresets(res))
+             .catch(err => console.log(err)) */
     }, [])
 
 
     return (
-        <div>
-            <h1 className='text-2xl pb-5'>תבניות אימון</h1>
-            {exercisePresets && workoutPlanPresets &&
-                <TemplateTabs tabs={tabs} />
-            }
-        </div>
+        <>
+            <div>
+                <h1 className='text-2xl pb-5'>תבניות אימון</h1>
+                {exercisePresets &&
+                    <TemplateTabs tabs={tabs} />
+                }
+            </div>
+
+        </>
     )
 }
 

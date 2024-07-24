@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import TableActions from "../templates/workout templates/TableActions";
+import TableActions from "../templates/workoutTemplates/TableActions";
 import {
   Pagination,
   PaginationLink,
@@ -28,10 +28,10 @@ import { Input } from "@/components/ui/input";
 interface PresetTableProps {
   data: any[];
   handleDelete: (id: string) => void;
-  navURL: string;
+  retrieveObjectId: (id: string) => void
 }
 
-const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, navURL }) => {
+const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, retrieveObjectId }) => {
   const [displayData, setDisplayData] = useState<any[]>(data);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
@@ -101,7 +101,7 @@ const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, navURL })
                 <div>
                   <TableActions
                     handleDelete={() => handleDelete(data._id)}
-                    endPoint={`${navURL}/${data._id}`}
+                    handleEdit={() => retrieveObjectId(data._id)}
                   />
                 </div>
               </TableCell>
@@ -139,6 +139,7 @@ const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, navURL })
         </TableFooter>
       </Table>
     </div>
+
   );
 };
 

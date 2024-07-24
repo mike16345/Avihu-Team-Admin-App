@@ -34,6 +34,10 @@ export interface IWorkoutPlanPreset {
   workoutPlan: IWorkoutPlan[]
 }
 
-export interface IWorkoutItem {
-  itemName: string
+export interface IExercisePresetItem {
+  itemName: string;
+  muscleGroup: string;
+  tipsFromTrainer?: string;
+  linkToVideo: string;
+
 }

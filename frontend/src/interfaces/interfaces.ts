@@ -5,10 +5,10 @@ interface ITabHeader {
 
 interface ITabContent {
     value: string;
-    navURL: string;
     btnPrompt: string;
-    state: any[];
-    deleter: (id: string) => Promise<unknown>;
+    state?: any[];
+    sheetForm: string;
+    deleteFunc: (id: string) => Promise<unknown>
 }
 
 interface ITabs {
