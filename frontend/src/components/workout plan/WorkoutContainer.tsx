@@ -59,7 +59,6 @@ export const WorkoutContainer: FC<IWorkoutContainerProps> = ({
 
               {isEditable ? (
                 <MuscleGroupSelector
-                  options={muscleGroups}
                   handleChange={(value) => handleUpdateMuscleGroup(value)}
                   existingMuscleGroup={muscleGroup.muscleGroup}
                 />
@@ -84,7 +83,7 @@ export const WorkoutContainer: FC<IWorkoutContainerProps> = ({
         <CollapsibleContent>
           <>
             <ExcerciseInput
-              options={muscleGroup?.muscleGroup === `חזה` ? chestExercises : shoulderExercises}
+              options={muscleGroup?.muscleGroup || ``}
               exercises={muscleGroup.exercises}
               updateWorkouts={(workouts) => handleUpdateWorkouts(workouts)}
             />

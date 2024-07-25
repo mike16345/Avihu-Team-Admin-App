@@ -14,18 +14,18 @@ import { BsPlusCircleFill } from "react-icons/bs";
 import { useParams } from "react-router-dom";
 import { Toggle } from "@/components/ui/toggle";
 import { toast } from "sonner";
+import { useWorkoutPlanPresetApi } from "@/hooks/useWorkoutPlanPresetsApi";
 
 export const isEditableContext = createContext<boolean>(false);
 
 const CreateWorkoutPlan: React.FC = () => {
   const { id } = useParams();
   const { addWorkoutPlan, getWorkoutPlanByUserId, updateWorkoutPlanByUserId } = useWorkoutPlanApi();
+  const { getAllWorkoutPlanPresets } = useWorkoutPlanPresetApi()
 
   // global
   const [isEditable, setIsEditable] = useState<boolean>(false);
 
-  //temp states
-  const workoutTemp: string[] = [`AB`, `ABC`, `יומי`, `התאמה אישית`];
 
   const [isCreate, setIsCreate] = useState<boolean>(false);
   const [workoutPlan, setWorkoutPlan] = useState<IWorkoutPlan[]>([]);
@@ -66,55 +66,20 @@ const CreateWorkoutPlan: React.FC = () => {
     });
   };
 
-  const handleSelect = (splitVal: string) => {
-    const initalWorkoutPlan = [];
-    let iterater = 1;
 
-    switch (splitVal) {
-      case `AB`:
-        iterater = 2;
-        break;
-      case `ABC`:
-        iterater = 3;
-        break;
-      case `יומי`:
-        iterater = 7;
-        break;
-      case `התאמה אישית`:
-        iterater = 1;
-        break;
-    }
-
-    for (let index = 1; index <= iterater; index++) {
-      if (splitVal === `AB` || splitVal === `ABC`) {
-        initalWorkoutPlan.push({
-          planName: `אימון ${splitVal[index - 1]}`,
-          workouts: [],
-        });
-      } else {
-        initalWorkoutPlan.push({
-          planName: `אימון ${index}`,
-          workouts: [],
-        });
-      }
-    }
-
-    setWorkoutPlan(initalWorkoutPlan);
-  };
 
   const handleSubmit = async () => {
     if (!id) return;
 
     const postObject: ICompleteWorkoutPlan = {
-      userId: id,
       workoutPlans: [...workoutPlan],
     };
 
     const cleanedPostObject = cleanWorkoutObject(postObject);
 
 
-      if (isCreate) {
-      addWorkoutPlan(id,cleanedPostObject)
+    if (isCreate) {
+      addWorkoutPlan(id, cleanedPostObject)
         .then(() => toast.success(`תוכנית אימון נשמרה בהצלחה!`))
         .catch(err => toast.error(`אופס, נתקלנו בבעיה!`, {
           description: `${err.response.data.message}`,
@@ -161,8 +126,8 @@ const CreateWorkoutPlan: React.FC = () => {
         <div className="flex flex-col gap-4">
           {isEditable && (
             <ComboBox
-              options={workoutTemp}
-              handleChange={(currentValue) => handleSelect(currentValue)}
+              getOptions={getAllWorkoutPlanPresets}
+              handleChange={(currentValue) => setWorkoutPlan(currentValue.workoutPlans)}
             />
           )}
 

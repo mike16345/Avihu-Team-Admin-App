@@ -10,15 +10,17 @@ import { IoClose } from "react-icons/io5";
 import { Card, CardContent, CardHeader } from "../ui/card";
 import { AddWorkoutPlanCard } from "./AddWorkoutPlanCard";
 import DeleteModal from "./DeleteModal";
+import useExercisePresetApi from "@/hooks/useExercisePresetApi";
 
 interface ExcerciseInputProps {
-  options: string[] | undefined;
+  options?: string;
   updateWorkouts: (workouts: IWorkout[]) => void;
   exercises?: IWorkout[];
 }
 
 const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts, exercises }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const { getExerciseByMuscleGroup } = useExercisePresetApi()
   const exerciseIndexToDelete = useRef<number | null>(null);
 
   const [workoutObjs, setWorkoutObjs] = useState<IWorkout[]>(
@@ -45,6 +47,17 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
     setWorkoutObjs(updatedWorkouts);
     updateWorkouts(updatedWorkouts);
   };
+
+  const handleUpdateExercise = (index: number, exercise: IExercisePresetItem) => {
+    const { itemName, linkToVideo, tipsFromTrainer } = exercise
+
+    const updatedWorkouts = workoutObjs.map((workout, i) =>
+      i === index ? { ...workout, linkToVideo, name: itemName, tipFromTrainer: tipsFromTrainer } : workout
+    )
+
+    setWorkoutObjs(updatedWorkouts);
+    updateWorkouts(updatedWorkouts);
+  }
 
   const handleAddExcercise = () => {
     const newObject: IWorkout = {
@@ -117,10 +130,11 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
                     </div>
                     {isEditable ? (
                       <ComboBox
-                        options={options}
+                        optionsEndpoint={options}
+                        getOptions={getExerciseByMuscleGroup}
                         existingValue={item.name}
                         handleChange={(currentValue) =>
-                          handleUpdateWorkoutObject("name", currentValue, i)
+                          handleUpdateExercise(i, currentValue)
                         }
                       />
                     ) : (

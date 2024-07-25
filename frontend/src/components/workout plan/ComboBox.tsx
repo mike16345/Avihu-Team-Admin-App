@@ -14,7 +14,7 @@ interface ComboBoxProps {
   optionsEndpoint?: string;
   handleChange: (value: any) => void;
   existingValue?: string;
-  getOptions: (endpoint: string) => Promise<unknown>
+  getOptions: (endpoint?: string) => Promise<unknown>
 }
 
 const ComboBox: React.FC<ComboBoxProps> = ({ optionsEndpoint, getOptions, handleChange, existingValue }) => {
@@ -26,7 +26,17 @@ const ComboBox: React.FC<ComboBoxProps> = ({ optionsEndpoint, getOptions, handle
   const onChange = (val: string) => {
     setValue(val);
     setOpen(false);
-    const objToReturn = values?.find(obj => obj.itemName === val)
+    let objToReturn;
+    if (values[0].itemName) {
+      objToReturn = values?.find(obj => obj.itemName === val)
+    } else {
+      console.log(`log`);
+
+      objToReturn = values?.find(obj => obj.presetName === val)
+    }
+    console.log(values[0])
+    console.log(objToReturn);
+
     handleChange(objToReturn);
   };
 
@@ -62,8 +72,8 @@ const ComboBox: React.FC<ComboBoxProps> = ({ optionsEndpoint, getOptions, handle
           <CommandList>
             <CommandGroup dir="rtl">
               {values?.map((option, i) => (
-                <CommandItem key={i} value={option.itemName} onSelect={(val) => onChange(val)}>
-                  {option.itemName}
+                <CommandItem key={i} value={option.itemName || option.presetName} onSelect={(val) => onChange(val)}>
+                  {option.itemName || option.presetName}
                 </CommandItem>
               ))}
             </CommandGroup>
