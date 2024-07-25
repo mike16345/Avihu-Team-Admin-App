@@ -8,25 +8,6 @@ import MuscleGroupSelector from "./MuscleGroupSelector";
 import { isEditableContext } from "./CreateWorkoutPlan";
 import DeleteModal from "./DeleteModal";
 
-const muscleGroups: string[] = [
-  "חזה",
-  "כתפיים",
-  "יד אחורית",
-  "גב",
-  "יד קידמית",
-  "רגליים",
-  "בטן",
-  "אירובי",
-];
-
-const chestExercises: string[] = [
-  "פרפר",
-  "מקבילים",
-  "לחיצת חזה בשיפוע שלילי",
-  "לחיצת חזה בשיפוע חיובי",
-  "לחיצת חזה",
-];
-const shoulderExercises: string[] = ["כתפיים"];
 
 interface IWorkoutContainerProps {
   muscleGroup: IMuscleGroupWorkouts;

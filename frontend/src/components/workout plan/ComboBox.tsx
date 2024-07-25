@@ -14,7 +14,7 @@ interface ComboBoxProps {
   optionsEndpoint?: string;
   handleChange: (value: any) => void;
   existingValue?: string;
-  getOptions: (endpoint?: string) => Promise<unknown>
+  getOptions: (endpoint?: string) => Promise<any[]>
 }
 
 const ComboBox: React.FC<ComboBoxProps> = ({ optionsEndpoint, getOptions, handleChange, existingValue }) => {
@@ -24,18 +24,17 @@ const ComboBox: React.FC<ComboBoxProps> = ({ optionsEndpoint, getOptions, handle
   const [values, setValues] = useState<any[]>()
 
   const onChange = (val: string) => {
+    if (!values) return
+
     setValue(val);
     setOpen(false);
     let objToReturn;
+
     if (values[0].itemName) {
       objToReturn = values?.find(obj => obj.itemName === val)
     } else {
-      console.log(`log`);
-
       objToReturn = values?.find(obj => obj.presetName === val)
     }
-    console.log(values[0])
-    console.log(objToReturn);
 
     handleChange(objToReturn);
   };

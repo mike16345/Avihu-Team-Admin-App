@@ -5,7 +5,7 @@ import { ViewDietPlanPage } from "@/pages/ViewDietPlanPage";
 import { Route, Routes } from "react-router";
 import DietPlanTemplatePage from "@/pages/DietPlanTemplatePage";
 import WorkoutsTemplatePage from "@/pages/WorkoutsTemplatePage";
-import DietPlanSheet from "@/components/templates/diet templates/DietPlanSheet";
+import DietPlanSheet from "@/components/templates/dietTemplates/DietPlanSheet";
 import WorkoutPreset from "@/components/templates/workoutTemplates/WorkoutPreset";
 
 export const AppRoutes = () => {
