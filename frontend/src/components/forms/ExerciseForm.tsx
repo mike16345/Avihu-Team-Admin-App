@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { exerciseSchema } from '../templates/workoutTemplates/exercises/exerciseSchema'
@@ -9,6 +9,8 @@ import { Input } from '../ui/input'
 import { Button } from '../ui/button'
 import useExercisePresetApi from '@/hooks/useExercisePresetApi'
 import { toast } from 'sonner'
+import useMuscleGroupsApi from '@/hooks/useMuscleGroupsApi'
+import { IMuscleGroupItem } from '@/interfaces/IWorkoutPlan'
 
 interface ExerciseFormProps {
     objectId?: string
@@ -17,6 +19,8 @@ interface ExerciseFormProps {
 
 const ExerciseForm: React.FC<ExerciseFormProps> = ({ objectId, closeSheet }) => {
     const { getExerciseById, addExercise, updateExercise } = useExercisePresetApi()
+    const { getAllMuscleGroups } = useMuscleGroupsApi()
+    const [muscleGroups, setMuscleGroups] = useState<IMuscleGroupItem[]>()
 
     const exerciseForm = useForm<z.infer<typeof exerciseSchema>>({
         resolver: zodResolver(exerciseSchema),
@@ -49,7 +53,12 @@ const ExerciseForm: React.FC<ExerciseFormProps> = ({ objectId, closeSheet }) => 
     }
 
     useEffect(() => {
+        getAllMuscleGroups()
+            .then(res => setMuscleGroups(res))
+            .catch(err => console.log(err))
+
         if (!objectId) return
+
         getExerciseById(objectId)
             .then(res => reset(res))
             .catch(err => console.log(err))
@@ -110,10 +119,12 @@ const ExerciseForm: React.FC<ExerciseFormProps> = ({ objectId, closeSheet }) => 
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent dir='rtl'>
-                                    <SelectItem value="חזה">חזה</SelectItem>
-                                    <SelectItem value="גב">גב</SelectItem>
-                                    <SelectItem value="כתפיים">כתפיים</SelectItem>
-                                    <SelectItem value="רגליים">רגליים</SelectItem>
+                                    {muscleGroups?.map(muscleGroup =>
+                                        <SelectItem
+                                            key={muscleGroup.itemName}
+                                            value={muscleGroup.itemName}
+                                        >{muscleGroup.itemName}</SelectItem>
+                                    )}
                                 </SelectContent>
                             </Select>
                             <FormMessage />
