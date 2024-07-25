@@ -9,11 +9,9 @@ import {
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import useExercisePresetApi from "@/hooks/useExercisePresetApi";
-import { IExercisePresetItem } from "@/interfaces/IWorkoutPlan";
 
 interface ComboBoxProps {
-  optionsEndpoint: string | undefined;
+  optionsEndpoint?: string;
   handleChange: (value: any) => void;
   existingValue?: string;
   getOptions: (endpoint: string) => Promise<unknown>
@@ -33,10 +31,16 @@ const ComboBox: React.FC<ComboBoxProps> = ({ optionsEndpoint, getOptions, handle
   };
 
   useEffect(() => {
-    if (!optionsEndpoint) return
-    getOptions(optionsEndpoint)
-      .then(res => setValues(res))
-      .catch(err => console.log(err))
+    if (optionsEndpoint) {
+      getOptions(optionsEndpoint)
+        .then(res => setValues(res))
+        .catch(err => console.log(err))
+    } else {
+      getOptions()
+        .then(res => setValues(res))
+        .catch(err => console.log(err))
+    }
+
   }, [optionsEndpoint])
 
   return (

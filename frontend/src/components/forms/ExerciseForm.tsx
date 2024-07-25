@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { exerciseSchema } from '../templates/workoutTemplates/exercises/exerciseSchema'
 import { z } from 'zod'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -16,6 +15,13 @@ interface ExerciseFormProps {
     objectId?: string
     closeSheet: () => void
 }
+
+const exerciseSchema = z.object({
+    itemName: z.string().min(1, { message: `שם התרגיל חייב להיות תו אחד או יותר` }),
+    muscleGroup: z.string().min(1, { message: `תרגיל חייב להיות משוייך לקבוצת שריר` }),
+    tipsFromTrainer: z.string().min(1).optional(),
+    linkToVideo: z.string().url({ message: `אנא הכנס לינק תקין!` })
+})
 
 const ExerciseForm: React.FC<ExerciseFormProps> = ({ objectId, closeSheet }) => {
     const { getExerciseById, addExercise, updateExercise } = useExercisePresetApi()

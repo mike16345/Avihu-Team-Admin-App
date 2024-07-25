@@ -57,7 +57,6 @@ const WorkoutContainerPreset: React.FC<IWorkoutContainerPresetProps> = ({
                             <h4 className=" font-bold">קבוצת שריר -</h4>
 
                             <MuscleGroupSelector
-                                options={muscleGroups}
                                 handleChange={(value) => handleUpdateMuscleGroup(value)}
                                 existingMuscleGroup={muscleGroup.muscleGroup}
                             />

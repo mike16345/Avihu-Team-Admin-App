@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PresetTable from "@/components/tables/PresetTable";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import PresetSheet from "./workoutTemplates/exercises/PresetSheet";
+import PresetSheet from "./PresetSheet";
 import { useNavigate } from "react-router-dom";
 
 interface TemplateTabsProps {
