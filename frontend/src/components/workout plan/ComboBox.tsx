@@ -9,22 +9,35 @@ import {
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import useExercisePresetApi from "@/hooks/useExercisePresetApi";
+import { IExercisePresetItem } from "@/interfaces/IWorkoutPlan";
 
 interface ComboBoxProps {
-  options: string[] | undefined;
-  handleChange: (value: string) => void;
+  optionsEndpoint: string | undefined;
+  handleChange: (value: any) => void;
   existingValue?: string;
+  getOptions: (endpoint: string) => Promise<unknown>
 }
 
-const ComboBox: React.FC<ComboBoxProps> = ({ options, handleChange, existingValue }) => {
+const ComboBox: React.FC<ComboBoxProps> = ({ optionsEndpoint, getOptions, handleChange, existingValue }) => {
+
   const [open, setOpen] = useState<boolean>(false);
   const [value, setValue] = useState<string | undefined>(existingValue ? existingValue : undefined);
+  const [values, setValues] = useState<any[]>()
 
   const onChange = (val: string) => {
     setValue(val);
     setOpen(false);
-    handleChange(val);
+    const objToReturn = values?.find(obj => obj.itemName === val)
+    handleChange(objToReturn);
   };
+
+  useEffect(() => {
+    if (!optionsEndpoint) return
+    getOptions(optionsEndpoint)
+      .then(res => setValues(res))
+      .catch(err => console.log(err))
+  }, [optionsEndpoint])
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -44,9 +57,9 @@ const ComboBox: React.FC<ComboBoxProps> = ({ options, handleChange, existingValu
           <CommandInput dir="rtl" placeholder="בחר סוג תוכנית..." />
           <CommandList>
             <CommandGroup dir="rtl">
-              {options?.map((option) => (
-                <CommandItem key={option} value={option} onSelect={(val) => onChange(val)}>
-                  {option}
+              {values?.map((option, i) => (
+                <CommandItem key={i} value={option.itemName} onSelect={(val) => onChange(val)}>
+                  {option.itemName}
                 </CommandItem>
               ))}
             </CommandGroup>

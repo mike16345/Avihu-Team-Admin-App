@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { exerciseSchema } from '../templates/workoutTemplates/exerciseSchema'
+import { exerciseSchema } from '../templates/workoutTemplates/exercises/exerciseSchema'
 import { z } from 'zod'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -12,9 +12,10 @@ import { toast } from 'sonner'
 
 interface ExerciseFormProps {
     objectId?: string
+    closeSheet: () => void
 }
 
-const ExerciseForm: React.FC<ExerciseFormProps> = ({ objectId }) => {
+const ExerciseForm: React.FC<ExerciseFormProps> = ({ objectId, closeSheet }) => {
     const { getExerciseById, addExercise, updateExercise } = useExercisePresetApi()
 
     const exerciseForm = useForm<z.infer<typeof exerciseSchema>>({
@@ -30,16 +31,17 @@ const ExerciseForm: React.FC<ExerciseFormProps> = ({ objectId }) => {
     const { reset } = exerciseForm
 
     const onSubmit = (values: z.infer<typeof exerciseSchema>) => {
-        console.log(values)
         if (objectId) {
             updateExercise(objectId, values)
                 .then(() => toast.success(`פריט עודכן בהצלחה!`))
+                .then(() => closeSheet())
                 .catch((err) => toast.error(`אופס, נתקלנו בבעיה!`, {
                     description: err.response.data.message
                 }))
         } else {
             addExercise(values)
                 .then(() => toast.success(`פריט נשמר בהצלחה!`))
+                .then(() => closeSheet())
                 .catch((err) => toast.error(`אופס, נתקלנו בבעיה!`, {
                     description: err.response.data.message
                 }))

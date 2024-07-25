@@ -17,14 +17,14 @@ interface PresetSheetProps {
 
 const PresetSheet: React.FC<PresetSheetProps> = ({ form, id, isOpen, onCloseSheet }) => {
   return (
-    <Sheet modal={false} open={isOpen} onOpenChange={() => onCloseSheet()}>
+    <Sheet open={isOpen} onOpenChange={() => onCloseSheet()}>
       <SheetContent dir="rtl">
         <SheetHeader>
           <SheetTitle className="text-right text-3xl pt-4">הוסף פריט</SheetTitle>
           <SheetDescription className="pt-3 text-right">
             כאן ניתן להוסיף פריטים לרשימה הקיימת במערכת
           </SheetDescription>
-          {form == `Exercise` && <ExerciseForm objectId={id} />}
+          {form == `Exercise` && <ExerciseForm objectId={id} closeSheet={() => onCloseSheet()} />}
         </SheetHeader>
       </SheetContent>
     </Sheet>

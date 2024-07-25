@@ -4,12 +4,14 @@ import PresetTable from "@/components/tables/PresetTable";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import PresetSheet from "./workoutTemplates/exercises/PresetSheet";
+import { useNavigate } from "react-router-dom";
 
 interface TemplateTabsProps {
   tabs: ITabs;
 }
 
 const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
+  const navigate = useNavigate()
   const [selectedForm, setSelectedForm] = useState<string | undefined>();
   const [selectedObjectId, setSelectedObjectId] = useState<string>();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -39,6 +41,18 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
 
     setIsSheetOpen(true);
   }, [selectedObjectId]);
+
+  useEffect(() => {
+    if (selectedForm === `workoutPlan`) {
+      if (selectedObjectId) {
+        navigate(`/presets/workoutPlans/${selectedObjectId}`)
+      } else {
+        navigate(`/presets/workoutPlans/`)
+      }
+    }
+  }, [selectedForm]);
+
+
 
   return (
     <>

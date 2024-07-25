@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { IMuscleGroupWorkouts, IWorkoutPlan } from '@/interfaces/IWorkoutPlan';
-import React, { Fragment, useState } from 'react'
+import React, { Fragment, useEffect, useState } from 'react'
 import { BsPlusCircleFill } from 'react-icons/bs';
 import MuscleGroupPreset from './MuscleGroupPreset';
 import { Input } from '@/components/ui/input';
@@ -12,7 +12,7 @@ import { cleanWorkoutObject } from '@/utils/workoutPlanUtils';
 const WorkoutPreset = () => {
     const { id } = useParams()
 
-    const { addWorkoutPlanPreset } = useWorkoutPlanPresetApi()
+    const { addWorkoutPlanPreset, getWorkoutPlanPresetById, updateWorkoutPlanPreset } = useWorkoutPlanPresetApi()
 
     const [workoutPlan, setWorkoutPlan] = useState<IWorkoutPlan[]>([]);
     const [presetName, setPresetName] = useState<string>()
@@ -68,6 +68,12 @@ const WorkoutPreset = () => {
 
 
         if (isEdit) {
+            if (!id) return
+            updateWorkoutPlanPreset(id, cleanedObject)
+                .then(() => toast.success(`תבנית אימון נשמרה בהצלחה!`))
+                .catch(err => toast.error(`אופס! נתקלנו בבעיה..`, {
+                    description: err.response.data.message
+                }))
         } else {
             addWorkoutPlanPreset(cleanedObject)
                 .then(() => toast.success(`תבנית אימון נשמרה בהצלחה!`))
@@ -76,6 +82,16 @@ const WorkoutPreset = () => {
                 }))
         }
     }
+
+    useEffect(() => {
+        if (!id) return
+        getWorkoutPlanPresetById(id)
+            .then(res => {
+                setWorkoutPlan(res.workoutPlans);
+                setPresetName(res.presetName)
+            })
+            .catch(err => console.log(err));
+    }, [])
 
 
     return (

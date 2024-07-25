@@ -30,8 +30,8 @@ export interface IMuscleGroupWorkouts {
 }
 
 export interface IWorkoutPlanPreset {
-  planName: string;
-  workoutPlan: IWorkoutPlan[]
+  presetName: string;
+  workoutPlans: IWorkoutPlan[]
 }
 
 export interface IExercisePresetItem {
@@ -40,4 +40,7 @@ export interface IExercisePresetItem {
   tipsFromTrainer?: string;
   linkToVideo: string;
 
+}
+export interface IMuscleGroupItem {
+  itemName: string;
 }
