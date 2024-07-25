@@ -3,7 +3,7 @@ import { deleteItem, fetchData, sendData, updateItem } from "@/API/api";
 import { IMuscleGroupItem } from '@/interfaces/IWorkoutPlan';
 
 const useMuscleGroupsApi = () => {
-    const MUSCLEGROUP_PRESETS_API = `/presets/muscleGroups`
+    const MUSCLEGROUP_PRESETS_API = `/presets/muscleGroups/`
 
     const getAllMuscleGroups = () => fetchData<IMuscleGroupItem[]>(MUSCLEGROUP_PRESETS_API)
 

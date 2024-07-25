@@ -1,17 +1,19 @@
 import TemplateTabs from '@/components/templates/TemplateTabs'
 import { tempMusclegroupArr, tempPresetArr } from '@/constants/TempWorkoutPresetConsts'
 import useExercisePresetApi from '@/hooks/useExercisePresetApi'
+import useMuscleGroupsApi from '@/hooks/useMuscleGroupsApi'
 import { useWorkoutPlanPresetApi } from '@/hooks/useWorkoutPlanPresetsApi'
-import { ICompleteWorkoutPlan, IExercisePresetItem, IWorkoutPlanPreset, } from '@/interfaces/IWorkoutPlan'
+import { ICompleteWorkoutPlan, IExercisePresetItem, IMuscleGroupItem, IWorkoutPlanPreset, } from '@/interfaces/IWorkoutPlan'
 import React, { useEffect, useState } from 'react'
 
 const WorkoutsTemplatePage = () => {
 
     const { getExercisePresets, deleteExercise } = useExercisePresetApi()
     const { getAllWorkoutPlanPresets, deleteWorkoutPlanPreset } = useWorkoutPlanPresetApi()
+    const { getAllMuscleGroups, deleteMuscleGroup } = useMuscleGroupsApi()
 
     const [workoutPlanPresets, setWorkoutPlanPresets] = useState<IWorkoutPlanPreset[]>()
-    /*   const [tempMusclegroupState, setTempMusclegroupState] = useState<IWorkoutItem[]>(tempMusclegroupArr) */
+    const [musclegroupState, setMusclegroupState] = useState<IMuscleGroupItem[]>()
     const [exercisePresets, setExercisePresets] = useState<IExercisePresetItem[]>()
 
 
@@ -34,14 +36,14 @@ const WorkoutsTemplatePage = () => {
                 state: workoutPlanPresets,
                 sheetForm: `workoutPlan`,
                 deleteFunc: deleteWorkoutPlanPreset
-            },  /* 
-              {
-                  value: `muscleGroups`,
-                  navURL: `/workoutPlans/presets/muscleGroups`,
-                  btnPrompt: `הוסף קבוצת שריר`,
-                  state: tempMusclegroupState,
-                  setter: setTempMusclegroupState,
-              }, */
+            },
+            {
+                value: `muscleGroups`,
+                btnPrompt: `הוסף קבוצת שריר`,
+                state: musclegroupState,
+                sheetForm: `muscleGroup`,
+                deleteFunc: deleteMuscleGroup
+            },
             {
                 value: `exercises`,
                 btnPrompt: `הוסף תרגיל`,
@@ -60,6 +62,9 @@ const WorkoutsTemplatePage = () => {
         getAllWorkoutPlanPresets()
             .then(res => setWorkoutPlanPresets(res))
             .catch(err => console.log(err))
+        getAllMuscleGroups()
+            .then(res => setMusclegroupState(res))
+            .catch(err => console.log(err))
     }, [])
 
 
@@ -67,7 +72,7 @@ const WorkoutsTemplatePage = () => {
         <>
             <div>
                 <h1 className='text-2xl pb-5'>תבניות אימון</h1>
-                {exercisePresets && workoutPlanPresets &&
+                {exercisePresets && workoutPlanPresets && musclegroupState &&
                     <TemplateTabs tabs={tabs} />
                 }
             </div>
