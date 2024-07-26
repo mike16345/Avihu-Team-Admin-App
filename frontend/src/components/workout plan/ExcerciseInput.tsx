@@ -2,7 +2,7 @@ import React, { useContext, useRef, useState } from "react";
 import ComboBox from "./ComboBox";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ISet, IWorkout } from "@/interfaces/IWorkoutPlan";
+import { IExercisePresetItem, ISet, IWorkout } from "@/interfaces/IWorkoutPlan";
 import SetsContainer from "./SetsContainer";
 import { Input } from "../ui/input";
 import { isEditableContext } from "./CreateWorkoutPlan";
@@ -20,7 +20,7 @@ interface ExcerciseInputProps {
 
 const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts, exercises }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const { getExerciseByMuscleGroup } = useExercisePresetApi()
+  const { getExerciseByMuscleGroup } = useExercisePresetApi();
   const exerciseIndexToDelete = useRef<number | null>(null);
 
   const [workoutObjs, setWorkoutObjs] = useState<IWorkout[]>(
@@ -49,15 +49,17 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
   };
 
   const handleUpdateExercise = (index: number, exercise: IExercisePresetItem) => {
-    const { itemName, linkToVideo, tipsFromTrainer } = exercise
+    const { name, linkToVideo, tipsFromTrainer } = exercise;
 
     const updatedWorkouts = workoutObjs.map((workout, i) =>
-      i === index ? { ...workout, linkToVideo, name: itemName, tipFromTrainer: tipsFromTrainer } : workout
-    )
+      i === index
+        ? { ...workout, linkToVideo, name: name, tipFromTrainer: tipsFromTrainer }
+        : workout
+    );
 
     setWorkoutObjs(updatedWorkouts);
     updateWorkouts(updatedWorkouts);
-  }
+  };
 
   const handleAddExcercise = () => {
     const newObject: IWorkout = {
@@ -133,9 +135,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
                         optionsEndpoint={options}
                         getOptions={getExerciseByMuscleGroup}
                         existingValue={item.name}
-                        handleChange={(currentValue) =>
-                          handleUpdateExercise(i, currentValue)
-                        }
+                        handleChange={(currentValue) => handleUpdateExercise(i, currentValue)}
                       />
                     ) : (
                       <p className="font-bold">{item.name}</p>

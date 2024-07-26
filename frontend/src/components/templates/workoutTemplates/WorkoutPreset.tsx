@@ -59,13 +59,11 @@ const WorkoutPreset = () => {
     const hanldeSubmit = () => {
         if (!presetName) return
         const postObject = {
-            presetName,
+            name: presetName,
             workoutPlans: [...workoutPlan]
         }
 
         const cleanedObject = cleanWorkoutObject(postObject)
-        console.log(cleanedObject);
-
 
         if (isEdit) {
             if (!id) return
@@ -88,7 +86,7 @@ const WorkoutPreset = () => {
         getWorkoutPlanPresetById(id)
             .then(res => {
                 setWorkoutPlan(res.workoutPlans);
-                setPresetName(res.presetName)
+                setPresetName(res.name)
             })
             .catch(err => console.log(err));
     }, [])

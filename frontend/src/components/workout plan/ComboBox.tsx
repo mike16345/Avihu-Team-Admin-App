@@ -14,26 +14,28 @@ interface ComboBoxProps {
   optionsEndpoint?: string;
   handleChange: (value: any) => void;
   existingValue?: string;
-  getOptions: (endpoint?: string) => Promise<any[]>
+  getOptions: (endpoint?: string) => Promise<any[]>;
 }
 
-const ComboBox: React.FC<ComboBoxProps> = ({ optionsEndpoint, getOptions, handleChange, existingValue }) => {
-
+const ComboBox: React.FC<ComboBoxProps> = ({
+  optionsEndpoint,
+  getOptions,
+  handleChange,
+  existingValue,
+}) => {
   const [open, setOpen] = useState<boolean>(false);
-  const [value, setValue] = useState<string | undefined>(existingValue ? existingValue : undefined);
-  const [values, setValues] = useState<any[]>()
+  const [value, setValue] = useState<string | undefined>(existingValue);
+  const [values, setValues] = useState<any[]>();
 
   const onChange = (val: string) => {
-    if (!values) return
+    if (!values) return;
 
     setValue(val);
     setOpen(false);
     let objToReturn;
 
-    if (values[0].itemName) {
-      objToReturn = values?.find(obj => obj.itemName === val)
-    } else {
-      objToReturn = values?.find(obj => obj.presetName === val)
+    if (values[0].name) {
+      objToReturn = values?.find((obj) => obj.name === val);
     }
 
     handleChange(objToReturn);
@@ -42,15 +44,16 @@ const ComboBox: React.FC<ComboBoxProps> = ({ optionsEndpoint, getOptions, handle
   useEffect(() => {
     if (optionsEndpoint) {
       getOptions(optionsEndpoint)
-        .then(res => setValues(res))
-        .catch(err => console.log(err))
+        .then((res) => setValues(res))
+        .catch((err) => console.log(err));
     } else {
       getOptions()
-        .then(res => setValues(res))
-        .catch(err => console.log(err))
+        .then((res) => setValues(res))
+        .catch((err) => console.log(err));
     }
+  }, [optionsEndpoint]);
 
-  }, [optionsEndpoint])
+  console.log("options", values);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -71,8 +74,8 @@ const ComboBox: React.FC<ComboBoxProps> = ({ optionsEndpoint, getOptions, handle
           <CommandList>
             <CommandGroup dir="rtl">
               {values?.map((option, i) => (
-                <CommandItem key={i} value={option.itemName || option.presetName} onSelect={(val) => onChange(val)}>
-                  {option.itemName || option.presetName}
+                <CommandItem key={i} value={option.name} onSelect={(val) => onChange(val)}>
+                  {option.name}
                 </CommandItem>
               ))}
             </CommandGroup>

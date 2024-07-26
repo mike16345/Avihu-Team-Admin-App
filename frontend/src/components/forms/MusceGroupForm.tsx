@@ -14,7 +14,7 @@ interface MusceGroupFormProps {
 }
 
 const muscleGroupSchema = z.object({
-    itemName: z.string().min(1, { message: `אנא הכנס שם לקבוצת שריר` })
+    name: z.string().min(1, { message: `אנא הכנס שם לקבוצת שריר` })
 })
 
 const MusceGroupForm: React.FC<MusceGroupFormProps> = ({ objectId, closeSheet }) => {
@@ -24,7 +24,7 @@ const MusceGroupForm: React.FC<MusceGroupFormProps> = ({ objectId, closeSheet })
     const muscleGroupForm = useForm<z.infer<typeof muscleGroupSchema>>({
         resolver: zodResolver(muscleGroupSchema),
         defaultValues: {
-            itemName: "",
+            name: "",
         },
     })
 
@@ -59,7 +59,7 @@ const MusceGroupForm: React.FC<MusceGroupFormProps> = ({ objectId, closeSheet })
             <form onSubmit={muscleGroupForm.handleSubmit(onSubmit)} className="space-y-4 text-right" >
                 <FormField
                     control={muscleGroupForm.control}
-                    name="itemName"
+                    name="name"
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>שם</FormLabel>

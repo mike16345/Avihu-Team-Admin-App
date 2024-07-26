@@ -39,7 +39,7 @@ const DietPlanSheet = () => {
     const menuItemForm = useForm<z.infer<typeof menuItemSchema>>({
         resolver: zodResolver(menuItemSchema),
         defaultValues: {
-            itemName: "",
+            name: "",
             dietaryType: "Standard",
             oneServing:
             {
@@ -99,7 +99,7 @@ const DietPlanSheet = () => {
                         <form onSubmit={menuItemForm.handleSubmit(onSubmit)} className="space-y-4 text-right" >
                             <FormField
                                 control={menuItemForm.control}
-                                name="itemName"
+                                name="name"
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>שם פריט</FormLabel>

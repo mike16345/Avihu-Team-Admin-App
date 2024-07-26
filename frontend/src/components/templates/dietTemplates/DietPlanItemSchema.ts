@@ -7,6 +7,6 @@ const servingItemSchema = z.object({
 
 export const menuItemSchema = z.object({
     dietaryType: z.string().min(1),
-    itemName: z.string().min(1, { message: `חובה לתת לפריט שם` }),
+    name: z.string().min(1, { message: `חובה לתת לפריט שם` }),
     oneServing: servingItemSchema
 })

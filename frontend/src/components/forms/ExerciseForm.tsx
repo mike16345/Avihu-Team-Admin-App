@@ -17,7 +17,7 @@ interface ExerciseFormProps {
 }
 
 const exerciseSchema = z.object({
-    itemName: z.string().min(1, { message: `שם התרגיל חייב להיות תו אחד או יותר` }),
+    name: z.string().min(1, { message: `שם התרגיל חייב להיות תו אחד או יותר` }),
     muscleGroup: z.string().min(1, { message: `תרגיל חייב להיות משוייך לקבוצת שריר` }),
     tipsFromTrainer: z.string().min(1).optional(),
     linkToVideo: z.string().url({ message: `אנא הכנס לינק תקין!` })
@@ -31,7 +31,7 @@ const ExerciseForm: React.FC<ExerciseFormProps> = ({ objectId, closeSheet }) => 
     const exerciseForm = useForm<z.infer<typeof exerciseSchema>>({
         resolver: zodResolver(exerciseSchema),
         defaultValues: {
-            itemName: "",
+            name: "",
             muscleGroup: "",
             linkToVideo: "",
             tipsFromTrainer: ""
@@ -75,7 +75,7 @@ const ExerciseForm: React.FC<ExerciseFormProps> = ({ objectId, closeSheet }) => 
             <form onSubmit={exerciseForm.handleSubmit(onSubmit)} className="space-y-4 text-right" >
                 <FormField
                     control={exerciseForm.control}
-                    name="itemName"
+                    name="name"
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>שם התרגיל</FormLabel>
@@ -127,9 +127,9 @@ const ExerciseForm: React.FC<ExerciseFormProps> = ({ objectId, closeSheet }) => 
                                 <SelectContent dir='rtl'>
                                     {muscleGroups?.map(muscleGroup =>
                                         <SelectItem
-                                            key={muscleGroup.itemName}
-                                            value={muscleGroup.itemName}
-                                        >{muscleGroup.itemName}</SelectItem>
+                                            key={muscleGroup.name}
+                                            value={muscleGroup.name}
+                                        >{muscleGroup.name}</SelectItem>
                                     )}
                                 </SelectContent>
                             </Select>

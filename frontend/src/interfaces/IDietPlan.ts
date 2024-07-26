@@ -29,7 +29,7 @@ export interface IServingItem {
 }
 
 export interface IMenuItem {
-  itemName: string;
+  name: string;
   dietaryType: string;
   foodGroup: string;
   oneServing: IServingItem;

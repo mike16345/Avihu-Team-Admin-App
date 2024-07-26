@@ -28,7 +28,7 @@ import { Input } from "@/components/ui/input";
 interface PresetTableProps {
   data: any[];
   handleDelete: (id: string) => void;
-  retrieveObjectId: (id: string) => void
+  retrieveObjectId: (id: string) => void;
 }
 
 const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, retrieveObjectId }) => {
@@ -55,7 +55,7 @@ const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, retrieveO
   const handleItemsPerPageChange = (itemsPerPage: number) => {
     setItemsPerPage(itemsPerPage);
     setCurrentPage(1);
-  }; 
+  };
 
   const paginatedData = displayData.slice(
     (currentPage - 1) * itemsPerPage,
@@ -68,7 +68,7 @@ const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, retrieveO
     if (!value) {
       setDisplayData(data);
     }
-    const filteredArr = data.filter((item) => item.itemName.includes(value));
+    const filteredArr = data.filter((item) => item.name.includes(value));
 
     setDisplayData(filteredArr);
   };
@@ -97,7 +97,7 @@ const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, retrieveO
           {paginatedData.map((data, i) => (
             <TableRow key={i}>
               <TableCell className="flex justify-between items-center px-3">
-                <div className="pr-4">{data.presetName || data.itemName}</div>
+                <div className="pr-4">{data.name}</div>
                 <div>
                   <TableActions
                     handleDelete={() => handleDelete(data._id)}
@@ -139,7 +139,6 @@ const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, retrieveO
         </TableFooter>
       </Table>
     </div>
-
   );
 };
 
