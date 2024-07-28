@@ -30,7 +30,7 @@ export interface IServingItem {
 
 export interface IMenuItem {
   name: string;
-  dietaryType: string;
+  dietaryType: string[];
   foodGroup: string;
   oneServing: IServingItem;
 }

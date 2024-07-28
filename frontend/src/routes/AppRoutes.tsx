@@ -5,7 +5,6 @@ import { ViewDietPlanPage } from "@/pages/ViewDietPlanPage";
 import { Route, Routes } from "react-router";
 import DietPlanTemplatePage from "@/pages/DietPlanTemplatePage";
 import WorkoutsTemplatePage from "@/pages/WorkoutsTemplatePage";
-import DietPlanSheet from "@/components/templates/dietTemplates/DietPlanSheet";
 import WorkoutPreset from "@/components/templates/workoutTemplates/WorkoutPreset";
 
 export const AppRoutes = () => {
@@ -21,8 +20,6 @@ export const AppRoutes = () => {
         <Route path="/presets/workoutPlans/" element={<WorkoutPreset />} />
         <Route path="/presets/workoutPlans/:id" element={<WorkoutPreset />} />
         <Route path="/dietPlans" element={<DietPlanTemplatePage />} />
-        <Route path="/dietPlans/presets/:type" element={<DietPlanSheet />} />
-        <Route path="/dietPlans/presets/:type/:id" element={<DietPlanSheet />} />
       </Routes>
     </>
   );

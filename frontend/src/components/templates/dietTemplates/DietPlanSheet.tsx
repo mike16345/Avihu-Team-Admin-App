@@ -36,21 +36,7 @@ const DietPlanSheet = () => {
 
     const [isEdit] = useState<boolean>(Boolean(id));
 
-    const menuItemForm = useForm<z.infer<typeof menuItemSchema>>({
-        resolver: zodResolver(menuItemSchema),
-        defaultValues: {
-            name: "",
-            dietaryType: "Standard",
-            oneServing:
-            {
-                spoons: 0,
-                grams: 0
-            }
-        },
-        values: existingMenuItem
-    })
 
-    const { reset } = menuItemForm;
 
     const onSubmit = (values: z.infer<typeof menuItemSchema>) => {
         if (!type) return

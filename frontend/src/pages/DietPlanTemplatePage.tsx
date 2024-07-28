@@ -39,31 +39,31 @@ const DietPlanTemplatePage = () => {
         tabContent: [
             {
                 value: `proteinItems`,
-                navURL: `/dietPlans/presets/protein`,
                 btnPrompt: `הוסף חלבון`,
                 state: proteinMenuState || [],
-                deleter: deleteMenuItem,
+                sheetForm: `protein`,
+                deleteFunc: deleteMenuItem
             },
             {
                 value: `carbItems`,
-                navURL: `/dietPlans/presets/carbs`,
                 btnPrompt: `הוסף פחמימה`,
                 state: carbsMenuState || [],
-                deleter: deleteMenuItem,
+                sheetForm: `carbs`,
+                deleteFunc: deleteMenuItem
             },
             {
                 value: `vegetableItems`,
-                navURL: `/dietPlans/presets/vegetables`,
                 btnPrompt: `הוסף ירקות`,
                 state: VegetableMenuState || [],
-                deleter: deleteMenuItem,
+                sheetForm: `vegetables`,
+                deleteFunc: deleteMenuItem
             },
             {
                 value: `fatsItems`,
-                navURL: `/dietPlans/presets/fats`,
                 btnPrompt: `הוסף שומנים`,
                 state: fatsMenueState || [],
-                deleter: deleteMenuItem,
+                sheetForm: `fats`,
+                deleteFunc: deleteMenuItem
             },
         ]
     }
