@@ -1,9 +1,9 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import SetsInput from "./SetsInput";
 import { ISet } from "@/interfaces/IWorkoutPlan";
 import AddButton from "./buttons/AddButton";
 import DeleteButton from "./buttons/DeleteButton";
-import { isEditableContext } from "./CreateWorkoutPlan";
+import { useIsEditableContext } from "../context/useIsEditableContext";
 
 interface SetContainerProps {
   updateSets: (componentSets: ISet[]) => void;
@@ -11,7 +11,7 @@ interface SetContainerProps {
 }
 
 const SetsContainer: React.FC<SetContainerProps> = ({ updateSets, existingSets }) => {
-  const isEditable = useContext(isEditableContext);
+  const { isEditable } = useIsEditableContext();
 
   const [componentSets, setComponentSets] = useState<ISet[]>(
     existingSets || [

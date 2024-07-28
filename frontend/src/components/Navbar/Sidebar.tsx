@@ -19,7 +19,7 @@ export const Sidebar = () => {
     },
     {
       to: "/users",
-      linkName: "יוזרים",
+      linkName: "משתמשים",
       icon: <FaUser />,
     },
     {

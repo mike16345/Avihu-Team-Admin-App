@@ -1,7 +1,7 @@
-import React, { useContext } from "react";
+import React from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { isEditableContext } from "./CreateWorkoutPlan";
+import { useIsEditableContext } from "../context/useIsEditableContext";
 
 interface SetInputProps {
   setNumber: number;
@@ -11,8 +11,7 @@ interface SetInputProps {
 }
 
 const SetsInput: React.FC<SetInputProps> = ({ setNumber, handleChange, maxReps, minReps }) => {
-  const isEditable = useContext(isEditableContext);
-
+  const { isEditable } = useIsEditableContext();
   return (
     <div className="flex items-center gap-3">
       <div className="mt-5 font-semibold">סט {setNumber}</div>
