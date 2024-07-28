@@ -1,7 +1,6 @@
 import TemplateTabs from '@/components/templates/TemplateTabs';
-import { carbMenuItems, fatsMenuItems, proteinMenuItems, veggatableMenuItems } from '@/constants/TempDietPresetConsts';
 import useMenuItemApi from '@/hooks/useMenuItemApi';
-import { IMenue, IMenuItem } from '@/interfaces/IDietPlan';
+import { IMenuItem } from '@/interfaces/IDietPlan';
 import React, { useEffect, useState } from 'react'
 
 
@@ -89,7 +88,7 @@ const DietPlanTemplatePage = () => {
     return (
         <div>
             <h1 className='text-2xl pb-5'>תפריטים</h1>
-            {fatsMenuItems && proteinMenuState && carbsMenuState && VegetableMenuState &&
+            {fatsMenueState && proteinMenuState && carbsMenuState && VegetableMenuState &&
                 <TemplateTabs tabs={tabs} />
             }
         </div>
