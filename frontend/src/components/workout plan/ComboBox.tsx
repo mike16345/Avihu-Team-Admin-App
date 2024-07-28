@@ -55,13 +55,13 @@ const ComboBox: React.FC<ComboBoxProps> = ({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger className="w-3/4 flex justify-between" dir="rtl" asChild>
+      <PopoverTrigger className="max-w-fit flex justify-between" dir="rtl" asChild>
         <Button variant="outline" role="combobox" aria-expanded={open}>
           {value || `בחר`}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="mr-4 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-fit p-0">
+      <PopoverContent className="w-full p-0">
         <Command>
           <CommandInput dir="rtl" placeholder="בחר סוג תוכנית..." />
           <CommandList>
