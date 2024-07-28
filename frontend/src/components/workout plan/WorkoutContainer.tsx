@@ -1,13 +1,12 @@
 import { IMuscleGroupWorkouts, IWorkout } from "@/interfaces/IWorkoutPlan";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
-import { FC, useContext, useState } from "react";
+import { FC, useState } from "react";
 import { ChevronsUpDown } from "lucide-react";
 import DeleteButton from "./buttons/DeleteButton";
 import ExcerciseInput from "./ExcerciseInput";
 import MuscleGroupSelector from "./MuscleGroupSelector";
-import { isEditableContext } from "./CreateWorkoutPlan";
 import DeleteModal from "./DeleteModal";
-
+import { useIsEditableContext } from "../context/useIsEditableContext";
 
 interface IWorkoutContainerProps {
   muscleGroup: IMuscleGroupWorkouts;
@@ -22,7 +21,7 @@ export const WorkoutContainer: FC<IWorkoutContainerProps> = ({
   handleUpdateWorkouts,
   handleDeleteMuscleGroup,
 }) => {
-  const isEditable = useContext(isEditableContext);
+  const { isEditable } = useIsEditableContext();
   const [isDeleteMuscleGroupModalOpen, setIsDeleteMuscleGroupModalOpen] = useState(false);
   const [openMuscleGroupContainer, setOpenMuscleGroupContainer] = useState(false);
 

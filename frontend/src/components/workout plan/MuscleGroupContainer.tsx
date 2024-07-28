@@ -1,13 +1,13 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { IMuscleGroupWorkouts, IWorkout } from "@/interfaces/IWorkoutPlan";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { Button } from "../ui/button";
 import DeleteButton from "./buttons/DeleteButton";
 import { Input } from "../ui/input";
-import { isEditableContext } from "./CreateWorkoutPlan";
 import { FaChevronDown } from "react-icons/fa";
 import { WorkoutContainer } from "./WorkoutContainer";
 import DeleteModal from "./DeleteModal";
+import { useIsEditableContext } from "../context/useIsEditableContext";
 
 interface MuscleGroupContainerProps {
   title: string;
@@ -15,6 +15,7 @@ interface MuscleGroupContainerProps {
   handleSave: (workouts: IMuscleGroupWorkouts[]) => void;
   handlePlanNameChange: (newName: string) => void;
   handleDeleteWorkout: () => void;
+  isEdit?: boolean;
 }
 
 const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({
@@ -29,7 +30,7 @@ const MuscleGroupContainer: React.FC<MuscleGroupContainerProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  const isEditable = useContext(isEditableContext);
+  const isEditable = useIsEditableContext().isEditable;
 
   const addWorkout = () => {
     const newObject: IMuscleGroupWorkouts = {

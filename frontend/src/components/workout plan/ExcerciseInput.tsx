@@ -1,16 +1,16 @@
-import React, { useContext, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import ComboBox from "./ComboBox";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { IExercisePresetItem, ISet, IWorkout } from "@/interfaces/IWorkoutPlan";
 import SetsContainer from "./SetsContainer";
 import { Input } from "../ui/input";
-import { isEditableContext } from "./CreateWorkoutPlan";
 import { IoClose } from "react-icons/io5";
 import { Card, CardContent, CardHeader } from "../ui/card";
 import { AddWorkoutPlanCard } from "./AddWorkoutPlanCard";
 import DeleteModal from "./DeleteModal";
 import useExercisePresetApi from "@/hooks/useExercisePresetApi";
+import { useIsEditableContext } from "../context/useIsEditableContext";
 
 interface ExcerciseInputProps {
   options?: string;
@@ -33,7 +33,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
     ]
   );
 
-  const isEditable = useContext(isEditableContext);
+  const { isEditable } = useIsEditableContext();
 
   const handleUpdateWorkoutObject = <K extends keyof IWorkout>(
     key: K,
@@ -108,7 +108,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
   return (
     <>
       <div className="w-full flex flex-col gap-3 px-2 py-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid lg:grid-cols-2 gap-4">
           {workoutObjs.map((item, i) => (
             <>
               <Card
@@ -179,9 +179,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
                           }
                         />
                       ) : (
-                        <p className="border-b-2">
-                          {item.tipFromTrainer == `` ? `לא קיים` : item.tipFromTrainer}
-                        </p>
+                        <p className="border-b-2">{item.tipFromTrainer || `לא קיים`}</p>
                       )}
                     </div>
                   </div>

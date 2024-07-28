@@ -1,4 +1,4 @@
-import React, { createContext, Fragment, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import ComboBox from "./ComboBox";
 import {
   ICompleteWorkoutPlan,
@@ -15,17 +15,13 @@ import { useParams } from "react-router-dom";
 import { Toggle } from "@/components/ui/toggle";
 import { toast } from "sonner";
 import { useWorkoutPlanPresetApi } from "@/hooks/useWorkoutPlanPresetsApi";
-
-export const isEditableContext = createContext<boolean>(false);
+import { useIsEditableContext } from "../context/useIsEditableContext";
 
 const CreateWorkoutPlan: React.FC = () => {
   const { id } = useParams();
   const { addWorkoutPlan, getWorkoutPlanByUserId, updateWorkoutPlanByUserId } = useWorkoutPlanApi();
-  const { getAllWorkoutPlanPresets } = useWorkoutPlanPresetApi()
-
-  // global
-  const [isEditable, setIsEditable] = useState<boolean>(false);
-
+  const { getAllWorkoutPlanPresets } = useWorkoutPlanPresetApi();
+  const { isEditable, setIsEditable, toggleIsEditable } = useIsEditableContext();
 
   const [isCreate, setIsCreate] = useState<boolean>(false);
   const [workoutPlan, setWorkoutPlan] = useState<IWorkoutPlan[]>([]);
@@ -34,6 +30,7 @@ const CreateWorkoutPlan: React.FC = () => {
     const newWorkoutPlan = workoutPlan.map((workout, i) =>
       i == index ? { ...workout, planName: newName } : workout
     );
+    
     setWorkoutPlan(newWorkoutPlan);
   };
 
@@ -66,8 +63,6 @@ const CreateWorkoutPlan: React.FC = () => {
     });
   };
 
-
-
   const handleSubmit = async () => {
     if (!id) return;
 
@@ -77,19 +72,22 @@ const CreateWorkoutPlan: React.FC = () => {
 
     const cleanedPostObject = cleanWorkoutObject(postObject);
 
-
     if (isCreate) {
       addWorkoutPlan(id, cleanedPostObject)
         .then(() => toast.success(`תוכנית אימון נשמרה בהצלחה!`))
-        .catch(err => toast.error(`אופס, נתקלנו בבעיה!`, {
-          description: `${err.response.data.message}`,
-        }))
+        .catch((err) =>
+          toast.error(`אופס, נתקלנו בבעיה!`, {
+            description: `${err.response.data.message}`,
+          })
+        );
     } else {
       updateWorkoutPlanByUserId(id, cleanedPostObject)
         .then(() => toast.success(`תוכנית אימון נשמרה בהצלחה!`))
-        .catch(err => toast.error(`אופס, נתקלנו בבעיה!`, {
-          description: `${err.response.data.message}`
-        }))
+        .catch((err) =>
+          toast.error(`אופס, נתקלנו בבעיה!`, {
+            description: `${err.response.data.message}`,
+          })
+        );
     }
   };
 
@@ -107,14 +105,11 @@ const CreateWorkoutPlan: React.FC = () => {
   }, []);
 
   return (
-    <isEditableContext.Provider value={isEditable}>
+    <>
       <div className="flex flex-col gap-4 p-5 overflow-y-scroll hide-scrollbar w-5/6 max-h-[95vh] ">
         <div className=" w-full flex justify-between items-center">
           <h1 className="text-4xl">תוכנית אימון</h1>
-          <Toggle
-            onClick={() => setIsEditable(!isEditable)}
-            className="px-3 rounded cursor-pointer "
-          >
+          <Toggle onClick={() => toggleIsEditable()} className="px-3 rounded cursor-pointer ">
             <BsFillPencilFill />
           </Toggle>
         </div>
@@ -161,7 +156,7 @@ const CreateWorkoutPlan: React.FC = () => {
           </div>
         )}
       </div>
-    </isEditableContext.Provider>
+    </>
   );
 };
 
