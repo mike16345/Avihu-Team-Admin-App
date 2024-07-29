@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { Fragment, useRef, useState } from "react";
 import ComboBox from "./ComboBox";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -108,8 +108,8 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
       <div className="w-full flex flex-col gap-3 px-2 py-4">
         <div className="grid xl:grid-cols-2 gap-4">
           {workoutObjs.map((item, i) => (
-            <>
-              <Card key={i} className=" p-6 max-h-[575px] overflow-y-auto custom-scrollbar">
+            <Fragment key={i}>
+              <Card className=" p-6 max-h-[575px] overflow-y-auto custom-scrollbar">
                 <CardHeader>
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center justify-between">
@@ -156,9 +156,20 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
                           }
                         />
                       ) : (
-                        <p className="py-1 border-b-2 text-ellipsis break-words whitespace-normal">
+                        <a
+                          onClick={(e) => {
+                            const target = e.target as HTMLAnchorElement;
+                            if (!target || !target.href || !target.href.includes("youtube")) {
+                              e.preventDefault();
+                              return;
+                            }
+                          }}
+                          target="_blank"
+                          href={item.linkToVideo}
+                          className="py-1 block border-b-2 text-ellipsis break-words whitespace-normal"
+                        >
                           {item.linkToVideo == `` ? `לא קיים` : item.linkToVideo}
-                        </p>
+                        </a>
                       )}
                     </div>
                     <div>
@@ -184,7 +195,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
                   </div>
                 </CardContent>
               </Card>
-            </>
+            </Fragment>
           ))}
           {isEditable && (
             <div className="h-[550px]">
