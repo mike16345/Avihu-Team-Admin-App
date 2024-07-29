@@ -28,12 +28,6 @@ export const Sidebar = () => {
       icon: <FaEdit />,
     },
     {
-      to: "/users",
-      linkName: "לקוחות",
-      icon: <FaUser />,
-    },
-
-    {
       to: "/dietPlans",
       linkName: "תפריטים",
       icon: <PiNotepadFill />,
