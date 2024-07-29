@@ -111,7 +111,7 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
               </Button>
             </div>
           </div>
-          <CollapsibleContent>
+          <CollapsibleContent className="flex flex-col gap-4">
             {muscleGroups.map((workout, i) => (
               <MuscleGroupContainer
                 key={i}
@@ -121,7 +121,11 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
                 handleDeleteMuscleGroup={() => deleteMuscleGroup(i)}
               />
             ))}
-            {isEditable && <Button onClick={addWorkout}>הוסף קבוצת שריר</Button>}
+            {isEditable && (
+              <div>
+                <Button onClick={addWorkout}>הוסף קבוצת שריר</Button>
+              </div>
+            )}
           </CollapsibleContent>
         </Collapsible>
       </div>
