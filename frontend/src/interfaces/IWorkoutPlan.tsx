@@ -28,3 +28,19 @@ export interface IMuscleGroupWorkouts {
   muscleGroup: string;
   exercises: IWorkout[]
 }
+
+export interface IWorkoutPlanPreset {
+  name: string;
+  workoutPlans: IWorkoutPlan[]
+}
+
+export interface IExercisePresetItem {
+  name: string;
+  muscleGroup: string;
+  tipsFromTrainer?: string;
+  linkToVideo: string;
+
+}
+export interface IMuscleGroupItem {
+  name: string;
+}

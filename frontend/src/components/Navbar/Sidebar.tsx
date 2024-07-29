@@ -18,6 +18,11 @@ export const Sidebar = () => {
       icon: <FaHome />,
     },
     {
+      to: "/users",
+      linkName: "משתמשים",
+      icon: <FaUser />,
+    },
+    {
       to: "/blogs",
       linkName: "בלוגים",
       icon: <FaEdit />,

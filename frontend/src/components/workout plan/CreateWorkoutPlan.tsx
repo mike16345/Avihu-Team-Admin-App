@@ -1,4 +1,4 @@
-import React, { createContext, Fragment, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import ComboBox from "./ComboBox";
 import {
   ICompleteWorkoutPlan,
@@ -14,18 +14,14 @@ import { BsPlusCircleFill } from "react-icons/bs";
 import { useParams } from "react-router-dom";
 import { Toggle } from "@/components/ui/toggle";
 import { toast } from "sonner";
-
-export const isEditableContext = createContext<boolean>(false);
+import { useWorkoutPlanPresetApi } from "@/hooks/useWorkoutPlanPresetsApi";
+import { useIsEditableContext } from "../context/useIsEditableContext";
 
 const CreateWorkoutPlan: React.FC = () => {
   const { id } = useParams();
   const { addWorkoutPlan, getWorkoutPlanByUserId, updateWorkoutPlanByUserId } = useWorkoutPlanApi();
-
-  // global
-  const [isEditable, setIsEditable] = useState<boolean>(false);
-
-  //temp states
-  const workoutTemp: string[] = [`AB`, `ABC`, `יומי`, `התאמה אישית`];
+  const { getAllWorkoutPlanPresets } = useWorkoutPlanPresetApi();
+  const { isEditable, setIsEditable, toggleIsEditable } = useIsEditableContext();
 
   const [isCreate, setIsCreate] = useState<boolean>(false);
   const [workoutPlan, setWorkoutPlan] = useState<IWorkoutPlan[]>([]);
@@ -34,6 +30,7 @@ const CreateWorkoutPlan: React.FC = () => {
     const newWorkoutPlan = workoutPlan.map((workout, i) =>
       i == index ? { ...workout, planName: newName } : workout
     );
+    
     setWorkoutPlan(newWorkoutPlan);
   };
 
@@ -66,65 +63,31 @@ const CreateWorkoutPlan: React.FC = () => {
     });
   };
 
-  const handleSelect = (splitVal: string) => {
-    const initalWorkoutPlan = [];
-    let iterater = 1;
-
-    switch (splitVal) {
-      case `AB`:
-        iterater = 2;
-        break;
-      case `ABC`:
-        iterater = 3;
-        break;
-      case `יומי`:
-        iterater = 7;
-        break;
-      case `התאמה אישית`:
-        iterater = 1;
-        break;
-    }
-
-    for (let index = 1; index <= iterater; index++) {
-      if (splitVal === `AB` || splitVal === `ABC`) {
-        initalWorkoutPlan.push({
-          planName: `אימון ${splitVal[index - 1]}`,
-          workouts: [],
-        });
-      } else {
-        initalWorkoutPlan.push({
-          planName: `אימון ${index}`,
-          workouts: [],
-        });
-      }
-    }
-
-    setWorkoutPlan(initalWorkoutPlan);
-  };
-
   const handleSubmit = async () => {
     if (!id) return;
 
     const postObject: ICompleteWorkoutPlan = {
-      userId: id,
       workoutPlans: [...workoutPlan],
     };
 
     const cleanedPostObject = cleanWorkoutObject(postObject);
 
-
-      if (isCreate) {
-      addWorkoutPlan(id,cleanedPostObject)
+    if (isCreate) {
+      addWorkoutPlan(id, cleanedPostObject)
         .then(() => toast.success(`תוכנית אימון נשמרה בהצלחה!`))
-        .catch(err => toast.error(`אופס, נתקלנו בבעיה!`, {
-          description: `${err.response.data.message}`,
-        }))
+        .catch((err) =>
+          toast.error(`אופס, נתקלנו בבעיה!`, {
+            description: `${err.response.data.message}`,
+          })
+        );
     } else {
       updateWorkoutPlanByUserId(id, cleanedPostObject)
         .then(() => toast.success(`תוכנית אימון נשמרה בהצלחה!`))
-        .catch(err => toast.error(`אופס, נתקלנו בבעיה!`, {
-          description: `${err.response.data.message}`
-        }))
+        .catch((err) =>
+          toast.error(`אופס, נתקלנו בבעיה!`, {
+            description: `${err.response.data.message}`,
+          })
+        );
     }
   };
 
@@ -142,14 +105,11 @@ const CreateWorkoutPlan: React.FC = () => {
   }, []);
 
   return (
-    <isEditableContext.Provider value={isEditable}>
+    <>
       <div className="flex flex-col gap-4 p-5 overflow-y-scroll hide-scrollbar w-5/6 max-h-[95vh] ">
         <div className=" w-full flex justify-between items-center">
           <h1 className="text-4xl">תוכנית אימון</h1>
-          <Toggle
-            onClick={() => setIsEditable(!isEditable)}
-            className="px-3 rounded cursor-pointer "
-          >
+          <Toggle onClick={() => toggleIsEditable()} className="px-3 rounded cursor-pointer ">
             <BsFillPencilFill />
           </Toggle>
         </div>
@@ -161,8 +121,8 @@ const CreateWorkoutPlan: React.FC = () => {
         <div className="flex flex-col gap-4">
           {isEditable && (
             <ComboBox
-              options={workoutTemp}
-              handleChange={(currentValue) => handleSelect(currentValue)}
+              getOptions={getAllWorkoutPlanPresets}
+              handleChange={(currentValue) => setWorkoutPlan(currentValue.workoutPlans)}
             />
           )}
 
@@ -196,7 +156,7 @@ const CreateWorkoutPlan: React.FC = () => {
           </div>
         )}
       </div>
-    </isEditableContext.Provider>
+    </>
   );
 };
 

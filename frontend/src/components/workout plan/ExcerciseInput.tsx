@@ -1,24 +1,26 @@
-import React, { useContext, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import ComboBox from "./ComboBox";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ISet, IWorkout } from "@/interfaces/IWorkoutPlan";
+import { IExercisePresetItem, ISet, IWorkout } from "@/interfaces/IWorkoutPlan";
 import SetsContainer from "./SetsContainer";
 import { Input } from "../ui/input";
-import { isEditableContext } from "./CreateWorkoutPlan";
 import { IoClose } from "react-icons/io5";
 import { Card, CardContent, CardHeader } from "../ui/card";
 import { AddWorkoutPlanCard } from "./AddWorkoutPlanCard";
 import DeleteModal from "./DeleteModal";
+import useExercisePresetApi from "@/hooks/useExercisePresetApi";
+import { useIsEditableContext } from "../context/useIsEditableContext";
 
 interface ExcerciseInputProps {
-  options: string[] | undefined;
+  options?: string;
   updateWorkouts: (workouts: IWorkout[]) => void;
   exercises?: IWorkout[];
 }
 
 const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts, exercises }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const { getExerciseByMuscleGroup } = useExercisePresetApi();
   const exerciseIndexToDelete = useRef<number | null>(null);
 
   const [workoutObjs, setWorkoutObjs] = useState<IWorkout[]>(
@@ -31,7 +33,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
     ]
   );
 
-  const isEditable = useContext(isEditableContext);
+  const { isEditable } = useIsEditableContext();
 
   const handleUpdateWorkoutObject = <K extends keyof IWorkout>(
     key: K,
@@ -40,6 +42,19 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
   ) => {
     const updatedWorkouts = workoutObjs.map((workout, i) =>
       i === index ? { ...workout, [key]: value } : workout
+    );
+
+    setWorkoutObjs(updatedWorkouts);
+    updateWorkouts(updatedWorkouts);
+  };
+
+  const handleUpdateExercise = (index: number, exercise: IExercisePresetItem) => {
+    const { name, linkToVideo, tipsFromTrainer } = exercise;
+
+    const updatedWorkouts = workoutObjs.map((workout, i) =>
+      i === index
+        ? { ...workout, linkToVideo, name: name, tipFromTrainer: tipsFromTrainer }
+        : workout
     );
 
     setWorkoutObjs(updatedWorkouts);
@@ -93,7 +108,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
   return (
     <>
       <div className="w-full flex flex-col gap-3 px-2 py-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid lg:grid-cols-2 gap-4">
           {workoutObjs.map((item, i) => (
             <>
               <Card
@@ -117,11 +132,10 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
                     </div>
                     {isEditable ? (
                       <ComboBox
-                        options={options}
+                        optionsEndpoint={options}
+                        getOptions={getExerciseByMuscleGroup}
                         existingValue={item.name}
-                        handleChange={(currentValue) =>
-                          handleUpdateWorkoutObject("name", currentValue, i)
-                        }
+                        handleChange={(currentValue) => handleUpdateExercise(i, currentValue)}
                       />
                     ) : (
                       <p className="font-bold">{item.name}</p>
@@ -165,9 +179,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
                           }
                         />
                       ) : (
-                        <p className="border-b-2">
-                          {item.tipFromTrainer == `` ? `לא קיים` : item.tipFromTrainer}
-                        </p>
+                        <p className="border-b-2">{item.tipFromTrainer || `לא קיים`}</p>
                       )}
                     </div>
                   </div>
