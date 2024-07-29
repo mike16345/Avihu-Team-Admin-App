@@ -18,7 +18,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import MuscleGroupContainer from "@/components/workout plan/MuscleGroupContainer";
+import WorkoutContainer from "@/components/workout plan/WorkoutPlanContainer";
 import { EditableContextProvider } from "@/components/context/useIsEditableContext";
 
 const workoutFormSchema = z.object({
@@ -27,6 +27,7 @@ const workoutFormSchema = z.object({
 
 const WorkoutPreset = () => {
   const { id } = useParams();
+  const isEdit = id !== undefined;
 
   const workoutForm = useForm<any>({
     resolver: zodResolver(workoutFormSchema),
@@ -39,7 +40,6 @@ const WorkoutPreset = () => {
     useWorkoutPlanPresetApi();
 
   const [workoutPlan, setWorkoutPlan] = useState<IWorkoutPlan[]>([]);
-  const [isEdit] = useState<boolean>(Boolean(id));
 
   const handlePlanNameChange = (newName: string, index: number) => {
     const newWorkoutPlan = workoutPlan.map((workout, i) =>
@@ -49,7 +49,10 @@ const WorkoutPreset = () => {
   };
 
   const handleAddWorkout = () => {
-    const newObject = { planName: `אימון ${workoutPlan.length + 1}`, workouts: [] };
+    const newObject: IWorkoutPlan = {
+      planName: `אימון ${workoutPlan.length + 1}`,
+      muscleGroups: [],
+    };
 
     setWorkoutPlan([...workoutPlan, newObject]);
   };
@@ -66,12 +69,12 @@ const WorkoutPreset = () => {
 
       if (workoutExists) {
         return prevWorkoutPlan.map((workout, i) =>
-          i === index ? { ...workout, workouts: workouts } : workout
+          i === index ? { ...workout, muscleGroups: workouts } : workout
         );
       } else {
         return [
           ...prevWorkoutPlan,
-          { planName: `אימון ${workoutPlan.length + 1}`, workouts: workouts },
+          { planName: `אימון ${workoutPlan.length + 1}`, muscleGroups: workouts },
         ];
       }
     });
@@ -147,8 +150,8 @@ const WorkoutPreset = () => {
 
           {workoutPlan.map((workout, i) => (
             <Fragment key={i}>
-              <MuscleGroupContainer
-                workout={workout.workouts}
+              <WorkoutContainer
+                initialMuscleGroups={workout.muscleGroups}
                 handleSave={(workouts) => handleSave(i, workouts)}
                 title={workout.planName}
                 handlePlanNameChange={(newName) => handlePlanNameChange(newName, i)}

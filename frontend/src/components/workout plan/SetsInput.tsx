@@ -12,6 +12,7 @@ interface SetInputProps {
 
 const SetsInput: React.FC<SetInputProps> = ({ setNumber, handleChange, maxReps, minReps }) => {
   const { isEditable } = useIsEditableContext();
+  
   return (
     <div className="flex items-center gap-3">
       <div className="mt-5 font-semibold">סט {setNumber}</div>
