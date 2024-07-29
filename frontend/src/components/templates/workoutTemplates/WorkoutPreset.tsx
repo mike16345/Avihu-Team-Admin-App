@@ -19,7 +19,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import WorkoutContainer from "@/components/workout plan/WorkoutPlanContainer";
-import { EditableContextProvider } from "@/components/context/useIsEditableContext";
+import { EditableContextProvider } from "@/context/useIsEditableContext";
 
 const workoutFormSchema = z.object({
   name: z.string().min(1).max(25),

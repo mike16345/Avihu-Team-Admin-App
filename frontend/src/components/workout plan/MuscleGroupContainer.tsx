@@ -5,8 +5,8 @@ import { ChevronsUpDown } from "lucide-react";
 import DeleteButton from "./buttons/DeleteButton";
 import ExcerciseInput from "./ExcerciseInput";
 import MuscleGroupSelector from "./MuscleGroupSelector";
-import DeleteModal from "./DeleteModal";
-import { useIsEditableContext } from "../context/useIsEditableContext";
+import DeleteModal from "../Alerts/DeleteModal";
+import { useIsEditableContext } from "@/context/useIsEditableContext";
 import { Button } from "../ui/button";
 
 interface IMuscleGroupContainerProps {

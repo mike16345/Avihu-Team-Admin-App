@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useParams } from "react-router";
 import { defaultDietPlan, defaultMeal } from "@/constants/DietPlanConsts";
-import DeleteModal from "@/components/workout plan/DeleteModal";
+import DeleteModal from "@/components/Alerts/DeleteModal";
 
 export const ViewDietPlanPage = () => {
   const { id } = useParams();

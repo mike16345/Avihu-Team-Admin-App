@@ -6,8 +6,8 @@ import DeleteButton from "./buttons/DeleteButton";
 import { Input } from "../ui/input";
 import { FaChevronDown } from "react-icons/fa";
 import { MuscleGroupContainer } from "./MuscleGroupContainer";
-import DeleteModal from "./DeleteModal";
-import { useIsEditableContext } from "../context/useIsEditableContext";
+import DeleteModal from "@/components/Alerts/DeleteModal";
+import { useIsEditableContext } from "@/context/useIsEditableContext";
 
 interface WorkoutContainerProps {
   title: string;
@@ -28,7 +28,7 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
   const { isEditable } = useIsEditableContext();
 
   const [planName, setPlanName] = useState<string | undefined>();
-  console.log('muscle groups',initialMuscleGroups)
+  console.log("muscle groups", initialMuscleGroups);
   const [muscleGroups, setMuscleGroups] = useState<IMuscleGroupWorkouts[]>(initialMuscleGroups);
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);

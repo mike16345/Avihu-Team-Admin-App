@@ -3,7 +3,7 @@ import SetsInput from "./SetsInput";
 import { ISet } from "@/interfaces/IWorkoutPlan";
 import AddButton from "./buttons/AddButton";
 import DeleteButton from "./buttons/DeleteButton";
-import { useIsEditableContext } from "../context/useIsEditableContext";
+import { useIsEditableContext } from "@/context/useIsEditableContext";
 
 interface SetContainerProps {
   updateSets: (componentSets: ISet[]) => void;

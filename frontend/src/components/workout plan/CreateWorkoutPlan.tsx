@@ -15,7 +15,7 @@ import { useParams } from "react-router-dom";
 import { Toggle } from "@/components/ui/toggle";
 import { toast } from "sonner";
 import { useWorkoutPlanPresetApi } from "@/hooks/useWorkoutPlanPresetsApi";
-import { useIsEditableContext } from "../context/useIsEditableContext";
+import { useIsEditableContext } from "@/context/useIsEditableContext";
 
 const CreateWorkoutPlan: React.FC = () => {
   const { id } = useParams();

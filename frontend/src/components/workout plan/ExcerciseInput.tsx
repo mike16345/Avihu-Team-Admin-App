@@ -8,9 +8,9 @@ import { Input } from "../ui/input";
 import { IoClose } from "react-icons/io5";
 import { Card, CardContent, CardHeader } from "../ui/card";
 import { AddWorkoutPlanCard } from "./AddWorkoutPlanCard";
-import DeleteModal from "./DeleteModal";
 import useExercisePresetApi from "@/hooks/useExercisePresetApi";
-import { useIsEditableContext } from "../context/useIsEditableContext";
+import { useIsEditableContext } from "@/context/useIsEditableContext";
+import DeleteModal from "../Alerts/DeleteModal";
 
 interface ExcerciseInputProps {
   options?: string;
