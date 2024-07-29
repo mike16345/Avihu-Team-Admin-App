@@ -5,8 +5,8 @@ import { IDietPlan, IMeal } from "@/interfaces/IDietPlan";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useParams } from "react-router";
-import CustomAlertDialog from "@/components/Alerts/DialogAlert/CustomAlertDialog";
 import { defaultDietPlan, defaultMeal } from "@/constants/DietPlanConsts";
+import DeleteModal from "@/components/workout plan/DeleteModal";
 
 export const ViewDietPlanPage = () => {
   const { id } = useParams();
@@ -128,16 +128,11 @@ export const ViewDietPlanPage = () => {
         </div>
       )}
 
-      <CustomAlertDialog
-        alertDialogProps={{ open: openDeleteModal, onOpenChange: setOpenDeleteModal }}
-        alertDialogCancelProps={{
-          onClick: () => {
-            setMealToDelete(null);
-            setOpenDeleteModal(false);
-          },
-          children: "בטל",
-        }}
-        alertDialogActionProps={{ onClick: handleDeleteMeal, children: "אשר" }}
+      <DeleteModal
+        onConfirm={() => handleDeleteMeal()}
+        onCancel={() => setMealToDelete(null)}
+        isModalOpen={openDeleteModal}
+        setIsModalOpen={setOpenDeleteModal}
       />
     </div>
   );
