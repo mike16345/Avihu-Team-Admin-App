@@ -5,10 +5,10 @@ import { AppRoutes } from "./routes/AppRoutes";
 function App() {
   return (
     <div className="flex size-full ">
-      <div className="w-1/6 h-full bg-secondary border-l-2">
+      <div>
         <Sidebar />
       </div>
-      <div className="w-5/6 h-full p-8 overflow-y-auto custom-scrollbar ">
+      <div className="size-full p-8 overflow-y-auto custom-scrollbar ">
         <AppRoutes />
       </div>
     </div>

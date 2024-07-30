@@ -109,7 +109,7 @@ const CreateWorkoutPlan: React.FC = () => {
 
   return (
     <>
-      <div className="flex flex-col gap-4 p-5 overflow-y-scroll hide-scrollbar w-5/6 max-h-[95vh] ">
+      <div className="flex flex-col gap-4 px-20 py-4   w-full ">
         <div className=" w-full flex justify-between items-center">
           <h1 className="text-4xl">תוכנית אימון</h1>
           <Toggle onClick={() => toggleIsEditable()} className="px-3 rounded cursor-pointer ">
