@@ -1,5 +1,5 @@
 import { deleteItem, fetchData } from "@/API/api";
-import { IWeighIns } from "@/interfaces/IWeighIns";
+import { IWeighIn, IWeighIns } from "@/interfaces/IWeighIns";
 
 const WEIGH_INS_ENDPOINT = "weighIns/";
 
@@ -10,7 +10,7 @@ export const useWeighInsApi = () => {
     deleteItem(WEIGH_INS_ENDPOINT + "user", userID);
 
   const getWeighInsByUserId = (userID: string) =>
-    fetchData<IWeighIns>(`${WEIGH_INS_ENDPOINT}user/${userID}`);
+    fetchData<IWeighIn[]>(`${WEIGH_INS_ENDPOINT}user/${userID}`);
 
   const getWeighInsById = (id: string) => fetchData<IWeighIns>(WEIGH_INS_ENDPOINT + id);
 

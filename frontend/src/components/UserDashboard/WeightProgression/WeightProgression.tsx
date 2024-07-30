@@ -2,7 +2,7 @@ import { WeightChart } from "./WeightChart";
 import { WeightCalendar } from "./WeightCalendar";
 import { Card, CardContent } from "../../ui/card";
 import { useEffect, useState } from "react";
-import { IWeighIns } from "@/interfaces/IWeighIns";
+import { IWeighIn } from "@/interfaces/IWeighIns";
 import { useWeighInsApi } from "@/hooks/useWeighInsApi";
 import { useParams } from "react-router";
 
@@ -10,7 +10,7 @@ export const WeightProgression = () => {
   const { id } = useParams();
 
   const { getWeighInsByUserId } = useWeighInsApi();
-  const [weighIns, setWeighIns] = useState<IWeighIns | null>();
+  const [weighIns, setWeighIns] = useState<IWeighIn[] | null>();
 
   useEffect(() => {
     if (!id) return;

@@ -8,7 +8,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { IWeighIns } from "@/interfaces/IWeighIns";
+import { IWeighIn } from "@/interfaces/IWeighIns";
 import { FC } from "react";
 import DateUtils from "@/lib/dateUtils";
 
@@ -24,7 +24,7 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 type WeighChartProps = {
-  weighIns: IWeighIns;
+  weighIns: IWeighIn[];
 };
 
 export const WeightChart: FC<WeighChartProps> = ({ weighIns }) => {
@@ -33,7 +33,7 @@ export const WeightChart: FC<WeighChartProps> = ({ weighIns }) => {
       <ChartContainer className=" max-h-[400px] w-full" config={chartConfig}>
         <LineChart
           accessibilityLayer
-          data={weighIns.weighIns}
+          data={weighIns}
           margin={{
             left: 12,
             right: 12,

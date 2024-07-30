@@ -1,4 +1,4 @@
-import { IWeighIns } from "@/interfaces/IWeighIns";
+import { IWeighIn } from "@/interfaces/IWeighIns";
 import { Card, CardContent } from "../../ui/card";
 import { FC } from "react";
 import { type DayContentProps } from "react-day-picker";
@@ -6,13 +6,13 @@ import { type DayContentProps } from "react-day-picker";
 import { Calendar } from "../../ui/calendar";
 
 type WeighCalendarProps = {
-  weighIns: IWeighIns;
+  weighIns: IWeighIn[];
 };
 
 const formatDate = (date: Date) => date.toISOString().split("T")[0];
 
 export const WeightCalendar: FC<WeighCalendarProps> = ({ weighIns }) => {
-  const weighInLookup: Record<string, number> = weighIns.weighIns.reduce((acc, weighIn) => {
+  const weighInLookup: Record<string, number> = weighIns.reduce((acc, weighIn) => {
     const date = new Date(weighIn.date);
     acc[formatDate(date)] = weighIn.weight;
 
