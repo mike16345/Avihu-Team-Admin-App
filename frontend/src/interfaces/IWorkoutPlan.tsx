@@ -2,8 +2,9 @@ export interface IWorkoutPlan {
   id?: string;
   userId?: string;
   planName: string;
-  workouts: IMuscleGroupWorkouts[];
+  muscleGroups: IMuscleGroupWorkouts[];
 }
+
 export interface ICompleteWorkoutPlan {
   userId?: string;
   workoutPlans: IWorkoutPlan[];
@@ -16,8 +17,7 @@ export interface ISet {
   restTime?: number;
 }
 
-export interface IWorkout {
-  id: string;
+export interface IExercise {
   tipFromTrainer?: string;
   linkToVideo?: string;
   name: string;
@@ -26,12 +26,12 @@ export interface IWorkout {
 
 export interface IMuscleGroupWorkouts {
   muscleGroup: string;
-  exercises: IWorkout[]
+  exercises: IExercise[];
 }
 
 export interface IWorkoutPlanPreset {
   name: string;
-  workoutPlans: IWorkoutPlan[]
+  workoutPlans: IWorkoutPlan[];
 }
 
 export interface IExercisePresetItem {
@@ -39,7 +39,6 @@ export interface IExercisePresetItem {
   muscleGroup: string;
   tipsFromTrainer?: string;
   linkToVideo: string;
-
 }
 export interface IMuscleGroupItem {
   name: string;

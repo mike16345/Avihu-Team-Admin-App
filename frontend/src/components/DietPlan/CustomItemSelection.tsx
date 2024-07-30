@@ -88,7 +88,7 @@ export const CustomItemSelection: FC<CustomItemSelectionProps> = ({
   };
 
   return (
-    <div className="flex   flex-wrap items-center p-2  max-h-48 custom-scrollbar overflow-y-scroll gap-4">
+    <div className="flex flex-wrap items-center p-2  max-h-48 custom-scrollbar overflow-y-scroll gap-4">
       {proteinItems.map((item, index) => (
         <Badge
           key={index}

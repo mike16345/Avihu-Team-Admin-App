@@ -5,7 +5,7 @@ import {
   IMuscleGroupWorkouts,
   IWorkoutPlan,
 } from "@/interfaces/IWorkoutPlan";
-import MuscleGroupContainer from "./MuscleGroupContainer";
+import WorkoutContainer from "./WorkoutPlanContainer";
 import { useWorkoutPlanApi } from "@/hooks/useWorkoutPlanApi";
 import { cleanWorkoutObject } from "@/utils/workoutPlanUtils";
 import { Button } from "../ui/button";
@@ -15,7 +15,7 @@ import { useParams } from "react-router-dom";
 import { Toggle } from "@/components/ui/toggle";
 import { toast } from "sonner";
 import { useWorkoutPlanPresetApi } from "@/hooks/useWorkoutPlanPresetsApi";
-import { useIsEditableContext } from "../context/useIsEditableContext";
+import { useIsEditableContext } from "@/context/useIsEditableContext";
 
 const CreateWorkoutPlan: React.FC = () => {
   const { id } = useParams();
@@ -30,12 +30,15 @@ const CreateWorkoutPlan: React.FC = () => {
     const newWorkoutPlan = workoutPlan.map((workout, i) =>
       i == index ? { ...workout, planName: newName } : workout
     );
-    
+
     setWorkoutPlan(newWorkoutPlan);
   };
 
   const handleAddWorkout = () => {
-    const newObject = { planName: `אימון ${workoutPlan.length + 1}`, workouts: [] };
+    const newObject: IWorkoutPlan = {
+      planName: `אימון ${workoutPlan.length + 1}`,
+      muscleGroups: [],
+    };
 
     setWorkoutPlan([...workoutPlan, newObject]);
   };
@@ -52,12 +55,12 @@ const CreateWorkoutPlan: React.FC = () => {
 
       if (workoutExists) {
         return prevWorkoutPlan.map((workout, i) =>
-          i === index ? { ...workout, workouts: workouts } : workout
+          i === index ? { ...workout, muscleGroups: workouts } : workout
         );
       } else {
         return [
           ...prevWorkoutPlan,
-          { planName: `אימון ${workoutPlan.length + 1}`, workouts: workouts },
+          { planName: `אימון ${workoutPlan.length + 1}`, muscleGroups: workouts },
         ];
       }
     });
@@ -126,17 +129,20 @@ const CreateWorkoutPlan: React.FC = () => {
             />
           )}
 
-          {workoutPlan.map((workout, i) => (
-            <Fragment key={i}>
-              <MuscleGroupContainer
-                workout={workout.workouts}
-                handleSave={(workouts) => handleSave(i, workouts)}
-                title={workout.planName}
-                handlePlanNameChange={(newName) => handlePlanNameChange(newName, i)}
-                handleDeleteWorkout={() => handleDeleteWorkout(i)}
-              />
-            </Fragment>
-          ))}
+          {workoutPlan.map((workout, i) => {
+            console.log("workout", workout);
+            return (
+              <Fragment key={i}>
+                <WorkoutContainer
+                  initialMuscleGroups={workout.muscleGroups}
+                  handleSave={(workouts) => handleSave(i, workouts)}
+                  title={workout.planName}
+                  handlePlanNameChange={(newName) => handlePlanNameChange(newName, i)}
+                  handleDeleteWorkout={() => handleDeleteWorkout(i)}
+                />
+              </Fragment>
+            );
+          })}
           <div className="w-full flex items-center justify-center">
             {isEditable && (
               <Button onClick={handleAddWorkout}>

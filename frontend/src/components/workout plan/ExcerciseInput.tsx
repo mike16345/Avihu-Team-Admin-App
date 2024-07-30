@@ -1,43 +1,42 @@
-import React, { useRef, useState } from "react";
+import React, { Fragment, useRef, useState } from "react";
 import ComboBox from "./ComboBox";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { IExercisePresetItem, ISet, IWorkout } from "@/interfaces/IWorkoutPlan";
+import { IExercisePresetItem, ISet, IExercise } from "@/interfaces/IWorkoutPlan";
 import SetsContainer from "./SetsContainer";
 import { Input } from "../ui/input";
 import { IoClose } from "react-icons/io5";
 import { Card, CardContent, CardHeader } from "../ui/card";
 import { AddWorkoutPlanCard } from "./AddWorkoutPlanCard";
-import DeleteModal from "./DeleteModal";
 import useExercisePresetApi from "@/hooks/useExercisePresetApi";
-import { useIsEditableContext } from "../context/useIsEditableContext";
+import { useIsEditableContext } from "@/context/useIsEditableContext";
+import DeleteModal from "../Alerts/DeleteModal";
 
 interface ExcerciseInputProps {
   options?: string;
-  updateWorkouts: (workouts: IWorkout[]) => void;
-  exercises?: IWorkout[];
+  updateWorkouts: (workouts: IExercise[]) => void;
+  exercises?: IExercise[];
 }
 
 const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts, exercises }) => {
+  const { isEditable } = useIsEditableContext();
+
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const { getExerciseByMuscleGroup } = useExercisePresetApi();
   const exerciseIndexToDelete = useRef<number | null>(null);
 
-  const [workoutObjs, setWorkoutObjs] = useState<IWorkout[]>(
+  const [workoutObjs, setWorkoutObjs] = useState<IExercise[]>(
     exercises || [
       {
-        id: `1`,
         name: ``,
         sets: [],
       },
     ]
   );
 
-  const { isEditable } = useIsEditableContext();
-
-  const handleUpdateWorkoutObject = <K extends keyof IWorkout>(
+  const handleUpdateWorkoutObject = <K extends keyof IExercise>(
     key: K,
-    value: IWorkout[K],
+    value: IExercise[K],
     index: number
   ) => {
     const updatedWorkouts = workoutObjs.map((workout, i) =>
@@ -62,8 +61,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
   };
 
   const handleAddExcercise = () => {
-    const newObject: IWorkout = {
-      id: (workoutObjs.length + 1).toString(),
+    const newObject: IExercise = {
       name: ``,
       sets: [
         {
@@ -108,14 +106,11 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
   return (
     <>
       <div className="w-full flex flex-col gap-3 px-2 py-4">
-        <div className="grid lg:grid-cols-2 gap-4">
+        <div className="grid xl:grid-cols-2 gap-4">
           {workoutObjs.map((item, i) => (
-            <>
-              <Card
-                key={i}
-                className=" px-3 py-2 border-b-2 last:border-b-0  max-h-[550px] overflow-y-auto custom-scrollbar"
-              >
-                <CardHeader className="">
+            <Fragment key={i}>
+              <Card className=" p-6 max-h-[575px] overflow-y-auto custom-scrollbar">
+                <CardHeader>
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center justify-between">
                       <h2 className="font-bold underline">תרגיל:</h2>
@@ -142,12 +137,12 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
                     )}
                   </div>
                 </CardHeader>
-                <CardContent className="flex flex-col gap-2 ">
+                <CardContent className="flex flex-col gap-4 ">
                   <SetsContainer
                     existingSets={item.sets}
                     updateSets={(setsArr: ISet[]) => updateSets(setsArr, i)}
                   />
-                  <div className=" flex flex-col gap-1">
+                  <div className=" flex flex-col gap-4">
                     <div>
                       <Label className="font-bold underline">לינק לסרטון</Label>
                       {isEditable ? (
@@ -161,9 +156,20 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
                           }
                         />
                       ) : (
-                        <p className="py-1 border-b-2">
+                        <a
+                          onClick={(e) => {
+                            const target = e.target as HTMLAnchorElement;
+                            if (!target || !target.href || !target.href.includes("youtube")) {
+                              e.preventDefault();
+                              return;
+                            }
+                          }}
+                          target="_blank"
+                          href={item.linkToVideo}
+                          className="py-1 block border-b-2 text-ellipsis break-words whitespace-normal"
+                        >
                           {item.linkToVideo == `` ? `לא קיים` : item.linkToVideo}
-                        </p>
+                        </a>
                       )}
                     </div>
                     <div>
@@ -179,13 +185,17 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
                           }
                         />
                       ) : (
-                        <p className="border-b-2">{item.tipFromTrainer || `לא קיים`}</p>
+                        <p className="py-1 border-b-2 text-ellipsis break-words whitespace-normal">
+                          {item.tipFromTrainer?.replace(" ", "").length == 0
+                            ? `לא קיים`
+                            : item.tipFromTrainer}
+                        </p>
                       )}
                     </div>
                   </div>
                 </CardContent>
               </Card>
-            </>
+            </Fragment>
           ))}
           {isEditable && (
             <div className="h-[550px]">

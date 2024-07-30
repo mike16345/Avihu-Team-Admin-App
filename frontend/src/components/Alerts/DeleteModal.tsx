@@ -1,7 +1,6 @@
 import React, { Dispatch, SetStateAction } from "react";
 
-import { Button } from "@/components/ui/button";
-import CustomAlertDialog from "../Alerts/DialogAlert/CustomAlertDialog";
+import CustomAlertDialog from "./DialogAlert/CustomAlertDialog";
 
 interface IDeleteModalProps {
   isModalOpen: boolean;
