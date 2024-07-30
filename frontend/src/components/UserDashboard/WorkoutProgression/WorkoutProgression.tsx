@@ -1,10 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { ExerciseProgressChart } from "./ExerciseProgressChart";
 import { useParams } from "react-router";
-import { MuscleGroupCombobox } from "./MuscleGroupCombobox";
-import { Label } from "@/components/ui/label";
 import { RecordedSetsList } from "./RecordedSetsList";
-import { ExerciseComboBox } from "./ExerciseComboBox";
 import { MuscleExerciseSelector } from "./MuscleExerciseSelector";
 
 export const WorkoutProgression = () => {

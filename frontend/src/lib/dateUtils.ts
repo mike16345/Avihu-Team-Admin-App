@@ -175,7 +175,7 @@ class DateUtils {
     return labels.length > 5 ? labels.map((label) => label.slice(0, 3)) : labels;
   }
 
-  static convertToDate(date: string): Date {
+  static convertToDate(date: string | Date): Date {
     return new Date(date);
   }
 }

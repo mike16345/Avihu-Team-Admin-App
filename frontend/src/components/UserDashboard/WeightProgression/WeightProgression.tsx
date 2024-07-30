@@ -1,10 +1,18 @@
 import { WeightChart } from "./WeightChart";
 import { WeightCalendar } from "./WeightCalendar";
-import { Card, CardContent } from "../../ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../../ui/card";
 import { useEffect, useState } from "react";
 import { IWeighIn } from "@/interfaces/IWeighIns";
 import { useWeighInsApi } from "@/hooks/useWeighInsApi";
 import { useParams } from "react-router";
+import { CurrentWeighIn } from "./CurrentWeighIn";
 
 export const WeightProgression = () => {
   const { id } = useParams();
@@ -24,17 +32,27 @@ export const WeightProgression = () => {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="w-full h-[400px] flex items-center gap-12">
+      <div className="w-full h-full flex items-center ">
         {weighIns && (
-          <>
-            <WeightCalendar weighIns={weighIns} />
-            <WeightChart weighIns={weighIns} />
-          </>
+          <Card className="size-full">
+            <CardHeader>
+              <CardTitle>מעקב שקילה</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col  gap-2">
+              <div className="flex flex-col xl:flex-row gap-2">
+                <WeightCalendar weighIns={weighIns} />
+                <WeightChart weighIns={weighIns} />
+              </div>
+              <CurrentWeighIn weighIn={weighIns[weighIns.length - 1]} />
+            </CardContent>
+          </Card>
         )}
       </div>
-      <div className="flex flex-col gap-2">
-        <h1 className="text-lg font-semibold">תמונות</h1>
-        <div className="flex flex-wrap items-center  gap-4 border rounded px-2 py-4">
+      <Card className="flex flex-col gap-2">
+        <CardHeader className="text-lg font-semibold">
+          <CardTitle>תמונות</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-wrap items-center gap-2 rounded ">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
             <Card key={i}>
               <CardContent>
@@ -42,8 +60,8 @@ export const WeightProgression = () => {
               </CardContent>
             </Card>
           ))}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

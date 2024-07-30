@@ -15,3 +15,10 @@ const workoutPlanNames = {
 export function getWorkoutPlanName(plan: WorkoutPlan): string {
   return workoutPlanNames[plan] || "";
 }
+
+export function poundsToKg(pounds: number) {
+  const conversionFactor = 0.453592;
+  const kilograms = pounds * conversionFactor;
+
+  return kilograms.toFixed(2);
+}
