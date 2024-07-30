@@ -7,12 +7,12 @@ import { toast } from 'sonner';
 import {  defaultMeal } from "@/constants/DietPlanConsts";
 
 interface DietPlanFormProps{
-    save:(dietPlan:IDietPlan)=>void
-    existingItem?:IDietPlan;
+    handleSaveDietPlan:(dietPlan:IDietPlan)=>void
+    existingDietPlan?:IDietPlan;
 }
 
-const DietPlanForm:React.FC<DietPlanFormProps> = ({save,existingItem}) => {
-    const [dietPlan, setDietPlan] = useState<IDietPlan | undefined>(existingItem);
+const DietPlanForm:React.FC<DietPlanFormProps> = ({handleSaveDietPlan,existingDietPlan}) => {
+    const [dietPlan, setDietPlan] = useState<IDietPlan | undefined>(existingDietPlan);
     const [openDeleteModal, setOpenDeleteModal] = useState(false);
     const [mealToDelete, setMealToDelete] = useState<number | null>(null);
 
@@ -41,11 +41,7 @@ const DietPlanForm:React.FC<DietPlanFormProps> = ({save,existingItem}) => {
     toast.success("ארוחה נשמרה בהצלחה!");
   };
 
-  useEffect(()=>{
-    if (existingItem) {
-        setDietPlan(existingItem)
-    }
-  },[existingItem])
+ 
 
   return (
     <div className=" flex flex-col gap-4 w-4/5 h-full hide-scrollbar overflow-y-auto">
@@ -73,7 +69,7 @@ const DietPlanForm:React.FC<DietPlanFormProps> = ({save,existingItem}) => {
           })}
           {dietPlan.meals.length > 0 && (
             <div>
-              <Button className="font-bold" variant="success" onClick={()=>save(dietPlan)}>
+              <Button className="font-bold" variant="success" onClick={()=>handleSaveDietPlan(dietPlan)}>
                 שמור תפריט
               </Button>
             </div>

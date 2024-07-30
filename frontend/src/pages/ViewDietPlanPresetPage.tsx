@@ -77,9 +77,9 @@ export const ViewDietPlanPage = () => {
   return (
     <div className=" flex flex-col gap-4 w-4/5 h-full hide-scrollbar overflow-y-auto">
       <h1 className="text-2xl font-semibold mb-4">עריכת תפריט תזונה</h1>
-      { selectedSaveFunc && 
+      {/* { selectedSaveFunc && 
         <DietPlanForm existingItem={dietPlan} save={(dietPlan)=>selectedSaveFunc(dietPlan)} />
-      }
+      } */}
     </div>
   );
 };
