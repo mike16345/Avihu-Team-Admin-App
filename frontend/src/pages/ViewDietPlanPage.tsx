@@ -11,7 +11,7 @@ export const ViewDietPlanPage = () => {
 
   const { addDietPlan, updateDietPlanByUserId, getDietPlanByUserId } = useDietPlanApi();
 
-   const [selectedSaveFunc,setSelectedSaveFunc] = useState<((dietPlan: IDietPlan) => void)|null>(null)
+   const [isNewPlan,setIsNewPlan] = useState<boolean>(false)
 
     const [dietPlan, setDietPlan] = useState<IDietPlan>();
 
@@ -62,11 +62,11 @@ export const ViewDietPlanPage = () => {
       .then((dietPlan) => {
         if (dietPlan) {
           setDietPlan(dietPlan);
-          setSelectedSaveFunc(()=>editDietPlan)
+          setIsNewPlan(false)
         } else {
           console.log(`womp womp`);
           setDietPlan(defaultDietPlan);
-          setSelectedSaveFunc(()=>createDietPlan)
+          setIsNewPlan(true)
         }
       })
       .catch((err: Error) => {
@@ -77,9 +77,15 @@ export const ViewDietPlanPage = () => {
   return (
     <div className=" flex flex-col gap-4 w-4/5 h-full hide-scrollbar overflow-y-auto">
       <h1 className="text-2xl font-semibold mb-4">עריכת תפריט תזונה</h1>
-      { selectedSaveFunc && 
-        <DietPlanForm existingDietPlan={dietPlan} handleSaveDietPlan={(dietPlan)=>selectedSaveFunc(dietPlan)} />
-      }
+        <DietPlanForm 
+          existingDietPlan={dietPlan} 
+          handleSaveDietPlan={
+            isNewPlan?
+            (dietPlan)=>createDietPlan(dietPlan)
+            :
+            (dietPlan)=>editDietPlan(dietPlan)
+          } 
+        />
     </div>
   );
 };
