@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import { useParams } from "react-router";
 import { defaultDietPlan, } from "@/constants/DietPlanConsts";
 import DietPlanForm from "@/components/DietPlan/DietPlanForm";
+import Loader from "@/components/ui/Loader";
+import ErrorPage from "./ErrorPage";
 
 export const ViewDietPlanPage = () => {
   const { id } = useParams();
@@ -14,6 +16,10 @@ export const ViewDietPlanPage = () => {
    const [isNewPlan,setIsNewPlan] = useState<boolean>(false)
 
     const [dietPlan, setDietPlan] = useState<IDietPlan>();
+
+    const [isLoading,setIsLoading]=useState<boolean>(false)
+
+    const [error,setError]=useState<string>()
 
 
  const createDietPlan = (dietPlan:IDietPlan)=>{
@@ -57,22 +63,29 @@ export const ViewDietPlanPage = () => {
 
   useEffect(() => {
     if (!id) return;
-
+    setIsLoading(true)
     getDietPlanByUserId(id)
       .then((dietPlan) => {
         if (dietPlan) {
           setDietPlan(dietPlan);
           setIsNewPlan(false)
         } else {
-          console.log(`womp womp`);
           setDietPlan(defaultDietPlan);
           setIsNewPlan(true)
         }
       })
       .catch((err: Error) => {
-        console.error(err);
+        setError(err.message);
+      })
+      .finally(()=>{
+        setTimeout(()=>{
+          setIsLoading(false)
+        },1500)
       });
   }, []);
+
+  if (isLoading) return <Loader size="large"/>
+  if(error) return <ErrorPage message={error}/>
 
   return (
     <div className=" flex flex-col gap-4 w-4/5 h-full hide-scrollbar overflow-y-auto">
