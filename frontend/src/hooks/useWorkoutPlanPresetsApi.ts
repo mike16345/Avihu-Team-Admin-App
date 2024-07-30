@@ -1,42 +1,29 @@
 import { deleteItem, fetchData, sendData, updateItem } from "@/API/api";
-import { ICompleteWorkoutPlan, IWorkoutPlanPreset } from "@/interfaces/IWorkoutPlan";
+import { IWorkoutPlanPreset } from "@/interfaces/IWorkoutPlan";
 
-const WORKOUT_PLAN_ENDPOINT = "workoutPlansPresets/";
+const WORKOUT_PLAN_PRESETS_ENDPOINT = "presets/workoutPlans/";
 
-export const useWorkoutPlanPresetApi = () => {/* 
-  
-
-  
-
-  const updateWorkoutPlanByUserId = (userID: string, workoutPlan: ICompleteWorkoutPlan) =>
-    updateItem(`${WORKOUT_PLAN_ENDPOINT}user/${userID}`, workoutPlan);
-
-  */
-
-  const getAllWorkoutPlanPresets = () => fetchData<IWorkoutPlanPreset[]>(WORKOUT_PLAN_ENDPOINT);
+export const useWorkoutPlanPresetApi = () => {
+  const getAllWorkoutPlanPresets = () =>
+    fetchData<IWorkoutPlanPreset[]>(WORKOUT_PLAN_PRESETS_ENDPOINT);
 
   const getWorkoutPlanPresetById = (presetID: string) =>
-    fetchData<IWorkoutPlanPreset>(WORKOUT_PLAN_ENDPOINT + presetID);
+    fetchData<IWorkoutPlanPreset>(WORKOUT_PLAN_PRESETS_ENDPOINT + presetID);
 
-  const addWorkoutPlanPreset = (workoutPlan: IWorkoutPlanPreset) => sendData<IWorkoutPlanPreset>(WORKOUT_PLAN_ENDPOINT, workoutPlan);
+  const addWorkoutPlanPreset = (workoutPlan: IWorkoutPlanPreset) =>
+    sendData<IWorkoutPlanPreset>(WORKOUT_PLAN_PRESETS_ENDPOINT, workoutPlan);
 
-  const deleteWorkoutPlanPreset = (presetID: string) => deleteItem(WORKOUT_PLAN_ENDPOINT, presetID);
-
+  const deleteWorkoutPlanPreset = (presetID: string) =>
+    deleteItem(WORKOUT_PLAN_PRESETS_ENDPOINT, presetID);
+  
   const updateWorkoutPlanPreset = (presetID: string, workoutPlanPreset: IWorkoutPlanPreset) =>
-    updateItem(WORKOUT_PLAN_ENDPOINT + presetID, workoutPlanPreset);
-
+    updateItem(WORKOUT_PLAN_PRESETS_ENDPOINT + presetID, workoutPlanPreset);
 
   return {
     getAllWorkoutPlanPresets,
     addWorkoutPlanPreset,
     deleteWorkoutPlanPreset,
     getWorkoutPlanPresetById,
-    updateWorkoutPlanPreset
-    /* getWorkoutPlan,
-    getWorkoutPlanByUserId,
-    deleteWorkoutPlan,
-    updateWorkoutPlanByUserId,
-    updateWorkoutPlan,
-    addWorkoutPlan, */
+    updateWorkoutPlanPreset,
   };
 };

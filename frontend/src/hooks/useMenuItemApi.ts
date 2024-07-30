@@ -1,8 +1,7 @@
 import { fetchData, sendData, updateItem, deleteItem } from '@/API/api'
 import { IMenuItem } from '@/interfaces/IDietPlan'
-import React from 'react'
 
-const MENU_ITEMS_ENDPOINT = `/menuItems/`
+const MENU_ITEMS_ENDPOINT = `presets/menuItems/`
 
 const useMenuItemApi = () => {
     const getAllMenuItems = () => fetchData<IMenuItem[]>(MENU_ITEMS_ENDPOINT)
