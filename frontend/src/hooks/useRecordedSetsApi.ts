@@ -1,5 +1,5 @@
 import { fetchData, sendData, updateItem } from "@/API/api";
-import { IRecordedSet } from "@/interfaces/IWorkout";
+import { IMuscleGroupRecordedSets, IRecordedSet } from "@/interfaces/IWorkout";
 
 const RECORDED_SETS_ENDPOINT = "recordedSets";
 
@@ -17,7 +17,7 @@ export const useRecordedSetsApi = () => {
   const getRecordedSetsByUserId = (id: string) => {
     const endpoint = RECORDED_SETS_ENDPOINT + "/user/" + id;
 
-    return fetchData<IRecordedSet[]>(endpoint);
+    return fetchData<IMuscleGroupRecordedSets[]>(endpoint);
   };
 
   const getUserRecordedMuscleGroupNames = (id: string) => {

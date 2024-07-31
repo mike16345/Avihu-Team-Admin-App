@@ -101,7 +101,6 @@ export function MuscleGroupCombobox({ value, muscleGroups, onChange }: ComboBoxP
   const [currentValue, setValue] = React.useState(value);
   const options = convertStringsToOptions(muscleGroups);
 
-  console.log("options", options);
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>

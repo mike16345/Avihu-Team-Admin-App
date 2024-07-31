@@ -1,11 +1,20 @@
-import { useEffect, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { ExerciseComboBox } from "./ExerciseComboBox";
 import { MuscleGroupCombobox } from "./MuscleGroupCombobox";
 import { Label } from "@/components/ui/label";
 import { useRecordedSetsApi } from "@/hooks/useRecordedSetsApi";
 import { useParams } from "react-router-dom";
+import { IRecordedSet } from "@/interfaces/IWorkout";
 
-export const MuscleExerciseSelector = () => {
+interface MuscleExerciseSelectorProps {
+  onSelectMuscleGroup: (muscleGroup: string) => void;
+  onSelectExercise: (exercise: string) => void;
+}
+
+export const MuscleExerciseSelector: FC<MuscleExerciseSelectorProps> = ({
+  onSelectExercise,
+  onSelectMuscleGroup,
+}) => {
   const { id } = useParams();
 
   const { getUserRecordedMuscleGroupNames, getUserRecordedExerciseNamesByMuscleGroup } =
@@ -15,17 +24,19 @@ export const MuscleExerciseSelector = () => {
   const [exercises, setExercises] = useState<string[]>([]);
 
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState<string>("");
-  const [selectedExercise, setSelectedExercise] = useState<string>("");
 
   const handleSelectMuscleGroup = async (muscleGroup: string) => {
     if (!id) return;
 
     console.log("muscle group", muscleGroup);
+    onSelectMuscleGroup(muscleGroup);
     setSelectedMuscleGroup(muscleGroup);
     getUserRecordedExerciseNamesByMuscleGroup(id, muscleGroup).then((res) => setExercises(res));
   };
 
-  const handleSelectExercise = (exercise: string) => {};
+  const handleSelectExercise = (exercise: string) => {
+    onSelectExercise(exercise);
+  };
 
   useEffect(() => {
     if (!id) return;
