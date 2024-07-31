@@ -20,6 +20,7 @@ export const MuscleExerciseSelector = () => {
   const handleSelectMuscleGroup = async (muscleGroup: string) => {
     if (!id) return;
 
+    console.log("muscle group", muscleGroup);
     setSelectedMuscleGroup(muscleGroup);
     getUserRecordedExerciseNamesByMuscleGroup(id, muscleGroup).then((res) => setExercises(res));
   };

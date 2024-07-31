@@ -49,5 +49,6 @@ export function getElapsedSeconds(timestamp: number) {
 }
 
 export const convertStringsToOptions = (data: string[]) => {
+  console.log("data", data);
   return data.map((item, index) => ({ value: item, label: item }));
 };

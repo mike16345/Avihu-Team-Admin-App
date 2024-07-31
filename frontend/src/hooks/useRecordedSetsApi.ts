@@ -22,13 +22,14 @@ export const useRecordedSetsApi = () => {
 
   const getUserRecordedMuscleGroupNames = (id: string) => {
     const endpoint = RECORDED_SETS_ENDPOINT + "/user/" + id + "/names/muscleGroups";
+
     return fetchData<string[]>(endpoint);
   };
 
   const getUserRecordedExerciseNamesByMuscleGroup = (id: string, group: string) => {
-    const endpoint = RECORDED_SETS_ENDPOINT + "/user/" + id + "/names/";
+    const endpoint = RECORDED_SETS_ENDPOINT + "/user/" + id + "/names";
 
-    return fetchData<IRecordedSet[]>(endpoint, { muscleGroup: group });
+    return fetchData<string[]>(endpoint, { muscleGroup: group });
   };
 
   return {

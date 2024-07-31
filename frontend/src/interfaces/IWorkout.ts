@@ -7,3 +7,14 @@ export interface IRecordedSet {
   date: Date;
   note: string;
 }
+
+export interface IExerciseRecordedSets {
+  [exercise: string]: IRecordedSet[];
+}
+
+
+export interface IMuscleGroupRecordedSets {
+  userId: string;
+  muscleGroup: string;
+  recordedSets: IExerciseRecordedSets;
+}

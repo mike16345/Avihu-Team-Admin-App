@@ -99,9 +99,9 @@ interface ComboBoxProps {
 export function MuscleGroupCombobox({ value, muscleGroups, onChange }: ComboBoxProps) {
   const [open, setOpen] = React.useState(false);
   const [currentValue, setValue] = React.useState(value);
-
   const options = convertStringsToOptions(muscleGroups);
 
+  console.log("options", options);
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -118,7 +118,7 @@ export function MuscleGroupCombobox({ value, muscleGroups, onChange }: ComboBoxP
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
-        <Command>
+        <Command value={currentValue}>
           <CommandInput placeholder="חפש קבוצת שריר..." className="h-9" />
           <CommandList>
             <CommandEmpty>No framework found.</CommandEmpty>
@@ -127,9 +127,9 @@ export function MuscleGroupCombobox({ value, muscleGroups, onChange }: ComboBoxP
                 <CommandItem
                   key={framework.value}
                   value={framework.value}
-                  onSelect={(val) => {
-                    setValue(val === currentValue ? "" : val);
-                    onChange(val === currentValue ? "" : val);
+                  onSelect={() => {
+                    setValue(framework.value);
+                    onChange(framework.value);
                     setOpen(false);
                   }}
                 >

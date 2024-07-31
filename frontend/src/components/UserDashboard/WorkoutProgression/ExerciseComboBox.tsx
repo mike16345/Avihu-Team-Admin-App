@@ -46,7 +46,7 @@ export const ExerciseComboBox: FC<IExerciseCombobox> = ({ exercises, handleSelec
           className="w-[200px] justify-between"
         >
           {value ? options.find((exercise) => exercise.value === value)?.label : "בחר תרגיל..."}
-          <FaSort className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <FaSort className="ml-2 \h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
@@ -59,8 +59,9 @@ export const ExerciseComboBox: FC<IExerciseCombobox> = ({ exercises, handleSelec
                 <CommandItem
                   key={exercise.value}
                   value={exercise.value}
-                  onSelect={(currentValue) => {
-                    setValue(currentValue === value ? "" : currentValue);
+                  onSelect={() => {
+                    setValue(exercise.value);
+                    handleSelectExercise(exercise.value);
                     setOpen(false);
                   }}
                 >

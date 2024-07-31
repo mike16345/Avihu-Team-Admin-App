@@ -3,15 +3,17 @@ import { ExerciseProgressChart } from "./ExerciseProgressChart";
 import { useParams } from "react-router";
 import { RecordedSetsList } from "./RecordedSetsList";
 import { MuscleExerciseSelector } from "./MuscleExerciseSelector";
-import { IRecordedSet } from "@/interfaces/IWorkout";
+import { IMuscleGroupRecordedSets, IRecordedSet } from "@/interfaces/IWorkout";
 import { useRecordedSetsApi } from "@/hooks/useRecordedSetsApi";
 
 export const WorkoutProgression = () => {
   const { id } = useParams();
-  const { getRecordedSetsByUserId ,} = useRecordedSetsApi();
+  const { getRecordedSetsByUserId } = useRecordedSetsApi();
 
-  const [recordedWorkouts, setRecordedWorkouts] = useState<IRecordedSet[]>([]);
-
+  const [recordedWorkouts, setRecordedWorkouts] = useState<IMuscleGroupRecordedSets | null>();
+  const [recordedSets, setRecordedSets] = useState<IRecordedSet[]>(
+    recordedWorkouts.recordedSets[0]
+  );
   // TODO: Fetch workout progress data for the given user and exercise
 
   useEffect(() => {

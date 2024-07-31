@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
-import { useState } from "react";
+import { FC, useState } from "react";
 import { FaChevronDown } from "react-icons/fa";
 import { SetDetails } from "./SetDetails";
 import { WorkoutPlan } from "@/enums/WorkoutPlans";
@@ -70,9 +70,14 @@ const recordedSetsByDate: { [date: string]: IRecordedSet[] } = {
   // Add more dates and sets as needed
 };
 
-export const RecordedSetsList = () => {
+interface RecordedSetsListProps {
+  recordedSets: IRecordedSet[];
+}
+
+export const RecordedSetsList: FC<RecordedSetsListProps> = ({ recordedSets }) => {
   const [isOpen, setIsOpen] = useState<{ [key: string]: boolean }>({});
 
+  console.log("recorded sets", recordedSets);
   const toggleOpen = (date: string) => {
     setIsOpen((prevState) => ({
       ...prevState,
