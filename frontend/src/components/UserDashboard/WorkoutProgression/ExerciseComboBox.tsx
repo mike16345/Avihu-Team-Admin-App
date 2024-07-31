@@ -26,13 +26,18 @@ const exercisesToOptions = (exercises: string[]): Exercise[] => {
 };
 
 interface IExerciseCombobox {
+  exercise: string;
   exercises: string[];
   handleSelectExercise: (value: string) => void;
 }
 
-export const ExerciseComboBox: FC<IExerciseCombobox> = ({ exercises, handleSelectExercise }) => {
+export const ExerciseComboBox: FC<IExerciseCombobox> = ({
+  exercise,
+  exercises,
+  handleSelectExercise,
+}) => {
   const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState("");
+  const [value, setValue] = React.useState(exercise);
 
   const options = convertStringsToOptions(exercises);
 
@@ -45,7 +50,7 @@ export const ExerciseComboBox: FC<IExerciseCombobox> = ({ exercises, handleSelec
           aria-expanded={open}
           className="w-[200px] justify-between"
         >
-          {value ? options.find((exercise) => exercise.value === value)?.label : "בחר תרגיל..."}
+          {exercise !== "" ? exercise : "בחר קבוצת שריר..."}
           <FaSort className="ml-2 \h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>

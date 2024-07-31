@@ -97,9 +97,10 @@ interface ComboBoxProps {
 }
 
 export function MuscleGroupCombobox({ value, muscleGroups, onChange }: ComboBoxProps) {
+  const options = convertStringsToOptions(muscleGroups);
+
   const [open, setOpen] = React.useState(false);
   const [currentValue, setValue] = React.useState(value);
-  const options = convertStringsToOptions(muscleGroups);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -110,14 +111,12 @@ export function MuscleGroupCombobox({ value, muscleGroups, onChange }: ComboBoxP
           aria-expanded={open}
           className="w-[200px] justify-between"
         >
-          {currentValue
-            ? options.find((framework) => framework.value === currentValue)?.label
-            : "בחר קבוצת שריר..."}
+          {value !== "" ? value : "בחר קבוצת שריר..."}
           <FaSort className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
-        <Command value={currentValue}>
+        <Command value={value}>
           <CommandInput placeholder="חפש קבוצת שריר..." className="h-9" />
           <CommandList>
             <CommandEmpty>No framework found.</CommandEmpty>
@@ -136,7 +135,7 @@ export function MuscleGroupCombobox({ value, muscleGroups, onChange }: ComboBoxP
                   <FaCheck
                     className={cn(
                       "mr-auto h-4 w-4",
-                      currentValue === framework.value ? "opacity-100" : "opacity-0"
+                      value === framework.value ? "opacity-100" : "opacity-0"
                     )}
                   />
                 </CommandItem>

@@ -7,11 +7,15 @@ import { useParams } from "react-router-dom";
 import { IRecordedSet } from "@/interfaces/IWorkout";
 
 interface MuscleExerciseSelectorProps {
+  muscleGroup: string;
+  exercise: string;
   onSelectMuscleGroup: (muscleGroup: string) => void;
   onSelectExercise: (exercise: string) => void;
 }
 
 export const MuscleExerciseSelector: FC<MuscleExerciseSelectorProps> = ({
+  muscleGroup,
+  exercise,
   onSelectExercise,
   onSelectMuscleGroup,
 }) => {
@@ -23,14 +27,11 @@ export const MuscleExerciseSelector: FC<MuscleExerciseSelectorProps> = ({
   const [muscleGroups, setMuscleGroups] = useState<string[]>([]);
   const [exercises, setExercises] = useState<string[]>([]);
 
-  const [selectedMuscleGroup, setSelectedMuscleGroup] = useState<string>("");
-
   const handleSelectMuscleGroup = async (muscleGroup: string) => {
     if (!id) return;
 
     console.log("muscle group", muscleGroup);
     onSelectMuscleGroup(muscleGroup);
-    setSelectedMuscleGroup(muscleGroup);
     getUserRecordedExerciseNamesByMuscleGroup(id, muscleGroup).then((res) => setExercises(res));
   };
 
@@ -52,13 +53,17 @@ export const MuscleExerciseSelector: FC<MuscleExerciseSelectorProps> = ({
         <Label>קבוצת שריר</Label>
         <MuscleGroupCombobox
           muscleGroups={muscleGroups}
-          value={selectedMuscleGroup}
+          value={muscleGroup}
           onChange={(val) => handleSelectMuscleGroup(val)}
         />
       </div>
       <div className="flex flex-col gap-1">
         <Label>תרגיל</Label>
-        <ExerciseComboBox exercises={exercises} handleSelectExercise={handleSelectExercise} />
+        <ExerciseComboBox
+          exercise={exercise}
+          exercises={exercises}
+          handleSelectExercise={handleSelectExercise}
+        />
       </div>
     </div>
   );

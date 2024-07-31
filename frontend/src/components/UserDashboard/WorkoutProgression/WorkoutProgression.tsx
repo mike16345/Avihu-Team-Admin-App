@@ -3,7 +3,7 @@ import { ExerciseProgressChart } from "./ExerciseProgressChart";
 import { useParams } from "react-router";
 import { RecordedSetsList } from "./RecordedSetsList";
 import { MuscleExerciseSelector } from "./MuscleExerciseSelector";
-import { IMuscleGroupRecordedSets, IRecordedSet } from "@/interfaces/IWorkout";
+import { IMuscleGroupRecordedSets } from "@/interfaces/IWorkout";
 import { useRecordedSetsApi } from "@/hooks/useRecordedSetsApi";
 
 export const WorkoutProgression = () => {
@@ -11,6 +11,7 @@ export const WorkoutProgression = () => {
   const { getRecordedSetsByUserId } = useRecordedSetsApi();
 
   const [recordedWorkouts, setRecordedWorkouts] = useState<IMuscleGroupRecordedSets[]>([]);
+
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState<string>("");
   const [selectedExercise, setSelectedExercise] = useState<string>("");
 
@@ -28,7 +29,14 @@ export const WorkoutProgression = () => {
     if (!id) return;
 
     getRecordedSetsByUserId(id)
-      .then((res) => setRecordedWorkouts(res))
+      .then((recordedWorkouts) => {
+        setRecordedWorkouts(recordedWorkouts);
+        const initialMuscleGroup = recordedWorkouts[0]?.muscleGroup || "";
+        const initialExercise = Object.keys(recordedWorkouts[0]?.recordedSets || {})[0] || "";
+
+        setSelectedMuscleGroup(initialMuscleGroup);
+        setSelectedExercise(initialExercise);
+      })
       .catch((e) => console.error(e));
   }, []);
 
@@ -37,6 +45,8 @@ export const WorkoutProgression = () => {
   return (
     <div className="size-full flex flex-col gap-4 p-4">
       <MuscleExerciseSelector
+        exercise={selectedExercise}
+        muscleGroup={selectedMuscleGroup}
         onSelectExercise={(exercise) => setSelectedExercise(exercise)}
         onSelectMuscleGroup={(muscleGroup) => setSelectedMuscleGroup(muscleGroup)}
       />
