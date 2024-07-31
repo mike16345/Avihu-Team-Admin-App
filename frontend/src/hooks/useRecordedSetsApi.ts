@@ -1,28 +1,41 @@
-import { fetchData } from "@/API/api";
+import { fetchData, sendData, updateItem } from "@/API/api";
 import { IRecordedSet } from "@/interfaces/IWorkout";
 
-const RECORDED_SETS_ENDPOINT = "recordedSets/";
+const RECORDED_SETS_ENDPOINT = "recordedSets";
 
 export const useRecordedSetsApi = () => {
-  const getRecordedSetsByUserId = (userID: string) =>
-    fetchData<IRecordedSet[]>(`${RECORDED_SETS_ENDPOINT}user/${userID}`);
-
-  const getRecordedSets = (id: string) => fetchData<IRecordedSet>(RECORDED_SETS_ENDPOINT + id);
-
-  const getUserRecordedExerciseNamesByMuscleGroup = (userId: string, muscleGroup: string) => {
-    return fetchData<string[]>(
-      RECORDED_SETS_ENDPOINT + userId + "/" + muscleGroup + "/exerciseNames"
-    );
+  const addRecordedSet = (recordedSet: IRecordedSet) => {
+    return sendData<IRecordedSet>(RECORDED_SETS_ENDPOINT, recordedSet);
   };
 
-  const getUserRecordedSetsByMuscleGroup = (userId: string, muscleGroup: string) => {
-    return fetchData<IRecordedSet[]>(RECORDED_SETS_ENDPOINT + userId + "/" + muscleGroup);
+  const updateRecordedSet = (id: string, recordedSet: IRecordedSet) => {
+    const endpoint = RECORDED_SETS_ENDPOINT + "/" + id;
+
+    return updateItem(endpoint, recordedSet);
+  };
+
+  const getRecordedSetsByUserId = (id: string) => {
+    const endpoint = RECORDED_SETS_ENDPOINT + "/user/" + id;
+
+    return fetchData<IRecordedSet[]>(endpoint);
+  };
+
+  const getUserRecordedMuscleGroupNames = (id: string) => {
+    const endpoint = RECORDED_SETS_ENDPOINT + "/user/" + id + "/names/muscleGroups";
+    return fetchData<string[]>(endpoint);
+  };
+
+  const getUserRecordedExerciseNamesByMuscleGroup = (id: string, group: string) => {
+    const endpoint = RECORDED_SETS_ENDPOINT + "/user/" + id + "/names/";
+
+    return fetchData<IRecordedSet[]>(endpoint, { muscleGroup: group });
   };
 
   return {
-    getRecordedSets,
+    addRecordedSet,
+    updateRecordedSet,
     getRecordedSetsByUserId,
-    getUserRecordedSetsByMuscleGroup,
+    getUserRecordedMuscleGroupNames,
     getUserRecordedExerciseNamesByMuscleGroup,
   };
 };

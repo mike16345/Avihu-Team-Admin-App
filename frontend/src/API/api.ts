@@ -8,6 +8,15 @@ async function request<T>(
   params?: any,
   headers?: any
 ): Promise<T> {
+  const request = {
+    method,
+    url: endpoint,
+    data,
+    params,
+    headers,
+  };
+
+  console.log("request", request);
   try {
     const response = await axiosInstance.request<T>({
       method,

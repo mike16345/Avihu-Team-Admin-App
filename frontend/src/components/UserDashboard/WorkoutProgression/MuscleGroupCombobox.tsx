@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { cn } from "@/lib/utils";
+import { cn, convertStringsToOptions } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -92,12 +92,15 @@ const muscleGroups = [
 
 interface ComboBoxProps {
   value: string;
+  muscleGroups: string[];
   onChange: (value: string) => void;
-} 
+}
 
-export function MuscleGroupCombobox({ value, onChange }: ComboBoxProps) {
+export function MuscleGroupCombobox({ value, muscleGroups, onChange }: ComboBoxProps) {
   const [open, setOpen] = React.useState(false);
   const [currentValue, setValue] = React.useState(value);
+
+  const options = convertStringsToOptions(muscleGroups);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -109,7 +112,7 @@ export function MuscleGroupCombobox({ value, onChange }: ComboBoxProps) {
           className="w-[200px] justify-between"
         >
           {currentValue
-            ? muscleGroups.find((framework) => framework.value === currentValue)?.label
+            ? options.find((framework) => framework.value === currentValue)?.label
             : "בחר קבוצת שריר..."}
           <FaSort className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -120,7 +123,7 @@ export function MuscleGroupCombobox({ value, onChange }: ComboBoxProps) {
           <CommandList>
             <CommandEmpty>No framework found.</CommandEmpty>
             <CommandGroup>
-              {muscleGroups.map((framework) => (
+              {options.map((framework) => (
                 <CommandItem
                   key={framework.value}
                   value={framework.value}
@@ -133,7 +136,7 @@ export function MuscleGroupCombobox({ value, onChange }: ComboBoxProps) {
                   {framework.label}
                   <FaCheck
                     className={cn(
-                      "ml-auto h-4 w-4",
+                      "mr-auto h-4 w-4",
                       currentValue === framework.value ? "opacity-100" : "opacity-0"
                     )}
                   />

@@ -9,8 +9,8 @@ import {
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { exercisesByMuscleGroup } from "@/constants/Workout";
-import { cn } from "@/lib/utils";
-import React from "react";
+import { cn, convertStringsToOptions } from "@/lib/utils";
+import React, { FC } from "react";
 import { FaSort, FaCheck } from "react-icons/fa";
 
 type Exercise = {
@@ -24,12 +24,17 @@ const exercisesToOptions = (exercises: string[]): Exercise[] => {
     value: exercise,
   }));
 };
-export const ExerciseComboBox = ({ muscleGroup }: { muscleGroup: string }) => {
+
+interface IExerciseCombobox {
+  exercises: string[];
+  handleSelectExercise: (value: string) => void;
+}
+
+export const ExerciseComboBox: FC<IExerciseCombobox> = ({ exercises, handleSelectExercise }) => {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
 
-  // @ts-ignore
-  const exercises = exercisesToOptions(exercisesByMuscleGroup[muscleGroup] || []);
+  const options = convertStringsToOptions(exercises);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -40,7 +45,7 @@ export const ExerciseComboBox = ({ muscleGroup }: { muscleGroup: string }) => {
           aria-expanded={open}
           className="w-[200px] justify-between"
         >
-          {value ? exercises.find((exercise) => exercise.value === value)?.label : "בחר תרגיל..."}
+          {value ? options.find((exercise) => exercise.value === value)?.label : "בחר תרגיל..."}
           <FaSort className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -50,7 +55,7 @@ export const ExerciseComboBox = ({ muscleGroup }: { muscleGroup: string }) => {
           <CommandList>
             <CommandEmpty>No exercise found.</CommandEmpty>
             <CommandGroup>
-              {exercises.map((exercise) => (
+              {options.map((exercise) => (
                 <CommandItem
                   key={exercise.value}
                   value={exercise.value}
@@ -62,7 +67,7 @@ export const ExerciseComboBox = ({ muscleGroup }: { muscleGroup: string }) => {
                   {exercise.label}
                   <FaCheck
                     className={cn(
-                      "ml-auto h-4 w-4",
+                      "mr-auto h-4 w-4",
                       value === exercise.value ? "opacity-100" : "opacity-0"
                     )}
                   />
