@@ -12,6 +12,7 @@ export const WorkoutProgression = () => {
 
   const [recordedWorkouts, setRecordedWorkouts] = useState<IMuscleGroupRecordedSets[]>([]);
 
+  // TODO: Add exercises and muscle groups array here.
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState<string>("");
   const [selectedExercise, setSelectedExercise] = useState<string>("");
 
