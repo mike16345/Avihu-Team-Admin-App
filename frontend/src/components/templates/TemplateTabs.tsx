@@ -44,19 +44,11 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
 
   useEffect(() => {
     if (selectedForm === `workoutPlan`) {
-      if (selectedObjectId) {
-        navigate(`/presets/workoutPlans/${selectedObjectId}`)
-      } else {
-        navigate(`/presets/workoutPlans/`)
-      }
+        navigate(`/presets/workoutPlans/${selectedObjectId||``}`)
     }
 
     if (selectedForm ===`dietPlans`) {
-            if (selectedObjectId) {
-        navigate(`/presets/dietPlans/${selectedObjectId}`)
-      } else {
-        navigate(`/presets/dietPlans/`)
-      }
+        navigate(`/presets/dietPlans/${selectedObjectId||``}`)
     }
   }, [selectedForm]);
 
