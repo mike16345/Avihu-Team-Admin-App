@@ -8,36 +8,24 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { exercisesByMuscleGroup } from "@/constants/Workout";
 import { cn, convertStringsToOptions } from "@/lib/utils";
 import React, { FC } from "react";
 import { FaSort, FaCheck } from "react-icons/fa";
 
-type Exercise = {
-  label: string;
-  value: string;
-};
 
-const exercisesToOptions = (exercises: string[]): Exercise[] => {
-  return exercises.map((exercise) => ({
-    label: exercise,
-    value: exercise,
-  }));
-};
 
 interface IExerciseCombobox {
-  exercise: string;
+  selectedExercise: string;
   exercises: string[];
   handleSelectExercise: (value: string) => void;
 }
 
 export const ExerciseComboBox: FC<IExerciseCombobox> = ({
-  exercise,
+  selectedExercise,
   exercises,
   handleSelectExercise,
 }) => {
   const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState(exercise);
 
   const options = convertStringsToOptions(exercises);
 
@@ -50,7 +38,7 @@ export const ExerciseComboBox: FC<IExerciseCombobox> = ({
           aria-expanded={open}
           className="w-[200px] justify-between"
         >
-          {exercise !== "" ? exercise : "בחר קבוצת שריר..."}
+          {selectedExercise !== "" ? selectedExercise : "בחר תרגיל..."}
           <FaSort className="ml-2 \h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -65,7 +53,6 @@ export const ExerciseComboBox: FC<IExerciseCombobox> = ({
                   key={exercise.value}
                   value={exercise.value}
                   onSelect={() => {
-                    setValue(exercise.value);
                     handleSelectExercise(exercise.value);
                     setOpen(false);
                   }}
@@ -74,7 +61,7 @@ export const ExerciseComboBox: FC<IExerciseCombobox> = ({
                   <FaCheck
                     className={cn(
                       "mr-auto h-4 w-4",
-                      value === exercise.value ? "opacity-100" : "opacity-0"
+                      selectedExercise === exercise.value ? "opacity-100" : "opacity-0"
                     )}
                   />
                 </CommandItem>

@@ -5,16 +5,15 @@ import { RecordedSetsList } from "./RecordedSetsList";
 import { MuscleExerciseSelector } from "./MuscleExerciseSelector";
 import { IMuscleGroupRecordedSets } from "@/interfaces/IWorkout";
 import { useRecordedSetsApi } from "@/hooks/useRecordedSetsApi";
+import { extractExercises } from "@/lib/workoutUtils";
 
 export const WorkoutProgression = () => {
   const { id } = useParams();
   const { getRecordedSetsByUserId } = useRecordedSetsApi();
 
   const [recordedWorkouts, setRecordedWorkouts] = useState<IMuscleGroupRecordedSets[]>([]);
-
-  // TODO: Add exercises and muscle groups array here.
-  const [selectedMuscleGroup, setSelectedMuscleGroup] = useState<string>("");
-  const [selectedExercise, setSelectedExercise] = useState<string>("");
+  const [selectedMuscleGroup, setSelectedMuscleGroup] = useState("");
+  const [selectedExercise, setSelectedExercise] = useState("");
 
   const recordedMuscleGroup = recordedWorkouts?.find(
     (recordedMuscleGroup) => recordedMuscleGroup.muscleGroup == selectedMuscleGroup
@@ -24,17 +23,15 @@ export const WorkoutProgression = () => {
 
   console.log("recorded sets:", recordedSets);
 
-  // TODO: Fetch workout progress data for the given user and exercise
-
   useEffect(() => {
     if (!id) return;
 
     getRecordedSetsByUserId(id)
       .then((recordedWorkouts) => {
-        setRecordedWorkouts(recordedWorkouts);
         const initialMuscleGroup = recordedWorkouts[0]?.muscleGroup || "";
-        const initialExercise = Object.keys(recordedWorkouts[0]?.recordedSets || {})[0] || "";
+        const initialExercise = extractExercises(recordedWorkouts[0]?.recordedSets)[0] || "";
 
+        setRecordedWorkouts(recordedWorkouts);
         setSelectedMuscleGroup(initialMuscleGroup);
         setSelectedExercise(initialExercise);
       })
@@ -46,14 +43,19 @@ export const WorkoutProgression = () => {
   return (
     <div className="size-full flex flex-col gap-4 p-4">
       <MuscleExerciseSelector
-        exercise={selectedExercise}
-        muscleGroup={selectedMuscleGroup}
+        selectedExercise={selectedExercise}
+        recordedWorkouts={recordedWorkouts}
+        selectedMuscleGroup={selectedMuscleGroup}
         onSelectExercise={(exercise) => setSelectedExercise(exercise)}
         onSelectMuscleGroup={(muscleGroup) => setSelectedMuscleGroup(muscleGroup)}
       />
       <div className="w-full flex flex-col md:flex-row gap-4">
         <div className="md:w-4/6">
-          <ExerciseProgressChart />
+          <ExerciseProgressChart
+            selectedMuscleGroup={selectedMuscleGroup}
+            selectedExercise={selectedExercise}
+            recordedSets={recordedSets}
+          />
         </div>
         <div className="md:w-2/6 border rounded-lg ">
           <RecordedSetsList recordedSets={recordedSets} />

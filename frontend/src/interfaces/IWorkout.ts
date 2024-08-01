@@ -1,7 +1,7 @@
 import { WorkoutPlan } from "@/enums/WorkoutPlans";
 
 export interface IRecordedSet {
-  workoutPlan: WorkoutPlan;
+  plan: WorkoutPlan;
   weight: number;
   repsDone: number;
   date: Date;
@@ -11,7 +11,6 @@ export interface IRecordedSet {
 export interface IExerciseRecordedSets {
   [exercise: string]: IRecordedSet[];
 }
-
 
 export interface IMuscleGroupRecordedSets {
   userId: string;

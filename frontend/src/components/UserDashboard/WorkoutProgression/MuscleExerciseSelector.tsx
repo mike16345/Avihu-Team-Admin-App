@@ -1,51 +1,51 @@
-import { FC, useEffect, useState } from "react";
+import { FC } from "react";
 import { ExerciseComboBox } from "./ExerciseComboBox";
 import { MuscleGroupCombobox } from "./MuscleGroupCombobox";
 import { Label } from "@/components/ui/label";
-import { useRecordedSetsApi } from "@/hooks/useRecordedSetsApi";
 import { useParams } from "react-router-dom";
-import { IRecordedSet } from "@/interfaces/IWorkout";
+import { IMuscleGroupRecordedSets } from "@/interfaces/IWorkout";
+import { extractExercises } from "@/lib/workoutUtils";
 
 interface MuscleExerciseSelectorProps {
-  muscleGroup: string;
-  exercise: string;
+  recordedWorkouts: IMuscleGroupRecordedSets[];
+  selectedMuscleGroup: string;
+  selectedExercise: string;
   onSelectMuscleGroup: (muscleGroup: string) => void;
   onSelectExercise: (exercise: string) => void;
 }
 
 export const MuscleExerciseSelector: FC<MuscleExerciseSelectorProps> = ({
-  muscleGroup,
-  exercise,
+  selectedMuscleGroup,
+  selectedExercise,
+  recordedWorkouts,
   onSelectExercise,
   onSelectMuscleGroup,
 }) => {
   const { id } = useParams();
 
-  const { getUserRecordedMuscleGroupNames, getUserRecordedExerciseNamesByMuscleGroup } =
-    useRecordedSetsApi();
-
-  const [muscleGroups, setMuscleGroups] = useState<string[]>([]);
-  const [exercises, setExercises] = useState<string[]>([]);
+  const muscleGroups = recordedWorkouts.map((workout) => workout.muscleGroup);
+  const muscleGroupRecordedSets = recordedWorkouts.find(
+    (workout) => workout.muscleGroup == selectedMuscleGroup
+  );
+  const muscleGroupRecordedExercises = extractExercises(muscleGroupRecordedSets?.recordedSets);
 
   const handleSelectMuscleGroup = async (muscleGroup: string) => {
-    if (!id) return;
+    if (!id || muscleGroup == selectedMuscleGroup) return;
 
-    console.log("muscle group", muscleGroup);
+    const muscleGroupExercises = recordedWorkouts.find(
+      (workout) => workout.muscleGroup == muscleGroup
+    );
+    const exercises = extractExercises(muscleGroupExercises?.recordedSets);
+
+    onSelectExercise(exercises[0]);
     onSelectMuscleGroup(muscleGroup);
-    getUserRecordedExerciseNamesByMuscleGroup(id, muscleGroup).then((res) => setExercises(res));
   };
 
   const handleSelectExercise = (exercise: string) => {
+    if (exercise == selectedExercise) return;
+
     onSelectExercise(exercise);
   };
-
-  useEffect(() => {
-    if (!id) return;
-
-    getUserRecordedMuscleGroupNames(id)
-      .then((groups) => setMuscleGroups(groups))
-      .catch();
-  }, []);
 
   return (
     <div className="flex items-center gap-8">
@@ -53,15 +53,15 @@ export const MuscleExerciseSelector: FC<MuscleExerciseSelectorProps> = ({
         <Label>קבוצת שריר</Label>
         <MuscleGroupCombobox
           muscleGroups={muscleGroups}
-          value={muscleGroup}
+          value={selectedMuscleGroup}
           onChange={(val) => handleSelectMuscleGroup(val)}
         />
       </div>
       <div className="flex flex-col gap-1">
         <Label>תרגיל</Label>
         <ExerciseComboBox
-          exercise={exercise}
-          exercises={exercises}
+          selectedExercise={selectedExercise}
+          exercises={muscleGroupRecordedExercises}
           handleSelectExercise={handleSelectExercise}
         />
       </div>

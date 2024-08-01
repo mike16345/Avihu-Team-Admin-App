@@ -79,7 +79,7 @@ export const RecordedSetsList: FC<RecordedSetsListProps> = ({ recordedSets }) =>
               </div>
             </div>
             {setsForDate.length && (
-              <CollapsibleContent className="flex flex-col gap-3 mt-2">
+              <CollapsibleContent className="flex flex-col overflow-y-scroll hide-scrollbar max-h-[600px] gap-3 mt-2">
                 {setsForDate.map((set, index) => (
                   <SetDetails set={set} index={index} key={index} />
                 ))}
