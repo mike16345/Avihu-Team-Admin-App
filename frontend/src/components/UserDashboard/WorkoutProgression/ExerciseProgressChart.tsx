@@ -17,14 +17,10 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-const chartData = [
-  { month: "January", desktop: 186, mobile: 80 },
-  { month: "February", desktop: 305, mobile: 200 },
-  { month: "March", desktop: 237, mobile: 120 },
-  { month: "April", desktop: 73, mobile: 190 },
-  { month: "May", desktop: 209, mobile: 130 },
-  { month: "June", desktop: 214, mobile: 140 },
-];
+import { IRecordedSet } from "@/interfaces/IWorkout";
+import { FC } from "react";
+import DateUtils from "@/lib/dateUtils";
+import { SetProgressTooltip } from "./SetProgressTooltip";
 
 const chartConfig = {
   desktop: {
@@ -37,18 +33,28 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function ExerciseProgressChart() {
+interface ExerciseProgressChartProps {
+  recordedSets: IRecordedSet[];
+  selectedMuscleGroup: string;
+  selectedExercise: string;
+}
+
+export const ExerciseProgressChart: FC<ExerciseProgressChartProps> = ({
+  recordedSets,
+  selectedExercise,
+  selectedMuscleGroup,
+}) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Area Chart - Stacked</CardTitle>
-        <CardDescription>Showing total visitors for the last 6 months</CardDescription>
+        <CardTitle className="text-lg">קבוצת שריר: {selectedMuscleGroup}</CardTitle>
+        <CardDescription>תרגיל: {selectedExercise}</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
           <AreaChart
             accessibilityLayer
-            data={chartData}
+            data={recordedSets}
             margin={{
               left: 12,
               right: 12,
@@ -56,24 +62,40 @@ export function ExerciseProgressChart() {
           >
             <CartesianGrid vertical={false} />
             <XAxis
-              dataKey="month"
+              dataKey="date"
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={(value) => value.slice(0, 3)}
+              tickFormatter={(value) => {
+                const date = new Date(value);
+
+                return DateUtils.formatDate(date);
+              }}
             />
-            <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
+            <ChartTooltip
+              cursor={false}
+              content={
+                <ChartTooltipContent
+                  labelFormatter={(_, data) => {
+                    return <SetProgressTooltip data={data[0]} />;
+                  }}
+                  indicator="dot"
+                />
+              }
+            />
             <Area
-              dataKey="mobile"
+              dataKey="weight"
               type="natural"
               fill="var(--color-mobile)"
+              dot
               fillOpacity={0.4}
               stroke="var(--color-mobile)"
               stackId="a"
             />
             <Area
-              dataKey="desktop"
+              dataKey="repsDone"
               type="natural"
+              dot
               fill="var(--color-desktop)"
               fillOpacity={0.4}
               stroke="var(--color-desktop)"
@@ -82,7 +104,7 @@ export function ExerciseProgressChart() {
           </AreaChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter>
+      {/* <CardFooter>
         <div className="flex w-full items-start gap-2 text-sm">
           <div className="grid gap-2">
             <div className="flex items-center gap-2 font-medium leading-none">
@@ -93,7 +115,7 @@ export function ExerciseProgressChart() {
             </div>
           </div>
         </div>
-      </CardFooter>
+      </CardFooter> */}
     </Card>
   );
-}
+};

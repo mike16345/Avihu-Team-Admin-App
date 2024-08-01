@@ -1,4 +1,5 @@
 import { WorkoutPlan } from "@/enums/WorkoutPlans";
+import { IExerciseRecordedSets } from "@/interfaces/IWorkout";
 
 const workoutPlanNames = {
   [WorkoutPlan.WorkoutABeginner]: "Workout A - Beginner",
@@ -22,3 +23,9 @@ export function poundsToKg(pounds: number) {
 
   return kilograms.toFixed(2);
 }
+
+export const extractExercises = (exercises: IExerciseRecordedSets | undefined) => {
+  if (!exercises) return [];
+
+  return Object.keys(exercises);
+};
