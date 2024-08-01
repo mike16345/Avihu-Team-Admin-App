@@ -1,5 +1,5 @@
 import { useDietPlanApi } from "@/hooks/useDietPlanApi";
-import { IDietPlan } from "@/interfaces/IDietPlan";
+import { IDietPlan, IDietPlanPreset } from "@/interfaces/IDietPlan";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useParams } from "react-router";
@@ -8,15 +8,27 @@ import DietPlanForm from "@/components/DietPlan/DietPlanForm";
 import Loader from "@/components/ui/Loader";
 import ErrorPage from "./ErrorPage";
 import { ERROR_MESSAGE_TITLE } from "@/enums/ErrorMessages";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+  SelectTrigger,
+} from "@/components/ui/select";
+import { useDietPlanPresetApi } from "@/hooks/useDietPlanPresetsApi";
 
 export const ViewDietPlanPage = () => {
   const { id } = useParams();
 
   const { addDietPlan, updateDietPlanByUserId, getDietPlanByUserId } = useDietPlanApi();
 
+  const { getAllDietPlanPresets } = useDietPlanPresetApi();
+
   const [isNewPlan, setIsNewPlan] = useState(false);
 
   const [dietPlan, setDietPlan] = useState<IDietPlan>();
+
+  const [presetList, setPresetList] = useState<IDietPlanPreset[]>();
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -58,9 +70,17 @@ export const ViewDietPlanPage = () => {
       });
   };
 
+  const handleSelect = (presetName: string) => {
+    const selectedPreset = presetList?.find((preset) => preset.name === presetName);
+    setDietPlan(selectedPreset);
+  };
+
   useEffect(() => {
     if (!id) return;
     setIsLoading(true);
+    getAllDietPlanPresets()
+      .then((res) => setPresetList(res))
+      .catch((err) => setError(err));
     getDietPlanByUserId(id)
       .then((dietPlan) => {
         if (dietPlan) {
@@ -87,6 +107,18 @@ export const ViewDietPlanPage = () => {
   return (
     <div className=" flex flex-col gap-4 w-4/5 h-full hide-scrollbar overflow-y-auto">
       <h1 className="text-2xl font-semibold mb-4">עריכת תפריט תזונה</h1>
+      <Select onValueChange={(val) => handleSelect(val)}>
+        <SelectTrigger dir="rtl" className="w-[350px] mr-1">
+          <SelectValue placeholder="בחר תפריט" />
+        </SelectTrigger>
+        <SelectContent dir="rtl">
+          {presetList?.map((preset) => (
+            <SelectItem key={preset.name} value={preset.name}>
+              {preset.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
       <DietPlanForm
         existingDietPlan={dietPlan}
         handleSaveDietPlan={
