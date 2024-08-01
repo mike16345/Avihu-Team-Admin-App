@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { ModeToggle } from "../theme/mode-toggle";
-import { FaEdit, FaHome, FaUser } from "react-icons/fa";
+import { FaEdit, FaHeart, FaHome, FaUser } from "react-icons/fa";
 import { ReactNode, useState } from "react";
 import { PiNotepadFill } from "react-icons/pi";
 import { GiBiceps } from "react-icons/gi";
@@ -22,27 +22,27 @@ export const Sidebar = () => {
     {
       to: "/",
       linkName: "בית",
-      icon: <FaHome size={24} />,
+      icon: <FaHome className="text-yellow-600 hover:text-yellow-500" size={24} />, // Warm, welcoming color
     },
     {
       to: "/users",
       linkName: "משתמשים",
-      icon: <FaUser size={24} />,
+      icon: <FaUser className="text-blue-600 hover:text-blue-400" size={24} />, // Professional blue
     },
     {
       to: "/blogs",
       linkName: "בלוגים",
-      icon: <FaEdit size={24} />,
+      icon: <FaEdit className="text-green-600 hover:text-green-400" size={24} />, // Creative green
     },
     {
       to: "/dietPlans",
       linkName: "תפריטים",
-      icon: <PiNotepadFill size={24} />,
+      icon: <PiNotepadFill className="text-purple-600 hover:text-purple-400" size={24} />, // Organized purple
     },
     {
       to: "/workoutPlans",
       linkName: "תוכנית אימון",
-      icon: <GiBiceps size={24} />,
+      icon: <GiBiceps className="text-amber-700 hover:text-amber-500" size={24} />, // Human skin tone
     },
   ];
 
@@ -96,6 +96,9 @@ export const Sidebar = () => {
                 </Link>
               );
             })}
+          </nav>
+          <nav className="mt-auto ">
+            <ModeToggle />
           </nav>
         </SheetContent>
       </Sheet>

@@ -98,20 +98,22 @@ export function DataTableHebrew<TData, TValue>({
   return (
     <>
       <div className="flex flex-col ">
-        <div className="flex items-center py-4 gap-4">
-          <Input
-            placeholder="חיפוס..."
-            value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-            onChange={(event) => table.getColumn("name")?.setFilterValue(event.target.value)}
-            className="max-w-sm"
-          />
-          <div className="flex-1 text-sm text-muted-foreground">
-            {table.getFilteredSelectedRowModel().rows.length} {"תוך "}
-            {table.getFilteredRowModel().rows.length} שורות נבחרו.
+        <div className="w-full flex flex-col gap-2 md:gap-0 md:flex-col md:justify-between md:items-center py-4">
+          <div className="flex flex-col md:flex-row md:items-center md:gap-4">
+            <Input
+              placeholder="חיפוס..."
+              value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+              onChange={(event) => table.getColumn("name")?.setFilterValue(event.target.value)}
+              className="max-w-sm"
+            />
+            <div className=" shrink-0 text-sm text-muted-foreground">
+              {table.getFilteredSelectedRowModel().rows.length} {"תוך "}
+              {table.getFilteredRowModel().rows.length} שורות נבחרו.
+            </div>
           </div>
           <DropdownMenu dir="rtl">
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-auto">
+              <Button variant="outline" className="">
                 סינון עמודות
                 <FilterIcon size={15} className="mr-2" />
               </Button>
