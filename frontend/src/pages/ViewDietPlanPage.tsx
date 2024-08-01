@@ -19,19 +19,13 @@ import { useDietPlanPresetApi } from "@/hooks/useDietPlanPresetsApi";
 
 export const ViewDietPlanPage = () => {
   const { id } = useParams();
-
   const { addDietPlan, updateDietPlanByUserId, getDietPlanByUserId } = useDietPlanApi();
-
   const { getAllDietPlanPresets } = useDietPlanPresetApi();
 
   const [isNewPlan, setIsNewPlan] = useState(false);
-
-  const [dietPlan, setDietPlan] = useState<IDietPlan>();
-
-  const [presetList, setPresetList] = useState<IDietPlanPreset[]>();
-
+  const [dietPlan, setDietPlan] = useState<IDietPlan | IDietPlanPreset>(defaultDietPlan);
+  const [presetList, setPresetList] = useState<IDietPlanPreset[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-
   const [error, setError] = useState<string>();
 
   const createDietPlan = (dietPlan: IDietPlan) => {
@@ -53,8 +47,7 @@ export const ViewDietPlanPage = () => {
   };
 
   const editDietPlan = (dietPlan: IDietPlan) => {
-    if (!dietPlan) return;
-    if (!id) return;
+    if (!dietPlan || !id) return;
 
     const dietPlanToAdd = {
       ...dietPlan,
@@ -72,15 +65,20 @@ export const ViewDietPlanPage = () => {
 
   const handleSelect = (presetName: string) => {
     const selectedPreset = presetList?.find((preset) => preset.name === presetName);
+
+    if (!selectedPreset) return;
+
     setDietPlan(selectedPreset);
   };
 
   useEffect(() => {
     if (!id) return;
     setIsLoading(true);
+
     getAllDietPlanPresets()
       .then((res) => setPresetList(res))
       .catch((err) => setError(err));
+
     getDietPlanByUserId(id)
       .then((dietPlan) => {
         if (dietPlan) {

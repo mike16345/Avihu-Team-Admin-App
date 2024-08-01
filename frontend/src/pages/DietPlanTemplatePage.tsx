@@ -10,14 +10,14 @@ const DietPlanTemplatePage = () => {
   const { getMenuItems, deleteMenuItem } = useMenuItemApi();
   const { getAllDietPlanPresets, deleteDietPlanPreset } = useDietPlanPresetApi();
 
-  const [dietPlanPresetsState, setDietPlanPresetsState] = useState<IDietPlan[]>();
-  const [proteinMenuState, setProteinMenuState] = useState<IMenuItem[]>();
-  const [carbsMenuState, setCarbsMenuState] = useState<IMenuItem[]>();
-  const [VegetableMenuState, setVegetableMenuState] = useState<IMenuItem[]>();
-  const [fatsMenueState, setFatsMenueState] = useState<IMenuItem[]>();
+  const [dietPlanPresets, setDietPlanPresets] = useState<IDietPlan[]>();
+  const [proteinMenu, setProteinMenu] = useState<IMenuItem[]>();
+  const [carbsMenu, setCarbsMenu] = useState<IMenuItem[]>();
+  const [VegetableMenu, setVegetableMenu] = useState<IMenuItem[]>();
+  const [fatsMenue, setFatsMenue] = useState<IMenuItem[]>();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string>();
+  const [error, setError] = useState<string | null>(null);
 
   const tabs: ITabs = {
     tabHeaders: [
@@ -46,35 +46,35 @@ const DietPlanTemplatePage = () => {
       {
         value: `dietPlanPresets`,
         btnPrompt: `הוסף תפריט`,
-        state: dietPlanPresetsState || [],
+        state: dietPlanPresets || [],
         sheetForm: `dietPlans`,
         deleteFunc: deleteDietPlanPreset,
       },
       {
         value: `proteinItems`,
         btnPrompt: `הוסף חלבון`,
-        state: proteinMenuState || [],
+        state: proteinMenu || [],
         sheetForm: `protein`,
         deleteFunc: deleteMenuItem,
       },
       {
         value: `carbItems`,
         btnPrompt: `הוסף פחמימה`,
-        state: carbsMenuState || [],
+        state: carbsMenu || [],
         sheetForm: `carbs`,
         deleteFunc: deleteMenuItem,
       },
       {
         value: `vegetableItems`,
         btnPrompt: `הוסף ירקות`,
-        state: VegetableMenuState || [],
+        state: VegetableMenu || [],
         sheetForm: `vegetables`,
         deleteFunc: deleteMenuItem,
       },
       {
         value: `fatsItems`,
         btnPrompt: `הוסף שומנים`,
-        state: fatsMenueState || [],
+        state: fatsMenue || [],
         sheetForm: `fats`,
         deleteFunc: deleteMenuItem,
       },
@@ -83,20 +83,25 @@ const DietPlanTemplatePage = () => {
 
   useEffect(() => {
     setIsLoading(true);
+
     getAllDietPlanPresets()
-      .then((res) => setDietPlanPresetsState(res))
+      .then((res) => setDietPlanPresets(res))
       .catch((err) => setError(err));
+
     getMenuItems(`protein`)
-      .then((res) => setProteinMenuState(res))
+      .then((res) => setProteinMenu(res))
       .catch((err) => setError(err));
+
     getMenuItems(`carbs`)
-      .then((res) => setCarbsMenuState(res))
+      .then((res) => setCarbsMenu(res))
       .catch((err) => setError(err));
+
     getMenuItems(`vegetables`)
-      .then((res) => setVegetableMenuState(res))
+      .then((res) => setVegetableMenu(res))
       .catch((err) => setError(err));
+
     getMenuItems(`fats`)
-      .then((res) => setFatsMenueState(res))
+      .then((res) => setFatsMenue(res))
       .catch((err) => setError(err));
 
     setTimeout(() => {

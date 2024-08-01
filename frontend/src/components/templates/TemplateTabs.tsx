@@ -11,7 +11,7 @@ interface TemplateTabsProps {
 }
 
 const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [selectedForm, setSelectedForm] = useState<string | undefined>();
   const [selectedObjectId, setSelectedObjectId] = useState<string>();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -25,8 +25,14 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
   };
 
   const startEdit = (id: string, formToUse: string) => {
-    setSelectedForm(formToUse);
-    setSelectedObjectId(id);
+    if (formToUse === `dietPlans`) {
+      navigate(`/presets/dietPlans/${id}`);
+    } else if (formToUse === `workoutPlan`) {
+      navigate(`/presets/workoutPlans/${id}`);
+    } else {
+      setSelectedForm(formToUse);
+      setSelectedObjectId(id);
+    }
   };
 
   const onCloseSheet = () => {
@@ -41,18 +47,6 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
 
     setIsSheetOpen(true);
   }, [selectedObjectId]);
-
-  useEffect(() => {
-    if (selectedForm === `workoutPlan`) {
-        navigate(`/presets/workoutPlans/${selectedObjectId||``}`)
-    }
-
-    if (selectedForm ===`dietPlans`) {
-        navigate(`/presets/dietPlans/${selectedObjectId||``}`)
-    }
-  }, [selectedForm]);
-
-
 
   return (
     <>
@@ -69,10 +63,16 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
           {tabs.tabContent.map((tab) => (
             <TabsContent key={tab.value} value={tab.value}>
               <Button
-                onClick={() => {
-                  setSelectedForm(tab.sheetForm);
-                  setIsSheetOpen(true);
-                }}
+                onClick={
+                  tab.value === `dietPlanPresets`
+                    ? () => navigate(`/presets/dietPlans/${selectedObjectId || ``}`)
+                    : tab.value === `WorkoutPlans`
+                    ? () => navigate(`/presets/workoutPlans/${selectedObjectId || ``}`)
+                    : () => {
+                        setSelectedForm(tab.sheetForm);
+                        setIsSheetOpen(true);
+                      }
+                }
                 className="my-4"
               >
                 {tab.btnPrompt}

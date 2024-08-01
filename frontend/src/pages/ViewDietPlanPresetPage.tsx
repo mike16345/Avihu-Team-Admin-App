@@ -47,7 +47,6 @@ export const ViewDietPlanPresetPage = () => {
 
   const editDietPlanPreset = (dietPlan: IDietPlan) => {
     if (!dietPlan || !id || !presetName) return;
-    if (!id) return;
 
     const dietPlanToAdd = removeIdsAndVersions({
       ...dietPlan,
