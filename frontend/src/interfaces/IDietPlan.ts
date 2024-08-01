@@ -20,6 +20,11 @@ export interface IDietPlan {
   meals: IMeal[];
   totalCalories?: number;
 }
+export interface IDietPlanPreset {
+  name:string
+  meals: IMeal[];
+  totalCalories?: number;
+}
 
 export type DietItemUnit = "grams" | "spoons";
 

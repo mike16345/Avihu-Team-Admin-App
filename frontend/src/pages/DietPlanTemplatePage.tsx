@@ -1,6 +1,7 @@
 import TemplateTabs from '@/components/templates/TemplateTabs';
+import { useDietPlanPresetApi } from '@/hooks/useDietPlanPresetsApi';
 import useMenuItemApi from '@/hooks/useMenuItemApi';
-import { IMenuItem } from '@/interfaces/IDietPlan';
+import { IDietPlan, IMenuItem } from '@/interfaces/IDietPlan';
 import React, { useEffect, useState } from 'react'
 
 
@@ -10,7 +11,9 @@ import React, { useEffect, useState } from 'react'
 const DietPlanTemplatePage = () => {
 
     const { getMenuItems, deleteMenuItem } = useMenuItemApi()
+    const{getAllDietPlanPresets, deleteDietPlanPreset}=useDietPlanPresetApi()
 
+    const [dietPlanPresetsState, setDietPlanPresetsState] = useState<IDietPlan[]>();
     const [proteinMenuState, setProteinMenuState] = useState<IMenuItem[]>();
     const [carbsMenuState, setCarbsMenuState] = useState<IMenuItem[]>();
     const [VegetableMenuState, setVegetableMenuState] = useState<IMenuItem[]>();
@@ -18,6 +21,10 @@ const DietPlanTemplatePage = () => {
 
     const tabs: ITabs = {
         tabHeaders: [
+            {
+                name: `תפריטים`,
+                value: `dietPlanPresets`
+            },
             {
                 name: `חלבונים`,
                 value: `proteinItems`
@@ -36,6 +43,13 @@ const DietPlanTemplatePage = () => {
             },
         ],
         tabContent: [
+            {
+                value: `dietPlanPresets`,
+                btnPrompt: `הוסף תפריט`,
+                state: dietPlanPresetsState || [],
+                sheetForm: `dietPlans`,
+                deleteFunc: deleteDietPlanPreset
+            },
             {
                 value: `proteinItems`,
                 btnPrompt: `הוסף חלבון`,
@@ -68,6 +82,9 @@ const DietPlanTemplatePage = () => {
     }
 
     useEffect(() => {
+        getAllDietPlanPresets()
+        .then(res=>setDietPlanPresetsState(res))
+        .catch(err=>console.log(err))
         getMenuItems(`protein`)
             .then(res => setProteinMenuState(res))
             .catch(err => console.log(err))
@@ -88,7 +105,7 @@ const DietPlanTemplatePage = () => {
     return (
         <div>
             <h1 className='text-2xl pb-5'>תפריטים</h1>
-            {fatsMenueState && proteinMenuState && carbsMenuState && VegetableMenuState &&
+            {fatsMenueState && proteinMenuState && carbsMenuState && VegetableMenuState && dietPlanPresetsState &&
                 <TemplateTabs tabs={tabs} />
             }
         </div>

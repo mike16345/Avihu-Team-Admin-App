@@ -1,85 +1,120 @@
-import { useDietPlanApi } from "@/hooks/useDietPlanApi";
-import { IDietPlan, } from "@/interfaces/IDietPlan";
+import { IDietPlan } from "@/interfaces/IDietPlan";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useParams } from "react-router";
 import { defaultDietPlan, } from "@/constants/DietPlanConsts";
 import DietPlanForm from "@/components/DietPlan/DietPlanForm";
+import { useDietPlanPresetApi } from "@/hooks/useDietPlanPresetsApi";
+import Loader from "@/components/ui/Loader";
+import ErrorPage from "./ErrorPage";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {  removeIdsAndVersions } from "@/utils/dietPlanUtils";
 
-export const ViewDietPlanPage = () => {
+export const ViewDietPlanPresetPage = () => {
   const { id } = useParams();
 
-  const { addDietPlan, updateDietPlanByUserId, getDietPlanByUserId } = useDietPlanApi();
+  const { getDietPlanPreset, updateDietPlanPreset, addDietPlanPreset } = useDietPlanPresetApi();
 
-   const [selectedSaveFunc,setSelectedSaveFunc] = useState<((dietPlan: IDietPlan) => void)|null>(null)
+   const [isNewPlan,setIsNewPlan] = useState<boolean>(false)
 
     const [dietPlan, setDietPlan] = useState<IDietPlan>();
 
+    const [presetName,setPresetName]=useState<string>()
 
- const createDietPlan = (dietPlan:IDietPlan)=>{
-  if (!dietPlan) return;
+    const [isLoading,setIsLoading]=useState<boolean>(false)
 
-    const dietPlanToAdd = {
-      ...dietPlan,
-      userId: id,
-    };
+    const [error,setError]=useState<string>()
 
-    addDietPlan(dietPlanToAdd)
+
+ const createDietPlanPreset = (dietPlan:IDietPlan)=>{
+  if (!dietPlan ||!presetName) return;
+
+  const dietPlanToAdd={
+    ...dietPlan,
+    name:presetName
+  }
+
+    addDietPlanPreset(dietPlanToAdd)
         .then(() => {
           toast.success("תפריט נשמר בהצלחה!");
         })
         .catch((err) => {
-          toast.error("אופס, נתקלנו בבעיה!", { description: err.message });
+          toast.error("אופס, נתקלנו בבעיה!", { description: err.response.data.message });
           console.error("error", err);
         });
 
  }
 
- const editDietPlan = (dietPlan:IDietPlan)=>{
-  if (!dietPlan) return;
+ const editDietPlanPreset = (dietPlan:IDietPlan)=>{
+  if (!dietPlan || !id || !presetName) return;
   if (!id) return;
+  
+  const dietPlanToAdd=removeIdsAndVersions({
+    ...dietPlan,
+    name:presetName
+  })
 
-    const dietPlanToAdd = {
-      ...dietPlan,
-      userId: id,
-    };
-
-    updateDietPlanByUserId(id, dietPlanToAdd)
+    updateDietPlanPreset(id, dietPlanToAdd)
         .then(() => {
           toast.success("תפריט עודכן בהצלחה!");
         })
         .catch((err) => {
-          toast.error("אופס, נתקלנו בבעיה!", { description: err.message });
+          toast.error("אופס, נתקלנו בבעיה!", { description: err.response.data.message });
           console.error("error", err);
         });
  }
 
 
   useEffect(() => {
-    if (!id) return;
-
-    getDietPlanByUserId(id)
+    setIsLoading(true)
+    if (id) {
+    getDietPlanPreset(id)
       .then((dietPlan) => {
-        if (dietPlan) {
           setDietPlan(dietPlan);
-          setSelectedSaveFunc(()=>editDietPlan)
-        } else {
-          console.log(`womp womp`);
-          setDietPlan(defaultDietPlan);
-          setSelectedSaveFunc(()=>createDietPlan)
-        }
+          setPresetName(dietPlan.name)
+          setIsNewPlan(false)
       })
       .catch((err: Error) => {
-        console.error(err);
+        setError(err.message);
+      })
+      .finally(()=>{
+        setTimeout(()=>{
+          setIsLoading(false)
+        },1500)
       });
+    }else{      
+      setDietPlan(defaultDietPlan)
+      setIsNewPlan(true)
+      setTimeout(()=>{
+          setIsLoading(false)
+        },1500)
+    }
   }, []);
+
+  if (isLoading) return <Loader size="large"/>
+  if (error) return <ErrorPage message={error}/>
 
   return (
     <div className=" flex flex-col gap-4 w-4/5 h-full hide-scrollbar overflow-y-auto">
       <h1 className="text-2xl font-semibold mb-4">עריכת תפריט תזונה</h1>
-      {/* { selectedSaveFunc && 
-        <DietPlanForm existingItem={dietPlan} save={(dietPlan)=>selectedSaveFunc(dietPlan)} />
-      } */}
+      <Label
+        className="mr-1 font-bold"
+      >שם</Label>
+      <Input
+        placeholder="שם לתפריט..."
+        className="w-[400px] mr-1"
+        onChange={(e)=>setPresetName(e.target.value)}
+        value={presetName}
+      />
+        <DietPlanForm 
+        existingDietPlan={dietPlan} 
+        handleSaveDietPlan={isNewPlan?
+          (dietPlanPreset)=>createDietPlanPreset(dietPlanPreset)
+          :
+          (dietPlanPreset)=>editDietPlanPreset(dietPlanPreset)
+        } 
+        />
     </div>
   );
 };

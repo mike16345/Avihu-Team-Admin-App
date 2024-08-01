@@ -50,6 +50,14 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
         navigate(`/presets/workoutPlans/`)
       }
     }
+
+    if (selectedForm ===`dietPlans`) {
+            if (selectedObjectId) {
+        navigate(`/presets/dietPlans/${selectedObjectId}`)
+      } else {
+        navigate(`/presets/dietPlans/`)
+      }
+    }
   }, [selectedForm]);
 
 
