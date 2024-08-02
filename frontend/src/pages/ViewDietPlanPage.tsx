@@ -67,7 +67,6 @@ export const ViewDietPlanPage = () => {
     const selectedPreset = presetList?.find((preset) => preset.name === presetName);
 
     if (!selectedPreset) return;
-
     setDietPlan(selectedPreset);
   };
 
