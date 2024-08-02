@@ -10,21 +10,16 @@ import ErrorPage from "./ErrorPage";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { removeIdsAndVersions } from "@/utils/dietPlanUtils";
-import { ERROR_MESSAGE_TITLE } from "@/enums/ErrorMessages";
+import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 
 export const ViewDietPlanPresetPage = () => {
   const { id } = useParams();
-
   const { getDietPlanPreset, updateDietPlanPreset, addDietPlanPreset } = useDietPlanPresetApi();
 
   const [isNewPlan, setIsNewPlan] = useState(false);
-
   const [dietPlan, setDietPlan] = useState<IDietPlan>();
-
   const [presetName, setPresetName] = useState<string>();
-
   const [isLoading, setIsLoading] = useState(false);
-
   const [error, setError] = useState<string>();
 
   const createDietPlanPreset = (dietPlan: IDietPlan) => {
@@ -40,7 +35,9 @@ export const ViewDietPlanPresetPage = () => {
         toast.success("תפריט נשמר בהצלחה!");
       })
       .catch((err) => {
-        toast.error(ERROR_MESSAGE_TITLE, { description: err.response.data.message });
+        toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
+          description: err.response.data.message,
+        });
         console.error("error", err);
       });
   };
@@ -58,7 +55,9 @@ export const ViewDietPlanPresetPage = () => {
         toast.success("תפריט עודכן בהצלחה!");
       })
       .catch((err) => {
-        toast.error(ERROR_MESSAGE_TITLE, { description: err.response.data.message });
+        toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
+          description: err.response.data.message,
+        });
         console.error("error", err);
       });
   };
@@ -85,7 +84,7 @@ export const ViewDietPlanPresetPage = () => {
       setIsNewPlan(true);
       setTimeout(() => {
         setIsLoading(false);
-      }, 1500);
+      }, 1000);
     }
   }, []);
 

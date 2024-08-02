@@ -16,7 +16,7 @@ import { Toggle } from "@/components/ui/toggle";
 import { toast } from "sonner";
 import { useWorkoutPlanPresetApi } from "@/hooks/useWorkoutPlanPresetsApi";
 import { useIsEditableContext } from "@/context/useIsEditableContext";
-import { ERROR_MESSAGE_TITLE } from "@/enums/ErrorMessages";
+import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 
 const CreateWorkoutPlan: React.FC = () => {
   const { id } = useParams();
@@ -80,7 +80,7 @@ const CreateWorkoutPlan: React.FC = () => {
       addWorkoutPlan(id, cleanedPostObject)
         .then(() => toast.success(`תוכנית אימון נשמרה בהצלחה!`))
         .catch((err) =>
-          toast.error(ERROR_MESSAGE_TITLE, {
+          toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
             description: `${err.response.data.message}`,
           })
         );
@@ -88,7 +88,7 @@ const CreateWorkoutPlan: React.FC = () => {
       updateWorkoutPlanByUserId(id, cleanedPostObject)
         .then(() => toast.success(`תוכנית אימון נשמרה בהצלחה!`))
         .catch((err) =>
-          toast.error(ERROR_MESSAGE_TITLE, {
+          toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
             description: `${err.response.data.message}`,
           })
         );

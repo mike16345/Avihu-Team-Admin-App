@@ -7,7 +7,7 @@ import { defaultDietPlan } from "@/constants/DietPlanConsts";
 import DietPlanForm from "@/components/DietPlan/DietPlanForm";
 import Loader from "@/components/ui/Loader";
 import ErrorPage from "./ErrorPage";
-import { ERROR_MESSAGE_TITLE } from "@/enums/ErrorMessages";
+import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import {
   Select,
   SelectContent,
@@ -41,7 +41,7 @@ export const ViewDietPlanPage = () => {
         toast.success("תפריט נשמר בהצלחה!");
       })
       .catch((err) => {
-        toast.error(ERROR_MESSAGE_TITLE, { description: err.message });
+        toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, { description: err.message });
         console.error("error", err);
       });
   };
@@ -59,7 +59,7 @@ export const ViewDietPlanPage = () => {
         toast.success("תפריט עודכן בהצלחה!");
       })
       .catch((err) => {
-        toast.error(ERROR_MESSAGE_TITLE, { description: err.message });
+        toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, { description: err.message });
       });
   };
 
@@ -94,7 +94,7 @@ export const ViewDietPlanPage = () => {
       .finally(() => {
         setTimeout(() => {
           setIsLoading(false);
-        }, 1500);
+        }, 1000);
       });
   }, []);
 

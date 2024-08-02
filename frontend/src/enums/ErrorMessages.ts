@@ -1,1 +1,3 @@
-export const ERROR_MESSAGE_TITLE = `אופס, נתקלנו בבעיה!`;
+export const ERROR_MESSAGES = {
+  GENERIC_ERROR_MESSAGE: `אופס, נתקלנו בבעיה!`,
+};

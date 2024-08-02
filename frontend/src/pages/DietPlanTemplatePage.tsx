@@ -106,7 +106,7 @@ const DietPlanTemplatePage = () => {
 
     setTimeout(() => {
       setIsLoading(false);
-    }, 1500);
+    }, 1000);
   }, []);
 
   if (isLoading) return <TemplateTabsSkeleton />;

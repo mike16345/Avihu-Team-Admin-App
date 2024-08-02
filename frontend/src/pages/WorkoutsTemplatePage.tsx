@@ -71,13 +71,14 @@ const WorkoutsTemplatePage = () => {
     getAllWorkoutPlanPresets()
       .then((res) => setWorkoutPlanPresets(res))
       .catch((err) => setError(err));
+
     getAllMuscleGroups()
       .then((res) => setMusclegroupState(res))
       .catch((err) => setError(err));
 
     setTimeout(() => {
       setIsLoading(false);
-    }, 1500);
+    }, 1000);
   }, []);
 
   if (isLoading) return <TemplateTabsSkeleton />;
