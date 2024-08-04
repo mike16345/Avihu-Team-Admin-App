@@ -1,17 +1,18 @@
 interface ITabHeader {
-    name: string;
-    value: string
+  name: string;
+  value: string;
 }
 
 interface ITabContent {
-    value: string;
-    btnPrompt: string;
-    state?: any[];
-    sheetForm: string;
-    deleteFunc: (id: string) => Promise<unknown>
+  value: string;
+  btnPrompt: string;
+  state?: any[];
+  setState: React.Dispatch<React.SetStateAction<any[]>>;
+  sheetForm: string;
+  deleteFunc: (id: string) => Promise<unknown>;
 }
 
 interface ITabs {
-    tabHeaders: ITabHeader[],
-    tabContent: ITabContent[]
+  tabHeaders: ITabHeader[];
+  tabContent: ITabContent[];
 }

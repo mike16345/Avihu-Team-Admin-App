@@ -11,26 +11,51 @@ interface TemplateTabsProps {
 }
 
 const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [selectedForm, setSelectedForm] = useState<string | undefined>();
   const [selectedObjectId, setSelectedObjectId] = useState<string>();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
-  const deleteItem = (id: string, deleteFunc: (id: string) => Promise<unknown>) => {
+  const deleteItem = (
+    id: string,
+    deleteFunc: (id: string) => Promise<unknown>,
+    stateArr: any[],
+    setState: React.Dispatch<React.SetStateAction<any[]>>
+  ) => {
     deleteFunc(id)
-      .then(() => toast.success(`פריט נמחק בהצלחה!`))
+      .then(() => {
+        toast.success(`פריט נמחק בהצלחה!`);
+        const newArr = stateArr.filter((item) => item._id !== id);
+        setState(newArr);
+      })
       .catch((err) =>
         toast.error(`אופס! נתקלנו בבעיה`, { description: err.response.data.message })
       );
   };
 
   const startEdit = (id: string, formToUse: string) => {
-    setSelectedForm(formToUse);
-    setSelectedObjectId(id);
+    if (formToUse === `dietPlans`) {
+      navigate(`/presets/dietPlans/${id}`);
+    } else if (formToUse === `workoutPlan`) {
+      navigate(`/presets/workoutPlans/${id}`);
+    } else {
+      setSelectedForm(formToUse);
+      setSelectedObjectId(id);
+    }
+  };
+
+  const handleAddNew = (formToUse: string) => {
+    if (formToUse === `dietPlans`) {
+      navigate(`/presets/dietPlans`);
+    } else if (formToUse === `workoutPlan`) {
+      navigate(`/presets/workoutPlans/`);
+    } else {
+      setSelectedForm(formToUse);
+      setIsSheetOpen(true);
+    }
   };
 
   const onCloseSheet = () => {
-    console.log("on close sheet");
     setIsSheetOpen(false);
     setSelectedObjectId(undefined);
     setSelectedForm(undefined);
@@ -41,18 +66,6 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
 
     setIsSheetOpen(true);
   }, [selectedObjectId]);
-
-  useEffect(() => {
-    if (selectedForm === `workoutPlan`) {
-      if (selectedObjectId) {
-        navigate(`/presets/workoutPlans/${selectedObjectId}`)
-      } else {
-        navigate(`/presets/workoutPlans/`)
-      }
-    }
-  }, [selectedForm]);
-
-
 
   return (
     <>
@@ -68,18 +81,12 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
 
           {tabs.tabContent.map((tab) => (
             <TabsContent key={tab.value} value={tab.value}>
-              <Button
-                onClick={() => {
-                  setSelectedForm(tab.sheetForm);
-                  setIsSheetOpen(true);
-                }}
-                className="my-4"
-              >
+              <Button onClick={() => handleAddNew(tab.sheetForm)} className="my-4">
                 {tab.btnPrompt}
               </Button>
               <PresetTable
                 data={tab.state || []}
-                handleDelete={(id) => deleteItem(id, tab.deleteFunc)}
+                handleDelete={(id) => deleteItem(id, tab.deleteFunc, tab.state || [], tab.setState)}
                 retrieveObjectId={(id: string) => startEdit(id, tab.sheetForm)}
               />
             </TabsContent>

@@ -1,7 +1,7 @@
 import { deleteItem, fetchData, sendData, updateItem } from "@/API/api";
 import { IExercisePresetItem } from "@/interfaces/IWorkoutPlan";
 
-const EXERCISE_PRESETS_ENDPOINT = "/presets/exercises/";
+const EXERCISE_PRESETS_ENDPOINT = "presets/exercises/";
 
 
 const useExercisePresetApi = () => {

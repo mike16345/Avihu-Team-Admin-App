@@ -20,6 +20,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import WorkoutContainer from "@/components/workout plan/WorkoutPlanContainer";
 import { EditableContextProvider } from "@/context/useIsEditableContext";
+import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 
 const workoutFormSchema = z.object({
   name: z.string().min(1).max(25),
@@ -94,7 +95,7 @@ const WorkoutPreset = () => {
       updateWorkoutPlanPreset(id, cleanedObject)
         .then(() => toast.success(`תבנית אימון נשמרה בהצלחה!`))
         .catch((err) =>
-          toast.error(`אופס! נתקלנו בבעיה..`, {
+          toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
             description: err.response.data.message,
           })
         );
@@ -102,7 +103,7 @@ const WorkoutPreset = () => {
       addWorkoutPlanPreset(cleanedObject)
         .then(() => toast.success(`תבנית אימון נשמרה בהצלחה!`))
         .catch((err) =>
-          toast.error(`אופס! נתקלנו בבעיה..`, {
+          toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
             description: err.response.data.message,
           })
         );
