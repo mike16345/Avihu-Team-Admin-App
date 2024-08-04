@@ -22,7 +22,7 @@ interface MusceGroupFormProps {
 }
 
 const muscleGroupSchema = z.object({
-  name: z.string().min(1, { message: `אנא הכנס שם לקבוצת שריר` }),
+  name: z.string().min(1, { message: `אנא בחר שם לקבוצת השריר` }),
 });
 
 const MusceGroupForm: React.FC<MusceGroupFormProps> = ({ objectId, closeSheet }) => {

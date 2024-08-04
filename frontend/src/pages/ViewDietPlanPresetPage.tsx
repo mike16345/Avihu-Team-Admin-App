@@ -1,4 +1,4 @@
-import { IDietPlan } from "@/interfaces/IDietPlan";
+import { IDietPlan, IDietPlanPreset } from "@/interfaces/IDietPlan";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useParams } from "react-router";
@@ -8,9 +8,23 @@ import { useDietPlanPresetApi } from "@/hooks/useDietPlanPresetsApi";
 import Loader from "@/components/ui/Loader";
 import ErrorPage from "./ErrorPage";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { removeIdsAndVersions } from "@/utils/dietPlanUtils";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+const presetNameShcema = z.object({
+  name: z.string().min(1, { message: `בחר שם לתפריט` }).max(25),
+});
 
 export const ViewDietPlanPresetPage = () => {
   const { id } = useParams();
@@ -18,19 +32,37 @@ export const ViewDietPlanPresetPage = () => {
 
   const [isNewPlan, setIsNewPlan] = useState(false);
   const [dietPlan, setDietPlan] = useState<IDietPlan>(defaultDietPlan);
-  const [presetName, setPresetName] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const createDietPlanPreset = (dietPlan: IDietPlan) => {
-    if (!dietPlan || !presetName) return;
+  const presetNameForm = useForm<z.infer<typeof presetNameShcema>>({
+    resolver: zodResolver(presetNameShcema),
+    defaultValues: {
+      name: "",
+    },
+  });
 
+  const { reset } = presetNameForm;
+
+  const handleSubmit = (values: z.infer<typeof presetNameShcema>) => {
     const dietPlanToAdd = {
       ...dietPlan,
-      name: presetName,
+      name: values.name,
     };
 
-    addDietPlanPreset(dietPlanToAdd)
+    if (isNewPlan) {
+      createDietPlanPreset(dietPlanToAdd);
+    } else {
+      editDietPlanPreset(dietPlanToAdd);
+    }
+  };
+
+  const updateDietPlan = (dietPlan: IDietPlan) => setDietPlan(dietPlan);
+
+  const createDietPlanPreset = (dietPlan: IDietPlanPreset) => {
+    if (!dietPlan) return;
+
+    addDietPlanPreset(dietPlan)
       .then(() => {
         toast.success("תפריט נשמר בהצלחה!");
       })
@@ -42,15 +74,12 @@ export const ViewDietPlanPresetPage = () => {
       });
   };
 
-  const editDietPlanPreset = (dietPlan: IDietPlan) => {
-    if (!dietPlan || !id || !presetName) return;
+  const editDietPlanPreset = (dietPlan: IDietPlanPreset) => {
+    if (!dietPlan || !id) return;
 
-    const dietPlanToAdd = removeIdsAndVersions({
-      ...dietPlan,
-      name: presetName,
-    });
+    const cleanedDietPlan = removeIdsAndVersions(dietPlan);
 
-    updateDietPlanPreset(id, dietPlanToAdd)
+    updateDietPlanPreset(id, cleanedDietPlan)
       .then(() => {
         toast.success("תפריט עודכן בהצלחה!");
       })
@@ -68,7 +97,7 @@ export const ViewDietPlanPresetPage = () => {
       getDietPlanPreset(id)
         .then((dietPlan) => {
           setDietPlan(dietPlan);
-          setPresetName(dietPlan.name);
+          reset(dietPlan);
           setIsNewPlan(false);
         })
         .catch((err: Error) => {
@@ -94,21 +123,39 @@ export const ViewDietPlanPresetPage = () => {
   return (
     <div className=" flex flex-col gap-4 w-4/5 h-full hide-scrollbar overflow-y-auto">
       <h1 className="text-2xl font-semibold mb-4">עריכת תפריט תזונה</h1>
-      <Label className="mr-1 font-bold">שם</Label>
-      <Input
-        placeholder="שם לתפריט..."
-        className="w-[400px] mr-1"
-        onChange={(e) => setPresetName(e.target.value)}
-        value={presetName || ``}
-      />
-      <DietPlanForm
-        existingDietPlan={dietPlan}
-        handleSaveDietPlan={
-          isNewPlan
-            ? (dietPlanPreset) => createDietPlanPreset(dietPlanPreset)
-            : (dietPlanPreset) => editDietPlanPreset(dietPlanPreset)
-        }
-      />
+      <div className="w-1/3 mr-1">
+        <Form {...presetNameForm}>
+          <form>
+            <FormField
+              control={presetNameForm.control}
+              name="name"
+              render={({ field }) => {
+                return (
+                  <FormItem>
+                    <FormLabel className="font-bold underline pb-3">שם התפריט:</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="שם לתפריט..." />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
+          </form>
+        </Form>
+      </div>
+      <DietPlanForm existingDietPlan={dietPlan} updateDietPlan={updateDietPlan} />
+      {dietPlan.meals.length > 0 && (
+        <div>
+          <Button
+            className="font-bold"
+            variant="success"
+            onClick={presetNameForm.handleSubmit(handleSubmit)}
+          >
+            שמור תפריט
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

@@ -16,6 +16,7 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { useDietPlanPresetApi } from "@/hooks/useDietPlanPresetsApi";
+import { Button } from "@/components/ui/button";
 
 export const ViewDietPlanPage = () => {
   const { id } = useParams();
@@ -23,20 +24,30 @@ export const ViewDietPlanPage = () => {
   const { getAllDietPlanPresets } = useDietPlanPresetApi();
 
   const [isNewPlan, setIsNewPlan] = useState(false);
-  const [dietPlan, setDietPlan] = useState<IDietPlan | IDietPlanPreset>(defaultDietPlan);
+  const [dietPlan, setDietPlan] = useState<IDietPlan>(defaultDietPlan);
   const [presetList, setPresetList] = useState<IDietPlanPreset[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const createDietPlan = (dietPlan: IDietPlan) => {
-    if (!dietPlan) return;
+  const updateDietPlan = (dietPlan: IDietPlan) => setDietPlan(dietPlan);
 
+  const handleSubmit = () => {
     const dietPlanToAdd = {
       ...dietPlan,
       userId: id,
     };
 
-    addDietPlan(dietPlanToAdd)
+    if (isNewPlan) {
+      createDietPlan(dietPlanToAdd);
+    } else {
+      editDietPlan(dietPlanToAdd);
+    }
+  };
+
+  const createDietPlan = (dietPlan: IDietPlan) => {
+    if (!dietPlan) return;
+
+    addDietPlan(dietPlan)
       .then(() => {
         toast.success("תפריט נשמר בהצלחה!");
       })
@@ -49,12 +60,7 @@ export const ViewDietPlanPage = () => {
   const editDietPlan = (dietPlan: IDietPlan) => {
     if (!dietPlan || !id) return;
 
-    const dietPlanToAdd = {
-      ...dietPlan,
-      userId: id,
-    };
-
-    updateDietPlanByUserId(id, dietPlanToAdd)
+    updateDietPlanByUserId(id, dietPlan)
       .then(() => {
         toast.success("תפריט עודכן בהצלחה!");
       })
@@ -67,7 +73,8 @@ export const ViewDietPlanPage = () => {
     const selectedPreset = presetList?.find((preset) => preset.name === presetName);
 
     if (!selectedPreset) return;
-    setDietPlan(selectedPreset);
+
+    setDietPlan({ meals: selectedPreset.meals, totalCalories: selectedPreset.totalCalories });
   };
 
   useEffect(() => {
@@ -116,12 +123,14 @@ export const ViewDietPlanPage = () => {
           ))}
         </SelectContent>
       </Select>
-      <DietPlanForm
-        existingDietPlan={dietPlan}
-        handleSaveDietPlan={
-          isNewPlan ? (dietPlan) => createDietPlan(dietPlan) : (dietPlan) => editDietPlan(dietPlan)
-        }
-      />
+      <DietPlanForm existingDietPlan={dietPlan} updateDietPlan={updateDietPlan} />
+      {dietPlan.meals.length > 0 && (
+        <div>
+          <Button className="font-bold" variant="success" onClick={handleSubmit}>
+            שמור תפריט
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
