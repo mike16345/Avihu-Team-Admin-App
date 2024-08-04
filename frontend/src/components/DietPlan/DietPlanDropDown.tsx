@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FaChevronDown, FaTrash } from "react-icons/fa";
@@ -52,17 +52,27 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
 
   const [isOpen, setIsOpen] = useState(false);
 
-  const showProtein = !!meal.totalProtein.customInstructions?.length;
-  const showCarbs = !!meal.totalCarbs.customInstructions?.length;
-  const showFats = !!meal?.totalFats?.customInstructions?.length;
-  const showVeggies = !!meal?.totalVeggies?.customInstructions?.length;
+  const initialShowCustomSelection = useMemo(() => {
+    const showProtein = !!meal.totalProtein.customInstructions?.length;
+    const showCarbs = !!meal.totalCarbs.customInstructions?.length;
+    const showFats = !!meal?.totalFats?.customInstructions?.length;
+    const showVeggies = !!meal?.totalVeggies?.customInstructions?.length;
 
-  const [showCustomSelection, setShowCustomSelection] = useState<ShowCustomSelectionType>({
-    totalProtein: showProtein,
-    totalCarbs: showCarbs,
-    totalFats: showFats,
-    totalVeggies: showVeggies,
-  });
+    return {
+      totalProtein: showProtein,
+      totalCarbs: showCarbs,
+      totalFats: showFats,
+      totalVeggies: showVeggies,
+    };
+  }, [meal]);
+
+  const [showCustomSelection, setShowCustomSelection] = useState<ShowCustomSelectionType>(
+    initialShowCustomSelection
+  );
+
+  useEffect(() => {
+    setShowCustomSelection(initialShowCustomSelection);
+  }, [initialShowCustomSelection]);
 
   const onSubmit = async (meal: IMeal) => {
     const newMeal = Object.keys(meal).reduce((acc, key) => {

@@ -21,11 +21,17 @@ export interface IDietPlan {
   totalCalories?: number;
 }
 
+export interface IDietPlanPreset {
+  name: string;
+  meals: IMeal[];
+  totalCalories?: number;
+}
+
 export type DietItemUnit = "grams" | "spoons";
 
 export interface IServingItem {
   spoons: number;
-  grams: number
+  grams: number;
 }
 
 export interface IMenuItem {
@@ -37,5 +43,5 @@ export interface IMenuItem {
 
 export interface IMenue {
   menuName: string;
-  menuItems: IMenuItem[]
+  menuItems: IMenuItem[];
 }

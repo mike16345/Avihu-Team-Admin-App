@@ -1,139 +1,136 @@
-import { DietPlanDropDown } from "@/components/DietPlan/DietPlanDropDown";
-import { Button } from "@/components/ui/button";
 import { useDietPlanApi } from "@/hooks/useDietPlanApi";
-import { IDietPlan, IMeal } from "@/interfaces/IDietPlan";
+import { IDietPlan, IDietPlanPreset } from "@/interfaces/IDietPlan";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useParams } from "react-router";
-import { defaultDietPlan, defaultMeal } from "@/constants/DietPlanConsts";
-import DeleteModal from "@/components/Alerts/DeleteModal";
+import { defaultDietPlan } from "@/constants/DietPlanConsts";
+import DietPlanForm from "@/components/DietPlan/DietPlanForm";
+import Loader from "@/components/ui/Loader";
+import ErrorPage from "./ErrorPage";
+import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+  SelectTrigger,
+} from "@/components/ui/select";
+import { useDietPlanPresetApi } from "@/hooks/useDietPlanPresetsApi";
+import { Button } from "@/components/ui/button";
 
 export const ViewDietPlanPage = () => {
   const { id } = useParams();
-
   const { addDietPlan, updateDietPlanByUserId, getDietPlanByUserId } = useDietPlanApi();
+  const { getAllDietPlanPresets } = useDietPlanPresetApi();
 
-  const [openDeleteModal, setOpenDeleteModal] = useState(false);
-  const [isNewPlan, setIsNewPlan] = useState(true);
-  const [mealToDelete, setMealToDelete] = useState<number | null>(null);
+  const [isNewPlan, setIsNewPlan] = useState(false);
+  const [dietPlan, setDietPlan] = useState<IDietPlan>(defaultDietPlan);
+  const [presetList, setPresetList] = useState<IDietPlanPreset[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const [dietPlan, setDietPlan] = useState<IDietPlan | null>(null);
+  const updateDietPlan = (dietPlan: IDietPlan) => setDietPlan(dietPlan);
 
-  const handleAddMeal = () => {
-    if (!dietPlan) return;
-
-    setDietPlan({ ...dietPlan, meals: [...dietPlan.meals, defaultMeal] });
-  };
-
-  const handleDeleteMeal = () => {
-    if (mealToDelete == null || !dietPlan) return;
-
-    setDietPlan({ ...dietPlan, meals: dietPlan.meals.filter((_, i) => i !== mealToDelete) });
-    setMealToDelete(null);
-  };
-
-  const handleSetMeal = (meal: IMeal, mealNumber: number) => {
-    if (!dietPlan) return;
-
-    const newMeals = [...dietPlan.meals];
-
-    newMeals[mealNumber] = meal;
-    setDietPlan({ ...dietPlan, meals: newMeals });
-    toast.success("ארוחה נשמרה בהצלחה!");
-  };
-
-  const handleSaveDietPlan = async () => {
-    if (!dietPlan) return;
-
+  const handleSubmit = () => {
     const dietPlanToAdd = {
       ...dietPlan,
       userId: id,
     };
 
-    if (id && !isNewPlan) {
-      await updateDietPlanByUserId(id, dietPlanToAdd)
-        .then(() => {
-          toast.success("תפריט עודכנה בהצלחה!");
-          setOpenDeleteModal(false);
-          setMealToDelete(null);
-        })
-        .catch((err) => {
-          toast.error("הייתה בעיה בעדכון!", { description: err.message });
-          console.error("error", err);
-        });
+    if (isNewPlan) {
+      createDietPlan(dietPlanToAdd);
     } else {
-      await addDietPlan(dietPlanToAdd)
-        .then((res) => {
-          toast.success("תפריט נשמר בהצלחה!");
-          setDietPlan(res);
-          setIsNewPlan(false);
-        })
-        .catch((err) => {
-          toast.error("הייתה בעיה בשמירה", { description: err.message });
-          console.error("error", err);
-        });
+      editDietPlan(dietPlanToAdd);
     }
+  };
+
+  const createDietPlan = (dietPlan: IDietPlan) => {
+    if (!dietPlan) return;
+
+    addDietPlan(dietPlan)
+      .then(() => {
+        toast.success("תפריט נשמר בהצלחה!");
+      })
+      .catch((err) => {
+        toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, { description: err.message });
+        console.error("error", err);
+      });
+  };
+
+  const editDietPlan = (dietPlan: IDietPlan) => {
+    if (!dietPlan || !id) return;
+
+    updateDietPlanByUserId(id, dietPlan)
+      .then(() => {
+        toast.success("תפריט עודכן בהצלחה!");
+      })
+      .catch((err) => {
+        toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, { description: err.message });
+      });
+  };
+
+  const handleSelect = (presetName: string) => {
+    const selectedPreset = presetList?.find((preset) => preset.name === presetName);
+
+    if (!selectedPreset) return;
+
+    setDietPlan({ meals: selectedPreset.meals, totalCalories: selectedPreset.totalCalories });
   };
 
   useEffect(() => {
     if (!id) return;
+    setIsLoading(true);
+
+    getAllDietPlanPresets()
+      .then((res) => setPresetList(res))
+      .catch((err) => setError(err));
 
     getDietPlanByUserId(id)
       .then((dietPlan) => {
         if (dietPlan) {
-          setIsNewPlan(false);
           setDietPlan(dietPlan);
+          setIsNewPlan(false);
         } else {
-          setIsNewPlan(true);
           setDietPlan(defaultDietPlan);
+          setIsNewPlan(true);
         }
       })
       .catch((err: Error) => {
-        console.error(err);
+        setError(err.message);
+      })
+      .finally(() => {
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 1000);
       });
   }, []);
+
+  if (isLoading) return <Loader size="large" />;
+  if (error) return <ErrorPage message={error} />;
 
   return (
     <div className=" flex flex-col gap-4 w-4/5 h-full hide-scrollbar overflow-y-auto">
       <h1 className="text-2xl font-semibold mb-4">עריכת תפריט תזונה</h1>
-      <div>
-        <Button className="font-bold" onClick={handleAddMeal}>
-          הוסף ארוחה
-        </Button>
-      </div>
-      {dietPlan && (
-        <div className="flex flex-col gap-4 ">
-          {dietPlan.meals.map((meal, index) => {
-            return (
-              <div key={index} className={`${index !== dietPlan.meals.length - 1 && "border-b"}`}>
-                <DietPlanDropDown
-                  mealNumber={index + 1}
-                  meal={meal}
-                  setDietPlan={(meal: IMeal) => handleSetMeal(meal, index)}
-                  onDelete={() => {
-                    setMealToDelete(index);
-                    setOpenDeleteModal(true);
-                  }}
-                />
-              </div>
-            );
-          })}
-          {dietPlan.meals.length > 0 && (
-            <div>
-              <Button className="font-bold" variant="success" onClick={handleSaveDietPlan}>
-                שמור תפריט
-              </Button>
-            </div>
-          )}
+      <Select onValueChange={(val) => handleSelect(val)}>
+        <SelectTrigger dir="rtl" className="w-[350px] mr-1">
+          <SelectValue placeholder="בחר תפריט" />
+        </SelectTrigger>
+        <SelectContent dir="rtl">
+          {presetList?.map((preset) => (
+            <SelectItem key={preset.name} value={preset.name}>
+              {preset.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <DietPlanForm existingDietPlan={dietPlan} updateDietPlan={updateDietPlan} />
+      {dietPlan.meals.length > 0 && (
+        <div>
+          <Button className="font-bold" variant="success" onClick={handleSubmit}>
+            שמור תפריט
+          </Button>
         </div>
       )}
-
-      <DeleteModal
-        onConfirm={() => handleDeleteMeal()}
-        onCancel={() => setMealToDelete(null)}
-        isModalOpen={openDeleteModal}
-        setIsModalOpen={setOpenDeleteModal}
-      />
     </div>
   );
 };

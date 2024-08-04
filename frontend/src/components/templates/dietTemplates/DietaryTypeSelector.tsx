@@ -1,93 +1,78 @@
-import { Badge } from '@/components/ui/badge'
-import React, { useEffect, useState } from 'react'
-import { FaCheck, FaPlus } from 'react-icons/fa'
-import {
-    Collapsible,
-    CollapsibleContent,
-} from "@/components/ui/collapsible"
-import { BiPencil } from 'react-icons/bi'
+import { Badge } from "@/components/ui/badge";
+import React, { useEffect, useState } from "react";
+import { FaCheck, FaPlus } from "react-icons/fa";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+import { BiPencil } from "react-icons/bi";
 
-
-
-const dietaryTypeItems = [
-    `צמחוני`,
-    `טבעוני`,
-    `פסקטריאן`,
-    `ללא גלוטן`,
-    `ללא לקטוז`
-]
+const dietaryTypeItems = [`צמחוני`, `טבעוני`, `פסקטריאן`, `ללא גלוטן`, `ללא לקטוז`];
 
 interface DietaryTypeSelectorProps {
-    saveSelected: (selectedItems: string[]) => void;
-    existingItems?: string[]
+  saveSelected: (selectedItems: string[]) => void;
+  existingItems?: string[];
 }
 
-const DietaryTypeSelector: React.FC<DietaryTypeSelectorProps> = ({ saveSelected, existingItems }) => {
-    const [selectedItems, setSelectedItems] = useState<string[]>([])
-    const [isOpen, setIsOpen] = useState<boolean>(false)
+const DietaryTypeSelector: React.FC<DietaryTypeSelectorProps> = ({
+  saveSelected,
+  existingItems,
+}) => {
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
-    const handleSelect = (item: string) => {
-        setSelectedItems((prevSelectedItems) => {
-            const selected = prevSelectedItems?.includes(item)
-                ?
-                prevSelectedItems.filter(i => i !== item)
-                :
-                [...prevSelectedItems, item]
+  const handleSelect = (item: string) => {
+    setSelectedItems((prevSelectedItems) => {
+      const selected = prevSelectedItems?.includes(item)
+        ? prevSelectedItems.filter((i) => i !== item)
+        : [...prevSelectedItems, item];
 
-            saveSelected(selected)
+      saveSelected(selected);
 
-            return selected
-        })
+      return selected;
+    });
+  };
+
+  useEffect(() => {
+    if (existingItems) {
+      setSelectedItems(existingItems);
     }
+  }, [existingItems]);
 
-    useEffect(() => {
-        if (existingItems) {
-            setSelectedItems(existingItems)
-        }
-    }, [existingItems])
-
-    return (
-        <Collapsible open={isOpen}>
-            <div className='flex items-end justify-between'>
-                <h1>הגבלות תזונה</h1>
-                <div
-                    className='cursor-pointer border-2 hover:border-black hover:bg-accent p-2 rounded'
-                    onClick={() => setIsOpen(!isOpen)}
-                >
-                    <BiPencil />
-                </div>
-            </div>
-            <div
-                className='flex p-2 my-2 gap-2 flex-wrap h-auto border-y-2'
+  return (
+    <Collapsible open={isOpen}>
+      <div className="flex items-end justify-between">
+        <h1>הגבלות תזונה</h1>
+        <div
+          className="cursor-pointer border-2 hover:border-black hover:bg-accent p-2 rounded"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          <BiPencil />
+        </div>
+      </div>
+      <div className="flex p-2 my-2 gap-2 flex-wrap h-auto border-y-2">
+        {selectedItems.length == 0
+          ? `ללא`
+          : selectedItems.map((item) => <p className="inline  pl-2 border-l-2"> {item}</p>)}
+      </div>
+      <CollapsibleContent>
+        <div className="w-full bg-accent py-3 px-2 rounded">
+          {dietaryTypeItems.map((item) => (
+            <Badge
+              className={`m-1 cursor-pointer ${
+                selectedItems.includes(item) ? `bg-green-500 text-white` : ``
+              }`}
+              onClick={() => handleSelect(item)}
             >
-                {selectedItems.length == 0 ?
-                    `ללא`
-                    :
-                    selectedItems.map(item => (
-                        <p className='inline  pl-2 border-l-2'> {item}</p>
-                    ))
-                }
-            </div>
-            <CollapsibleContent>
-                <div className='w-full bg-accent py-3 px-2 rounded'>
-                    {dietaryTypeItems.map(item => (
-                        <Badge
-                            className={`m-1 cursor-pointer ${selectedItems.includes(item) ? `bg-green-500 text-white` : ``}`}
-                            onClick={() => handleSelect(item)}
-                        >
-                            {item}
-                            {selectedItems.includes(item) ? (
-                                <FaCheck size={12} className='inline mr-1' />
-                            ) : (
-                                <FaPlus size={12} className='inline mr-1' />
-                            )}
-                        </Badge>
-                    ))}
+              {item}
+              {selectedItems.includes(item) ? (
+                <FaCheck size={12} className="inline mr-1" />
+              ) : (
+                <FaPlus size={12} className="inline mr-1" />
+              )}
+            </Badge>
+          ))}
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
+  );
+};
 
-                </div>
-            </CollapsibleContent>
-        </Collapsible>
-    )
-}
-
-export default DietaryTypeSelector
+export default DietaryTypeSelector;

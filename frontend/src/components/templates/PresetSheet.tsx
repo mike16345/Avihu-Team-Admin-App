@@ -27,10 +27,12 @@ const PresetSheet: React.FC<PresetSheetProps> = ({ form, id, isOpen, onCloseShee
             כאן ניתן להוסיף פריטים לרשימה הקיימת במערכת
           </SheetDescription>
           {form == `Exercise` && <ExerciseForm objectId={id} closeSheet={() => onCloseSheet()} />}
-          {form == `muscleGroup` && <MusceGroupForm objectId={id} closeSheet={() => onCloseSheet()} />}
-          {(form == `fats` || form == `vegetables` || form == `carbs` || form == `protein`) &&
+          {form == `muscleGroup` && (
+            <MusceGroupForm objectId={id} closeSheet={() => onCloseSheet()} />
+          )}
+          {(form == `fats` || form == `vegetables` || form == `carbs` || form == `protein`) && (
             <MenuItemForm objectId={id} closeSheet={() => onCloseSheet()} foodGroup={form} />
-          }
+          )}
         </SheetHeader>
       </SheetContent>
     </Sheet>
