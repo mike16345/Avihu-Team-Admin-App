@@ -10,11 +10,11 @@ const DietPlanTemplatePage = () => {
   const { getMenuItems, deleteMenuItem } = useMenuItemApi();
   const { getAllDietPlanPresets, deleteDietPlanPreset } = useDietPlanPresetApi();
 
-  const [dietPlanPresets, setDietPlanPresets] = useState<IDietPlan[]>();
-  const [proteinMenu, setProteinMenu] = useState<IMenuItem[]>();
-  const [carbsMenu, setCarbsMenu] = useState<IMenuItem[]>();
-  const [VegetableMenu, setVegetableMenu] = useState<IMenuItem[]>();
-  const [fatsMenue, setFatsMenue] = useState<IMenuItem[]>();
+  const [dietPlanPresets, setDietPlanPresets] = useState<IDietPlan[]>([]);
+  const [proteinMenu, setProteinMenu] = useState<IMenuItem[]>([]);
+  const [carbsMenu, setCarbsMenu] = useState<IMenuItem[]>([]);
+  const [VegetableMenu, setVegetableMenu] = useState<IMenuItem[]>([]);
+  const [fatsMenue, setFatsMenue] = useState<IMenuItem[]>([]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,35 +46,40 @@ const DietPlanTemplatePage = () => {
       {
         value: `dietPlanPresets`,
         btnPrompt: `הוסף תפריט`,
-        state: dietPlanPresets || [],
+        state: dietPlanPresets,
+        setState: setDietPlanPresets,
         sheetForm: `dietPlans`,
         deleteFunc: deleteDietPlanPreset,
       },
       {
         value: `proteinItems`,
         btnPrompt: `הוסף חלבון`,
-        state: proteinMenu || [],
+        state: proteinMenu,
+        setState: setProteinMenu,
         sheetForm: `protein`,
         deleteFunc: deleteMenuItem,
       },
       {
         value: `carbItems`,
         btnPrompt: `הוסף פחמימה`,
-        state: carbsMenu || [],
+        state: carbsMenu,
+        setState: setCarbsMenu,
         sheetForm: `carbs`,
         deleteFunc: deleteMenuItem,
       },
       {
         value: `vegetableItems`,
         btnPrompt: `הוסף ירקות`,
-        state: VegetableMenu || [],
+        state: VegetableMenu,
+        setState: setVegetableMenu,
         sheetForm: `vegetables`,
         deleteFunc: deleteMenuItem,
       },
       {
         value: `fatsItems`,
         btnPrompt: `הוסף שומנים`,
-        state: fatsMenue || [],
+        state: fatsMenue,
+        setState: setFatsMenue,
         sheetForm: `fats`,
         deleteFunc: deleteMenuItem,
       },

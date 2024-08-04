@@ -26,7 +26,7 @@ export const ViewDietPlanPage = () => {
   const [dietPlan, setDietPlan] = useState<IDietPlan | IDietPlanPreset>(defaultDietPlan);
   const [presetList, setPresetList] = useState<IDietPlanPreset[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string>();
+  const [error, setError] = useState<string | null>(null);
 
   const createDietPlan = (dietPlan: IDietPlan) => {
     if (!dietPlan) return;

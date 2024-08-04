@@ -16,11 +16,11 @@ const WorkoutsTemplatePage = () => {
   const { getAllWorkoutPlanPresets, deleteWorkoutPlanPreset } = useWorkoutPlanPresetApi();
   const { getAllMuscleGroups, deleteMuscleGroup } = useMuscleGroupsApi();
 
-  const [workoutPlanPresets, setWorkoutPlanPresets] = useState<IWorkoutPlanPreset[]>();
-  const [musclegroupState, setMusclegroupState] = useState<IMuscleGroupItem[]>();
-  const [exercisePresets, setExercisePresets] = useState<IExercisePresetItem[]>();
+  const [workoutPlanPresets, setWorkoutPlanPresets] = useState<IWorkoutPlanPreset[]>([]);
+  const [muscleGroupPresets, setMuscleGroupPresets] = useState<IMuscleGroupItem[]>([]);
+  const [exercisePresets, setExercisePresets] = useState<IExercisePresetItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string>();
+  const [error, setError] = useState<string | null>(null);
 
   const tabs: ITabs = {
     tabHeaders: [
@@ -42,13 +42,15 @@ const WorkoutsTemplatePage = () => {
         value: `WorkoutPlans`,
         btnPrompt: `הוסף תבנית`,
         state: workoutPlanPresets,
+        setState: setWorkoutPlanPresets,
         sheetForm: `workoutPlan`,
         deleteFunc: deleteWorkoutPlanPreset,
       },
       {
         value: `muscleGroups`,
         btnPrompt: `הוסף קבוצת שריר`,
-        state: musclegroupState,
+        state: muscleGroupPresets,
+        setState: setMuscleGroupPresets,
         sheetForm: `muscleGroup`,
         deleteFunc: deleteMuscleGroup,
       },
@@ -56,6 +58,7 @@ const WorkoutsTemplatePage = () => {
         value: `exercises`,
         btnPrompt: `הוסף תרגיל`,
         state: exercisePresets,
+        setState: setExercisePresets,
         sheetForm: `Exercise`,
         deleteFunc: deleteExercise,
       },
@@ -73,7 +76,7 @@ const WorkoutsTemplatePage = () => {
       .catch((err) => setError(err));
 
     getAllMuscleGroups()
-      .then((res) => setMusclegroupState(res))
+      .then((res) => setMuscleGroupPresets(res))
       .catch((err) => setError(err));
 
     setTimeout(() => {

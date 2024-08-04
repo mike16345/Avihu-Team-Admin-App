@@ -17,10 +17,10 @@ export const ViewDietPlanPresetPage = () => {
   const { getDietPlanPreset, updateDietPlanPreset, addDietPlanPreset } = useDietPlanPresetApi();
 
   const [isNewPlan, setIsNewPlan] = useState(false);
-  const [dietPlan, setDietPlan] = useState<IDietPlan>();
-  const [presetName, setPresetName] = useState<string>();
+  const [dietPlan, setDietPlan] = useState<IDietPlan>(defaultDietPlan);
+  const [presetName, setPresetName] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string>();
+  const [error, setError] = useState<string | null>(null);
 
   const createDietPlanPreset = (dietPlan: IDietPlan) => {
     if (!dietPlan || !presetName) return;
@@ -99,7 +99,7 @@ export const ViewDietPlanPresetPage = () => {
         placeholder="שם לתפריט..."
         className="w-[400px] mr-1"
         onChange={(e) => setPresetName(e.target.value)}
-        value={presetName}
+        value={presetName || ``}
       />
       <DietPlanForm
         existingDietPlan={dietPlan}
