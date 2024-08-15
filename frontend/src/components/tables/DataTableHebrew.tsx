@@ -29,6 +29,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { FilterIcon, Trash2Icon } from "lucide-react";
 import { RowData } from "@tanstack/react-table";
+import { useNavigate } from "react-router-dom";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -56,6 +57,8 @@ export function DataTableHebrew<TData, TValue>({
   handleViewNestedData,
   handleSetData,
 }: DataTableProps<TData, TValue>) {
+  const navigate=useNavigate();
+
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -100,7 +103,7 @@ export function DataTableHebrew<TData, TValue>({
       <div className="flex flex-col ">
         <div className="flex items-center py-4 gap-4">
           <Input
-            placeholder="חיפוס..."
+            placeholder="חיפוש..."
             value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
             onChange={(event) => table.getColumn("name")?.setFilterValue(event.target.value)}
             className="max-w-sm"
@@ -109,6 +112,9 @@ export function DataTableHebrew<TData, TValue>({
             {table.getFilteredSelectedRowModel().rows.length} {"תוך "}
             {table.getFilteredRowModel().rows.length} שורות נבחרו.
           </div>
+          <Button 
+            onClick={()=>navigate(`/users/add`)}
+          >הוסף משתמש</Button>
           <DropdownMenu dir="rtl">
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="ml-auto">

@@ -6,6 +6,7 @@ import DietPlanTemplatePage from "@/pages/DietPlanTemplatePage";
 import WorkoutsTemplatePage from "@/pages/WorkoutsTemplatePage";
 import { CreateWorkoutPlanWrapper } from "@/components/workout plan/CreateWorkoutPlanWrapper";
 import PresetRoutes from "./PresetRoutes";
+import UserFormPage from "@/pages/UserFormPage";
 
 export const AppRoutes = () => {
   return (
@@ -13,6 +14,7 @@ export const AppRoutes = () => {
       <Routes>
         <Route path="/" element={<UsersTable />} />
         <Route path="/users/*" element={<UsersTable />} />
+        <Route path="/users/add" element={< UserFormPage/>} />
         <Route path="/users/:id" element={<UserDashboard />} />
         <Route path="/diet-plans/:id" element={<ViewDietPlanPage />} />
         <Route path="/workout-plans/:id" element={<CreateWorkoutPlanWrapper />} />
