@@ -98,7 +98,7 @@ export function DataTableHebrew<TData, TValue>({
   return (
     <>
       <div className="flex flex-col ">
-        <div className="w-full flex flex-col gap-2 md:gap-0 md:flex-col md:justify-between md:items-center py-4">
+        <div className="w-full flex flex-col gap-2 md:gap-0 md:flex-row md:justify-between md:items-center py-4">
           <div className="flex flex-col md:flex-row md:items-center md:gap-4">
             <Input
               placeholder="חיפוס..."
