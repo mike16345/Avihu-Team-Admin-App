@@ -27,7 +27,7 @@ export const WeightProgression = () => {
   return (
     <>
       <div className="flex flex-col gap-8">
-        <div className="w-full h-full flex items-center ">
+        <div className="size-full flex items-center ">
           {weighIns && (
             <Card className="size-full">
               <CardHeader>

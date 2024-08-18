@@ -47,7 +47,7 @@ export const UserDashboard = () => {
           </Link>
         </ul>
       </div>
-      <div className="">
+      <div>
         <Tabs dir="rtl" defaultValue="מעקב שקילה" className="w-full">
           <TabsList>
             <TabsTrigger value="מעקב שקילה">מעקב שקילה</TabsTrigger>

@@ -15,92 +15,20 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { FaCheck, FaSort } from "react-icons/fa";
 
-const muscleGroups = [
-  {
-    value: "קרסוליים",
-    label: "קרסוליים",
-  },
-  {
-    value: "שרירי עקב",
-    label: "שרירי עקב",
-  },
-  {
-    value: "שרירי רגל",
-    label: "שרירי רגל",
-  },
-  {
-    value: "שרירי הירך",
-    label: "שרירי הירך",
-  },
-  {
-    value: "שרירי הבטן",
-    label: "שרירי הבטן",
-  },
-  {
-    value: "שרירי הצדדים",
-    label: "שרירי הצדדים",
-  },
-  {
-    value: "שרירי החזה",
-    label: "שרירי החזה",
-  },
-  {
-    value: "שרירי הכתפיים",
-    label: "שרירי הכתפיים",
-  },
-  {
-    value: "שריר חולמי",
-    label: "שריר חולמי",
-  },
-  {
-    value: "שריר הגב",
-    label: "שריר הגב",
-  },
-  {
-    value: "שרירי הזרוע",
-    label: "שרירי הזרוע",
-  },
-  {
-    value: "שרירי היד",
-    label: "שרירי היד",
-  },
-  {
-    value: "שרירי הידיים",
-    label: "שרירי הידיים",
-  },
-  {
-    value: "שרירי הגב הקשר",
-    label: "שרירי הגב הקשר",
-  },
-  {
-    value: "שרירי הירך הסטרי",
-    label: "שרירי הירך הסטרי",
-  },
-  {
-    value: "שרירי הירך הכניסי",
-    label: "שרירי הירך הכניסי",
-  },
-  {
-    value: "שריר הכף הגדולה",
-    label: "שריר הכף הגדולה",
-  },
-  {
-    value: "שריר הכף הקטנה",
-    label: "שריר הכף הקטנה",
-  },
-];
-
 interface ComboBoxProps {
-  value: string;
+  selectedMuscleGroup: string;
   muscleGroups: string[];
-  onChange: (value: string) => void;
+  handleSelectMuscleGroup: (value: string) => void;
 }
 
-export function MuscleGroupCombobox({ value, muscleGroups, onChange }: ComboBoxProps) {
+export function MuscleGroupCombobox({
+  selectedMuscleGroup,
+  muscleGroups,
+  handleSelectMuscleGroup,
+}: ComboBoxProps) {
   const options = convertStringsToOptions(muscleGroups);
 
   const [open, setOpen] = React.useState(false);
-  const [currentValue, setValue] = React.useState(value);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -111,31 +39,30 @@ export function MuscleGroupCombobox({ value, muscleGroups, onChange }: ComboBoxP
           aria-expanded={open}
           className="w-[200px] justify-between"
         >
-          {value !== "" ? value : "בחר קבוצת שריר..."}
+          {selectedMuscleGroup !== "" ? selectedMuscleGroup : "בחר קבוצת שריר..."}
           <FaSort className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
-        <Command value={value}>
+        <Command>
           <CommandInput placeholder="חפש קבוצת שריר..." className="h-9" />
           <CommandList>
-            <CommandEmpty>No framework found.</CommandEmpty>
+            <CommandEmpty>No muscle groups found.</CommandEmpty>
             <CommandGroup>
-              {options.map((framework) => (
+              {options.map((muscleGroup) => (
                 <CommandItem
-                  key={framework.value}
-                  value={framework.value}
+                  key={muscleGroup.value}
+                  value={muscleGroup.value}
                   onSelect={() => {
-                    setValue(framework.value);
-                    onChange(framework.value);
+                    handleSelectMuscleGroup(muscleGroup.value);
                     setOpen(false);
                   }}
                 >
-                  {framework.label}
+                  {muscleGroup.label}
                   <FaCheck
                     className={cn(
                       "mr-auto h-4 w-4",
-                      value === framework.value ? "opacity-100" : "opacity-0"
+                      selectedMuscleGroup === muscleGroup.value ? "opacity-100" : "opacity-0"
                     )}
                   />
                 </CommandItem>

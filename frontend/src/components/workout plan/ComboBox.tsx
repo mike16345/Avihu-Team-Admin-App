@@ -69,7 +69,7 @@ const ComboBox: React.FC<ComboBoxProps> = ({
               {values?.map((option, i) => (
                 <CommandItem key={i} value={option.name} onSelect={(val) => onChange(val)}>
                   {option.name}
-                </CommandItem>
+                </CommandItem>  
               ))}
             </CommandGroup>
           </CommandList>

@@ -161,8 +161,6 @@ body {
   /* box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37); */
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-  border-radius: 10px;
-  border: 2px solid rgba(255, 255, 255, 0.18);
 }
 
 /* Hide scrollbars for WebKit browsers (Chrome, Safari) */
@@ -220,18 +218,10 @@ body {
   border-radius: 10px;
 }
 
-.glassmorphism {
-  background: rgba(255, 255, 255, 0.25);
-  /* box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37); */
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  /* border: 2px solid rgba(255, 255, 255, 0.18); */
-}
-
 @keyframes fadeInLeft {
   from {
     opacity: 0;
-    transform: translateX(-100px);
+    transform: translateX(-10px);
   }
   to {
     opacity: 1;
@@ -247,14 +237,14 @@ body {
   to {
     opacity: 0;
     visibility: hidden;
-    transform: translateX(-100px);
+    transform: translateX(-10px);
   }
 }
 
 @keyframes fadeInRight {
   from {
     opacity: 0;
-    transform: translateX(100px);
+    transform: translateX(10px);
   }
   to {
     opacity: 1;
@@ -270,6 +260,6 @@ body {
   to {
     opacity: 0;
     visibility: hidden;
-    transform: translateX(100px);
+    transform: translateX(10px);
   }
 }

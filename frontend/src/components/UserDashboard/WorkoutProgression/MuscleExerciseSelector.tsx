@@ -53,8 +53,8 @@ export const MuscleExerciseSelector: FC<MuscleExerciseSelectorProps> = ({
         <Label>קבוצת שריר</Label>
         <MuscleGroupCombobox
           muscleGroups={muscleGroups}
-          value={selectedMuscleGroup}
-          onChange={(val) => handleSelectMuscleGroup(val)}
+          selectedMuscleGroup={selectedMuscleGroup}
+          handleSelectMuscleGroup={handleSelectMuscleGroup}
         />
       </div>
       <div className="flex flex-col gap-1">

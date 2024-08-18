@@ -19,7 +19,7 @@ export const FullscreenImage: FC<FullscreenImageProps> = ({
 }) => {
   return (
     <div className="fixed top-0 left-0  size-full glassmorphism z-50 flex items-center justify-center">
-      <div className="absolute top-10 left-4">
+      <div className="absolute top-4 left-4">
         <IoClose
           onClick={onClose}
           className=" text-white  filter-black cursor-pointer font-bold"

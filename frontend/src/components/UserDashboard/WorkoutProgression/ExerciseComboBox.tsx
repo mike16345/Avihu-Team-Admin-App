@@ -12,8 +12,6 @@ import { cn, convertStringsToOptions } from "@/lib/utils";
 import React, { FC } from "react";
 import { FaSort, FaCheck } from "react-icons/fa";
 
-
-
 interface IExerciseCombobox {
   selectedExercise: string;
   exercises: string[];
@@ -25,9 +23,10 @@ export const ExerciseComboBox: FC<IExerciseCombobox> = ({
   exercises,
   handleSelectExercise,
 }) => {
+  const options = convertStringsToOptions(exercises);
+  
   const [open, setOpen] = React.useState(false);
 
-  const options = convertStringsToOptions(exercises);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -39,7 +38,7 @@ export const ExerciseComboBox: FC<IExerciseCombobox> = ({
           className="w-[200px] justify-between"
         >
           {selectedExercise !== "" ? selectedExercise : "בחר תרגיל..."}
-          <FaSort className="ml-2 \h-4 w-4 shrink-0 opacity-50" />
+          <FaSort className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
