@@ -4,6 +4,7 @@ export interface IRecordedSet {
   plan: WorkoutPlan;
   weight: number;
   repsDone: number;
+  setNumber: number;
   date: Date;
   note: string;
 }

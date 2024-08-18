@@ -50,15 +50,15 @@ export const WorkoutProgression = () => {
         onSelectMuscleGroup={(muscleGroup) => setSelectedMuscleGroup(muscleGroup)}
       />
       <div className="w-full flex flex-col md:flex-row gap-4">
+        <div className="md:w-2/6 border rounded-lg ">
+          <RecordedSetsList recordedSets={recordedSets} />
+        </div>
         <div className="md:w-4/6">
           <ExerciseProgressChart
             selectedMuscleGroup={selectedMuscleGroup}
             selectedExercise={selectedExercise}
             recordedSets={recordedSets}
           />
-        </div>
-        <div className="md:w-2/6 border rounded-lg ">
-          <RecordedSetsList recordedSets={recordedSets} />
         </div>
       </div>
     </div>

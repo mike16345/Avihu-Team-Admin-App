@@ -2,32 +2,33 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { IRecordedSet } from "@/interfaces/IWorkout";
 import DateUtils from "@/lib/dateUtils";
 
-export const SetDetails = ({ set, index }: { set: IRecordedSet; index: number }) => {
+export const SetDetails = ({ set }: { set: IRecordedSet; index: number }) => {
   const dateRecorded = new Date(set.date);
   const dateString = DateUtils.formatDate(dateRecorded, "DD/MM/YYYY");
-  const time = dateRecorded.toLocaleTimeString();
+  const time = dateRecorded.toLocaleTimeString().replace("AM", "").replace("PM", "");
 
   return (
-    <Card>
+    <Card dir="rtl">
       <CardHeader>
-        <CardTitle className="text-xl">Set {index + 1}</CardTitle>
+        <CardTitle className="text-xl">סט {set.setNumber}</CardTitle>
         <CardDescription className="font-medium">
-          Date: <span className="text-xs">{dateString + ": " + time}</span>
+          תאריך: <span className="text-xs">{dateString + ": " + time}</span>
         </CardDescription>
       </CardHeader>
       <CardContent>
         <p>
-          Weight: <span className="font-normal text-muted-foreground ms-1">{set.weight} kg</span>
+          משקל עבודה:
+          <span className="font-normal text-muted-foreground ms-1">{set.weight} ק"ג</span>
         </p>
         <p>
-          Reps Done: <span className="font-normal text-muted-foreground ms-1">{set.repsDone}</span>
+          חזרות: <span className="font-normal text-muted-foreground ms-1">{set.repsDone}</span>
         </p>
         <p>
-          Workout Plan:
+          תוכנית:
           <span className="font-normal text-muted-foreground ms-1">{set.plan}</span>
         </p>
         <p>
-          Note: <span className="font-normal text-muted-foreground ms-1">{set.note}</span>
+          פטק: <span className="font-normal text-muted-foreground ms-1">{set.note}</span>
         </p>
       </CardContent>
     </Card>

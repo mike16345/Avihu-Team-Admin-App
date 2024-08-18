@@ -1,9 +1,10 @@
 import { IRecordedSet } from "@/interfaces/IWorkout";
 import { Collapsible, CollapsibleContent } from "@radix-ui/react-collapsible";
-import React, { FC, useState } from "react";
+import { FC, useState } from "react";
 import { FaChevronDown } from "react-icons/fa";
 import { SetDetails } from "./SetDetails";
 import { Button } from "@/components/ui/button";
+import SetDropDownHeader from "./SetDropDownHeader";
 
 interface RecordedSetsListProps {
   recordedSets: IRecordedSet[];
@@ -32,14 +33,10 @@ export const RecordedSetsList: FC<RecordedSetsListProps> = ({ recordedSets }) =>
     <>
       {recordedSetsByDatesKeys.map((date) => {
         const setsForDate = recordedSetsByDate[date];
-        const shortMonth = new Date(date)
-          .toLocaleString("default", { month: "short" })
-          .toUpperCase();
         const dateAsLocaleString = new Date(date).toLocaleDateString();
 
         return (
           <Collapsible
-            dir="ltr"
             key={date}
             open={isOpen[dateAsLocaleString]}
             onOpenChange={() => toggleOpen(dateAsLocaleString)}
@@ -47,37 +44,12 @@ export const RecordedSetsList: FC<RecordedSetsListProps> = ({ recordedSets }) =>
               recordedSetsByDatesKeys.length > 1 && "last:border-b-0"
             } `}
           >
-            <div className="flex flex-col gap-2">
-              <div className="flex justify-between items-center">
-                <div className="flex flex-col justify-center items-center">
-                  <h1 className="font-bold bg-secondary rounded-full p-2">
-                    {shortMonth.toUpperCase()}
-                  </h1>
-                  <h2 className="text-muted-foreground">{new Date(date).getDate()}</h2>
-                </div>
-                <div>
-                  <div className="flex items-center gap-2 leading-none text-muted-foreground">
-                    Total sets: {setsForDate.length}
-                  </div>
-                  <div className="flex items-center gap-2 leading-none text-muted-foreground">
-                    Total weight: {setsForDate.reduce((total, set) => total + set.weight, 0)} kg
-                  </div>
-                </div>
-                {setsForDate.length && (
-                  <Button
-                    onClick={() => toggleOpen(dateAsLocaleString)}
-                    variant="ghost"
-                    size="sm"
-                    className={`w-9 p-0 transition ${
-                      isOpen[dateAsLocaleString] ? "rotate-180" : "rotate-0"
-                    }`}
-                  >
-                    <FaChevronDown className="h-4 w-4" />
-                    <span className="sr-only">Toggle</span>
-                  </Button>
-                )}
-              </div>
-            </div>
+            <SetDropDownHeader
+              date={date}
+              isOpen={isOpen[dateAsLocaleString]}
+              setsForDate={setsForDate}
+              onToggleDropDown={() => toggleOpen(dateAsLocaleString)}
+            />
             {setsForDate.length && (
               <CollapsibleContent className="flex flex-col overflow-y-scroll hide-scrollbar max-h-[600px] gap-3 mt-2">
                 {setsForDate.map((set, index) => (
