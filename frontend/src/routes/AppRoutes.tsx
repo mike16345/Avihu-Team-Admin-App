@@ -15,6 +15,7 @@ export const AppRoutes = () => {
         <Route path="/" element={<UsersTable />} />
         <Route path="/users/*" element={<UsersTable />} />
         <Route path="/users/add" element={< UserFormPage/>} />
+        <Route path="/users/edit/:id" element={< UserFormPage/>} />
         <Route path="/users/:id" element={<UserDashboard />} />
         <Route path="/diet-plans/:id" element={<ViewDietPlanPage />} />
         <Route path="/workout-plans/:id" element={<CreateWorkoutPlanWrapper />} />

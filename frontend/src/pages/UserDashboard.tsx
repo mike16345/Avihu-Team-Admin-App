@@ -13,15 +13,21 @@ export const UserDashboard = () => {
         <ul className="flex flex-col text-sm ">
           <Link
             className=" hover:bg-secondary font-bold px-2 py-0.5 rounded-md"
+            to={"/users/edit/" + id}
+          >
+            עריכת משתמש
+          </Link>
+          <Link
+            className=" hover:bg-secondary font-bold px-2 py-0.5 rounded-md"
             to={"/diet-plans/" + id}
           >
-            עריכה תפריט
+            עריכת תפריט
           </Link>
           <Link
             className="  hover:bg-secondary font-bold px-2 py-0.5 rounded-md"
             to={"/workout-plans/" + id}
           >
-            עריכה תוכנית אימון
+            עריכת תוכנית אימון
           </Link>
         </ul>
       </div>

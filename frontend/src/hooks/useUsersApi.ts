@@ -11,7 +11,6 @@ export const useUsersApi = () => {
 
   const deleteUser = (userID: string) => deleteItem(`${USERS_ENDPOINT}`, userID);
 
-  const getuserByUserId = (userID: string) => fetchData<IUser>(`${USERS_ENDPOINT}${userID}`);
 
   const getUser = (id: string) => fetchData<IUser>(USERS_ENDPOINT + id);
 
@@ -20,7 +19,6 @@ export const useUsersApi = () => {
   return {
     adduser,
     updateUser,
-    getuserByUserId,
     deleteUser,
     getUser,
     getAllUsers,

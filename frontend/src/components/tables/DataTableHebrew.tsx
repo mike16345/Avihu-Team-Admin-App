@@ -104,8 +104,8 @@ export function DataTableHebrew<TData, TValue>({
         <div className="flex items-center py-4 gap-4">
           <Input
             placeholder="חיפוש..."
-            value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-            onChange={(event) => table.getColumn("name")?.setFilterValue(event.target.value)}
+            value={(table.getColumn("firstName")?.getFilterValue() as string) ?? ""}
+            onChange={(event) => table.getColumn("firstName")?.setFilterValue(event.target.value)}
             className="max-w-sm"
           />
           <div className="flex-1 text-sm text-muted-foreground">

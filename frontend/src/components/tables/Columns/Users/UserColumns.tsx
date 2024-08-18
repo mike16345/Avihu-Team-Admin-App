@@ -38,7 +38,7 @@ export const columns: ColumnDef<IUser>[] = [
   },
 
   {
-    accessorKey: "name",
+    accessorKey: "firstName",
     header: ({ column }) => {
       return (
         <Button
@@ -59,7 +59,7 @@ export const columns: ColumnDef<IUser>[] = [
   },
 
   {
-    accessorKey: "createdAt",
+    accessorKey: "dateJoined",
     header: "תאריך הצטרפות",
     cell: ({ row }) => {
       const user = row.original;

@@ -1,8 +1,9 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { addDays, format } from "date-fns"
 import { Calendar as CalendarIcon } from "lucide-react"
  
 import { cn } from "@/lib/utils"
+import { he } from 'date-fns/locale';
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import {
@@ -31,14 +32,22 @@ interface DatePickerProps{
 }
 
 const DatePicker:React.FC<DatePickerProps> = ({presets, presetValues, selectedDate, onChangeDate}) => {
-
+  console.log(selectedDate);
+  
+  
     const [date, setDate] = useState<Date>()
     const handleSelect=(date?:Date)=>{
         if (!date) return 
-
-        setDate(date)
+      
         onChangeDate(date)
     }
+
+    useEffect(()=>{
+      if (!selectedDate) return 
+
+      setDate(selectedDate)
+    },[selectedDate])
+
 
   return (
     <Popover>
@@ -51,13 +60,15 @@ const DatePicker:React.FC<DatePickerProps> = ({presets, presetValues, selectedDa
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {date ? format(date, "PPP") : <span>בחר תאריך</span>}
+          {date ? format(date, "PPP", {locale:he}) : <span>בחר תאריך</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="flex w-auto flex-col space-y-2 p-2">
         <Select
-          onValueChange={(value) =>
+          onValueChange={(value) =>{
             setDate(addDays(new Date(), parseInt(value)))
+            onChangeDate(addDays(new Date(), parseInt(value)))
+            }
           }
         >
             {presets &&
@@ -74,7 +85,7 @@ const DatePicker:React.FC<DatePickerProps> = ({presets, presetValues, selectedDa
             }
         </Select>
         <div className="rounded-md border">
-          <Calendar mode="single" selected={selectedDate} onSelect={handleSelect}  />
+          <Calendar mode="single" selected={date} onSelect={handleSelect}  />
         </div>
       </PopoverContent>
     </Popover>

@@ -9,11 +9,13 @@ const dietaryTypeItems = [`צמחוני`, `טבעוני`, `פסקטריאן`, `�
 interface DietaryTypeSelectorProps {
   saveSelected: (selectedItems: string[]) => void;
   existingItems?: string[];
+  error?:boolean
 }
 
 const DietaryTypeSelector: React.FC<DietaryTypeSelectorProps> = ({
   saveSelected,
   existingItems,
+  error
 }) => {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -39,7 +41,9 @@ const DietaryTypeSelector: React.FC<DietaryTypeSelectorProps> = ({
   return (
     <Collapsible open={isOpen}>
       <div className="flex items-end justify-between">
-        <h1>הגבלות תזונה</h1>
+        <h1
+          className={error?`text-destructive`:``}
+        >הגבלות תזונה</h1>
         <div
           className="cursor-pointer border-2 hover:border-black hover:bg-accent p-2 rounded"
           onClick={() => setIsOpen(!isOpen)}

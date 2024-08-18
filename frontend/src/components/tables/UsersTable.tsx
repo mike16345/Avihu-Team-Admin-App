@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { columns as userColumns } from "./Columns/Users/UserColumns";
 import { DataTableHebrew } from "./DataTableHebrew";
 import { useNavigate } from "react-router";
-import { Button } from "../ui/button";
 
 export const UsersTable = () => {
   const navigate = useNavigate();

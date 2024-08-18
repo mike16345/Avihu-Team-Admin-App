@@ -19,8 +19,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { toast } from "sonner";
 import DatePicker from "../ui/DatePicker";
+import DietaryTypeSelector from "../templates/dietTemplates/DietaryTypeSelector";
+import { IUser } from "@/interfaces/IUser";
 
 const datePresets=[
     {name:`חודש`, timeInDays:`30`},
@@ -29,7 +30,6 @@ const datePresets=[
     {name:`חצי שנה`, timeInDays:`180`},
 ]
 
-// Define the validation schema using Zod
 const userSchema = z.object({
   firstName: z.string().min(1, { message: "אנא הכנס שם פרטי" }),
   lastName: z.string().min(1, { message: "אנא הכנס שם משפחה" }),
@@ -37,10 +37,15 @@ const userSchema = z.object({
   email: z.string().email({ message: "כתובת מייל אינה תקינה" }),
   dateFinished: z.date({ message: 'בחר תאריך סיום' }),
   planType: z.string().min(1, { message: "בחר סוג תוכנית" }),
-  dietaryType: z.string().min(1, { message: "בחר הגבלות תזונה" }),
+  dietaryType: z.string().array().optional(),
 });
 
-const UserForm = () => {
+interface UserFormProps{
+  existingUser:IUser|null;
+  saveInfo:(user:IUser)=>void
+}
+
+const UserForm:React.FC<UserFormProps> = ({existingUser, saveInfo}) => {
 
   const userForm = useForm<z.infer<typeof userSchema>>({
     resolver: zodResolver(userSchema),
@@ -50,21 +55,29 @@ const UserForm = () => {
       phone: "",
       email: "",
       planType: "",
-      dietaryType: "",
+      dietaryType: [],
     },
   });
 
-  const {formState:{errors}}=userForm
+  const {formState:{errors}, reset}=userForm
+
 
   const onSubmit = (values: z.infer<typeof userSchema>) => {
-    // Handle form submission here
-    console.log(values);
-    toast.success("User saved successfully!");
+    
+    saveInfo(values)
   };
+
+  useEffect(()=>{
+    if (!existingUser) return 
+
+    existingUser.dateFinished=new Date(existingUser.dateFinished)
+    
+    reset(existingUser)
+  },[existingUser])
 
   return (
     <Form {...userForm}>
-      <form onSubmit={userForm.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={userForm.handleSubmit(onSubmit)} className="space-y-4 p-10  w-[80%]">
         <div className="flex gap-4">
         <FormField
           control={userForm.control}
@@ -73,7 +86,7 @@ const UserForm = () => {
             <FormItem>
               <FormLabel>שם פרטי</FormLabel>
               <FormControl>
-                <Input placeholder="Enter first name..." {...field} />
+                <Input placeholder="שם פרטי..." {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -86,7 +99,7 @@ const UserForm = () => {
             <FormItem>
               <FormLabel>שם משפחה</FormLabel>
               <FormControl>
-                <Input placeholder="Enter last name..." {...field} />
+                <Input placeholder="שם משפחה..." {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -101,7 +114,7 @@ const UserForm = () => {
             <FormItem>
               <FormLabel>טלפון</FormLabel>
               <FormControl>
-                <Input placeholder="Enter phone number..." {...field} />
+                <Input  placeholder="מספר טלפון..." {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -114,15 +127,35 @@ const UserForm = () => {
             <FormItem>
               <FormLabel>אימייל</FormLabel>
               <FormControl>
-                <Input placeholder="Enter email address..." {...field} />
+                <Input placeholder="israel@example.com" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         </div>
-        <div className="flex gap-4 ">
         <FormField
+          control={userForm.control}
+          name="planType"
+          render={({ field }) => (
+            <FormItem className="w-[40%]">
+              <FormLabel>סוג תוכנית</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger dir="rtl">
+                    <SelectValue placeholder={field.value||"בחר סוג תוכנית"} />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent dir="rtl">
+                  <SelectItem value="מסה">מסה</SelectItem>
+                  <SelectItem value="חיטוב">חיטוב</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+           <FormField
           control={userForm.control}
           name="dateFinished"
           render={({ field }) => (
@@ -135,58 +168,29 @@ const UserForm = () => {
                     selectedDate={field.value}
                     onChangeDate={(date:Date)=>field.onChange(date)}
                 />
-                
               </FormControl>
-              {errors.dateFinished && <p className="text-destructive text-sm">{errors.dateFinished.message}</p>}
+              <FormMessage/>
             </FormItem>
           )}
         />
-        <FormField
-          control={userForm.control}
-          name="planType"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>סוג תוכנית</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select plan type" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="מסה">מסה</SelectItem>
-                  <SelectItem value="חיטוב">חיטוב</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        </div>
         <FormField
           control={userForm.control}
           name="dietaryType"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>הגבלות תזונה</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <FormItem className="w-[50%]">
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select dietary type" />
-                  </SelectTrigger>
+                 <DietaryTypeSelector 
+                  existingItems={field.value} 
+                  error={errors.dietaryType?true:false} 
+                  saveSelected={field.onChange} 
+                 />
                 </FormControl>
-                <SelectContent>
-                  <SelectItem value="vegan">Vegan</SelectItem>
-                  <SelectItem value="vegetarian">Vegetarian</SelectItem>
-                  <SelectItem value="omnivore">Omnivore</SelectItem>
-                </SelectContent>
-              </Select>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button className="w-full" type="submit">
-          Save
+        <Button  type="submit">
+          שמור משתמש
         </Button>
       </form>
     </Form>
