@@ -4,7 +4,7 @@ import { useParams } from "react-router";
 import { RecordedSetsList } from "./RecordedSetsList";
 import { MuscleExerciseSelector } from "./MuscleExerciseSelector";
 import { IMuscleGroupRecordedSets } from "@/interfaces/IWorkout";
-import { useRecordedSetsApi } from "@/hooks/useRecordedSetsApi";
+import { useRecordedSetsApi } from "@/hooks/api/useRecordedSetsApi";
 import { extractExercises } from "@/lib/workoutUtils";
 
 export const WorkoutProgression = () => {

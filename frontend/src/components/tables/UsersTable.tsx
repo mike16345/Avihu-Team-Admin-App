@@ -1,4 +1,4 @@
-import { useUsersApi } from "@/hooks/useUsersApi";
+import { useUsersApi } from "@/hooks/api/useUsersApi";
 import { IUser } from "@/interfaces/IUser";
 import { useEffect, useState } from "react";
 import { columns as userColumns } from "./Columns/Users/UserColumns";

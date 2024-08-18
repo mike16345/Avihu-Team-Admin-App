@@ -1,6 +1,6 @@
 import TemplateTabs from "@/components/templates/TemplateTabs";
-import { useDietPlanPresetApi } from "@/hooks/useDietPlanPresetsApi";
-import useMenuItemApi from "@/hooks/useMenuItemApi";
+import { useDietPlanPresetApi } from "@/hooks/api/useDietPlanPresetsApi";
+import useMenuItemApi from "@/hooks/api/useMenuItemApi";
 import { IDietPlan, IMenuItem } from "@/interfaces/IDietPlan";
 import React, { useEffect, useState } from "react";
 import ErrorPage from "./ErrorPage";

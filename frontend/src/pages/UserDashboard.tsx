@@ -1,7 +1,7 @@
 import { WeightProgression } from "@/components/UserDashboard/WeightProgression/WeightProgression";
 import { WorkoutProgression } from "@/components/UserDashboard/WorkoutProgression/WorkoutProgression";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useUsersApi } from "@/hooks/useUsersApi";
+import { useUsersApi } from "@/hooks/api/useUsersApi";
 import { IUser } from "@/interfaces/IUser";
 import { useEffect, useState } from "react";
 import { FaPencilAlt } from "react-icons/fa";
@@ -22,7 +22,7 @@ export const UserDashboard = () => {
       .catch((error) => console.error(error));
   }, []);
 
-  // TODO: Display plan type. 
+  // TODO: Display plan type.
 
   return (
     <div className="size-full flex flex-col gap-2">

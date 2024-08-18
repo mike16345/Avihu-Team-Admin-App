@@ -5,7 +5,7 @@ import { BsPlusCircleFill } from "react-icons/bs";
 import { Input } from "@/components/ui/input";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { useWorkoutPlanPresetApi } from "@/hooks/useWorkoutPlanPresetsApi";
+import { useWorkoutPlanPresetApi } from "@/hooks/api/useWorkoutPlanPresetsApi";
 import { cleanWorkoutObject } from "@/utils/workoutPlanUtils";
 import {
   Form,

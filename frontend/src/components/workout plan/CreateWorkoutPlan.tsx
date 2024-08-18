@@ -6,7 +6,7 @@ import {
   IWorkoutPlan,
 } from "@/interfaces/IWorkoutPlan";
 import WorkoutContainer from "./WorkoutPlanContainer";
-import { useWorkoutPlanApi } from "@/hooks/useWorkoutPlanApi";
+import { useWorkoutPlanApi } from "@/hooks/api/useWorkoutPlanApi";
 import { cleanWorkoutObject } from "@/utils/workoutPlanUtils";
 import { Button } from "../ui/button";
 import { BsFillPencilFill } from "react-icons/bs";
@@ -14,7 +14,7 @@ import { BsPlusCircleFill } from "react-icons/bs";
 import { useParams } from "react-router-dom";
 import { Toggle } from "@/components/ui/toggle";
 import { toast } from "sonner";
-import { useWorkoutPlanPresetApi } from "@/hooks/useWorkoutPlanPresetsApi";
+import { useWorkoutPlanPresetApi } from "@/hooks/api/useWorkoutPlanPresetsApi";
 import { useIsEditableContext } from "@/context/useIsEditableContext";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 

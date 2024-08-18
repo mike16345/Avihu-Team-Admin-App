@@ -1,8 +1,8 @@
 import TemplateTabs from "@/components/templates/TemplateTabs";
 import TemplateTabsSkeleton from "@/components/ui/skeletons/TemplateTabsSkeleton";
-import useExercisePresetApi from "@/hooks/useExercisePresetApi";
-import useMuscleGroupsApi from "@/hooks/useMuscleGroupsApi";
-import { useWorkoutPlanPresetApi } from "@/hooks/useWorkoutPlanPresetsApi";
+import useExercisePresetApi from "@/hooks/api/useExercisePresetApi";
+import useMuscleGroupsApi from "@/hooks/api/useMuscleGroupsApi";
+import { useWorkoutPlanPresetApi } from "@/hooks/api/useWorkoutPlanPresetsApi";
 import {
   IExercisePresetItem,
   IMuscleGroupItem,

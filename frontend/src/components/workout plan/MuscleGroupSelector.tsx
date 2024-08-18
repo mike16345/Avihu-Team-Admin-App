@@ -11,7 +11,7 @@ import ComboBox from "./ComboBox";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { Button } from "../ui/button";
 import { BiPencil } from "react-icons/bi";
-import useMuscleGroupsApi from "@/hooks/useMuscleGroupsApi";
+import useMuscleGroupsApi from "@/hooks/api/useMuscleGroupsApi";
 
 interface MuscleGroupSelectorProps {
   handleChange: (value: string) => void;
@@ -22,7 +22,7 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
   handleChange,
   existingMuscleGroup,
 }) => {
-  const { getAllMuscleGroups } = useMuscleGroupsApi()
+  const { getAllMuscleGroups } = useMuscleGroupsApi();
   const [value, setValue] = useState<string>(existingMuscleGroup || ``);
   const [tempValue, setTempValue] = useState<string>();
 
@@ -57,7 +57,7 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
         <DialogClose>
           <Button
             className="w-full"
-            onClick={tempValue ? () => updateSelection(tempValue) : () => { }}
+            onClick={tempValue ? () => updateSelection(tempValue) : () => {}}
           >
             אישור
           </Button>
