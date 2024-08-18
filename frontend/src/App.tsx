@@ -8,7 +8,7 @@ function App() {
       <div>
         <Sidebar />
       </div>
-      <div className="size-full p-8 overflow-y-auto custom-scrollbar ">
+      <div className="size-full py-8 px-4 xs:p-8 overflow-y-auto custom-scrollbar ">
         <AppRoutes />
       </div>
     </div>

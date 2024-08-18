@@ -14,7 +14,7 @@ export const CurrentWeighIn: FC<CurrentWeighInProps> = ({ weighIn }) => {
   const date = DateUtils.formatDate(convertedDate, "DD/MM/YYYY");
 
   return (
-    <Card className="bg-accent w-1/4  text-accent-foreground">
+    <Card className="bg-accent w-full  xs:w-1/2 lg:w-1/4  text-accent-foreground">
       <CardHeader>
         <CardTitle>משקל הנוכחי</CardTitle>
         <CardDescription>הקלטה: {date}</CardDescription>
