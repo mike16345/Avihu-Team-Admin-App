@@ -63,17 +63,13 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo }) => {
     reset,
   } = userForm;
 
+  if (existingUser) {
+    reset(existingUser);
+  }
+
   const onSubmit = (values: z.infer<typeof userSchema>) => {
     saveInfo(values);
   };
-
-  useEffect(() => {
-    if (!existingUser) return;
-
-    existingUser.dateFinished = new Date(existingUser.dateFinished);
-
-    reset(existingUser);
-  }, [existingUser]);
 
   return (
     <Form {...userForm}>

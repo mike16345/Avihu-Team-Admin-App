@@ -59,8 +59,6 @@ export function DataTableHebrew<TData, TValue>({
   handleViewNestedData,
   handleSetData,
 }: DataTableProps<TData, TValue>) {
-  const navigate = useNavigate();
-
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -106,8 +104,8 @@ export function DataTableHebrew<TData, TValue>({
         <div className="flex items-center py-4 gap-4">
           <Input
             placeholder="חיפוש..."
-            value={(table.getColumn("firstName")?.getFilterValue() as string) ?? ""}
-            onChange={(event) => table.getColumn("firstName")?.setFilterValue(event.target.value)}
+            value={(table.getColumn("שם")?.getFilterValue() as string) ?? ""}
+            onChange={(event) => table.getColumn("שם")?.setFilterValue(event.target.value)}
             className="max-w-sm"
           />
           <div className="flex-1 text-sm text-muted-foreground">
@@ -149,7 +147,6 @@ export function DataTableHebrew<TData, TValue>({
           <div className="text-muted-foreground">
             דף {pageNumber} תוך {table.getPageCount()}
           </div>
-          {actionButton}
           {Object.keys(rowSelection).length > 0 && (
             <div
               onClick={handleDeleteRows}
@@ -158,6 +155,7 @@ export function DataTableHebrew<TData, TValue>({
               <Trash2Icon className="cursor-pointer" />
             </div>
           )}
+          {actionButton}
         </div>
       </div>
       <div className="rounded-md border max-h-[75vh] overflow-auto">

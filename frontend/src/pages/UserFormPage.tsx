@@ -1,4 +1,5 @@
 import UserForm from "@/components/forms/UserForm";
+import Loader from "@/components/ui/Loader";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { useUsersApi } from "@/hooks/useUsersApi";
 import { IUser } from "@/interfaces/IUser";
@@ -11,6 +12,7 @@ const UserFormPage = () => {
   const { getUser, adduser, updateUser } = useUsersApi();
 
   const [user, setUser] = useState<IUser | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSaveUser = (user: IUser) => {
     if (id) {
@@ -30,10 +32,15 @@ const UserFormPage = () => {
 
   useEffect(() => {
     if (!id) return;
+
+    setIsLoading(true);
     getUser(id)
       .then((res) => setUser(res))
-      .catch((err) => console.log(err));
+      .catch((err) => console.log(err))
+      .finally(() => setIsLoading(false));
   }, []);
+
+  if (isLoading) return <Loader />;
 
   return (
     <div>

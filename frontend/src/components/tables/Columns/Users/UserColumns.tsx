@@ -72,7 +72,7 @@ export const columns: ColumnDef<IUser>[] = [
     },
   },
   {
-    accessorKey: "dateJoined",
+    accessorKey: "dateFinished",
     header: "תום הליווי",
     cell: ({ row }) => {
       const user = row.original;
