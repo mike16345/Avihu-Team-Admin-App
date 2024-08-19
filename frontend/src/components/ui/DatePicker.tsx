@@ -22,6 +22,7 @@ interface PresetValues {
 
 interface DatePickerProps {
   presets?: boolean;
+  noPrevDates?: boolean;
   presetValues?: PresetValues[];
   selectedDate: Date;
   onChangeDate: (date: Date) => void;
@@ -29,16 +30,17 @@ interface DatePickerProps {
 
 const DatePicker: React.FC<DatePickerProps> = ({
   presets,
+  noPrevDates,
   presetValues,
   selectedDate,
   onChangeDate,
 }) => {
-  console.log(selectedDate);
-
   const [date, setDate] = useState<Date>();
   const handleSelect = (date?: Date) => {
     if (!date) return;
-    if (date < new Date()) return;
+    if (noPrevDates) {
+      if (date < new Date()) return;
+    }
 
     onChangeDate(date);
   };

@@ -33,7 +33,7 @@ const datePresets = [
 const userSchema = z.object({
   firstName: z.string().min(1, { message: "אנא הכנס שם פרטי" }),
   lastName: z.string().min(1, { message: "אנא הכנס שם משפחה" }),
-  phone: z.string().regex(/^0[0-9]{10}$/, { message: "אנא הכנס מספר טלפון תקין" }),
+  phone: z.string().regex(/^0[0-9]{9}$/, { message: "אנא הכנס מספר טלפון תקין" }),
   email: z.string().email({ message: "כתובת מייל אינה תקינה" }),
   dateFinished: z.date({ message: "בחר תאריך סיום" }),
   planType: z.string().min(1, { message: "בחר סוג תוכנית" }),
@@ -164,6 +164,7 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo }) => {
               <FormControl>
                 <DatePicker
                   presets
+                  noPrevDates
                   presetValues={datePresets}
                   selectedDate={field.value}
                   onChangeDate={(date: Date) => field.onChange(date)}
