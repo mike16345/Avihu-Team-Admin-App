@@ -96,29 +96,34 @@ export const WeightProgressionPhotos: FC<WeightProgressionPhotosProps> = ({ onCl
     };
   }, [fullScreenImage]);
 
-  console.log("photo", fullScreenImage);
-
   return (
     <>
-      <Card className="flex flex-col gap-2">
-        <CardHeader className="text-lg font-semibold">
-          <CardTitle>תמונות</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-wrap items-center gap-2 rounded">
-          {photos.map((photo, i) => {
-            const photoURI = handleBuildPhotoURI(photo);
-            return (
-              <Card
-                onClick={() => handleClickPhoto(photoURI, i)}
-                className="w-[200px] cursor-pointer"
-                key={i}
-              >
-                <img src={photoURI} alt={photo.filename} />
-              </Card>
-            );
-          })}
-        </CardContent>
-      </Card>
+      {photos.length > 0 && (
+        <Card className="flex flex-col gap-2">
+          <CardHeader className="text-lg font-semibold">
+            <CardTitle>תמונות</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-wrap items-center gap-2 rounded">
+            {photos.map((photo, i) => {
+              const photoURI = handleBuildPhotoURI(photo);
+              return (
+                <Card
+                  onClick={() => handleClickPhoto(photoURI, i)}
+                  className="w-[200px] cursor-pointer"
+                  key={i}
+                >
+                  <img src={photoURI} alt={photo.filename} />
+                </Card>
+              );
+            })}
+          </CardContent>
+        </Card>
+      )}
+      {photos.length == 0 && (
+        <div className="size-full items-center justify-center">
+          <h1 className="text-center"> אין תמונות</h1>
+        </div>
+      )}
       {fullScreenImage && (
         <FullscreenImage
           img={fullScreenImage.photo}

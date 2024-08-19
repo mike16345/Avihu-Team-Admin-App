@@ -18,7 +18,7 @@ class DateUtils {
     });
   }
 
-  static formatDate(date: Date, formatType: DateFormatType = "DD/MM/YYYY"): string {
+  static formatDate(date: Date | string, formatType: DateFormatType = "DD/MM/YYYY"): string {
     return moment(date).format(formatType);
   }
 

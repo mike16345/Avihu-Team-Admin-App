@@ -21,8 +21,6 @@ export const WorkoutProgression = () => {
 
   const recordedSets = recordedMuscleGroup?.recordedSets[selectedExercise] || [];
 
-  console.log("recorded sets:", recordedSets);
-
   useEffect(() => {
     if (!id) return;
 
@@ -38,29 +36,32 @@ export const WorkoutProgression = () => {
       .catch((e) => console.error(e));
   }, []);
 
-  console.log(recordedWorkouts);
-
   return (
     <div className="size-full flex flex-col gap-4 p-4">
-      <MuscleExerciseSelector
-        selectedExercise={selectedExercise}
-        recordedWorkouts={recordedWorkouts}
-        selectedMuscleGroup={selectedMuscleGroup}
-        onSelectExercise={(exercise) => setSelectedExercise(exercise)}
-        onSelectMuscleGroup={(muscleGroup) => setSelectedMuscleGroup(muscleGroup)}
-      />
-      <div className="w-full flex flex-col md:flex-row gap-4">
-        <div className="md:w-2/6 border rounded-lg ">
-          <RecordedSetsList recordedSets={recordedSets} />
-        </div>
-        <div className="md:w-4/6">
-          <ExerciseProgressChart
-            selectedMuscleGroup={selectedMuscleGroup}
+      {recordedWorkouts.length > 0 && (
+        <>
+          <MuscleExerciseSelector
             selectedExercise={selectedExercise}
-            recordedSets={recordedSets}
+            recordedWorkouts={recordedWorkouts}
+            selectedMuscleGroup={selectedMuscleGroup}
+            onSelectExercise={(exercise) => setSelectedExercise(exercise)}
+            onSelectMuscleGroup={(muscleGroup) => setSelectedMuscleGroup(muscleGroup)}
           />
-        </div>
-      </div>
+          <div className="w-full flex flex-col md:flex-row gap-4">
+            <div className="md:w-2/6 border rounded-lg ">
+              <RecordedSetsList recordedSets={recordedSets} />
+            </div>
+            <div className="md:w-4/6">
+              <ExerciseProgressChart
+                selectedMuscleGroup={selectedMuscleGroup}
+                selectedExercise={selectedExercise}
+                recordedSets={recordedSets}
+              />
+            </div>
+          </div>
+        </>
+      )}
+      {recordedWorkouts.length == 0 && <h1 className="text-center">לא הקליטו אימונים</h1>}
     </div>
   );
 };
