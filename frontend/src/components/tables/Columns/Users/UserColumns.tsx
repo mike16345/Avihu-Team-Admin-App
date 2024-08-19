@@ -1,5 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
+import { format } from "date-fns";
+import { he } from "date-fns/locale";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,7 +40,8 @@ export const columns: ColumnDef<IUser>[] = [
   },
 
   {
-    accessorKey: "name",
+    accessorKey: "firstName",
+    id: `שם`,
     header: ({ column }) => {
       return (
         <Button
@@ -59,17 +62,26 @@ export const columns: ColumnDef<IUser>[] = [
   },
 
   {
-    accessorKey: "createdAt",
-    header: "תאריך הצטרפות",
+    accessorKey: "dateJoined",
+    header: "תחילת הליווי",
     cell: ({ row }) => {
       const user = row.original;
-      console.log("user", user);
 
-      return "24/06/202";
+      return format(user.dateJoined || user.createdAt, "PPP", { locale: he });
+      //temporary fix since avihu still has createdAt not dateJoined
     },
   },
   {
-    id: "actions",
+    accessorKey: "dateFinished",
+    header: "תום הליווי",
+    cell: ({ row }) => {
+      const user = row.original;
+
+      return format(user.dateFinished, "PPP", { locale: he });
+    },
+  },
+  {
+    id: "פעולות",
     cell: ({ table, row }) => {
       const user = row.original;
       const handleDeleteUser = table.options.meta?.handleDeleteData;

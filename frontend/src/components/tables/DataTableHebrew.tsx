@@ -29,10 +29,12 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { FilterIcon, Trash2Icon } from "lucide-react";
 import { RowData } from "@tanstack/react-table";
+import { useNavigate } from "react-router-dom";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  actionButton?: React.JSX.Element;
   handleViewData: (data: TData) => void;
   handleSetData: (data: TData) => void;
   handleDeleteData: (data: TData) => void;
@@ -51,6 +53,7 @@ declare module "@tanstack/table-core" {
 export function DataTableHebrew<TData, TValue>({
   columns,
   data,
+  actionButton,
   handleViewData,
   handleDeleteData,
   handleViewNestedData,
@@ -100,15 +103,16 @@ export function DataTableHebrew<TData, TValue>({
       <div className="flex flex-col ">
         <div className="flex items-center py-4 gap-4">
           <Input
-            placeholder="חיפוס..."
-            value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-            onChange={(event) => table.getColumn("name")?.setFilterValue(event.target.value)}
+            placeholder="חיפוש..."
+            value={(table.getColumn("שם")?.getFilterValue() as string) ?? ""}
+            onChange={(event) => table.getColumn("שם")?.setFilterValue(event.target.value)}
             className="max-w-sm"
           />
           <div className="flex-1 text-sm text-muted-foreground">
             {table.getFilteredSelectedRowModel().rows.length} {"תוך "}
             {table.getFilteredRowModel().rows.length} שורות נבחרו.
           </div>
+
           <DropdownMenu dir="rtl">
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="ml-auto">
@@ -143,7 +147,6 @@ export function DataTableHebrew<TData, TValue>({
           <div className="text-muted-foreground">
             דף {pageNumber} תוך {table.getPageCount()}
           </div>
-
           {Object.keys(rowSelection).length > 0 && (
             <div
               onClick={handleDeleteRows}
@@ -152,6 +155,7 @@ export function DataTableHebrew<TData, TValue>({
               <Trash2Icon className="cursor-pointer" />
             </div>
           )}
+          {actionButton}
         </div>
       </div>
       <div className="rounded-md border max-h-[75vh] overflow-auto">
