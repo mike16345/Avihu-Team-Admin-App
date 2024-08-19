@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { ModeToggle } from "../theme/mode-toggle";
-import { FaEdit, FaHeart, FaHome, FaUser } from "react-icons/fa";
+import { FaEdit, FaHome, FaUser } from "react-icons/fa";
 import { ReactNode, useState } from "react";
 import { PiNotepadFill } from "react-icons/pi";
 import { GiBiceps } from "react-icons/gi";
@@ -58,7 +58,6 @@ export const Sidebar = () => {
                 tooltipContent={link.linkName}
                 tooltipTrigger={
                   <Link
-                    key={link.linkName}
                     className={`w-full flex items-center justify-center size-9 px-2 py-1 gap-3 text-xl rounded-full  ${
                       location.pathname == link.to && " text-secondary bg-secondary-foreground"
                     } `}
@@ -87,6 +86,7 @@ export const Sidebar = () => {
             {links.map((link) => {
               return (
                 <Link
+                  key={link.linkName}
                   to={link.to}
                   onClick={() => setIsSheetOpen(false)}
                   className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
