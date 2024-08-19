@@ -34,6 +34,7 @@ import { useNavigate } from "react-router-dom";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  actionButton?: React.JSX.Element;
   handleViewData: (data: TData) => void;
   handleSetData: (data: TData) => void;
   handleDeleteData: (data: TData) => void;
@@ -52,12 +53,13 @@ declare module "@tanstack/table-core" {
 export function DataTableHebrew<TData, TValue>({
   columns,
   data,
+  actionButton,
   handleViewData,
   handleDeleteData,
   handleViewNestedData,
   handleSetData,
 }: DataTableProps<TData, TValue>) {
-  const navigate=useNavigate();
+  const navigate = useNavigate();
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pageNumber, setPageNumber] = useState<number>(1);
@@ -112,9 +114,7 @@ export function DataTableHebrew<TData, TValue>({
             {table.getFilteredSelectedRowModel().rows.length} {"תוך "}
             {table.getFilteredRowModel().rows.length} שורות נבחרו.
           </div>
-          <Button 
-            onClick={()=>navigate(`/users/add`)}
-          >הוסף משתמש</Button>
+
           <DropdownMenu dir="rtl">
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="ml-auto">
@@ -149,7 +149,7 @@ export function DataTableHebrew<TData, TValue>({
           <div className="text-muted-foreground">
             דף {pageNumber} תוך {table.getPageCount()}
           </div>
-
+          {actionButton}
           {Object.keys(rowSelection).length > 0 && (
             <div
               onClick={handleDeleteRows}
