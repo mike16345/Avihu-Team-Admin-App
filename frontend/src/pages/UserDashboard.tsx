@@ -28,7 +28,7 @@ export const UserDashboard = () => {
     <div className="size-full flex flex-col gap-2">
       <div className="flex items-center justify-between">
         <div className="text-xl font-bold flex items-center gap-2 underline">
-          {`לקוח: ${currentUser?.name || ""}`}
+          {`לקוח: ${(currentUser && currentUser?.firstName + currentUser?.lastName) || ""}`}
         </div>
         <ul className="flex flex-col text-sm ">
           <Link
