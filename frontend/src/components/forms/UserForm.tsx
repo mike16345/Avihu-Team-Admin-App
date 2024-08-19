@@ -31,8 +31,8 @@ const datePresets = [
 ];
 
 const userSchema = z.object({
-  firstName: z.string().min(1, { message: "אנא הכנס שם פרטי" }),
-  lastName: z.string().min(1, { message: "אנא הכנס שם משפחה" }),
+  firstName: z.string().min(2, { message: "אנא הכנס שם פרטי" }),
+  lastName: z.string().min(2, { message: "אנא הכנס שם משפחה" }),
   phone: z.string().regex(/^0[0-9]{9}$/, { message: "אנא הכנס מספר טלפון תקין" }),
   email: z.string().email({ message: "כתובת מייל אינה תקינה" }),
   dateFinished: z.date({ message: "בחר תאריך סיום" }),
@@ -49,23 +49,19 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo }) => {
   const userForm = useForm<z.infer<typeof userSchema>>({
     resolver: zodResolver(userSchema),
     defaultValues: {
-      firstName: "",
-      lastName: "",
-      phone: "",
-      email: "",
-      planType: "",
-      dietaryType: [],
+      firstName: existingUser?.firstName || ``,
+      lastName: existingUser?.lastName || ``,
+      phone: existingUser?.phone || ``,
+      email: existingUser?.email || ``,
+      planType: existingUser?.planType || ``,
+      dietaryType: existingUser?.dietaryType || [],
+      dateFinished: existingUser && new Date(existingUser?.dateFinished),
     },
   });
 
   const {
     formState: { errors },
-    reset,
   } = userForm;
-
-  if (existingUser) {
-    reset(existingUser);
-  }
 
   const onSubmit = (values: z.infer<typeof userSchema>) => {
     saveInfo(values);

@@ -49,16 +49,23 @@ export const columns: ColumnDef<IUser>[] = [
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          שם
+          שם פרטי
           <ArrowUpDown className="h-4 w-4" />
         </Button>
       );
     },
   },
-
+  {
+    accessorKey: "lastName",
+    header: "שם משפחה",
+  },
   {
     accessorKey: "email",
     header: "מייל",
+  },
+  {
+    accessorKey: "phone",
+    header: "פלאפון",
   },
 
   {
