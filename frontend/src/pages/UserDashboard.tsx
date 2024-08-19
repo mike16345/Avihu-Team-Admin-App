@@ -45,6 +45,13 @@ export const UserDashboard = () => {
             תפריט תזונה
             <FaPencilAlt size={12} />
           </Link>
+          <Link
+            className=" flex items-center justify-between w-32 hover:bg-secondary font-bold px-2 py-0.5 rounded-md "
+            to={"/users/edit/" + id}
+          >
+            <p>עריכת משתמש</p>
+            <FaPencilAlt size={12} />
+          </Link>
         </ul>
       </div>
       <div>
