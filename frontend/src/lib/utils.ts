@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { array } from "zod";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -44,8 +45,10 @@ export function getElapsedSeconds(timestamp: number) {
   }
 
   const days = Math.floor(hours / 24);
-  return `${days}d ${
-    hours % 24
-  }h ${remainingMinutes}m ${remainingSeconds.toFixed(0)}s`;
+  return `${days}d ${hours % 24}h ${remainingMinutes}m ${remainingSeconds.toFixed(0)}s`;
 }
 
+export const convertStringsToOptions = (data: string[]) => {
+  console.log("data", data);
+  return data.map((item, index) => ({ value: item, label: item }));
+};

@@ -1,8 +1,3 @@
-"use client";
-
-import * as React from "react";
-
-import { cn, convertStringsToOptions } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -13,22 +8,25 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { FaCheck, FaSort } from "react-icons/fa";
+import { cn, convertStringsToOptions } from "@/lib/utils";
+import React, { FC } from "react";
+import { FaSort, FaCheck } from "react-icons/fa";
 
-interface ComboBoxProps {
-  selectedMuscleGroup: string;
-  muscleGroups: string[];
-  handleSelectMuscleGroup: (value: string) => void;
+interface IExerciseCombobox {
+  selectedExercise: string;
+  exercises: string[];
+  handleSelectExercise: (value: string) => void;
 }
 
-export function MuscleGroupCombobox({
-  selectedMuscleGroup,
-  muscleGroups,
-  handleSelectMuscleGroup,
-}: ComboBoxProps) {
-  const options = convertStringsToOptions(muscleGroups);
-
+export const ExerciseComboBox: FC<IExerciseCombobox> = ({
+  selectedExercise,
+  exercises,
+  handleSelectExercise,
+}) => {
+  const options = convertStringsToOptions(exercises);
+  
   const [open, setOpen] = React.useState(false);
+
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -39,7 +37,7 @@ export function MuscleGroupCombobox({
           aria-expanded={open}
           className="w-[200px] justify-between"
         >
-          {selectedMuscleGroup !== "" ? selectedMuscleGroup : "בחר קבוצת שריר..."}
+          {selectedExercise !== "" ? selectedExercise : "בחר תרגיל..."}
           <FaSort className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -47,22 +45,22 @@ export function MuscleGroupCombobox({
         <Command>
           <CommandInput placeholder="חפש קבוצת שריר..." className="h-9" />
           <CommandList>
-            <CommandEmpty>No muscle groups found.</CommandEmpty>
+            <CommandEmpty>No exercise found.</CommandEmpty>
             <CommandGroup>
-              {options.map((muscleGroup) => (
+              {options.map((exercise) => (
                 <CommandItem
-                  key={muscleGroup.value}
-                  value={muscleGroup.value}
+                  key={exercise.value}
+                  value={exercise.value}
                   onSelect={() => {
-                    handleSelectMuscleGroup(muscleGroup.value);
+                    handleSelectExercise(exercise.value);
                     setOpen(false);
                   }}
                 >
-                  {muscleGroup.label}
+                  {exercise.label}
                   <FaCheck
                     className={cn(
                       "mr-auto h-4 w-4",
-                      selectedMuscleGroup === muscleGroup.value ? "opacity-100" : "opacity-0"
+                      selectedExercise === exercise.value ? "opacity-100" : "opacity-0"
                     )}
                   />
                 </CommandItem>
@@ -73,4 +71,4 @@ export function MuscleGroupCombobox({
       </PopoverContent>
     </Popover>
   );
-}
+};

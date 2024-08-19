@@ -8,7 +8,7 @@ import { Input } from "../ui/input";
 import { IoClose } from "react-icons/io5";
 import { Card, CardContent, CardHeader } from "../ui/card";
 import { AddWorkoutPlanCard } from "./AddWorkoutPlanCard";
-import useExercisePresetApi from "@/hooks/useExercisePresetApi";
+import useExercisePresetApi from "@/hooks/api/useExercisePresetApi";
 import { useIsEditableContext } from "@/context/useIsEditableContext";
 import DeleteModal from "../Alerts/DeleteModal";
 

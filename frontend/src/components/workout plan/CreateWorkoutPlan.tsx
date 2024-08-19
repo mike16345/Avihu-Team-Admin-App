@@ -6,7 +6,7 @@ import {
   IWorkoutPlan,
 } from "@/interfaces/IWorkoutPlan";
 import WorkoutContainer from "./WorkoutPlanContainer";
-import { useWorkoutPlanApi } from "@/hooks/useWorkoutPlanApi";
+import { useWorkoutPlanApi } from "@/hooks/api/useWorkoutPlanApi";
 import { cleanWorkoutObject } from "@/utils/workoutPlanUtils";
 import { Button } from "../ui/button";
 import { BsFillPencilFill } from "react-icons/bs";
@@ -14,7 +14,7 @@ import { BsPlusCircleFill } from "react-icons/bs";
 import { useParams } from "react-router-dom";
 import { Toggle } from "@/components/ui/toggle";
 import { toast } from "sonner";
-import { useWorkoutPlanPresetApi } from "@/hooks/useWorkoutPlanPresetsApi";
+import { useWorkoutPlanPresetApi } from "@/hooks/api/useWorkoutPlanPresetsApi";
 import { useIsEditableContext } from "@/context/useIsEditableContext";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 
@@ -110,7 +110,7 @@ const CreateWorkoutPlan: React.FC = () => {
 
   return (
     <>
-      <div className="flex flex-col gap-4 p-5 overflow-y-scroll hide-scrollbar w-5/6 max-h-[95vh] ">
+      <div className="flex flex-col gap-4 px-20 py-4   w-full ">
         <div className=" w-full flex justify-between items-center">
           <h1 className="text-4xl">תוכנית אימון</h1>
           <Toggle onClick={() => toggleIsEditable()} className="px-3 rounded cursor-pointer ">

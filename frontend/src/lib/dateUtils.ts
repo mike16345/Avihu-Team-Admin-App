@@ -18,7 +18,7 @@ class DateUtils {
     });
   }
 
-  static formatDate(date: Date, formatType: DateFormatType = "DD/MM/YYYY"): string {
+  static formatDate(date: Date | string, formatType: DateFormatType = "DD/MM/YYYY"): string {
     return moment(date).format(formatType);
   }
 
@@ -175,7 +175,7 @@ class DateUtils {
     return labels.length > 5 ? labels.map((label) => label.slice(0, 3)) : labels;
   }
 
-  static convertToDate(date: string): Date {
+  static convertToDate(date: string | Date): Date {
     return new Date(date);
   }
 }

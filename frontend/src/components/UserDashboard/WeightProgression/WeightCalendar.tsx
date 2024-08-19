@@ -4,6 +4,8 @@ import { FC } from "react";
 import { type DayContentProps } from "react-day-picker";
 
 import { Calendar } from "../../ui/calendar";
+import { poundsToKg } from "@/lib/workoutUtils";
+import { IoClose } from "react-icons/io5";
 
 type WeighCalendarProps = {
   weighIns: IWeighIn[];
@@ -22,22 +24,24 @@ export const WeightCalendar: FC<WeighCalendarProps> = ({ weighIns }) => {
   function CustomDayContent({ date }: DayContentProps) {
     const dateString = formatDate(date);
     const weight = weighInLookup[dateString];
-    console.log("weight: ", weight);
-    console.log("date: ", dateString);
+    const today = new Date();
+    const isDateEarlierThanToday = date.getTime() <= today.getTime();
 
     return (
-      <div className="relative ">
+      <span>
         {date.getDate()}
-        {weight && <p className="text-xs text-primary">{weight}</p>}
-      </div>
+        <p className="flex items-center justify-center text-[0.60rem] leading-3  text-primary">
+          {weight
+            ? poundsToKg(weight)
+            : isDateEarlierThanToday && <IoClose className=" text-destructive" size={12} />}
+        </p>
+      </span>
     );
   }
 
   return (
-    <Card className="flex items-center justify-center h-full">
-      <CardContent>
-        <Calendar components={{ DayContent: CustomDayContent }} />
-      </CardContent>
-    </Card>
+    <div className="w-fit h-[350px] ">
+      <Calendar dir="ltr" components={{ DayContent: CustomDayContent }} />
+    </div>
   );
 };

@@ -1,9 +1,9 @@
 import UserForm from "@/components/forms/UserForm";
 import Loader from "@/components/ui/Loader";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
-import { useUsersApi } from "@/hooks/useUsersApi";
+import { useUsersApi } from "@/hooks/api/useUsersApi";
 import { IUser } from "@/interfaces/IUser";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 

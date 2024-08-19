@@ -19,9 +19,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import useExercisePresetApi from "@/hooks/useExercisePresetApi";
+import useExercisePresetApi from "@/hooks/api/useExercisePresetApi";
 import { toast } from "sonner";
-import useMuscleGroupsApi from "@/hooks/useMuscleGroupsApi";
+import useMuscleGroupsApi from "@/hooks/api/useMuscleGroupsApi";
 import { IMuscleGroupItem } from "@/interfaces/IWorkoutPlan";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 

@@ -13,7 +13,7 @@ import { useForm } from "react-hook-form";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
-import useMenuItemApi from "@/hooks/useMenuItemApi";
+import useMenuItemApi from "@/hooks/api/useMenuItemApi";
 import DietaryTypeSelector from "../templates/dietTemplates/DietaryTypeSelector";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 

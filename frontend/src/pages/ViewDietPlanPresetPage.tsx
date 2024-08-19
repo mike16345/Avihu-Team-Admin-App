@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useParams } from "react-router";
 import { defaultDietPlan } from "@/constants/DietPlanConsts";
 import DietPlanForm from "@/components/DietPlan/DietPlanForm";
-import { useDietPlanPresetApi } from "@/hooks/useDietPlanPresetsApi";
+import { useDietPlanPresetApi } from "@/hooks/api/useDietPlanPresetsApi";
 import Loader from "@/components/ui/Loader";
 import ErrorPage from "./ErrorPage";
 import { Input } from "@/components/ui/input";

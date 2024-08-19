@@ -1,4 +1,4 @@
-import { useDietPlanApi } from "@/hooks/useDietPlanApi";
+import { useDietPlanApi } from "@/hooks/api/useDietPlanApi";
 import { IDietPlan, IDietPlanPreset } from "@/interfaces/IDietPlan";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -15,7 +15,7 @@ import {
   SelectValue,
   SelectTrigger,
 } from "@/components/ui/select";
-import { useDietPlanPresetApi } from "@/hooks/useDietPlanPresetsApi";
+import { useDietPlanPresetApi } from "@/hooks/api/useDietPlanPresetsApi";
 import { Button } from "@/components/ui/button";
 
 export const ViewDietPlanPage = () => {

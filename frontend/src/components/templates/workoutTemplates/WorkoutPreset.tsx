@@ -5,7 +5,7 @@ import { BsPlusCircleFill } from "react-icons/bs";
 import { Input } from "@/components/ui/input";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { useWorkoutPlanPresetApi } from "@/hooks/useWorkoutPlanPresetsApi";
+import { useWorkoutPlanPresetApi } from "@/hooks/api/useWorkoutPlanPresetsApi";
 import { cleanWorkoutObject } from "@/utils/workoutPlanUtils";
 import {
   Form,
@@ -127,7 +127,7 @@ const WorkoutPreset = () => {
         <h1 className="text-5xl">תבנית אימון</h1>
         <p>{isEdit ? `כאן תוכל לערוך תבנית אימון קיימת` : `  כאן תוכל ליצור תבנית אימון חדשה`}</p>
         <div className="flex flex-col gap-2 px-2 py-4">
-          <div className="w-3/4 py-4 border-b-2 mb-2">
+          <div className="w-full py-4 border-b-2 mb-2">
             <Form {...workoutForm}>
               <form>
                 <FormField
@@ -138,7 +138,7 @@ const WorkoutPreset = () => {
                       <FormItem>
                         <FormLabel className="font-bold underline pb-3">שם התבנית:</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="שם..." />
+                          <Input className="w-2/4" {...field} placeholder="שם..." />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

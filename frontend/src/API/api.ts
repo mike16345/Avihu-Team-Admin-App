@@ -1,5 +1,5 @@
 import axiosInstance from "@/config/apiConfig";
-import { Method } from "axios";
+import { AxiosRequestConfig, Method } from "axios";
 
 async function request<T>(
   method: Method,
@@ -8,18 +8,21 @@ async function request<T>(
   params?: any,
   headers?: any
 ): Promise<T> {
+  const request: AxiosRequestConfig = {
+    method,
+    url: endpoint,
+    data,
+    params,
+    headers,
+  };
+
+  console.log("request", request);
   try {
-    const response = await axiosInstance.request<T>({
-      method,
-      url: endpoint,
-      data,
-      params,
-      headers,
-    });
+    const response = await axiosInstance.request<T>(request);
 
     return response.data;
   } catch (error) {
-    console.log("Error:", error);
+    console.error("Error:", error);
     throw error;
   }
 }

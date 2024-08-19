@@ -4,11 +4,11 @@ import { AppRoutes } from "./routes/AppRoutes";
 
 function App() {
   return (
-    <div className="flex size-full">
-      <div className="w-1/6 h-full bg-secondary border-l-2">
+    <div className="flex size-full ">
+      <div>
         <Sidebar />
       </div>
-      <div className="w-5/6 h-full p-8 overflow-y-auto ">
+      <div className="size-full py-8 px-4 xs:p-8 overflow-y-auto custom-scrollbar ">
         <AppRoutes />
       </div>
     </div>

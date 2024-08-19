@@ -12,7 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import useMuscleGroupsApi from "@/hooks/useMuscleGroupsApi";
+import useMuscleGroupsApi from "@/hooks/api/useMuscleGroupsApi";
 import { toast } from "sonner";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 
