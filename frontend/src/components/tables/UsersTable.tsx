@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { columns as userColumns } from "./Columns/Users/UserColumns";
 import { DataTableHebrew } from "./DataTableHebrew";
 import { useNavigate } from "react-router";
+import { Button } from "../ui/button";
 
 export const UsersTable = () => {
   const navigate = useNavigate();
@@ -32,6 +33,7 @@ export const UsersTable = () => {
       <DataTableHebrew
         data={users}
         columns={userColumns}
+        actionButton={<Button onClick={() => navigate(`/users/add`)}>הוסף משתמש</Button>}
         handleSetData={() => console.log("setting data")}
         handleViewData={(user) => handleViewUser(user)}
         handleDeleteData={(user) => console.log("user to delete", user)}
