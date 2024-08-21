@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { UsersCheckIn } from "@/interfaces/IAnalytics";
 import { Checkbox } from "../ui/checkbox";
 import { useNavigate } from "react-router-dom";
-import { Button } from "../ui/button";
 import useAnalyticsApi from "@/hooks/api/useAnalyticsApi";
 import Loader from "../ui/Loader";
 import { toast } from "sonner";
@@ -33,13 +32,14 @@ const UserCheckIn = () => {
     }, 800);
   };
 
+  console.log(users?.length == 0);
+
   useEffect(() => {
     setIsLoading(true);
     getAllCheckInUsers()
       .then((res) => setUsers(res))
-      .catch((err) => console.log(err));
-
-    setIsLoading(false);
+      .catch((err) => console.log(err))
+      .finally(() => setIsLoading(false));
   }, []);
 
   return (
@@ -66,6 +66,11 @@ const UserCheckIn = () => {
             />
           </div>
         ))}
+        {users?.length == 0 && (
+          <div className="h-24 flex items-end justify-center">
+            <h2 className="font-bold text-success">לא נשארו לקוחות לבדיקה!</h2>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
