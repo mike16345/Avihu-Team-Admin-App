@@ -1,95 +1,68 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { UsersCheckIn } from "@/interfaces/IAnalytics";
 import { Checkbox } from "../ui/checkbox";
-
-const tempUsers = [
-  {
-    _id: "1a2b3c",
-    firstName: "Emily",
-    lastName: "Johnson",
-    isChecked: true,
-  },
-  {
-    _id: "4d5e6f",
-    firstName: "Michael",
-    lastName: "Smith",
-    isChecked: false,
-  },
-  {
-    _id: "7g8h9i",
-    firstName: "Sarah",
-    lastName: "Williams",
-    isChecked: true,
-  },
-  {
-    _id: "10j11k",
-    firstName: "David",
-    lastName: "Brown",
-    isChecked: false,
-  },
-  {
-    _id: "12l13m",
-    firstName: "Jessica",
-    lastName: "Jones",
-    isChecked: true,
-  },
-  {
-    _id: "14n15o",
-    firstName: "Daniel",
-    lastName: "Garcia",
-    isChecked: false,
-  },
-  {
-    _id: "16p17q",
-    firstName: "Ashley",
-    lastName: "Martinez",
-    isChecked: true,
-  },
-  {
-    _id: "18r19s",
-    firstName: "Christopher",
-    lastName: "Rodriguez",
-    isChecked: false,
-  },
-  {
-    _id: "20t21u",
-    firstName: "Amanda",
-    lastName: "Lopez",
-    isChecked: true,
-  },
-  {
-    _id: "22v23w",
-    firstName: "Matthew",
-    lastName: "Wilson",
-    isChecked: false,
-  },
-];
+import { useNavigate } from "react-router-dom";
+import { Button } from "../ui/button";
+import useAnalyticsApi from "@/hooks/api/useAnalyticsApi";
+import Loader from "../ui/Loader";
+import { toast } from "sonner";
+import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 
 const UserCheckIn = () => {
-  const [users, setUsers] = useState<UsersCheckIn[]>(tempUsers);
+  const navigate = useNavigate();
+  const { getAllCheckInUsers, checkOffUser } = useAnalyticsApi();
 
-  const handleCheckChange = (val: boolean, id: string) => {
-    const newUsers = users.map((user) => (user._id === id ? { ...user, isChecked: val } : user));
+  const [users, setUsers] = useState<UsersCheckIn[] | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-    setUsers(newUsers);
+  const handleCheckChange = (id: string) => {
+    if (!users) return;
+    checkOffUser(id)
+      .then(() => toast.success(`משתמש סומן בהצלחה!`))
+      .catch((err) =>
+        toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
+          description: err.response.data.message,
+        })
+      );
+
+    setTimeout(() => {
+      const newUsers = users.filter((user) => user._id !== id);
+
+      setUsers(newUsers);
+    }, 800);
   };
+
+  useEffect(() => {
+    setIsLoading(true);
+    getAllCheckInUsers()
+      .then((res) => setUsers(res))
+      .catch((err) => console.log(err));
+
+    setIsLoading(false);
+  }, []);
 
   return (
     <Card dir="rtl" className="w-[40%] shadow-md py-5">
       <CardHeader>
         <CardTitle>לקוחות לבדיקה</CardTitle>
       </CardHeader>
-      <CardContent className="max-h-[40vh] overflow-y-scroll">
-        {users.map((user) => (
-          <div key={user._id} className="w-full flex justify-between items-center border-b-2 p-5">
+      <CardContent className="max-h-[40vh] overflow-y-scroll  border-y-2">
+        {isLoading && <Loader size="large" />}
+        {users?.map((user) => (
+          <div
+            key={user._id}
+            className="w-full flex justify-between items-center border-b-2 p-5 hover:bg-accent cursor-pointer "
+            onClick={() => navigate(`/users/${user._id}`)}
+          >
             <div className="flex gap-5">
               <h2>{user.firstName}</h2>
               <h2>{user.lastName}</h2>
             </div>
             <Checkbox
-              onCheckedChange={(val) => handleCheckChange(val, user._id)}
-              checked={user.isChecked}
+              className="h-6 w-6 rounded-full"
+              onCheckedChange={() => handleCheckChange(user._id)}
+              onClick={(e) => e.stopPropagation()}
             />
           </div>
         ))}
