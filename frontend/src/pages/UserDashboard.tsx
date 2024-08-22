@@ -1,5 +1,6 @@
 import { WeightProgression } from "@/components/UserDashboard/WeightProgression/WeightProgression";
 import { WorkoutProgression } from "@/components/UserDashboard/WorkoutProgression/WorkoutProgression";
+import Loader from "@/components/ui/Loader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUsersApi } from "@/hooks/api/useUsersApi";
 import { IUser } from "@/interfaces/IUser";
@@ -14,15 +15,20 @@ export const UserDashboard = () => {
   const { id } = useParams();
 
   const [currentUser, setCurrentUser] = useState<IUser | null>(user);
+  const [isLoading, setIsLoading] = useState(false);
 
   console.log("user", user);
   useEffect(() => {
     if (!id || currentUser) return;
 
+    setIsLoading(true);
     getUser(id)
       .then((user) => setCurrentUser(user))
-      .catch((error) => console.error(error));
+      .catch((error) => console.error(error))
+      .finally(() => setIsLoading(false));
   }, []);
+
+  if (isLoading) return <Loader size="large" />;
 
   return (
     <div className="size-full flex flex-col gap-4">
@@ -36,18 +42,18 @@ export const UserDashboard = () => {
           </h1>
           <h2 className="text-lg text-muted-foreground font-bold flex items-center gap-2 ">
             סוג תוכנית:
-            <p className="font-normal">{currentUser!.planType}</p>
+            <p className="font-normal">{currentUser?.planType}</p>
           </h2>
           <h2 className="text-lg text-muted-foreground font-bold flex items-center gap-2 ">
             תחילת ליווי:
             <p className="font-normal">
-              {DateUtils.formatDate(currentUser!.dateJoined!, "DD/MM/YYYY")}
+              {DateUtils.formatDate(currentUser?.dateJoined!, "DD/MM/YYYY")}
             </p>
           </h2>
           <h2 className="text-lg text-muted-foreground font-bold flex items-center gap-2 ">
             סיום ליווי:
             <p className="font-normal">
-              {DateUtils.formatDate(currentUser!.dateFinished!, "DD/MM/YYYY")}
+              {DateUtils.formatDate(currentUser?.dateFinished!, "DD/MM/YYYY")}
             </p>
           </h2>
         </div>
