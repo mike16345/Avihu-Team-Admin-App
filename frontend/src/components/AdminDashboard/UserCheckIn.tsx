@@ -32,8 +32,6 @@ const UserCheckIn = () => {
     }, 800);
   };
 
-  console.log(users?.length == 0);
-
   useEffect(() => {
     setIsLoading(true);
     getAllCheckInUsers()
