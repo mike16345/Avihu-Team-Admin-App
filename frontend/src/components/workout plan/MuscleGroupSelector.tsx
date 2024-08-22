@@ -50,7 +50,9 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
             <ComboBox
               existingValue={value}
               getOptions={getAllMuscleGroups}
-              handleChange={(val) => setTempValue(val.name)}
+              handleChange={(val) => {
+                setTempValue(val.name);
+              }}
             />
           </DialogDescription>
         </DialogHeader>

@@ -35,7 +35,7 @@ const ComboBox: React.FC<ComboBoxProps> = ({
     let objToReturn;
 
     if (values[0].name) {
-      objToReturn = values?.find((obj) => obj.name === val);
+      objToReturn = values?.find((obj) => obj.name.toLowerCase() === val.toLowerCase());
     }
 
     handleChange(objToReturn);
@@ -69,7 +69,7 @@ const ComboBox: React.FC<ComboBoxProps> = ({
               {values?.map((option, i) => (
                 <CommandItem key={i} value={option.name} onSelect={(val) => onChange(val)}>
                   {option.name}
-                </CommandItem>  
+                </CommandItem>
               ))}
             </CommandGroup>
           </CommandList>
