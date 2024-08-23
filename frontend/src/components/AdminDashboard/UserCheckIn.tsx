@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { UsersCheckIn } from "@/interfaces/IAnalytics";
-import { Checkbox } from "../ui/checkbox";
 import { useNavigate } from "react-router-dom";
 import useAnalyticsApi from "@/hooks/api/useAnalyticsApi";
 import Loader from "../ui/Loader";
 import { toast } from "sonner";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
+import { BiCheckSquare } from "react-icons/bi";
+import { Badge } from "../ui/badge";
 
 const UserCheckIn = () => {
   const navigate = useNavigate();
@@ -18,18 +19,20 @@ const UserCheckIn = () => {
   const handleCheckChange = (id: string) => {
     if (!users) return;
     checkOffUser(id)
-      .then(() => toast.success(`משתמש סומן בהצלחה!`))
+      .then(() => {
+        toast.success(`משתמש סומן בהצלחה!`);
+
+        const newUsers = users.map((user) =>
+          user._id === id ? { ...user, isChecked: true } : user
+        );
+
+        setUsers(newUsers);
+      })
       .catch((err) =>
         toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
           description: err.response.data.message,
         })
       );
-
-    setTimeout(() => {
-      const newUsers = users.filter((user) => user._id !== id);
-
-      setUsers(newUsers);
-    }, 800);
   };
 
   useEffect(() => {
@@ -41,7 +44,7 @@ const UserCheckIn = () => {
   }, []);
 
   return (
-    <Card dir="rtl" className="w-[40%] shadow-md py-5">
+    <Card dir="rtl" className="sm:w-full md:w-[60%] lg:w-[40%] shadow-md py-5">
       <CardHeader>
         <CardTitle>לקוחות לבדיקה</CardTitle>
       </CardHeader>
@@ -50,22 +53,29 @@ const UserCheckIn = () => {
         {users?.map((user) => (
           <div
             key={user._id}
-            className="w-full flex justify-between items-center border-b-2 p-5 hover:bg-accent cursor-pointer "
+            className="w-full flex justify-between items-center border-b-2 p-5 hover:bg-accent cursor-pointer"
             onClick={() => navigate(`/users/${user._id}`)}
           >
             <div className="flex gap-5">
               <h2>{user.firstName}</h2>
               <h2>{user.lastName}</h2>
             </div>
-            <Checkbox
-              className="h-6 w-6 rounded-full"
-              onCheckedChange={() => handleCheckChange(user._id)}
-              onClick={(e) => e.stopPropagation()}
-            />
+            {!user.isChecked ? (
+              <BiCheckSquare
+                size={30}
+                className="hover:text-success"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCheckChange(user._id);
+                }}
+              />
+            ) : (
+              <Badge className="bg-success">נבדק</Badge>
+            )}
           </div>
         ))}
         {users?.length == 0 && (
-          <div className="h-24 flex items-end justify-center">
+          <div className="h-24 flex items-center justify-center">
             <h2 className="font-bold text-success">לא נשארו לקוחות לבדיקה!</h2>
           </div>
         )}

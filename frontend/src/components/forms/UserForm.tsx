@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import {
   Form,
   FormControl,
@@ -22,6 +22,13 @@ import { Button } from "../ui/button";
 import DatePicker from "../ui/DatePicker";
 import DietaryTypeSelector from "../templates/dietTemplates/DietaryTypeSelector";
 import { IUser } from "@/interfaces/IUser";
+
+const remindInOptions = [
+  { value: `604800`, name: `שבוע` },
+  { value: `1209600`, name: `שבועיים` },
+  { value: `1814400`, name: `שלושה שבועות` },
+  { value: `2592000`, name: `חודש` },
+];
 
 const datePresets = [
   { name: `חודש`, timeInDays: `30` },
@@ -162,11 +169,11 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo }) => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent dir="rtl">
-                  <SelectItem value="259200">שלושה ימים</SelectItem>
-                  <SelectItem value="604800">שבוע</SelectItem>
-                  <SelectItem value="1209600">שבועיים</SelectItem>
-                  <SelectItem value="1814400">שלושה שבועות</SelectItem>
-                  <SelectItem value="2592000">חודש</SelectItem>
+                  {remindInOptions.map((option) => (
+                    <SelectItem key={option.name} value={option.value}>
+                      {option.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormMessage />

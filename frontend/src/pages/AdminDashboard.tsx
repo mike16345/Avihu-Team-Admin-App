@@ -3,7 +3,7 @@ import React from "react";
 
 const AdminDashboard = () => {
   return (
-    <div className="h-full w-full">
+    <div className="size-full">
       <h1>admin page</h1>
       <UserCheckIn />
     </div>
