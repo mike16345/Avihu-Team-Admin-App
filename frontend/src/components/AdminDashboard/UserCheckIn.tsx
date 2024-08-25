@@ -22,9 +22,7 @@ const UserCheckIn = () => {
       .then(() => {
         toast.success(`משתמש סומן בהצלחה!`);
 
-        const newUsers = users.map((user) =>
-          user._id === id ? { ...user, isChecked: true } : user
-        );
+        const newUsers = users.filter((user) => user._id !== id);
 
         setUsers(newUsers);
       })
@@ -48,30 +46,29 @@ const UserCheckIn = () => {
       <CardHeader>
         <CardTitle>לקוחות לבדיקה</CardTitle>
       </CardHeader>
-      <CardContent className="max-h-[40vh] overflow-y-scroll  border-y-2">
+      <CardContent className="max-h-[40vh] overflow-y-auto  border-y-2">
         {isLoading && <Loader size="large" />}
         {users?.map((user) => (
           <div
             key={user._id}
-            className="w-full flex justify-between items-center border-b-2 p-5 hover:bg-accent cursor-pointer"
-            onClick={() => navigate(`/users/${user._id}`)}
+            className="w-full flex justify-between items-center border-b-2 p-5 hover:bg-accent"
           >
-            <div className="flex gap-5">
+            <div
+              className="flex gap-5 hover:underline cursor-pointer"
+              onClick={() => navigate(`/users/${user._id}`)}
+            >
               <h2>{user.firstName}</h2>
               <h2>{user.lastName}</h2>
             </div>
-            {!user.isChecked ? (
-              <BiCheckSquare
-                size={30}
-                className="hover:text-success"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleCheckChange(user._id);
-                }}
-              />
-            ) : (
-              <Badge className="bg-success">נבדק</Badge>
-            )}
+            <Badge
+              className="cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleCheckChange(user._id);
+              }}
+            >
+              נבדק
+            </Badge>
           </div>
         ))}
         {users?.length == 0 && (
