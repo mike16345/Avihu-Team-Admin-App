@@ -1,14 +1,15 @@
 import { UserPlan } from "@/enums/User";
 
 export interface IUser {
-  _id?:string
-  firstName: string;     
-  lastName: string;      
-  email: string;         
-  phone: string;         
-  dietaryType?: string[]; 
-  password?: string;      
-  dateJoined?: Date;      
-  dateFinished: Date;    
-  planType: string;      
+  _id?: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  dietaryType?: string[];
+  password?: string;
+  dateJoined?: Date;
+  dateFinished: Date;
+  planType: string;
+  remindIn: number;
 }

@@ -7,15 +7,16 @@ import WorkoutsTemplatePage from "@/pages/WorkoutsTemplatePage";
 import { CreateWorkoutPlanWrapper } from "@/components/workout plan/CreateWorkoutPlanWrapper";
 import PresetRoutes from "./PresetRoutes";
 import UserFormPage from "@/pages/UserFormPage";
+import AdminDashboard from "@/pages/AdminDashboard";
 
 export const AppRoutes = () => {
   return (
     <>
       <Routes>
-        <Route path="/" element={<UsersTable />} />
+        <Route path="/" element={<AdminDashboard />} />
         <Route path="/users/*" element={<UsersTable />} />
-        <Route path="/users/add" element={< UserFormPage/>} />
-        <Route path="/users/edit/:id" element={< UserFormPage/>} />
+        <Route path="/users/add" element={<UserFormPage />} />
+        <Route path="/users/edit/:id" element={<UserFormPage />} />
         <Route path="/users/:id" element={<UserDashboard />} />
         <Route path="/diet-plans/:id" element={<ViewDietPlanPage />} />
         <Route path="/workout-plans/:id" element={<CreateWorkoutPlanWrapper />} />

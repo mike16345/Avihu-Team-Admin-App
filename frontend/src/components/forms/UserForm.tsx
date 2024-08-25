@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import {
   Form,
   FormControl,
@@ -23,6 +23,13 @@ import DatePicker from "../ui/DatePicker";
 import DietaryTypeSelector from "../templates/dietTemplates/DietaryTypeSelector";
 import { IUser } from "@/interfaces/IUser";
 
+const remindInOptions = [
+  { value: `604800`, name: `שבוע` },
+  { value: `1209600`, name: `שבועיים` },
+  { value: `1814400`, name: `שלושה שבועות` },
+  { value: `2592000`, name: `חודש` },
+];
+
 const datePresets = [
   { name: `חודש`, timeInDays: `30` },
   { name: `חודשיים`, timeInDays: `60` },
@@ -37,6 +44,7 @@ const userSchema = z.object({
   email: z.string().email({ message: "כתובת מייל אינה תקינה" }),
   dateFinished: z.date({ message: "בחר תאריך סיום" }),
   planType: z.string().min(1, { message: "בחר סוג תוכנית" }),
+  remindIn: z.coerce.number(),
   dietaryType: z.string().array().optional(),
 });
 
@@ -55,6 +63,7 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo }) => {
       email: existingUser?.email || ``,
       planType: existingUser?.planType || ``,
       dietaryType: existingUser?.dietaryType || [],
+      remindIn: existingUser?.remindIn,
       dateFinished: existingUser && new Date(existingUser?.dateFinished),
     },
   });
@@ -141,6 +150,30 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo }) => {
                 <SelectContent dir="rtl">
                   <SelectItem value="מסה">מסה</SelectItem>
                   <SelectItem value="חיטוב">חיטוב</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={userForm.control}
+          name="remindIn"
+          render={({ field }) => (
+            <FormItem className="w-[40%]">
+              <FormLabel>בדיקה תקופתית</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger dir="rtl">
+                    <SelectValue placeholder={field.value || "תבדוק אותי כל שבוע..."} />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent dir="rtl">
+                  {remindInOptions.map((option) => (
+                    <SelectItem key={option.name} value={option.value}>
+                      {option.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormMessage />
