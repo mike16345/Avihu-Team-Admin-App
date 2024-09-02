@@ -18,7 +18,7 @@ export const UsersTable = () => {
 
   useEffect(() => {
     getAllUsers()
-      .then((users) => setUsers(users))
+      .then((res) => setUsers(res.data))
       .catch((error) => {
         console.error("error", error);
       });

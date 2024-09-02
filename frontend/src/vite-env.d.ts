@@ -11,8 +11,8 @@ declare module "*.svg" {
 }
 
 interface ImportMetaEnv {
-  readonly VITE_SERVER_IP: string;
-  readonly VITE_SERVER_PORT: string;
+  readonly VITE_SERVER: string;
+  readonly VITE_API_AUTH_TOKEN: string;
 }
 
 interface ImportMeta {

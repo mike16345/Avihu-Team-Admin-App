@@ -1,6 +1,8 @@
 import axiosInstance from "@/config/apiConfig";
 import { AxiosRequestConfig, Method } from "axios";
 
+const API_AUTH_TOKEN = import.meta.env.VITE_API_AUTH_TOKEN;
+
 async function request<T>(
   method: Method,
   endpoint: string,
@@ -13,7 +15,7 @@ async function request<T>(
     url: endpoint,
     data,
     params,
-    headers,
+    headers: { ["X-Api-Key"]: API_AUTH_TOKEN, ...headers },
   };
 
   console.log("request", request);
