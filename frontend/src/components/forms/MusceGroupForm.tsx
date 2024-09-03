@@ -15,6 +15,8 @@ import { Button } from "../ui/button";
 import useMuscleGroupsApi from "@/hooks/api/useMuscleGroupsApi";
 import { toast } from "sonner";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
+import { useQueryClient } from "@tanstack/react-query";
+import { IMuscleGroupItem } from "@/interfaces/IWorkoutPlan";
 
 interface MusceGroupFormProps {
   objectId?: string;
@@ -27,13 +29,18 @@ const muscleGroupSchema = z.object({
 
 const MusceGroupForm: React.FC<MusceGroupFormProps> = ({ objectId, closeSheet }) => {
   const { getMuscleGroupById, addMuscleGroup, updateMuscleGroup } = useMuscleGroupsApi();
+  const queryClient = useQueryClient();
+  let item: string;
 
-  const muscleGroups = {};
+  if (objectId) {
+    const muscleGroups: IMuscleGroupItem = queryClient.getQueryData([`muscleGroups`]).data;
+    item = muscleGroups.find((muscleGroup) => muscleGroup._id == objectId).name;
+  }
 
   const muscleGroupForm = useForm<z.infer<typeof muscleGroupSchema>>({
     resolver: zodResolver(muscleGroupSchema),
     defaultValues: {
-      name: "",
+      name: item || "",
     },
   });
 
@@ -63,9 +70,14 @@ const MusceGroupForm: React.FC<MusceGroupFormProps> = ({ objectId, closeSheet })
 
   useEffect(() => {
     if (!objectId) return;
-    getMuscleGroupById(objectId)
+    /* const muscleGroups = queryClient.getQueryData([`muscleGroups`]).data;
+    const item = muscleGroups.find((item) => item._id == objectId);
+    console.log(`items`, item);
+    console.log(`id`, objectId); */
+
+    /* getMuscleGroupById(objectId)
       .then((res) => reset(res.data))
-      .catch((err) => console.log(err));
+      .catch((err) => console.log(err)); */
   }, []);
   return (
     <Form {...muscleGroupForm}>
