@@ -20,10 +20,9 @@ export const UserDashboard = () => {
     staleTime: MIN_STALE_TIME,
     queryFn: () => getUser(id || ""),
   });
-  console.log("user", user);
 
   if (query.isLoading) return <Loader size="large" />;
-  const currentUser = query.data;
+  const currentUser = query.data || user;
 
   return (
     <div className="size-full flex flex-col gap-4">
