@@ -12,8 +12,12 @@ export const useUsersApi = () => {
 
   const deleteUser = (userID: string) => deleteItem(`${USERS_ENDPOINT}/one`, userID);
 
-  const getUser = (id: string) =>
-    fetchData<ApiResponse<IUser>>(USERS_ENDPOINT + "/one", { userId: id }).then((res) => res.data);
+  const getUser = (id: string) => {
+    console.log("user id", id);
+    return fetchData<ApiResponse<IUser>>(USERS_ENDPOINT + "/one", { userId: id }).then(
+      (res) => res.data
+    );
+  };
 
   const getAllUsers = () => fetchData<ApiResponse<IUser[]>>(USERS_ENDPOINT).then((res) => res.data);
 
