@@ -28,6 +28,8 @@ const muscleGroupSchema = z.object({
 const MusceGroupForm: React.FC<MusceGroupFormProps> = ({ objectId, closeSheet }) => {
   const { getMuscleGroupById, addMuscleGroup, updateMuscleGroup } = useMuscleGroupsApi();
 
+  const muscleGroups = {};
+
   const muscleGroupForm = useForm<z.infer<typeof muscleGroupSchema>>({
     resolver: zodResolver(muscleGroupSchema),
     defaultValues: {
@@ -62,7 +64,7 @@ const MusceGroupForm: React.FC<MusceGroupFormProps> = ({ objectId, closeSheet })
   useEffect(() => {
     if (!objectId) return;
     getMuscleGroupById(objectId)
-      .then((res) => reset(res))
+      .then((res) => reset(res.data))
       .catch((err) => console.log(err));
   }, []);
   return (

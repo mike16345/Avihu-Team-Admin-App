@@ -1,3 +1,5 @@
+import { ApiResponse } from "@/types/types";
+
 interface ITabHeader {
   name: string;
   value: string;
@@ -12,7 +14,7 @@ interface ITabContent {
   deleteFunc: (id: string) => Promise<unknown>;
 }
 
-interface ITabs {
+export interface ITabs {
   tabHeaders: ITabHeader[];
   tabContent: ITabContent[];
 }
