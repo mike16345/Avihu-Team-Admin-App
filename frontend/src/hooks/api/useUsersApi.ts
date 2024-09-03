@@ -1,22 +1,24 @@
 import { deleteItem, fetchData, sendData, updateItem } from "@/API/api";
 import { IUser } from "@/interfaces/IUser";
+import { ApiResponse } from "@/types/types";
 
 const USERS_ENDPOINT = "users";
 
 export const useUsersApi = () => {
-  const adduser = (user: IUser) => sendData<IUser>(USERS_ENDPOINT, user);
+  const addUser = (user: IUser) => sendData<IUser>(USERS_ENDPOINT, user);
 
   const updateUser = (userID: string, user: IUser) =>
-    updateItem(`${USERS_ENDPOINT}${userID}`, user);
+    updateItem(`${USERS_ENDPOINT}${userID}`, user, null, { id: userID });
 
   const deleteUser = (userID: string) => deleteItem(`${USERS_ENDPOINT}`, userID);
 
-  const getUser = (id: string) => fetchData<IUser>(USERS_ENDPOINT + "/" + id);
+  const getUser = (id: string) =>
+    fetchData<ApiResponse<IUser>>(USERS_ENDPOINT, { userId: id }).then((res) => res.data);
 
-  const getAllUsers = () => fetchData<IUser[]>(USERS_ENDPOINT);
+  const getAllUsers = () => fetchData<ApiResponse<IUser[]>>(USERS_ENDPOINT).then((res) => res.data);
 
   return {
-    adduser,
+    addUser,
     updateUser,
     deleteUser,
     getUser,

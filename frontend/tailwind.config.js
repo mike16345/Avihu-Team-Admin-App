@@ -13,8 +13,7 @@ module.exports = {
   theme: {
     screens: {
       xs: "485px",
-      "": ".screens",
-      "...defaultTheme.screens": "",
+      ...defaultTheme.screens,
     },
     container: {
       center: "true",

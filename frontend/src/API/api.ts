@@ -37,8 +37,13 @@ export async function sendData<T>(endpoint: string, data: any, headers?: any): P
   return request<T>("post", endpoint, data, undefined, headers);
 }
 
-export async function updateItem<T>(endpoint: string, data: any, headers?: any): Promise<T> {
-  return request<T>("put", endpoint, data, undefined, headers);
+export async function updateItem<T>(
+  endpoint: string,
+  data: any,
+  headers?: any,
+  params?: any
+): Promise<T> {
+  return request<T>("put", endpoint, data, params, headers);
 }
 
 export async function patchItem<T>(endpoint: string, params?: any, headers?: any): Promise<T> {

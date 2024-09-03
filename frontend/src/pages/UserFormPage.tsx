@@ -9,7 +9,7 @@ import { toast } from "sonner";
 
 const UserFormPage = () => {
   const { id } = useParams();
-  const { getUser, adduser, updateUser } = useUsersApi();
+  const { getUser, addUser, updateUser } = useUsersApi();
 
   const [user, setUser] = useState<IUser | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -22,7 +22,7 @@ const UserFormPage = () => {
           toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, { description: err.message })
         );
     } else {
-      adduser(user)
+      addUser(user)
         .then(() => toast.success(`משתמש נשמר בהצלחה!`))
         .catch((err) =>
           toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, { description: err.message })

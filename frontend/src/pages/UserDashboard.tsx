@@ -2,10 +2,10 @@ import { WeightProgression } from "@/components/UserDashboard/WeightProgression/
 import { WorkoutProgression } from "@/components/UserDashboard/WorkoutProgression/WorkoutProgression";
 import Loader from "@/components/ui/Loader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MIN_STALE_TIME } from "@/constants/constants";
 import { useUsersApi } from "@/hooks/api/useUsersApi";
-import { IUser } from "@/interfaces/IUser";
 import DateUtils from "@/lib/dateUtils";
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { FaPencilAlt } from "react-icons/fa";
 import { Link, useLocation, useParams } from "react-router-dom";
 
@@ -14,21 +14,16 @@ export const UserDashboard = () => {
   const { getUser } = useUsersApi();
   const { id } = useParams();
 
-  const [currentUser, setCurrentUser] = useState<IUser | null>(user);
-  const [isLoading, setIsLoading] = useState(false);
-
+  const query = useQuery({
+    enabled: !user,
+    queryKey: [id || "oneUser"],
+    staleTime: MIN_STALE_TIME,
+    queryFn: () => getUser(id || ""),
+  });
   console.log("user", user);
-  useEffect(() => {
-    if (!id || currentUser) return;
 
-    setIsLoading(true);
-    getUser(id)
-      .then((user) => setCurrentUser(user))
-      .catch((error) => console.error(error))
-      .finally(() => setIsLoading(false));
-  }, []);
-
-  if (isLoading) return <Loader size="large" />;
+  if (query.isLoading) return <Loader size="large" />;
+  const currentUser = query.data;
 
   return (
     <div className="size-full flex flex-col gap-4">
