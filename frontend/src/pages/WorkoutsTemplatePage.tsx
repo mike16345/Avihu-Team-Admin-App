@@ -10,24 +10,31 @@ import {
 } from "@/interfaces/IWorkoutPlan";
 import React, { useEffect, useState } from "react";
 import ErrorPage from "./ErrorPage";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ITabs } from "@/interfaces/interfaces";
+import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 
 const WorkoutsTemplatePage = () => {
-  const { getExercisePresets, deleteExercise } = useExercisePresetApi();
-  const { getAllWorkoutPlanPresets, deleteWorkoutPlanPreset } = useWorkoutPlanPresetApi();
+  /* const { getExercisePresets, deleteExercise } = useExercisePresetApi();
+  const { getAllWorkoutPlanPresets, deleteWorkoutPlanPreset } = useWorkoutPlanPresetApi(); */
   const { getAllMuscleGroups, deleteMuscleGroup } = useMuscleGroupsApi();
 
-  const [workoutPlanPresets, setWorkoutPlanPresets] = useState<IWorkoutPlanPreset[]>([]);
   const muscleGroups = useQuery({
     queryKey: ["muscleGroups"],
-    staleTime: 30,
+    staleTime: FULL_DAY_STALE_TIME,
     queryFn: getAllMuscleGroups,
   });
-  const [muscleGroupPresets, setMuscleGroupPresets] = useState<IMuscleGroupItem[]>([]);
+
+  const queryClient = useQueryClient();
+
+  const deleteExistingMuscleGroup = useMutation({
+    mutationFn: deleteMuscleGroup,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`muscleGroups`] });
+    },
+  });
   const [exercisePresets, setExercisePresets] = useState<IExercisePresetItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [workoutPlanPresets, setWorkoutPlanPresets] = useState<IWorkoutPlanPreset[]>([]);
 
   const tabs: ITabs = {
     tabHeaders: [
@@ -57,9 +64,8 @@ const WorkoutsTemplatePage = () => {
         value: `muscleGroups`,
         btnPrompt: `הוסף קבוצת שריר`,
         state: muscleGroups.data?.data,
-        setState: setMuscleGroupPresets,
         sheetForm: `muscleGroup`,
-        deleteFunc: deleteMuscleGroup,
+        deleteFunc: deleteExistingMuscleGroup,
       },
       /* {
         value: `exercises`,
