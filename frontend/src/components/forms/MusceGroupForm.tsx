@@ -16,6 +16,7 @@ import useMuscleGroupsApi from "@/hooks/api/useMuscleGroupsApi";
 import { toast } from "sonner";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { IMuscleGroupItem } from "@/interfaces/IWorkoutPlan";
 
 interface MusceGroupFormProps {
   objectId?: string;
@@ -37,7 +38,8 @@ const MusceGroupForm: React.FC<MusceGroupFormProps> = ({ objectId, closeSheet })
     },
   });
   const updateAMuscleGroup = useMutation({
-    mutationFn: ({ objectId, values }) => updateMuscleGroup(objectId, values),
+    mutationFn: ({ objectId, values }: { objectId: string; values: IMuscleGroupItem }) =>
+      updateMuscleGroup(objectId, values),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`muscleGroups`] });
     },
