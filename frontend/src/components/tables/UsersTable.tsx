@@ -1,33 +1,32 @@
 import { useUsersApi } from "@/hooks/api/useUsersApi";
 import { IUser } from "@/interfaces/IUser";
-import { useEffect, useState } from "react";
 import { columns as userColumns } from "./Columns/Users/UserColumns";
 import { DataTableHebrew } from "./DataTableHebrew";
 import { useNavigate } from "react-router";
 import { Button } from "../ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { MIN_STALE_TIME } from "@/constants/constants";
+import Loader from "../ui/Loader";
+import ErrorPage from "@/pages/ErrorPage";
 
 export const UsersTable = () => {
   const navigate = useNavigate();
   const { getAllUsers } = useUsersApi();
 
-  // Use the useQuery hook from React Query
-  const query = useQuery({ queryKey: ["users"], staleTime: 30, queryFn: getAllUsers });
+  const query = useQuery({ queryKey: ["users"], staleTime: MIN_STALE_TIME, queryFn: getAllUsers });
 
   const handleViewUser = (user: IUser) => {
     navigate(`/users/${user._id}`, { state: user });
   };
 
   if (query.isLoading) {
-    return "Loading...";
+    return <Loader size="large" />;
   }
 
   if (query.isError) {
-    return <div>Error: {query.error.message}</div>;
+    return <ErrorPage message={query.error.message} />;
   }
 
-  console.log("query", query);
   return (
     <>
       <DataTableHebrew

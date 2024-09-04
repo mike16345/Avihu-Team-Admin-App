@@ -1,28 +1,32 @@
 import { WeightChart } from "./WeightChart";
 import { WeightCalendar } from "./WeightCalendar";
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
-import { useEffect, useState } from "react";
-import { IWeighIn } from "@/interfaces/IWeighIns";
 import { useWeighInsApi } from "@/hooks/api/useWeighInsApi";
 import { useParams } from "react-router";
 import { CurrentWeighIn } from "./CurrentWeighIn";
 import { WeightProgressionPhotos } from "./WeightProgressionPhotos";
+import { useQuery } from "@tanstack/react-query";
+import Loader from "@/components/ui/Loader";
+import ErrorPage from "@/pages/ErrorPage";
+import { MIN_STALE_TIME } from "@/constants/constants";
 
 export const WeightProgression = () => {
   const { id } = useParams();
 
   const { getWeighInsByUserId } = useWeighInsApi();
 
-  const [weighIns, setWeighIns] = useState<IWeighIn[] | null>(null);
-
   if (!id) return;
-  useEffect(() => {
-    getWeighInsByUserId(id)
-      .then((res) => {
-        setWeighIns(res);
-      })
-      .catch((err) => console.error("err", err));
-  }, []);
+  const queryWeighIns = useQuery({
+    queryKey: ["weighIns"],
+    staleTime: MIN_STALE_TIME,
+    queryFn: () => getWeighInsByUserId(id),
+  });
+
+  if (queryWeighIns.isLoading) return <Loader size="large" />;
+  if (queryWeighIns.isError) return <ErrorPage message={queryWeighIns.error.message} />;
+
+  const weighIns = queryWeighIns.data;
+  console.log("weighins", weighIns);
 
   return (
     <>
@@ -49,7 +53,7 @@ export const WeightProgression = () => {
           )}
         </div>
 
-        <WeightProgressionPhotos />
+        {/* <WeightProgressionPhotos /> */}
       </div>
     </>
   );
