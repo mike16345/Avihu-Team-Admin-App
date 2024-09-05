@@ -11,7 +11,7 @@ const useAnalyticsApi = () => {
     );
 
   const checkOffUser = (id: string) =>
-    patchItem<UsersCheckIn>(ANALYTICS_ENDPOINT + `/checkIns/one?id=${id}`);
+    patchItem<ApiResponse<UsersCheckIn>>(ANALYTICS_ENDPOINT + `/checkIns/one?id=${id}`);
 
   return { getAllCheckInUsers, checkOffUser };
 };
