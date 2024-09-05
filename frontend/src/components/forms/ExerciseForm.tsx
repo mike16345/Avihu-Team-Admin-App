@@ -22,8 +22,9 @@ import { Button } from "../ui/button";
 import useExercisePresetApi from "@/hooks/api/useExercisePresetApi";
 import { toast } from "sonner";
 import useMuscleGroupsApi from "@/hooks/api/useMuscleGroupsApi";
-import { IMuscleGroupItem } from "@/interfaces/IWorkoutPlan";
+import { IExercisePresetItem, IMuscleGroupItem } from "@/interfaces/IWorkoutPlan";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface ExerciseFormProps {
   objectId?: string;
@@ -54,37 +55,58 @@ const ExerciseForm: React.FC<ExerciseFormProps> = ({ objectId, closeSheet }) => 
 
   const { reset } = exerciseForm;
 
+  const queryClient = useQueryClient();
+
+  const addNewExercise = useMutation({
+    mutationFn: addExercise,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`exercises`] });
+    },
+  });
+
+  const editExercise = useMutation({
+    mutationFn: ({ objectId, values }: { objectId: string; values: IExercisePresetItem }) =>
+      updateExercise(objectId, values),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`exercises`] });
+    },
+  });
+
   const onSubmit = (values: z.infer<typeof exerciseSchema>) => {
     if (objectId) {
-      updateExercise(objectId, values)
-        .then(() => toast.success(`פריט עודכן בהצלחה!`))
-        .then(() => closeSheet())
-        .catch((err) =>
-          toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-            description: err.response.data.message,
-          })
-        );
+      editExercise.mutate({ objectId, values });
+
+      if (editExercise.error) {
+        return toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
+          description: editExercise.error.message,
+        });
+      }
+
+      toast.success(`פריט עודכן בהצלחה!`);
+      closeSheet();
     } else {
-      addExercise(values)
-        .then(() => toast.success(`פריט נשמר בהצלחה!`))
-        .then(() => closeSheet())
-        .catch((err) =>
-          toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-            description: err.response.data.message,
-          })
-        );
+      addNewExercise.mutate(values);
+
+      if (addNewExercise.error) {
+        return toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
+          description: addNewExercise.error.message,
+        });
+      }
+
+      toast.success(`פריט נשמר בהצלחה!`);
+      closeSheet();
     }
   };
 
   useEffect(() => {
     getAllMuscleGroups()
-      .then((res) => setMuscleGroups(res))
+      .then((res) => setMuscleGroups(res.data))
       .catch((err) => console.log(err));
 
     if (!objectId) return;
 
     getExerciseById(objectId)
-      .then((res) => reset(res))
+      .then((res) => reset(res.data))
       .catch((err) => console.log(err));
   }, []);
 
