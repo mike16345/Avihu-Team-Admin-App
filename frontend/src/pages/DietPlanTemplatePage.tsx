@@ -5,26 +5,56 @@ import { IDietPlan, IMenuItem } from "@/interfaces/IDietPlan";
 import React, { useEffect, useState } from "react";
 import ErrorPage from "./ErrorPage";
 import TemplateTabsSkeleton from "@/components/ui/skeletons/TemplateTabsSkeleton";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { FULL_DAY_STALE_TIME } from "@/constants/constants";
+import { Item } from "@radix-ui/react-dropdown-menu";
 
 const DietPlanTemplatePage = () => {
   const { getMenuItems, deleteMenuItem } = useMenuItemApi();
-  const { getAllDietPlanPresets, deleteDietPlanPreset } = useDietPlanPresetApi();
+  /*  const { getAllDietPlanPresets, deleteDietPlanPreset } = useDietPlanPresetApi(); */
 
   const [dietPlanPresets, setDietPlanPresets] = useState<IDietPlan[]>([]);
-  const [proteinMenu, setProteinMenu] = useState<IMenuItem[]>([]);
+  /*  const [proteinMenu, setProteinMenu] = useState<IMenuItem[]>([]);
   const [carbsMenu, setCarbsMenu] = useState<IMenuItem[]>([]);
   const [VegetableMenu, setVegetableMenu] = useState<IMenuItem[]>([]);
-  const [fatsMenue, setFatsMenue] = useState<IMenuItem[]>([]);
+  const [fatsMenue, setFatsMenue] = useState<IMenuItem[]>([]); */
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const carbs = useQuery({
+    queryKey: [`carbs`],
+    staleTime: FULL_DAY_STALE_TIME,
+    queryFn: () => getMenuItems(`carbs`),
+  });
+  const protein = useQuery({
+    queryKey: [`protein`],
+    staleTime: FULL_DAY_STALE_TIME,
+    queryFn: () => getMenuItems(`protein`),
+  });
+  const fats = useQuery({
+    queryKey: [`fats`],
+    staleTime: FULL_DAY_STALE_TIME,
+    queryFn: () => getMenuItems(`fats`),
+  });
+  const vegetables = useQuery({
+    queryKey: [`vegetables`],
+    staleTime: FULL_DAY_STALE_TIME,
+    queryFn: () => getMenuItems(`vegetables`),
+  });
+
+  const queryClient = useQueryClient();
+
+  const deletemenuItem = useMutation({
+    mutationFn: deleteMenuItem,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`muscleGroups`] });
+    },
+  });
 
   const tabs: ITabs = {
     tabHeaders: [
-      {
+      /* {
         name: `תפריטים`,
         value: `dietPlanPresets`,
-      },
+      }, */
       {
         name: `חלבונים`,
         value: `proteinItems`,
@@ -43,79 +73,58 @@ const DietPlanTemplatePage = () => {
       },
     ],
     tabContent: [
-      {
+      /*  {
         value: `dietPlanPresets`,
         btnPrompt: `הוסף תפריט`,
         state: dietPlanPresets,
         setState: setDietPlanPresets,
         sheetForm: `dietPlans`,
         deleteFunc: deleteDietPlanPreset,
-      },
+      }, */
       {
         value: `proteinItems`,
         btnPrompt: `הוסף חלבון`,
-        state: proteinMenu,
-        setState: setProteinMenu,
+        state: protein.data?.data,
         sheetForm: `protein`,
         deleteFunc: deleteMenuItem,
       },
       {
         value: `carbItems`,
         btnPrompt: `הוסף פחמימה`,
-        state: carbsMenu,
-        setState: setCarbsMenu,
+        state: carbs.data?.data,
         sheetForm: `carbs`,
         deleteFunc: deleteMenuItem,
       },
       {
         value: `vegetableItems`,
         btnPrompt: `הוסף ירקות`,
-        state: VegetableMenu,
-        setState: setVegetableMenu,
+        state: vegetables.data?.data,
         sheetForm: `vegetables`,
         deleteFunc: deleteMenuItem,
       },
       {
         value: `fatsItems`,
         btnPrompt: `הוסף שומנים`,
-        state: fatsMenue,
-        setState: setFatsMenue,
+        state: fats.data?.data,
         sheetForm: `fats`,
         deleteFunc: deleteMenuItem,
       },
     ],
   };
 
-  useEffect(() => {
-    setIsLoading(true);
-
-    getAllDietPlanPresets()
-      .then((res) => setDietPlanPresets(res))
-      .catch((err) => setError(err));
-
-    getMenuItems(`protein`)
-      .then((res) => setProteinMenu(res))
-      .catch((err) => setError(err));
-
-    getMenuItems(`carbs`)
-      .then((res) => setCarbsMenu(res))
-      .catch((err) => setError(err));
-
-    getMenuItems(`vegetables`)
-      .then((res) => setVegetableMenu(res))
-      .catch((err) => setError(err));
-
-    getMenuItems(`fats`)
-      .then((res) => setFatsMenue(res))
-      .catch((err) => setError(err));
-
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-  }, []);
-
-  if (isLoading) return <TemplateTabsSkeleton />;
-  if (error) return <ErrorPage message={error} />;
+  if (carbs.isLoading || protein.isLoading || vegetables.isLoading || fats.isLoading)
+    return <TemplateTabsSkeleton />;
+  if (carbs.isError || protein.isError || fats.isError || vegetables.isError)
+    return (
+      <ErrorPage
+        message={
+          carbs.error?.message ||
+          protein.error?.message ||
+          fats.error?.message ||
+          vegetables.error?.message
+        }
+      />
+    );
 
   return (
     <div>
