@@ -3,16 +3,11 @@ import TemplateTabsSkeleton from "@/components/ui/skeletons/TemplateTabsSkeleton
 import useExercisePresetApi from "@/hooks/api/useExercisePresetApi";
 import useMuscleGroupsApi from "@/hooks/api/useMuscleGroupsApi";
 import { useWorkoutPlanPresetApi } from "@/hooks/api/useWorkoutPlanPresetsApi";
-import {
-  IExercisePresetItem,
-  IMuscleGroupItem,
-  IWorkoutPlanPreset,
-} from "@/interfaces/IWorkoutPlan";
+import { IExercisePresetItem, IWorkoutPlanPreset } from "@/interfaces/IWorkoutPlan";
 import React, { useEffect, useState } from "react";
 import ErrorPage from "./ErrorPage";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ITabs } from "@/interfaces/interfaces";
-import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 
 const WorkoutsTemplatePage = () => {
   /* const { getExercisePresets, deleteExercise } = useExercisePresetApi();
@@ -21,7 +16,7 @@ const WorkoutsTemplatePage = () => {
 
   const muscleGroups = useQuery({
     queryKey: ["muscleGroups"],
-    staleTime: FULL_DAY_STALE_TIME,
+    staleTime: Infinity,
     queryFn: getAllMuscleGroups,
   });
 
