@@ -10,82 +10,95 @@ import {
 } from "@/interfaces/IWorkoutPlan";
 import React, { useEffect, useState } from "react";
 import ErrorPage from "./ErrorPage";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ITabs } from "@/interfaces/interfaces";
+import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 
 const WorkoutsTemplatePage = () => {
-  const { getExercisePresets, deleteExercise } = useExercisePresetApi();
-  const { getAllWorkoutPlanPresets, deleteWorkoutPlanPreset } = useWorkoutPlanPresetApi();
+  /* const { getExercisePresets, deleteExercise } = useExercisePresetApi();
+  const { getAllWorkoutPlanPresets, deleteWorkoutPlanPreset } = useWorkoutPlanPresetApi(); */
   const { getAllMuscleGroups, deleteMuscleGroup } = useMuscleGroupsApi();
 
-  const [workoutPlanPresets, setWorkoutPlanPresets] = useState<IWorkoutPlanPreset[]>([]);
-  const [muscleGroupPresets, setMuscleGroupPresets] = useState<IMuscleGroupItem[]>([]);
+  const muscleGroups = useQuery({
+    queryKey: ["muscleGroups"],
+    staleTime: FULL_DAY_STALE_TIME,
+    queryFn: getAllMuscleGroups,
+  });
+
+  const queryClient = useQueryClient();
+
+  const deleteExistingMuscleGroup = useMutation({
+    mutationFn: deleteMuscleGroup,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`muscleGroups`] });
+    },
+  });
   const [exercisePresets, setExercisePresets] = useState<IExercisePresetItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [workoutPlanPresets, setWorkoutPlanPresets] = useState<IWorkoutPlanPreset[]>([]);
 
   const tabs: ITabs = {
     tabHeaders: [
-      {
+      /*  {
         name: `תבניות אימונים`,
         value: `WorkoutPlans`,
-      },
+      }, */
       {
         name: `קבוצות שריר`,
         value: `muscleGroups`,
       },
-      {
+      /* {
         name: `תרגילים`,
         value: `exercises`,
-      },
+      }, */
     ],
     tabContent: [
-      {
+      /* {
         value: `WorkoutPlans`,
         btnPrompt: `הוסף תבנית`,
         state: workoutPlanPresets,
         setState: setWorkoutPlanPresets,
         sheetForm: `workoutPlan`,
         deleteFunc: deleteWorkoutPlanPreset,
-      },
+      }, */
       {
         value: `muscleGroups`,
         btnPrompt: `הוסף קבוצת שריר`,
-        state: muscleGroupPresets,
-        setState: setMuscleGroupPresets,
+        state: muscleGroups.data?.data,
         sheetForm: `muscleGroup`,
-        deleteFunc: deleteMuscleGroup,
+        deleteFunc: deleteExistingMuscleGroup,
       },
-      {
+      /* {
         value: `exercises`,
         btnPrompt: `הוסף תרגיל`,
         state: exercisePresets,
         setState: setExercisePresets,
         sheetForm: `Exercise`,
         deleteFunc: deleteExercise,
-      },
+      }, */
     ],
   };
 
   useEffect(() => {
-    setIsLoading(true);
-    getExercisePresets()
+    /* setIsLoading(true); */
+    /*   getExercisePresets()
       .then((res) => setExercisePresets(res))
       .catch((err) => setError(err));
 
     getAllWorkoutPlanPresets()
       .then((res) => setWorkoutPlanPresets(res))
       .catch((err) => setError(err));
-
-    getAllMuscleGroups()
-      .then((res) => setMuscleGroupPresets(res))
-      .catch((err) => setError(err));
-
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
+ */
+    /*  getAllMuscleGroups()
+      .then((res) => setMuscleGroupPresets(res.data))
+      .catch((err) => setError(err))
+      .finally(() => setIsLoading(false)); */
+    /*   setTimeout(() => {
+      
+    }, 1000); */
   }, []);
 
-  if (isLoading) return <TemplateTabsSkeleton />;
-  if (error) return <ErrorPage message={error} />;
+  if (muscleGroups.isLoading) return <TemplateTabsSkeleton />;
+  if (muscleGroups.error) return <ErrorPage message={muscleGroups.error.message} />;
 
   return (
     <>

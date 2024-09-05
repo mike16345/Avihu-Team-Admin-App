@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import PresetSheet from "./PresetSheet";
 import { useNavigate } from "react-router-dom";
+import { UseMutationResult } from "@tanstack/react-query";
+import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
+import { ITabs } from "@/interfaces/interfaces";
 
 interface TemplateTabsProps {
   tabs: ITabs;
@@ -18,19 +21,16 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
 
   const deleteItem = (
     id: string,
-    deleteFunc: (id: string) => Promise<unknown>,
-    stateArr: any[],
-    setState: React.Dispatch<React.SetStateAction<any[]>>
+    deleteFunc: UseMutationResult<unknown, Error, string, unknown>
   ) => {
-    deleteFunc(id)
-      .then(() => {
-        toast.success(`פריט נמחק בהצלחה!`);
-        const newArr = stateArr.filter((item) => item._id !== id);
-        setState(newArr);
-      })
-      .catch((err) =>
-        toast.error(`אופס! נתקלנו בבעיה`, { description: err.response.data.message })
-      );
+    deleteFunc.mutate(id);
+    if (deleteFunc.isError) {
+      toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
+        description: deleteFunc.error.message,
+      });
+      return;
+    }
+    toast.success(`פריט נמחק בהצלחה!`);
   };
 
   const startEdit = (id: string, formToUse: string) => {
@@ -86,7 +86,7 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
               </Button>
               <PresetTable
                 data={tab.state || []}
-                handleDelete={(id) => deleteItem(id, tab.deleteFunc, tab.state || [], tab.setState)}
+                handleDelete={(id) => deleteItem(id, tab.deleteFunc)}
                 retrieveObjectId={(id: string) => startEdit(id, tab.sheetForm)}
               />
             </TabsContent>
