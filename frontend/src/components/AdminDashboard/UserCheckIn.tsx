@@ -36,7 +36,6 @@ const UserCheckIn = () => {
     mutationFn: (id: string) => checkOffUser(id).then((res) => res.data),
     onSuccess: (data) => {
       toast.success(`משתמש סומן בהצלחה!`);
-      // Update the cached data by filtering out the checked user
       queryClient.setQueryData<UsersCheckIn[] | undefined>(
         ["usersToCheck"],
         (oldData) => oldData?.filter((user) => user._id !== data._id) ?? []

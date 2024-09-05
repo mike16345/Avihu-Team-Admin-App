@@ -16,6 +16,8 @@ import { toast } from "sonner";
 import useMenuItemApi from "@/hooks/api/useMenuItemApi";
 import DietaryTypeSelector from "../templates/dietTemplates/DietaryTypeSelector";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { IMenuItem } from "@/interfaces/IDietPlan";
 
 interface MenuItemFormProps {
   objectId?: string;
@@ -54,6 +56,22 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
 
   const { reset } = menuItemForm;
 
+  const queryClient = useQueryClient();
+
+  const updateMenuItem = useMutation({
+    mutationFn: ({ objectId, menuItemObject }: { objectId: string; menuItemObject: IMenuItem }) =>
+      editMenuItem(menuItemObject, objectId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [foodGroup] });
+    },
+  });
+  const addNewMenuItem = useMutation({
+    mutationFn: addMenuItem,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [foodGroup] });
+    },
+  });
+
   const onSubmit = (values: z.infer<typeof menuItemSchema>) => {
     const menuItemObject = {
       ...values,
@@ -61,23 +79,23 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
       dietaryType: dietaryTypes,
     };
     if (objectId) {
-      editMenuItem(menuItemObject, objectId)
-        .then(() => toast.success(`פריט עודכן בהצלחה!`))
-        .then(() => closeSheet())
-        .catch((err) =>
-          toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-            description: err.response.data.message,
-          })
-        );
+      updateMenuItem.mutate({ menuItemObject, objectId });
+      if (updateMenuItem.isError) {
+        return toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
+          description: updateMenuItem.error.message,
+        });
+      }
+      toast.success(`פריט עודכן בהצלחה!`);
+      closeSheet();
     } else {
-      addMenuItem(menuItemObject)
-        .then(() => toast.success(`פריט נשמר בהצלחה!`))
-        .then(() => closeSheet())
-        .catch((err) =>
-          toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-            description: err.response.data.message,
-          })
-        );
+      addNewMenuItem.mutate(menuItemObject);
+      if (addNewMenuItem.isError) {
+        return toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
+          description: addNewMenuItem.error.message,
+        });
+      }
+      toast.success(`פריט נשמר בהצלחה!`);
+      closeSheet();
     }
   };
 
@@ -85,8 +103,8 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
     if (!objectId) return;
     getOneMenuItem(foodGroup, objectId)
       .then((res) => {
-        setDietaryTypes(res.dietaryType);
-        reset(res);
+        setDietaryTypes(res.data.dietaryType);
+        reset(res.data);
       })
       .catch((err) => console.log(err));
   }, []);
