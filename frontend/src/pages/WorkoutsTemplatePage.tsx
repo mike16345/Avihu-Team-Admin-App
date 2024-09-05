@@ -10,14 +10,20 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ITabs } from "@/interfaces/interfaces";
 
 const WorkoutsTemplatePage = () => {
-  /* const { getExercisePresets, deleteExercise } = useExercisePresetApi();
-  const { getAllWorkoutPlanPresets, deleteWorkoutPlanPreset } = useWorkoutPlanPresetApi(); */
+  const { getExercisePresets, deleteExercise } = useExercisePresetApi();
+  /* const { getAllWorkoutPlanPresets, deleteWorkoutPlanPreset } = useWorkoutPlanPresetApi(); */
   const { getAllMuscleGroups, deleteMuscleGroup } = useMuscleGroupsApi();
 
   const muscleGroups = useQuery({
     queryKey: ["muscleGroups"],
     staleTime: Infinity,
     queryFn: getAllMuscleGroups,
+  });
+
+  const exercises = useQuery({
+    queryKey: ["exercises"],
+    staleTime: Infinity,
+    queryFn: getExercisePresets,
   });
 
   const queryClient = useQueryClient();
@@ -28,7 +34,14 @@ const WorkoutsTemplatePage = () => {
       queryClient.invalidateQueries({ queryKey: [`muscleGroups`] });
     },
   });
-  const [exercisePresets, setExercisePresets] = useState<IExercisePresetItem[]>([]);
+
+  const deleteExistingExercise = useMutation({
+    mutationFn: deleteExercise,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`exercises`] });
+    },
+  });
+
   const [workoutPlanPresets, setWorkoutPlanPresets] = useState<IWorkoutPlanPreset[]>([]);
 
   const tabs: ITabs = {
@@ -41,10 +54,10 @@ const WorkoutsTemplatePage = () => {
         name: `קבוצות שריר`,
         value: `muscleGroups`,
       },
-      /* {
+      {
         name: `תרגילים`,
         value: `exercises`,
-      }, */
+      },
     ],
     tabContent: [
       /* {
@@ -62,38 +75,19 @@ const WorkoutsTemplatePage = () => {
         sheetForm: `muscleGroup`,
         deleteFunc: deleteExistingMuscleGroup,
       },
-      /* {
+      {
         value: `exercises`,
         btnPrompt: `הוסף תרגיל`,
-        state: exercisePresets,
-        setState: setExercisePresets,
+        state: exercises.data?.data,
         sheetForm: `Exercise`,
-        deleteFunc: deleteExercise,
-      }, */
+        deleteFunc: deleteExistingExercise,
+      },
     ],
   };
 
-  useEffect(() => {
-    /* setIsLoading(true); */
-    /*   getExercisePresets()
-      .then((res) => setExercisePresets(res))
-      .catch((err) => setError(err));
-
-    getAllWorkoutPlanPresets()
-      .then((res) => setWorkoutPlanPresets(res))
-      .catch((err) => setError(err));
- */
-    /*  getAllMuscleGroups()
-      .then((res) => setMuscleGroupPresets(res.data))
-      .catch((err) => setError(err))
-      .finally(() => setIsLoading(false)); */
-    /*   setTimeout(() => {
-      
-    }, 1000); */
-  }, []);
-
-  if (muscleGroups.isLoading) return <TemplateTabsSkeleton />;
-  if (muscleGroups.error) return <ErrorPage message={muscleGroups.error.message} />;
+  if (muscleGroups.isLoading || exercises.isLoading) return <TemplateTabsSkeleton />;
+  if (muscleGroups.error || exercises.isError)
+    return <ErrorPage message={muscleGroups.error?.message || exercises.error?.message} />;
 
   return (
     <>
