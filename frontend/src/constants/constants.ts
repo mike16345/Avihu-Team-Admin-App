@@ -1,2 +1,4 @@
 export const ONE_MIN_IN_MILLISECONDS = 60000;
 export const MIN_STALE_TIME = ONE_MIN_IN_MILLISECONDS * 30; // In milliseconds
+export const HOUR_STALE_TIME = ONE_MIN_IN_MILLISECONDS * 60;
+export const FULL_DAY_STALE_TIME = HOUR_STALE_TIME * 24;

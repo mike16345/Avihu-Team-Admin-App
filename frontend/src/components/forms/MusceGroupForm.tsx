@@ -15,6 +15,8 @@ import { Button } from "../ui/button";
 import useMuscleGroupsApi from "@/hooks/api/useMuscleGroupsApi";
 import { toast } from "sonner";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { IMuscleGroupItem } from "@/interfaces/IWorkoutPlan";
 
 interface MusceGroupFormProps {
   objectId?: string;
@@ -27,6 +29,21 @@ const muscleGroupSchema = z.object({
 
 const MusceGroupForm: React.FC<MusceGroupFormProps> = ({ objectId, closeSheet }) => {
   const { getMuscleGroupById, addMuscleGroup, updateMuscleGroup } = useMuscleGroupsApi();
+  const queryClient = useQueryClient();
+
+  const addNewMuscleGroup = useMutation({
+    mutationFn: addMuscleGroup,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`muscleGroups`] });
+    },
+  });
+  const updateAMuscleGroup = useMutation({
+    mutationFn: ({ objectId, values }: { objectId: string; values: IMuscleGroupItem }) =>
+      updateMuscleGroup(objectId, values),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`muscleGroups`] });
+    },
+  });
 
   const muscleGroupForm = useForm<z.infer<typeof muscleGroupSchema>>({
     resolver: zodResolver(muscleGroupSchema),
@@ -39,30 +56,34 @@ const MusceGroupForm: React.FC<MusceGroupFormProps> = ({ objectId, closeSheet })
 
   const onSubmit = (values: z.infer<typeof muscleGroupSchema>) => {
     if (objectId) {
-      updateMuscleGroup(objectId, values)
-        .then(() => toast.success(`פריט עודכן בהצלחה!`))
-        .then(() => closeSheet())
-        .catch((err) =>
-          toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-            description: err.response.data,
-          })
-        );
+      updateAMuscleGroup.mutate({ objectId, values });
+      if (updateAMuscleGroup.isError) {
+        toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
+          description: updateAMuscleGroup.error.message,
+        });
+        return;
+      }
+      toast.success(`פריט נשמר בהצלחה!`);
+      closeSheet();
     } else {
-      addMuscleGroup(values)
-        .then(() => toast.success(`פריט נשמר בהצלחה!`))
-        .then(() => closeSheet())
-        .catch((err) =>
-          toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-            description: err.response.data,
-          })
-        );
+      addNewMuscleGroup.mutate(values);
+      if (addNewMuscleGroup.isError) {
+        toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
+          description: addNewMuscleGroup.error.message,
+        });
+        return;
+      }
+
+      toast.success(`פריט נשמר בהצלחה!`);
+      closeSheet();
     }
   };
 
   useEffect(() => {
     if (!objectId) return;
+
     getMuscleGroupById(objectId)
-      .then((res) => reset(res))
+      .then((res) => reset(res.data))
       .catch((err) => console.log(err));
   }, []);
   return (
