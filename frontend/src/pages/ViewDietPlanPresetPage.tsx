@@ -96,8 +96,8 @@ export const ViewDietPlanPresetPage = () => {
     if (id) {
       getDietPlanPreset(id)
         .then((dietPlan) => {
-          setDietPlan(dietPlan);
-          reset(dietPlan);
+          setDietPlan(dietPlan.data);
+          reset(dietPlan.data);
           setIsNewPlan(false);
         })
         .catch((err: Error) => {
