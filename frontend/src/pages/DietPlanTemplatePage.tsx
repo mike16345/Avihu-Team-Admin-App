@@ -2,40 +2,21 @@ import TemplateTabs from "@/components/templates/TemplateTabs";
 import { useDietPlanPresetApi } from "@/hooks/api/useDietPlanPresetsApi";
 import useMenuItemApi from "@/hooks/api/useMenuItemApi";
 import React from "react";
-import ErrorPage from "./ErrorPage";
-import TemplateTabsSkeleton from "@/components/ui/skeletons/TemplateTabsSkeleton";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ITabs } from "@/interfaces/interfaces";
 
 const DietPlanTemplatePage = () => {
-  const { getMenuItems, deleteMenuItem } = useMenuItemApi();
-  /*  const { getAllDietPlanPresets, deleteDietPlanPreset } = useDietPlanPresetApi(); */
-
-  /* const [dietPlanPresets, setDietPlanPresets] = useState<IDietPlan[]>([]); */
-
-  const carbs = useQuery({
-    queryKey: [`carbs`],
-    staleTime: Infinity,
-    queryFn: () => getMenuItems(`carbs`),
-  });
-  const protein = useQuery({
-    queryKey: [`protein`],
-    staleTime: Infinity,
-    queryFn: () => getMenuItems(`protein`),
-  });
-  const fats = useQuery({
-    queryKey: [`fats`],
-    staleTime: Infinity,
-    queryFn: () => getMenuItems(`fats`),
-  });
-  const vegetables = useQuery({
-    queryKey: [`vegetables`],
-    staleTime: Infinity,
-    queryFn: () => getMenuItems(`vegetables`),
-  });
+  const { deleteMenuItem } = useMenuItemApi();
+  const { deleteDietPlanPreset } = useDietPlanPresetApi();
 
   const queryClient = useQueryClient();
 
+  const deleteDietPlan = useMutation({
+    mutationFn: deleteDietPlanPreset,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`dietPlans`] });
+    },
+  });
   const deleteCarbs = useMutation({
     mutationFn: deleteMenuItem,
     onSuccess: () => {
@@ -63,80 +44,65 @@ const DietPlanTemplatePage = () => {
 
   const tabs: ITabs = {
     tabHeaders: [
-      /* {
+      {
         name: `תפריטים`,
         value: `dietPlanPresets`,
-      }, */
+        queryKey: `dietPlans`,
+      },
       {
         name: `חלבונים`,
         value: `proteinItems`,
+        queryKey: `protein`,
       },
       {
         name: `פחמימות`,
         value: `carbItems`,
+        queryKey: `carbs`,
       },
       {
         name: `ירקות`,
         value: `vegetableItems`,
+        queryKey: `vegetables`,
       },
       {
         name: `שומנים`,
         value: `fatsItems`,
+        queryKey: `fats`,
       },
     ],
     tabContent: [
-      /*  {
+      {
         value: `dietPlanPresets`,
         btnPrompt: `הוסף תפריט`,
-        state: dietPlanPresets,
-        setState: setDietPlanPresets,
         sheetForm: `dietPlans`,
-        deleteFunc: deleteDietPlanPreset,
-      }, */
+        deleteFunc: deleteDietPlan,
+      },
       {
         value: `proteinItems`,
         btnPrompt: `הוסף חלבון`,
-        state: protein.data?.data,
         sheetForm: `protein`,
         deleteFunc: deleteProteins,
       },
       {
         value: `carbItems`,
         btnPrompt: `הוסף פחמימה`,
-        state: carbs.data?.data,
         sheetForm: `carbs`,
         deleteFunc: deleteCarbs,
       },
       {
         value: `vegetableItems`,
         btnPrompt: `הוסף ירקות`,
-        state: vegetables.data?.data,
         sheetForm: `vegetables`,
         deleteFunc: deleteVegetables,
       },
       {
         value: `fatsItems`,
         btnPrompt: `הוסף שומנים`,
-        state: fats.data?.data,
         sheetForm: `fats`,
         deleteFunc: deleteFats,
       },
     ],
   };
-
-  if (carbs.isLoading || protein.isLoading || vegetables.isLoading || fats.isLoading)
-    return <TemplateTabsSkeleton />;
-  if (carbs.isError || protein.isError || fats.isError || vegetables.isError)
-    return (
-      <ErrorPage
-        message={
-          carbs.error?.message ||
-          protein.error?.message ||
-          fats.error?.message ||
-          vegetables.error?.message
-        }
-      />
-    );
 
   return (
     <div>

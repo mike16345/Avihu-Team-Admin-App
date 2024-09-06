@@ -82,7 +82,7 @@ export const ViewDietPlanPage = () => {
     setIsLoading(true);
 
     getAllDietPlanPresets()
-      .then((res) => setPresetList(res))
+      .then((res) => setPresetList(res.data))
       .catch((err) => setError(err));
 
     getDietPlanByUserId(id)

@@ -6,9 +6,7 @@ const DIET_PLAN_PRESET_ENDPOINT = "presets/dietPlans";
 
 export const useDietPlanPresetApi = () => {
   const addDietPlanPreset = (dietPlan: IDietPlanPreset) =>
-    sendData<ApiResponse<IDietPlanPreset>>(DIET_PLAN_PRESET_ENDPOINT, dietPlan).then(
-      (res) => res.data
-    );
+    sendData<ApiResponse<IDietPlanPreset>>(DIET_PLAN_PRESET_ENDPOINT, dietPlan);
 
   const updateDietPlanPreset = (planId: string, dietPlan: IDietPlanPreset) =>
     updateItem(`${DIET_PLAN_PRESET_ENDPOINT}/one?id=${planId}`, dietPlan);
@@ -17,11 +15,10 @@ export const useDietPlanPresetApi = () => {
     deleteItem(`${DIET_PLAN_PRESET_ENDPOINT}/one?id=${planId}`);
 
   const getDietPlanPreset = (id: string) =>
-    fetchData<ApiResponse<IDietPlanPreset>>(`${DIET_PLAN_PRESET_ENDPOINT}/one?id=${id}`).then(
-      (res => res.data)
-    );
+    fetchData<ApiResponse<IDietPlanPreset>>(`${DIET_PLAN_PRESET_ENDPOINT}/one?id=${id}`);
+
   const getAllDietPlanPresets = () =>
-    fetchData<ApiResponse<IDietPlanPreset[]>>(DIET_PLAN_PRESET_ENDPOINT).then((res) => res.data);
+    fetchData<ApiResponse<IDietPlanPreset[]>>(DIET_PLAN_PRESET_ENDPOINT);
 
   return {
     addDietPlanPreset,

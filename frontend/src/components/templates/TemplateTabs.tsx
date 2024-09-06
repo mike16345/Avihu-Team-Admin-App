@@ -5,9 +5,14 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import PresetSheet from "./PresetSheet";
 import { useNavigate } from "react-router-dom";
-import { UseMutationResult } from "@tanstack/react-query";
+import { UseMutationResult, useQuery } from "@tanstack/react-query";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { ITabs } from "@/interfaces/interfaces";
+import useMenuItemApi from "@/hooks/api/useMenuItemApi";
+import { useDietPlanPresetApi } from "@/hooks/api/useDietPlanPresetsApi";
+import { ApiResponse } from "@/types/types";
+import TemplateTabsSkeleton from "../ui/skeletons/TemplateTabsSkeleton";
+import ErrorPage from "@/pages/ErrorPage";
 
 interface TemplateTabsProps {
   tabs: ITabs;
@@ -15,9 +20,33 @@ interface TemplateTabsProps {
 
 const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
   const navigate = useNavigate();
+  const { getMenuItems } = useMenuItemApi();
+  const { getAllDietPlanPresets } = useDietPlanPresetApi();
   const [selectedForm, setSelectedForm] = useState<string | undefined>();
   const [selectedObjectId, setSelectedObjectId] = useState<string>();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [queryKey, setQueryKey] = useState<string>(tabs.tabHeaders[0].queryKey);
+
+  type ApiHooks = {
+    [key: string]: (params: any) => Promise<ApiResponse<any[]>>;
+  };
+
+  const apiHooks: ApiHooks = {
+    [`carbs`]: getMenuItems,
+    [`protein`]: getMenuItems,
+    [`fats`]: getMenuItems,
+    [`vegetables`]: getMenuItems,
+    [`dietPlans`]: getAllDietPlanPresets,
+  };
+
+  const apiFunc = apiHooks[queryKey];
+
+  const apiData = useQuery({
+    queryKey: [queryKey],
+    staleTime: Infinity,
+    queryFn: () => apiFunc(queryKey),
+    enabled: !!apiFunc,
+  });
 
   const deleteItem = (
     id: string,
@@ -67,13 +96,19 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
     setIsSheetOpen(true);
   }, [selectedObjectId]);
 
+  if (apiData.isError) return <ErrorPage message={apiData.error.message} />;
+
   return (
     <>
       <div>
         <Tabs defaultValue={tabs.tabHeaders[0].value} dir="rtl">
           <TabsList>
             {tabs.tabHeaders.map((tab) => (
-              <TabsTrigger key={tab.value} value={tab.value}>
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                onClick={() => setQueryKey(tab.queryKey)}
+              >
                 {tab.name}
               </TabsTrigger>
             ))}
@@ -84,8 +119,9 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
               <Button onClick={() => handleAddNew(tab.sheetForm)} className="my-4">
                 {tab.btnPrompt}
               </Button>
+              {apiData.isLoading && <TemplateTabsSkeleton />}
               <PresetTable
-                data={tab.state || []}
+                data={apiData.data?.data || []}
                 handleDelete={(id) => deleteItem(id, tab.deleteFunc)}
                 retrieveObjectId={(id: string) => startEdit(id, tab.sheetForm)}
               />
