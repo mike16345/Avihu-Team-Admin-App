@@ -10,7 +10,7 @@ export const useRecordedSetsApi = () => {
   };
 
   const updateRecordedSet = (id: string, recordedSet: IRecordedSet) => {
-    const endpoint = `RECORDED_SETS_ENDPOINT/id?=${id}`;
+    const endpoint = `${RECORDED_SETS_ENDPOINT}/id?=${id}`;
 
     return updateItem(endpoint, recordedSet);
   };
