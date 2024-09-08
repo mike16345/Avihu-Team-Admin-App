@@ -125,6 +125,7 @@ const CreateWorkoutPlan: React.FC = () => {
         <div className="flex flex-col gap-4">
           {isEditable && (
             <ComboBox
+              queryKey="workoutPlanPresets"
               getOptions={getAllWorkoutPlanPresets}
               handleChange={(currentValue) => setWorkoutPlan(currentValue.workoutPlans)}
             />

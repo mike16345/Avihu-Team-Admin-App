@@ -128,6 +128,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
                     {isEditable ? (
                       <ComboBox
                         optionsEndpoint={options}
+                        queryKey={options || ``}
                         getOptions={getExerciseByMuscleGroup}
                         existingValue={item.name}
                         handleChange={(currentValue) => handleUpdateExercise(i, currentValue)}

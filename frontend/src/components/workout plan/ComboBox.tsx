@@ -9,12 +9,19 @@ import {
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import { ApiResponse } from "@/types/types";
+import Loader from "../ui/Loader";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { HOUR_STALE_TIME } from "@/constants/constants";
+import ErrorPage from "@/pages/ErrorPage";
+import InputSkeleton from "../ui/skeletons/InputSkeleton";
 
 interface ComboBoxProps {
   optionsEndpoint?: string;
   handleChange: (value: any) => void;
   existingValue?: string;
-  getOptions: (endpoint?: string) => Promise<any[]>;
+  getOptions: (endpoint?: any) => Promise<ApiResponse<any[]>>;
+  queryKey: string;
 }
 
 const ComboBox: React.FC<ComboBoxProps> = ({
@@ -22,36 +29,33 @@ const ComboBox: React.FC<ComboBoxProps> = ({
   getOptions,
   handleChange,
   existingValue,
+  queryKey,
 }) => {
   const [open, setOpen] = useState<boolean>(false);
   const [value, setValue] = useState<string | undefined>(existingValue);
-  const [values, setValues] = useState<any[]>();
+
+  const data = useQuery({
+    queryFn: () => getOptions(optionsEndpoint),
+    staleTime: HOUR_STALE_TIME,
+    queryKey: [queryKey],
+  });
 
   const onChange = (val: string) => {
-    if (!values) return;
+    if (!data.data?.data) return;
 
     setValue(val);
     setOpen(false);
     let objToReturn;
 
-    if (values[0].name) {
-      objToReturn = values?.find((obj) => obj.name.toLowerCase() === val.toLowerCase());
+    if (data.data?.data[0].name) {
+      objToReturn = data.data?.data?.find((obj) => obj.name.toLowerCase() === val.toLowerCase());
     }
 
     handleChange(objToReturn);
   };
 
-  useEffect(() => {
-    if (optionsEndpoint) {
-      getOptions(optionsEndpoint)
-        .then((res) => setValues(res))
-        .catch((err) => console.log(err));
-    } else {
-      getOptions()
-        .then((res) => setValues(res))
-        .catch((err) => console.log(err));
-    }
-  }, [optionsEndpoint]);
+  if (data.isLoading) return <InputSkeleton />;
+  if (data.isError) return <ErrorPage message={data.error.message} />;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -66,7 +70,7 @@ const ComboBox: React.FC<ComboBoxProps> = ({
           <CommandInput dir="rtl" placeholder="בחר סוג תוכנית..." />
           <CommandList>
             <CommandGroup dir="rtl">
-              {values?.map((option, i) => (
+              {data.data?.data?.map((option, i) => (
                 <CommandItem key={i} value={option.name} onSelect={(val) => onChange(val)}>
                   {option.name}
                 </CommandItem>
