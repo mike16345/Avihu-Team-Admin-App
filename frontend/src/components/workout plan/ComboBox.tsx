@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { ApiResponse } from "@/types/types";
 import Loader from "../ui/Loader";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { HOUR_STALE_TIME } from "@/constants/constants";
+import { FULL_DAY_STALE_TIME, HOUR_STALE_TIME } from "@/constants/constants";
 import ErrorPage from "@/pages/ErrorPage";
 import InputSkeleton from "../ui/skeletons/InputSkeleton";
 
@@ -36,7 +36,7 @@ const ComboBox: React.FC<ComboBoxProps> = ({
 
   const data = useQuery({
     queryFn: () => getOptions(optionsEndpoint),
-    staleTime: HOUR_STALE_TIME,
+    staleTime: FULL_DAY_STALE_TIME,
     queryKey: [queryKey],
   });
 
