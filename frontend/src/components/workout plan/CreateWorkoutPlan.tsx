@@ -99,7 +99,7 @@ const CreateWorkoutPlan: React.FC = () => {
     if (!id) return;
 
     getWorkoutPlanByUserId(id)
-      .then((data) => setWorkoutPlan(data.workoutPlans))
+      .then((data) => setWorkoutPlan(data.data.workoutPlans))
       .catch((err) => {
         if (err.response.data.message == `Workout plan not found.`) {
           setIsCreate(true);
