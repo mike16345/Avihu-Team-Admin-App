@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { useWorkoutPlanPresetApi } from "@/hooks/api/useWorkoutPlanPresetsApi";
 import { useIsEditableContext } from "@/context/useIsEditableContext";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 import Loader from "../ui/Loader";
 import ErrorPage from "@/pages/ErrorPage";
@@ -33,6 +33,21 @@ const CreateWorkoutPlan: React.FC = () => {
     staleTime: FULL_DAY_STALE_TIME,
     queryKey: [id],
     enabled: !!id,
+  });
+
+  const queryClient = useQueryClient();
+
+  const updateWorkoutPlan = useMutation({
+    mutationFn: ({
+      id,
+      cleanedPostObject,
+    }: {
+      id: string;
+      cleanedPostObject: ICompleteWorkoutPlan;
+    }) => updateWorkoutPlanByUserId(id, cleanedPostObject),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [id] });
+    },
   });
 
   const [isCreate, setIsCreate] = useState(true);
@@ -102,13 +117,13 @@ const CreateWorkoutPlan: React.FC = () => {
           })
         );
     } else {
-      updateWorkoutPlanByUserId(id, cleanedPostObject)
-        .then(() => toast.success(`תוכנית אימון נשמרה בהצלחה!`))
-        .catch((err) =>
-          toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-            description: `${err.response.data.message}`,
-          })
-        );
+      updateWorkoutPlan.mutate({ id, cleanedPostObject });
+      if (updateWorkoutPlan.isError) {
+        return toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
+          description: updateWorkoutPlan.error.message,
+        });
+      }
+      toast.success(`תוכנית אימון נשמרה בהצלחה!`);
     }
   };
 
