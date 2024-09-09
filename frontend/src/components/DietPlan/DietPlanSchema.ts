@@ -1,3 +1,4 @@
+import { IDietPlan } from "@/interfaces/IDietPlan";
 import { z } from "zod";
 
 const customInstructionsSchema = z.object({
@@ -17,5 +18,26 @@ const mealSchema = z.object({
   totalFats: dietItemSchema.optional(),
   totalVeggies: dietItemSchema.optional(),
 });
+function validateMealsInDietPlan(dietPlan: IDietPlan) {
+  const validationResults = dietPlan.meals.map((meal, index) => {
+    const result = mealSchema.safeParse(meal);
 
-export { mealSchema };
+    if (!result.success) {
+      console.error(`Validation failed for meal at index ${index}:`, result.error);
+      return {
+        index,
+        isValid: false,
+        errors: result.error.format(),
+      };
+    }
+
+    return {
+      index,
+      isValid: true,
+      errors: null,
+    };
+  });
+
+  return validationResults;
+}
+export { mealSchema, validateMealsInDietPlan };

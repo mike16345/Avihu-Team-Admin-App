@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { useDietPlanPresetApi } from "@/hooks/api/useDietPlanPresetsApi";
 import { Button } from "@/components/ui/button";
+import { validateMealsInDietPlan } from "@/components/DietPlan/DietPlanSchema";
 
 export const ViewDietPlanPage = () => {
   const { id } = useParams();
@@ -37,6 +38,13 @@ export const ViewDietPlanPage = () => {
       userId: id,
     };
 
+    const validations = validateMealsInDietPlan(dietPlanToAdd);
+    const hasInvalidMeal = validations.some((val) => !val.isValid);
+
+    if (hasInvalidMeal) {
+      toast.error(`יש בעיה בקלט.`);
+      return;
+    }
     if (isNewPlan) {
       createDietPlan(dietPlanToAdd);
     } else {

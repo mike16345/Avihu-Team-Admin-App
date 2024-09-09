@@ -9,7 +9,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <App />
-      <Toaster dir="rtl" richColors />
+      <Toaster dir="rtl" richColors position="bottom-left" />
     </ThemeProvider>
   </BrowserRouter>
 );

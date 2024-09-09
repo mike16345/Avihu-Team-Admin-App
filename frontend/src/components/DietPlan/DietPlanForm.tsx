@@ -38,7 +38,6 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ existingDietPlan, updateDie
 
     newMeals[mealNumber] = meal;
     updateDietPlan({ ...dietPlan, meals: newMeals });
-    toast.success("ארוחה נשמרה בהצלחה!");
   };
 
   useEffect(() => {
@@ -58,7 +57,7 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ existingDietPlan, updateDie
         <div className="flex flex-col gap-4 ">
           {dietPlan.meals.map((meal, index) => {
             return (
-              <div key={index} className={`${index !== dietPlan.meals.length - 1 && "border-b"}`}>
+              <div key={meal?._id || index} className={`border-b`}>
                 <DietPlanDropDown
                   mealNumber={index + 1}
                   meal={meal}
