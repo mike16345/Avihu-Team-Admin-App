@@ -25,6 +25,7 @@ const AdminDashboard = () => {
           carouselItems={[
             <AnalyticsCard title="לקוחות ללא תוכנית אימון" dataKey="workoutPlan" />,
             <AnalyticsCard title="לקוחות ללא תפריט תזונה" dataKey="dietPlan" />,
+            <AnalyticsCard title="לקוחות שמסיימים תהליך החודש" dataKey="expiringUsers" />,
           ]}
         />
       </div>

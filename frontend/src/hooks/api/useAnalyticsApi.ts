@@ -16,7 +16,10 @@ const useAnalyticsApi = () => {
   const getUsersWithoutPlans = (colection: string) =>
     fetchData<UsersWithoutPlans[]>(`http://localhost:3003/analytics/${colection}`);
 
-  return { getAllCheckInUsers, checkOffUser, getUsersWithoutPlans };
+  const getUsersExpringThisMonth = () =>
+    fetchData<UsersWithoutPlans[]>(`http://localhost:3003/analytics/users/expiring`);
+
+  return { getAllCheckInUsers, checkOffUser, getUsersWithoutPlans, getUsersExpringThisMonth };
 };
 
 export default useAnalyticsApi;
