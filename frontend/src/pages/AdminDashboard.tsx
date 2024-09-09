@@ -20,12 +20,14 @@ const AdminDashboard = () => {
     <div className="size-full">
       <h1>admin page</h1>
       {/* <UserCheckIn /> */}
-      <GenericCarousel
-        carouselItems={[
-          <AnalyticsCard title="testing" data={analyticsList} />,
-          <AnalyticsCard title="testing" data={analyticsList} />,
-        ]}
-      />
+      <div className="p-5">
+        <GenericCarousel
+          carouselItems={[
+            <AnalyticsCard title="לקוחות ללא תוכנית אימון" dataKey="workoutPlan" />,
+            <AnalyticsCard title="לקוחות ללא תפריט תזונה" dataKey="dietPlan" />,
+          ]}
+        />
+      </div>
     </div>
   );
 };
