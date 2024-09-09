@@ -6,9 +6,7 @@ const WORKOUT_PLAN_ENDPOINT = "workoutPlans";
 
 export const useWorkoutPlanApi = () => {
   const addWorkoutPlan = (userId: string, workoutPlan: ICompleteWorkoutPlan) => {
-    const endpoint = WORKOUT_PLAN_ENDPOINT + userId;
-
-    return sendData<ICompleteWorkoutPlan>(endpoint, workoutPlan);
+    return sendData<ICompleteWorkoutPlan>(WORKOUT_PLAN_ENDPOINT, workoutPlan, null, { id: userId });
   };
 
   const updateWorkoutPlan = (userId: string, workoutPlan: ICompleteWorkoutPlan) =>

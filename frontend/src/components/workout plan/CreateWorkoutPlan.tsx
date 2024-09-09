@@ -17,6 +17,10 @@ import { toast } from "sonner";
 import { useWorkoutPlanPresetApi } from "@/hooks/api/useWorkoutPlanPresetsApi";
 import { useIsEditableContext } from "@/context/useIsEditableContext";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
+import { useQuery } from "@tanstack/react-query";
+import { FULL_DAY_STALE_TIME } from "@/constants/constants";
+import Loader from "../ui/Loader";
+import ErrorPage from "@/pages/ErrorPage";
 
 const CreateWorkoutPlan: React.FC = () => {
   const { id } = useParams();
@@ -24,8 +28,21 @@ const CreateWorkoutPlan: React.FC = () => {
   const { getAllWorkoutPlanPresets } = useWorkoutPlanPresetApi();
   const { isEditable, setIsEditable, toggleIsEditable } = useIsEditableContext();
 
-  const [isCreate, setIsCreate] = useState(false);
+  const existingWorkoutPlan = useQuery({
+    queryFn: () => getWorkoutPlanByUserId(id || ``),
+    staleTime: FULL_DAY_STALE_TIME,
+    queryKey: [id],
+    enabled: !!id,
+  });
+
+  const [isCreate, setIsCreate] = useState(true);
   const [workoutPlan, setWorkoutPlan] = useState<IWorkoutPlan[]>([]);
+
+  if (existingWorkoutPlan.data?.data && workoutPlan.length == 0) {
+    setWorkoutPlan(existingWorkoutPlan.data.data.workoutPlans);
+    setIsCreate(false);
+    setIsEditable(false);
+  }
 
   const handlePlanNameChange = (newName: string, index: number) => {
     const newWorkoutPlan = workoutPlan.map((workout, i) =>
@@ -95,18 +112,12 @@ const CreateWorkoutPlan: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    if (!id) return;
-
-    getWorkoutPlanByUserId(id)
-      .then((data) => setWorkoutPlan(data.data.workoutPlans))
-      .catch((err) => {
-        if (err.response.data.message == `Workout plan not found.`) {
-          setIsCreate(true);
-          setIsEditable(true);
-        }
-      });
-  }, []);
+  if (existingWorkoutPlan.isLoading) return <Loader size="large" />;
+  if (
+    existingWorkoutPlan.isError &&
+    existingWorkoutPlan.error.response.data.message !== `Workout plan not found!`
+  )
+    return <ErrorPage message={existingWorkoutPlan.error.message} />;
 
   return (
     <>
