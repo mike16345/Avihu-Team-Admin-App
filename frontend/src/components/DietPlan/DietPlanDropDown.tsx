@@ -42,14 +42,13 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
   setDietPlan,
 }) => {
   const initialFormValues = useMemo(() => {
-    delete meal._id;
     return meal;
   }, [meal]);
 
   const form = useForm<OmittedIMeal>({
     resolver: zodResolver(mealSchema),
     values: initialFormValues,
-    mode: "onTouched",
+    mode: "onBlur",
   });
 
   const {
@@ -57,8 +56,6 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
     setValue,
     formState: { errors },
   } = form;
-
-  console.log("errors", errors);
 
   const [isOpen, setIsOpen] = useState(false);
 

@@ -25,7 +25,8 @@ export const ViewDietPlanPage = () => {
   const { getAllDietPlanPresets } = useDietPlanPresetApi();
 
   const [isNewPlan, setIsNewPlan] = useState(false);
-  const [dietPlan, setDietPlan] = useState<IDietPlan>(defaultDietPlan);
+  const [dietPlan, setDietPlan] = useState<IDietPlan | null>(null);
+
   const [presetList, setPresetList] = useState<IDietPlanPreset[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,6 +34,7 @@ export const ViewDietPlanPage = () => {
   const updateDietPlan = (dietPlan: IDietPlan) => setDietPlan(dietPlan);
 
   const handleSubmit = () => {
+    if (!dietPlan) return;
     const dietPlanToAdd = {
       ...dietPlan,
       userId: id,
@@ -113,7 +115,7 @@ export const ViewDietPlanPage = () => {
       });
   }, []);
 
-  if (isLoading) return <Loader size="large" />;
+  if (isLoading || !dietPlan) return <Loader size="large" />;
   if (error) return <ErrorPage message={error} />;
 
   return (
@@ -131,7 +133,7 @@ export const ViewDietPlanPage = () => {
           ))}
         </SelectContent>
       </Select>
-      <DietPlanForm existingDietPlan={dietPlan} updateDietPlan={updateDietPlan} />
+      <DietPlanForm dietPlan={dietPlan} updateDietPlan={updateDietPlan} />
       {dietPlan.meals.length > 0 && (
         <div>
           <Button className="font-bold" variant="success" onClick={handleSubmit}>

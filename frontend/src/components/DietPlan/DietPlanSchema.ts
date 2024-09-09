@@ -3,7 +3,7 @@ import { z } from "zod";
 
 const customInstructionsSchema = z.object({
   item: z.string(),
-  quantity: z.number(),
+  quantity: z.coerce.number(),
 });
 
 const dietItemSchema = z.object({

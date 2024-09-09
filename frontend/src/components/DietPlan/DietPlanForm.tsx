@@ -3,16 +3,14 @@ import { DietPlanDropDown } from "./DietPlanDropDown";
 import DeleteModal from "../Alerts/DeleteModal";
 import { IDietPlan, IMeal } from "@/interfaces/IDietPlan";
 import { Button } from "../ui/button";
-import { toast } from "sonner";
 import { defaultMeal } from "@/constants/DietPlanConsts";
 
 interface DietPlanFormProps {
   updateDietPlan: (dietPlan: IDietPlan) => void;
-  existingDietPlan?: IDietPlan;
+  dietPlan: IDietPlan;
 }
 
-const DietPlanForm: React.FC<DietPlanFormProps> = ({ existingDietPlan, updateDietPlan }) => {
-  const [dietPlan, setDietPlan] = useState<IDietPlan | undefined>(existingDietPlan);
+const DietPlanForm: React.FC<DietPlanFormProps> = ({ dietPlan, updateDietPlan }) => {
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [mealToDelete, setMealToDelete] = useState<number | null>(null);
 
@@ -39,12 +37,6 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ existingDietPlan, updateDie
     newMeals[mealNumber] = meal;
     updateDietPlan({ ...dietPlan, meals: newMeals });
   };
-
-  useEffect(() => {
-    if (existingDietPlan) {
-      setDietPlan(existingDietPlan);
-    }
-  }, [existingDietPlan]);
 
   return (
     <div className=" flex flex-col gap-4 w-4/5 h-auto hide-scrollbar overflow-y-auto">
