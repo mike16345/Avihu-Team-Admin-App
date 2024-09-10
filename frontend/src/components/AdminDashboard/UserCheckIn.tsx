@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { BiCheckSquare } from "react-icons/bi";
 import { Badge } from "../ui/badge";
+import { FaCheck } from "react-icons/fa";
 
 const UserCheckIn = () => {
   const navigate = useNavigate();
@@ -42,7 +43,7 @@ const UserCheckIn = () => {
   }, []);
 
   return (
-    <Card dir="rtl" className="sm:w-full md:w-[60%] lg:w-[40%] shadow-md py-5">
+    <Card dir="rtl" className="w-full shadow-md py-5">
       <CardHeader>
         <CardTitle>לקוחות לבדיקה</CardTitle>
       </CardHeader>
@@ -60,15 +61,15 @@ const UserCheckIn = () => {
               <h2>{user.firstName}</h2>
               <h2>{user.lastName}</h2>
             </div>
-            <Badge
-              className="cursor-pointer"
+            <div
+              className="cursor-pointer p-2 hover:opacity-40"
               onClick={(e) => {
                 e.stopPropagation();
                 handleCheckChange(user._id);
               }}
             >
-              נבדק
-            </Badge>
+              <FaCheck className="text-green-600" />
+            </div>
           </div>
         ))}
         {users?.length == 0 && (
