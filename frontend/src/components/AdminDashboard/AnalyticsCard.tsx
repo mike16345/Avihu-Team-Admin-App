@@ -46,7 +46,7 @@ const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ title, dataKey }) => {
   });
 
   return (
-    <Card dir="rtl" className="p-5 h-full">
+    <Card dir="rtl" className="p-5 h-full ">
       <CardHeader>
         <CardTitle>{title}</CardTitle>
       </CardHeader>
