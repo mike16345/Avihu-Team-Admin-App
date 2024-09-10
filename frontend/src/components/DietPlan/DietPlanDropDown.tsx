@@ -13,7 +13,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "../ui/input";
-import { CustomInstructionsRadio } from "./CustomInstructionsRadio";
+import { CustomItemSelectionRadio } from "./CustomItemSelectionRadio";
 import { DietItemUnit, IMeal } from "@/interfaces/IDietPlan";
 import { CustomItemSelection } from "./CustomItemSelection";
 import { DietItemUnitRadio } from "./DietItemUnitRadio";
@@ -60,10 +60,10 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
   const [isOpen, setIsOpen] = useState(false);
 
   const initialShowCustomSelection = useMemo(() => {
-    const showProtein = !!meal.totalProtein.customInstructions?.length;
-    const showCarbs = !!meal.totalCarbs.customInstructions?.length;
-    const showFats = !!meal?.totalFats?.customInstructions?.length;
-    const showVeggies = !!meal?.totalVeggies?.customInstructions?.length;
+    const showProtein = !!meal.totalProtein.customItems?.length;
+    const showCarbs = !!meal.totalCarbs.customItems?.length;
+    const showFats = !!meal?.totalFats?.customItems?.length;
+    const showVeggies = !!meal?.totalVeggies?.customItems?.length;
 
     return {
       totalProtein: showProtein,
@@ -88,11 +88,11 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
   const handleToggleCustomItem = (selectedItems: string[], type: keyof OmittedIMeal) => {
     const item = form.getValues()[type];
     if (!item) return;
-    const customInstructions = selectedItems.map((selectedItem) => {
+    const customItems = selectedItems.map((selectedItem) => {
       return { item: selectedItem, quantity: item.quantity };
     });
 
-    setValue(type, { ...item, customInstructions: customInstructions });
+    setValue(type, { ...item, customItems: customItems });
     handleInputChange(type, item.quantity);
   };
 
@@ -109,8 +109,8 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
   }, []);
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full gap-2">
-      <div className="flex items-center justify-between">
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="gap-2">
+      <div className="flex items-center justify-between w-full">
         <h4 className="text-sm font-bold">ארוחה {mealNumber}</h4>
         <div className="flex items-center">
           <Button onClick={onDelete} variant="ghost" size="sm" className="w-9 p-0">
@@ -154,7 +154,7 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
                   )}
 
                   <div className="flex items-center justify-between">
-                    <CustomInstructionsRadio
+                    <CustomItemSelectionRadio
                       defaultValue={showCustomSelection.totalProtein ? "Custom" : "Fixed"}
                       onChangeSelection={(val: string) =>
                         setShowCustomSelection({
@@ -170,7 +170,7 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
                   {showCustomSelection.totalProtein && (
                     <CustomItemSelection
                       selectedItems={form
-                        ?.getValues("totalProtein.customInstructions")
+                        ?.getValues("totalProtein.customItems")
                         ?.map((s) => s.item)}
                       onItemToggle={(selectedItems) =>
                         handleToggleCustomItem(selectedItems, "totalProtein")
@@ -204,7 +204,7 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
                   )}
 
                   <div className="flex items-center justify-between">
-                    <CustomInstructionsRadio
+                    <CustomItemSelectionRadio
                       defaultValue={showCustomSelection.totalCarbs ? "Custom" : "Fixed"}
                       onChangeSelection={(val: string) =>
                         setShowCustomSelection({
@@ -220,9 +220,7 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
 
                   {showCustomSelection.totalCarbs && (
                     <CustomItemSelection
-                      selectedItems={form
-                        ?.getValues("totalCarbs.customInstructions")
-                        ?.map((s) => s.item)}
+                      selectedItems={form?.getValues("totalCarbs.customItems")?.map((s) => s.item)}
                       onItemToggle={(selectedItems) =>
                         handleToggleCustomItem(selectedItems, "totalCarbs")
                       }
@@ -253,7 +251,7 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
                     <FormMessage>{errors.totalFats.quantity.message}</FormMessage>
                   )}
 
-                  <CustomInstructionsRadio
+                  <CustomItemSelectionRadio
                     defaultValue={showCustomSelection.totalFats ? "Custom" : "Fixed"}
                     onChangeSelection={(val: string) =>
                       setShowCustomSelection({
@@ -264,9 +262,7 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
                   />
                   {showCustomSelection.totalFats && (
                     <CustomItemSelection
-                      selectedItems={form
-                        ?.getValues("totalFats.customInstructions")
-                        ?.map((s) => s.item)}
+                      selectedItems={form?.getValues("totalFats.customItems")?.map((s) => s.item)}
                       onItemToggle={(selectedItems) =>
                         handleToggleCustomItem(selectedItems, "totalFats")
                       }
@@ -297,7 +293,7 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
                     <FormMessage>{errors.totalVeggies.quantity.message}</FormMessage>
                   )}
 
-                  <CustomInstructionsRadio
+                  <CustomItemSelectionRadio
                     defaultValue={showCustomSelection.totalVeggies ? "Custom" : "Fixed"}
                     onChangeSelection={(val: string) =>
                       setShowCustomSelection({
@@ -309,7 +305,7 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
                   {showCustomSelection.totalVeggies && (
                     <CustomItemSelection
                       selectedItems={form
-                        ?.getValues("totalVeggies.customInstructions")
+                        ?.getValues("totalVeggies.customItems")
                         ?.map((s) => s.item)}
                       onItemToggle={(selectedItems) =>
                         handleToggleCustomItem(selectedItems, "totalVeggies")

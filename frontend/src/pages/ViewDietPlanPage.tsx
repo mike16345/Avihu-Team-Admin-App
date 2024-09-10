@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/select";
 import { useDietPlanPresetApi } from "@/hooks/api/useDietPlanPresetsApi";
 import { Button } from "@/components/ui/button";
-import { validateMealsInDietPlan } from "@/components/DietPlan/DietPlanSchema";
+import { validateDietPlan } from "@/components/DietPlan/DietPlanSchema";
 
 export const ViewDietPlanPage = () => {
   const { id } = useParams();
@@ -40,10 +40,10 @@ export const ViewDietPlanPage = () => {
       userId: id,
     };
 
-    const validations = validateMealsInDietPlan(dietPlanToAdd);
-    const hasInvalidMeal = validations.some((val) => !val.isValid);
+    const { isValid, errors } = validateDietPlan(dietPlanToAdd);
 
-    if (hasInvalidMeal) {
+    console.log("isvalid", isValid);
+    if (!isValid) {
       toast.error(`יש בעיה בקלט.`);
       return;
     }
@@ -84,7 +84,11 @@ export const ViewDietPlanPage = () => {
 
     if (!selectedPreset) return;
 
-    setDietPlan({ meals: selectedPreset.meals, totalCalories: selectedPreset.totalCalories });
+    setDietPlan({
+      ...selectedPreset,
+      meals: selectedPreset.meals,
+      totalCalories: selectedPreset.totalCalories,
+    });
   };
 
   useEffect(() => {
@@ -119,7 +123,7 @@ export const ViewDietPlanPage = () => {
   if (error) return <ErrorPage message={error} />;
 
   return (
-    <div className=" flex flex-col gap-4 w-4/5 h-full hide-scrollbar overflow-y-auto">
+    <div className=" flex flex-col gap-4 size-full hide-scrollbar overflow-y-auto">
       <h1 className="text-2xl font-semibold mb-4">עריכת תפריט תזונה</h1>
       <Select onValueChange={(val) => handleSelect(val)}>
         <SelectTrigger dir="rtl" className="w-[350px] mr-1">

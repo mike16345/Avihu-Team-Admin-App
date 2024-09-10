@@ -8,7 +8,7 @@ type CustomInstructionsRadioProps = {
   onChangeSelection: Function;
 };
 
-export const CustomInstructionsRadio: FC<CustomInstructionsRadioProps> = ({
+export const CustomItemSelectionRadio: FC<CustomInstructionsRadioProps> = ({
   defaultValue,
   onChangeSelection,
 }) => {

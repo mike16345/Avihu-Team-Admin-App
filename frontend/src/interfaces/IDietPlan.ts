@@ -6,7 +6,7 @@ export interface ICustomItemInstructions {
 export interface IDietItem {
   quantity: number;
   unit: DietItemUnit;
-  customInstructions?: ICustomItemInstructions[];
+  customItems?: ICustomItemInstructions[];
 }
 
 export interface IMeal {
@@ -20,12 +20,12 @@ export interface IMeal {
 export interface IDietPlan {
   meals: IMeal[];
   totalCalories?: number;
+  freeCalories: number;
+  customInstructions?: string;
 }
 
-export interface IDietPlanPreset {
+export interface IDietPlanPreset extends IDietPlan {
   name: string;
-  meals: IMeal[];
-  totalCalories?: number;
 }
 
 export type DietItemUnit = "grams" | "spoons";
