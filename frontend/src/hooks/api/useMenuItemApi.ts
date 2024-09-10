@@ -4,7 +4,7 @@ import { IMenuItem } from '@/interfaces/IDietPlan'
 const MENU_ITEMS_ENDPOINT = `presets/menuItems/`
 
 const useMenuItemApi = () => {
-    const getAllMenuItems = () => fetchData<IMenuItem[]>(MENU_ITEMS_ENDPOINT)
+    const getAllMenuItems = () => fetchData<any>(MENU_ITEMS_ENDPOINT)
 
     const getMenuItems = (foodGroup: string) => fetchData<IMenuItem[]>(MENU_ITEMS_ENDPOINT + foodGroup)
 

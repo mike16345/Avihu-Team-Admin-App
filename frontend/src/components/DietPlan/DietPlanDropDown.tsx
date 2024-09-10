@@ -18,6 +18,7 @@ import { DietItemUnit, IMeal } from "@/interfaces/IDietPlan";
 import { CustomItemSelection } from "./CustomItemSelection";
 import { DietItemUnitRadio } from "./DietItemUnitRadio";
 import { mealSchema } from "./DietPlanSchema";
+import { CustomItems } from "./DietPlanForm";
 
 type ShowCustomSelectionType = {
   totalProtein: boolean;
@@ -29,6 +30,7 @@ type ShowCustomSelectionType = {
 type DietPlanDropDownProps = {
   mealNumber: number;
   meal: IMeal;
+  customItems: CustomItems;
   onDelete: () => void;
   setDietPlan: (meal: IMeal) => void;
 };
@@ -38,6 +40,7 @@ type OmittedIMeal = Omit<IMeal, "_id">;
 export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
   mealNumber,
   meal,
+  customItems,
   onDelete,
   setDietPlan,
 }) => {
@@ -169,6 +172,7 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
                   </div>
                   {showCustomSelection.totalProtein && (
                     <CustomItemSelection
+                      items={customItems.protein}
                       selectedItems={form
                         ?.getValues("totalProtein.customItems")
                         ?.map((s) => s.item)}
@@ -220,6 +224,7 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
 
                   {showCustomSelection.totalCarbs && (
                     <CustomItemSelection
+                      items={customItems.carbs}
                       selectedItems={form?.getValues("totalCarbs.customItems")?.map((s) => s.item)}
                       onItemToggle={(selectedItems) =>
                         handleToggleCustomItem(selectedItems, "totalCarbs")
@@ -262,6 +267,7 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
                   />
                   {showCustomSelection.totalFats && (
                     <CustomItemSelection
+                      items={customItems.fats}
                       selectedItems={form?.getValues("totalFats.customItems")?.map((s) => s.item)}
                       onItemToggle={(selectedItems) =>
                         handleToggleCustomItem(selectedItems, "totalFats")
@@ -304,6 +310,7 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
                   />
                   {showCustomSelection.totalVeggies && (
                     <CustomItemSelection
+                      items={customItems.vegetables}
                       selectedItems={form
                         ?.getValues("totalVeggies.customItems")
                         ?.map((s) => s.item)}

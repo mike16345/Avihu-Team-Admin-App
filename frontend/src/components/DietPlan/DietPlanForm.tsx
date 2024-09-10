@@ -1,23 +1,37 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DietPlanDropDown } from "./DietPlanDropDown";
 import DeleteModal from "../Alerts/DeleteModal";
 import { IDietPlan, IMeal } from "@/interfaces/IDietPlan";
 import { Button } from "../ui/button";
 import { defaultMeal } from "@/constants/DietPlanConsts";
 import CustomInstructions from "./CustomInstructions";
+import useMenuItemApi from "@/hooks/api/useMenuItemApi";
 
 interface DietPlanFormProps {
   updateDietPlan: (dietPlan: IDietPlan) => void;
   dietPlan: IDietPlan;
 }
 
+export type CustomItems = {
+  fats: string[];
+  carbs: string[];
+  vegetables: string[];
+  protein: string[];
+};
+
 const DietPlanForm: React.FC<DietPlanFormProps> = ({ dietPlan, updateDietPlan }) => {
+  const { getAllMenuItems } = useMenuItemApi();
+
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [mealToDelete, setMealToDelete] = useState<number | null>(null);
+  const [customItems, setCustomItems] = useState<CustomItems>({
+    protein: [],
+    carbs: [],
+    fats: [],
+    vegetables: [],
+  });
 
   const handleAddMeal = () => {
-    console.log(dietPlan);
-
     if (!dietPlan) return;
 
     updateDietPlan({ ...dietPlan, meals: [...dietPlan.meals, defaultMeal] });
@@ -39,8 +53,14 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ dietPlan, updateDietPlan })
     updateDietPlan({ ...dietPlan, meals: newMeals });
   };
 
+  useEffect(() => {
+    getAllMenuItems().then((items) => {
+      setCustomItems(items);
+    });
+  }, []);
+
   return (
-    <div className=" flex flex-col gap-4 w-full h-auto hide-scrollbar overflow-y-auto">
+    <div className=" flex flex-col gap-4 w-full h-auto">
       <div>
         <Button className="font-bold" onClick={handleAddMeal}>
           הוסף ארוחה
@@ -53,6 +73,7 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ dietPlan, updateDietPlan })
               return (
                 <div key={meal?._id || index} className={`border-b`}>
                   <DietPlanDropDown
+                    customItems={customItems}
                     mealNumber={index + 1}
                     meal={meal}
                     setDietPlan={(meal: IMeal) => handleSetMeal(meal, index)}

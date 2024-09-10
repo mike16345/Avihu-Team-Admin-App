@@ -42,7 +42,6 @@ export const ViewDietPlanPage = () => {
 
     const { isValid, errors } = validateDietPlan(dietPlanToAdd);
 
-    console.log("isvalid", isValid);
     if (!isValid) {
       toast.error(`יש בעיה בקלט.`);
       return;
