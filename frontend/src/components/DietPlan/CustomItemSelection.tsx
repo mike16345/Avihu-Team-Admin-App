@@ -76,7 +76,7 @@ export const CustomItemSelection: FC<CustomItemSelectionProps> = ({
   items,
 }) => {
   const [selected, setSelectedItems] = useState<string[]>(selectedItems || []);
-
+  
   const toggleSelect = (item: string) => {
     setSelectedItems((prevSelectedItems) => {
       const selected = prevSelectedItems.includes(item)
@@ -94,13 +94,13 @@ export const CustomItemSelection: FC<CustomItemSelectionProps> = ({
       {items.map((item, index) => (
         <Badge
           key={item._id || index}
-          onClick={() => toggleSelect(item)}
+          onClick={() => toggleSelect(item.name)}
           className={`cursor-pointer  flex item-center justify-center ${
-            selected.includes(item) ? "bg-green-500  text-white" : ""
+            selected.includes(item.name) ? "bg-green-500  text-white" : ""
           }`}
         >
           {item.name}
-          {selected.includes(item) ? (
+          {selected.includes(item.name) ? (
             <FaCheck size={12} className="inline mr-1" />
           ) : (
             <FaPlus size={12} className="inline mr-1" />

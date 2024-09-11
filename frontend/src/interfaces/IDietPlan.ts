@@ -1,12 +1,17 @@
-export interface ICustomItemInstructions {
-  item: string;
-  quantity: number;
+export interface ICustomItem {
+  name: string;
+  dietaryType: string[];
+  foodGroup: string;
+  oneServing: {
+    grams: number;
+    spoons: number;
+  };
 }
 
 export interface IDietItem {
   quantity: number;
   unit: DietItemUnit;
-  customItems?: ICustomItemInstructions[];
+  customItems?: ICustomItem[];
 }
 
 export interface IMeal {
