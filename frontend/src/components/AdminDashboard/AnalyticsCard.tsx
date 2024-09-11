@@ -50,7 +50,7 @@ const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ title, dataKey }) => {
       <CardHeader>
         <CardTitle>{title}</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col max-h-64 overflow-y-auto border-y-2">
+      <CardContent className="flex flex-col max-h-64 overflow-y-auto ">
         {data.isError && <ErrorPage message={data.error.message} />}
         {data.isLoading && <Loader size="large" />}
         {data.data?.length == 0 && (
@@ -58,11 +58,11 @@ const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ title, dataKey }) => {
         )}
         {data.data?.map((item, i) => (
           <div key={i} className="w-full flex items-center justify-between border-b-2">
-            <div className="flex gap-5 items-center py-5 px-2">
-              <p>{item.firstName}</p>
-              <p>{item.lastName}</p>
+            <div className="flex gap-2 font-bold text-lg items-center py-5 px-2">
+              <p >{item.firstName}</p>
+              <p >{item.lastName}</p>
             </div>
-            <Button onClick={() => navigate(`${actions?.navUrl}${item._id}`)}>צפה</Button>
+            <Button className="font-bold px-5 text-base" onClick={() => navigate(`${actions?.navUrl}${item._id}`)}>צפה</Button>
           </div>
         ))}
       </CardContent>

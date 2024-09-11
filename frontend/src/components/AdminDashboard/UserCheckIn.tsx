@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { UsersCheckIn } from "@/interfaces/IAnalytics";
 import { useNavigate } from "react-router-dom";
@@ -6,8 +6,6 @@ import useAnalyticsApi from "@/hooks/api/useAnalyticsApi";
 import Loader from "../ui/Loader";
 import { toast } from "sonner";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
-import { BiCheckSquare } from "react-icons/bi";
-import { Badge } from "../ui/badge";
 import { FaCheck } from "react-icons/fa";
 
 const UserCheckIn = () => {
@@ -43,11 +41,11 @@ const UserCheckIn = () => {
   }, []);
 
   return (
-    <Card dir="rtl" className="w-full shadow-md py-5">
+    <Card dir="rtl" className="w-full shadow-md ">
       <CardHeader>
         <CardTitle>לקוחות לבדיקה</CardTitle>
       </CardHeader>
-      <CardContent className="max-h-[40vh] overflow-y-auto  border-y-2">
+      <CardContent className="max-h-[40vh] overflow-y-auto  ">
         {isLoading && <Loader size="large" />}
         {users?.map((user) => (
           <div
@@ -55,7 +53,7 @@ const UserCheckIn = () => {
             className="w-full flex justify-between items-center border-b-2 p-5 hover:bg-accent"
           >
             <div
-              className="flex gap-5 hover:underline cursor-pointer"
+              className="flex font-bold gap-1 text-lg hover:underline cursor-pointer"
               onClick={() => navigate(`/users/${user._id}`)}
             >
               <h2>{user.firstName}</h2>
