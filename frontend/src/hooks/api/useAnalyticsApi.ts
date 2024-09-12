@@ -14,10 +14,12 @@ const useAnalyticsApi = () => {
     patchItem<ApiResponse<UsersCheckIn>>(ANALYTICS_ENDPOINT + `/checkIns/one?id=${id}`);
 
   const getUsersWithoutPlans = (colection: string) =>
-    fetchData<UsersWithoutPlans[]>(`http://localhost:3003/analytics/${colection}`);
+    fetchData<ApiResponse<UsersWithoutPlans[]>>(
+      `${ANALYTICS_ENDPOINT}/users?collection=${colection}`
+    );
 
   const getUsersExpringThisMonth = () =>
-    fetchData<UsersWithoutPlans[]>(`http://localhost:3003/analytics/users/expiring`);
+    fetchData<ApiResponse<UsersWithoutPlans[]>>(`${ANALYTICS_ENDPOINT}/users/expiring`);
 
   return { getAllCheckInUsers, checkOffUser, getUsersWithoutPlans, getUsersExpringThisMonth };
 };

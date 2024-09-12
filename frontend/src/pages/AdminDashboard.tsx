@@ -1,33 +1,60 @@
 import AnalyticsCard from "@/components/AdminDashboard/AnalyticsCard";
+import Shortcut from "@/components/AdminDashboard/Shortcut";
 import UserCheckIn from "@/components/AdminDashboard/UserCheckIn";
 import GenericCarousel from "@/components/ui/GenericCarousel";
 import React from "react";
-const analyticsList = [
-  { firstName: "John", lastName: "Doe", navLink: "/dashboard/john" },
-  { firstName: "Jane", lastName: "Smith", navLink: "/dashboard/jane" },
-  { firstName: "Michael", lastName: "Johnson", navLink: "/dashboard/michael" },
-  { firstName: "Emily", lastName: "Brown", navLink: "/dashboard/emily" },
-  { firstName: "David", lastName: "Williams", navLink: "/dashboard/david" },
-  { firstName: "Sarah", lastName: "Jones", navLink: "/dashboard/sarah" },
-  { firstName: "Robert", lastName: "Garcia", navLink: "/dashboard/robert" },
-  { firstName: "Olivia", lastName: "Miller", navLink: "/dashboard/olivia" },
-  { firstName: "James", lastName: "Martinez", navLink: "/dashboard/james" },
-  { firstName: "Sophia", lastName: "Davis", navLink: "/dashboard/sophia" },
+import { BiFoodMenu } from "react-icons/bi";
+import { FaDumbbell } from "react-icons/fa";
+import { FiUserPlus } from "react-icons/fi";
+import { MdOutlinePostAdd } from "react-icons/md";
+
+const shortcuts = [
+  {
+    actionName: `הוסף משתמש`,
+    navLink: `/users/add`,
+    icon: <FiUserPlus />,
+  },
+  {
+    actionName: `הוסף תפריט`,
+    navLink: `/presets/dietPlans`,
+    icon: <BiFoodMenu />,
+  },
+  {
+    actionName: `הוסף תבנית אימון`,
+    navLink: `/presets/workoutPlans/`,
+    icon: <FaDumbbell />,
+  },
+  {
+    actionName: `הוסף פוסט`,
+    navLink: `/blogs`,
+    icon: <MdOutlinePostAdd />,
+  },
 ];
 
 const AdminDashboard = () => {
   return (
     <div className="size-full">
       <h1>admin page</h1>
-      {/* <UserCheckIn /> */}
-      <div className="p-5">
-        <GenericCarousel
-          carouselItems={[
-            <AnalyticsCard title="לקוחות ללא תוכנית אימון" dataKey="workoutPlan" />,
-            <AnalyticsCard title="לקוחות ללא תפריט תזונה" dataKey="dietPlan" />,
-            <AnalyticsCard title="לקוחות שמסיימים תהליך החודש" dataKey="expiringUsers" />,
-          ]}
-        />
+      <h2 className="font-bold pt-2 text-lg">פעולות מהירות</h2>
+      <div className="flex flex-wrap items-center justify-center  py-5 gap-5 border-b-2">
+        {shortcuts.map((item, i) => (
+          <div key={i} className="flex justify-center items-center ">
+            <Shortcut actionName={item.actionName} icon={item.icon} navLink={item.navLink} />
+          </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 py-4">
+        <UserCheckIn />
+
+        <div className="px-5">
+          <GenericCarousel
+            carouselItems={[
+              <AnalyticsCard title="לקוחות ללא תוכנית אימון" dataKey="workoutPlan" />,
+              <AnalyticsCard title="לקוחות ללא תפריט תזונה" dataKey="dietPlan" />,
+              <AnalyticsCard title="לקוחות שמסיימים תהליך החודש" dataKey="expiringUsers" />,
+            ]}
+          />
+        </div>
       </div>
     </div>
   );

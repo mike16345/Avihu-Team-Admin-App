@@ -55,7 +55,7 @@ const UserCheckIn = () => {
   if (isError) return <ErrorPage message={error?.message} />;
 
   return (
-    <Card dir="rtl" className="sm:w-full md:w-[60%] lg:w-[40%] shadow-md py-5">
+    <Card dir="rtl" className="w-full shadow-md py-5">
       <CardHeader>
         <CardTitle>לקוחות לבדיקה</CardTitle>
       </CardHeader>
