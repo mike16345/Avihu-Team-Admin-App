@@ -9,7 +9,7 @@ set FULL_TAG=%REPO_NAME%/%IMAGE_TAG%:%IMAGE_NAME%
 
 REM Step 1: Build the Docker image
 echo Building Docker image...
-@REM docker build -t %IMAGE_NAME% .
+docker build -t %IMAGE_NAME% .
 
 REM Step 2: Tag the image with the repository name
 echo Tagging image...
