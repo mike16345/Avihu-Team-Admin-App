@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { useDietPlanPresetApi } from "@/hooks/api/useDietPlanPresetsApi";
 import { Button } from "@/components/ui/button";
+import { validateDietPlan } from "@/components/DietPlan/DietPlanSchema";
 
 export const ViewDietPlanPage = () => {
   const { id } = useParams();
@@ -24,7 +25,8 @@ export const ViewDietPlanPage = () => {
   const { getAllDietPlanPresets } = useDietPlanPresetApi();
 
   const [isNewPlan, setIsNewPlan] = useState(false);
-  const [dietPlan, setDietPlan] = useState<IDietPlan>(defaultDietPlan);
+  const [dietPlan, setDietPlan] = useState<IDietPlan | null>(null);
+
   const [presetList, setPresetList] = useState<IDietPlanPreset[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,11 +34,18 @@ export const ViewDietPlanPage = () => {
   const updateDietPlan = (dietPlan: IDietPlan) => setDietPlan(dietPlan);
 
   const handleSubmit = () => {
+    if (!dietPlan) return;
     const dietPlanToAdd = {
       ...dietPlan,
       userId: id,
     };
 
+    const { isValid, errors } = validateDietPlan(dietPlanToAdd);
+
+    if (!isValid) {
+      toast.error(`יש בעיה בקלט.`);
+      return;
+    }
     if (isNewPlan) {
       createDietPlan(dietPlanToAdd);
     } else {
@@ -74,7 +83,11 @@ export const ViewDietPlanPage = () => {
 
     if (!selectedPreset) return;
 
-    setDietPlan({ meals: selectedPreset.meals, totalCalories: selectedPreset.totalCalories });
+    setDietPlan({
+      ...selectedPreset,
+      meals: selectedPreset.meals,
+      totalCalories: selectedPreset.totalCalories,
+    });
   };
 
   useEffect(() => {
@@ -105,11 +118,11 @@ export const ViewDietPlanPage = () => {
       });
   }, []);
 
-  if (isLoading) return <Loader size="large" />;
+  if (isLoading || !dietPlan) return <Loader size="large" />;
   if (error) return <ErrorPage message={error} />;
 
   return (
-    <div className=" flex flex-col gap-4 w-4/5 h-full hide-scrollbar overflow-y-auto">
+    <div className=" flex flex-col gap-4 size-full hide-scrollbar overflow-y-auto">
       <h1 className="text-2xl font-semibold mb-4">עריכת תפריט תזונה</h1>
       <Select onValueChange={(val) => handleSelect(val)}>
         <SelectTrigger dir="rtl" className="w-[350px] mr-1">
@@ -123,7 +136,7 @@ export const ViewDietPlanPage = () => {
           ))}
         </SelectContent>
       </Select>
-      <DietPlanForm existingDietPlan={dietPlan} updateDietPlan={updateDietPlan} />
+      <DietPlanForm dietPlan={dietPlan} updateDietPlan={updateDietPlan} />
       {dietPlan.meals.length > 0 && (
         <div>
           <Button className="font-bold" variant="success" onClick={handleSubmit}>

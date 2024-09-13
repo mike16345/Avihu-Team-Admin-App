@@ -22,6 +22,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
+
 const presetNameShcema = z.object({
   name: z.string().min(1, { message: `בחר שם לתפריט` }).max(25),
 });
@@ -121,7 +122,7 @@ export const ViewDietPlanPresetPage = () => {
   if (error) return <ErrorPage message={error} />;
 
   return (
-    <div className=" flex flex-col gap-4 w-4/5 h-full hide-scrollbar overflow-y-auto">
+    <div className=" flex flex-col gap-4 size-full hide-scrollbar overflow-y-auto">
       <h1 className="text-2xl font-semibold mb-4">עריכת תפריט תזונה</h1>
       <div className="w-1/3 mr-1">
         <Form {...presetNameForm}>
@@ -144,7 +145,7 @@ export const ViewDietPlanPresetPage = () => {
           </form>
         </Form>
       </div>
-      <DietPlanForm existingDietPlan={dietPlan} updateDietPlan={updateDietPlan} />
+      <DietPlanForm dietPlan={dietPlan} updateDietPlan={updateDietPlan} />
       {dietPlan.meals.length > 0 && (
         <div>
           <Button

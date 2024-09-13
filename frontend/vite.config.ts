@@ -4,27 +4,25 @@ import { defineConfig } from "vite";
 import tailwindcss from "tailwindcss";
 import svgr from "vite-plugin-svgr";
 import { VitePWA } from "vite-plugin-pwa";
-import electron from "vite-plugin-electron/simple";
 
 export default defineConfig({
-  plugins: [
-    react(),
-    svgr(),
-    VitePWA(),
-    // electron({
-    //   main: {
-    //     entry: "./electron/main.ts",
-    //   },
-    //   preload: {
-    //     input: path.join(__dirname, "./electron/preload.ts"),
-    //   },
-    //   renderer: {},
-    // }),
-  ],
+  base: "/",
+  plugins: [react(), svgr(), VitePWA()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+
+  preview: {
+    port: 8080,
+    strictPort: true,
+  },
+  server: {
+    port: 3000,
+    strictPort: true,
+    host: true,
+    origin: "http://0.0.0.0:3000",
   },
   css: {
     postcss: {

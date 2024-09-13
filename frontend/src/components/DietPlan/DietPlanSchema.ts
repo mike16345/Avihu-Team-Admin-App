@@ -1,14 +1,15 @@
+import { IDietPlan } from "@/interfaces/IDietPlan";
 import { z } from "zod";
 
-const customInstructionsSchema = z.object({
+const customItemsSchema = z.object({
   item: z.string(),
-  quantity: z.number(),
+  quantity: z.coerce.number(),
 });
 
 const dietItemSchema = z.object({
   quantity: z.coerce.number().min(0, { message: "Quantity must be 0 or more." }),
   unit: z.enum(["grams", "spoons"]),
-  customInstructions: z.array(customInstructionsSchema).optional(),
+  customItems: z.array(customItemsSchema).optional(),
 });
 
 const mealSchema = z.object({
@@ -18,4 +19,21 @@ const mealSchema = z.object({
   totalVeggies: dietItemSchema.optional(),
 });
 
-export { mealSchema };
+const dietPlanSchema = z.object({
+  meals: z.array(mealSchema),
+  totalCalories: z.coerce.number().optional(),
+  freeCalories: z.coerce.number(),
+  customInstructions: z.string().optional(),
+});
+
+function validateDietPlan(dietPlan: IDietPlan) {
+  const result = dietPlanSchema.safeParse(dietPlan);
+  if (result.error) {
+    console.error("Validation failed:", result.error);
+  }
+  return {
+    isValid: result.success,
+    errors: result?.error?.format(),
+  };
+}
+export { mealSchema, validateDietPlan, dietPlanSchema };

@@ -1,0 +1,10 @@
+services:
+  web:
+    image: node:20-alpine
+    working_dir: /
+    volumes:
+      - ./frontend:/frontend
+      - /frontend/node_modules
+    ports:
+      - "3000:3000"
+    command: ["npm", "run", "dev"]

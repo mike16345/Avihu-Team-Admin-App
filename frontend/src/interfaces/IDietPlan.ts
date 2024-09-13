@@ -1,15 +1,21 @@
-export interface ICustomItemInstructions {
-  item: string;
-  quantity: number;
+export interface ICustomItem {
+  name: string;
+  dietaryType: string[];
+  foodGroup: string;
+  oneServing: {
+    grams: number;
+    spoons: number;
+  };
 }
 
 export interface IDietItem {
   quantity: number;
   unit: DietItemUnit;
-  customInstructions?: ICustomItemInstructions[];
+  customItems?: ICustomItem[];
 }
 
 export interface IMeal {
+  _id?: string;
   totalProtein: IDietItem;
   totalCarbs: IDietItem;
   totalFats?: IDietItem;
@@ -19,12 +25,12 @@ export interface IMeal {
 export interface IDietPlan {
   meals: IMeal[];
   totalCalories?: number;
+  freeCalories: number;
+  customInstructions?: string;
 }
 
-export interface IDietPlanPreset {
+export interface IDietPlanPreset extends IDietPlan {
   name: string;
-  meals: IMeal[];
-  totalCalories?: number;
 }
 
 export type DietItemUnit = "grams" | "spoons";

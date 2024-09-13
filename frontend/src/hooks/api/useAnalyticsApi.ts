@@ -1,6 +1,6 @@
 import { fetchData, patchItem } from "@/API/api";
-import { UsersCheckIn } from "@/interfaces/IAnalytics";
 import { ApiResponse } from "@/types/types";
+import { UsersCheckIn, UsersWithoutPlans } from "@/interfaces/IAnalytics";
 
 const ANALYTICS_ENDPOINT = `analytics`;
 
@@ -13,7 +13,13 @@ const useAnalyticsApi = () => {
   const checkOffUser = (id: string) =>
     patchItem<ApiResponse<UsersCheckIn>>(ANALYTICS_ENDPOINT + `/checkIns/one?id=${id}`);
 
-  return { getAllCheckInUsers, checkOffUser };
+  const getUsersWithoutPlans = (colection: string) =>
+    fetchData<UsersWithoutPlans[]>(`${ANALYTICS_ENDPOINT}${colection}`);
+
+  const getUsersExpringThisMonth = () =>
+    fetchData<UsersWithoutPlans[]>(`${ANALYTICS_ENDPOINT}users/expiring`);
+
+  return { getAllCheckInUsers, checkOffUser, getUsersWithoutPlans, getUsersExpringThisMonth };
 };
 
 export default useAnalyticsApi;
