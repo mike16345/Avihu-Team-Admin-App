@@ -13,6 +13,9 @@ import { useDietPlanPresetApi } from "@/hooks/api/useDietPlanPresetsApi";
 import { ApiResponse } from "@/types/types";
 import TemplateTabsSkeleton from "../ui/skeletons/TemplateTabsSkeleton";
 import ErrorPage from "@/pages/ErrorPage";
+import { useWorkoutPlanPresetApi } from "@/hooks/api/useWorkoutPlanPresetsApi";
+import useMuscleGroupsApi from "@/hooks/api/useMuscleGroupsApi";
+import useExercisePresetApi from "@/hooks/api/useExercisePresetApi";
 
 interface TemplateTabsProps {
   tabs: ITabs;
@@ -22,6 +25,10 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
   const navigate = useNavigate();
   const { getMenuItems } = useMenuItemApi();
   const { getAllDietPlanPresets } = useDietPlanPresetApi();
+  const { getAllWorkoutPlanPresets } = useWorkoutPlanPresetApi();
+  const { getAllMuscleGroups } = useMuscleGroupsApi();
+  const { getExercisePresets } = useExercisePresetApi();
+
   const [selectedForm, setSelectedForm] = useState<string | undefined>();
   const [selectedObjectId, setSelectedObjectId] = useState<string>();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -37,6 +44,9 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
     [`fats`]: getMenuItems,
     [`vegetables`]: getMenuItems,
     [`dietPlans`]: getAllDietPlanPresets,
+    [`workoutPlans`]: getAllWorkoutPlanPresets,
+    [`exercises`]: getExercisePresets,
+    [`muscleGroups`]: getAllMuscleGroups,
   };
 
   const apiFunc = apiHooks[queryKey];
