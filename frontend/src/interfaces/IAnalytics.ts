@@ -4,6 +4,7 @@ export interface UsersCheckIn {
   lastName: string;
   isChecked: boolean;
 }
+
 export interface UsersWithoutPlans {
   _id: string;
   firstName: string;

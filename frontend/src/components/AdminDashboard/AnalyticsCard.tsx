@@ -39,30 +39,32 @@ const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ title, dataKey }) => {
 
   const actions = determineActionsByKey(dataKey);
 
-  const data = useQuery({
+  const apiData = useQuery({
     queryFn: () => actions?.queryFunc(dataKey),
     queryKey: [dataKey],
     staleTime: HOUR_STALE_TIME,
   });
 
+  const { data, error, isError, isLoading } = apiData;
+
   return (
-    <Card dir="rtl" className="p-5 h-full ">
+    <Card dir="rtl" className="p-5">
       <CardHeader>
         <CardTitle>{title}</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col max-h-64 overflow-y-auto ">
-        {data.isError && <ErrorPage message={data.error.message} />}
-        {data.isLoading && <Loader size="large" />}
-        {data.data?.length == 0 && (
+      <CardContent className="flex flex-col max-h-64 overflow-y-auto border-y-2">
+        {isError && <ErrorPage message={error.message} />}
+        {isLoading && <Loader size="large" />}
+        {data?.data.length == 0 && (
           <h1 className="text-center text-lg font-bold pt-2">אין נתונים להצגה!</h1>
         )}
-        {data.data?.map((item, i) => (
+        {data?.data.map((item, i) => (
           <div key={i} className="w-full flex items-center justify-between border-b-2">
-            <div className="flex gap-2 font-bold text-lg items-center py-5 px-2">
-              <p >{item.firstName}</p>
-              <p >{item.lastName}</p>
+            <div className="flex gap-5 items-center py-5 px-2">
+              <p>{item.firstName}</p>
+              <p>{item.lastName}</p>
             </div>
-            <Button className="font-bold px-5 text-base" onClick={() => navigate(`${actions?.navUrl}${item._id}`)}>צפה</Button>
+            <Button onClick={() => navigate(`${actions?.navUrl}${item._id}`)}>צפה</Button>
           </div>
         ))}
       </CardContent>
