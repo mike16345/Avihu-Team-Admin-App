@@ -17,7 +17,7 @@ const EditableContext = createContext<EditableContextProps | null>(null);
 
 export const EditableContextProvider: React.FC<{ children: ReactNode; isEdit?: boolean }> = ({
   children,
-  isEdit = false,
+  isEdit = true,
 }) => {
   const [isEditable, setIsEditable] = useState(isEdit);
 

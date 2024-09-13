@@ -17,6 +17,10 @@ import { toast } from "sonner";
 import { useWorkoutPlanPresetApi } from "@/hooks/api/useWorkoutPlanPresetsApi";
 import { useIsEditableContext } from "@/context/useIsEditableContext";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { FULL_DAY_STALE_TIME } from "@/constants/constants";
+import Loader from "../ui/Loader";
+import ErrorPage from "@/pages/ErrorPage";
 
 const CreateWorkoutPlan: React.FC = () => {
   const { id } = useParams();
@@ -24,8 +28,36 @@ const CreateWorkoutPlan: React.FC = () => {
   const { getAllWorkoutPlanPresets } = useWorkoutPlanPresetApi();
   const { isEditable, setIsEditable, toggleIsEditable } = useIsEditableContext();
 
-  const [isCreate, setIsCreate] = useState(false);
+  const existingWorkoutPlan = useQuery({
+    queryFn: () => getWorkoutPlanByUserId(id || ``),
+    staleTime: FULL_DAY_STALE_TIME,
+    queryKey: [id],
+    enabled: !!id,
+  });
+
+  const queryClient = useQueryClient();
+
+  const updateWorkoutPlan = useMutation({
+    mutationFn: ({
+      id,
+      cleanedPostObject,
+    }: {
+      id: string;
+      cleanedPostObject: ICompleteWorkoutPlan;
+    }) => updateWorkoutPlanByUserId(id, cleanedPostObject),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [id] });
+    },
+  });
+
+  const [isCreate, setIsCreate] = useState(true);
   const [workoutPlan, setWorkoutPlan] = useState<IWorkoutPlan[]>([]);
+
+  if (existingWorkoutPlan.data?.data && workoutPlan.length == 0) {
+    setWorkoutPlan(existingWorkoutPlan.data.data.workoutPlans);
+    setIsCreate(false);
+    setIsEditable(false);
+  }
 
   const handlePlanNameChange = (newName: string, index: number) => {
     const newWorkoutPlan = workoutPlan.map((workout, i) =>
@@ -85,28 +117,22 @@ const CreateWorkoutPlan: React.FC = () => {
           })
         );
     } else {
-      updateWorkoutPlanByUserId(id, cleanedPostObject)
-        .then(() => toast.success(`תוכנית אימון נשמרה בהצלחה!`))
-        .catch((err) =>
-          toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-            description: `${err.response.data.message}`,
-          })
-        );
+      updateWorkoutPlan.mutate({ id, cleanedPostObject });
+      if (updateWorkoutPlan.isError) {
+        return toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
+          description: updateWorkoutPlan.error.message,
+        });
+      }
+      toast.success(`תוכנית אימון נשמרה בהצלחה!`);
     }
   };
 
-  useEffect(() => {
-    if (!id) return;
-
-    getWorkoutPlanByUserId(id)
-      .then((data) => setWorkoutPlan(data.workoutPlans))
-      .catch((err) => {
-        if (err.response.data.message == `Workout plan not found.`) {
-          setIsCreate(true);
-          setIsEditable(true);
-        }
-      });
-  }, []);
+  if (existingWorkoutPlan.isLoading) return <Loader size="large" />;
+  if (
+    existingWorkoutPlan.isError &&
+    existingWorkoutPlan.error.response.data.message !== `Workout plan not found!`
+  )
+    return <ErrorPage message={existingWorkoutPlan.error.message} />;
 
   return (
     <>
@@ -125,6 +151,7 @@ const CreateWorkoutPlan: React.FC = () => {
         <div className="flex flex-col gap-4">
           {isEditable && (
             <ComboBox
+              queryKey="workoutPlanPresets"
               getOptions={getAllWorkoutPlanPresets}
               handleChange={(currentValue) => setWorkoutPlan(currentValue.workoutPlans)}
             />

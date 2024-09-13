@@ -48,6 +48,7 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
           </DialogTitle>
           <DialogDescription className="flex justify-center py-4 z-50">
             <ComboBox
+              queryKey="muscleGroups"
               existingValue={value}
               getOptions={getAllMuscleGroups}
               handleChange={(val) => {
