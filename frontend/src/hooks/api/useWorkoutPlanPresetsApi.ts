@@ -11,7 +11,7 @@ export const useWorkoutPlanPresetApi = () => {
   const getWorkoutPlanPresetById = (presetId: string) =>
     fetchData<ApiResponse<IWorkoutPlanPreset>>(WORKOUT_PLAN_PRESETS_ENDPOINT + `/one`, {
       presetId,
-    });
+    }).then((res) => res.data);
 
   const addWorkoutPlanPreset = (workoutPlan: IWorkoutPlanPreset) =>
     sendData<IWorkoutPlanPreset>(WORKOUT_PLAN_PRESETS_ENDPOINT, workoutPlan);

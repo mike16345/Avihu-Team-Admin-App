@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useState } from "react";
 import ComboBox from "./ComboBox";
 import {
   ICompleteWorkoutPlan,
@@ -160,7 +160,7 @@ const CreateWorkoutPlan: React.FC = () => {
           {workoutPlan.map((workout, i) => {
             console.log("workout", workout);
             return (
-              <Fragment key={i}>
+              <Fragment key={workout?._id || i}>
                 <WorkoutContainer
                   initialMuscleGroups={workout.muscleGroups}
                   handleSave={(workouts) => handleSave(i, workouts)}

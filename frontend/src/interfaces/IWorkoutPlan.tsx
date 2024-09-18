@@ -1,5 +1,5 @@
 export interface IWorkoutPlan {
-  id?: string;
+  _id?: string;
   userId?: string;
   planName: string;
   muscleGroups: IMuscleGroupWorkouts[];
@@ -11,13 +11,14 @@ export interface ICompleteWorkoutPlan {
 }
 
 export interface ISet {
-  id: number;
+  _id?: string;
   minReps: number;
   maxReps?: number;
   restTime?: number;
 }
 
 export interface IExercise {
+  _id?: string;
   tipFromTrainer?: string;
   linkToVideo?: string;
   name: string;
@@ -25,6 +26,7 @@ export interface IExercise {
 }
 
 export interface IMuscleGroupWorkouts {
+  _id?: string;
   muscleGroup: string;
   exercises: IExercise[];
 }

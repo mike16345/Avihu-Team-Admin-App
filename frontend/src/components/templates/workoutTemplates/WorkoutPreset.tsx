@@ -150,7 +150,7 @@ const WorkoutPreset = () => {
           </div>
 
           {workoutPlan.map((workout, i) => (
-            <Fragment key={i}>
+            <Fragment key={workout?._id || workout.planName + i}>
               <WorkoutContainer
                 initialMuscleGroups={workout.muscleGroups}
                 handleSave={(workouts) => handleSave(i, workouts)}
