@@ -6,14 +6,9 @@ import Loader from "../ui/Loader";
 import { toast } from "sonner";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { FaCheck } from "react-icons/fa";
-import { Badge } from "../ui/badge";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import ErrorPage from "@/pages/ErrorPage";
-import {
-  FULL_DAY_STALE_TIME,
-  MIN_STALE_TIME,
-  ONE_MIN_IN_MILLISECONDS,
-} from "@/constants/constants";
+import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 
 const UserCheckIn = () => {
   const navigate = useNavigate();
