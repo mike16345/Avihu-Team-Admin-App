@@ -51,3 +51,10 @@ export interface IMenue {
   menuName: string;
   menuItems: IMenuItem[];
 }
+
+export type CustomItems = {
+  fats: string[];
+  carbs: string[];
+  vegetables: string[];
+  protein: string[];
+};
