@@ -40,7 +40,7 @@ const ComboBox: React.FC<ComboBoxProps> = ({
   });
 
   const onChange = (val: string) => {
-    if (data?.data) return;
+    if (!data?.data) return;
 
     setValue(val);
     setOpen(false);
@@ -64,7 +64,7 @@ const ComboBox: React.FC<ComboBoxProps> = ({
           <ChevronsUpDown className="mr-4 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full z-[100] p-0">
+      <PopoverContent className="w-full p-0">
         <Command>
           <CommandInput dir="rtl" placeholder="בחר סוג תוכנית..." />
           <CommandList>

@@ -46,7 +46,7 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
           <DialogTitle dir="rtl" className="text-center underline pb-6">
             בחר קבוצת שריר:
           </DialogTitle>
-          <DialogDescription className="py-4  z-50 ">
+          <DialogDescription className="py-4   z-50 ">
             <ComboBox
               queryKey="muscleGroups"
               existingValue={value}
