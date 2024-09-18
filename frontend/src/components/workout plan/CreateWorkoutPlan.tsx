@@ -113,7 +113,7 @@ const CreateWorkoutPlan: React.FC = () => {
         .then(() => toast.success(`תוכנית אימון נשמרה בהצלחה!`))
         .catch((err) =>
           toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-            description: `${err.response.data.message}`,
+            description: `${err?.response?.data?.message || ""}`,
           })
         );
     } else {
