@@ -8,15 +8,24 @@ import { useQuery } from "@tanstack/react-query";
 import { MIN_STALE_TIME } from "@/constants/constants";
 import Loader from "../ui/Loader";
 import ErrorPage from "@/pages/ErrorPage";
+import { toast } from "sonner";
 
 export const UsersTable = () => {
   const navigate = useNavigate();
-  const { getAllUsers } = useUsersApi();
+  const { getAllUsers, deleteUser } = useUsersApi();
 
   const query = useQuery({ queryKey: ["users"], staleTime: MIN_STALE_TIME, queryFn: getAllUsers });
 
   const handleViewUser = (user: IUser) => {
     navigate(`/users/${user._id}`, { state: user });
+  };
+
+  const handleDeleteUser = async (id?: string) => {
+    if (!id) {
+      toast.error("יש בעיה עם המחיקה");
+      return;
+    }
+    await deleteUser(id);
   };
 
   if (query.isLoading) {
@@ -35,7 +44,7 @@ export const UsersTable = () => {
         actionButton={<Button onClick={() => navigate(`/users/add`)}>הוסף משתמש</Button>}
         handleSetData={() => console.log("setting data")}
         handleViewData={(user) => handleViewUser(user)}
-        handleDeleteData={(user) => console.log("user to delete", user)}
+        handleDeleteData={(user) => handleDeleteUser(user._id)}
         handleViewNestedData={(data, userId) => console.log("data user", data, userId)}
       />
     </>
