@@ -21,7 +21,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
+import CustomButton from "@/components/ui/CustomButton";
 
 const presetNameShcema = z.object({
   name: z.string().min(1, { message: `בחר שם לתפריט` }).max(25),
@@ -34,6 +34,7 @@ export const ViewDietPlanPresetPage = () => {
   const [isNewPlan, setIsNewPlan] = useState(false);
   const [dietPlan, setDietPlan] = useState<IDietPlan>(defaultDietPlan);
   const [isLoading, setIsLoading] = useState(false);
+  const [buttonLoading, setButtonLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const presetNameForm = useForm<z.infer<typeof presetNameShcema>>({
@@ -63,6 +64,7 @@ export const ViewDietPlanPresetPage = () => {
   const createDietPlanPreset = (dietPlan: IDietPlanPreset) => {
     if (!dietPlan) return;
 
+    setButtonLoading(true);
     addDietPlanPreset(dietPlan)
       .then(() => {
         toast.success("תפריט נשמר בהצלחה!");
@@ -72,7 +74,8 @@ export const ViewDietPlanPresetPage = () => {
           description: err.response.data.message,
         });
         console.error("error", err);
-      });
+      })
+      .finally(() => setButtonLoading(false));
   };
 
   const editDietPlanPreset = (dietPlan: IDietPlanPreset) => {
@@ -148,13 +151,13 @@ export const ViewDietPlanPresetPage = () => {
       <DietPlanForm dietPlan={dietPlan} updateDietPlan={updateDietPlan} />
       {dietPlan.meals.length > 0 && (
         <div>
-          <Button
+          <CustomButton
             className="font-bold"
             variant="success"
+            title="שמור תפריט"
+            isLoading={buttonLoading}
             onClick={presetNameForm.handleSubmit(handleSubmit)}
-          >
-            שמור תפריט
-          </Button>
+          />
         </div>
       )}
     </div>

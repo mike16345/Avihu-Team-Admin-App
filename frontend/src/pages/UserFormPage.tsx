@@ -40,7 +40,7 @@ const UserFormPage = () => {
       .finally(() => setIsLoading(false));
   }, []);
 
-  if (isLoading) return <Loader />;
+  if (isLoading) return <Loader size="large" />;
 
   return (
     <div>

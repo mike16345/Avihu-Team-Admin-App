@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { ChevronsUpDown } from "lucide-react";
 import {
   Command,
@@ -10,9 +10,8 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { ApiResponse } from "@/types/types";
-import Loader from "../ui/Loader";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { FULL_DAY_STALE_TIME, HOUR_STALE_TIME } from "@/constants/constants";
+import { useQuery } from "@tanstack/react-query";
+import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 import ErrorPage from "@/pages/ErrorPage";
 import InputSkeleton from "../ui/skeletons/InputSkeleton";
 
@@ -34,43 +33,43 @@ const ComboBox: React.FC<ComboBoxProps> = ({
   const [open, setOpen] = useState<boolean>(false);
   const [value, setValue] = useState<string | undefined>(existingValue);
 
-  const data = useQuery({
+  const { data, isError, isLoading, error } = useQuery({
     queryFn: () => getOptions(optionsEndpoint),
     staleTime: FULL_DAY_STALE_TIME,
     queryKey: [queryKey],
   });
 
   const onChange = (val: string) => {
-    if (!data.data?.data) return;
+    if (data?.data) return;
 
     setValue(val);
     setOpen(false);
     let objToReturn;
 
-    if (data.data?.data[0].name) {
-      objToReturn = data.data?.data?.find((obj) => obj.name.toLowerCase() === val.toLowerCase());
+    if (data?.data[0].name) {
+      objToReturn = data?.data?.find((obj) => obj.name.toLowerCase() === val.toLowerCase());
     }
 
     handleChange(objToReturn);
   };
 
-  if (data.isLoading) return <InputSkeleton />;
-  if (data.isError) return <ErrorPage message={data.error.message} />;
+  if (isLoading) return <InputSkeleton />;
+  if (isError) return <ErrorPage message={error.message} />;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger className="max-w-fit flex justify-between" dir="rtl" asChild>
+      <PopoverTrigger className="max-w-fit m-auto z-50 flex justify-between" dir="rtl" asChild>
         <Button variant="outline" role="combobox" aria-expanded={open}>
           {value || `בחר`}
           <ChevronsUpDown className="mr-4 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0">
+      <PopoverContent className="w-full z-[100] p-0">
         <Command>
           <CommandInput dir="rtl" placeholder="בחר סוג תוכנית..." />
           <CommandList>
             <CommandGroup dir="rtl">
-              {data.data?.data?.map((option, i) => (
+              {data?.data?.map((option, i) => (
                 <CommandItem key={i} value={option.name} onSelect={(val) => onChange(val)}>
                   {option.name}
                 </CommandItem>

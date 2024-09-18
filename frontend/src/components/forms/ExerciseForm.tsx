@@ -18,13 +18,13 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Input } from "../ui/input";
-import { Button } from "../ui/button";
 import useExercisePresetApi from "@/hooks/api/useExercisePresetApi";
 import { toast } from "sonner";
 import useMuscleGroupsApi from "@/hooks/api/useMuscleGroupsApi";
 import { IExercisePresetItem, IMuscleGroupItem } from "@/interfaces/IWorkoutPlan";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import CustomButton from "../ui/CustomButton";
 
 interface ExerciseFormProps {
   objectId?: string;
@@ -176,9 +176,12 @@ const ExerciseForm: React.FC<ExerciseFormProps> = ({ objectId, closeSheet }) => 
             </FormItem>
           )}
         />
-        <Button className="w-full" type="submit">
-          שמור
-        </Button>
+        <CustomButton
+          className="w-full"
+          type="submit"
+          title="שמור"
+          isLoading={addNewExercise.isPending || editExercise.isPending}
+        />
       </form>
     </Form>
   );
