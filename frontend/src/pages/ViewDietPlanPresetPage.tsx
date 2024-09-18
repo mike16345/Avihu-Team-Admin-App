@@ -69,9 +69,8 @@ export const ViewDietPlanPresetPage = () => {
       })
       .catch((err) => {
         toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-          description: err.response.data.message,
+          description: err?.data?.message || "",
         });
-        console.error("error", err);
       });
   };
 
@@ -86,7 +85,7 @@ export const ViewDietPlanPresetPage = () => {
       })
       .catch((err) => {
         toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-          description: err.response.data.message,
+          description: err?.data?.message || "",
         });
         console.error("error", err);
       });
