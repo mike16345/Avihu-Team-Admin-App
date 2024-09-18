@@ -8,19 +8,19 @@ export const useWorkoutPlanPresetApi = () => {
   const getAllWorkoutPlanPresets = () =>
     fetchData<ApiResponse<IWorkoutPlanPreset[]>>(WORKOUT_PLAN_PRESETS_ENDPOINT);
 
-  const getWorkoutPlanPresetById = (presetID: string) =>
+  const getWorkoutPlanPresetById = (presetId: string) =>
     fetchData<ApiResponse<IWorkoutPlanPreset>>(WORKOUT_PLAN_PRESETS_ENDPOINT + `/one`, {
-      presetID,
+      presetId,
     });
 
   const addWorkoutPlanPreset = (workoutPlan: IWorkoutPlanPreset) =>
     sendData<IWorkoutPlanPreset>(WORKOUT_PLAN_PRESETS_ENDPOINT, workoutPlan);
 
-  const deleteWorkoutPlanPreset = (presetID: string) =>
-    deleteItem(WORKOUT_PLAN_PRESETS_ENDPOINT + `/one`, { presetID });
+  const deleteWorkoutPlanPreset = (presetId: string) =>
+    deleteItem(WORKOUT_PLAN_PRESETS_ENDPOINT + `/one`, { presetId });
 
-  const updateWorkoutPlanPreset = (presetID: string, workoutPlanPreset: IWorkoutPlanPreset) =>
-    updateItem(WORKOUT_PLAN_PRESETS_ENDPOINT + `/one`, workoutPlanPreset, null, { presetID });
+  const updateWorkoutPlanPreset = (presetId: string, workoutPlanPreset: IWorkoutPlanPreset) =>
+    updateItem(WORKOUT_PLAN_PRESETS_ENDPOINT + `/one`, workoutPlanPreset, null, { presetId });
 
   return {
     getAllWorkoutPlanPresets,
