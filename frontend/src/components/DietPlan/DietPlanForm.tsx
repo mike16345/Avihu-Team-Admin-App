@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { DietPlanDropDown } from "./DietPlanDropDown";
 import DeleteModal from "../Alerts/DeleteModal";
-import { IDietPlan, IMeal } from "@/interfaces/IDietPlan";
+import { CustomItems, IDietPlan, IMeal } from "@/interfaces/IDietPlan";
 import { Button } from "../ui/button";
 import { defaultMeal } from "@/constants/DietPlanConsts";
 import CustomInstructions from "./CustomInstructions";
@@ -11,13 +11,6 @@ interface DietPlanFormProps {
   updateDietPlan: (dietPlan: IDietPlan) => void;
   dietPlan: IDietPlan;
 }
-
-export type CustomItems = {
-  fats: string[];
-  carbs: string[];
-  vegetables: string[];
-  protein: string[];
-};
 
 const DietPlanForm: React.FC<DietPlanFormProps> = ({ dietPlan, updateDietPlan }) => {
   const { getAllMenuItems } = useMenuItemApi();
