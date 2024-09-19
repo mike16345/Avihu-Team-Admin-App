@@ -13,8 +13,8 @@ interface GenericCarouselProps {
 
 const GenericCarousel: React.FC<GenericCarouselProps> = ({ carouselItems }) => {
   return (
-    <Carousel dir="ltr" opts={{ align: `end` }}>
-      <CarouselContent>
+    <Carousel dir="ltr">
+      <CarouselContent className="shadow-md">
         {carouselItems.map((item, i) => (
           <CarouselItem key={i}>{item}</CarouselItem>
         ))}

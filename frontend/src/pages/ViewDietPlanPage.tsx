@@ -18,6 +18,7 @@ import {
 import { useDietPlanPresetApi } from "@/hooks/api/useDietPlanPresetsApi";
 import { Button } from "@/components/ui/button";
 import { validateDietPlan } from "@/components/DietPlan/DietPlanSchema";
+import { useQuery } from "@tanstack/react-query";
 
 export const ViewDietPlanPage = () => {
   const { id } = useParams();
@@ -28,8 +29,6 @@ export const ViewDietPlanPage = () => {
   const [dietPlan, setDietPlan] = useState<IDietPlan | null>(null);
 
   const [presetList, setPresetList] = useState<IDietPlanPreset[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const updateDietPlan = (dietPlan: IDietPlan) => setDietPlan(dietPlan);
 
@@ -90,36 +89,23 @@ export const ViewDietPlanPage = () => {
     });
   };
 
+  const { isLoading, isError, error, data } = useQuery({
+    queryKey: [`diet-plans-${id}`],
+    enabled: !!id,
+    queryFn: () =>
+      getDietPlanByUserId(id!).catch((e) => {
+        setIsNewPlan(true);
+        return e;
+      }),
+  });
+
   useEffect(() => {
-    if (!id) return;
-    setIsLoading(true);
-
-    getAllDietPlanPresets()
-      .then((res) => setPresetList(res.data))
-      .catch((err) => setError(err));
-
-    getDietPlanByUserId(id)
-      .then((dietPlan) => {
-        if (dietPlan) {
-          setDietPlan(dietPlan);
-          setIsNewPlan(false);
-        } else {
-          setDietPlan(defaultDietPlan);
-          setIsNewPlan(true);
-        }
-      })
-      .catch((err: Error) => {
-        setError(err.message);
-      })
-      .finally(() => {
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 1000);
-      });
+    getAllDietPlanPresets().then((res) => setPresetList(res.data));
   }, []);
 
-  if (isLoading || !dietPlan) return <Loader size="large" />;
-  if (error) return <ErrorPage message={error} />;
+  if (isLoading) return <Loader size="large" />;
+  if (error) return <ErrorPage message={error.message} />;
+  const plan = dietPlan || defaultDietPlan;
 
   return (
     <div className=" flex flex-col gap-4 size-full hide-scrollbar overflow-y-auto">
@@ -136,8 +122,8 @@ export const ViewDietPlanPage = () => {
           ))}
         </SelectContent>
       </Select>
-      <DietPlanForm dietPlan={dietPlan} updateDietPlan={updateDietPlan} />
-      {dietPlan.meals.length > 0 && (
+      <DietPlanForm dietPlan={plan} updateDietPlan={updateDietPlan} />
+      {plan.meals.length > 0 && (
         <div>
           <Button className="font-bold" variant="success" onClick={handleSubmit}>
             שמור תפריט

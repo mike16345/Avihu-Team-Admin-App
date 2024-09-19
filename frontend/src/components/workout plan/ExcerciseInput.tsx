@@ -11,6 +11,7 @@ import { AddWorkoutPlanCard } from "./AddWorkoutPlanCard";
 import useExercisePresetApi from "@/hooks/api/useExercisePresetApi";
 import { useIsEditableContext } from "@/context/useIsEditableContext";
 import DeleteModal from "../Alerts/DeleteModal";
+import { Button } from "../ui/button";
 
 interface ExcerciseInputProps {
   options?: string;
@@ -65,7 +66,6 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
       name: ``,
       sets: [
         {
-          id: 1,
           minReps: 0,
           maxReps: 0,
         },
@@ -108,21 +108,22 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ options, updateWorkouts
       <div className="w-full flex flex-col gap-3 px-2 py-4">
         <div className="grid xl:grid-cols-2 gap-4">
           {workoutObjs.map((item, i) => (
-            <Fragment key={i}>
+            <Fragment key={item._id || item.name + i}>
               <Card className=" p-6 max-h-[575px] overflow-y-auto custom-scrollbar">
                 <CardHeader>
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center justify-between">
                       <h2 className="font-bold underline">תרגיל:</h2>
                       {isEditable && (
-                        <div
+                        <Button
+                          variant={"ghost"}
                           onClick={() => {
                             exerciseIndexToDelete.current = i;
                             setIsDeleteModalOpen(true);
                           }}
                         >
-                          <IoClose className="hover:scale-105  cursor-pointer" size={22} />
-                        </div>
+                          <IoClose size={22} />
+                        </Button>
                       )}
                     </div>
                     {isEditable ? (

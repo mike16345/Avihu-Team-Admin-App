@@ -2,7 +2,6 @@ import AnalyticsCard from "@/components/AdminDashboard/AnalyticsCard";
 import Shortcut from "@/components/AdminDashboard/Shortcut";
 import UserCheckIn from "@/components/AdminDashboard/UserCheckIn";
 import GenericCarousel from "@/components/ui/GenericCarousel";
-import React from "react";
 import { BiFoodMenu } from "react-icons/bi";
 import { FaDumbbell } from "react-icons/fa";
 import { FiUserPlus } from "react-icons/fi";
@@ -34,19 +33,21 @@ const shortcuts = [
 const AdminDashboard = () => {
   return (
     <div className="size-full">
-      <h1>admin page</h1>
-      <h2 className="font-bold pt-2 text-lg">פעולות מהירות</h2>
-      <div className="flex flex-wrap items-center justify-center  py-5 gap-5 border-b-2">
-        {shortcuts.map((item, i) => (
-          <div key={i} className="flex justify-center items-center ">
-            <Shortcut actionName={item.actionName} icon={item.icon} navLink={item.navLink} />
-          </div>
-        ))}
+      <h1 className="text-4xl font-bold">אדמין</h1>
+      <div className="flex flex-col pt-4 gap-2">
+        <h2 className="font-bold text-xl">פעולות מהירות</h2>
+        <div className="flex flex-wrap items-center gap-5">
+          {shortcuts.map((item) => (
+            <div key={item.navLink} className="flex justify-center items-center ">
+              <Shortcut actionName={item.actionName} icon={item.icon} navLink={item.navLink} />
+            </div>
+          ))}
+        </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 py-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 py-4">
         <UserCheckIn />
 
-        <div className="px-5">
+        <div className="px-8 ">
           <GenericCarousel
             carouselItems={[
               <AnalyticsCard title="לקוחות ללא תוכנית אימון" dataKey="workoutPlan" />,

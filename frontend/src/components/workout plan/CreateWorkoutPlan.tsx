@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useState } from "react";
 import ComboBox from "./ComboBox";
 import {
   ICompleteWorkoutPlan,
@@ -114,7 +114,7 @@ const CreateWorkoutPlan: React.FC = () => {
         .then(() => toast.success(`תוכנית אימון נשמרה בהצלחה!`))
         .catch((err) =>
           toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-            description: `${err.response.data.message}`,
+            description: `${err?.data?.message || ""}`,
           })
         );
     } else {
@@ -131,7 +131,7 @@ const CreateWorkoutPlan: React.FC = () => {
   if (existingWorkoutPlan.isLoading) return <Loader size="large" />;
   if (
     existingWorkoutPlan.isError &&
-    existingWorkoutPlan.error.response.data.message !== `Workout plan not found!`
+    existingWorkoutPlan.error?.response?.data?.message !== `Workout plan not found!`
   )
     return <ErrorPage message={existingWorkoutPlan.error.message} />;
 
@@ -161,7 +161,7 @@ const CreateWorkoutPlan: React.FC = () => {
           {workoutPlan.map((workout, i) => {
             console.log("workout", workout);
             return (
-              <Fragment key={i}>
+              <Fragment key={workout?._id || i}>
                 <WorkoutContainer
                   initialMuscleGroups={workout.muscleGroups}
                   handleSave={(workouts) => handleSave(i, workouts)}

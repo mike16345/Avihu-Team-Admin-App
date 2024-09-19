@@ -1,32 +1,39 @@
 import UserForm from "@/components/forms/UserForm";
 import Loader from "@/components/ui/Loader";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
+import { MainRoutes } from "@/enums/Routes";
 import { useUsersApi } from "@/hooks/api/useUsersApi";
 import { IUser } from "@/interfaces/IUser";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 
 const UserFormPage = () => {
   const { id } = useParams();
+  const navigation = useNavigate();
   const { getUser, addUser, updateUser } = useUsersApi();
 
   const [user, setUser] = useState<IUser | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  const onSuccess = () => {
+    toast.success(`משתמש נשמר בהצלחה!`);
+    navigation(MainRoutes.USERS);
+  };
+
+  const onError = (e: any) => {
+    toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, { description: e.message });
+  };
+
   const handleSaveUser = (user: IUser) => {
     if (id) {
       updateUser(id, user)
-        .then(() => toast.success(`משתמש עודכן בהצלחה!`))
-        .catch((err) =>
-          toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, { description: err.message })
-        );
+        .then(() => onSuccess())
+        .catch(onError);
     } else {
       addUser(user)
-        .then(() => toast.success(`משתמש נשמר בהצלחה!`))
-        .catch((err) =>
-          toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, { description: err.message })
-        );
+        .then(() => onSuccess())
+        .catch(onError);
     }
   };
 

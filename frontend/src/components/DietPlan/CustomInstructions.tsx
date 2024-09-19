@@ -7,7 +7,7 @@ import { Textarea } from "../ui/textarea";
 interface CustomInstructionsProps {
   instructions: string;
   freeCalories: number;
-  onUpdate: (key: string, val: string) => void;
+  onUpdate: (key: string, val: any) => void;
 }
 
 const CustomInstructions: FC<CustomInstructionsProps> = ({
@@ -26,7 +26,7 @@ const CustomInstructions: FC<CustomInstructionsProps> = ({
         <Input
           type="number"
           value={freeCalories}
-          onChange={(e) => onUpdate("freeCalories", e.target.value)}
+          onChange={(e) => onUpdate("freeCalories", Number(e.target.value))}
         />
         <Label>פקודות נוספות</Label>
         <Textarea

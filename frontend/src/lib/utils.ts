@@ -1,3 +1,4 @@
+import { AxiosError } from "axios";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -48,6 +49,22 @@ export function getElapsedSeconds(timestamp: number) {
 }
 
 export const convertStringsToOptions = (data: string[]) => {
-  console.log("data", data);
   return data.map((item, index) => ({ value: item, label: item }));
+};
+
+export const handleAxiosError = (error: AxiosError) => {
+  if (error.response) {
+    // Server responded with a status code outside of the 2xx range
+    console.error(`Response Error \n Status code ${error.response.status}: `, error);
+
+    return error.response;
+  } else if (error.request) {
+    // Request was made but no response was received
+    console.error("No Response:", error.request);
+    return error.request;
+  } else {
+    // Something went wrong during setup of the request
+    console.error("Request Setup Error:", error.message);
+    return error.message;
+  }
 };

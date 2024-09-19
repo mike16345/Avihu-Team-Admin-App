@@ -16,23 +16,21 @@ export const WeightProgression = () => {
   const { getWeighInsByUserId } = useWeighInsApi();
 
   if (!id) return;
-  const queryWeighIns = useQuery({
+  const { data, error, isError, isLoading } = useQuery({
     queryKey: ["weighIns"],
     staleTime: MIN_STALE_TIME,
     queryFn: () => getWeighInsByUserId(id),
   });
 
-  if (queryWeighIns.isLoading) return <Loader size="large" />;
-  if (queryWeighIns.isError) return <ErrorPage message={queryWeighIns.error.message} />;
-
-  const weighIns = queryWeighIns.data;
-  console.log("weighins", weighIns);
+  if (isLoading) return <Loader size="large" />;
+  if (isError && !data) return <ErrorPage message={error.message} />;
+  const weighIns = data || [];
 
   return (
     <>
       <div className="flex flex-col gap-8">
         <div className="size-full flex items-center ">
-          {weighIns && (
+          {!!weighIns?.length && (
             <Card className="size-full">
               <CardHeader>
                 <CardTitle>מעקב שקילה</CardTitle>
@@ -46,7 +44,7 @@ export const WeightProgression = () => {
               </CardContent>
             </Card>
           )}
-          {!weighIns && (
+          {weighIns?.length == 0 && (
             <div className="size-full">
               <h1 className="text-center">אין מעקב שקילה</h1>
             </div>

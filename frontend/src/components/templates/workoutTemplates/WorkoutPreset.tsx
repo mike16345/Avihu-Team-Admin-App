@@ -96,7 +96,7 @@ const WorkoutPreset = () => {
         .then(() => toast.success(`תבנית אימון נשמרה בהצלחה!`))
         .catch((err) =>
           toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-            description: err.response.data.message,
+            description: err?.data?.message || "",
           })
         );
     } else {
@@ -104,7 +104,7 @@ const WorkoutPreset = () => {
         .then(() => toast.success(`תבנית אימון נשמרה בהצלחה!`))
         .catch((err) =>
           toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-            description: err.response.data.message,
+            description: err?.data?.message || "",
           })
         );
     }
@@ -150,7 +150,7 @@ const WorkoutPreset = () => {
           </div>
 
           {workoutPlan.map((workout, i) => (
-            <Fragment key={i}>
+            <Fragment key={workout?._id || workout.planName + i}>
               <WorkoutContainer
                 initialMuscleGroups={workout.muscleGroups}
                 handleSave={(workouts) => handleSave(i, workouts)}

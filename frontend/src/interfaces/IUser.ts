@@ -1,5 +1,3 @@
-import { UserPlan } from "@/enums/User";
-
 export interface IUser {
   _id?: string;
   firstName: string;

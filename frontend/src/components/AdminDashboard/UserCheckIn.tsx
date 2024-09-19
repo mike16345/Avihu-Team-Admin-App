@@ -6,14 +6,9 @@ import Loader from "../ui/Loader";
 import { toast } from "sonner";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { FaCheck } from "react-icons/fa";
-import { Badge } from "../ui/badge";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import ErrorPage from "@/pages/ErrorPage";
-import {
-  FULL_DAY_STALE_TIME,
-  MIN_STALE_TIME,
-  ONE_MIN_IN_MILLISECONDS,
-} from "@/constants/constants";
+import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 
 const UserCheckIn = () => {
   const navigate = useNavigate();
@@ -55,11 +50,11 @@ const UserCheckIn = () => {
   if (isError) return <ErrorPage message={error?.message} />;
 
   return (
-    <Card dir="rtl" className="w-full shadow-md ">
+    <Card dir="rtl" className=" shadow-md ">
       <CardHeader>
         <CardTitle>לקוחות לבדיקה</CardTitle>
       </CardHeader>
-      <CardContent className="max-h-[40vh] overflow-y-auto  ">
+      <CardContent className="h-48 overflow-y-auto  ">
         {isLoading && <Loader size="large" />}
         {users?.map((user) => (
           <div
@@ -85,8 +80,10 @@ const UserCheckIn = () => {
           </div>
         ))}
         {users?.length === 0 && (
-          <div className="h-24 flex items-center justify-center">
-            <h2 className="font-bold text-success">לא נשארו לקוחות לבדיקה!</h2>
+          <div className="size-full flex items-center justify-center">
+            <h2 className=" text-center text-xl  font-bold text-success">
+              לא נשארו לקוחות לבדיקה!
+            </h2>
           </div>
         )}
       </CardContent>
