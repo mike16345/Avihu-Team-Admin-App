@@ -18,6 +18,7 @@ import DietaryTypeSelector from "../templates/dietTemplates/DietaryTypeSelector"
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { IMenuItem } from "@/interfaces/IDietPlan";
+import CustomButton from "../ui/CustomButton";
 
 interface MenuItemFormProps {
   objectId?: string;
@@ -157,9 +158,12 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
           saveSelected={(selectedItems) => setDietaryTypes(selectedItems)}
           existingItems={dietaryTypes}
         />
-        <Button className="w-full" type="submit">
-          שמור
-        </Button>
+        <CustomButton
+          title="שמור"
+          type="submit"
+          className="w-full h-auto"
+          isLoading={addNewMenuItem.isPending || updateMenuItem.isPending}
+        />
       </form>
     </Form>
   );

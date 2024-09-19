@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { IMuscleGroupItem } from "@/interfaces/IWorkoutPlan";
+import CustomButton from "../ui/CustomButton";
 
 interface MusceGroupFormProps {
   objectId?: string;
@@ -97,9 +98,12 @@ const MusceGroupForm: React.FC<MusceGroupFormProps> = ({ objectId, closeSheet })
             </FormItem>
           )}
         />
-        <Button className="w-full" type="submit">
-          שמור
-        </Button>
+        <CustomButton
+          className="w-full"
+          type="submit"
+          title="שמור"
+          isLoading={updateAMuscleGroup.isPending || addNewMuscleGroup.isPending}
+        />
       </form>
     </Form>
   );
