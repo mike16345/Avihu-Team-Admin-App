@@ -95,6 +95,7 @@ export const ViewDietPlanPage = () => {
     queryFn: () =>
       getDietPlanByUserId(id!).catch((e) => {
         setIsNewPlan(true);
+        setDietPlan(defaultDietPlan);
         return e;
       }),
   });

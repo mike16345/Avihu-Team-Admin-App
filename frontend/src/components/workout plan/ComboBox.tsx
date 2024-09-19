@@ -58,7 +58,7 @@ const ComboBox: React.FC<ComboBoxProps> = ({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger className="w-1/3 flex justify-between" dir="rtl" asChild>
+      <PopoverTrigger className="min-w-1/3  flex justify-between" dir="rtl" asChild>
         <Button variant="outline" role="combobox" aria-expanded={open}>
           <span>{value || `בחר`}</span>
           <ChevronsUpDown className="mr-4 h-4 w-4 shrink-0 opacity-50" />

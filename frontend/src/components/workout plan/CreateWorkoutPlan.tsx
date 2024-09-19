@@ -21,6 +21,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 import Loader from "../ui/Loader";
 import ErrorPage from "@/pages/ErrorPage";
+import { createRetryFunction } from "@/lib/utils";
 
 const CreateWorkoutPlan: React.FC = () => {
   const { id } = useParams();
@@ -33,6 +34,7 @@ const CreateWorkoutPlan: React.FC = () => {
     staleTime: FULL_DAY_STALE_TIME,
     queryKey: [id],
     enabled: !!id,
+    retry: createRetryFunction(404),
   });
 
   const queryClient = useQueryClient();
@@ -130,7 +132,7 @@ const CreateWorkoutPlan: React.FC = () => {
   if (existingWorkoutPlan.isLoading) return <Loader size="large" />;
   if (
     existingWorkoutPlan.isError &&
-    existingWorkoutPlan.error?.response?.data?.message !== `Workout plan not found!`
+    existingWorkoutPlan.error?.data?.message !== `Workout plan not found!`
   )
     return <ErrorPage message={existingWorkoutPlan.error.message} />;
 
@@ -158,7 +160,6 @@ const CreateWorkoutPlan: React.FC = () => {
           )}
 
           {workoutPlan.map((workout, i) => {
-            console.log("workout", workout);
             return (
               <Fragment key={workout?._id || i}>
                 <WorkoutContainer
