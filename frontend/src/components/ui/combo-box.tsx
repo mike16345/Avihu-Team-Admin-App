@@ -1,7 +1,7 @@
 import { Option } from "@/types/types";
 import { Popover, PopoverTrigger, PopoverContent } from "./popover";
 import { ChevronsUpDown } from "lucide-react";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { Button } from "./button";
 import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "./command";
 
@@ -13,6 +13,10 @@ interface ComboBoxProps {
 
 const ComboBox: FC<ComboBoxProps> = ({ onSelect, options, value }) => {
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    return () => setOpen(false);
+  }, []);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -29,7 +33,7 @@ const ComboBox: FC<ComboBoxProps> = ({ onSelect, options, value }) => {
             <CommandGroup dir="rtl">
               {options?.map((option, i) => (
                 <CommandItem
-                  key={i}
+                  key={option.name + i}
                   value={option.name}
                   onSelect={(name) => {
                     setOpen(false);

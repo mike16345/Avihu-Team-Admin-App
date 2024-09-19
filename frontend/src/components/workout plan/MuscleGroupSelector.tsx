@@ -57,14 +57,16 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
           <DialogTitle dir="rtl" className="text-center underline pb-6">
             בחר קבוצת שריר:
           </DialogTitle>
-          <DialogDescription className="py-4 z-50 ">
-            <ComboBox
-              value={value}
-              options={muscleGroupOptions}
-              onSelect={(val) => {
-                setValue(val);
-              }}
-            />
+          <DialogDescription className="w-full flex justify-center py-4 z-50 ">
+            <div className=" w-1/2">
+              <ComboBox
+                value={value}
+                options={muscleGroupOptions}
+                onSelect={(val) => {
+                  setValue(val);
+                }}
+              />
+            </div>
           </DialogDescription>
         </DialogHeader>
         <DialogClose>
