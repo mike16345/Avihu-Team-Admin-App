@@ -40,9 +40,11 @@ const CreateWorkoutPlan: React.FC = () => {
     retry: createRetryFunction(404),
   });
 
+  console.log("edit:", isEditable);
   const workoutPlanPresets = useQuery({
     queryFn: () => getAllWorkoutPlanPresets().then((res) => res.data),
     staleTime: FULL_DAY_STALE_TIME,
+    enabled: isEditable,
     queryKey: ["workoutPlanPresets"],
   });
 
@@ -162,17 +164,19 @@ const CreateWorkoutPlan: React.FC = () => {
             : `כאן תוכל לצפות בתוכנית האימון הקיימת של לקוח זה`}
         </p>
         <div className="flex flex-col gap-4">
-          {isEditable && (
-            <ComboBox
-              value={selectedPreset}
-              options={workoutPresetsOptions}
-              onSelect={(currentValue) => {
-                console.log("current value", currentValue);
-                setWorkoutPlan(currentValue.workoutPlans);
-                setSelectedPreset(currentValue.name);
-              }}
-            />
-          )}
+          <div className="w-1/4">
+            {isEditable && (
+              <ComboBox
+                value={selectedPreset}
+                options={workoutPresetsOptions}
+                onSelect={(currentValue) => {
+                  console.log("current value", currentValue);
+                  setWorkoutPlan(currentValue.workoutPlans);
+                  setSelectedPreset(currentValue.name);
+                }}
+              />
+            )}
+          </div>
 
           {workoutPlan.map((workout, i) => {
             return (
