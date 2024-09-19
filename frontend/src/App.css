@@ -22,7 +22,7 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url("/assets/Fonts/Varela-Round/w8gdH283Tvk__Lua32TysjIfpcuPP9g.woff2")
+  src: url("/src/assets/Fonts/Varela-Round/w8gdH283Tvk__Lua32TysjIfpcuPP9g.woff2")
     format("woff2");
   unicode-range: U+0590-05FF, U+200C-2010, U+20AA, U+25CC, U+FB1D-FB4F;
 }
@@ -32,7 +32,7 @@
   font-style: normal;
   font-weight: normal;
   src: local("Arial MT Bold"),
-    url("/assets/Fonts/Varela-Round/ARIALBOLDMT.woff") format("woff");
+    url("/src/assets/Fonts/Varela-Round/ARIALBOLDMT.woff") format("woff");
 }
 
 /* vietnamese */

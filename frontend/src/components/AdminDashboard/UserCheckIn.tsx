@@ -54,7 +54,7 @@ const UserCheckIn = () => {
       <CardHeader>
         <CardTitle>לקוחות לבדיקה</CardTitle>
       </CardHeader>
-      <CardContent className="max-h-[40vh] overflow-y-auto  ">
+      <CardContent className="h-48 overflow-y-auto  ">
         {isLoading && <Loader size="large" />}
         {users?.map((user) => (
           <div
@@ -80,8 +80,10 @@ const UserCheckIn = () => {
           </div>
         ))}
         {users?.length === 0 && (
-          <div className="h-24 flex items-center justify-center">
-            <h2 className="font-bold text-success">לא נשארו לקוחות לבדיקה!</h2>
+          <div className="size-full flex items-center justify-center">
+            <h2 className=" text-center text-lg  font-bold text-success">
+              לא נשארו לקוחות לבדיקה!
+            </h2>
           </div>
         )}
       </CardContent>
