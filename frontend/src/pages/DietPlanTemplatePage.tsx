@@ -14,7 +14,7 @@ const DietPlanTemplatePage = () => {
   const deleteDietPlan = useMutation({
     mutationFn: deleteDietPlanPreset,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`dietPlans`] });
+      queryClient.invalidateQueries({ queryKey: [`preset-dietPlans`] });
     },
   });
   const deleteCarbs = useMutation({
@@ -47,7 +47,7 @@ const DietPlanTemplatePage = () => {
       {
         name: `תפריטים`,
         value: `dietPlanPresets`,
-        queryKey: `dietPlans`,
+        queryKey: `preset-dietPlans`,
       },
       {
         name: `חלבונים`,

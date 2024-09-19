@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { ChevronsUpDown } from "lucide-react";
 import {
   Command,
@@ -33,28 +33,28 @@ const ComboBox: React.FC<ComboBoxProps> = ({
   const [open, setOpen] = useState<boolean>(false);
   const [value, setValue] = useState<string | undefined>(existingValue);
 
-  const data = useQuery({
+  const { data, isError, isLoading, error } = useQuery({
     queryFn: () => getOptions(optionsEndpoint),
     staleTime: FULL_DAY_STALE_TIME,
     queryKey: [queryKey],
   });
 
   const onChange = (val: string) => {
-    if (!data.data?.data) return;
+    if (!data?.data) return;
 
     setValue(val);
     setOpen(false);
     let objToReturn;
 
-    if (data.data?.data[0].name) {
-      objToReturn = data.data?.data?.find((obj) => obj.name.toLowerCase() === val.toLowerCase());
+    if (data?.data[0].name) {
+      objToReturn = data?.data?.find((obj) => obj.name.toLowerCase() === val.toLowerCase());
     }
 
     handleChange(objToReturn);
   };
 
-  if (data.isLoading) return <InputSkeleton />;
-  if (data.isError) return <ErrorPage message={data.error.message} />;
+  if (isLoading) return <InputSkeleton />;
+  if (isError) return <ErrorPage message={error.message} />;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -65,11 +65,11 @@ const ComboBox: React.FC<ComboBoxProps> = ({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0">
-        <Command className="w-full">
+        <Command>
           <CommandInput dir="rtl" placeholder="בחר סוג תוכנית..." />
           <CommandList>
             <CommandGroup dir="rtl">
-              {data.data?.data?.map((option, i) => (
+              {data?.data?.map((option, i) => (
                 <CommandItem key={i} value={option.name} onSelect={(val) => onChange(val)}>
                   {option.name}
                 </CommandItem>

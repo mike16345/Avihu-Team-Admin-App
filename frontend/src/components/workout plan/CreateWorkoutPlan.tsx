@@ -22,6 +22,7 @@ import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 import Loader from "../ui/Loader";
 import ErrorPage from "@/pages/ErrorPage";
 import { createRetryFunction } from "@/lib/utils";
+import CustomButton from "../ui/CustomButton";
 
 const CreateWorkoutPlan: React.FC = () => {
   const { id } = useParams();
@@ -185,9 +186,12 @@ const CreateWorkoutPlan: React.FC = () => {
         </div>
         {isEditable && (
           <div className="flex justify-end">
-            <Button variant={"success"} onClick={handleSubmit}>
-              שמור תוכנית אימון
-            </Button>
+            <CustomButton
+              variant="success"
+              onClick={handleSubmit}
+              title="שמור תוכנית אימון"
+              isLoading={updateWorkoutPlan.isPending}
+            />
           </div>
         )}
       </div>

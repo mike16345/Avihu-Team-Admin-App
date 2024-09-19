@@ -18,10 +18,10 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Input } from "../ui/input";
-import { Button } from "../ui/button";
 import DatePicker from "../ui/DatePicker";
 import DietaryTypeSelector from "../templates/dietTemplates/DietaryTypeSelector";
 import { IUser } from "@/interfaces/IUser";
+import CustomButton from "../ui/CustomButton";
 
 const remindInOptions = [
   { value: `604800`, name: `שבוע` },
@@ -51,9 +51,15 @@ const userSchema = z.object({
 interface UserFormProps {
   existingUser: IUser | null;
   saveInfo: (user: IUser) => void;
+  pending?: boolean;
 }
 
-const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo }) => {
+function getRemindInDate(remindIn: number) {
+  const result = remindInOptions.find((o) => o.value == String(remindIn));
+  return result?.name || "לא נבחר";
+}
+
+const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) => {
   const userForm = useForm<z.infer<typeof userSchema>>({
     resolver: zodResolver(userSchema),
     defaultValues: {
@@ -75,6 +81,8 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo }) => {
   const onSubmit = (values: z.infer<typeof userSchema>) => {
     saveInfo(values);
   };
+
+  console.log("remind in", new Date(new Date().getTime() + userForm.getValues().remindIn));
 
   return (
     <Form {...userForm}>
@@ -159,26 +167,30 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo }) => {
         <FormField
           control={userForm.control}
           name="remindIn"
-          render={({ field }) => (
-            <FormItem className="w-[40%]">
-              <FormLabel>בדיקה תקופתית</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger dir="rtl">
-                    <SelectValue placeholder={field.value || "תבדוק אותי כל שבוע..."} />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent dir="rtl">
-                  {remindInOptions.map((option) => (
-                    <SelectItem key={option.name} value={option.value}>
-                      {option.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
+          render={({ field }) => {
+            const remindIn = getRemindInDate(field.value);
+
+            return (
+              <FormItem className="w-[40%]">
+                <FormLabel>בדיקה תקופתית</FormLabel>
+                <Select key={remindIn} onValueChange={field.onChange}>
+                  <FormControl>
+                    <SelectTrigger dir="rtl">
+                      <SelectValue placeholder={remindIn || "תבדוק אותי כל שבוע..."} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent dir="rtl">
+                    {remindInOptions.map((option) => (
+                      <SelectItem key={option.name} value={option.value}>
+                        {option.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
         />
         <FormField
           control={userForm.control}
@@ -215,7 +227,7 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo }) => {
             </FormItem>
           )}
         />
-        <Button type="submit">שמור משתמש</Button>
+        <CustomButton title="שמור משתמש" type="submit" isLoading={pending} />
       </form>
     </Form>
   );
