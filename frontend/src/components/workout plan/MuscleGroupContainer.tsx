@@ -71,7 +71,7 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
         <CollapsibleContent>
           <>
             <ExcerciseInput
-              options={muscleGroup?.muscleGroup || ``}
+              muscleGroup={muscleGroup?.muscleGroup || ``}
               exercises={muscleGroup.exercises}
               updateWorkouts={(workouts) => handleUpdateWorkouts(workouts)}
             />
