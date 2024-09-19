@@ -7,12 +7,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { DialogClose } from "@radix-ui/react-dialog";
-import { Button } from "../ui/button";
 import { BiPencil } from "react-icons/bi";
 import useMuscleGroupsApi from "@/hooks/api/useMuscleGroupsApi";
 import { useQuery } from "@tanstack/react-query";
-import ComboBox from "../ui/combo-box";
 import { convertItemsToOptions } from "@/lib/utils";
 import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "../ui/command";
@@ -28,17 +25,18 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
 }) => {
   const { getAllMuscleGroups } = useMuscleGroupsApi();
   const [value, setValue] = useState<string>(existingMuscleGroup || ``);
-  const [open, setOpen] = useState(false);
 
   const muscleGroupsQuery = useQuery({
     queryKey: ["muscleGroups"],
     queryFn: () => getAllMuscleGroups().then((res) => res.data),
     staleTime: FULL_DAY_STALE_TIME,
   });
+
   const muscleGroupOptions = useMemo(
     () => convertItemsToOptions(muscleGroupsQuery.data || [], "name", "name"),
     []
   );
+
   const updateSelection = (selection: string) => {
     handleChange(selection);
     setValue(selection);
@@ -57,11 +55,11 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
       <DialogContent onClick={(e) => e.stopPropagation()}>
         <DialogHeader>
           <DialogTitle dir="rtl" className="text-center underline pb-6">
-            בחר קבוצת שריר:
+            בחר קבוצת שריר
           </DialogTitle>
           <DialogDescription className="w-full flex justify-center py-4 z-50 ">
             <Command>
-              <CommandInput dir="rtl" placeholder="בחר סוג תוכנית..." />
+              <CommandInput dir="rtl" placeholder="בחר קבוצת שריר..." />
               <CommandList>
                 <CommandGroup dir="rtl">
                   {muscleGroupOptions?.map((option, i) => (
@@ -70,7 +68,7 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
                       className="text-lg font-bold"
                       value={option.name}
                       onSelect={(name) => {
-                        if (value?.toLowerCase() == name.toLowerCase()) return; // Return
+                        if (value?.toLowerCase() == name.toLowerCase()) return; // Return if value is the same as previous value.
                         updateSelection(option.value);
                       }}
                     >
