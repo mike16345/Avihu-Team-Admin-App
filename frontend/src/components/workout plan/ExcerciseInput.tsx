@@ -36,7 +36,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
   const exerciseQuery = useQuery({
     queryKey: [`exercise-${muscleGroup}`],
     queryFn: () => getExerciseByMuscleGroup(muscleGroup!).then((res) => res.data),
-    enabled: !!muscleGroup && isEditable,
+    enabled: doQuery,
     retry: createRetryFunction(404),
   });
 

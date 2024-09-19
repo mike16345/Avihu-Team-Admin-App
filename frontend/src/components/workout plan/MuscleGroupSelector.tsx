@@ -21,6 +21,7 @@ import {
   CommandList,
 } from "../ui/command";
 import Loader from "../ui/Loader";
+import { useWorkoutPlanContext } from "@/context/useWorkoutPlanContext";
 
 interface MuscleGroupSelectorProps {
   handleChange: (value: string) => void;
@@ -31,8 +32,12 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
   handleChange,
   existingMuscleGroup,
 }) => {
+  const { workout } = useWorkoutPlanContext();
   const { getAllMuscleGroups } = useMuscleGroupsApi();
   const [value, setValue] = useState<string>(existingMuscleGroup || ``);
+
+  console.log("workout", workout);
+  const muscleGroupsInWorkout = workout.muscleGroups.map((muscleGroup) => muscleGroup.muscleGroup);
 
   const muscleGroupsQuery = useQuery({
     queryKey: ["muscleGroups"],
@@ -40,10 +45,17 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
     staleTime: FULL_DAY_STALE_TIME,
   });
 
-  const muscleGroupOptions = useMemo(
-    () => convertItemsToOptions(muscleGroupsQuery.data || [], "name", "name"),
-    [muscleGroupsQuery.data]
-  );
+  const muscleGroupOptions = useMemo(() => {
+    console.log("muscleGroups", muscleGroupsQuery.data);
+    console.log("muscleGroups in workout", muscleGroupsInWorkout);
+    const filteredExistingMuscleGroups = muscleGroupsQuery.data?.filter(
+      (muscleGroup) =>
+        muscleGroupsInWorkout.find((mgName) => muscleGroup.name == mgName) == undefined
+    );
+
+    console.log("filteredExistingMuscleGroups", filteredExistingMuscleGroups);
+    return convertItemsToOptions(filteredExistingMuscleGroups || [], "name", "name");
+  }, [muscleGroupsQuery.data, muscleGroupsInWorkout]);
 
   const updateSelection = (selection: string) => {
     handleChange(selection);

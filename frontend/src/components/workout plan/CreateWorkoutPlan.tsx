@@ -5,7 +5,7 @@ import {
   IWorkoutPlan,
   IWorkoutPlanPreset,
 } from "@/interfaces/IWorkoutPlan";
-import WorkoutContainer from "./WorkoutPlanContainer";
+import WorkoutPlanContainer from "./WorkoutPlanContainer";
 import { useWorkoutPlanApi } from "@/hooks/api/useWorkoutPlanApi";
 import { cleanWorkoutObject } from "@/utils/workoutPlanUtils";
 import { Button } from "../ui/button";
@@ -24,6 +24,7 @@ import ErrorPage from "@/pages/ErrorPage";
 import { convertItemsToOptions, createRetryFunction } from "@/lib/utils";
 import CustomButton from "../ui/CustomButton";
 import ComboBox from "../ui/combo-box";
+import WorkoutPlanContainerWrapper from "../Wrappers/WorkoutPlanContainerWrapper";
 
 const CreateWorkoutPlan: React.FC = () => {
   const { id } = useParams();
@@ -181,13 +182,17 @@ const CreateWorkoutPlan: React.FC = () => {
           {workoutPlan.map((workout, i) => {
             return (
               <Fragment key={workout?._id || i}>
-                <WorkoutContainer
-                  initialMuscleGroups={workout.muscleGroups}
-                  handleSave={(workouts) => handleSave(i, workouts)}
-                  title={workout.planName}
-                  handlePlanNameChange={(newName) => handlePlanNameChange(newName, i)}
-                  handleDeleteWorkout={() => handleDeleteWorkout(i)}
-                />
+                <WorkoutPlanContainerWrapper workoutPlan={workout}>
+                  <WorkoutPlanContainer
+                    initialMuscleGroups={workout.muscleGroups}
+                    handleSave={(muscleGroups) => {
+                      handleSave(i, muscleGroups);
+                    }}
+                    title={workout.planName}
+                    handlePlanNameChange={(newName) => handlePlanNameChange(newName, i)}
+                    handleDeleteWorkout={() => handleDeleteWorkout(i)}
+                  />
+                </WorkoutPlanContainerWrapper>
               </Fragment>
             );
           })}

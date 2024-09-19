@@ -39,7 +39,7 @@ export interface IWorkoutPlanPreset {
 export interface IExercisePresetItem {
   name: string;
   muscleGroup: string;
-  tipsFromTrainer?: string;
+  tipFromTrainer?: string;
   linkToVideo: string;
 }
 export interface IMuscleGroupItem {

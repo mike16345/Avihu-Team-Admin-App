@@ -21,6 +21,7 @@ import { z } from "zod";
 import WorkoutContainer from "@/components/workout plan/WorkoutPlanContainer";
 import { EditableContextProvider } from "@/context/useIsEditableContext";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
+import WorkoutPlanContainerWrapper from "@/components/Wrappers/WorkoutPlanContainerWrapper";
 
 const workoutFormSchema = z.object({
   name: z.string().min(1).max(25),
@@ -151,13 +152,15 @@ const WorkoutPreset = () => {
 
           {workoutPlan.map((workout, i) => (
             <Fragment key={workout?._id || workout.planName + i}>
-              <WorkoutContainer
-                initialMuscleGroups={workout.muscleGroups}
-                handleSave={(workouts) => handleSave(i, workouts)}
-                title={workout.planName}
-                handlePlanNameChange={(newName) => handlePlanNameChange(newName, i)}
-                handleDeleteWorkout={() => handleDeleteWorkout(i)}
-              />
+              <WorkoutPlanContainerWrapper workoutPlan={workout}>
+                <WorkoutContainer
+                  initialMuscleGroups={workout.muscleGroups}
+                  handleSave={(workouts) => handleSave(i, workouts)}
+                  title={workout.planName}
+                  handlePlanNameChange={(newName) => handlePlanNameChange(newName, i)}
+                  handleDeleteWorkout={() => handleDeleteWorkout(i)}
+                />
+              </WorkoutPlanContainerWrapper>
             </Fragment>
           ))}
           <div className="w-full flex items-center justify-center">
