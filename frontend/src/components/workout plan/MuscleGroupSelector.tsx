@@ -12,7 +12,15 @@ import useMuscleGroupsApi from "@/hooks/api/useMuscleGroupsApi";
 import { useQuery } from "@tanstack/react-query";
 import { convertItemsToOptions } from "@/lib/utils";
 import { FULL_DAY_STALE_TIME } from "@/constants/constants";
-import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "../ui/command";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "../ui/command";
+import Loader from "../ui/Loader";
 
 interface MuscleGroupSelectorProps {
   handleChange: (value: string) => void;
@@ -34,7 +42,7 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
 
   const muscleGroupOptions = useMemo(
     () => convertItemsToOptions(muscleGroupsQuery.data || [], "name", "name"),
-    []
+    [muscleGroupsQuery.data]
   );
 
   const updateSelection = (selection: string) => {
@@ -59,9 +67,11 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
           </DialogTitle>
           <DialogDescription className="w-full flex justify-center py-4 z-50 ">
             <Command>
+              <CommandEmpty></CommandEmpty>
               <CommandInput dir="rtl" placeholder="בחר קבוצת שריר..." />
               <CommandList>
                 <CommandGroup dir="rtl">
+                  {muscleGroupsQuery.isLoading && <Loader size="medium" />}
                   {muscleGroupOptions?.map((option, i) => (
                     <CommandItem
                       key={option.name + i}
