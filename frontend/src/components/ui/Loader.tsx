@@ -6,7 +6,6 @@ interface LoaderProps {
 
 const Loader: React.FC<LoaderProps> = ({ size = `medium`, variant = `standard` }) => {
   const pxSize = size === `small` ? 12 : size === `medium` ? 16 : size === `large` ? 20 : 24;
-  console.log(variant);
 
   return (
     <div className="w-full h-full flex items-center justify-center">
