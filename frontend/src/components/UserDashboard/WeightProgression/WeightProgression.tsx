@@ -8,7 +8,8 @@ import { WeightProgressionPhotos } from "./WeightProgressionPhotos";
 import { useQuery } from "@tanstack/react-query";
 import Loader from "@/components/ui/Loader";
 import ErrorPage from "@/pages/ErrorPage";
-import { MIN_STALE_TIME } from "@/constants/constants";
+import { HOUR_STALE_TIME, MIN_STALE_TIME } from "@/constants/constants";
+import { createRetryFunction } from "@/lib/utils";
 
 export const WeightProgression = () => {
   const { id } = useParams();
@@ -18,12 +19,13 @@ export const WeightProgression = () => {
   if (!id) return;
   const { data, error, isError, isLoading } = useQuery({
     queryKey: ["weighIns"],
-    staleTime: MIN_STALE_TIME,
+    staleTime: HOUR_STALE_TIME,
     queryFn: () => getWeighInsByUserId(id),
+    retry: createRetryFunction(404),
   });
 
   if (isLoading) return <Loader size="large" />;
-  if (isError && !data) return <ErrorPage message={error.message} />;
+  if (error?.status !== 404) return <ErrorPage message={error.message} />;
   const weighIns = data || [];
 
   return (

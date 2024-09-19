@@ -11,8 +11,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Added ability to delete a user from User's table.
 - Added ability to double click on row to view items.
-- Added custom button with loading option
-- Added button variant to Loader
 
 ### Fixed
 
@@ -22,9 +20,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Fixed issue where selecting a diet plan preset would not update the page properly.
 - Fixed issue where selecting a workout plan preset would not update the page properly.
 - Fixed combobox loader not working in muscleGroup selector
+- Fixed issue where weigh ins page showed an error if user had no weigh ins.
 
 ### Changed
 
+- Muscle group selection opens right away when creating workouts.
 - Diet plan now updates automatically when creating/editing.
 - Multiple UI/UX improvements.
-- implemented React Querry in most forms
+- Implemented React Query in most forms
+- User now returns to previous pages when submitting a form.
+- Prevented users from clicking submit button while the request is processing.
