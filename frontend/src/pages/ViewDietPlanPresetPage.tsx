@@ -22,6 +22,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import CustomButton from "@/components/ui/CustomButton";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const presetNameShcema = z.object({
   name: z.string().min(1, { message: `בחר שם לתפריט` }).max(25),
@@ -30,11 +31,11 @@ const presetNameShcema = z.object({
 export const ViewDietPlanPresetPage = () => {
   const { id } = useParams();
   const { getDietPlanPreset, updateDietPlanPreset, addDietPlanPreset } = useDietPlanPresetApi();
+  const queryClient = useQueryClient();
 
   const [isNewPlan, setIsNewPlan] = useState(false);
   const [dietPlan, setDietPlan] = useState<IDietPlan>(defaultDietPlan);
   const [isLoading, setIsLoading] = useState(false);
-  const [buttonLoading, setButtonLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const presetNameForm = useForm<z.infer<typeof presetNameShcema>>({
@@ -46,6 +47,30 @@ export const ViewDietPlanPresetPage = () => {
 
   const { reset } = presetNameForm;
 
+  const onSuccess = () => {
+    toast.success("תפריט נשמר בהצלחה!");
+    queryClient.invalidateQueries({ queryKey: [`preset-dietPlans`] });
+  };
+
+  const onError = (e: any) => {
+    toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
+      description: e?.data?.message || "",
+    });
+  };
+
+  const createPreset = useMutation({
+    mutationFn: addDietPlanPreset,
+    onSuccess: onSuccess,
+    onError: onError,
+  });
+
+  const updatePreset = useMutation({
+    mutationFn: ({ id, cleanedDietPlan }: { id: string; cleanedDietPlan: IDietPlanPreset }) =>
+      updateDietPlanPreset(id, cleanedDietPlan),
+    onSuccess: onSuccess,
+    onError: onError,
+  });
+
   const handleSubmit = (values: z.infer<typeof presetNameShcema>) => {
     const dietPlanToAdd = {
       ...dietPlan,
@@ -53,46 +78,17 @@ export const ViewDietPlanPresetPage = () => {
     };
 
     if (isNewPlan) {
-      createDietPlanPreset(dietPlanToAdd);
+      createPreset.mutate(dietPlanToAdd);
     } else {
-      editDietPlanPreset(dietPlanToAdd);
+      if (!id) return;
+
+      const cleanedDietPlan = removeIdsAndVersions(dietPlanToAdd);
+
+      updatePreset.mutate({ id, cleanedDietPlan });
     }
   };
 
   const updateDietPlan = (dietPlan: IDietPlan) => setDietPlan(dietPlan);
-
-  const createDietPlanPreset = (dietPlan: IDietPlanPreset) => {
-    if (!dietPlan) return;
-
-    setButtonLoading(true);
-    addDietPlanPreset(dietPlan)
-      .then(() => {
-        toast.success("תפריט נשמר בהצלחה!");
-      })
-      .catch((err) => {
-        toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-          description: err?.data?.message || "",
-        });
-      })
-      .finally(() => setButtonLoading(false));
-  };
-
-  const editDietPlanPreset = (dietPlan: IDietPlanPreset) => {
-    if (!dietPlan || !id) return;
-
-    const cleanedDietPlan = removeIdsAndVersions(dietPlan);
-
-    updateDietPlanPreset(id, cleanedDietPlan)
-      .then(() => {
-        toast.success("תפריט עודכן בהצלחה!");
-      })
-      .catch((err) => {
-        toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-          description: err?.data?.message || "",
-        });
-        console.error("error", err);
-      });
-  };
 
   useEffect(() => {
     setIsLoading(true);
@@ -154,7 +150,7 @@ export const ViewDietPlanPresetPage = () => {
             className="font-bold"
             variant="success"
             title="שמור תפריט"
-            isLoading={buttonLoading}
+            isLoading={createPreset.isPending || updatePreset.isPending}
             onClick={presetNameForm.handleSubmit(handleSubmit)}
           />
         </div>

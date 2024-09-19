@@ -12,8 +12,6 @@ import { Button } from "@/components/ui/button";
 import { ApiResponse } from "@/types/types";
 import { useQuery } from "@tanstack/react-query";
 import { FULL_DAY_STALE_TIME } from "@/constants/constants";
-import { useQuery } from "@tanstack/react-query";
-import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 import ErrorPage from "@/pages/ErrorPage";
 import InputSkeleton from "../ui/skeletons/InputSkeleton";
 
@@ -60,7 +58,7 @@ const ComboBox: React.FC<ComboBoxProps> = ({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger className="w-1/3 flex justify-between" dir="rtl" asChild>
+      <PopoverTrigger className="min-w-1/3 m-auto flex justify-between" dir="rtl" asChild>
         <Button variant="outline" role="combobox" aria-expanded={open}>
           <span>{value || `בחר`}</span>
           <ChevronsUpDown className="mr-4 h-4 w-4 shrink-0 opacity-50" />

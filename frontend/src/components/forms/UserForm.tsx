@@ -22,6 +22,7 @@ import { Button } from "../ui/button";
 import DatePicker from "../ui/DatePicker";
 import DietaryTypeSelector from "../templates/dietTemplates/DietaryTypeSelector";
 import { IUser } from "@/interfaces/IUser";
+import CustomButton from "../ui/CustomButton";
 
 const remindInOptions = [
   { value: `604800`, name: `שבוע` },
@@ -51,9 +52,10 @@ const userSchema = z.object({
 interface UserFormProps {
   existingUser: IUser | null;
   saveInfo: (user: IUser) => void;
+  pending?: boolean;
 }
 
-const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo }) => {
+const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) => {
   const userForm = useForm<z.infer<typeof userSchema>>({
     resolver: zodResolver(userSchema),
     defaultValues: {
@@ -215,7 +217,7 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo }) => {
             </FormItem>
           )}
         />
-        <Button type="submit">שמור משתמש</Button>
+        <CustomButton title="שמור משתמש" type="submit" isLoading={pending} />
       </form>
     </Form>
   );

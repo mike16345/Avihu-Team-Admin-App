@@ -43,7 +43,7 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
     [`protein`]: getMenuItems,
     [`fats`]: getMenuItems,
     [`vegetables`]: getMenuItems,
-    [`dietPlans`]: getAllDietPlanPresets,
+    [`preset-dietPlans`]: getAllDietPlanPresets,
     [`workoutPlans`]: getAllWorkoutPlanPresets,
     [`exercises`]: getExercisePresets,
     [`muscleGroups`]: getAllMuscleGroups,
