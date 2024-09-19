@@ -4,11 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
 import { useWeighInsApi } from "@/hooks/api/useWeighInsApi";
 import { useParams } from "react-router";
 import { CurrentWeighIn } from "./CurrentWeighIn";
-import { WeightProgressionPhotos } from "./WeightProgressionPhotos";
 import { useQuery } from "@tanstack/react-query";
 import Loader from "@/components/ui/Loader";
 import ErrorPage from "@/pages/ErrorPage";
-import { HOUR_STALE_TIME, MIN_STALE_TIME } from "@/constants/constants";
+import { HOUR_STALE_TIME } from "@/constants/constants";
 import { createRetryFunction } from "@/lib/utils";
 
 export const WeightProgression = () => {
@@ -16,11 +15,11 @@ export const WeightProgression = () => {
 
   const { getWeighInsByUserId } = useWeighInsApi();
 
-  if (!id) return;
-  const { data, error, isError, isLoading } = useQuery({
+  const { data, error, isLoading } = useQuery({
     queryKey: ["weighIns"],
     staleTime: HOUR_STALE_TIME,
-    queryFn: () => getWeighInsByUserId(id),
+    enabled: !!id,
+    queryFn: () => getWeighInsByUserId(id!),
     retry: createRetryFunction(404),
   });
 
