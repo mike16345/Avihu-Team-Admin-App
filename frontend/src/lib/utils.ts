@@ -1,3 +1,4 @@
+import { Option } from "@/types/types";
 import { AxiosError } from "axios";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -50,6 +51,21 @@ export function getElapsedSeconds(timestamp: number) {
 
 export const convertStringsToOptions = (data: string[]) => {
   return data.map((item, index) => ({ value: item, label: item }));
+};
+
+export const convertItemsToOptions = (
+  data: any[],
+  nameKey: string,
+  valueKey: string | "this" = "this"
+): Option[] => {
+  return data.map((item) => {
+    let val = valueKey == "this" ? item : item[valueKey];
+
+    return {
+      name: item[nameKey],
+      value: val,
+    };
+  });
 };
 
 export const handleAxiosError = (error: AxiosError) => {

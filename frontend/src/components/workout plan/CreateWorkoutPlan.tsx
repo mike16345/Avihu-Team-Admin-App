@@ -1,9 +1,9 @@
 import React, { Fragment, useState } from "react";
-import ComboBox from "./ComboBox";
 import {
   ICompleteWorkoutPlan,
   IMuscleGroupWorkouts,
   IWorkoutPlan,
+  IWorkoutPlanPreset,
 } from "@/interfaces/IWorkoutPlan";
 import WorkoutContainer from "./WorkoutPlanContainer";
 import { useWorkoutPlanApi } from "@/hooks/api/useWorkoutPlanApi";
@@ -21,14 +21,16 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 import Loader from "../ui/Loader";
 import ErrorPage from "@/pages/ErrorPage";
-import { createRetryFunction } from "@/lib/utils";
+import { convertItemsToOptions, createRetryFunction } from "@/lib/utils";
 import CustomButton from "../ui/CustomButton";
+import ComboBox from "../ui/combo-box";
 
 const CreateWorkoutPlan: React.FC = () => {
   const { id } = useParams();
   const { addWorkoutPlan, getWorkoutPlanByUserId, updateWorkoutPlanByUserId } = useWorkoutPlanApi();
   const { getAllWorkoutPlanPresets } = useWorkoutPlanPresetApi();
   const { isEditable, setIsEditable, toggleIsEditable } = useIsEditableContext();
+  const [selectedPreset, setSelectedPreset] = useState<IWorkoutPlanPreset | null>(null);
 
   const existingWorkoutPlan = useQuery({
     queryFn: () => getWorkoutPlanByUserId(id || ``),
@@ -36,6 +38,12 @@ const CreateWorkoutPlan: React.FC = () => {
     queryKey: [id],
     enabled: !!id,
     retry: createRetryFunction(404),
+  });
+
+  const workoutPlanPresets = useQuery({
+    queryFn: () => getAllWorkoutPlanPresets().then((res) => res.data),
+    staleTime: FULL_DAY_STALE_TIME,
+    queryKey: ["workoutPlanPresets"],
   });
 
   const queryClient = useQueryClient();
@@ -137,6 +145,8 @@ const CreateWorkoutPlan: React.FC = () => {
   )
     return <ErrorPage message={existingWorkoutPlan.error.message} />;
 
+  const workoutPresetsOptions = convertItemsToOptions(workoutPlanPresets.data || [], "name");
+
   return (
     <>
       <div className="flex flex-col gap-4 px-20 py-4   w-full ">
@@ -154,9 +164,13 @@ const CreateWorkoutPlan: React.FC = () => {
         <div className="flex flex-col gap-4">
           {isEditable && (
             <ComboBox
-              queryKey="workoutPlanPresets"
-              getOptions={getAllWorkoutPlanPresets}
-              handleChange={(currentValue) => setWorkoutPlan(currentValue.workoutPlans)}
+              value={selectedPreset}
+              options={workoutPresetsOptions}
+              onSelect={(currentValue) => {
+                console.log("current value", currentValue);
+                setWorkoutPlan(currentValue.workoutPlans);
+                setSelectedPreset(currentValue.name);
+              }}
             />
           )}
 
