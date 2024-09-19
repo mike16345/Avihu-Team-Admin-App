@@ -15,6 +15,7 @@ import { useQuery } from "@tanstack/react-query";
 import ComboBox from "../ui/combo-box";
 import { convertItemsToOptions } from "@/lib/utils";
 import { FULL_DAY_STALE_TIME } from "@/constants/constants";
+import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "../ui/command";
 
 interface MuscleGroupSelectorProps {
   handleChange: (value: string) => void;
@@ -27,6 +28,7 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
 }) => {
   const { getAllMuscleGroups } = useMuscleGroupsApi();
   const [value, setValue] = useState<string>(existingMuscleGroup || ``);
+  const [open, setOpen] = useState(false);
 
   const muscleGroupsQuery = useQuery({
     queryKey: ["muscleGroups"],
@@ -58,22 +60,28 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
             בחר קבוצת שריר:
           </DialogTitle>
           <DialogDescription className="w-full flex justify-center py-4 z-50 ">
-            <div className=" w-1/2">
-              <ComboBox
-                value={value}
-                options={muscleGroupOptions}
-                onSelect={(val) => {
-                  setValue(val);
-                }}
-              />
-            </div>
+            <Command>
+              <CommandInput dir="rtl" placeholder="בחר סוג תוכנית..." />
+              <CommandList>
+                <CommandGroup dir="rtl">
+                  {muscleGroupOptions?.map((option, i) => (
+                    <CommandItem
+                      key={option.name + i}
+                      className="text-lg font-bold"
+                      value={option.name}
+                      onSelect={(name) => {
+                        if (value?.toLowerCase() == name.toLowerCase()) return; // Return
+                        updateSelection(option.value);
+                      }}
+                    >
+                      {option.name}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
           </DialogDescription>
         </DialogHeader>
-        <DialogClose>
-          <Button className="w-full" onClick={value ? () => updateSelection(value) : () => {}}>
-            אישור
-          </Button>
-        </DialogClose>
       </DialogContent>
     </Dialog>
   );
