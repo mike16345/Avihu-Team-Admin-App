@@ -57,7 +57,7 @@ const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ title, dataKey }) => {
         {isLoading && <Loader size="large" />}
         {data?.data.length == 0 && (
           <div className="size-full flex items-center justify-center ">
-            <h1 className="text-center text-success text-lg font-bold ">אין נתונים להצגה!</h1>
+            <h1 className="text-center text-success text-xl font-bold ">אין נתונים להצגה!</h1>
           </div>
         )}
         {data?.data.map((item, i) => (

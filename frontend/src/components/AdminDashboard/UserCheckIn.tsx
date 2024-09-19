@@ -50,7 +50,7 @@ const UserCheckIn = () => {
   if (isError) return <ErrorPage message={error?.message} />;
 
   return (
-    <Card dir="rtl" className="w-full shadow-md ">
+    <Card dir="rtl" className=" shadow-md ">
       <CardHeader>
         <CardTitle>לקוחות לבדיקה</CardTitle>
       </CardHeader>
@@ -81,7 +81,7 @@ const UserCheckIn = () => {
         ))}
         {users?.length === 0 && (
           <div className="size-full flex items-center justify-center">
-            <h2 className=" text-center text-lg  font-bold text-success">
+            <h2 className=" text-center text-xl  font-bold text-success">
               לא נשארו לקוחות לבדיקה!
             </h2>
           </div>

@@ -123,20 +123,22 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
               </TabsTrigger>
             ))}
           </TabsList>
+          {apiData.isLoading && <TemplateTabsSkeleton />}
 
-          {tabs.tabContent.map((tab) => (
-            <TabsContent key={tab.value} value={tab.value}>
-              <Button onClick={() => handleAddNew(tab.sheetForm)} className="my-4">
-                {tab.btnPrompt}
-              </Button>
-              {apiData.isLoading && <TemplateTabsSkeleton />}
-              <PresetTable
-                data={apiData.data?.data || []}
-                handleDelete={(id) => deleteItem(id, tab.deleteFunc)}
-                retrieveObjectId={(id: string) => startEdit(id, tab.sheetForm)}
-              />
-            </TabsContent>
-          ))}
+          {!apiData.isLoading &&
+            tabs.tabContent.map((tab) => (
+              <TabsContent key={tab.value} value={tab.value}>
+                <Button onClick={() => handleAddNew(tab.sheetForm)} className="my-4">
+                  {tab.btnPrompt}
+                </Button>
+
+                <PresetTable
+                  data={apiData.data?.data || []}
+                  handleDelete={(id) => deleteItem(id, tab.deleteFunc)}
+                  retrieveObjectId={(id: string) => startEdit(id, tab.sheetForm)}
+                />
+              </TabsContent>
+            ))}
         </Tabs>
       </div>
       <PresetSheet
