@@ -14,7 +14,7 @@ export const UserDashboard = () => {
   const user = useLocation().state;
   const { getUser } = useUsersApi();
   const { id } = useParams();
-  const [activeTab, setActiveTab] = useState("candidates");
+  const [activeTab, setActiveTab] = useState("מעקב שקילה");
 
   const { data, isLoading, isError, error } = useQuery({
     enabled: !user,
