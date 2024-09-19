@@ -28,7 +28,6 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
   const { isEditable } = useIsEditableContext();
 
   const [planName, setPlanName] = useState<string | undefined>();
-  console.log("muscle groups", initialMuscleGroups);
   const [muscleGroups, setMuscleGroups] = useState<IMuscleGroupWorkouts[]>(initialMuscleGroups);
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -114,7 +113,7 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
           <CollapsibleContent className="flex flex-col gap-4">
             {muscleGroups.map((workout, i) => (
               <MuscleGroupContainer
-                key={i}
+                key={workout?._id || workout.muscleGroup}
                 muscleGroup={workout}
                 handleUpdateWorkouts={(workouts) => updateWorkouts(i, workouts)}
                 handleUpdateMuscleGroup={(value) => updateMuscleGroup(i, value)}

@@ -10,6 +10,7 @@ interface CurrentWeighInProps {
 }
 
 export const CurrentWeighIn: FC<CurrentWeighInProps> = ({ weighIn }) => {
+  if (!weighIn) return;
   const convertedDate = DateUtils.convertToDate(weighIn.date);
   const date = DateUtils.formatDate(convertedDate, "DD/MM/YYYY");
 

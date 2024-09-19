@@ -1,11 +1,12 @@
 import { fetchData, sendData, updateItem, deleteItem } from "@/API/api";
-import { IMenuItem } from "@/interfaces/IDietPlan";
+import { CustomItems, IMenuItem } from "@/interfaces/IDietPlan";
 import { ApiResponse } from "@/types/types";
 
 const MENU_ITEMS_ENDPOINT = `menuItems`;
 
 const useMenuItemApi = () => {
-  const getAllMenuItems = () => fetchData<ApiResponse<IMenuItem[]>>(MENU_ITEMS_ENDPOINT);
+  const getAllMenuItems = () =>
+    fetchData<ApiResponse<CustomItems>>(MENU_ITEMS_ENDPOINT).then((res) => res.data);
 
   const getMenuItems = (foodGroup: string) =>
     fetchData<ApiResponse<IMenuItem[]>>(MENU_ITEMS_ENDPOINT + `/foodGroup`, { foodGroup });

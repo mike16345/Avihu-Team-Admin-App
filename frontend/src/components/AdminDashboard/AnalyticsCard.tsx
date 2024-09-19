@@ -48,15 +48,17 @@ const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ title, dataKey }) => {
   const { data, error, isError, isLoading } = apiData;
 
   return (
-    <Card dir="rtl" className="p-5">
+    <Card dir="rtl">
       <CardHeader>
         <CardTitle>{title}</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col max-h-64 overflow-y-auto border-y-2">
+      <CardContent className="flex flex-col h-48 overflow-y-auto ">
         {isError && <ErrorPage message={error.message} />}
         {isLoading && <Loader size="large" />}
         {data?.data.length == 0 && (
-          <h1 className="text-center text-lg font-bold pt-2">אין נתונים להצגה!</h1>
+          <div className="size-full flex items-center justify-center ">
+            <h1 className="text-center text-success text-xl font-bold ">אין נתונים להצגה!</h1>
+          </div>
         )}
         {data?.data.map((item, i) => (
           <div key={i} className="w-full flex items-center justify-between border-b-2">
