@@ -25,6 +25,7 @@ import { convertItemsToOptions, createRetryFunction } from "@/lib/utils";
 import CustomButton from "../ui/CustomButton";
 import ComboBox from "../ui/combo-box";
 import WorkoutPlanContainerWrapper from "../Wrappers/WorkoutPlanContainerWrapper";
+import { QueryKeys } from "@/enums/QueryKeys";
 
 const CreateWorkoutPlan: React.FC = () => {
   const { id } = useParams();
@@ -41,12 +42,11 @@ const CreateWorkoutPlan: React.FC = () => {
     retry: createRetryFunction(404),
   });
 
-  console.log("edit:", isEditable);
   const workoutPlanPresets = useQuery({
     queryFn: () => getAllWorkoutPlanPresets().then((res) => res.data),
     staleTime: FULL_DAY_STALE_TIME,
     enabled: isEditable,
-    queryKey: ["workoutPlanPresets"],
+    queryKey: [QueryKeys.WORKOUT_PRESETS],
   });
 
   const queryClient = useQueryClient();
