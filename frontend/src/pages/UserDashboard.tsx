@@ -27,6 +27,7 @@ export const UserDashboard = () => {
   if (isError && !data) return <ErrorPage message={error.message} />;
 
   const currentUser = data || user;
+  console.log("currentUser", currentUser);
 
   return (
     <div className="size-full flex flex-col gap-4">

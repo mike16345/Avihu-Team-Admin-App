@@ -44,7 +44,7 @@ const CreateWorkoutPlan: React.FC = () => {
   const existingWorkoutPlan = useQuery({
     queryFn: () => getWorkoutPlanByUserId(id || ``),
     staleTime: FULL_DAY_STALE_TIME,
-    queryKey: [id],
+    queryKey: [QueryKeys.USER_WORKOUT_PLAN + `${id}`],
     enabled: !!id,
     retry: createRetryFunction(404),
   });
@@ -80,7 +80,7 @@ const CreateWorkoutPlan: React.FC = () => {
   const onSuccess = () => {
     toast.success(`תכנית אימון נשמרה בהצלחה!`);
     navigation(MainRoutes.USERS + `/${id}`);
-    queryClient.invalidateQueries({ queryKey: [`workout-plan-${id}`] });
+    queryClient.invalidateQueries({ queryKey: [`${QueryKeys.USER_WORKOUT_PLAN}${id}`] });
   };
 
   const onError = (error: any) => {
