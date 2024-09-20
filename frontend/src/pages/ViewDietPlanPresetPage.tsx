@@ -24,12 +24,15 @@ import {
 import CustomButton from "@/components/ui/CustomButton";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { QueryKeys } from "@/enums/QueryKeys";
+import { useNavigate } from "react-router-dom";
+import { MainRoutes } from "@/enums/Routes";
 
 const presetNameShcema = z.object({
   name: z.string().min(1, { message: `בחר שם לתפריט` }).max(25),
 });
 
 export const ViewDietPlanPresetPage = () => {
+  const navigation = useNavigate();
   const { id } = useParams();
   const { getDietPlanPreset, updateDietPlanPreset, addDietPlanPreset } = useDietPlanPresetApi();
   const queryClient = useQueryClient();
@@ -49,6 +52,7 @@ export const ViewDietPlanPresetPage = () => {
   const { reset } = presetNameForm;
 
   const onSuccess = () => {
+    navigation(MainRoutes.DIET_PLANS);
     toast.success("תפריט נשמר בהצלחה!");
     queryClient.invalidateQueries({ queryKey: [QueryKeys.DIET_PLAN_PRESETS] });
   };
