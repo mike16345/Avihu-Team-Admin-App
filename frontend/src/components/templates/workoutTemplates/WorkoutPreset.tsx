@@ -49,7 +49,7 @@ const WorkoutPreset = () => {
 
   const onSuccess = () => {
     toast.success(`תבנית אימון נשמרה בהצלחה!`);
-    navigation(MainRoutes.WORKOUT_PLANS);
+    navigation(MainRoutes.WORKOUT_PLANS_PRESETS);
     queryClient.invalidateQueries({ queryKey: [QueryKeys.WORKOUT_PRESETS] });
   };
 

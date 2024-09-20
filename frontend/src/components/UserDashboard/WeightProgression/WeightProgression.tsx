@@ -24,7 +24,7 @@ export const WeightProgression = () => {
   });
 
   if (isLoading) return <Loader size="large" />;
-  if (error?.status !== 404) return <ErrorPage message={error.message} />;
+  if (error && error?.status !== 404) return <ErrorPage message={error} />;
   const weighIns = data || [];
 
   return (

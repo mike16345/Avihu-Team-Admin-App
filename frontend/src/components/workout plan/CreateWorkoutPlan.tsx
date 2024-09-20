@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useMemo, useState } from "react";
 import {
   ICompleteWorkoutPlan,
   IMuscleGroupWorkouts,
@@ -11,7 +11,7 @@ import { cleanWorkoutObject } from "@/utils/workoutPlanUtils";
 import { Button } from "../ui/button";
 import { BsFillPencilFill } from "react-icons/bs";
 import { BsPlusCircleFill } from "react-icons/bs";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Toggle } from "@/components/ui/toggle";
 import { toast } from "sonner";
 import { useWorkoutPlanPresetApi } from "@/hooks/api/useWorkoutPlanPresetsApi";
@@ -26,13 +26,20 @@ import CustomButton from "../ui/CustomButton";
 import ComboBox from "../ui/combo-box";
 import WorkoutPlanContainerWrapper from "../Wrappers/WorkoutPlanContainerWrapper";
 import { QueryKeys } from "@/enums/QueryKeys";
+import { MainRoutes } from "@/enums/Routes";
 
 const CreateWorkoutPlan: React.FC = () => {
+  const navigation = useNavigate();
+  const queryClient = useQueryClient();
+
   const { id } = useParams();
   const { addWorkoutPlan, getWorkoutPlanByUserId, updateWorkoutPlanByUserId } = useWorkoutPlanApi();
   const { getAllWorkoutPlanPresets } = useWorkoutPlanPresetApi();
   const { isEditable, setIsEditable, toggleIsEditable } = useIsEditableContext();
+
   const [selectedPreset, setSelectedPreset] = useState<IWorkoutPlanPreset | null>(null);
+  const [isCreate, setIsCreate] = useState(true);
+  const [workoutPlan, setWorkoutPlan] = useState<IWorkoutPlan[]>([]);
 
   const existingWorkoutPlan = useQuery({
     queryFn: () => getWorkoutPlanByUserId(id || ``),
@@ -49,23 +56,44 @@ const CreateWorkoutPlan: React.FC = () => {
     queryKey: [QueryKeys.WORKOUT_PRESETS],
   });
 
-  const queryClient = useQueryClient();
+  const workoutPresetsOptions = useMemo(
+    () => convertItemsToOptions(workoutPlanPresets.data || [], "name"),
+    [workoutPlanPresets.data]
+  );
+
+  const handleSubmit = async () => {
+    if (!id) return Promise.reject();
+
+    const postObject: ICompleteWorkoutPlan = {
+      workoutPlans: [...workoutPlan],
+    };
+
+    const cleanedPostObject = cleanWorkoutObject(postObject);
+
+    if (isCreate) {
+      return addWorkoutPlan(id, cleanedPostObject);
+    } else {
+      return updateWorkoutPlanByUserId(id, cleanedPostObject);
+    }
+  };
+
+  const onSuccess = () => {
+    toast.success(`תכנית אימון נשמרה בהצלחה!`);
+    navigation(MainRoutes.USERS + `/${id}`);
+    queryClient.invalidateQueries({ queryKey: [`workout-plan-${id}`] });
+  };
+
+  const onError = (error: any) => {
+    toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
+      description: error?.data?.message || "",
+    });
+  };
 
   const updateWorkoutPlan = useMutation({
-    mutationFn: ({
-      id,
-      cleanedPostObject,
-    }: {
-      id: string;
-      cleanedPostObject: ICompleteWorkoutPlan;
-    }) => updateWorkoutPlanByUserId(id, cleanedPostObject),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [id] });
-    },
+    mutationFn: handleSubmit,
+    onSuccess,
+    onError,
   });
-
-  const [isCreate, setIsCreate] = useState(true);
-  const [workoutPlan, setWorkoutPlan] = useState<IWorkoutPlan[]>([]);
 
   if (existingWorkoutPlan.data?.data && workoutPlan.length == 0) {
     setWorkoutPlan(existingWorkoutPlan.data.data.workoutPlans);
@@ -113,42 +141,12 @@ const CreateWorkoutPlan: React.FC = () => {
     });
   };
 
-  const handleSubmit = async () => {
-    if (!id) return;
-
-    const postObject: ICompleteWorkoutPlan = {
-      workoutPlans: [...workoutPlan],
-    };
-
-    const cleanedPostObject = cleanWorkoutObject(postObject);
-
-    if (isCreate) {
-      addWorkoutPlan(id, cleanedPostObject)
-        .then(() => toast.success(`תוכנית אימון נשמרה בהצלחה!`))
-        .catch((err) =>
-          toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-            description: `${err?.data?.message || ""}`,
-          })
-        );
-    } else {
-      updateWorkoutPlan.mutate({ id, cleanedPostObject });
-      if (updateWorkoutPlan.isError) {
-        return toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-          description: updateWorkoutPlan.error.message,
-        });
-      }
-      toast.success(`תוכנית אימון נשמרה בהצלחה!`);
-    }
-  };
-
   if (existingWorkoutPlan.isLoading) return <Loader size="large" />;
   if (
     existingWorkoutPlan.isError &&
     existingWorkoutPlan.error?.data?.message !== `Workout plan not found!`
   )
     return <ErrorPage message={existingWorkoutPlan.error.message} />;
-
-  const workoutPresetsOptions = convertItemsToOptions(workoutPlanPresets.data || [], "name");
 
   return (
     <>
@@ -210,7 +208,7 @@ const CreateWorkoutPlan: React.FC = () => {
           <div className="flex justify-end">
             <CustomButton
               variant="success"
-              onClick={handleSubmit}
+              onClick={() => updateWorkoutPlan.mutate()}
               title="שמור תוכנית אימון"
               isLoading={updateWorkoutPlan.isPending}
             />
