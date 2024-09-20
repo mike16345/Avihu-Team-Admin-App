@@ -14,6 +14,7 @@ import { Button } from "../ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { convertItemsToOptions, createRetryFunction } from "@/lib/utils";
 import ComboBox from "../ui/combo-box";
+import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 
 interface ExcerciseInputProps {
   muscleGroup?: string;
@@ -36,6 +37,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
   const exerciseQuery = useQuery({
     queryKey: [`exercise-${muscleGroup}`],
     queryFn: () => getExerciseByMuscleGroup(muscleGroup!).then((res) => res.data),
+    staleTime: FULL_DAY_STALE_TIME,
     enabled: doQuery,
     retry: createRetryFunction(404),
   });
