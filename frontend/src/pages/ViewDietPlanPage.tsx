@@ -22,6 +22,7 @@ import CustomButton from "@/components/ui/CustomButton";
 import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 import { useNavigate } from "react-router-dom";
 import { MainRoutes } from "@/enums/Routes";
+import { QueryKeys } from "@/enums/QueryKeys";
 
 export const ViewDietPlanPage = () => {
   const navigation = useNavigate();
@@ -38,7 +39,7 @@ export const ViewDietPlanPage = () => {
   const onSuccess = () => {
     toast.success("תפריט נשמר בהצלחה!");
     navigation(MainRoutes.USERS + `/${id}`);
-    queryClient.invalidateQueries({ queryKey: [`diet-plans-${id}`] });
+    queryClient.invalidateQueries({ queryKey: [`${QueryKeys.USER_DIET_PLAN}${id}`] });
   };
 
   const onError = (e: any) => {
@@ -84,14 +85,14 @@ export const ViewDietPlanPage = () => {
   };
 
   const dietPlanPresets = useQuery({
-    queryKey: [`diet-plan-presets`],
+    queryKey: [QueryKeys.DIET_PLAN_PRESETS],
     enabled: !!id,
     staleTime: FULL_DAY_STALE_TIME,
     queryFn: () => getAllDietPlanPresets().then((res) => res.data),
   });
 
   const { isLoading, error } = useQuery({
-    queryKey: [`diet-plans-${id}`],
+    queryKey: [`${QueryKeys.USER_DIET_PLAN}${id}`],
     enabled: !!id,
     staleTime: FULL_DAY_STALE_TIME,
     queryFn: () =>

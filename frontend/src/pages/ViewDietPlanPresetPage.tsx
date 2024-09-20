@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/form";
 import CustomButton from "@/components/ui/CustomButton";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { QueryKeys } from "@/enums/QueryKeys";
 
 const presetNameShcema = z.object({
   name: z.string().min(1, { message: `בחר שם לתפריט` }).max(25),
@@ -49,7 +50,7 @@ export const ViewDietPlanPresetPage = () => {
 
   const onSuccess = () => {
     toast.success("תפריט נשמר בהצלחה!");
-    queryClient.invalidateQueries({ queryKey: [`preset-dietPlans`] });
+    queryClient.invalidateQueries({ queryKey: [QueryKeys.DIET_PLAN_PRESETS] });
   };
 
   const onError = (e: any) => {
