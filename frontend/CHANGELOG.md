@@ -31,3 +31,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Implemented React Query in most forms
 - User now returns to previous pages when submitting a form.
 - Prevented users from clicking submit button while the request is processing.
+- Filtered out selected muscle groups and exercises to avoid duplicates.
