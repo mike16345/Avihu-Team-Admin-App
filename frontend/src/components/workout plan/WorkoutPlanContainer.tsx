@@ -128,7 +128,7 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
               <MuscleGroupContainer
                 key={muscleGroup?._id || muscleGroup.muscleGroup}
                 muscleGroup={muscleGroup}
-                handleUpdateWorkouts={(workouts) => handleUpdateWorkout("exercises", workouts, i)}
+                handleUpdateExercises={(workouts) => handleUpdateWorkout("exercises", workouts, i)}
                 handleUpdateMuscleGroup={(value) => handleUpdateWorkout("muscleGroup", value, i)}
                 handleDeleteMuscleGroup={() => deleteMuscleGroup(i)}
               />

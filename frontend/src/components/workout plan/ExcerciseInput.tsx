@@ -17,13 +17,13 @@ import ComboBox from "../ui/combo-box";
 
 interface ExcerciseInputProps {
   muscleGroup?: string;
-  updateWorkouts: (workouts: IExercise[]) => void;
+  handleUpdateExercises: (workouts: IExercise[]) => void;
   exercises?: IExercise[];
 }
 
 const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
   muscleGroup,
-  updateWorkouts,
+  handleUpdateExercises,
   exercises,
 }) => {
   const { isEditable } = useIsEditableContext();
@@ -56,26 +56,28 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
     value: IExercise[K],
     index: number
   ) => {
-    const updatedWorkouts = exerciseObjs.map((workout, i) =>
+    const updatedExercises = exerciseObjs.map((workout, i) =>
       i === index ? { ...workout, [key]: value } : workout
     );
 
-    setExerciseObjs(updatedWorkouts);
-    updateWorkouts(updatedWorkouts);
+    setExerciseObjs(updatedExercises);
+    handleUpdateExercises(updatedExercises);
   };
 
   const handleUpdateExercise = (index: number, updatedExercise: IExercisePresetItem) => {
-    setExerciseObjs((prevExercises) => {
-      const updatedWorkouts = [...prevExercises];
-      updatedWorkouts[index] = { ...prevExercises[index], ...updatedExercise };
+    const { name, linkToVideo, tipFromTrainer } = updatedExercise;
 
-      updateWorkouts(updatedWorkouts);
-      return updatedWorkouts;
+    setExerciseObjs((prevExercises) => {
+      const updatedExercises = [...prevExercises];
+      updatedExercises[index] = { ...prevExercises[index], name, linkToVideo, tipFromTrainer };
+
+      handleUpdateExercises(updatedExercises);
+      return updatedExercises;
     });
   };
 
   const handleAddExcercise = () => {
-    const newObject: IExercise = {
+    const newExercise: IExercise = {
       name: ``,
       sets: [
         {
@@ -85,19 +87,19 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
       ],
     };
 
-    const newArr = [...exerciseObjs, newObject];
+    const updatedExercises = [...exerciseObjs, newExercise];
 
-    setExerciseObjs(newArr);
-    updateWorkouts(newArr);
+    setExerciseObjs(updatedExercises);
+    handleUpdateExercises(updatedExercises);
   };
 
   const handleDeleteExcercise = () => {
     if (exerciseIndexToDelete.current === null) return;
 
-    const newArr = exerciseObjs.filter((_, i) => i !== exerciseIndexToDelete.current);
+    const updatedExercises = exerciseObjs.filter((_, i) => i !== exerciseIndexToDelete.current);
 
-    setExerciseObjs(newArr);
-    updateWorkouts(newArr);
+    setExerciseObjs(updatedExercises);
+    handleUpdateExercises(updatedExercises);
     exerciseIndexToDelete.current = null;
   };
 
@@ -109,7 +111,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
         sets: setsArr,
       };
 
-      updateWorkouts(updatedWorkouts);
+      handleUpdateExercises(updatedWorkouts);
       return updatedWorkouts;
     });
   };
