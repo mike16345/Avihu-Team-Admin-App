@@ -36,9 +36,6 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
   const { getAllMuscleGroups } = useMuscleGroupsApi();
   const [value, setValue] = useState<string>(existingMuscleGroup || ``);
 
-  console.log("workout", workout);
-  const muscleGroupsInWorkout = workout.muscleGroups.map((muscleGroup) => muscleGroup.muscleGroup);
-
   const muscleGroupsQuery = useQuery({
     queryKey: ["muscleGroups"],
     queryFn: () => getAllMuscleGroups().then((res) => res.data),
@@ -46,16 +43,17 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
   });
 
   const muscleGroupOptions = useMemo(() => {
-    console.log("muscleGroups", muscleGroupsQuery.data);
-    console.log("muscleGroups in workout", muscleGroupsInWorkout);
+    const muscleGroupsInWorkout = workout.muscleGroups.map(
+      (muscleGroup) => muscleGroup.muscleGroup
+    );
+
     const filteredExistingMuscleGroups = muscleGroupsQuery.data?.filter(
       (muscleGroup) =>
         muscleGroupsInWorkout.find((mgName) => muscleGroup.name == mgName) == undefined
     );
 
-    console.log("filteredExistingMuscleGroups", filteredExistingMuscleGroups);
     return convertItemsToOptions(filteredExistingMuscleGroups || [], "name", "name");
-  }, [muscleGroupsQuery.data, muscleGroupsInWorkout]);
+  }, [muscleGroupsQuery.data, workout.muscleGroups]);
 
   const updateSelection = (selection: string) => {
     handleChange(selection);

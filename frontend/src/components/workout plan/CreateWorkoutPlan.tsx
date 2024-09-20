@@ -171,7 +171,6 @@ const CreateWorkoutPlan: React.FC = () => {
                 value={selectedPreset}
                 options={workoutPresetsOptions}
                 onSelect={(currentValue) => {
-                  console.log("current value", currentValue);
                   setWorkoutPlan(currentValue.workoutPlans);
                   setSelectedPreset(currentValue.name);
                 }}

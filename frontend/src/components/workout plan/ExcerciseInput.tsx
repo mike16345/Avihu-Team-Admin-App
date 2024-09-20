@@ -1,4 +1,4 @@
-import React, { Fragment, useRef, useState } from "react";
+import React, { Fragment, useMemo, useRef, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { IExercisePresetItem, ISet, IExercise } from "@/interfaces/IWorkoutPlan";
@@ -40,7 +40,17 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
     retry: createRetryFunction(404),
   });
 
-  const exerciseOptions = convertItemsToOptions(exerciseQuery.data || [], "name");
+  const exerciseOptions = useMemo(() => {
+    if (!exerciseQuery.data) return [];
+    const exercisesInMuscleGroup = exercises?.map((exercise) => exercise.name);
+
+    const filteredExistingExercises = exerciseQuery.data?.filter(
+      (exercise) =>
+        exercisesInMuscleGroup?.find((exerciseName) => exercise.name == exerciseName) == undefined
+    );
+
+    return convertItemsToOptions(filteredExistingExercises || [], "name");
+  }, [exerciseQuery.data, exercises]);
 
   const [exerciseObjs, setExerciseObjs] = useState<IExercise[]>(
     exercises || [
@@ -65,6 +75,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
   };
 
   const handleUpdateExercise = (index: number, updatedExercise: IExercisePresetItem) => {
+    console.log("update exercise", updatedExercise);
     const { name, linkToVideo, tipFromTrainer } = updatedExercise;
 
     setExerciseObjs((prevExercises) => {
@@ -144,7 +155,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
                         <ComboBox
                           options={exerciseOptions}
                           value={item.name}
-                          onSelect={(currentValue) => handleUpdateExercise(i, currentValue)}
+                          onSelect={(exercise) => handleUpdateExercise(i, exercise)}
                         />
                       </div>
                     ) : (
