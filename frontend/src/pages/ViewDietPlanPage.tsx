@@ -20,8 +20,11 @@ import { validateDietPlan } from "@/components/DietPlan/DietPlanSchema";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import CustomButton from "@/components/ui/CustomButton";
 import { FULL_DAY_STALE_TIME } from "@/constants/constants";
+import { useNavigate } from "react-router-dom";
+import { MainRoutes } from "@/enums/Routes";
 
 export const ViewDietPlanPage = () => {
+  const navigation = useNavigate();
   const { id } = useParams();
   const { addDietPlan, updateDietPlanByUserId, getDietPlanByUserId } = useDietPlanApi();
   const { getAllDietPlanPresets } = useDietPlanPresetApi();
@@ -34,6 +37,7 @@ export const ViewDietPlanPage = () => {
 
   const onSuccess = () => {
     toast.success("תפריט נשמר בהצלחה!");
+    navigation(MainRoutes.USERS + `/${id}`);
     queryClient.invalidateQueries({ queryKey: [`diet-plans-${id}`] });
   };
 
@@ -57,7 +61,7 @@ export const ViewDietPlanPage = () => {
   });
 
   const handleSubmit = () => {
-    console.log("diet", dietPlan);
+    console.log("diet plan", dietPlan);
     if (!dietPlan) return;
     const dietPlanToAdd = {
       ...dietPlan,
