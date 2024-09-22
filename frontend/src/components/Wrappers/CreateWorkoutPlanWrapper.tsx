@@ -1,5 +1,5 @@
 import { EditableContextProvider } from "@/context/useIsEditableContext";
-import CreateWorkoutPlan from "./CreateWorkoutPlan";
+import CreateWorkoutPlan from "../workout plan/CreateWorkoutPlan";
 
 export const CreateWorkoutPlanWrapper = () => {
   return (

@@ -34,7 +34,7 @@ interface ExerciseFormProps {
 const exerciseSchema = z.object({
   name: z.string().min(1, { message: `שם התרגיל חייב להיות תו אחד או יותר` }),
   muscleGroup: z.string().min(1, { message: `תרגיל חייב להיות משוייך לקבוצת שריר` }),
-  tipsFromTrainer: z.string().min(1).optional(),
+  tipFromTrainer: z.string().min(1).optional(),
   linkToVideo: z.string().url({ message: `אנא הכנס לינק תקין!` }),
 });
 
@@ -49,7 +49,7 @@ const ExerciseForm: React.FC<ExerciseFormProps> = ({ objectId, closeSheet }) => 
       name: "",
       muscleGroup: "",
       linkToVideo: "",
-      tipsFromTrainer: "",
+      tipFromTrainer: "",
     },
   });
 
@@ -141,7 +141,7 @@ const ExerciseForm: React.FC<ExerciseFormProps> = ({ objectId, closeSheet }) => 
         />
         <FormField
           control={exerciseForm.control}
-          name="tipsFromTrainer"
+          name="tipFromTrainer"
           render={({ field }) => (
             <FormItem>
               <FormLabel>דגשים</FormLabel>

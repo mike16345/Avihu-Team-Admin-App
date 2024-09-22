@@ -82,8 +82,6 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
     saveInfo(values);
   };
 
-  console.log("remind in", new Date(new Date().getTime() + userForm.getValues().remindIn));
-
   return (
     <Form {...userForm}>
       <form onSubmit={userForm.handleSubmit(onSubmit)} className="space-y-4 p-10  w-[80%]">

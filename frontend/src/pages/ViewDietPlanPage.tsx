@@ -1,6 +1,6 @@
 import { useDietPlanApi } from "@/hooks/api/useDietPlanApi";
-import { IDietPlan, IDietPlanPreset } from "@/interfaces/IDietPlan";
-import { useEffect, useState } from "react";
+import { IDietPlan } from "@/interfaces/IDietPlan";
+import { useState } from "react";
 import { toast } from "sonner";
 import { useParams } from "react-router";
 import { defaultDietPlan } from "@/constants/DietPlanConsts";
@@ -19,8 +19,13 @@ import { useDietPlanPresetApi } from "@/hooks/api/useDietPlanPresetsApi";
 import { validateDietPlan } from "@/components/DietPlan/DietPlanSchema";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import CustomButton from "@/components/ui/CustomButton";
+import { FULL_DAY_STALE_TIME } from "@/constants/constants";
+import { useNavigate } from "react-router-dom";
+import { MainRoutes } from "@/enums/Routes";
+import { QueryKeys } from "@/enums/QueryKeys";
 
 export const ViewDietPlanPage = () => {
+  const navigation = useNavigate();
   const { id } = useParams();
   const { addDietPlan, updateDietPlanByUserId, getDietPlanByUserId } = useDietPlanApi();
   const { getAllDietPlanPresets } = useDietPlanPresetApi();
@@ -29,13 +34,12 @@ export const ViewDietPlanPage = () => {
   const [isNewPlan, setIsNewPlan] = useState(false);
   const [dietPlan, setDietPlan] = useState<IDietPlan | null>(null);
 
-  const [presetList, setPresetList] = useState<IDietPlanPreset[]>([]);
-
   const updateDietPlan = (dietPlan: IDietPlan) => setDietPlan(dietPlan);
 
   const onSuccess = () => {
     toast.success("תפריט נשמר בהצלחה!");
-    queryClient.invalidateQueries({ queryKey: [`diet-plans-${id}`] });
+    navigation(MainRoutes.USERS + `/${id}`);
+    queryClient.invalidateQueries({ queryKey: [`${QueryKeys.USER_DIET_PLAN}${id}`] });
   };
 
   const onError = (e: any) => {
@@ -58,6 +62,7 @@ export const ViewDietPlanPage = () => {
   });
 
   const handleSubmit = () => {
+    console.log("diet plan", dietPlan);
     if (!dietPlan) return;
     const dietPlanToAdd = {
       ...dietPlan,
@@ -79,33 +84,45 @@ export const ViewDietPlanPage = () => {
     }
   };
 
+  const dietPlanPresets = useQuery({
+    queryKey: [QueryKeys.DIET_PLAN_PRESETS],
+    enabled: !!id,
+    staleTime: FULL_DAY_STALE_TIME,
+    queryFn: () => getAllDietPlanPresets().then((res) => res.data),
+  });
+
+  const { isLoading, error } = useQuery({
+    queryKey: [`${QueryKeys.USER_DIET_PLAN}${id}`],
+    enabled: !!id,
+    staleTime: FULL_DAY_STALE_TIME,
+    queryFn: () =>
+      getDietPlanByUserId(id!)
+        .then((plan) => {
+          setDietPlan(plan);
+          return plan;
+        })
+        .catch((e) => {
+          setIsNewPlan(true);
+          setDietPlan(defaultDietPlan);
+          return e;
+        }),
+  });
+
   const handleSelect = (presetName: string) => {
-    const selectedPreset = presetList?.find((preset) => preset.name === presetName);
+    const selectedPreset = dietPlanPresets?.data?.find((preset) => preset.name === presetName);
 
     if (!selectedPreset) return;
+    const { meals, totalCalories, freeCalories, customInstructions } = selectedPreset;
 
     setDietPlan({
-      ...selectedPreset,
-      meals: selectedPreset.meals,
-      totalCalories: selectedPreset.totalCalories,
+      meals,
+      totalCalories,
+      freeCalories,
+      customInstructions,
     });
   };
 
-  const { isLoading, isError, error, data } = useQuery({
-    queryKey: [`diet-plans-${id}`],
-    enabled: !!id,
-    queryFn: () =>
-      getDietPlanByUserId(id!).catch((e) => {
-        setIsNewPlan(true);
-        return e;
-      }),
-  });
-
-  useEffect(() => {
-    getAllDietPlanPresets().then((res) => setPresetList(res.data));
-  }, []);
-
-  if (isLoading) return <Loader size="large" />;
+  if (isLoading || dietPlanPresets.isLoading) return <Loader size="large" />;
   if (error) return <ErrorPage message={error.message} />;
   const plan = dietPlan || defaultDietPlan;
 
@@ -117,7 +134,7 @@ export const ViewDietPlanPage = () => {
           <SelectValue placeholder="בחר תפריט" />
         </SelectTrigger>
         <SelectContent dir="rtl">
-          {presetList?.map((preset) => (
+          {dietPlanPresets?.data?.map((preset) => (
             <SelectItem key={preset.name} value={preset.name}>
               {preset.name}
             </SelectItem>
