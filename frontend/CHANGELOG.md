@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Fixed Loader bug when selecting size medium
 - Fixed default diet plan loading for users with existing plans
 - Fixed workout plan presets caching invalidation issue when adding/updating workout plan preset.
+- Fixed error toast descriptions showing in users form
 
 ### Changed
 
