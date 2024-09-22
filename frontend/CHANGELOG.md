@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Fixed issue where weigh ins page showed an error if user had no weigh ins.
 - Fixed issue where you could not leave maxReps as 0.
 - Fixed Loader bug when selecting size medium
+- Fixed default diet plan loading for users with existing plans
 
 ### Changed
 
