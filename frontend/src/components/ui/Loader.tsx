@@ -13,7 +13,7 @@ const Loader: React.FC<LoaderProps> = ({ size = `medium`, variant = `standard` }
         <div
           className={
             variant === `standard`
-              ? `rounded-full  border-8 border-t-primary animate-spin w-${pxSize} h-${pxSize}`
+              ? `rounded-full  border-8 border-t-primary animate-spin w-${pxSize} h-${pxSize} `
               : `rounded-full animate-spin border-2 border-primary-foreground border-t-transparent w-6 h-6`
           }
         ></div>

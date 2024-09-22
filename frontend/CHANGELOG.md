@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Fixed combobox loader not working in muscleGroup selector
 - Fixed issue where weigh ins page showed an error if user had no weigh ins.
 - Fixed issue where you could not leave maxReps as 0.
+- Fixed Loader bug when selecting size medium
 
 ### Changed
 
