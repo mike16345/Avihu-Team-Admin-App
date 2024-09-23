@@ -62,7 +62,6 @@ export const ViewDietPlanPage = () => {
   });
 
   const handleSubmit = () => {
-    console.log("diet plan", dietPlan);
     if (!dietPlan) return;
     const dietPlanToAdd = {
       ...dietPlan,
@@ -105,8 +104,7 @@ export const ViewDietPlanPage = () => {
           setIsNewPlan(true);
           setDietPlan(defaultDietPlan);
           return e;
-        })
-        .finally(() => console.log(`ran`)),
+        }),
   });
 
   const handleSelect = (presetName: string) => {
@@ -142,17 +140,22 @@ export const ViewDietPlanPage = () => {
           ))}
         </SelectContent>
       </Select>
-      {plan && <DietPlanForm dietPlan={plan} updateDietPlan={updateDietPlan} />}
-      {plan && plan.meals.length > 0 && (
-        <div>
-          <CustomButton
-            className="font-bold"
-            variant="success"
-            onClick={handleSubmit}
-            title="שמור תפריט"
-            isLoading={createDietPlan.isPending || editDietPlan.isPending}
-          />
-        </div>
+
+      {plan && (
+        <>
+          <DietPlanForm dietPlan={plan} updateDietPlan={updateDietPlan} />
+          {plan.meals.length > 0 && (
+            <div>
+              <CustomButton
+                className="font-bold"
+                variant="success"
+                onClick={handleSubmit}
+                title="שמור תפריט"
+                isLoading={createDietPlan.isPending || editDietPlan.isPending}
+              />
+            </div>
+          )}
+        </>
       )}
     </div>
   );

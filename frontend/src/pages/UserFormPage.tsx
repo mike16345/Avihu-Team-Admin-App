@@ -25,8 +25,6 @@ const UserFormPage = () => {
   };
 
   const onError = (e: any) => {
-    console.log(e);
-
     toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, { description: e.data.message });
   };
 

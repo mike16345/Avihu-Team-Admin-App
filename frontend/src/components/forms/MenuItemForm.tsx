@@ -59,18 +59,28 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
 
   const queryClient = useQueryClient();
 
+  const successFunc = () => {
+    queryClient.invalidateQueries({ queryKey: [foodGroup] });
+    toast.success(`פריט נשמר בהצלחה!`);
+    closeSheet();
+  };
+
+  const errFunc = (e: any) => {
+    toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
+      description: e.data.message,
+    });
+  };
+
   const updateMenuItem = useMutation({
     mutationFn: ({ objectId, menuItemObject }: { objectId: string; menuItemObject: IMenuItem }) =>
       editMenuItem(menuItemObject, objectId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [foodGroup] });
-    },
+    onSuccess: successFunc,
+    onError: errFunc,
   });
   const addNewMenuItem = useMutation({
     mutationFn: addMenuItem,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [foodGroup] });
-    },
+    onSuccess: successFunc,
+    onError: errFunc,
   });
 
   const onSubmit = (values: z.infer<typeof menuItemSchema>) => {
@@ -81,22 +91,8 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
     };
     if (objectId) {
       updateMenuItem.mutate({ menuItemObject, objectId });
-      if (updateMenuItem.isError) {
-        return toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-          description: updateMenuItem.error.message,
-        });
-      }
-      toast.success(`פריט עודכן בהצלחה!`);
-      closeSheet();
     } else {
       addNewMenuItem.mutate(menuItemObject);
-      if (addNewMenuItem.isError) {
-        return toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-          description: addNewMenuItem.error.message,
-        });
-      }
-      toast.success(`פריט נשמר בהצלחה!`);
-      closeSheet();
     }
   };
 
