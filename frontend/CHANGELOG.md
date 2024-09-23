@@ -22,6 +22,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Fixed combobox loader not working in muscleGroup selector
 - Fixed issue where weigh ins page showed an error if user had no weigh ins.
 - Fixed issue where you could not leave maxReps as 0.
+- Fixed Loader bug when selecting size medium the loader would not be round.
+- Fixed default diet plan loading for users with existing plans
+- Fixed workout plan presets caching invalidation issue when adding/updating workout plan preset.
+- Fixed issue where the description in the error toast was not shown in the UserForm.
+- Fixed issue in creating a menu item, when receiving an error sucess toast would still show up.
 
 ### Changed
 

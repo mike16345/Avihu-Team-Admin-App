@@ -38,8 +38,8 @@ export const ViewDietPlanPage = () => {
 
   const onSuccess = () => {
     toast.success("תפריט נשמר בהצלחה!");
-    navigation(MainRoutes.USERS + `/${id}`);
     queryClient.invalidateQueries({ queryKey: [`${QueryKeys.USER_DIET_PLAN}${id}`] });
+    navigation(MainRoutes.USERS + `/${id}`);
   };
 
   const onError = (e: any) => {
@@ -62,7 +62,6 @@ export const ViewDietPlanPage = () => {
   });
 
   const handleSubmit = () => {
-    console.log("diet plan", dietPlan);
     if (!dietPlan) return;
     const dietPlanToAdd = {
       ...dietPlan,
@@ -91,7 +90,7 @@ export const ViewDietPlanPage = () => {
     queryFn: () => getAllDietPlanPresets().then((res) => res.data),
   });
 
-  const { isLoading, error } = useQuery({
+  const { isLoading, error, data } = useQuery({
     queryKey: [`${QueryKeys.USER_DIET_PLAN}${id}`],
     enabled: !!id,
     staleTime: FULL_DAY_STALE_TIME,
@@ -124,7 +123,7 @@ export const ViewDietPlanPage = () => {
 
   if (isLoading || dietPlanPresets.isLoading) return <Loader size="large" />;
   if (error) return <ErrorPage message={error.message} />;
-  const plan = dietPlan || defaultDietPlan;
+  const plan = dietPlan || data;
 
   return (
     <div className=" flex flex-col gap-4 size-full hide-scrollbar overflow-y-auto">
@@ -141,17 +140,22 @@ export const ViewDietPlanPage = () => {
           ))}
         </SelectContent>
       </Select>
-      <DietPlanForm dietPlan={plan} updateDietPlan={updateDietPlan} />
-      {plan.meals.length > 0 && (
-        <div>
-          <CustomButton
-            className="font-bold"
-            variant="success"
-            onClick={handleSubmit}
-            title="שמור תפריט"
-            isLoading={createDietPlan.isPending || editDietPlan.isPending}
-          />
-        </div>
+
+      {plan && (
+        <>
+          <DietPlanForm dietPlan={plan} updateDietPlan={updateDietPlan} />
+          {plan.meals.length > 0 && (
+            <div>
+              <CustomButton
+                className="font-bold"
+                variant="success"
+                onClick={handleSubmit}
+                title="שמור תפריט"
+                isLoading={createDietPlan.isPending || editDietPlan.isPending}
+              />
+            </div>
+          )}
+        </>
       )}
     </div>
   );

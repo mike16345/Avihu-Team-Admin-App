@@ -8,6 +8,7 @@ import React, { useState } from "react";
 import ErrorPage from "./ErrorPage";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ITabs } from "@/interfaces/interfaces";
+import { QueryKeys } from "@/enums/QueryKeys";
 
 const WorkoutsTemplatePage = () => {
   const { deleteExercise } = useExercisePresetApi();
@@ -19,7 +20,7 @@ const WorkoutsTemplatePage = () => {
   const deleteWorkoutPreset = useMutation({
     mutationFn: deleteWorkoutPlanPreset,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`workoutPlans`] });
+      queryClient.invalidateQueries({ queryKey: [QueryKeys.WORKOUT_PRESETS] });
     },
   });
   const deleteExistingMuscleGroup = useMutation({
@@ -41,7 +42,7 @@ const WorkoutsTemplatePage = () => {
       {
         name: `תבניות אימונים`,
         value: `WorkoutPlans`,
-        queryKey: `workoutPlans`,
+        queryKey: QueryKeys.WORKOUT_PRESETS,
       },
       {
         name: `קבוצות שריר`,
