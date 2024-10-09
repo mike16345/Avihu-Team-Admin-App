@@ -1,21 +1,23 @@
 import { deleteItem, fetchData, sendData, updateItem } from "@/API/api";
 import { IMuscleGroupItem } from "@/interfaces/IWorkoutPlan";
+import { ApiResponse } from "@/types/types";
 
 const useMuscleGroupsApi = () => {
-  const MUSCLEGROUP_PRESETS_API = `/presets/muscleGroups/`;
+  const MUSCLEGROUP_PRESETS_API = `muscleGroups`;
 
-  const getAllMuscleGroups = () => fetchData<IMuscleGroupItem[]>(MUSCLEGROUP_PRESETS_API);
+  const getAllMuscleGroups = () =>
+    fetchData<ApiResponse<IMuscleGroupItem[]>>(MUSCLEGROUP_PRESETS_API);
 
   const getMuscleGroupById = (id: string) =>
-    fetchData<IMuscleGroupItem>(MUSCLEGROUP_PRESETS_API + id);
+    fetchData<ApiResponse<IMuscleGroupItem>>(MUSCLEGROUP_PRESETS_API + `/one`, { id: id });
 
   const updateMuscleGroup = (id: string, newExercise: IMuscleGroupItem) =>
-    updateItem(MUSCLEGROUP_PRESETS_API + id, newExercise);
+    updateItem(MUSCLEGROUP_PRESETS_API + `/one`, newExercise, null, { id });
 
   const addMuscleGroup = (newExercise: IMuscleGroupItem) =>
     sendData<IMuscleGroupItem>(MUSCLEGROUP_PRESETS_API, newExercise);
 
-  const deleteMuscleGroup = (id: string) => deleteItem(MUSCLEGROUP_PRESETS_API, id);
+  const deleteMuscleGroup = (id: string) => deleteItem(MUSCLEGROUP_PRESETS_API + `/one`, { id });
 
   return {
     getAllMuscleGroups,

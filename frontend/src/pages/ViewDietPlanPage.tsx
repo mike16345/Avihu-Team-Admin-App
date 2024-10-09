@@ -1,6 +1,6 @@
 import { useDietPlanApi } from "@/hooks/api/useDietPlanApi";
-import { IDietPlan, IDietPlanPreset } from "@/interfaces/IDietPlan";
-import { useEffect, useState } from "react";
+import { IDietPlan } from "@/interfaces/IDietPlan";
+import { useState } from "react";
 import { toast } from "sonner";
 import { useParams } from "react-router";
 import { defaultDietPlan } from "@/constants/DietPlanConsts";
@@ -16,120 +16,146 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { useDietPlanPresetApi } from "@/hooks/api/useDietPlanPresetsApi";
-import { Button } from "@/components/ui/button";
+import { validateDietPlan } from "@/components/DietPlan/DietPlanSchema";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import CustomButton from "@/components/ui/CustomButton";
+import { FULL_DAY_STALE_TIME } from "@/constants/constants";
+import { useNavigate } from "react-router-dom";
+import { MainRoutes } from "@/enums/Routes";
+import { QueryKeys } from "@/enums/QueryKeys";
 
 export const ViewDietPlanPage = () => {
+  const navigation = useNavigate();
   const { id } = useParams();
   const { addDietPlan, updateDietPlanByUserId, getDietPlanByUserId } = useDietPlanApi();
   const { getAllDietPlanPresets } = useDietPlanPresetApi();
+  const queryClient = useQueryClient();
 
   const [isNewPlan, setIsNewPlan] = useState(false);
-  const [dietPlan, setDietPlan] = useState<IDietPlan>(defaultDietPlan);
-  const [presetList, setPresetList] = useState<IDietPlanPreset[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [dietPlan, setDietPlan] = useState<IDietPlan | null>(null);
 
   const updateDietPlan = (dietPlan: IDietPlan) => setDietPlan(dietPlan);
 
+  const onSuccess = () => {
+    toast.success("תפריט נשמר בהצלחה!");
+    queryClient.invalidateQueries({ queryKey: [`${QueryKeys.USER_DIET_PLAN}${id}`] });
+    navigation(MainRoutes.USERS + `/${id}`);
+  };
+
+  const onError = (e: any) => {
+    toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
+      description: e?.data?.message || "",
+    });
+  };
+
+  const createDietPlan = useMutation({
+    mutationFn: addDietPlan,
+    onSuccess: onSuccess,
+    onError: onError,
+  });
+
+  const editDietPlan = useMutation({
+    mutationFn: ({ id, dietPlanToAdd }: { id: string; dietPlanToAdd: IDietPlan }) =>
+      updateDietPlanByUserId(id, dietPlanToAdd),
+    onSuccess: onSuccess,
+    onError: onError,
+  });
+
   const handleSubmit = () => {
+    if (!dietPlan) return;
     const dietPlanToAdd = {
       ...dietPlan,
       userId: id,
     };
 
+    const { isValid, errors } = validateDietPlan(dietPlanToAdd);
+
+    if (!isValid) {
+      toast.error(`יש בעיה בקלט.`);
+      return;
+    }
     if (isNewPlan) {
-      createDietPlan(dietPlanToAdd);
+      createDietPlan.mutate(dietPlanToAdd);
     } else {
-      editDietPlan(dietPlanToAdd);
+      if (!id) return;
+
+      editDietPlan.mutate({ id, dietPlanToAdd });
     }
   };
 
-  const createDietPlan = (dietPlan: IDietPlan) => {
-    if (!dietPlan) return;
+  const dietPlanPresets = useQuery({
+    queryKey: [QueryKeys.DIET_PLAN_PRESETS],
+    enabled: !!id,
+    staleTime: FULL_DAY_STALE_TIME,
+    queryFn: () => getAllDietPlanPresets().then((res) => res.data),
+  });
 
-    addDietPlan(dietPlan)
-      .then(() => {
-        toast.success("תפריט נשמר בהצלחה!");
-      })
-      .catch((err) => {
-        toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, { description: err.message });
-        console.error("error", err);
-      });
-  };
-
-  const editDietPlan = (dietPlan: IDietPlan) => {
-    if (!dietPlan || !id) return;
-
-    updateDietPlanByUserId(id, dietPlan)
-      .then(() => {
-        toast.success("תפריט עודכן בהצלחה!");
-      })
-      .catch((err) => {
-        toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, { description: err.message });
-      });
-  };
+  const { isLoading, error, data } = useQuery({
+    queryKey: [`${QueryKeys.USER_DIET_PLAN}${id}`],
+    enabled: !!id,
+    staleTime: FULL_DAY_STALE_TIME,
+    queryFn: () =>
+      getDietPlanByUserId(id!)
+        .then((plan) => {
+          setDietPlan(plan);
+          return plan;
+        })
+        .catch((e) => {
+          setIsNewPlan(true);
+          setDietPlan(defaultDietPlan);
+          return e;
+        }),
+  });
 
   const handleSelect = (presetName: string) => {
-    const selectedPreset = presetList?.find((preset) => preset.name === presetName);
+    const selectedPreset = dietPlanPresets?.data?.find((preset) => preset.name === presetName);
 
     if (!selectedPreset) return;
+    const { meals, totalCalories, freeCalories, customInstructions } = selectedPreset;
 
-    setDietPlan({ meals: selectedPreset.meals, totalCalories: selectedPreset.totalCalories });
+    setDietPlan({
+      meals,
+      totalCalories,
+      freeCalories,
+      customInstructions,
+    });
   };
 
-  useEffect(() => {
-    if (!id) return;
-    setIsLoading(true);
-
-    getAllDietPlanPresets()
-      .then((res) => setPresetList(res))
-      .catch((err) => setError(err));
-
-    getDietPlanByUserId(id)
-      .then((dietPlan) => {
-        if (dietPlan) {
-          setDietPlan(dietPlan);
-          setIsNewPlan(false);
-        } else {
-          setDietPlan(defaultDietPlan);
-          setIsNewPlan(true);
-        }
-      })
-      .catch((err: Error) => {
-        setError(err.message);
-      })
-      .finally(() => {
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 1000);
-      });
-  }, []);
-
-  if (isLoading) return <Loader size="large" />;
-  if (error) return <ErrorPage message={error} />;
+  if (isLoading || dietPlanPresets.isLoading) return <Loader size="large" />;
+  if (error) return <ErrorPage message={error.message} />;
+  const plan = dietPlan || data;
 
   return (
-    <div className=" flex flex-col gap-4 w-4/5 h-full hide-scrollbar overflow-y-auto">
+    <div className=" flex flex-col gap-4 size-full hide-scrollbar overflow-y-auto">
       <h1 className="text-2xl font-semibold mb-4">עריכת תפריט תזונה</h1>
       <Select onValueChange={(val) => handleSelect(val)}>
         <SelectTrigger dir="rtl" className="w-[350px] mr-1">
           <SelectValue placeholder="בחר תפריט" />
         </SelectTrigger>
         <SelectContent dir="rtl">
-          {presetList?.map((preset) => (
+          {dietPlanPresets?.data?.map((preset) => (
             <SelectItem key={preset.name} value={preset.name}>
               {preset.name}
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
-      <DietPlanForm existingDietPlan={dietPlan} updateDietPlan={updateDietPlan} />
-      {dietPlan.meals.length > 0 && (
-        <div>
-          <Button className="font-bold" variant="success" onClick={handleSubmit}>
-            שמור תפריט
-          </Button>
-        </div>
+
+      {plan && (
+        <>
+          <DietPlanForm dietPlan={plan} updateDietPlan={updateDietPlan} />
+          {plan.meals.length > 0 && (
+            <div>
+              <CustomButton
+                className="font-bold"
+                variant="success"
+                onClick={handleSubmit}
+                title="שמור תפריט"
+                isLoading={createDietPlan.isPending || editDietPlan.isPending}
+              />
+            </div>
+          )}
+        </>
       )}
     </div>
   );

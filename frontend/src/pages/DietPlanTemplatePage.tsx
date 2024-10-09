@@ -1,121 +1,108 @@
 import TemplateTabs from "@/components/templates/TemplateTabs";
 import { useDietPlanPresetApi } from "@/hooks/api/useDietPlanPresetsApi";
 import useMenuItemApi from "@/hooks/api/useMenuItemApi";
-import { IDietPlan, IMenuItem } from "@/interfaces/IDietPlan";
-import React, { useEffect, useState } from "react";
-import ErrorPage from "./ErrorPage";
-import TemplateTabsSkeleton from "@/components/ui/skeletons/TemplateTabsSkeleton";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { ITabs } from "@/interfaces/interfaces";
+import { QueryKeys } from "@/enums/QueryKeys";
 
 const DietPlanTemplatePage = () => {
-  const { getMenuItems, deleteMenuItem } = useMenuItemApi();
-  const { getAllDietPlanPresets, deleteDietPlanPreset } = useDietPlanPresetApi();
+  const { deleteMenuItem } = useMenuItemApi();
+  const { deleteDietPlanPreset } = useDietPlanPresetApi();
 
-  const [dietPlanPresets, setDietPlanPresets] = useState<IDietPlan[]>([]);
-  const [proteinMenu, setProteinMenu] = useState<IMenuItem[]>([]);
-  const [carbsMenu, setCarbsMenu] = useState<IMenuItem[]>([]);
-  const [VegetableMenu, setVegetableMenu] = useState<IMenuItem[]>([]);
-  const [fatsMenue, setFatsMenue] = useState<IMenuItem[]>([]);
+  const queryClient = useQueryClient();
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const deleteDietPlan = useMutation({
+    mutationFn: deleteDietPlanPreset,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QueryKeys.DIET_PLAN_PRESETS] });
+    },
+  });
+  const deleteCarbs = useMutation({
+    mutationFn: deleteMenuItem,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`carbs`] });
+    },
+  });
+  const deleteFats = useMutation({
+    mutationFn: deleteMenuItem,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`fats`] });
+    },
+  });
+  const deleteVegetables = useMutation({
+    mutationFn: deleteMenuItem,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`vegetables`] });
+    },
+  });
+  const deleteProteins = useMutation({
+    mutationFn: deleteMenuItem,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`protein`] });
+    },
+  });
 
   const tabs: ITabs = {
     tabHeaders: [
       {
         name: `תפריטים`,
         value: `dietPlanPresets`,
+        queryKey: QueryKeys.DIET_PLAN_PRESETS,
       },
       {
         name: `חלבונים`,
         value: `proteinItems`,
+        queryKey: `protein`,
       },
       {
         name: `פחמימות`,
         value: `carbItems`,
+        queryKey: `carbs`,
       },
       {
         name: `ירקות`,
         value: `vegetableItems`,
+        queryKey: `vegetables`,
       },
       {
         name: `שומנים`,
         value: `fatsItems`,
+        queryKey: `fats`,
       },
     ],
     tabContent: [
       {
         value: `dietPlanPresets`,
         btnPrompt: `הוסף תפריט`,
-        state: dietPlanPresets,
-        setState: setDietPlanPresets,
         sheetForm: `dietPlans`,
-        deleteFunc: deleteDietPlanPreset,
+        deleteFunc: deleteDietPlan,
       },
       {
         value: `proteinItems`,
         btnPrompt: `הוסף חלבון`,
-        state: proteinMenu,
-        setState: setProteinMenu,
         sheetForm: `protein`,
-        deleteFunc: deleteMenuItem,
+        deleteFunc: deleteProteins,
       },
       {
         value: `carbItems`,
         btnPrompt: `הוסף פחמימה`,
-        state: carbsMenu,
-        setState: setCarbsMenu,
         sheetForm: `carbs`,
-        deleteFunc: deleteMenuItem,
+        deleteFunc: deleteCarbs,
       },
       {
         value: `vegetableItems`,
         btnPrompt: `הוסף ירקות`,
-        state: VegetableMenu,
-        setState: setVegetableMenu,
         sheetForm: `vegetables`,
-        deleteFunc: deleteMenuItem,
+        deleteFunc: deleteVegetables,
       },
       {
         value: `fatsItems`,
         btnPrompt: `הוסף שומנים`,
-        state: fatsMenue,
-        setState: setFatsMenue,
         sheetForm: `fats`,
-        deleteFunc: deleteMenuItem,
+        deleteFunc: deleteFats,
       },
     ],
   };
-
-  useEffect(() => {
-    setIsLoading(true);
-
-    getAllDietPlanPresets()
-      .then((res) => setDietPlanPresets(res))
-      .catch((err) => setError(err));
-
-    getMenuItems(`protein`)
-      .then((res) => setProteinMenu(res))
-      .catch((err) => setError(err));
-
-    getMenuItems(`carbs`)
-      .then((res) => setCarbsMenu(res))
-      .catch((err) => setError(err));
-
-    getMenuItems(`vegetables`)
-      .then((res) => setVegetableMenu(res))
-      .catch((err) => setError(err));
-
-    getMenuItems(`fats`)
-      .then((res) => setFatsMenue(res))
-      .catch((err) => setError(err));
-
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-  }, []);
-
-  if (isLoading) return <TemplateTabsSkeleton />;
-  if (error) return <ErrorPage message={error} />;
 
   return (
     <div>

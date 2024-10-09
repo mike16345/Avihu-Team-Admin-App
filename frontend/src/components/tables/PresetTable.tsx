@@ -95,7 +95,12 @@ const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, retrieveO
             </TableRow>
           )}
           {paginatedData.map((data, i) => (
-            <TableRow key={i}>
+            <TableRow
+              key={i}
+              onDoubleClick={() => {
+                retrieveObjectId(data._id);
+              }}
+            >
               <TableCell className="flex justify-between items-center px-3">
                 <div className="pr-4">{data.name}</div>
                 <div>

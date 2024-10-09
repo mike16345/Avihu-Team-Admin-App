@@ -18,12 +18,13 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Input } from "../ui/input";
-import { Button } from "../ui/button";
 import useExercisePresetApi from "@/hooks/api/useExercisePresetApi";
 import { toast } from "sonner";
 import useMuscleGroupsApi from "@/hooks/api/useMuscleGroupsApi";
-import { IMuscleGroupItem } from "@/interfaces/IWorkoutPlan";
+import { IExercisePresetItem, IMuscleGroupItem } from "@/interfaces/IWorkoutPlan";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import CustomButton from "../ui/CustomButton";
 
 interface ExerciseFormProps {
   objectId?: string;
@@ -33,7 +34,7 @@ interface ExerciseFormProps {
 const exerciseSchema = z.object({
   name: z.string().min(1, { message: `שם התרגיל חייב להיות תו אחד או יותר` }),
   muscleGroup: z.string().min(1, { message: `תרגיל חייב להיות משוייך לקבוצת שריר` }),
-  tipsFromTrainer: z.string().min(1).optional(),
+  tipFromTrainer: z.string().min(1).optional(),
   linkToVideo: z.string().url({ message: `אנא הכנס לינק תקין!` }),
 });
 
@@ -48,43 +49,64 @@ const ExerciseForm: React.FC<ExerciseFormProps> = ({ objectId, closeSheet }) => 
       name: "",
       muscleGroup: "",
       linkToVideo: "",
-      tipsFromTrainer: "",
+      tipFromTrainer: "",
     },
   });
 
   const { reset } = exerciseForm;
 
+  const queryClient = useQueryClient();
+
+  const addNewExercise = useMutation({
+    mutationFn: addExercise,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`exercises`] });
+    },
+  });
+
+  const editExercise = useMutation({
+    mutationFn: ({ objectId, values }: { objectId: string; values: IExercisePresetItem }) =>
+      updateExercise(objectId, values),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`exercises`] });
+    },
+  });
+
   const onSubmit = (values: z.infer<typeof exerciseSchema>) => {
     if (objectId) {
-      updateExercise(objectId, values)
-        .then(() => toast.success(`פריט עודכן בהצלחה!`))
-        .then(() => closeSheet())
-        .catch((err) =>
-          toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-            description: err.response.data.message,
-          })
-        );
+      editExercise.mutate({ objectId, values });
+
+      if (editExercise.error) {
+        return toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
+          description: editExercise.error.message,
+        });
+      }
+
+      toast.success(`פריט עודכן בהצלחה!`);
+      closeSheet();
     } else {
-      addExercise(values)
-        .then(() => toast.success(`פריט נשמר בהצלחה!`))
-        .then(() => closeSheet())
-        .catch((err) =>
-          toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-            description: err.response.data.message,
-          })
-        );
+      addNewExercise.mutate(values);
+
+      if (addNewExercise.error) {
+        return toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
+          description: addNewExercise.error.message,
+        });
+      }
+
+      toast.success(`פריט נשמר בהצלחה!`);
+      closeSheet();
     }
   };
 
   useEffect(() => {
     getAllMuscleGroups()
-      .then((res) => setMuscleGroups(res))
+      .then((res) => setMuscleGroups(res.data))
       .catch((err) => console.log(err));
 
     if (!objectId) return;
 
     getExerciseById(objectId)
-      .then((res) => reset(res))
+      .then((res) => reset(res.data))
       .catch((err) => console.log(err));
   }, []);
 
@@ -119,7 +141,7 @@ const ExerciseForm: React.FC<ExerciseFormProps> = ({ objectId, closeSheet }) => 
         />
         <FormField
           control={exerciseForm.control}
-          name="tipsFromTrainer"
+          name="tipFromTrainer"
           render={({ field }) => (
             <FormItem>
               <FormLabel>דגשים</FormLabel>
@@ -154,9 +176,12 @@ const ExerciseForm: React.FC<ExerciseFormProps> = ({ objectId, closeSheet }) => 
             </FormItem>
           )}
         />
-        <Button className="w-full" type="submit">
-          שמור
-        </Button>
+        <CustomButton
+          className="w-full"
+          type="submit"
+          title="שמור"
+          isLoading={addNewExercise.isPending || editExercise.isPending}
+        />
       </form>
     </Form>
   );

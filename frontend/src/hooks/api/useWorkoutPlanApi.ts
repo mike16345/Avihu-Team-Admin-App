@@ -1,25 +1,25 @@
 import { deleteItem, fetchData, sendData, updateItem } from "@/API/api";
 import { ICompleteWorkoutPlan } from "@/interfaces/IWorkoutPlan";
+import { ApiResponse } from "@/types/types";
 
-const WORKOUT_PLAN_ENDPOINT = "workoutPlans/";
+const WORKOUT_PLAN_ENDPOINT = "workoutPlans";
 
 export const useWorkoutPlanApi = () => {
-  const addWorkoutPlan = (userID: string, workoutPlan: ICompleteWorkoutPlan) => {
-    const endpoint = WORKOUT_PLAN_ENDPOINT + userID;
-
-    return sendData<ICompleteWorkoutPlan>(endpoint, workoutPlan);
+  const addWorkoutPlan = (userId: string, workoutPlan: ICompleteWorkoutPlan) => {
+    return sendData<ICompleteWorkoutPlan>(WORKOUT_PLAN_ENDPOINT, workoutPlan, null, { id: userId });
   };
 
-  const updateWorkoutPlan = (userID: string, workoutPlan: ICompleteWorkoutPlan) =>
-    updateItem(`${WORKOUT_PLAN_ENDPOINT}${userID}`, workoutPlan);
+  const updateWorkoutPlan = (userId: string, workoutPlan: ICompleteWorkoutPlan) =>
+    updateItem(`${WORKOUT_PLAN_ENDPOINT}/one`, workoutPlan, null, { userId });
 
-  const updateWorkoutPlanByUserId = (userID: string, workoutPlan: ICompleteWorkoutPlan) =>
-    updateItem(`${WORKOUT_PLAN_ENDPOINT}user/${userID}`, workoutPlan);
+  const updateWorkoutPlanByUserId = (userId: string, workoutPlan: ICompleteWorkoutPlan) =>
+    updateItem(`${WORKOUT_PLAN_ENDPOINT}/one/user`, workoutPlan, null, { userId });
 
-  const deleteWorkoutPlan = (userID: string) => deleteItem(`${WORKOUT_PLAN_ENDPOINT}`, userID);
+  const deleteWorkoutPlan = (userId: string) =>
+    deleteItem(`${WORKOUT_PLAN_ENDPOINT}/one`, { userId });
 
-  const getWorkoutPlanByUserId = (userID: string) =>
-    fetchData<ICompleteWorkoutPlan>(`${WORKOUT_PLAN_ENDPOINT}user/${userID}`);
+  const getWorkoutPlanByUserId = (userId: string) =>
+    fetchData<ApiResponse<ICompleteWorkoutPlan>>(`${WORKOUT_PLAN_ENDPOINT}/user`, { userId });
 
   const getWorkoutPlan = (id: string) =>
     fetchData<ICompleteWorkoutPlan>(WORKOUT_PLAN_ENDPOINT + id);

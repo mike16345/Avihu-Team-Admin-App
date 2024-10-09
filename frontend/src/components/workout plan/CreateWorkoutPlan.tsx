@@ -1,31 +1,105 @@
-import React, { Fragment, useEffect, useState } from "react";
-import ComboBox from "./ComboBox";
+import React, { Fragment, useMemo, useState } from "react";
 import {
   ICompleteWorkoutPlan,
   IMuscleGroupWorkouts,
   IWorkoutPlan,
+  IWorkoutPlanPreset,
 } from "@/interfaces/IWorkoutPlan";
-import WorkoutContainer from "./WorkoutPlanContainer";
+import WorkoutPlanContainer from "./WorkoutPlanContainer";
 import { useWorkoutPlanApi } from "@/hooks/api/useWorkoutPlanApi";
 import { cleanWorkoutObject } from "@/utils/workoutPlanUtils";
 import { Button } from "../ui/button";
 import { BsFillPencilFill } from "react-icons/bs";
 import { BsPlusCircleFill } from "react-icons/bs";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Toggle } from "@/components/ui/toggle";
 import { toast } from "sonner";
 import { useWorkoutPlanPresetApi } from "@/hooks/api/useWorkoutPlanPresetsApi";
 import { useIsEditableContext } from "@/context/useIsEditableContext";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { FULL_DAY_STALE_TIME } from "@/constants/constants";
+import Loader from "../ui/Loader";
+import ErrorPage from "@/pages/ErrorPage";
+import { convertItemsToOptions, createRetryFunction } from "@/lib/utils";
+import CustomButton from "../ui/CustomButton";
+import ComboBox from "../ui/combo-box";
+import WorkoutPlanContainerWrapper from "../Wrappers/WorkoutPlanContainerWrapper";
+import { QueryKeys } from "@/enums/QueryKeys";
+import { MainRoutes } from "@/enums/Routes";
 
 const CreateWorkoutPlan: React.FC = () => {
+  const navigation = useNavigate();
+  const queryClient = useQueryClient();
+
   const { id } = useParams();
   const { addWorkoutPlan, getWorkoutPlanByUserId, updateWorkoutPlanByUserId } = useWorkoutPlanApi();
   const { getAllWorkoutPlanPresets } = useWorkoutPlanPresetApi();
   const { isEditable, setIsEditable, toggleIsEditable } = useIsEditableContext();
 
-  const [isCreate, setIsCreate] = useState(false);
+  const [selectedPreset, setSelectedPreset] = useState<IWorkoutPlanPreset | null>(null);
+  const [isCreate, setIsCreate] = useState(true);
   const [workoutPlan, setWorkoutPlan] = useState<IWorkoutPlan[]>([]);
+
+  const existingWorkoutPlan = useQuery({
+    queryFn: () => getWorkoutPlanByUserId(id || ``),
+    staleTime: FULL_DAY_STALE_TIME,
+    queryKey: [QueryKeys.USER_WORKOUT_PLAN + `${id}`],
+    enabled: !!id,
+    retry: createRetryFunction(404),
+  });
+
+  const workoutPlanPresets = useQuery({
+    queryFn: () => getAllWorkoutPlanPresets().then((res) => res.data),
+    staleTime: FULL_DAY_STALE_TIME,
+    enabled: isEditable,
+    queryKey: [QueryKeys.WORKOUT_PRESETS],
+  });
+
+  const workoutPresetsOptions = useMemo(
+    () => convertItemsToOptions(workoutPlanPresets.data || [], "name"),
+    [workoutPlanPresets.data]
+  );
+
+  const handleSubmit = async () => {
+    if (!id) return Promise.reject();
+
+    const postObject: ICompleteWorkoutPlan = {
+      workoutPlans: [...workoutPlan],
+    };
+
+    const cleanedPostObject = cleanWorkoutObject(postObject);
+
+    if (isCreate) {
+      return addWorkoutPlan(id, cleanedPostObject);
+    } else {
+      return updateWorkoutPlanByUserId(id, cleanedPostObject);
+    }
+  };
+
+  const onSuccess = () => {
+    toast.success(`תכנית אימון נשמרה בהצלחה!`);
+    navigation(MainRoutes.USERS + `/${id}`);
+    queryClient.invalidateQueries({ queryKey: [`${QueryKeys.USER_WORKOUT_PLAN}${id}`] });
+  };
+
+  const onError = (error: any) => {
+    toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
+      description: error?.data?.message || "",
+    });
+  };
+
+  const updateWorkoutPlan = useMutation({
+    mutationFn: handleSubmit,
+    onSuccess,
+    onError,
+  });
+
+  if (existingWorkoutPlan.data?.data && workoutPlan.length == 0) {
+    setWorkoutPlan(existingWorkoutPlan.data.data.workoutPlans);
+    setIsCreate(false);
+    setIsEditable(false);
+  }
 
   const handlePlanNameChange = (newName: string, index: number) => {
     const newWorkoutPlan = workoutPlan.map((workout, i) =>
@@ -67,46 +141,12 @@ const CreateWorkoutPlan: React.FC = () => {
     });
   };
 
-  const handleSubmit = async () => {
-    if (!id) return;
-
-    const postObject: ICompleteWorkoutPlan = {
-      workoutPlans: [...workoutPlan],
-    };
-
-    const cleanedPostObject = cleanWorkoutObject(postObject);
-
-    if (isCreate) {
-      addWorkoutPlan(id, cleanedPostObject)
-        .then(() => toast.success(`תוכנית אימון נשמרה בהצלחה!`))
-        .catch((err) =>
-          toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-            description: `${err.response.data.message}`,
-          })
-        );
-    } else {
-      updateWorkoutPlanByUserId(id, cleanedPostObject)
-        .then(() => toast.success(`תוכנית אימון נשמרה בהצלחה!`))
-        .catch((err) =>
-          toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-            description: `${err.response.data.message}`,
-          })
-        );
-    }
-  };
-
-  useEffect(() => {
-    if (!id) return;
-
-    getWorkoutPlanByUserId(id)
-      .then((data) => setWorkoutPlan(data.workoutPlans))
-      .catch((err) => {
-        if (err.response.data.message == `Workout plan not found.`) {
-          setIsCreate(true);
-          setIsEditable(true);
-        }
-      });
-  }, []);
+  if (existingWorkoutPlan.isLoading) return <Loader size="large" />;
+  if (
+    existingWorkoutPlan.isError &&
+    existingWorkoutPlan.error?.data?.message !== `Workout plan not found!`
+  )
+    return <ErrorPage message={existingWorkoutPlan.error.message} />;
 
   return (
     <>
@@ -123,24 +163,33 @@ const CreateWorkoutPlan: React.FC = () => {
             : `כאן תוכל לצפות בתוכנית האימון הקיימת של לקוח זה`}
         </p>
         <div className="flex flex-col gap-4">
-          {isEditable && (
-            <ComboBox
-              getOptions={getAllWorkoutPlanPresets}
-              handleChange={(currentValue) => setWorkoutPlan(currentValue.workoutPlans)}
-            />
-          )}
+          <div className="w-1/4">
+            {isEditable && (
+              <ComboBox
+                value={selectedPreset}
+                options={workoutPresetsOptions}
+                onSelect={(currentValue) => {
+                  setWorkoutPlan(currentValue.workoutPlans);
+                  setSelectedPreset(currentValue.name);
+                }}
+              />
+            )}
+          </div>
 
           {workoutPlan.map((workout, i) => {
-            console.log("workout", workout);
             return (
-              <Fragment key={i}>
-                <WorkoutContainer
-                  initialMuscleGroups={workout.muscleGroups}
-                  handleSave={(workouts) => handleSave(i, workouts)}
-                  title={workout.planName}
-                  handlePlanNameChange={(newName) => handlePlanNameChange(newName, i)}
-                  handleDeleteWorkout={() => handleDeleteWorkout(i)}
-                />
+              <Fragment key={workout?._id || i}>
+                <WorkoutPlanContainerWrapper workoutPlan={workout}>
+                  <WorkoutPlanContainer
+                    initialMuscleGroups={workout.muscleGroups}
+                    handleSave={(muscleGroups) => {
+                      handleSave(i, muscleGroups);
+                    }}
+                    title={workout.planName}
+                    handlePlanNameChange={(newName) => handlePlanNameChange(newName, i)}
+                    handleDeleteWorkout={() => handleDeleteWorkout(i)}
+                  />
+                </WorkoutPlanContainerWrapper>
               </Fragment>
             );
           })}
@@ -157,9 +206,12 @@ const CreateWorkoutPlan: React.FC = () => {
         </div>
         {isEditable && (
           <div className="flex justify-end">
-            <Button variant={"success"} onClick={handleSubmit}>
-              שמור תוכנית אימון
-            </Button>
+            <CustomButton
+              variant="success"
+              onClick={() => updateWorkoutPlan.mutate()}
+              title="שמור תוכנית אימון"
+              isLoading={updateWorkoutPlan.isPending}
+            />
           </div>
         )}
       </div>

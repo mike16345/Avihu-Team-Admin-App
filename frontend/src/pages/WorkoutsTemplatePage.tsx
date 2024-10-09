@@ -3,89 +3,79 @@ import TemplateTabsSkeleton from "@/components/ui/skeletons/TemplateTabsSkeleton
 import useExercisePresetApi from "@/hooks/api/useExercisePresetApi";
 import useMuscleGroupsApi from "@/hooks/api/useMuscleGroupsApi";
 import { useWorkoutPlanPresetApi } from "@/hooks/api/useWorkoutPlanPresetsApi";
-import {
-  IExercisePresetItem,
-  IMuscleGroupItem,
-  IWorkoutPlanPreset,
-} from "@/interfaces/IWorkoutPlan";
-import React, { useEffect, useState } from "react";
+import { IWorkoutPlanPreset } from "@/interfaces/IWorkoutPlan";
+import React, { useState } from "react";
 import ErrorPage from "./ErrorPage";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ITabs } from "@/interfaces/interfaces";
+import { QueryKeys } from "@/enums/QueryKeys";
 
 const WorkoutsTemplatePage = () => {
-  const { getExercisePresets, deleteExercise } = useExercisePresetApi();
-  const { getAllWorkoutPlanPresets, deleteWorkoutPlanPreset } = useWorkoutPlanPresetApi();
-  const { getAllMuscleGroups, deleteMuscleGroup } = useMuscleGroupsApi();
+  const { deleteExercise } = useExercisePresetApi();
+  const { deleteWorkoutPlanPreset } = useWorkoutPlanPresetApi();
+  const { deleteMuscleGroup } = useMuscleGroupsApi();
 
-  const [workoutPlanPresets, setWorkoutPlanPresets] = useState<IWorkoutPlanPreset[]>([]);
-  const [muscleGroupPresets, setMuscleGroupPresets] = useState<IMuscleGroupItem[]>([]);
-  const [exercisePresets, setExercisePresets] = useState<IExercisePresetItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  const deleteWorkoutPreset = useMutation({
+    mutationFn: deleteWorkoutPlanPreset,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QueryKeys.WORKOUT_PRESETS] });
+    },
+  });
+  const deleteExistingMuscleGroup = useMutation({
+    mutationFn: deleteMuscleGroup,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`muscleGroups`] });
+    },
+  });
+
+  const deleteExistingExercise = useMutation({
+    mutationFn: deleteExercise,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`exercises`] });
+    },
+  });
 
   const tabs: ITabs = {
     tabHeaders: [
       {
         name: `תבניות אימונים`,
         value: `WorkoutPlans`,
+        queryKey: QueryKeys.WORKOUT_PRESETS,
       },
       {
         name: `קבוצות שריר`,
         value: `muscleGroups`,
+        queryKey: `muscleGroups`,
       },
       {
         name: `תרגילים`,
         value: `exercises`,
+        queryKey: `exercises`,
       },
     ],
     tabContent: [
       {
         value: `WorkoutPlans`,
         btnPrompt: `הוסף תבנית`,
-        state: workoutPlanPresets,
-        setState: setWorkoutPlanPresets,
         sheetForm: `workoutPlan`,
-        deleteFunc: deleteWorkoutPlanPreset,
+        deleteFunc: deleteWorkoutPreset,
       },
       {
         value: `muscleGroups`,
         btnPrompt: `הוסף קבוצת שריר`,
-        state: muscleGroupPresets,
-        setState: setMuscleGroupPresets,
         sheetForm: `muscleGroup`,
-        deleteFunc: deleteMuscleGroup,
+        deleteFunc: deleteExistingMuscleGroup,
       },
       {
         value: `exercises`,
         btnPrompt: `הוסף תרגיל`,
-        state: exercisePresets,
-        setState: setExercisePresets,
         sheetForm: `Exercise`,
-        deleteFunc: deleteExercise,
+        deleteFunc: deleteExistingExercise,
       },
     ],
   };
-
-  useEffect(() => {
-    setIsLoading(true);
-    getExercisePresets()
-      .then((res) => setExercisePresets(res))
-      .catch((err) => setError(err));
-
-    getAllWorkoutPlanPresets()
-      .then((res) => setWorkoutPlanPresets(res))
-      .catch((err) => setError(err));
-
-    getAllMuscleGroups()
-      .then((res) => setMuscleGroupPresets(res))
-      .catch((err) => setError(err));
-
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-  }, []);
-
-  if (isLoading) return <TemplateTabsSkeleton />;
-  if (error) return <ErrorPage message={error} />;
 
   return (
     <>

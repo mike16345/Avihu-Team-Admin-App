@@ -15,6 +15,9 @@ import { Button } from "../ui/button";
 import useMuscleGroupsApi from "@/hooks/api/useMuscleGroupsApi";
 import { toast } from "sonner";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { IMuscleGroupItem } from "@/interfaces/IWorkoutPlan";
+import CustomButton from "../ui/CustomButton";
 
 interface MusceGroupFormProps {
   objectId?: string;
@@ -27,6 +30,32 @@ const muscleGroupSchema = z.object({
 
 const MusceGroupForm: React.FC<MusceGroupFormProps> = ({ objectId, closeSheet }) => {
   const { getMuscleGroupById, addMuscleGroup, updateMuscleGroup } = useMuscleGroupsApi();
+  const queryClient = useQueryClient();
+
+  const onSuccess = (e: any) => {
+    queryClient.invalidateQueries({ queryKey: [`muscleGroups`] });
+    toast.success(`פריט נשמר בהצלחה!`);
+    closeSheet();
+  };
+
+  const onError = (e: any) => {
+    console.log("error", e);
+    toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
+      description: e.data.message,
+    });
+  };
+  const addNewMuscleGroup = useMutation({
+    mutationFn: addMuscleGroup,
+    onSuccess,
+    onError,
+  });
+
+  const updateAMuscleGroup = useMutation({
+    mutationFn: ({ objectId, values }: { objectId: string; values: IMuscleGroupItem }) =>
+      updateMuscleGroup(objectId, values),
+    onSuccess,
+    onError,
+  });
 
   const muscleGroupForm = useForm<z.infer<typeof muscleGroupSchema>>({
     resolver: zodResolver(muscleGroupSchema),
@@ -39,32 +68,20 @@ const MusceGroupForm: React.FC<MusceGroupFormProps> = ({ objectId, closeSheet })
 
   const onSubmit = (values: z.infer<typeof muscleGroupSchema>) => {
     if (objectId) {
-      updateMuscleGroup(objectId, values)
-        .then(() => toast.success(`פריט עודכן בהצלחה!`))
-        .then(() => closeSheet())
-        .catch((err) =>
-          toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-            description: err.response.data,
-          })
-        );
+      updateAMuscleGroup.mutate({ objectId, values });
     } else {
-      addMuscleGroup(values)
-        .then(() => toast.success(`פריט נשמר בהצלחה!`))
-        .then(() => closeSheet())
-        .catch((err) =>
-          toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-            description: err.response.data,
-          })
-        );
+      addNewMuscleGroup.mutate(values);
     }
   };
 
   useEffect(() => {
     if (!objectId) return;
+
     getMuscleGroupById(objectId)
-      .then((res) => reset(res))
+      .then((res) => reset(res.data))
       .catch((err) => console.log(err));
   }, []);
+
   return (
     <Form {...muscleGroupForm}>
       <form onSubmit={muscleGroupForm.handleSubmit(onSubmit)} className="space-y-4 text-right">
@@ -81,9 +98,12 @@ const MusceGroupForm: React.FC<MusceGroupFormProps> = ({ objectId, closeSheet })
             </FormItem>
           )}
         />
-        <Button className="w-full" type="submit">
-          שמור
-        </Button>
+        <CustomButton
+          className="w-full"
+          type="submit"
+          title="שמור"
+          isLoading={updateAMuscleGroup.isPending || addNewMuscleGroup.isPending}
+        />
       </form>
     </Form>
   );

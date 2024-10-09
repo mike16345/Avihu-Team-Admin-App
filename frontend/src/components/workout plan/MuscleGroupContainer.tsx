@@ -12,14 +12,14 @@ import { Button } from "../ui/button";
 interface IMuscleGroupContainerProps {
   muscleGroup: IMuscleGroupWorkouts;
   handleUpdateMuscleGroup: (value: string) => void;
-  handleUpdateWorkouts: (workoutsObject: IExercise[]) => void;
+  handleUpdateExercises: (exerciseObjects: IExercise[]) => void;
   handleDeleteMuscleGroup: () => void;
 }
 
 export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
   muscleGroup,
   handleUpdateMuscleGroup,
-  handleUpdateWorkouts,
+  handleUpdateExercises,
   handleDeleteMuscleGroup,
 }) => {
   const { isEditable } = useIsEditableContext();
@@ -71,9 +71,9 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
         <CollapsibleContent>
           <>
             <ExcerciseInput
-              options={muscleGroup?.muscleGroup || ``}
+              muscleGroup={muscleGroup?.muscleGroup || ``}
               exercises={muscleGroup.exercises}
-              updateWorkouts={(workouts) => handleUpdateWorkouts(workouts)}
+              handleUpdateExercises={(workouts) => handleUpdateExercises(workouts)}
             />
           </>
         </CollapsibleContent>

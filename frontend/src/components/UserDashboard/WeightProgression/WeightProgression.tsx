@@ -1,34 +1,37 @@
 import { WeightChart } from "./WeightChart";
 import { WeightCalendar } from "./WeightCalendar";
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
-import { useEffect, useState } from "react";
-import { IWeighIn } from "@/interfaces/IWeighIns";
 import { useWeighInsApi } from "@/hooks/api/useWeighInsApi";
 import { useParams } from "react-router";
 import { CurrentWeighIn } from "./CurrentWeighIn";
-import { WeightProgressionPhotos } from "./WeightProgressionPhotos";
+import { useQuery } from "@tanstack/react-query";
+import Loader from "@/components/ui/Loader";
+import ErrorPage from "@/pages/ErrorPage";
+import { HOUR_STALE_TIME } from "@/constants/constants";
+import { createRetryFunction } from "@/lib/utils";
 
 export const WeightProgression = () => {
   const { id } = useParams();
 
   const { getWeighInsByUserId } = useWeighInsApi();
 
-  const [weighIns, setWeighIns] = useState<IWeighIn[] | null>(null);
+  const { data, error, isLoading } = useQuery({
+    queryKey: ["weighIns"],
+    staleTime: HOUR_STALE_TIME,
+    enabled: !!id,
+    queryFn: () => getWeighInsByUserId(id!),
+    retry: createRetryFunction(404),
+  });
 
-  if (!id) return;
-  useEffect(() => {
-    getWeighInsByUserId(id)
-      .then((res) => {
-        setWeighIns(res);
-      })
-      .catch((err) => console.error("err", err));
-  }, []);
+  if (isLoading) return <Loader size="large" />;
+  if (error && error?.status !== 404) return <ErrorPage message={error} />;
+  const weighIns = data || [];
 
   return (
     <>
       <div className="flex flex-col gap-8">
         <div className="size-full flex items-center ">
-          {weighIns && (
+          {!!weighIns?.length && (
             <Card className="size-full">
               <CardHeader>
                 <CardTitle>מעקב שקילה</CardTitle>
@@ -42,14 +45,14 @@ export const WeightProgression = () => {
               </CardContent>
             </Card>
           )}
-          {!weighIns && (
+          {weighIns?.length == 0 && (
             <div className="size-full">
               <h1 className="text-center">אין מעקב שקילה</h1>
             </div>
           )}
         </div>
 
-        <WeightProgressionPhotos />
+        {/* <WeightProgressionPhotos /> */}
       </div>
     </>
   );

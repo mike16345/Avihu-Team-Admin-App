@@ -1,16 +1,27 @@
 import { fetchData, patchItem } from "@/API/api";
-import { UsersCheckIn } from "@/interfaces/IAnalytics";
-import React from "react";
+import { ApiResponse } from "@/types/types";
+import { UsersCheckIn, UsersWithoutPlans } from "@/interfaces/IAnalytics";
 
-const ANALYTICS_ENDPOINT = `analytics/`;
+const ANALYTICS_ENDPOINT = `analytics`;
 
 const useAnalyticsApi = () => {
-  const getAllCheckInUsers = () => fetchData<UsersCheckIn[]>(ANALYTICS_ENDPOINT + `checkIns`);
+  const getAllCheckInUsers = () =>
+    fetchData<ApiResponse<UsersCheckIn[]>>(ANALYTICS_ENDPOINT + `/checkIns`).then(
+      (res) => res.data
+    );
 
   const checkOffUser = (id: string) =>
-    patchItem<UsersCheckIn>(ANALYTICS_ENDPOINT + `checkIns/` + id);
+    patchItem<ApiResponse<UsersCheckIn>>(ANALYTICS_ENDPOINT + `/checkIns/one?id=${id}`);
 
-  return { getAllCheckInUsers, checkOffUser };
+  const getUsersWithoutPlans = (colection: string) =>
+    fetchData<ApiResponse<UsersWithoutPlans[]>>(
+      `${ANALYTICS_ENDPOINT}/users?collection=${colection}`
+    );
+
+  const getUsersExpringThisMonth = () =>
+    fetchData<ApiResponse<UsersWithoutPlans[]>>(`${ANALYTICS_ENDPOINT}/users/expiring`);
+
+  return { getAllCheckInUsers, checkOffUser, getUsersWithoutPlans, getUsersExpringThisMonth };
 };
 
 export default useAnalyticsApi;

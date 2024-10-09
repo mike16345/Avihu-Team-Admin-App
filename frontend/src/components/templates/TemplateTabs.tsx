@@ -5,6 +5,18 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import PresetSheet from "./PresetSheet";
 import { useNavigate } from "react-router-dom";
+import { Query, UseMutationResult, useQuery } from "@tanstack/react-query";
+import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
+import { ITabs } from "@/interfaces/interfaces";
+import useMenuItemApi from "@/hooks/api/useMenuItemApi";
+import { useDietPlanPresetApi } from "@/hooks/api/useDietPlanPresetsApi";
+import { ApiResponse } from "@/types/types";
+import TemplateTabsSkeleton from "../ui/skeletons/TemplateTabsSkeleton";
+import ErrorPage from "@/pages/ErrorPage";
+import { useWorkoutPlanPresetApi } from "@/hooks/api/useWorkoutPlanPresetsApi";
+import useMuscleGroupsApi from "@/hooks/api/useMuscleGroupsApi";
+import useExercisePresetApi from "@/hooks/api/useExercisePresetApi";
+import { QueryKeys } from "@/enums/QueryKeys";
 
 interface TemplateTabsProps {
   tabs: ITabs;
@@ -12,25 +24,53 @@ interface TemplateTabsProps {
 
 const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
   const navigate = useNavigate();
+  const { getMenuItems } = useMenuItemApi();
+  const { getAllDietPlanPresets } = useDietPlanPresetApi();
+  const { getAllWorkoutPlanPresets } = useWorkoutPlanPresetApi();
+  const { getAllMuscleGroups } = useMuscleGroupsApi();
+  const { getExercisePresets } = useExercisePresetApi();
+
   const [selectedForm, setSelectedForm] = useState<string | undefined>();
   const [selectedObjectId, setSelectedObjectId] = useState<string>();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [queryKey, setQueryKey] = useState<string>(tabs.tabHeaders[0].queryKey);
+
+  type ApiHooks = {
+    [key: string]: (params: any) => Promise<ApiResponse<any[]>>;
+  };
+
+  const apiHooks: ApiHooks = {
+    [`carbs`]: getMenuItems,
+    [`protein`]: getMenuItems,
+    [`fats`]: getMenuItems,
+    [`vegetables`]: getMenuItems,
+    [QueryKeys.DIET_PLAN_PRESETS]: getAllDietPlanPresets,
+    [QueryKeys.WORKOUT_PRESETS]: getAllWorkoutPlanPresets,
+    [`exercises`]: getExercisePresets,
+    [`muscleGroups`]: getAllMuscleGroups,
+  };
+
+  const apiFunc = apiHooks[queryKey];
+
+  const apiData = useQuery({
+    queryKey: [queryKey],
+    staleTime: Infinity,
+    queryFn: () => apiFunc(queryKey),
+    enabled: !!apiFunc,
+  });
 
   const deleteItem = (
     id: string,
-    deleteFunc: (id: string) => Promise<unknown>,
-    stateArr: any[],
-    setState: React.Dispatch<React.SetStateAction<any[]>>
+    deleteFunc: UseMutationResult<unknown, Error, string, unknown>
   ) => {
-    deleteFunc(id)
-      .then(() => {
-        toast.success(`פריט נמחק בהצלחה!`);
-        const newArr = stateArr.filter((item) => item._id !== id);
-        setState(newArr);
-      })
-      .catch((err) =>
-        toast.error(`אופס! נתקלנו בבעיה`, { description: err.response.data.message })
-      );
+    deleteFunc.mutate(id);
+    if (deleteFunc.isError) {
+      toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
+        description: deleteFunc.error.message,
+      });
+      return;
+    }
+    toast.success(`פריט נמחק בהצלחה!`);
   };
 
   const startEdit = (id: string, formToUse: string) => {
@@ -67,30 +107,39 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
     setIsSheetOpen(true);
   }, [selectedObjectId]);
 
+  if (apiData.isError) return <ErrorPage message={apiData.error.message} />;
+
   return (
     <>
       <div>
         <Tabs defaultValue={tabs.tabHeaders[0].value} dir="rtl">
           <TabsList>
             {tabs.tabHeaders.map((tab) => (
-              <TabsTrigger key={tab.value} value={tab.value}>
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                onClick={() => setQueryKey(tab.queryKey)}
+              >
                 {tab.name}
               </TabsTrigger>
             ))}
           </TabsList>
+          {apiData.isLoading && <TemplateTabsSkeleton />}
 
-          {tabs.tabContent.map((tab) => (
-            <TabsContent key={tab.value} value={tab.value}>
-              <Button onClick={() => handleAddNew(tab.sheetForm)} className="my-4">
-                {tab.btnPrompt}
-              </Button>
-              <PresetTable
-                data={tab.state || []}
-                handleDelete={(id) => deleteItem(id, tab.deleteFunc, tab.state || [], tab.setState)}
-                retrieveObjectId={(id: string) => startEdit(id, tab.sheetForm)}
-              />
-            </TabsContent>
-          ))}
+          {!apiData.isLoading &&
+            tabs.tabContent.map((tab) => (
+              <TabsContent key={tab.value} value={tab.value}>
+                <Button onClick={() => handleAddNew(tab.sheetForm)} className="my-4">
+                  {tab.btnPrompt}
+                </Button>
+
+                <PresetTable
+                  data={apiData.data?.data || []}
+                  handleDelete={(id) => deleteItem(id, tab.deleteFunc)}
+                  retrieveObjectId={(id: string) => startEdit(id, tab.sheetForm)}
+                />
+              </TabsContent>
+            ))}
         </Tabs>
       </div>
       <PresetSheet
