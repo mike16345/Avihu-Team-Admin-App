@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Fixed workout plan presets caching invalidation issue when adding/updating workout plan preset.
 - Fixed issue where the description in the error toast was not shown in the UserForm.
 - Fixed issue in creating a menu item, when receiving an error sucess toast would still show up.
+- Fixed issue where a bad cache key name would prevent a fetch for user weigh ins
 
 ### Changed
 
