@@ -9,6 +9,7 @@ import Loader from "@/components/ui/Loader";
 import ErrorPage from "@/pages/ErrorPage";
 import { HOUR_STALE_TIME } from "@/constants/constants";
 import { createRetryFunction } from "@/lib/utils";
+import { QueryKeys } from "@/enums/QueryKeys";
 
 export const WeightProgression = () => {
   const { id } = useParams();
@@ -16,7 +17,7 @@ export const WeightProgression = () => {
   const { getWeighInsByUserId } = useWeighInsApi();
 
   const { data, error, isLoading } = useQuery({
-    queryKey: ["weighIns"],
+    queryKey: [QueryKeys.WEIGH_INS + id],
     staleTime: HOUR_STALE_TIME,
     enabled: !!id,
     queryFn: () => getWeighInsByUserId(id!),
