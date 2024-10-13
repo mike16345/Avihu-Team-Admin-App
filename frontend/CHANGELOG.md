@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Added ability to delete a user from User's table.
 - Added ability to double click on row to view items.
+- Added modal warning when user changes a muscle group.
+- Added global back button component and implemented in all forms.
 
 ### Fixed
 
@@ -37,3 +39,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - User now returns to previous pages when submitting a form.
 - Prevented users from clicking submit button while the request is processing.
 - Filtered out selected muscle groups and exercises to avoid duplicates.
+- Exercise selection opens right away when selecting muscle group.
+- Existing exercises get deleted when muscle group gets changed.
+- Added props to delete modal to make it more generic
+- Moved vegetables and fats from meal item and added into sidebar (interface and form)
