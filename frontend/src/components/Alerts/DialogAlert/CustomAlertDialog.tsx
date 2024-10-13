@@ -47,7 +47,7 @@ const CustomAlertDialog: React.FC<CustomAlertDialogProps> = ({
 }) => {
   return (
     <AlertDialog {...alertDialogProps}>
-      <AlertDialogContent {...alertDialogContentProps}>
+      <AlertDialogContent aria-describedby="dsdfg" {...alertDialogContentProps}>
         <AlertDialogHeader {...alertDialogHeaderProps}>
           <AlertDialogTitle
             {...alertDialogTitleProps}

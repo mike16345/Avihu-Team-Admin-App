@@ -1,6 +1,6 @@
 import { IMuscleGroupWorkouts, IExercise } from "@/interfaces/IWorkoutPlan";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
-import { FC, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import { ChevronsUpDown } from "lucide-react";
 import DeleteButton from "./buttons/DeleteButton";
 import ExcerciseInput from "./ExcerciseInput";
@@ -26,6 +26,14 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
 
   const [isDeleteMuscleGroupModalOpen, setIsDeleteMuscleGroupModalOpen] = useState(false);
   const [openMuscleGroupContainer, setOpenMuscleGroupContainer] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    // Check if muscleGroups.exercises.length === 0
+    if (muscleGroup.exercises.length === 0 && buttonRef.current) {
+      buttonRef.current.click(); // Simulate the click
+    }
+  }, [muscleGroup]);
 
   return (
     <Collapsible
@@ -58,6 +66,7 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
 
               <Button
                 onClick={() => setOpenMuscleGroupContainer((open) => !open)}
+                ref={buttonRef}
                 variant="ghost"
                 size="sm"
                 className={`w-9 p-0 transition }`}
