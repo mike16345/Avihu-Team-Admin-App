@@ -33,7 +33,7 @@ const shortcuts = [
 const AdminDashboard = () => {
   return (
     <div className="size-full">
-      <h1 className="text-4xl font-bold">אדמין</h1>
+      <h1 className="text-4xl font-bold">עמוד מאמן</h1>
       <div className="flex flex-col pt-4 gap-2">
         <h2 className="font-bold text-xl">פעולות מהירות</h2>
         <div className="flex flex-wrap items-center gap-5">

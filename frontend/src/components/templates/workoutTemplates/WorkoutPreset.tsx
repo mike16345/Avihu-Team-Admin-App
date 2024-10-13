@@ -26,6 +26,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { MainRoutes } from "@/enums/Routes";
 import { QueryKeys } from "@/enums/QueryKeys";
 import CustomButton from "@/components/ui/CustomButton";
+import BackButton from "@/components/ui/BackButton";
 
 const workoutFormSchema = z.object({
   name: z.string().min(1).max(25),
@@ -139,6 +140,7 @@ const WorkoutPreset = () => {
     <EditableContextProvider isEdit={true}>
       <div className="flex flex-col gap-4 p-5 overflow-y-scroll hide-scrollbar w-5/6 max-h-[95vh] ">
         <h1 className="text-5xl">תבנית אימון</h1>
+        <BackButton navLink={MainRoutes.WORKOUT_PLANS_PRESETS} />
         <p>{isEdit ? `כאן תוכל לערוך תבנית אימון קיימת` : `  כאן תוכל ליצור תבנית אימון חדשה`}</p>
         <div className="flex flex-col gap-2 px-2 py-4">
           <div className="w-full py-4 border-b-2 mb-2">

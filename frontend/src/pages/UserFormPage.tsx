@@ -1,4 +1,5 @@
 import UserForm from "@/components/forms/UserForm";
+import BackButton from "@/components/ui/BackButton";
 import Loader from "@/components/ui/Loader";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { MainRoutes } from "@/enums/Routes";
@@ -63,6 +64,7 @@ const UserFormPage = () => {
   return (
     <div>
       <h1 className="font-bold text-2xl">פרטי משתמש</h1>
+      <BackButton navLink={`${MainRoutes.USERS}/${id || ``}`} />
       <UserForm
         existingUser={user}
         saveInfo={(user) => handleSaveUser(user)}
