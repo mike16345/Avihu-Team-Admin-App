@@ -62,7 +62,7 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
   };
 
   return (
-    <Dialog open={!Boolean(value) || open}>
+    <Dialog open={!Boolean(value) || open} onOpenChange={setOpen}>
       <DialogTrigger
         className="w-[180px] border hover:border-secondary-foreground rounded py-1 px-2"
         onClick={() => setOpen(true)}
