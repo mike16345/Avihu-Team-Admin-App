@@ -35,7 +35,7 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
   const { workout } = useWorkoutPlanContext();
   const { getAllMuscleGroups } = useMuscleGroupsApi();
   const [value, setValue] = useState<string>(existingMuscleGroup || ``);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(!Boolean(existingMuscleGroup));
 
   const muscleGroupsQuery = useQuery({
     queryKey: ["muscleGroups"],
@@ -62,7 +62,7 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
   };
 
   return (
-    <Dialog open={!Boolean(value) || open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         className="w-[180px] border hover:border-secondary-foreground rounded py-1 px-2"
         onClick={() => setOpen(true)}

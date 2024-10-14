@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Fixed issue where the description in the error toast was not shown in the UserForm.
 - Fixed issue in creating a menu item, when receiving an error sucess toast would still show up.
 - Fixed issue where a bad cache key name would prevent a fetch for user weigh ins
+- Fixed issue where you could not close muscle group selector if you did not have a muscle group selected.
 
 ### Changed
 
