@@ -43,6 +43,11 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
 
               {isEditable ? (
                 <MuscleGroupSelector
+                  handleDismiss={(val) => {
+                    if (!val) {
+                      handleDeleteMuscleGroup();
+                    }
+                  }}
                   handleChange={(value) => handleUpdateMuscleGroup(value)}
                   existingMuscleGroup={muscleGroup.muscleGroup}
                 />
@@ -62,9 +67,9 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
                 onClick={() => setOpenMuscleGroupContainer((open) => !open)}
                 variant="ghost"
                 size="sm"
-                className={`w-9 p-0 transition }`}
+                className={`w-9 p-0 transition`}
               >
-                <ChevronsUpDown size={20} className=" opacity-70" />{" "}
+                <ChevronsUpDown size={20} className=" opacity-70" />
                 <span className="sr-only">Toggle</span>
               </Button>
             </div>

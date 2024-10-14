@@ -24,12 +24,14 @@ import Loader from "../ui/Loader";
 import { useWorkoutPlanContext } from "@/context/useWorkoutPlanContext";
 
 interface MuscleGroupSelectorProps {
+  handleDismiss: (value?: string) => void;
   handleChange: (value: string) => void;
   existingMuscleGroup?: string;
 }
 
 const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
   handleChange,
+  handleDismiss,
   existingMuscleGroup,
 }) => {
   const { workout } = useWorkoutPlanContext();
@@ -62,7 +64,13 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(open) => {
+        handleDismiss(value);
+        setOpen(open);
+      }}
+    >
       <DialogTrigger
         className="w-[180px] border hover:border-secondary-foreground rounded py-1 px-2"
         onClick={() => setOpen(true)}
