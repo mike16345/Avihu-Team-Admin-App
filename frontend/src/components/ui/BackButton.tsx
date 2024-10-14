@@ -5,21 +5,30 @@ import { useNavigate } from "react-router-dom";
 
 interface BackButtonProps {
   navLink: string;
+  variant?: `navigation` | `cancel`;
+  handleClick?: () => void;
+  fixedPosition?: boolean;
 }
 
-const BackButton: React.FC<BackButtonProps> = ({ navLink }) => {
+const BackButton: React.FC<BackButtonProps> = ({
+  navLink,
+  variant = `navigation`,
+  handleClick,
+  fixedPosition = true,
+}) => {
   const navigate = useNavigate();
 
   return (
     <Button
-      className="absolute top-5 left-12 group hover:bg-primary transition-colors duration-500"
+      className={`${
+        fixedPosition && `absolute top-5 left-12`
+      } group hover:bg-primary transition-colors duration-500`}
       variant="secondary"
-      onClick={() => navigate(navLink)}
+      onClick={variant === `navigation` ? () => navigate(navLink) : handleClick}
     >
-      <IoArrowBackCircleOutline
-        size={30}
-        className="group-hover:animate-bounce group-hover:text-background transition-colors duration-500"
-      />
+      <span className="group-hover:text-background transition-colors duration-500">
+        {variant === `navigation` ? <IoArrowBackCircleOutline size={30} /> : `בטל`}
+      </span>
     </Button>
   );
 };
