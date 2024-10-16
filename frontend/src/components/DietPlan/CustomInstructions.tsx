@@ -7,18 +7,22 @@ import { Textarea } from "../ui/textarea";
 interface CustomInstructionsProps {
   instructions: string;
   freeCalories: number;
+  fatsPerDay: number;
+  veggiesPerDay: number;
   onUpdate: (key: string, val: any) => void;
 }
 
 const CustomInstructions: FC<CustomInstructionsProps> = ({
   instructions,
   freeCalories,
+  fatsPerDay,
+  veggiesPerDay,
   onUpdate,
 }) => {
   return (
     <Card className="h-fit">
       <CardHeader>
-        <CardTitle>פקודות נוספות </CardTitle>
+        <CardTitle>הערות נוספות </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-4 ">
         <Label>קלוריות חופשיות</Label>
@@ -28,7 +32,21 @@ const CustomInstructions: FC<CustomInstructionsProps> = ({
           value={freeCalories}
           onChange={(e) => onUpdate("freeCalories", Number(e.target.value))}
         />
-        <Label>פקודות נוספות</Label>
+        <Label>כמות שומנים ליום (גרם)</Label>
+
+        <Input
+          type="number"
+          value={fatsPerDay}
+          onChange={(e) => onUpdate("fatsPerDay", Number(e.target.value))}
+        />
+        <Label>כמות ירקות ליום </Label>
+
+        <Input
+          type="number"
+          value={veggiesPerDay}
+          onChange={(e) => onUpdate("veggiesPerDay", Number(e.target.value))}
+        />
+        <Label>הערה</Label>
         <Textarea
           value={instructions}
           placeholder="קח 2 כדורים אחרי ארוחה 2"

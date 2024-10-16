@@ -26,6 +26,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { useNavigate } from "react-router-dom";
 import { MainRoutes } from "@/enums/Routes";
+import BackButton from "@/components/ui/BackButton";
 
 const presetNameShcema = z.object({
   name: z.string().min(1, { message: `בחר שם לתפריט` }).max(25),
@@ -127,6 +128,7 @@ export const ViewDietPlanPresetPage = () => {
   return (
     <div className=" flex flex-col gap-4 size-full hide-scrollbar overflow-y-auto">
       <h1 className="text-2xl font-semibold mb-4">עריכת תפריט תזונה</h1>
+      <BackButton navLink={MainRoutes.DIET_PLANS} />
       <div className="w-1/3 mr-1">
         <Form {...presetNameForm}>
           <form>

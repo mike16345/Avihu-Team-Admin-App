@@ -23,6 +23,7 @@ import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 import { useNavigate } from "react-router-dom";
 import { MainRoutes } from "@/enums/Routes";
 import { QueryKeys } from "@/enums/QueryKeys";
+import BackButton from "@/components/ui/BackButton";
 
 export const ViewDietPlanPage = () => {
   const navigation = useNavigate();
@@ -128,6 +129,7 @@ export const ViewDietPlanPage = () => {
   return (
     <div className=" flex flex-col gap-4 size-full hide-scrollbar overflow-y-auto">
       <h1 className="text-2xl font-semibold mb-4">עריכת תפריט תזונה</h1>
+      <BackButton navLink={MainRoutes.USERS + `/${id}`} />
       <Select onValueChange={(val) => handleSelect(val)}>
         <SelectTrigger dir="rtl" className="w-[350px] mr-1">
           <SelectValue placeholder="בחר תפריט" />

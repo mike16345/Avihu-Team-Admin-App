@@ -27,6 +27,7 @@ import ComboBox from "../ui/combo-box";
 import WorkoutPlanContainerWrapper from "../Wrappers/WorkoutPlanContainerWrapper";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { MainRoutes } from "@/enums/Routes";
+import BackButton from "../ui/BackButton";
 
 const CreateWorkoutPlan: React.FC = () => {
   const navigation = useNavigate();
@@ -153,7 +154,11 @@ const CreateWorkoutPlan: React.FC = () => {
       <div className="flex flex-col gap-4 px-20 py-4   w-full ">
         <div className=" w-full flex justify-between items-center">
           <h1 className="text-4xl">תוכנית אימון</h1>
-          <Toggle onClick={() => toggleIsEditable()} className="px-3 rounded cursor-pointer ">
+          <BackButton navLink={MainRoutes.USERS + `/${id}`} />
+          <Toggle
+            onClick={() => toggleIsEditable()}
+            className="px-3 rounded cursor-pointer absolute top-5 left-32"
+          >
             <BsFillPencilFill />
           </Toggle>
         </div>

@@ -24,17 +24,20 @@ import Loader from "../ui/Loader";
 import { useWorkoutPlanContext } from "@/context/useWorkoutPlanContext";
 
 interface MuscleGroupSelectorProps {
+  handleDismiss: (value?: string) => void;
   handleChange: (value: string) => void;
   existingMuscleGroup?: string;
 }
 
 const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
   handleChange,
+  handleDismiss,
   existingMuscleGroup,
 }) => {
   const { workout } = useWorkoutPlanContext();
   const { getAllMuscleGroups } = useMuscleGroupsApi();
   const [value, setValue] = useState<string>(existingMuscleGroup || ``);
+  const [open, setOpen] = useState(!Boolean(existingMuscleGroup));
 
   const muscleGroupsQuery = useQuery({
     queryKey: ["muscleGroups"],
@@ -61,8 +64,17 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
   };
 
   return (
-    <Dialog defaultOpen={!Boolean(value)}>
-      <DialogTrigger className="w-[180px] border hover:border-secondary-foreground rounded py-1 px-2">
+    <Dialog
+      open={open}
+      onOpenChange={(open) => {
+        handleDismiss(value);
+        setOpen(open);
+      }}
+    >
+      <DialogTrigger
+        className="w-[180px] border hover:border-secondary-foreground rounded py-1 px-2"
+        onClick={() => setOpen(true)}
+      >
         <div className="flex items-center justify-between">
           <p className="font-bold text-md">{existingMuscleGroup || `לא נבחר`}</p>
           <p className="text-sm">
@@ -90,6 +102,7 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
                       onSelect={(name) => {
                         if (value?.toLowerCase() == name.toLowerCase()) return; // Return if value is the same as previous value.
                         updateSelection(option.value);
+                        setOpen(false);
                       }}
                     >
                       {option.name}

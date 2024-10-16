@@ -7,6 +7,7 @@ interface IDeleteModalProps {
   setIsModalOpen: Dispatch<SetStateAction<boolean>>;
   onConfirm: () => void;
   onCancel?: () => void;
+  alertMessage?: any;
 }
 
 const DeleteModal: React.FC<IDeleteModalProps> = ({
@@ -14,17 +15,18 @@ const DeleteModal: React.FC<IDeleteModalProps> = ({
   onCancel = () => {},
   isModalOpen,
   setIsModalOpen,
+  alertMessage = (
+    <>
+      פעולה זו אינה ניתנת לביטול.<br></br> פעולה זו תמחק את המוצר לצמיתות ותסיר את נתוניו מהשרתים
+      שלנו.<br></br>האם אתה בטוח שאתה רוצה להמשיך?
+    </>
+  ),
 }) => {
   return (
     <CustomAlertDialog
       alertDialogProps={{ open: isModalOpen, onOpenChange: setIsModalOpen }}
       alertDialogContentProps={{
-        children: (
-          <>
-            פעולה זו אינה ניתנת לביטול.<br></br> פעולה זו תמחק את המוצר לצמיתות ותסיר את נתוניו
-            מהשרתים שלנו.<br></br>האם אתה בטוח שאתה רוצה להמשיך?
-          </>
-        ),
+        children: alertMessage,
       }}
       alertDialogCancelProps={{
         onClick: () => {

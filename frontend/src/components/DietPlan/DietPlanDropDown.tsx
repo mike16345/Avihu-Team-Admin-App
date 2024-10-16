@@ -14,11 +14,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "../ui/input";
 import { CustomItemSelectionRadio } from "./CustomItemSelectionRadio";
-import { DietItemUnit, ICustomItem, IMeal } from "@/interfaces/IDietPlan";
+import { CustomItems, DietItemUnit, ICustomItem, IMeal } from "@/interfaces/IDietPlan";
 import { CustomItemSelection } from "./CustomItemSelection";
 import { DietItemUnitRadio } from "./DietItemUnitRadio";
 import { mealSchema } from "./DietPlanSchema";
-import { CustomItems } from "./DietPlanForm";
 
 type ShowCustomSelectionType = {
   totalProtein: boolean;
@@ -65,14 +64,10 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
   const initialShowCustomSelection = useMemo(() => {
     const showProtein = !!meal.totalProtein.customItems?.length;
     const showCarbs = !!meal.totalCarbs.customItems?.length;
-    const showFats = !!meal?.totalFats?.customItems?.length;
-    const showVeggies = !!meal?.totalVeggies?.customItems?.length;
 
     return {
       totalProtein: showProtein,
       totalCarbs: showCarbs,
-      totalFats: showFats,
-      totalVeggies: showVeggies,
     };
   }, [meal]);
 
@@ -228,94 +223,6 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
                       selectedItems={form?.getValues("totalCarbs.customItems")?.map((s) => s.item)}
                       onItemToggle={(selectedItems) =>
                         handleToggleCustomItem(selectedItems, "totalCarbs")
-                      }
-                    />
-                  )}
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={control}
-              name="totalFats.quantity"
-              render={({ field }) => (
-                <FormItem className="text-right font-bold">
-                  <FormLabel className="text-right font-bold">כמות שומנים</FormLabel>
-                  <FormControl>
-                    <Input
-                      dir="rtl"
-                      type="number"
-                      {...field}
-                      onChange={(e) => {
-                        field.onChange(e);
-                        handleInputChange("totalFats", e.target.value);
-                      }}
-                    />
-                  </FormControl>
-                  {errors.totalFats?.quantity && (
-                    <FormMessage>{errors.totalFats.quantity.message}</FormMessage>
-                  )}
-
-                  <CustomItemSelectionRadio
-                    defaultValue={showCustomSelection.totalFats ? "Custom" : "Fixed"}
-                    onChangeSelection={(val: string) =>
-                      setShowCustomSelection({
-                        ...showCustomSelection,
-                        totalFats: val === "Custom",
-                      })
-                    }
-                  />
-                  {showCustomSelection.totalFats && (
-                    <CustomItemSelection
-                      items={customItems.fats}
-                      selectedItems={form?.getValues("totalFats.customItems")?.map((s) => s.item)}
-                      onItemToggle={(selectedItems) =>
-                        handleToggleCustomItem(selectedItems, "totalFats")
-                      }
-                    />
-                  )}
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={control}
-              name="totalVeggies.quantity"
-              render={({ field }) => (
-                <FormItem className="text-right font-bold">
-                  <FormLabel className="text-right font-bold">כמות ירקות</FormLabel>
-                  <FormControl>
-                    <Input
-                      dir="rtl"
-                      type="number"
-                      {...field}
-                      onChange={(e) => {
-                        field.onChange(e);
-                        handleInputChange("totalVeggies", e.target.value);
-                      }}
-                    />
-                  </FormControl>
-                  {errors.totalVeggies?.quantity && (
-                    <FormMessage>{errors.totalVeggies.quantity.message}</FormMessage>
-                  )}
-
-                  <CustomItemSelectionRadio
-                    defaultValue={showCustomSelection.totalVeggies ? "Custom" : "Fixed"}
-                    onChangeSelection={(val: string) =>
-                      setShowCustomSelection({
-                        ...showCustomSelection,
-                        totalVeggies: val === "Custom",
-                      })
-                    }
-                  />
-                  {showCustomSelection.totalVeggies && (
-                    <CustomItemSelection
-                      items={customItems.vegetables}
-                      selectedItems={form
-                        ?.getValues("totalVeggies.customItems")
-                        ?.map((s) => s.item)}
-                      onItemToggle={(selectedItems) =>
-                        handleToggleCustomItem(selectedItems, "totalVeggies")
                       }
                     />
                   )}

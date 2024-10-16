@@ -77,7 +77,6 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
   };
 
   const handleUpdateExercise = (index: number, updatedExercise: IExercisePresetItem) => {
-    console.log("update exercise", updatedExercise);
     const { name, linkToVideo, tipFromTrainer } = updatedExercise;
 
     setExerciseObjs((prevExercises) => {

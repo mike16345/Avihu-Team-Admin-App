@@ -18,14 +18,14 @@ export interface IMeal {
   _id?: string;
   totalProtein: IDietItem;
   totalCarbs: IDietItem;
-  totalFats?: IDietItem;
-  totalVeggies?: IDietItem;
 }
 
 export interface IDietPlan {
   meals: IMeal[];
   totalCalories?: number;
   freeCalories: number;
+  fatsPerDay?: number;
+  veggiesPerDay?: number;
   customInstructions?: string;
 }
 
@@ -53,8 +53,6 @@ export interface IMenue {
 }
 
 export type CustomItems = {
-  fats: string[];
   carbs: string[];
-  vegetables: string[];
   protein: string[];
 };

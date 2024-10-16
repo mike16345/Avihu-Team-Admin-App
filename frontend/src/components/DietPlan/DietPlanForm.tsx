@@ -20,8 +20,6 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ dietPlan, updateDietPlan })
   const [customItems, setCustomItems] = useState<CustomItems>({
     protein: [],
     carbs: [],
-    fats: [],
-    vegetables: [],
   });
 
   const handleAddMeal = () => {
@@ -83,6 +81,8 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ dietPlan, updateDietPlan })
         <CustomInstructions
           instructions={dietPlan.customInstructions || ""}
           freeCalories={dietPlan.freeCalories || 0}
+          fatsPerDay={dietPlan.fatsPerDay || 0}
+          veggiesPerDay={dietPlan.veggiesPerDay || 0}
           onUpdate={(key, val) => updateDietPlan({ ...dietPlan, [key]: val })}
         />
       </div>
