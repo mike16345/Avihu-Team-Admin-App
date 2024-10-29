@@ -3,6 +3,7 @@ import { useWeighInPhotosApi } from "@/hooks/api/useWeighInPhotosApi";
 import { FC, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { FullscreenImage } from "./FullscreenImage";
+import { buildPhotoUrls } from "@/lib/utils";
 
 interface WeightProgressionPhotosProps {
   onClickPhoto?: (photo: string) => void;
@@ -59,11 +60,13 @@ export const WeightProgressionPhotos: FC<WeightProgressionPhotosProps> = ({ onCl
 
   useEffect(() => {
     const fetchPhotos = async () => {
-      if (!id) return;
+      if (!id || photos.length > 0) return;
 
       try {
         const userImageUrls = await getUserImageUrls(id);
-        setPhotos(userImageUrls.data);
+        const urls = buildPhotoUrls(userImageUrls.data);
+        
+        setPhotos(urls);
       } catch (error) {
         console.error("Failed to load images:", error);
       }
