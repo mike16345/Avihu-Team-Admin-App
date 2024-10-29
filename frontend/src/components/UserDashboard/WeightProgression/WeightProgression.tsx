@@ -10,6 +10,7 @@ import ErrorPage from "@/pages/ErrorPage";
 import { HOUR_STALE_TIME } from "@/constants/constants";
 import { createRetryFunction } from "@/lib/utils";
 import { QueryKeys } from "@/enums/QueryKeys";
+import { WeightProgressionPhotos } from "./WeightProgressionPhotos";
 
 export const WeightProgression = () => {
   const { id } = useParams();
@@ -53,7 +54,7 @@ export const WeightProgression = () => {
           )}
         </div>
 
-        {/* <WeightProgressionPhotos /> */}
+        <WeightProgressionPhotos />
       </div>
     </>
   );

@@ -14,6 +14,7 @@ export interface Photo {
 interface WeightProgressionPhotosProps {
   onClickPhoto?: (photo: string) => void;
 }
+
 type SelectedFullscreenImage = {
   photo: string;
   index: number;
@@ -21,7 +22,7 @@ type SelectedFullscreenImage = {
 
 export const WeightProgressionPhotos: FC<WeightProgressionPhotosProps> = ({ onClickPhoto }) => {
   const { id } = useParams();
-  const { getWeighInPhotosById } = useWeighInPhotosApi();
+  const { getUserImageUrls } = useWeighInPhotosApi();
 
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [fullScreenImage, setFullScreenImage] = useState<SelectedFullscreenImage | null>(null);
@@ -72,10 +73,18 @@ export const WeightProgressionPhotos: FC<WeightProgressionPhotosProps> = ({ onCl
   useEffect(() => {
     const fetchPhotos = async () => {
       if (!id) return;
+      const userImageUrls = await getUserImageUrls(id);
+      const cloudfrontUrl = import.meta.env.VITE_CLOUDFRONT_URL;
+      userImageUrls.data.map(async (imageUrl) => {
+        const url = `${cloudfrontUrl}/${id}/${imageUrl}`;
+        console.log("URL", url);
+        const res = await fetch(url);
+        console.log("res", res);
+        photos.push(res);
+      });
 
       try {
-        const response = await getWeighInPhotosById(id);
-        setPhotos(response.data);
+        // setPhotos(response.data);
       } catch (err) {
         console.error(err);
       }
