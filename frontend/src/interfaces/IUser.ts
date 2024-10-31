@@ -10,4 +10,6 @@ export interface IUser {
   dateFinished: Date;
   planType: string;
   remindIn: number;
+  isChecked: boolean;
+  checkInAt: number;
 }
