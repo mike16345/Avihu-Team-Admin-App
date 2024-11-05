@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ExerciseProgressChart } from "./ExerciseProgressChart";
 import { useParams } from "react-router";
 import { RecordedSetsList } from "./RecordedSetsList";
 import { MuscleExerciseSelector } from "./MuscleExerciseSelector";
-import { IMuscleGroupRecordedSets } from "@/interfaces/IWorkout";
 import { useRecordedSetsApi } from "@/hooks/api/useRecordedSetsApi";
 import { extractExercises } from "@/lib/workoutUtils";
 import { useSearchParams } from "react-router-dom";
