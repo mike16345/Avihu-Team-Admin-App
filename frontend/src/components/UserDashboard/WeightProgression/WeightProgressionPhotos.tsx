@@ -3,17 +3,12 @@ import { useWeighInPhotosApi } from "@/hooks/api/useWeighInPhotosApi";
 import { FC, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { FullscreenImage } from "./FullscreenImage";
-
-export interface Photo {
-  id: string;
-  filename: string;
-  contentType: string;
-  data?: string; // Base64 encoded image data
-}
+import { buildPhotoUrls } from "@/lib/utils";
 
 interface WeightProgressionPhotosProps {
   onClickPhoto?: (photo: string) => void;
 }
+
 type SelectedFullscreenImage = {
   photo: string;
   index: number;
@@ -21,17 +16,13 @@ type SelectedFullscreenImage = {
 
 export const WeightProgressionPhotos: FC<WeightProgressionPhotosProps> = ({ onClickPhoto }) => {
   const { id } = useParams();
-  const { getWeighInPhotosById } = useWeighInPhotosApi();
+  const { getUserImageUrls } = useWeighInPhotosApi();
 
-  const [photos, setPhotos] = useState<Photo[]>([]);
+  const [photos, setPhotos] = useState<string[]>([]);
   const [fullScreenImage, setFullScreenImage] = useState<SelectedFullscreenImage | null>(null);
 
   const maxPhotosIndex = photos.length - 1;
   const minPhotosIndex = 0;
-
-  const handleBuildPhotoURI = (photo: Photo) => {
-    return `data:${photo.contentType};base64,${photo.data}`;
-  };
 
   const handleKeyDown = (e: KeyboardEvent) => {
     switch (e.key) {
@@ -51,12 +42,10 @@ export const WeightProgressionPhotos: FC<WeightProgressionPhotosProps> = ({ onCl
     if (!fullScreenImage) return;
     const currIndex = fullScreenImage.index;
 
-    if ((key === "ArrowLeft" || key == "previous") && currIndex > minPhotosIndex) {
-      const prevPhoto = photos[currIndex - 1];
-      setFullScreenImage({ photo: handleBuildPhotoURI(prevPhoto), index: currIndex - 1 });
-    } else if ((key === "ArrowRight" || key == "next") && currIndex < maxPhotosIndex) {
-      const nextPhoto = photos[currIndex + 1];
-      setFullScreenImage({ photo: handleBuildPhotoURI(nextPhoto), index: currIndex + 1 });
+    if ((key === "ArrowLeft" || key === "previous") && currIndex > minPhotosIndex) {
+      setFullScreenImage({ photo: photos[currIndex - 1], index: currIndex - 1 });
+    } else if ((key === "ArrowRight" || key === "next") && currIndex < maxPhotosIndex) {
+      setFullScreenImage({ photo: photos[currIndex + 1], index: currIndex + 1 });
     }
   };
 
@@ -71,13 +60,15 @@ export const WeightProgressionPhotos: FC<WeightProgressionPhotosProps> = ({ onCl
 
   useEffect(() => {
     const fetchPhotos = async () => {
-      if (!id) return;
+      if (!id || photos.length > 0) return;
 
       try {
-        const response = await getWeighInPhotosById(id);
-        setPhotos(response.data);
-      } catch (err) {
-        console.error(err);
+        const userImageUrls = await getUserImageUrls(id);
+        const urls = buildPhotoUrls(userImageUrls.data);
+        
+        setPhotos(urls);
+      } catch (error) {
+        console.error("Failed to load images:", error);
       }
     };
 
@@ -98,30 +89,26 @@ export const WeightProgressionPhotos: FC<WeightProgressionPhotosProps> = ({ onCl
 
   return (
     <>
-      {photos.length > 0 && (
+      {photos.length > 0 ? (
         <Card className="flex flex-col gap-2">
           <CardHeader className="text-lg font-semibold">
             <CardTitle>תמונות</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-wrap items-center gap-2 rounded">
-            {photos.map((photo, i) => {
-              const photoURI = handleBuildPhotoURI(photo);
-              return (
-                <Card
-                  onClick={() => handleClickPhoto(photoURI, i)}
-                  className="w-[200px] cursor-pointer"
-                  key={i}
-                >
-                  <img src={photoURI} alt={photo.filename} />
-                </Card>
-              );
-            })}
+            {photos.map((photo, i) => (
+              <Card
+                onClick={() => handleClickPhoto(photo, i)}
+                className="w-[200px] cursor-pointer"
+                key={i}
+              >
+                <img src={photo} alt={`Photo ${i + 1}`} />
+              </Card>
+            ))}
           </CardContent>
         </Card>
-      )}
-      {photos.length == 0 && (
+      ) : (
         <div className="size-full items-center justify-center">
-          <h1 className="text-center"> אין תמונות</h1>
+          <h1 className="text-center">אין תמונות</h1>
         </div>
       )}
       {fullScreenImage && (

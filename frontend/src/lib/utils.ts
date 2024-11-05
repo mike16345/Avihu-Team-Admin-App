@@ -96,3 +96,13 @@ export const createRetryFunction = (ignoreStatusCode: number, maxRetries: number
     return failureCount < maxRetries;
   };
 };
+
+export const buildPhotoUrls = (urls: string[]) => {
+  const cloudfrontUrl = import.meta.env.VITE_CLOUDFRONT_URL;
+
+  const imageUrls = urls.map((url) => {
+    return `${cloudfrontUrl}/images/${url}`;
+  });
+
+  return imageUrls;
+};
