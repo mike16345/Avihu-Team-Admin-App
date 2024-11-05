@@ -13,7 +13,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Added ability to double click on row to view items.
 - Added modal warning when user changes a muscle group.
 - Added global back button component and implemented in all forms.
-
+- Added user photos to user dashboard
+- Added url search params to workout progression page for better experience when refreshing page.
+  
 ### Fixed
 
 - Fixed weigh ins not being displayed properly in the calendar.
