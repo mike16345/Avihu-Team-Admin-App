@@ -2,7 +2,7 @@ import { FC } from "react";
 import { ExerciseComboBox } from "./ExerciseComboBox";
 import { MuscleGroupCombobox } from "./MuscleGroupCombobox";
 import { Label } from "@/components/ui/label";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { IMuscleGroupRecordedSets } from "@/interfaces/IWorkout";
 import { extractExercises } from "@/lib/workoutUtils";
 
@@ -22,6 +22,7 @@ export const MuscleExerciseSelector: FC<MuscleExerciseSelectorProps> = ({
   onSelectMuscleGroup,
 }) => {
   const { id } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const muscleGroups = recordedWorkouts.map((workout) => workout.muscleGroup);
   const muscleGroupRecordedSets = recordedWorkouts.find(
@@ -39,12 +40,27 @@ export const MuscleExerciseSelector: FC<MuscleExerciseSelectorProps> = ({
 
     onSelectExercise(exercises[0]);
     onSelectMuscleGroup(muscleGroup);
+
+    // Update the URL with the new muscle group and reset exercise
+    setSearchParams((prevParams) => {
+      const updatedParams = new URLSearchParams(prevParams);
+      updatedParams.set("muscleGroup", muscleGroup);
+      updatedParams.set("exercise", exercises[0] || ""); // Set the first exercise if available
+      return updatedParams;
+    });
   };
 
   const handleSelectExercise = (exercise: string) => {
     if (exercise == selectedExercise) return;
 
     onSelectExercise(exercise);
+
+    // Update the URL with the selected exercise
+    setSearchParams((prevParams) => {
+      const updatedParams = new URLSearchParams(prevParams);
+      updatedParams.set("exercise", exercise);
+      return updatedParams;
+    });
   };
 
   return (
