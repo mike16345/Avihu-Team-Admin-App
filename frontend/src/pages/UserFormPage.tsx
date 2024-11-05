@@ -45,6 +45,7 @@ const UserFormPage = () => {
     if (id) {
       editUser.mutate({ id, user });
     } else {
+      user.checkInAt = Date.now() + user.remindIn;
       addNewUser.mutate(user);
     }
   };
