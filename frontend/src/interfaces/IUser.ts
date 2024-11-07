@@ -12,4 +12,5 @@ export interface IUser {
   remindIn: number;
   isChecked: boolean;
   checkInAt: number;
+  hasAccess: boolean;
 }

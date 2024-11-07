@@ -13,6 +13,12 @@ import {
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { IUser } from "@/interfaces/IUser";
+import { useUsersApi } from "@/hooks/api/useUsersApi";
+import { useState } from "react";
+import { toast } from "sonner";
+import { Toggle } from "@/components/ui/toggle";
+import { Switch } from "@/components/ui/switch";
+import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 
 export const columns: ColumnDef<IUser>[] = [
   {
@@ -67,6 +73,35 @@ export const columns: ColumnDef<IUser>[] = [
     accessorKey: "phone",
     header: "פלאפון",
   },
+  {
+    accessorKey: "hasAccess",
+    header: "רשות",
+    cell: ({ row }) => {
+      const { updateUserField } = useUsersApi();
+      const [isChecked, setIsChecked] = useState(row.original.hasAccess);
+
+      const handleChangeAccess = async (hasAccess: boolean) => {
+        setIsChecked(hasAccess);
+        await updateUserField(row.original._id!, "hasAccess", hasAccess)
+          .then((res) => {
+            setIsChecked(res.data.hasAccess);
+          })
+          .catch((err) => {
+            console.log("error", err);
+            toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE);
+            setIsChecked(!hasAccess);
+          });
+      };
+
+      return (
+        <Switch
+          dir="rtl"
+          checked={isChecked}
+          onCheckedChange={(value) => handleChangeAccess(Boolean(value))}
+        />
+      );
+    },
+  },
 
   {
     accessorKey: "dateJoined",
@@ -74,7 +109,7 @@ export const columns: ColumnDef<IUser>[] = [
     cell: ({ row }) => {
       const user = row.original;
 
-      return format(user.dateJoined || user.createdAt, "PPP", { locale: he });
+      return format(user.dateJoined, "PPP", { locale: he });
       //temporary fix since avihu still has createdAt not dateJoined
     },
   },
