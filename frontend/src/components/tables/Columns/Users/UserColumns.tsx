@@ -85,6 +85,11 @@ export const columns: ColumnDef<IUser>[] = [
         await updateUserField(row.original._id!, "hasAccess", hasAccess)
           .then((res) => {
             setIsChecked(res.data.hasAccess);
+            toast.success(
+              `הגישה לאפליקציה ${res.data.hasAccess ? "ניתנה" : "נחסמה "}  ל- ${
+                row.original.firstName
+              } ${row.original.lastName}`
+            );
           })
           .catch((err) => {
             console.log("error", err);
@@ -97,7 +102,7 @@ export const columns: ColumnDef<IUser>[] = [
         <Switch
           dir="rtl"
           checked={isChecked}
-          onCheckedChange={(value) => handleChangeAccess(Boolean(value))}
+          onCheckedChange={(value: any) => handleChangeAccess(Boolean(value))}
         />
       );
     },
@@ -110,7 +115,6 @@ export const columns: ColumnDef<IUser>[] = [
       const user = row.original;
 
       return format(user.dateJoined, "PPP", { locale: he });
-      //temporary fix since avihu still has createdAt not dateJoined
     },
   },
   {

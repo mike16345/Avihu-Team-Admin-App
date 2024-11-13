@@ -6,7 +6,7 @@ export interface IUser {
   phone: string;
   dietaryType?: string[];
   password?: string;
-  dateJoined?: Date;
+  dateJoined: Date;
   dateFinished: Date;
   planType: string;
   remindIn: number;
