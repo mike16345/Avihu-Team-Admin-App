@@ -66,7 +66,7 @@ export const WorkoutProgression = () => {
   const recordedSets = recordedMuscleGroup?.recordedSets[selectedExercise] || [];
 
   if (isLoading) return <Loader />;
-  if (error) return <ErrorPage message={error} />;
+  if (error) return <ErrorPage message={error.data.message} />;
 
   return (
     <div className="size-full flex flex-col gap-4 p-4">

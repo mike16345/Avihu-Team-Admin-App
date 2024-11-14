@@ -135,11 +135,12 @@ export const ViewDietPlanPage = () => {
           <SelectValue placeholder="בחר תפריט" />
         </SelectTrigger>
         <SelectContent dir="rtl">
-          {dietPlanPresets?.data?.map((preset) => (
-            <SelectItem key={preset.name} value={preset.name}>
-              {preset.name}
-            </SelectItem>
-          ))}
+          {dietPlanPresets &&
+            dietPlanPresets.data?.map((preset) => (
+              <SelectItem key={preset.name} value={preset.name}>
+                {preset.name}
+              </SelectItem>
+            ))}
         </SelectContent>
       </Select>
 
