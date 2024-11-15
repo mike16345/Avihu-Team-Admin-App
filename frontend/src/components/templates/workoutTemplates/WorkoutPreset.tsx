@@ -102,7 +102,6 @@ const WorkoutPreset = () => {
   };
 
   const handleSubmit = (values: z.infer<typeof workoutFormSchema>) => {
-    console.log("values", values);
     const postObject = {
       name: values.name,
       workoutPlans: [...workoutPlan],

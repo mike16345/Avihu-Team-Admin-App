@@ -142,15 +142,20 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
             </div>
           </div>
           <CollapsibleContent className="flex flex-col gap-4">
-            {muscleGroups.map((muscleGroup, i) => (
-              <MuscleGroupContainer
-                key={muscleGroup?._id || muscleGroup.muscleGroup}
-                muscleGroup={muscleGroup}
-                handleUpdateExercises={(workouts) => handleUpdateWorkout("exercises", workouts, i)}
-                handleUpdateMuscleGroup={(value) => handleMuscleGroupChange(value, i)}
-                handleDeleteMuscleGroup={() => deleteMuscleGroup(i)}
-              />
-            ))}
+            {muscleGroups.map((muscleGroup, i) => {
+              console.log("muscle group", muscleGroup);
+              return (
+                <MuscleGroupContainer
+                  key={muscleGroup?._id || muscleGroup.muscleGroup}
+                  muscleGroup={muscleGroup}
+                  handleUpdateExercises={(workouts) =>
+                    handleUpdateWorkout("exercises", workouts, i)
+                  }
+                  handleUpdateMuscleGroup={(value) => handleMuscleGroupChange(value, i)}
+                  handleDeleteMuscleGroup={() => deleteMuscleGroup(i)}
+                />
+              );
+            })}
             {isEditable && (
               <div>
                 <Button onClick={addWorkout}>הוסף קבוצת שריר</Button>
