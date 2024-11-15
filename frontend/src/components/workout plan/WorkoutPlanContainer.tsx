@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { IMuscleGroupWorkouts, IExercise, IWorkoutPlan } from "@/interfaces/IWorkoutPlan";
+import React, { useState } from "react";
+import { IMuscleGroupWorkouts } from "@/interfaces/IWorkoutPlan";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { Button } from "../ui/button";
 import DeleteButton from "./buttons/DeleteButton";
@@ -30,7 +30,7 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
 
   const [planName, setPlanName] = useState<string | undefined>();
   const [muscleGroups, setMuscleGroups] = useState<IMuscleGroupWorkouts[]>(workout.muscleGroups);
-  const [tempMuscleGroupDetails, setTempuscleGroupDetails] = useState<any>(undefined);
+  const [tempMuscleGroupDetails, setTempMuscleGroupDetails] = useState<any>(undefined);
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isMuscleGroupChangedModalOpen, setIsMuscleGroupChangedModalOpen] = useState(false);
@@ -85,12 +85,16 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
   };
 
   const handleMuscleGroupChange = (value: string, index: number) => {
-    if (value !== muscleGroups[index].muscleGroup && muscleGroups[index].muscleGroup) {
-      setTempuscleGroupDetails({ value, index });
+    const currentMuscleGroup = muscleGroups[index].muscleGroup;
+    const currentExercises = muscleGroups[index].exercises;
+
+    if (currentMuscleGroup !== value && currentExercises.length) {
+      setTempMuscleGroupDetails({ value, index });
       setIsMuscleGroupChangedModalOpen(true);
-    } else {
-      handleUpdateWorkout(`muscleGroup`, value, index);
+      return;
     }
+
+    handleUpdateWorkout(`muscleGroup`, value, index);
   };
 
   const deleteMuscleGroup = (index: number) => {
