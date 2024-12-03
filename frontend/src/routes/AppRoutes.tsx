@@ -8,6 +8,7 @@ import { CreateWorkoutPlanWrapper } from "@/components/Wrappers/CreateWorkoutPla
 import PresetRoutes from "./PresetRoutes";
 import UserFormPage from "@/pages/UserFormPage";
 import AdminDashboard from "@/pages/AdminDashboard";
+import BlogPage from "@/pages/BlogPage";
 
 export const AppRoutes = () => {
   return (
@@ -15,6 +16,7 @@ export const AppRoutes = () => {
       <Routes>
         <Route path="/" element={<AdminDashboard />} />
         <Route path="/users/*" element={<UsersTable />} />
+        <Route path="/blogs/" element={<BlogPage />} />
         <Route path="/users/add" element={<UserFormPage />} />
         <Route path="/users/edit/:id" element={<UserFormPage />} />
         <Route path="/users/:id" element={<UserDashboard />} />

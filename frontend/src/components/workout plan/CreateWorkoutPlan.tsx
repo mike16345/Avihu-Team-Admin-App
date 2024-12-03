@@ -193,7 +193,7 @@ const CreateWorkoutPlan: React.FC = () => {
                     title={workout.planName}
                     handlePlanNameChange={(newName) => handlePlanNameChange(newName, i)}
                     handleDeleteWorkout={() => handleDeleteWorkout(i)}
-                  />
+                  />  
                 </WorkoutPlanContainerWrapper>
               </Fragment>
             );
