@@ -65,7 +65,7 @@ export const WeightProgressionPhotos: FC<WeightProgressionPhotosProps> = ({ onCl
       try {
         const userImageUrls = await getUserImageUrls(id);
         const urls = buildPhotoUrls(userImageUrls.data);
-        
+
         setPhotos(urls);
       } catch (error) {
         console.error("Failed to load images:", error);

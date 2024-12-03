@@ -33,7 +33,6 @@ const Editor = () => {
   };
 
   const handleSave = () => {
-    console.log("Saved blog:", blog);
     handleUploadBlog(blog, image);
   };
 

@@ -26,12 +26,13 @@ export const useBlogsApi = () => {
       const imageName = blog.title + "-image";
       const id = uuidv4();
       const url = `${api}/signedUrl?userId=${id}&date=${today}&imageName=${imageName}`;
+      const urlToStore = `${id}/${today}/${imageName}`;
 
       if (image) {
         const signedUrl = await fetchSignedUrl(url);
         await uploadImageToS3(image, signedUrl);
-        
-        blog.imageUrl = signedUrl;
+
+        blog.imageUrl = urlToStore;
       }
 
       const res = await sendData<ApiResponse<{}>>(BLOGS_API_URL, blog);
