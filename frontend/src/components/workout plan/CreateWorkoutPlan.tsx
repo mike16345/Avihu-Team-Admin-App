@@ -184,7 +184,7 @@ const CreateWorkoutPlan: React.FC = () => {
               />
             )}
           </div>
-          <div className="flex justify-between gap-8">
+          <div className="flex flex-col-reverse md:flex-row justify-between gap-8">
             <div className="flex flex-col w-full">
               {workoutPlan.map((workout, i) => {
                 return (
