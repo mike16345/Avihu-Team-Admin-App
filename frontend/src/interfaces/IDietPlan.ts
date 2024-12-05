@@ -26,7 +26,7 @@ export interface IDietPlan {
   freeCalories: number;
   fatsPerDay?: number;
   veggiesPerDay?: number;
-  customInstructions?: string;
+  customInstructions?: string[];
 }
 
 export interface IDietPlanPreset extends IDietPlan {

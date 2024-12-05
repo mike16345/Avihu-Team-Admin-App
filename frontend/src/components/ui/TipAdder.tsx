@@ -29,22 +29,26 @@ const TipAdder: React.FC<TipAdderProps> = ({ tips, saveTips, isEditable = true }
   };
 
   return (
-    <div className="border-2 rounded w-[30%] p-2 flex flex-col gap-4">
+    <div className="border-2 rounded  p-2 flex flex-col gap-4">
       <h2 className="font-bold py-2">דגשים</h2>
       <ul className="px-4 max-h-32 overflow-y-auto">
-        {tips.map((tip, i) => (
-          <div key={i} className="list-disc flex justify-between py-1 border-b-2 items-center ">
-            <li className="text-wrap">{tip}</li>
-            {isEditable && (
-              <div
-                className="hover:bg-secondary rounded p-1 cursor-pointer"
-                onClick={() => removeTip(i)}
-              >
-                <BsTrash3 />
-              </div>
-            )}
-          </div>
-        ))}
+        {tips.length === 0 ? (
+          <h2 className="text-center">לא הוספו טיפים!</h2>
+        ) : (
+          tips.map((tip, i) => (
+            <div key={i} className="list-disc flex justify-between py-1 border-b-2 items-center">
+              <li className="text-wrap">{tip}</li>
+              {isEditable && (
+                <div
+                  className="hover:bg-secondary rounded p-1 cursor-pointer"
+                  onClick={() => removeTip(i)}
+                >
+                  <BsTrash3 />
+                </div>
+              )}
+            </div>
+          ))
+        )}
       </ul>
       {isEditable && (
         <>

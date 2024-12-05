@@ -23,7 +23,7 @@ const dietPlanSchema = z.object({
   meals: z.array(mealSchema),
   totalCalories: z.coerce.number().optional(),
   freeCalories: z.coerce.number(),
-  customInstructions: z.string().optional(),
+  customInstructions: z.array(z.string()).optional(),
 });
 
 function validateDietPlan(dietPlan: IDietPlan) {

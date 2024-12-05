@@ -79,7 +79,7 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ dietPlan, updateDietPlan })
           </div>
         )}
         <CustomInstructions
-          instructions={dietPlan.customInstructions || ""}
+          instructions={dietPlan.customInstructions}
           freeCalories={dietPlan.freeCalories || 0}
           fatsPerDay={dietPlan.fatsPerDay || 0}
           veggiesPerDay={dietPlan.veggiesPerDay || 0}
