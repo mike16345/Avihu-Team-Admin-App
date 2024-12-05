@@ -28,6 +28,7 @@ import WorkoutPlanContainerWrapper from "../Wrappers/WorkoutPlanContainerWrapper
 import { QueryKeys } from "@/enums/QueryKeys";
 import { MainRoutes } from "@/enums/Routes";
 import BackButton from "../ui/BackButton";
+import TipAdder from "../ui/TipAdder";
 
 const CreateWorkoutPlan: React.FC = () => {
   const navigation = useNavigate();
@@ -41,6 +42,7 @@ const CreateWorkoutPlan: React.FC = () => {
   const [selectedPreset, setSelectedPreset] = useState<IWorkoutPlanPreset | null>(null);
   const [isCreate, setIsCreate] = useState(true);
   const [workoutPlan, setWorkoutPlan] = useState<IWorkoutPlan[]>([]);
+  const [workoutTips, setWorkoutTips] = useState<string[]>([]);
 
   const existingWorkoutPlan = useQuery({
     queryFn: () => getWorkoutPlanByUserId(id || ``),
@@ -67,6 +69,7 @@ const CreateWorkoutPlan: React.FC = () => {
 
     const postObject: ICompleteWorkoutPlan = {
       workoutPlans: [...workoutPlan],
+      tips: workoutTips,
     };
 
     const cleanedPostObject = cleanWorkoutObject(postObject);
@@ -98,6 +101,7 @@ const CreateWorkoutPlan: React.FC = () => {
 
   if (existingWorkoutPlan.data?.data && workoutPlan.length == 0) {
     setWorkoutPlan(existingWorkoutPlan.data.data.workoutPlans);
+    setWorkoutTips(existingWorkoutPlan.data.data.tips || []);
     setIsCreate(false);
     setIsEditable(false);
   }
@@ -168,17 +172,25 @@ const CreateWorkoutPlan: React.FC = () => {
             : `כאן תוכל לצפות בתוכנית האימון הקיימת של לקוח זה`}
         </p>
         <div className="flex flex-col gap-4">
-          <div className="w-1/4">
-            {isEditable && (
-              <ComboBox
-                value={selectedPreset}
-                options={workoutPresetsOptions}
-                onSelect={(currentValue) => {
-                  setWorkoutPlan(currentValue.workoutPlans);
-                  setSelectedPreset(currentValue.name);
-                }}
-              />
-            )}
+          <div className="flex flex-col gap-2 md:flex-row justify-between flex-wrap">
+            <div className="w-1/4">
+              {isEditable && (
+                <ComboBox
+                  value={selectedPreset}
+                  options={workoutPresetsOptions}
+                  onSelect={(currentValue) => {
+                    setWorkoutPlan(currentValue.workoutPlans);
+                    setSelectedPreset(currentValue.name);
+                  }}
+                />
+              )}
+            </div>
+
+            <TipAdder
+              tips={workoutTips}
+              saveTips={(tips) => setWorkoutTips(tips)}
+              isEditable={isEditable}
+            />
           </div>
 
           {workoutPlan.map((workout, i) => {

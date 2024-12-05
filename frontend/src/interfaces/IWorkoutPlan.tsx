@@ -8,6 +8,7 @@ export interface IWorkoutPlan {
 export interface ICompleteWorkoutPlan {
   userId?: string;
   workoutPlans: IWorkoutPlan[];
+  tips?: string[];
 }
 
 export interface ISet {
