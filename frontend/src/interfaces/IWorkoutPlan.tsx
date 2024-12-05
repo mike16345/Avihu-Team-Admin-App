@@ -34,6 +34,7 @@ export interface IMuscleGroupWorkouts {
 
 export interface IWorkoutPlanPreset {
   name: string;
+  tips?: string[];
   workoutPlans: IWorkoutPlan[];
 }
 

@@ -172,18 +172,37 @@ const CreateWorkoutPlan: React.FC = () => {
             : `כאן תוכל לצפות בתוכנית האימון הקיימת של לקוח זה`}
         </p>
         <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2 md:flex-row justify-between flex-wrap">
-            <div className="w-1/4">
-              {isEditable && (
-                <ComboBox
-                  value={selectedPreset}
-                  options={workoutPresetsOptions}
-                  onSelect={(currentValue) => {
-                    setWorkoutPlan(currentValue.workoutPlans);
-                    setSelectedPreset(currentValue.name);
-                  }}
-                />
-              )}
+          <div className="w-1/4">
+            {isEditable && (
+              <ComboBox
+                value={selectedPreset}
+                options={workoutPresetsOptions}
+                onSelect={(currentValue) => {
+                  setWorkoutPlan(currentValue.workoutPlans);
+                  setSelectedPreset(currentValue.name);
+                }}
+              />
+            )}
+          </div>
+          <div className="flex justify-between gap-8">
+            <div className="flex flex-col w-full">
+              {workoutPlan.map((workout, i) => {
+                return (
+                  <Fragment key={workout?._id || i}>
+                    <WorkoutPlanContainerWrapper workoutPlan={workout}>
+                      <WorkoutPlanContainer
+                        initialMuscleGroups={workout.muscleGroups}
+                        handleSave={(muscleGroups) => {
+                          handleSave(i, muscleGroups);
+                        }}
+                        title={workout.planName}
+                        handlePlanNameChange={(newName) => handlePlanNameChange(newName, i)}
+                        handleDeleteWorkout={() => handleDeleteWorkout(i)}
+                      />
+                    </WorkoutPlanContainerWrapper>
+                  </Fragment>
+                );
+              })}
             </div>
 
             <TipAdder
@@ -192,24 +211,6 @@ const CreateWorkoutPlan: React.FC = () => {
               isEditable={isEditable}
             />
           </div>
-
-          {workoutPlan.map((workout, i) => {
-            return (
-              <Fragment key={workout?._id || i}>
-                <WorkoutPlanContainerWrapper workoutPlan={workout}>
-                  <WorkoutPlanContainer
-                    initialMuscleGroups={workout.muscleGroups}
-                    handleSave={(muscleGroups) => {
-                      handleSave(i, muscleGroups);
-                    }}
-                    title={workout.planName}
-                    handlePlanNameChange={(newName) => handlePlanNameChange(newName, i)}
-                    handleDeleteWorkout={() => handleDeleteWorkout(i)}
-                  />
-                </WorkoutPlanContainerWrapper>
-              </Fragment>
-            );
-          })}
           <div className="w-full flex items-center justify-center">
             {isEditable && (
               <Button onClick={handleAddWorkout}>

@@ -29,9 +29,9 @@ const TipAdder: React.FC<TipAdderProps> = ({ tips, saveTips, isEditable = true }
   };
 
   return (
-    <div className="border-2 rounded  p-2 flex flex-col gap-4">
-      <h2 className="font-bold py-2">דגשים</h2>
-      <ul className="px-4 max-h-32 overflow-y-auto">
+    <div className="border-2 rounded  p-4 flex flex-col gap-4 h-fit">
+      <h2 className="font-bold">דגשים</h2>
+      <ul className="px-4 w-full max-h-32 overflow-y-auto">
         {tips.length === 0 ? (
           <h2 className="text-center">לא הוספו טיפים!</h2>
         ) : (
