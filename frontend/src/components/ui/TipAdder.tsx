@@ -59,11 +59,11 @@ const TipAdder: React.FC<TipAdderProps> = ({ tips, saveTips, isEditable = true }
             onChange={(e) => setNewTip(e.target.value)}
           ></input>
           <div className="flex justify-center gap-2">
-            <Button className="w-full" onClick={addTip}>
-              הוספה
-            </Button>
             <Button className="w-full" variant="secondary" onClick={() => saveTips([])}>
               נקה
+            </Button>
+            <Button className="w-full" onClick={addTip}>
+              הוספה
             </Button>
           </div>
         </>
