@@ -400,3 +400,6 @@ FodyWeavers.xsd
 
 #env
 *.local
+
+# Test file
+**/test.tsx
