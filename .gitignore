@@ -400,3 +400,6 @@ FodyWeavers.xsd
 
 #env
 *.local
+
+# Test component for local use only
+**/test.tsx

@@ -9,6 +9,7 @@ import PresetRoutes from "./PresetRoutes";
 import UserFormPage from "@/pages/UserFormPage";
 import AdminDashboard from "@/pages/AdminDashboard";
 import BlogPage from "@/pages/BlogPage";
+import BlogEditor from "@/components/Blog/BlogEditor";
 
 export const AppRoutes = () => {
   return (
@@ -17,6 +18,7 @@ export const AppRoutes = () => {
         <Route path="/" element={<AdminDashboard />} />
         <Route path="/users/*" element={<UsersTable />} />
         <Route path="/blogs/" element={<BlogPage />} />
+        <Route path="/blogs/create/:id" element={<BlogEditor />} />
         <Route path="/users/add" element={<UserFormPage />} />
         <Route path="/users/edit/:id" element={<UserFormPage />} />
         <Route path="/users/:id" element={<UserDashboard />} />
@@ -25,6 +27,7 @@ export const AppRoutes = () => {
         <Route path="/workoutPlans" element={<WorkoutsTemplatePage />} />
         <Route path="/dietPlans/" element={<DietPlanTemplatePage />} />
         <Route path="/presets/*" element={<PresetRoutes />} />
+        <Route path="/test/*" element={<OTP />} />
       </Routes>
     </>
   );

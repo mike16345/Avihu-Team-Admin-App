@@ -3,3 +3,7 @@ export interface IBlog {
   content: string;
   imageUrl?: string;
 }
+
+export interface IBlogResponse extends IBlog {
+  _id: string;
+}

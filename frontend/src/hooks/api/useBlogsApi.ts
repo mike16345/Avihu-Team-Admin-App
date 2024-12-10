@@ -1,7 +1,9 @@
-import { sendData } from "@/API/api";
-import { IBlog } from "@/interfaces/IBlog";
+import { deleteItem, fetchData, sendData, updateItem } from "@/API/api";
+import { IBlog, IBlogResponse } from "@/interfaces/IBlog";
+import { PaginationParams, PaginationResult } from "@/interfaces/interfaces";
 import { ApiResponse } from "@/types/types";
 import { v4 as uuidv4 } from "uuid";
+
 const BLOGS_API_URL = "blogs";
 
 const fetchSignedUrl = async (url: string) => {
@@ -19,20 +21,67 @@ const fetchSignedUrl = async (url: string) => {
 };
 
 export const useBlogsApi = () => {
+  const getBlogById = async (blogId: string) => {
+    const response = await fetchData<ApiResponse<IBlogResponse>>(
+      `${BLOGS_API_URL}/one?id=${blogId}`
+    );
+
+    return response.data;
+  };
+
+  const updateBlog = async (
+    blogId: string,
+    blog: IBlog,
+    imageToUpload?: string,
+    imageToDelete?: string
+  ) => {
+    try {
+      if (imageToDelete) {
+        await deleteItem("s3/photos/one", undefined, undefined, {
+          photoId: imageToDelete,
+        });
+      }
+
+      if (imageToUpload && imageToUpload !== imageToDelete) {
+        blog.imageUrl = await handleUploadImageToS3(blog.title, imageToUpload);
+      }
+
+      if (imageToDelete && !imageToUpload) {
+        blog.imageUrl = "";
+      }
+
+      const res = await updateItem<ApiResponse<IBlogResponse>>(`${BLOGS_API_URL}/one`, blog, null, {
+        id: blogId,
+      });
+
+      return res.data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const deleteBlog = async (blogId: string) => {
+    return await deleteItem(`${BLOGS_API_URL}?id=${blogId}`);
+  };
+
+  const handleUploadImageToS3 = async (name: string, image: string) => {
+    const api = import.meta.env.VITE_SERVER;
+    const today = new Date().toISOString().split("T")[0];
+    const imageName = name + "-image";
+    const id = uuidv4();
+    const url = `${api}/signedUrl?userId=${id}&date=${today}&imageName=${imageName}`;
+    const urlToStore = `${id}/${today}/${imageName}`;
+
+    const signedUrl = await fetchSignedUrl(url);
+    await uploadImageToS3(image, signedUrl);
+
+    return urlToStore;
+  };
+
   const handleUploadBlog = async (blog: IBlog, image?: string) => {
     try {
-      const api = import.meta.env.VITE_SERVER;
-      const today = new Date().toISOString().split("T")[0];
-      const imageName = blog.title + "-image";
-      const id = uuidv4();
-      const url = `${api}/signedUrl?userId=${id}&date=${today}&imageName=${imageName}`;
-      const urlToStore = `${id}/${today}/${imageName}`;
-
       if (image) {
-        const signedUrl = await fetchSignedUrl(url);
-        await uploadImageToS3(image, signedUrl);
-
-        blog.imageUrl = urlToStore;
+        blog.imageUrl = await handleUploadImageToS3(blog.title, image);
       }
 
       const res = await sendData<ApiResponse<{}>>(BLOGS_API_URL, blog);
@@ -41,6 +90,14 @@ export const useBlogsApi = () => {
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const getPaginatedPosts = async (pagination: PaginationParams) => {
+    const response = await fetchData<ApiResponse<PaginationResult<IBlogResponse>>>(
+      `${BLOGS_API_URL}/paginate?_page=${pagination.page}&_limit=${pagination.limit}`
+    );
+
+    return response.data;
   };
 
   const uploadImageToS3 = async (fileUri: string, presignedUrl: string) => {
@@ -65,5 +122,5 @@ export const useBlogsApi = () => {
     }
   };
 
-  return { handleUploadBlog };
+  return { handleUploadBlog, deleteBlog, getBlogById, updateBlog, getPaginatedPosts };
 };
