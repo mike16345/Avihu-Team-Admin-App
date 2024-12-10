@@ -27,7 +27,6 @@ export const AppRoutes = () => {
         <Route path="/workoutPlans" element={<WorkoutsTemplatePage />} />
         <Route path="/dietPlans/" element={<DietPlanTemplatePage />} />
         <Route path="/presets/*" element={<PresetRoutes />} />
-        <Route path="/test/*" element={<OTP />} />
       </Routes>
     </>
   );
