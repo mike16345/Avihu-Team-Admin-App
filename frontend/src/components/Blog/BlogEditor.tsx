@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
@@ -15,6 +15,7 @@ const BlogEditor = () => {
   const { handleUploadBlog, updateBlog, getBlogById } = useBlogsApi();
   const location = useLocation();
   const navigate = useNavigate();
+  const query = useQueryClient();
 
   const [blog, setBlog] = useState<IBlog>({
     title: "",
@@ -76,7 +77,7 @@ const BlogEditor = () => {
         await handleUploadBlog(blog, image);
         toast.success("Created blog successfully!");
       }
-
+      query.invalidateQueries({ queryKey: ["blogs"] });
       navigate("/blogs");
     } catch (error) {
       toast.error("Failed to save the blog. Please try again.");

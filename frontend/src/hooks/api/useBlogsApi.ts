@@ -20,6 +20,14 @@ const fetchSignedUrl = async (url: string) => {
   }
 };
 
+const handleDeletePhoto = async (photo?: string) => {
+  if (!photo) return Promise.reject("no photo available");
+
+  return await deleteItem("s3/photos/one", undefined, undefined, {
+    photoId: photo,
+  });
+};
+
 export const useBlogsApi = () => {
   const getBlogById = async (blogId: string) => {
     const response = await fetchData<ApiResponse<IBlogResponse>>(
@@ -36,11 +44,7 @@ export const useBlogsApi = () => {
     imageToDelete?: string
   ) => {
     try {
-      if (imageToDelete) {
-        await deleteItem("s3/photos/one", undefined, undefined, {
-          photoId: imageToDelete,
-        });
-      }
+      await handleDeletePhoto(`images/` + imageToDelete);
 
       if (imageToUpload && imageToUpload !== imageToDelete) {
         blog.imageUrl = await handleUploadImageToS3(blog.title, imageToUpload);
@@ -60,8 +64,10 @@ export const useBlogsApi = () => {
     }
   };
 
-  const deleteBlog = async (blogId: string) => {
-    return await deleteItem(`${BLOGS_API_URL}?id=${blogId}`);
+  const deleteBlog = async (blog: IBlog & { _id: string }) => {
+    await handleDeletePhoto(`images/` + blog.imageUrl);
+
+    return await deleteItem(`${BLOGS_API_URL}/one?id=${blog._id}`);
   };
 
   const handleUploadImageToS3 = async (name: string, image: string) => {
