@@ -18,6 +18,7 @@ export const AppRoutes = () => {
         <Route path="/" element={<AdminDashboard />} />
         <Route path="/users/*" element={<UsersTable />} />
         <Route path="/blogs/" element={<BlogPage />} />
+        <Route path="/blogs/create/" element={<BlogEditor />} />
         <Route path="/blogs/create/:id" element={<BlogEditor />} />
         <Route path="/users/add" element={<UserFormPage />} />
         <Route path="/users/edit/:id" element={<UserFormPage />} />
