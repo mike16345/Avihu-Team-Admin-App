@@ -78,12 +78,12 @@ const BlogEditor = () => {
 
   const onSuccess = () => {
     query.invalidateQueries({ queryKey: [QueryKeys.BLOGS] });
-    toast.success(`${!isEdit ? "Created" : "Updated"} blog successfully!`);
+    toast.success(`פוסט נשמר בהצלחה!`);
     navigate("/blogs");
   };
 
   const onError = () => {
-    toast.error("Failed to save the blog. Please try again.");
+    toast.error("אירעה שגיאה בהעלאת הפוסט!");
   };
 
   const saveBlogMutation = useMutation({ mutationFn: handleSave, onSuccess, onError });
@@ -115,7 +115,7 @@ const BlogEditor = () => {
       <BackButton navLink="/blogs" />
       <Label className="font-semibold">כותרת</Label>
       <Input
-        className="w-1/2"
+        className="w-1/2 "
         value={blog.title}
         onChange={(e) => handleFieldChange("title", e.target.value)}
       />
