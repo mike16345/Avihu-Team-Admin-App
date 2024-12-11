@@ -14,6 +14,25 @@ import BackButton from "../ui/BackButton";
 import { QueryKeys } from "@/enums/QueryKeys";
 import CustomButton from "../ui/CustomButton";
 
+const formats = [
+  "header",
+  "font",
+  "size",
+  "color",
+  "bold",
+  "italic",
+  "underline",
+  "strike",
+  "blockquote",
+  "list",
+  "bullet",
+  "indent",
+  "link",
+  "image",
+  "video",
+  "align",
+];
+
 const BlogEditor = () => {
   const { handleUploadBlog, updateBlog, getBlogById } = useBlogsApi();
   const location = useLocation();
@@ -135,9 +154,21 @@ const BlogEditor = () => {
       )}
       <Label className="font-semibold">תוכן</Label>
       <ReactQuill
-        style={{ direction: "rtl" }}
         value={blog.content}
-        className="flex-1"
+        modules={{
+          toolbar: [
+            [{ header: [] }, { font: [] }],
+            [{ size: [] }],
+            ["bold", "italic", "underline", "strike", "blockquote"],
+            [{ list: "ordered" }, { list: "bullet" }, { indent: "-1" }, { indent: "+1" }],
+            ["link"],
+            ["clean"],
+            [{ color: [] }, { background: [] }],
+            [{ align: "" }, { align: "center" }, { align: "right" }, { align: "justify" }],
+          ],
+        }}
+        formats={formats}
+        className="flex-1 text-right "
         onChange={(val) => handleFieldChange("content", val)}
       />
       <div className="flex items-center justify-end gap-3">
