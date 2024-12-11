@@ -7,14 +7,17 @@ import { IBlog } from "@/interfaces/IBlog";
 import { useNavigate } from "react-router-dom";
 import DeleteModal from "../Alerts/DeleteModal";
 import { toast } from "sonner";
+import { QueryKeys } from "@/enums/QueryKeys";
+import Loader from "../ui/Loader";
+import ErrorPage from "@/pages/ErrorPage";
 
 const BlogList: React.FC = () => {
   const navigate = useNavigate();
   const query = useQueryClient();
   const { getPaginatedPosts, deleteBlog } = useBlogsApi();
 
-  const { data, isLoading, isError, fetchNextPage, hasNextPage } = useInfiniteQuery({
-    queryKey: ["blogs"],
+  const { data, isLoading, isError, error, fetchNextPage, hasNextPage } = useInfiniteQuery({
+    queryKey: [QueryKeys.BLOGS],
     initialPageParam: { page: 1, limit: 10 },
     queryFn: ({ pageParam = { page: 1, limit: 10 } }) => getPaginatedPosts(pageParam),
     getNextPageParam: (lastPage: PaginationResult<IBlog>) => {
@@ -41,7 +44,7 @@ const BlogList: React.FC = () => {
       .then((res) => {
         console.log("deleted blog", res);
         toast.success("Successfully deleted blog");
-        query.invalidateQueries({ queryKey: ["blogs"] });
+        query.invalidateQueries({ queryKey: [QueryKeys.BLOGS] });
       })
       .catch((err) => {
         console.error("error deleting blog", err);
@@ -49,8 +52,8 @@ const BlogList: React.FC = () => {
       });
   };
 
-  if (isLoading) return <p>Loading...</p>;
-  if (isError) return <p>Something went wrong...</p>;
+  if (isLoading) return <Loader />;
+  if (isError) return <ErrorPage message={error?.response?.data?.message} />;
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4">
