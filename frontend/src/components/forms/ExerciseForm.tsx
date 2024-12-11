@@ -57,44 +57,35 @@ const ExerciseForm: React.FC<ExerciseFormProps> = ({ objectId, closeSheet }) => 
 
   const queryClient = useQueryClient();
 
+  const successFunc = (message: string) => {
+    queryClient.invalidateQueries({ queryKey: [`exercises`] });
+    toast.success(message);
+    closeSheet();
+  };
+
+  const errorFunc = (err: any) =>
+    toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
+      description: err.message,
+    });
+
   const addNewExercise = useMutation({
     mutationFn: addExercise,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`exercises`] });
-    },
+    onSuccess: () => successFunc(`פריט נשמר בהצלחה!`),
+    onError: errorFunc,
   });
 
   const editExercise = useMutation({
     mutationFn: ({ objectId, values }: { objectId: string; values: IExercisePresetItem }) =>
       updateExercise(objectId, values),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`exercises`] });
-    },
+    onSuccess: () => successFunc(`פריט עודכן בהצלחה!`),
+    onError: errorFunc,
   });
 
   const onSubmit = (values: z.infer<typeof exerciseSchema>) => {
     if (objectId) {
       editExercise.mutate({ objectId, values });
-
-      if (editExercise.error) {
-        return toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-          description: editExercise.error.message,
-        });
-      }
-
-      toast.success(`פריט עודכן בהצלחה!`);
-      closeSheet();
     } else {
       addNewExercise.mutate(values);
-
-      if (addNewExercise.error) {
-        return toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-          description: addNewExercise.error.message,
-        });
-      }
-
-      toast.success(`פריט נשמר בהצלחה!`);
-      closeSheet();
     }
   };
 
