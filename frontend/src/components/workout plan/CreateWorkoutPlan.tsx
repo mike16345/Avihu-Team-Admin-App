@@ -28,6 +28,7 @@ import WorkoutPlanContainerWrapper from "../Wrappers/WorkoutPlanContainerWrapper
 import { QueryKeys } from "@/enums/QueryKeys";
 import { MainRoutes } from "@/enums/Routes";
 import BackButton from "../ui/BackButton";
+import TipAdder from "../ui/TipAdder";
 
 const CreateWorkoutPlan: React.FC = () => {
   const navigation = useNavigate();
@@ -41,6 +42,7 @@ const CreateWorkoutPlan: React.FC = () => {
   const [selectedPreset, setSelectedPreset] = useState<IWorkoutPlanPreset | null>(null);
   const [isCreate, setIsCreate] = useState(true);
   const [workoutPlan, setWorkoutPlan] = useState<IWorkoutPlan[]>([]);
+  const [workoutTips, setWorkoutTips] = useState<string[]>([]);
 
   const existingWorkoutPlan = useQuery({
     queryFn: () => getWorkoutPlanByUserId(id || ``),
@@ -67,6 +69,7 @@ const CreateWorkoutPlan: React.FC = () => {
 
     const postObject: ICompleteWorkoutPlan = {
       workoutPlans: [...workoutPlan],
+      tips: workoutTips,
     };
 
     const cleanedPostObject = cleanWorkoutObject(postObject);
@@ -98,6 +101,7 @@ const CreateWorkoutPlan: React.FC = () => {
 
   if (existingWorkoutPlan.data?.data && workoutPlan.length == 0) {
     setWorkoutPlan(existingWorkoutPlan.data.data.workoutPlans);
+    setWorkoutTips(existingWorkoutPlan.data.data.tips || []);
     setIsCreate(false);
     setIsEditable(false);
   }
@@ -180,24 +184,33 @@ const CreateWorkoutPlan: React.FC = () => {
               />
             )}
           </div>
+          <div className="flex flex-col-reverse md:flex-row justify-between gap-8">
+            <div className="flex flex-col w-full">
+              {workoutPlan.map((workout, i) => {
+                return (
+                  <Fragment key={workout?._id || i}>
+                    <WorkoutPlanContainerWrapper workoutPlan={workout}>
+                      <WorkoutPlanContainer
+                        initialMuscleGroups={workout.muscleGroups}
+                        handleSave={(muscleGroups) => {
+                          handleSave(i, muscleGroups);
+                        }}
+                        title={workout.planName}
+                        handlePlanNameChange={(newName) => handlePlanNameChange(newName, i)}
+                        handleDeleteWorkout={() => handleDeleteWorkout(i)}
+                      />
+                    </WorkoutPlanContainerWrapper>
+                  </Fragment>
+                );
+              })}
+            </div>
 
-          {workoutPlan.map((workout, i) => {
-            return (
-              <Fragment key={workout?._id || i}>
-                <WorkoutPlanContainerWrapper workoutPlan={workout}>
-                  <WorkoutPlanContainer
-                    initialMuscleGroups={workout.muscleGroups}
-                    handleSave={(muscleGroups) => {
-                      handleSave(i, muscleGroups);
-                    }}
-                    title={workout.planName}
-                    handlePlanNameChange={(newName) => handlePlanNameChange(newName, i)}
-                    handleDeleteWorkout={() => handleDeleteWorkout(i)}
-                  />  
-                </WorkoutPlanContainerWrapper>
-              </Fragment>
-            );
-          })}
+            <TipAdder
+              tips={workoutTips}
+              saveTips={(tips) => setWorkoutTips(tips)}
+              isEditable={isEditable}
+            />
+          </div>
           <div className="w-full flex items-center justify-center">
             {isEditable && (
               <Button onClick={handleAddWorkout}>

@@ -3,9 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
+import TipAdder from "../ui/TipAdder";
 
 interface CustomInstructionsProps {
-  instructions: string;
+  instructions?: string[];
   freeCalories: number;
   fatsPerDay: number;
   veggiesPerDay: number;
@@ -46,11 +47,10 @@ const CustomInstructions: FC<CustomInstructionsProps> = ({
           value={veggiesPerDay}
           onChange={(e) => onUpdate("veggiesPerDay", Number(e.target.value))}
         />
-        <Label>הערה</Label>
-        <Textarea
-          value={instructions}
-          placeholder="קח 2 כדורים אחרי ארוחה 2"
-          onChange={(e) => onUpdate("customInstructions", e.target.value)}
+
+        <TipAdder
+          tips={instructions || []}
+          saveTips={(tips) => onUpdate("customInstructions", tips)}
         />
       </CardContent>
     </Card>
