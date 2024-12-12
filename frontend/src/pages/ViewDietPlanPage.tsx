@@ -81,6 +81,7 @@ export const ViewDietPlanPage = () => {
       if (!id) return;
 
       editDietPlan.mutate({ id, dietPlanToAdd });
+      queryClient.invalidateQueries({ queryKey: [QueryKeys.NO_DIET_PLAN] });
     }
   };
 
@@ -109,7 +110,7 @@ export const ViewDietPlanPage = () => {
   });
 
   const handleSelect = (presetName: string) => {
-    const selectedPreset = dietPlanPresets?.data?.find((preset) => preset.name === presetName);
+    const selectedPreset = dietPlanPresets.data?.data.find((preset) => preset.name === presetName);
 
     if (!selectedPreset) return;
     const { meals, totalCalories, freeCalories, customInstructions } = selectedPreset;

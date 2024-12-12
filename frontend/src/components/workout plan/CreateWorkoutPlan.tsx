@@ -85,6 +85,7 @@ const CreateWorkoutPlan: React.FC = () => {
     toast.success(`תכנית אימון נשמרה בהצלחה!`);
     navigation(MainRoutes.USERS + `/${id}`);
     queryClient.invalidateQueries({ queryKey: [`${QueryKeys.USER_WORKOUT_PLAN}${id}`] });
+    queryClient.invalidateQueries({ queryKey: [`${QueryKeys.NO_WORKOUT_PLAN}`] });
   };
 
   const onError = (error: any) => {
