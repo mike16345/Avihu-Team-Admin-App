@@ -88,7 +88,7 @@ export const ViewDietPlanPage = () => {
     queryKey: [QueryKeys.DIET_PLAN_PRESETS],
     enabled: !!id,
     staleTime: FULL_DAY_STALE_TIME,
-    queryFn: () => getAllDietPlanPresets().then((res) => res.data),
+    queryFn: () => getAllDietPlanPresets(),
   });
 
   const { isLoading, error, data } = useQuery({
@@ -136,7 +136,7 @@ export const ViewDietPlanPage = () => {
         </SelectTrigger>
         <SelectContent dir="rtl">
           {dietPlanPresets &&
-            dietPlanPresets.data?.map((preset) => (
+            dietPlanPresets.data?.data.map((preset) => (
               <SelectItem key={preset.name} value={preset.name}>
                 {preset.name}
               </SelectItem>
