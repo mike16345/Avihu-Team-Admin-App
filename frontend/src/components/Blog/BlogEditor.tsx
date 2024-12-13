@@ -1,21 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import ReactQuill from "react-quill-new";
+import ReactQuill, { Quill } from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useBlogsApi } from "@/hooks/api/useBlogsApi";
-import { IBlog, IBlogResponse } from "@/interfaces/IBlog";
+import { IBlog } from "@/interfaces/IBlog";
 import { buildPhotoUrl } from "@/lib/utils";
 import BackButton from "../ui/BackButton";
 import { QueryKeys } from "@/enums/QueryKeys";
 import CustomButton from "../ui/CustomButton";
 
 const formats = [
-  "header",
   "font",
   "size",
   "color",
@@ -28,8 +27,6 @@ const formats = [
   "bullet",
   "indent",
   "link",
-  "image",
-  "video",
   "align",
 ];
 
@@ -48,6 +45,8 @@ const BlogEditor = () => {
   const [isImageFromCloudFront, setIsImageFromCloudFront] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [imageToDelete, setImageToDelete] = useState<string | undefined>();
+
+  const quillRef = useRef<ReactQuill>(null);
 
   const { id } = useParams();
   const stateBlog = location.state?.blog as IBlog;
@@ -110,6 +109,13 @@ const BlogEditor = () => {
   const generatePhotoUrl = (url: string) => (isImageFromCloudFront ? buildPhotoUrl(url) : url);
 
   useEffect(() => {
+    if (!quillRef.current) return;
+    const editor = quillRef.current.getEditor();
+    editor.format("align", "right");
+    
+  }, [quillRef]);
+
+  useEffect(() => {
     if (stateBlog) {
       setBlog(stateBlog);
       setIsImageFromCloudFront(true);
@@ -154,21 +160,20 @@ const BlogEditor = () => {
       )}
       <Label className="font-semibold">תוכן</Label>
       <ReactQuill
+        id="editor"
+        ref={quillRef}
         value={blog.content}
         modules={{
           toolbar: [
-            [{ header: [] }, { font: [] }],
-            [{ size: [] }],
             ["bold", "italic", "underline", "strike", "blockquote"],
             [{ list: "ordered" }, { list: "bullet" }, { indent: "-1" }, { indent: "+1" }],
             ["link"],
             ["clean"],
-            [{ color: [] }, { background: [] }],
             [{ align: "" }, { align: "center" }, { align: "right" }, { align: "justify" }],
           ],
         }}
         formats={formats}
-        className="flex-1 text-right "
+        className="flex-1 "
         onChange={(val) => handleFieldChange("content", val)}
       />
       <div className="flex items-center justify-end gap-3">
