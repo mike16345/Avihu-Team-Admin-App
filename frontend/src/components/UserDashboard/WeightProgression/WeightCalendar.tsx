@@ -3,7 +3,6 @@ import { FC } from "react";
 import { type DayContentProps } from "react-day-picker";
 
 import { Calendar } from "../../ui/calendar";
-import { poundsToKg } from "@/lib/workoutUtils";
 import { IoClose } from "react-icons/io5";
 import DateUtils from "@/lib/dateUtils";
 
@@ -30,7 +29,7 @@ export const WeightCalendar: FC<WeighCalendarProps> = ({ weighIns }) => {
         {date.getDate()}
         <p className="flex items-center justify-center text-[0.60rem] leading-3  text-primary">
           {weight
-            ? poundsToKg(weight)
+            ? weight
             : isDateEarlierThanToday && <IoClose className=" text-destructive" size={12} />}
         </p>
       </span>
