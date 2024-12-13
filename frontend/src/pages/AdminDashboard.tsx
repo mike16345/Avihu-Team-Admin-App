@@ -26,7 +26,7 @@ const shortcuts = [
   },
   {
     actionName: `הוסף פוסט`,
-    navLink: `/blogs`,
+    navLink: `/blogs/create`,
     icon: <MdOutlinePostAdd />,
   },
 ];
