@@ -75,6 +75,7 @@ export const ViewDietPlanPage = () => {
       toast.error(`יש בעיה בקלט.`);
       return;
     }
+    
     if (isNewPlan) {
       createDietPlan.mutate(dietPlanToAdd);
     } else {
