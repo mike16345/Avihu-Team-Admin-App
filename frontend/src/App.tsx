@@ -1,6 +1,7 @@
 import "./App.css";
 import { Sidebar } from "./components/Navbar/Sidebar";
 import { AppRoutes } from "./routes/AppRoutes";
+import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
       <div className="size-full py-8 px-4 xs:p-8 overflow-y-auto custom-scrollbar ">
         <AppRoutes />
       </div>
+      {/* <ReactQueryDevtoolsPanel /> */}
     </div>
   );
 }
