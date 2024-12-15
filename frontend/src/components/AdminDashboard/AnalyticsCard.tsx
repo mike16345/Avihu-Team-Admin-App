@@ -20,13 +20,12 @@ const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ title, dataKey }) => {
 
   const actions: any = {
     [QueryKeys.NO_WORKOUT_PLAN]: {
-      key: "dietPlan",
+      key: "workoutPlan",
       queryFunc: getUsersWithoutPlans,
       navUrl: `/workout-plans/`,
     },
     [QueryKeys.NO_DIET_PLAN]: {
-      key: "workoutPlan",
-
+      key: "dietPlan",
       queryFunc: getUsersWithoutPlans,
       navUrl: `/diet-plans/`,
     },
@@ -37,14 +36,12 @@ const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ title, dataKey }) => {
     },
   };
 
-  const apiData = useQuery({
+  const { data, error, isError, isLoading } = useQuery({
     queryFn: () => actions[dataKey].queryFunc(actions[dataKey].key),
     queryKey: [dataKey],
     enabled: !!actions[dataKey],
-    staleTime: HOUR_STALE_TIME,
+    // staleTime: HOUR_STALE_TIME,
   });
-
-  const { data, error, isError, isLoading } = apiData;
 
   return (
     <Card dir="rtl">
@@ -65,7 +62,7 @@ const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ title, dataKey }) => {
               <p>{item.firstName}</p>
               <p>{item.lastName}</p>
             </div>
-            <Button onClick={() => navigate(`${actions?.navUrl}${item._id}`)}>צפה</Button>
+            <Button onClick={() => navigate(`${actions[dataKey]?.navUrl}${item._id}`)}>צפה</Button>
           </div>
         ))}
       </CardContent>
