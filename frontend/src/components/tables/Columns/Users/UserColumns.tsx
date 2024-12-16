@@ -147,9 +147,9 @@ export const columns: ColumnDef<IUser>[] = [
             <DropdownMenuItem onClick={() => handleViewUser && handleViewUser(user)}>
               View user
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleDeleteUser && handleDeleteUser(user)}>
+            {/* <DropdownMenuItem onClick={() => handleDeleteUser && handleDeleteUser(user)}>
               Delete User
-            </DropdownMenuItem>
+            </DropdownMenuItem> */}
           </DropdownMenuContent>
         </DropdownMenu>
       );

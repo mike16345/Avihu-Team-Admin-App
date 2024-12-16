@@ -151,14 +151,14 @@ export function DataTableHebrew<TData, TValue>({
           <div className="text-muted-foreground">
             דף {pageNumber} תוך {table.getPageCount()}
           </div>
-          {Object.keys(rowSelection).length > 0 && (
+          {/* {Object.keys(rowSelection).length > 0 && (
             <div
               onClick={handleDeleteRows}
               className="cursor-pointer hover:scale-[1.03] text-foreground "
             >
               <Trash2Icon className="cursor-pointer" />
             </div>
-          )}
+          )} */}
           {actionButton}
         </div>
       </div>
