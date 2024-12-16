@@ -11,9 +11,11 @@ import ErrorPage from "@/pages/ErrorPage";
 import { toast } from "sonner";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import DateUtils from "@/lib/dateUtils";
+import { useTheme } from "../theme/theme-provider";
 
 export const UsersTable = () => {
   const navigate = useNavigate();
+  const { theme } = useTheme();
   const { getAllUsers, deleteUser } = useUsersApi();
   const queryClient = useQueryClient();
 
@@ -41,7 +43,7 @@ export const UsersTable = () => {
     const daysUntilPlanIsFinished = DateUtils.getDaysDifference(new Date(), user.dateFinished);
 
     if (daysUntilPlanIsFinished <= MINIMUM_WARNING_DAYS) {
-      return " bg-red-50";
+      return theme == "dark" ? " bg-red-400" : "bg-red-300";
     }
 
     return "";

@@ -27,7 +27,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { FilterIcon, Trash2Icon } from "lucide-react";
+import { FilterIcon } from "lucide-react";
 import { RowData } from "@tanstack/react-table";
 
 interface DataTableProps<TData, TValue> {
