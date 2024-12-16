@@ -16,7 +16,6 @@ import { IUser } from "@/interfaces/IUser";
 import { useUsersApi } from "@/hooks/api/useUsersApi";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Toggle } from "@/components/ui/toggle";
 import { Switch } from "@/components/ui/switch";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 

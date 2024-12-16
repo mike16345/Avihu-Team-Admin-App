@@ -39,7 +39,10 @@ class DateUtils {
   }
 
   static getDaysDifference(startDate: Date, endDate: Date): number {
-    return moment(endDate).diff(startDate, "days");
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    return moment(end).diff(start, "days");
   }
 
   static isSameDay(date1: Date, date2: Date): boolean {

@@ -10,6 +10,7 @@ import Loader from "../ui/Loader";
 import ErrorPage from "@/pages/ErrorPage";
 import { toast } from "sonner";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
+import DateUtils from "@/lib/dateUtils";
 
 export const UsersTable = () => {
   const navigate = useNavigate();
@@ -35,6 +36,17 @@ export const UsersTable = () => {
     navigate(`/users/${user._id}`, { state: user });
   };
 
+  const handleGetRowClassName = (user: IUser) => {
+    const MINIMUM_WARNING_DAYS = 3;
+    const daysUntilPlanIsFinished = DateUtils.getDaysDifference(new Date(), user.dateFinished);
+
+    if (daysUntilPlanIsFinished <= MINIMUM_WARNING_DAYS) {
+      return " bg-red-50";
+    }
+
+    return "";
+  };
+
   if (isLoading) return <Loader size="large" />;
   if (isError) return <ErrorPage message={error.message} />;
 
@@ -48,6 +60,7 @@ export const UsersTable = () => {
         handleViewData={(user) => handleViewUser(user)}
         handleDeleteData={(user) => usersMutation.mutate(user._id || "")}
         handleViewNestedData={(data, userId) => console.log("data user", data, userId)}
+        getRowClassName={(user) => handleGetRowClassName(user)}
       />
     </>
   );
