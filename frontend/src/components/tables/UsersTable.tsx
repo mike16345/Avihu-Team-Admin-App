@@ -12,8 +12,10 @@ import { toast } from "sonner";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import DateUtils from "@/lib/dateUtils";
 import { useTheme } from "../theme/theme-provider";
+import { useUsersStore } from "@/store/userStore";
 
 export const UsersTable = () => {
+  const setUsers = useUsersStore((state) => state.setUsers);
   const navigate = useNavigate();
   const { theme } = useTheme();
   const { getAllUsers, deleteUser } = useUsersApi();
@@ -22,7 +24,15 @@ export const UsersTable = () => {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["users"],
     staleTime: MIN_STALE_TIME,
-    queryFn: getAllUsers,
+    queryFn: () =>
+      getAllUsers()
+        .then((users) => {
+          setUsers(users);
+          return users;
+        })
+        .catch((err) => {
+          throw err;
+        }),
   });
 
   const usersMutation = useMutation({
@@ -30,6 +40,7 @@ export const UsersTable = () => {
     onSuccess: () => {
       toast.success("המשתמש נמחק בהצלחה!");
       queryClient.invalidateQueries({ queryKey: [`users`] });
+      setUsers([]);
     },
     onError: () => toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE),
   });
