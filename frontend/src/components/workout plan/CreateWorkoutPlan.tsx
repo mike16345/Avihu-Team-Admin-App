@@ -7,7 +7,7 @@ import {
 } from "@/interfaces/IWorkoutPlan";
 import WorkoutPlanContainer from "./WorkoutPlanContainer";
 import { useWorkoutPlanApi } from "@/hooks/api/useWorkoutPlanApi";
-import { cleanWorkoutObject } from "@/utils/workoutPlanUtils";
+import { cleanWorkoutObject, parseErrorFromObject } from "@/utils/workoutPlanUtils";
 import { Button } from "../ui/button";
 import { BsFillPencilFill } from "react-icons/bs";
 import { BsPlusCircleFill } from "react-icons/bs";
@@ -88,8 +88,10 @@ const CreateWorkoutPlan: React.FC = () => {
   };
 
   const onError = (error: any) => {
+    const message = parseErrorFromObject(error.data || "");
+
     toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-      description: error?.data?.message || "",
+      description: message,
     });
   };
 

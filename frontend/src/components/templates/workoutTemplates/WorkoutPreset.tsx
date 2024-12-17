@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useWorkoutPlanPresetApi } from "@/hooks/api/useWorkoutPlanPresetsApi";
-import { cleanWorkoutObject } from "@/utils/workoutPlanUtils";
+import { cleanWorkoutObject, parseErrorFromObject } from "@/utils/workoutPlanUtils";
 import {
   Form,
   FormControl,
@@ -55,8 +55,10 @@ const WorkoutPreset = () => {
   };
 
   const onError = (error: any) => {
+    const message = parseErrorFromObject(error.data || "");
+
     toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-      description: error?.data?.message || "",
+      description: message,
     });
   };
 
