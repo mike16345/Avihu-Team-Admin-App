@@ -21,12 +21,14 @@ const mealSchema = z.object({
 
 const dietPlanSchema = z.object({
   meals: z.array(mealSchema),
-  totalCalories: z.coerce.number().optional(),
-  freeCalories: z.coerce.number(),
+  totalCalories: z.coerce.number().min(0).optional(),
+  freeCalories: z.coerce.number().min(0),
+  fatsPerDay: z.coerce.number().min(0).optional(),
   customInstructions: z.array(z.string()).optional(),
 });
 
 function validateDietPlan(dietPlan: IDietPlan) {
+  console.log("diet plan", dietPlan);
   const result = dietPlanSchema.safeParse(dietPlan);
   if (result.error) {
     console.error("Validation failed:", result.error);

@@ -27,9 +27,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { FilterIcon, Trash2Icon } from "lucide-react";
+import { FilterIcon } from "lucide-react";
 import { RowData } from "@tanstack/react-table";
-import { useNavigate } from "react-router-dom";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -39,6 +38,7 @@ interface DataTableProps<TData, TValue> {
   handleSetData: (data: TData) => void;
   handleDeleteData: (data: TData) => void;
   handleViewNestedData: (data: any | any[], id: string) => void;
+  getRowClassName: (row: TData) => string;
 }
 
 declare module "@tanstack/table-core" {
@@ -47,6 +47,7 @@ declare module "@tanstack/table-core" {
     handleSetData: (data: TData) => void;
     handleDeleteData: (data: TData) => void;
     handleViewNestedData: (data: any | any[], id: string) => void;
+    getRowClassName: (row: TData) => string;
   }
 }
 
@@ -58,6 +59,7 @@ export function DataTableHebrew<TData, TValue>({
   handleDeleteData,
   handleViewNestedData,
   handleSetData,
+  getRowClassName,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pageNumber, setPageNumber] = useState<number>(1);
@@ -81,6 +83,7 @@ export function DataTableHebrew<TData, TValue>({
       handleDeleteData: (data: TData) => handleDeleteData(data),
       handleViewNestedData: (data: TData, id: string) => handleViewNestedData(data, id),
       handleSetData: (data: TData) => handleSetData(data),
+      getRowClassName: (data: TData) => getRowClassName(data),
     },
 
     state: {
@@ -148,14 +151,14 @@ export function DataTableHebrew<TData, TValue>({
           <div className="text-muted-foreground">
             דף {pageNumber} תוך {table.getPageCount()}
           </div>
-          {Object.keys(rowSelection).length > 0 && (
+          {/* {Object.keys(rowSelection).length > 0 && (
             <div
               onClick={handleDeleteRows}
               className="cursor-pointer hover:scale-[1.03] text-foreground "
             >
               <Trash2Icon className="cursor-pointer" />
             </div>
-          )}
+          )} */}
           {actionButton}
         </div>
       </div>
@@ -181,6 +184,7 @@ export function DataTableHebrew<TData, TValue>({
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
+                  className={getRowClassName(row.original)}
                   onDoubleClick={(e) => handleViewData(row.original)}
                   data-state={row.getIsSelected() && "selected"}
                 >

@@ -59,12 +59,10 @@ const UserCheckIn = () => {
         {users?.map((user) => (
           <div
             key={user._id}
-            className="w-full flex justify-between items-center border-b-2 p-5 hover:bg-accent"
+            onDoubleClick={() => navigate(`/users/${user._id}`)}
+            className="w-full flex  cursor-pointer justify-between items-center border-b-2 p-5 hover:bg-accent"
           >
-            <div
-              className="flex font-bold gap-1 text-lg hover:underline cursor-pointer"
-              onClick={() => navigate(`/users/${user._id}`)}
-            >
+            <div className="flex font-bold gap-1 ">
               <h2>{user.firstName}</h2>
               <h2>{user.lastName}</h2>
             </div>

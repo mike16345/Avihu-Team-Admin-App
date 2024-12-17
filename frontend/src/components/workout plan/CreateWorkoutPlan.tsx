@@ -1,4 +1,4 @@
-import React, { Fragment, useMemo, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useState } from "react";
 import {
   ICompleteWorkoutPlan,
   IMuscleGroupWorkouts,
@@ -29,12 +29,20 @@ import { QueryKeys } from "@/enums/QueryKeys";
 import { MainRoutes } from "@/enums/Routes";
 import BackButton from "../ui/BackButton";
 import TipAdder from "../ui/TipAdder";
+import BasicUserDetails from "../UserDashboard/UserInfo/BasicUserDetails";
+import { useUsersStore } from "@/store/userStore";
+import { IUser } from "@/interfaces/IUser";
+import { useUsersApi } from "@/hooks/api/useUsersApi";
 
 const CreateWorkoutPlan: React.FC = () => {
+  const { id } = useParams();
   const navigation = useNavigate();
   const queryClient = useQueryClient();
+  const [user, setUser] = useState<IUser>();
 
-  const { id } = useParams();
+  const { users } = useUsersStore();
+
+  const { getUser } = useUsersApi();
   const { addWorkoutPlan, getWorkoutPlanByUserId, updateWorkoutPlanByUserId } = useWorkoutPlanApi();
   const { getAllWorkoutPlanPresets } = useWorkoutPlanPresetApi();
   const { isEditable, setIsEditable, toggleIsEditable } = useIsEditableContext();
@@ -85,6 +93,7 @@ const CreateWorkoutPlan: React.FC = () => {
     toast.success(`תכנית אימון נשמרה בהצלחה!`);
     navigation(MainRoutes.USERS + `/${id}`);
     queryClient.invalidateQueries({ queryKey: [`${QueryKeys.USER_WORKOUT_PLAN}${id}`] });
+    queryClient.invalidateQueries({ queryKey: [`${QueryKeys.NO_WORKOUT_PLAN}`] });
   };
 
   const onError = (error: any) => {
@@ -148,6 +157,16 @@ const CreateWorkoutPlan: React.FC = () => {
     });
   };
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      const user = users.find((user) => user._id === id) || (await getUser(id || ""));
+
+      setUser(user);
+    };
+
+    fetchUser();
+  }, []);
+
   if (existingWorkoutPlan.isLoading) return <Loader size="large" />;
   if (
     existingWorkoutPlan.isError &&
@@ -160,6 +179,7 @@ const CreateWorkoutPlan: React.FC = () => {
       <div className="flex flex-col gap-4 px-20 py-4   w-full ">
         <div className=" w-full flex justify-between items-center">
           <h1 className="text-4xl">תוכנית אימון</h1>
+
           <BackButton navLink={MainRoutes.USERS + `/${id}`} />
           <Toggle
             onClick={() => toggleIsEditable()}
@@ -173,6 +193,7 @@ const CreateWorkoutPlan: React.FC = () => {
             ? `כאן תוכל לערוך תוכנית אימון קיימת ללקוח שלך`
             : `כאן תוכל לצפות בתוכנית האימון הקיימת של לקוח זה`}
         </p>
+        {user && <BasicUserDetails user={user} />}
         <div className="flex flex-col gap-4">
           <div className="w-1/4">
             {isEditable && (

@@ -24,10 +24,15 @@ import { useNavigate } from "react-router-dom";
 import { MainRoutes } from "@/enums/Routes";
 import { QueryKeys } from "@/enums/QueryKeys";
 import BackButton from "@/components/ui/BackButton";
+import BasicUserDetails from "@/components/UserDashboard/UserInfo/BasicUserDetails";
+import { useUsersStore } from "@/store/userStore";
 
 export const ViewDietPlanPage = () => {
   const navigation = useNavigate();
   const { id } = useParams();
+  const { users } = useUsersStore();
+  const user = users.find((user) => user._id === id);
+
   const { addDietPlan, updateDietPlanByUserId, getDietPlanByUserId } = useDietPlanApi();
   const { getAllDietPlanPresets } = useDietPlanPresetApi();
   const queryClient = useQueryClient();
@@ -75,12 +80,14 @@ export const ViewDietPlanPage = () => {
       toast.error(`יש בעיה בקלט.`);
       return;
     }
+
     if (isNewPlan) {
       createDietPlan.mutate(dietPlanToAdd);
     } else {
       if (!id) return;
 
       editDietPlan.mutate({ id, dietPlanToAdd });
+      queryClient.invalidateQueries({ queryKey: [QueryKeys.NO_DIET_PLAN] });
     }
   };
 
@@ -88,7 +95,7 @@ export const ViewDietPlanPage = () => {
     queryKey: [QueryKeys.DIET_PLAN_PRESETS],
     enabled: !!id,
     staleTime: FULL_DAY_STALE_TIME,
-    queryFn: () => getAllDietPlanPresets().then((res) => res.data),
+    queryFn: () => getAllDietPlanPresets(),
   });
 
   const { isLoading, error, data } = useQuery({
@@ -109,7 +116,7 @@ export const ViewDietPlanPage = () => {
   });
 
   const handleSelect = (presetName: string) => {
-    const selectedPreset = dietPlanPresets?.data?.find((preset) => preset.name === presetName);
+    const selectedPreset = dietPlanPresets.data?.data.find((preset) => preset.name === presetName);
 
     if (!selectedPreset) return;
     const { meals, totalCalories, freeCalories, customInstructions } = selectedPreset;
@@ -128,18 +135,23 @@ export const ViewDietPlanPage = () => {
 
   return (
     <div className=" flex flex-col gap-4 size-full hide-scrollbar overflow-y-auto">
-      <h1 className="text-2xl font-semibold mb-4">עריכת תפריט תזונה</h1>
+      <div className="mb-4">
+        <h1 className="text-2xl font-semibold ">עריכת תפריט תזונה</h1>
+        {user && <BasicUserDetails user={user} />}
+      </div>
+
       <BackButton navLink={MainRoutes.USERS + `/${id}`} />
       <Select onValueChange={(val) => handleSelect(val)}>
         <SelectTrigger dir="rtl" className="w-[350px] mr-1">
           <SelectValue placeholder="בחר תפריט" />
         </SelectTrigger>
         <SelectContent dir="rtl">
-          {dietPlanPresets?.data?.map((preset) => (
-            <SelectItem key={preset.name} value={preset.name}>
-              {preset.name}
-            </SelectItem>
-          ))}
+          {dietPlanPresets &&
+            dietPlanPresets.data?.data.map((preset) => (
+              <SelectItem key={preset.name} value={preset.name}>
+                {preset.name}
+              </SelectItem>
+            ))}
         </SelectContent>
       </Select>
 

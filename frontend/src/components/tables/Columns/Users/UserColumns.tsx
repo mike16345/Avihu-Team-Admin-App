@@ -16,7 +16,6 @@ import { IUser } from "@/interfaces/IUser";
 import { useUsersApi } from "@/hooks/api/useUsersApi";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Toggle } from "@/components/ui/toggle";
 import { Switch } from "@/components/ui/switch";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 
@@ -148,9 +147,9 @@ export const columns: ColumnDef<IUser>[] = [
             <DropdownMenuItem onClick={() => handleViewUser && handleViewUser(user)}>
               View user
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleDeleteUser && handleDeleteUser(user)}>
+            {/* <DropdownMenuItem onClick={() => handleDeleteUser && handleDeleteUser(user)}>
               Delete User
-            </DropdownMenuItem>
+            </DropdownMenuItem> */}
           </DropdownMenuContent>
         </DropdownMenu>
       );

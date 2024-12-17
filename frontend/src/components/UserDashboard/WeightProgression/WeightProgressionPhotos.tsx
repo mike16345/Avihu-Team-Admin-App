@@ -4,6 +4,9 @@ import { FC, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { FullscreenImage } from "./FullscreenImage";
 import { buildPhotoUrls } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { FULL_DAY_STALE_TIME } from "@/constants/constants";
+import Loader from "@/components/ui/Loader";
 
 interface WeightProgressionPhotosProps {
   onClickPhoto?: (photo: string) => void;
@@ -18,8 +21,30 @@ export const WeightProgressionPhotos: FC<WeightProgressionPhotosProps> = ({ onCl
   const { id } = useParams();
   const { getUserImageUrls } = useWeighInPhotosApi();
 
-  const [photos, setPhotos] = useState<string[]>([]);
   const [fullScreenImage, setFullScreenImage] = useState<SelectedFullscreenImage | null>(null);
+
+  const handleGetPhotos = async () => {
+    try {
+      const userImageUrls = await getUserImageUrls(id!);
+      const urls = buildPhotoUrls(userImageUrls.data);
+
+      return urls;
+    } catch (error) {
+      console.error("Failed to load images:", error);
+      return [];
+    }
+  };
+
+  const {
+    data: photos = [],
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: [id + "-photos"],
+    queryFn: handleGetPhotos,
+    enabled: !!id,
+    staleTime: FULL_DAY_STALE_TIME,
+  });
 
   const maxPhotosIndex = photos.length - 1;
   const minPhotosIndex = 0;
@@ -59,23 +84,6 @@ export const WeightProgressionPhotos: FC<WeightProgressionPhotosProps> = ({ onCl
   };
 
   useEffect(() => {
-    const fetchPhotos = async () => {
-      if (!id || photos.length > 0) return;
-
-      try {
-        const userImageUrls = await getUserImageUrls(id);
-        const urls = buildPhotoUrls(userImageUrls.data);
-        
-        setPhotos(urls);
-      } catch (error) {
-        console.error("Failed to load images:", error);
-      }
-    };
-
-    fetchPhotos();
-  }, []);
-
-  useEffect(() => {
     if (fullScreenImage) {
       document.addEventListener("keydown", handleKeyDown);
     } else {
@@ -87,9 +95,11 @@ export const WeightProgressionPhotos: FC<WeightProgressionPhotosProps> = ({ onCl
     };
   }, [fullScreenImage]);
 
+  if (isLoading) return <Loader size="large" />;
+  
   return (
     <>
-      {photos.length > 0 ? (
+      {photos.length && (
         <Card className="flex flex-col gap-2">
           <CardHeader className="text-lg font-semibold">
             <CardTitle>תמונות</CardTitle>
@@ -106,7 +116,8 @@ export const WeightProgressionPhotos: FC<WeightProgressionPhotosProps> = ({ onCl
             ))}
           </CardContent>
         </Card>
-      ) : (
+      )}
+      {!photos.length && (
         <div className="size-full items-center justify-center">
           <h1 className="text-center">אין תמונות</h1>
         </div>

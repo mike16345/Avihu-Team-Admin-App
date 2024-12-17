@@ -6,7 +6,7 @@ interface IUserStore {
   setUsers: (users: IUser[]) => void;
 }
 
-export const useAreasStore = create<IUserStore>((set, get) => ({
+export const useUsersStore = create<IUserStore>((set, get) => ({
   users: [],
   setUsers: (users) => {
     set({ users: users });

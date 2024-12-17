@@ -98,11 +98,11 @@ export const createRetryFunction = (ignoreStatusCode: number, maxRetries: number
 };
 
 export const buildPhotoUrls = (urls: string[]) => {
+  return urls.map((url) => buildPhotoUrl(url));
+};
+
+export const buildPhotoUrl = (url: string) => {
   const cloudfrontUrl = import.meta.env.VITE_CLOUDFRONT_URL;
 
-  const imageUrls = urls.map((url) => {
-    return `${cloudfrontUrl}/images/${url}`;
-  });
-
-  return imageUrls;
+  return `${cloudfrontUrl}/images/${url}`;
 };

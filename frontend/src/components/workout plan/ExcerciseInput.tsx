@@ -1,4 +1,4 @@
-import React, { Fragment, useMemo, useRef, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { IExercisePresetItem, ISet, IExercise } from "@/interfaces/IWorkoutPlan";
@@ -127,6 +127,12 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
       return updatedWorkouts;
     });
   };
+
+  useEffect(() => {
+    if (!exercises) return;
+
+    setExerciseObjs(exercises);
+  }, [exercises]);
 
   return (
     <>

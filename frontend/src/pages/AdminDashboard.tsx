@@ -2,6 +2,7 @@ import AnalyticsCard from "@/components/AdminDashboard/AnalyticsCard";
 import Shortcut from "@/components/AdminDashboard/Shortcut";
 import UserCheckIn from "@/components/AdminDashboard/UserCheckIn";
 import GenericCarousel from "@/components/ui/GenericCarousel";
+import { QueryKeys } from "@/enums/QueryKeys";
 import { BiFoodMenu } from "react-icons/bi";
 import { FaDumbbell } from "react-icons/fa";
 import { FiUserPlus } from "react-icons/fi";
@@ -25,7 +26,7 @@ const shortcuts = [
   },
   {
     actionName: `הוסף פוסט`,
-    navLink: `/blogs`,
+    navLink: `/blogs/create`,
     icon: <MdOutlinePostAdd />,
   },
 ];
@@ -50,9 +51,12 @@ const AdminDashboard = () => {
         <div className="px-8 ">
           <GenericCarousel
             carouselItems={[
-              <AnalyticsCard title="לקוחות ללא תוכנית אימון" dataKey="workoutPlan" />,
-              <AnalyticsCard title="לקוחות ללא תפריט תזונה" dataKey="dietPlan" />,
-              <AnalyticsCard title="לקוחות שמסיימים תהליך החודש" dataKey="expiringUsers" />,
+              <AnalyticsCard title="לקוחות ללא תוכנית אימון" dataKey={QueryKeys.NO_WORKOUT_PLAN} />,
+              <AnalyticsCard title="לקוחות ללא תפריט תזונה" dataKey={QueryKeys.NO_DIET_PLAN} />,
+              <AnalyticsCard
+                title="לקוחות שמסיימים תהליך החודש"
+                dataKey={QueryKeys.EXPIRING_USERS}
+              />,
             ]}
           />
         </div>

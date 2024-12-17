@@ -8,5 +8,5 @@ export const defaultMeal: IMeal = {
 export const defaultDietPlan: IDietPlan = {
   meals: [defaultMeal, defaultMeal, defaultMeal, defaultMeal],
   freeCalories: 0,
-  customInstructions: "",
+  customInstructions: [],
 };
