@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ExerciseProgressChart } from "./ExerciseProgressChart";
 import { useParams } from "react-router";
 import { RecordedSetsList } from "./RecordedSetsList";
@@ -12,6 +12,7 @@ import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 import { createRetryFunction } from "@/lib/utils";
 import Loader from "@/components/ui/Loader";
 import ErrorPage from "@/pages/ErrorPage";
+import { workoutTab } from "@/pages/UserDashboard";
 
 export const WorkoutProgression = () => {
   const { id } = useParams();
@@ -21,26 +22,30 @@ export const WorkoutProgression = () => {
   const handleGetRecordedSets = async () => {
     try {
       const data = await getRecordedSetsByUserId(id!);
-      if (!searchParams.get("muscleGroup") && !searchParams.get("exercise")) {
-        const initialMuscleGroup = data[0]?.muscleGroup || "";
-        const initialExercise = extractExercises(data[0]?.recordedSets)[0] || "";
-
-        setSearchParams((s) => {
-          return {
-            ...Object.fromEntries(s.entries()),
-            muscleGroup: initialMuscleGroup,
-            exercise: initialExercise,
-          };
-        });
-        setSelectedMuscleGroup(initialMuscleGroup);
-        setSelectedExercise(initialExercise);
-      }
 
       return data;
     } catch (error) {
       console.error("Error fetching recorded sets:", error);
       throw error;
     }
+  };
+
+  const handleSetSearchParams = () => {
+    if (!recordedWorkouts || (searchParams.get("muscleGroup") && searchParams.get("exercise")))
+      return;
+
+    const initialMuscleGroup = recordedWorkouts[0]?.muscleGroup || "";
+    const initialExercise = extractExercises(recordedWorkouts[0]?.recordedSets)[0] || "";
+
+    setSearchParams((s) => {
+      return {
+        ...Object.fromEntries(s.entries()),
+        muscleGroup: initialMuscleGroup,
+        exercise: initialExercise,
+      };
+    });
+    setSelectedMuscleGroup(initialMuscleGroup);
+    setSelectedExercise(initialExercise);
   };
 
   const {
@@ -64,6 +69,11 @@ export const WorkoutProgression = () => {
   );
 
   const recordedSets = recordedMuscleGroup?.recordedSets[selectedExercise] || [];
+
+  useEffect(() => {
+    if (searchParams.get("tab") !== workoutTab || !recordedWorkouts) return;
+    handleSetSearchParams();
+  }, [searchParams]);
 
   if (isLoading) return <Loader />;
   if (error) return <ErrorPage message={error.data.message} />;

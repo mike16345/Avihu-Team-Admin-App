@@ -13,6 +13,7 @@ import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import DateUtils from "@/lib/dateUtils";
 import { useTheme } from "../theme/theme-provider";
 import { useUsersStore } from "@/store/userStore";
+import { weightTab } from "@/pages/UserDashboard";
 
 export const UsersTable = () => {
   const setUsers = useUsersStore((state) => state.setUsers);
@@ -46,7 +47,7 @@ export const UsersTable = () => {
   });
 
   const handleViewUser = (user: IUser) => {
-    navigate(`/users/${user._id}`, { state: user });
+    navigate(`/users/${user._id}?tab=${weightTab}`, { state: user });
   };
 
   const handleGetRowClassName = (user: IUser) => {
