@@ -145,11 +145,11 @@ export const columns: ColumnDef<IUser>[] = [
             <DropdownMenuSeparator />
 
             <DropdownMenuItem onClick={() => handleViewUser && handleViewUser(user)}>
-              View user
+              צפה
             </DropdownMenuItem>
-            {/* <DropdownMenuItem onClick={() => handleDeleteUser && handleDeleteUser(user)}>
-              Delete User
-            </DropdownMenuItem> */}
+            <DropdownMenuItem onClick={() => handleDeleteUser && handleDeleteUser(user)}>
+              מחק
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

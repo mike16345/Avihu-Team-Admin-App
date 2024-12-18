@@ -96,10 +96,10 @@ export const WeightProgressionPhotos: FC<WeightProgressionPhotosProps> = ({ onCl
   }, [fullScreenImage]);
 
   if (isLoading) return <Loader size="large" />;
-  
+
   return (
     <>
-      {photos.length && (
+      {photos.length > 0 && (
         <Card className="flex flex-col gap-2">
           <CardHeader className="text-lg font-semibold">
             <CardTitle>תמונות</CardTitle>
@@ -117,7 +117,7 @@ export const WeightProgressionPhotos: FC<WeightProgressionPhotosProps> = ({ onCl
           </CardContent>
         </Card>
       )}
-      {!photos.length && (
+      {photos.length == 0 && (
         <div className="size-full items-center justify-center">
           <h1 className="text-center">אין תמונות</h1>
         </div>

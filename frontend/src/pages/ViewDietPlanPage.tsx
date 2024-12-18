@@ -26,6 +26,8 @@ import { QueryKeys } from "@/enums/QueryKeys";
 import BackButton from "@/components/ui/BackButton";
 import BasicUserDetails from "@/components/UserDashboard/UserInfo/BasicUserDetails";
 import { useUsersStore } from "@/store/userStore";
+import { weightTab } from "./UserDashboard";
+import { createRetryFunction } from "@/lib/utils";
 
 export const ViewDietPlanPage = () => {
   const navigation = useNavigate();
@@ -45,7 +47,7 @@ export const ViewDietPlanPage = () => {
   const onSuccess = () => {
     toast.success("תפריט נשמר בהצלחה!");
     queryClient.invalidateQueries({ queryKey: [`${QueryKeys.USER_DIET_PLAN}${id}`] });
-    navigation(MainRoutes.USERS + `/${id}`);
+    navigation(MainRoutes.USERS + `/${id}?tab=${weightTab}`);
   };
 
   const onError = (e: any) => {
@@ -105,13 +107,16 @@ export const ViewDietPlanPage = () => {
     queryFn: () =>
       getDietPlanByUserId(id!)
         .then((plan) => {
+          console.log("plan data", plan);
+          console.log("plan", plan);
           setDietPlan(plan);
           return plan;
         })
         .catch((e) => {
           setIsNewPlan(true);
           setDietPlan(defaultDietPlan);
-          return e;
+
+          return defaultDietPlan;
         }),
   });
 
@@ -131,8 +136,9 @@ export const ViewDietPlanPage = () => {
 
   if (isLoading || dietPlanPresets.isLoading) return <Loader size="large" />;
   if (error) return <ErrorPage message={error.message} />;
-  const plan = dietPlan || data;
+  const plan = dietPlan || data || defaultDietPlan;
 
+  console.log("plan before render", plan);
   return (
     <div className=" flex flex-col gap-4 size-full hide-scrollbar overflow-y-auto">
       <div className="mb-4">
@@ -140,7 +146,7 @@ export const ViewDietPlanPage = () => {
         {user && <BasicUserDetails user={user} />}
       </div>
 
-      <BackButton navLink={MainRoutes.USERS + `/${id}`} />
+      <BackButton navLink={MainRoutes.USERS + `/${id}?tab=${weightTab}`} />
       <Select onValueChange={(val) => handleSelect(val)}>
         <SelectTrigger dir="rtl" className="w-[350px] mr-1">
           <SelectValue placeholder="בחר תפריט" />

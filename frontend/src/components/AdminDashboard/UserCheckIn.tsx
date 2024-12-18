@@ -9,6 +9,7 @@ import { FaCheck } from "react-icons/fa";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import ErrorPage from "@/pages/ErrorPage";
 import { FULL_DAY_STALE_TIME } from "@/constants/constants";
+import { weightTab } from "@/pages/UserDashboard";
 
 const UserCheckIn = () => {
   const navigate = useNavigate();
@@ -59,7 +60,7 @@ const UserCheckIn = () => {
         {users?.map((user) => (
           <div
             key={user._id}
-            onDoubleClick={() => navigate(`/users/${user._id}`)}
+            onDoubleClick={() => navigate(`/users/${user._id}?tab=${weightTab}`)}
             className="w-full flex  cursor-pointer justify-between items-center border-b-2 p-5 hover:bg-accent"
           >
             <div className="flex font-bold gap-1 ">

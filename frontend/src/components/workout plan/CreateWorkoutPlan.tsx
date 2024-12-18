@@ -33,6 +33,7 @@ import BasicUserDetails from "../UserDashboard/UserInfo/BasicUserDetails";
 import { useUsersStore } from "@/store/userStore";
 import { IUser } from "@/interfaces/IUser";
 import { useUsersApi } from "@/hooks/api/useUsersApi";
+import { weightTab } from "@/pages/UserDashboard";
 
 const CreateWorkoutPlan: React.FC = () => {
   const { id } = useParams();
@@ -91,7 +92,7 @@ const CreateWorkoutPlan: React.FC = () => {
 
   const onSuccess = () => {
     toast.success(`תכנית אימון נשמרה בהצלחה!`);
-    navigation(MainRoutes.USERS + `/${id}`);
+    navigation(MainRoutes.USERS + `/${id}?tab=${weightTab}`);
     queryClient.invalidateQueries({ queryKey: [`${QueryKeys.USER_WORKOUT_PLAN}${id}`] });
     queryClient.invalidateQueries({ queryKey: [`${QueryKeys.NO_WORKOUT_PLAN}`] });
   };
@@ -180,7 +181,7 @@ const CreateWorkoutPlan: React.FC = () => {
         <div className=" w-full flex justify-between items-center">
           <h1 className="text-4xl">תוכנית אימון</h1>
 
-          <BackButton navLink={MainRoutes.USERS + `/${id}`} />
+          <BackButton navLink={MainRoutes.USERS + `/${id}?tab=${weightTab}`} />
           <Toggle
             onClick={() => toggleIsEditable()}
             className="px-3 rounded cursor-pointer absolute top-5 left-32"

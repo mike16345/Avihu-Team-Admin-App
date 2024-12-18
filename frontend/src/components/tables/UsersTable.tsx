@@ -55,7 +55,7 @@ export const UsersTable = () => {
     const daysUntilPlanIsFinished = DateUtils.getDaysDifference(new Date(), user.dateFinished);
 
     if (daysUntilPlanIsFinished <= MINIMUM_WARNING_DAYS) {
-      return theme == "dark" ? " bg-red-400" : "bg-red-300";
+      return theme == "dark" ? " bg-red-400/95" : "bg-red-300/50";
     }
 
     return "";
@@ -73,7 +73,7 @@ export const UsersTable = () => {
         handleSetData={() => console.log("setting data")}
         handleViewData={(user) => handleViewUser(user)}
         handleDeleteData={(user) => usersMutation.mutate(user._id || "")}
-        handleViewNestedData={(data, userId) => console.log("data user", data, userId)}
+        handleViewNestedData={(_, userId) => navigate(`/users/${userId}?tab=${weightTab}`)}
         getRowClassName={(user) => handleGetRowClassName(user)}
       />
     </>
