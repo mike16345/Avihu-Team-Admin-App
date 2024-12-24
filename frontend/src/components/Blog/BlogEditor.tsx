@@ -13,6 +13,7 @@ import { buildPhotoUrl } from "@/lib/utils";
 import BackButton from "../ui/BackButton";
 import { QueryKeys } from "@/enums/QueryKeys";
 import CustomButton from "../ui/CustomButton";
+import Loader from "../ui/Loader";
 
 const formats = [
   "font",
@@ -81,7 +82,7 @@ const BlogEditor = () => {
   };
 
   const handleRemoveImage = () => {
-    setImageToDelete(image);
+    setImageToDelete(blog.imageUrl);
     setImage(undefined);
     setBlog((prev) => ({ ...prev, imageUrl: undefined }));
   };
@@ -112,7 +113,6 @@ const BlogEditor = () => {
     if (!quillRef.current) return;
     const editor = quillRef.current.getEditor();
     editor.format("align", "right");
-    
   }, [quillRef]);
 
   useEffect(() => {
@@ -132,7 +132,7 @@ const BlogEditor = () => {
   }, [stateBlog, fetchedBlog]);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <Loader variant="standard" />;
   }
 
   return (
