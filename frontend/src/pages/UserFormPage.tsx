@@ -9,6 +9,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
+import { weightTab } from "./UserDashboard";
 
 const UserFormPage = () => {
   const { id } = useParams();
@@ -65,7 +66,7 @@ const UserFormPage = () => {
   return (
     <div>
       <h1 className="font-bold text-2xl">פרטי משתמש</h1>
-      <BackButton navLink={`${MainRoutes.USERS}/${id || ``}`} />
+      <BackButton navLink={`${MainRoutes.USERS}/${id || ``}?tab=${weightTab}`} />
       <UserForm
         existingUser={user}
         saveInfo={(user) => handleSaveUser(user)}

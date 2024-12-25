@@ -76,7 +76,7 @@ export const CustomItemSelection: FC<CustomItemSelectionProps> = ({
   items,
 }) => {
   const [selected, setSelectedItems] = useState<string[]>(selectedItems || []);
-  
+
   const toggleSelect = (item: string) => {
     setSelectedItems((prevSelectedItems) => {
       const selected = prevSelectedItems.includes(item)
@@ -91,7 +91,8 @@ export const CustomItemSelection: FC<CustomItemSelectionProps> = ({
 
   return (
     <div className="flex flex-wrap items-center p-2  max-h-48 custom-scrollbar overflow-y-scroll gap-4">
-      {items.map((item, index) => (
+      {(!items || items?.length == 0) && <div className="text-red-500">אין פריטים</div>}
+      {items?.map((item, index) => (
         <Badge
           key={item._id || index}
           onClick={() => toggleSelect(item.name)}
