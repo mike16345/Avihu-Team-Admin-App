@@ -67,6 +67,9 @@ const BlogList: React.FC = () => {
           />
         ))
       )}
+      {(!data?.pages[0].results || data?.pages[0].results.length == 0) && (
+        <div className="col-span-full text-center text-xl">אין בלוגים כרגע</div>
+      )}
       {hasNextPage && (
         <button
           onClick={() => fetchNextPage()}
