@@ -62,14 +62,14 @@ const CreateWorkoutPlan: React.FC = () => {
   });
 
   const workoutPlanPresets = useQuery({
-    queryFn: () => getAllWorkoutPlanPresets().then((res) => res.data),
+    queryFn: getAllWorkoutPlanPresets,
     staleTime: FULL_DAY_STALE_TIME,
     enabled: isEditable,
     queryKey: [QueryKeys.WORKOUT_PRESETS],
   });
 
   const workoutPresetsOptions = useMemo(
-    () => convertItemsToOptions(workoutPlanPresets.data || [], "name"),
+    () => convertItemsToOptions(workoutPlanPresets.data?.data || [], "name"),
     [workoutPlanPresets.data]
   );
 

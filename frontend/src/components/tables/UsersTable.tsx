@@ -14,11 +14,14 @@ import DateUtils from "@/lib/dateUtils";
 import { useTheme } from "../theme/theme-provider";
 import { useUsersStore } from "@/store/userStore";
 import { weightTab } from "@/pages/UserDashboard";
+import { handleDeleteManyPhotos } from "@/hooks/api/useBlogsApi";
+import { useWeighInPhotosApi } from "@/hooks/api/useWeighInPhotosApi";
 
 export const UsersTable = () => {
   const setUsers = useUsersStore((state) => state.setUsers);
   const navigate = useNavigate();
   const { theme } = useTheme();
+  const { getUserImageUrls } = useWeighInPhotosApi();
   const { getAllUsers, deleteUser } = useUsersApi();
   const queryClient = useQueryClient();
 
@@ -36,8 +39,21 @@ export const UsersTable = () => {
         }),
   });
 
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      const userImageUrls = await getUserImageUrls(userId);
+      const urls = userImageUrls.data.map((url) => `images/${url}`);
+      await handleDeleteManyPhotos(urls);
+      return await deleteUser(userId);
+    } catch (err: any) {
+      toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE);
+      console.error(err);
+      return;
+    }
+  };
+
   const usersMutation = useMutation({
-    mutationFn: (id: string) => deleteUser(id),
+    mutationFn: (id: string) => handleDeleteUser(id),
     onSuccess: () => {
       toast.success("המשתמש נמחק בהצלחה!");
       queryClient.invalidateQueries({ queryKey: [`users`] });

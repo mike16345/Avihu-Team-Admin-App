@@ -28,6 +28,12 @@ const handleDeletePhoto = async (photo?: string) => {
   });
 };
 
+export const handleDeleteManyPhotos = async (photos?: string[]) => {
+  return await deleteItem("s3/photos/many", undefined, undefined, {
+    photoIds: photos,
+  });
+};
+
 export const useBlogsApi = () => {
   const getBlogById = async (blogId: string) => {
     const response = await fetchData<ApiResponse<IBlogResponse>>(
