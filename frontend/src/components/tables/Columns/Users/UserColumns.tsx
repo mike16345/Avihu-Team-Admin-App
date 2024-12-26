@@ -133,15 +133,15 @@ export const columns: ColumnDef<IUser>[] = [
       const handleViewUser = table.options.meta?.handleViewData;
 
       return (
-        <DropdownMenu>
+        <DropdownMenu dir="rtl">
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
               <span className="sr-only">Open menu</span>
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuContent>
+            <DropdownMenuLabel>פעולות</DropdownMenuLabel>
             <DropdownMenuSeparator />
 
             <DropdownMenuItem onClick={() => handleViewUser && handleViewUser(user)}>
