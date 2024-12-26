@@ -143,7 +143,6 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
           </div>
           <CollapsibleContent className="flex flex-col gap-4">
             {muscleGroups.map((muscleGroup, i) => {
-              console.log("muscle group", muscleGroup);
               return (
                 <MuscleGroupContainer
                   key={muscleGroup?._id || muscleGroup.muscleGroup}

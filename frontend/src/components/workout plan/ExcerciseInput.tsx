@@ -128,12 +128,6 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
     });
   };
 
-  useEffect(() => {
-    if (!exercises) return;
-
-    setExerciseObjs(exercises);
-  }, [exercises]);
-
   return (
     <>
       <div className="w-full flex flex-col gap-3 px-2 py-4">

@@ -41,7 +41,7 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
 
   const muscleGroupsQuery = useQuery({
     queryKey: ["muscleGroups"],
-    queryFn: () => getAllMuscleGroups().then((res) => res.data),
+    queryFn: getAllMuscleGroups,
     staleTime: FULL_DAY_STALE_TIME,
   });
 
@@ -50,7 +50,7 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
       (muscleGroup) => muscleGroup.muscleGroup
     );
 
-    const filteredExistingMuscleGroups = muscleGroupsQuery.data?.filter(
+    const filteredExistingMuscleGroups = muscleGroupsQuery.data?.data.filter(
       (muscleGroup) =>
         muscleGroupsInWorkout.find((mgName) => muscleGroup.name == mgName) == undefined
     );

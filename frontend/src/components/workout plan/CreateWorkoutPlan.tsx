@@ -161,7 +161,6 @@ const CreateWorkoutPlan: React.FC = () => {
   useEffect(() => {
     const fetchUser = async () => {
       const user = users.find((user) => user._id === id) || (await getUser(id || ""));
-
       setUser(user);
     };
 
