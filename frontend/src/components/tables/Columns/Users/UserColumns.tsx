@@ -18,6 +18,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
+import DeleteModal from "@/components/Alerts/DeleteModal";
 
 export const columns: ColumnDef<IUser>[] = [
   {
@@ -132,26 +133,34 @@ export const columns: ColumnDef<IUser>[] = [
       const handleDeleteUser = table.options.meta?.handleDeleteData;
       const handleViewUser = table.options.meta?.handleViewData;
 
-      return (
-        <DropdownMenu dir="rtl">
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuLabel>פעולות</DropdownMenuLabel>
-            <DropdownMenuSeparator />
+      const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-            <DropdownMenuItem onClick={() => handleViewUser && handleViewUser(user)}>
-              צפה
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleDeleteUser && handleDeleteUser(user)}>
-              מחק
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      return (
+        <>
+          <DropdownMenu dir="rtl">
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuLabel>פעולות</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem onClick={() => handleViewUser && handleViewUser(user)}>
+                צפה
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsDeleteModalOpen(true)}>מחק</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <DeleteModal
+            isModalOpen={isDeleteModalOpen}
+            setIsModalOpen={setIsDeleteModalOpen}
+            onConfirm={() => handleDeleteUser && handleDeleteUser(user)}
+            onCancel={() => setIsDeleteModalOpen(false)}
+          />
+        </>
       );
     },
   },
