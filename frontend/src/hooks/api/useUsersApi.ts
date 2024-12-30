@@ -1,5 +1,5 @@
 import { deleteItem, fetchData, sendData, updateItem } from "@/API/api";
-import { IUser } from "@/interfaces/IUser";
+import { ISession, IUser } from "@/interfaces/IUser";
 import { ApiResponse } from "@/types/types";
 
 const USERS_ENDPOINT = "users";
@@ -34,15 +34,26 @@ export const useUsersApi = () => {
     });
   };
 
+  const loginUser = (email: string, password: string) =>
+    sendData<ApiResponse<ISession>>(USERS_ENDPOINT + `/user/login`, { email, password });
+
+  const checkUserSessionToken = (token: ISession) => {
+    return sendData<ApiResponse<{ isValid: boolean }>>(USERS_ENDPOINT + `/user/session`, {
+      token,
+    }).then((res) => res.data);
+  };
+
   const getAllUsers = () => fetchData<ApiResponse<IUser[]>>(USERS_ENDPOINT).then((res) => res.data);
 
   return {
     addUser,
+    checkUserSessionToken,
     updateUserField,
     updateUser,
     deleteManyUsers,
     deleteUser,
     getUser,
     getAllUsers,
+    loginUser,
   };
 };

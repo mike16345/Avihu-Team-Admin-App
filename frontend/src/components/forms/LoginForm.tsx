@@ -9,7 +9,12 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { USER_TOKEN_STORAGE_KEY } from "@/constants/constants";
+import { useUsersApi } from "@/hooks/api/useUsersApi";
+import useAuth from "@/hooks/Authentication/useAuth";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import secureLocalStorage from "react-secure-storage";
 
 export const description =
   "A simple login form with email and password. The submit button says 'Sign in'.";
@@ -23,11 +28,15 @@ type LoginFormErrors = {
 };
 
 export default function LoginForm() {
+  const { login } = useAuth();
+  const { loginUser } = useUsersApi();
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<LoginFormErrors>({});
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     if (!validateEmail(email)) {
       setErrors({
@@ -38,6 +47,12 @@ export default function LoginForm() {
     }
 
     console.log({ email, password });
+    loginUser(email, password)
+      .then((res) => {
+        secureLocalStorage.setItem(USER_TOKEN_STORAGE_KEY, res.data);
+      })
+      .then(() => login())
+      .then(() => navigate("/"));
 
     setErrors({});
   };
@@ -63,7 +78,7 @@ export default function LoginForm() {
           {errors.email && <p className="text-red-500">{errors.email}</p>}
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password">סיסמה</Label>
           <Input
             placeholder="סיסמה"
             id="password"
@@ -77,8 +92,8 @@ export default function LoginForm() {
         </div>
       </CardContent>
       <CardFooter>
-        <Button onClick={handleSubmit} className="w-full">
-          Sign in
+        <Button onClick={handleSubmit} className="w-full font-bold">
+          כניסה
         </Button>
       </CardFooter>
     </Card>
