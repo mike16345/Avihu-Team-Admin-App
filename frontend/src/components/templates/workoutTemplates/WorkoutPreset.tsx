@@ -3,10 +3,10 @@ import { IMuscleGroupWorkouts, IWorkoutPlan } from "@/interfaces/IWorkoutPlan";
 import { Fragment, useEffect, useState } from "react";
 import { BsPlusCircleFill } from "react-icons/bs";
 import { Input } from "@/components/ui/input";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useWorkoutPlanPresetApi } from "@/hooks/api/useWorkoutPlanPresetsApi";
-import { cleanWorkoutObject } from "@/utils/workoutPlanUtils";
+import { cleanWorkoutObject, parseErrorFromObject } from "@/utils/workoutPlanUtils";
 import {
   Form,
   FormControl,
@@ -21,6 +21,12 @@ import { z } from "zod";
 import WorkoutContainer from "@/components/workout plan/WorkoutPlanContainer";
 import { EditableContextProvider } from "@/context/useIsEditableContext";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
+import WorkoutPlanContainerWrapper from "@/components/Wrappers/WorkoutPlanContainerWrapper";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { MainRoutes } from "@/enums/Routes";
+import { QueryKeys } from "@/enums/QueryKeys";
+import CustomButton from "@/components/ui/CustomButton";
+import BackButton from "@/components/ui/BackButton";
 
 const workoutFormSchema = z.object({
   name: z.string().min(1).max(25),
@@ -28,6 +34,7 @@ const workoutFormSchema = z.object({
 
 const WorkoutPreset = () => {
   const { id } = useParams();
+  const navigation = useNavigate();
   const isEdit = id !== undefined;
 
   const workoutForm = useForm<any>({
@@ -37,8 +44,23 @@ const WorkoutPreset = () => {
     },
   });
 
+  const queryClient = useQueryClient();
   const { addWorkoutPlanPreset, getWorkoutPlanPresetById, updateWorkoutPlanPreset } =
     useWorkoutPlanPresetApi();
+
+  const onSuccess = () => {
+    toast.success(`תבנית אימון נשמרה בהצלחה!`);
+    navigation(MainRoutes.WORKOUT_PLANS_PRESETS);
+    queryClient.invalidateQueries({ queryKey: [QueryKeys.WORKOUT_PRESETS] });
+  };
+
+  const onError = (error: any) => {
+    const message = parseErrorFromObject(error.data || "");
+
+    toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
+      description: message,
+    });
+  };
 
   const [workoutPlan, setWorkoutPlan] = useState<IWorkoutPlan[]>([]);
 
@@ -90,25 +112,19 @@ const WorkoutPreset = () => {
     const cleanedObject = cleanWorkoutObject(postObject);
 
     if (isEdit) {
-      if (!id) return;
+      if (!id) return Promise.reject();
 
-      updateWorkoutPlanPreset(id, cleanedObject)
-        .then(() => toast.success(`תבנית אימון נשמרה בהצלחה!`))
-        .catch((err) =>
-          toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-            description: err.response.data.message,
-          })
-        );
+      return updateWorkoutPlanPreset(id, cleanedObject);
     } else {
-      addWorkoutPlanPreset(cleanedObject)
-        .then(() => toast.success(`תבנית אימון נשמרה בהצלחה!`))
-        .catch((err) =>
-          toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-            description: err.response.data.message,
-          })
-        );
+      return addWorkoutPlanPreset(cleanedObject);
     }
   };
+
+  const workoutPlanMutator = useMutation({
+    mutationFn: (values: z.infer<typeof workoutFormSchema>) => handleSubmit(values),
+    onSuccess,
+    onError,
+  });
 
   useEffect(() => {
     if (!id) return;
@@ -125,6 +141,7 @@ const WorkoutPreset = () => {
     <EditableContextProvider isEdit={true}>
       <div className="flex flex-col gap-4 p-5 overflow-y-scroll hide-scrollbar w-5/6 max-h-[95vh] ">
         <h1 className="text-5xl">תבנית אימון</h1>
+        <BackButton navLink={MainRoutes.WORKOUT_PLANS_PRESETS} />
         <p>{isEdit ? `כאן תוכל לערוך תבנית אימון קיימת` : `  כאן תוכל ליצור תבנית אימון חדשה`}</p>
         <div className="flex flex-col gap-2 px-2 py-4">
           <div className="w-full py-4 border-b-2 mb-2">
@@ -150,14 +167,16 @@ const WorkoutPreset = () => {
           </div>
 
           {workoutPlan.map((workout, i) => (
-            <Fragment key={i}>
-              <WorkoutContainer
-                initialMuscleGroups={workout.muscleGroups}
-                handleSave={(workouts) => handleSave(i, workouts)}
-                title={workout.planName}
-                handlePlanNameChange={(newName) => handlePlanNameChange(newName, i)}
-                handleDeleteWorkout={() => handleDeleteWorkout(i)}
-              />
+            <Fragment key={workout?._id || workout.planName + i}>
+              <WorkoutPlanContainerWrapper workoutPlan={workout}>
+                <WorkoutContainer
+                  initialMuscleGroups={workout.muscleGroups}
+                  handleSave={(workouts) => handleSave(i, workouts)}
+                  title={workout.planName}
+                  handlePlanNameChange={(newName) => handlePlanNameChange(newName, i)}
+                  handleDeleteWorkout={() => handleDeleteWorkout(i)}
+                />
+              </WorkoutPlanContainerWrapper>
             </Fragment>
           ))}
           <div className="w-full flex items-center justify-center">
@@ -170,9 +189,13 @@ const WorkoutPreset = () => {
           </div>
         </div>
         <div className="flex justify-end">
-          <Button onClick={workoutForm.handleSubmit(handleSubmit)} variant="success">
-            שמור תוכנית אימון
-          </Button>
+          <CustomButton
+            onClick={workoutForm.handleSubmit((values) => workoutPlanMutator.mutate(values))}
+            variant="success"
+            title="שמור תוכנית אימון"
+            isLoading={workoutPlanMutator.isPending}
+            type="submit"
+          />
         </div>
       </div>
     </EditableContextProvider>

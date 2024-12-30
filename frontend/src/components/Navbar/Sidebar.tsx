@@ -44,6 +44,11 @@ export const Sidebar = () => {
       linkName: "תוכנית אימון",
       icon: <GiBiceps className="text-amber-700 hover:text-amber-500" size={24} />, // Human skin tone
     },
+    // {
+    //   to: "/test",
+    //   linkName: "Test",
+    //   icon: <GiBiceps className="text-amber-700 hover:text-amber-500" size={24} />, // Human skin tone
+    // },
   ];
 
   return (

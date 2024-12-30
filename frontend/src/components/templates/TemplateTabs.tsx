@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import PresetSheet from "./PresetSheet";
 import { useNavigate } from "react-router-dom";
-import { UseMutationResult, useQuery } from "@tanstack/react-query";
+import { Query, UseMutationResult, useQuery } from "@tanstack/react-query";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { ITabs } from "@/interfaces/interfaces";
 import useMenuItemApi from "@/hooks/api/useMenuItemApi";
@@ -13,6 +13,10 @@ import { useDietPlanPresetApi } from "@/hooks/api/useDietPlanPresetsApi";
 import { ApiResponse } from "@/types/types";
 import TemplateTabsSkeleton from "../ui/skeletons/TemplateTabsSkeleton";
 import ErrorPage from "@/pages/ErrorPage";
+import { useWorkoutPlanPresetApi } from "@/hooks/api/useWorkoutPlanPresetsApi";
+import useMuscleGroupsApi from "@/hooks/api/useMuscleGroupsApi";
+import useExercisePresetApi from "@/hooks/api/useExercisePresetApi";
+import { QueryKeys } from "@/enums/QueryKeys";
 
 interface TemplateTabsProps {
   tabs: ITabs;
@@ -22,6 +26,10 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
   const navigate = useNavigate();
   const { getMenuItems } = useMenuItemApi();
   const { getAllDietPlanPresets } = useDietPlanPresetApi();
+  const { getAllWorkoutPlanPresets } = useWorkoutPlanPresetApi();
+  const { getAllMuscleGroups } = useMuscleGroupsApi();
+  const { getExercisePresets } = useExercisePresetApi();
+
   const [selectedForm, setSelectedForm] = useState<string | undefined>();
   const [selectedObjectId, setSelectedObjectId] = useState<string>();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -36,7 +44,10 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
     [`protein`]: getMenuItems,
     [`fats`]: getMenuItems,
     [`vegetables`]: getMenuItems,
-    [`dietPlans`]: getAllDietPlanPresets,
+    [QueryKeys.DIET_PLAN_PRESETS]: getAllDietPlanPresets,
+    [QueryKeys.WORKOUT_PRESETS]: getAllWorkoutPlanPresets,
+    [`exercises`]: getExercisePresets,
+    [`muscleGroups`]: getAllMuscleGroups,
   };
 
   const apiFunc = apiHooks[queryKey];
@@ -113,20 +124,22 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
               </TabsTrigger>
             ))}
           </TabsList>
+          {apiData.isLoading && <TemplateTabsSkeleton />}
 
-          {tabs.tabContent.map((tab) => (
-            <TabsContent key={tab.value} value={tab.value}>
-              <Button onClick={() => handleAddNew(tab.sheetForm)} className="my-4">
-                {tab.btnPrompt}
-              </Button>
-              {apiData.isLoading && <TemplateTabsSkeleton />}
-              <PresetTable
-                data={apiData.data?.data || []}
-                handleDelete={(id) => deleteItem(id, tab.deleteFunc)}
-                retrieveObjectId={(id: string) => startEdit(id, tab.sheetForm)}
-              />
-            </TabsContent>
-          ))}
+          {!apiData.isLoading &&
+            tabs.tabContent.map((tab) => (
+              <TabsContent key={tab.value} value={tab.value}>
+                <Button onClick={() => handleAddNew(tab.sheetForm)} className="my-4">
+                  {tab.btnPrompt}
+                </Button>
+
+                <PresetTable
+                  data={apiData.data?.data || []}
+                  handleDelete={(id) => deleteItem(id, tab.deleteFunc)}
+                  retrieveObjectId={(id: string) => startEdit(id, tab.sheetForm)}
+                />
+              </TabsContent>
+            ))}
         </Tabs>
       </div>
       <PresetSheet

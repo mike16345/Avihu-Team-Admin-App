@@ -3,17 +3,66 @@ import { ExerciseProgressChart } from "./ExerciseProgressChart";
 import { useParams } from "react-router";
 import { RecordedSetsList } from "./RecordedSetsList";
 import { MuscleExerciseSelector } from "./MuscleExerciseSelector";
-import { IMuscleGroupRecordedSets } from "@/interfaces/IWorkout";
 import { useRecordedSetsApi } from "@/hooks/api/useRecordedSetsApi";
 import { extractExercises } from "@/lib/workoutUtils";
+import { useSearchParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { QueryKeys } from "@/enums/QueryKeys";
+import { FULL_DAY_STALE_TIME } from "@/constants/constants";
+import { createRetryFunction } from "@/lib/utils";
+import Loader from "@/components/ui/Loader";
+import ErrorPage from "@/pages/ErrorPage";
+import { workoutTab } from "@/pages/UserDashboard";
 
 export const WorkoutProgression = () => {
   const { id } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { getRecordedSetsByUserId } = useRecordedSetsApi();
 
-  const [recordedWorkouts, setRecordedWorkouts] = useState<IMuscleGroupRecordedSets[]>([]);
-  const [selectedMuscleGroup, setSelectedMuscleGroup] = useState("");
-  const [selectedExercise, setSelectedExercise] = useState("");
+  const handleGetRecordedSets = async () => {
+    try {
+      const data = await getRecordedSetsByUserId(id!);
+
+      return data;
+    } catch (error) {
+      console.error("Error fetching recorded sets:", error);
+      throw error;
+    }
+  };
+
+  const handleSetSearchParams = () => {
+    if (!recordedWorkouts || (searchParams.get("muscleGroup") && searchParams.get("exercise")))
+      return;
+
+    const initialMuscleGroup = recordedWorkouts[0]?.muscleGroup || "";
+    const initialExercise = extractExercises(recordedWorkouts[0]?.recordedSets)[0] || "";
+
+    setSearchParams((s) => {
+      return {
+        ...Object.fromEntries(s.entries()),
+        muscleGroup: initialMuscleGroup,
+        exercise: initialExercise,
+      };
+    });
+    setSelectedMuscleGroup(initialMuscleGroup);
+    setSelectedExercise(initialExercise);
+  };
+
+  const {
+    data: recordedWorkouts,
+    isLoading,
+    error,
+  } = useQuery({
+    queryFn: handleGetRecordedSets,
+    queryKey: [`${QueryKeys.RECORDED_WORKOUTS}${id}`],
+    staleTime: FULL_DAY_STALE_TIME / 2,
+    retry: createRetryFunction(404),
+    enabled: !!id,
+  });
+  const [selectedMuscleGroup, setSelectedMuscleGroup] = useState(
+    searchParams.get("muscleGroup") || ""
+  );
+  const [selectedExercise, setSelectedExercise] = useState(searchParams.get("exercise") || "");
 
   const recordedMuscleGroup = recordedWorkouts?.find(
     (recordedMuscleGroup) => recordedMuscleGroup.muscleGroup == selectedMuscleGroup
@@ -22,27 +71,20 @@ export const WorkoutProgression = () => {
   const recordedSets = recordedMuscleGroup?.recordedSets[selectedExercise] || [];
 
   useEffect(() => {
-    if (!id) return;
+    if (searchParams.get("tab") !== workoutTab || !recordedWorkouts) return;
+    handleSetSearchParams();
+  }, [searchParams]);
 
-    getRecordedSetsByUserId(id)
-      .then((recordedWorkouts) => {
-        const initialMuscleGroup = recordedWorkouts[0]?.muscleGroup || "";
-        const initialExercise = extractExercises(recordedWorkouts[0]?.recordedSets)[0] || "";
-
-        setRecordedWorkouts(recordedWorkouts);
-        setSelectedMuscleGroup(initialMuscleGroup);
-        setSelectedExercise(initialExercise);
-      })
-      .catch((e) => console.error(e));
-  }, []);
+  if (isLoading) return <Loader />;
+  if (error) return <ErrorPage message={error.data.message} />;
 
   return (
     <div className="size-full flex flex-col gap-4 p-4">
-      {recordedWorkouts.length > 0 && (
+      {recordedWorkouts!.length > 0 && (
         <>
           <MuscleExerciseSelector
             selectedExercise={selectedExercise}
-            recordedWorkouts={recordedWorkouts}
+            recordedWorkouts={recordedWorkouts!}
             selectedMuscleGroup={selectedMuscleGroup}
             onSelectExercise={(exercise) => setSelectedExercise(exercise)}
             onSelectMuscleGroup={(muscleGroup) => setSelectedMuscleGroup(muscleGroup)}
@@ -61,7 +103,7 @@ export const WorkoutProgression = () => {
           </div>
         </>
       )}
-      {recordedWorkouts.length == 0 && <h1 className="text-center">לא הקליטו אימונים</h1>}
+      {recordedWorkouts!?.length == 0 && <h1 className="text-center">לא הקליטו אימונים</h1>}
     </div>
   );
 };

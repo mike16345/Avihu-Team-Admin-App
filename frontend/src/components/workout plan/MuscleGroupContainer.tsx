@@ -12,20 +12,22 @@ import { Button } from "../ui/button";
 interface IMuscleGroupContainerProps {
   muscleGroup: IMuscleGroupWorkouts;
   handleUpdateMuscleGroup: (value: string) => void;
-  handleUpdateWorkouts: (workoutsObject: IExercise[]) => void;
+  handleUpdateExercises: (exerciseObjects: IExercise[]) => void;
   handleDeleteMuscleGroup: () => void;
 }
 
 export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
   muscleGroup,
   handleUpdateMuscleGroup,
-  handleUpdateWorkouts,
+  handleUpdateExercises,
   handleDeleteMuscleGroup,
 }) => {
   const { isEditable } = useIsEditableContext();
 
   const [isDeleteMuscleGroupModalOpen, setIsDeleteMuscleGroupModalOpen] = useState(false);
-  const [openMuscleGroupContainer, setOpenMuscleGroupContainer] = useState(false);
+  const [openMuscleGroupContainer, setOpenMuscleGroupContainer] = useState(
+    muscleGroup.exercises.length === 0
+  );
 
   return (
     <Collapsible
@@ -41,6 +43,11 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
 
               {isEditable ? (
                 <MuscleGroupSelector
+                  handleDismiss={(val) => {
+                    if (!val) {
+                      handleDeleteMuscleGroup();
+                    }
+                  }}
                   handleChange={(value) => handleUpdateMuscleGroup(value)}
                   existingMuscleGroup={muscleGroup.muscleGroup}
                 />
@@ -60,9 +67,9 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
                 onClick={() => setOpenMuscleGroupContainer((open) => !open)}
                 variant="ghost"
                 size="sm"
-                className={`w-9 p-0 transition }`}
+                className={`w-9 p-0 transition`}
               >
-                <ChevronsUpDown size={20} className=" opacity-70" />{" "}
+                <ChevronsUpDown size={20} className=" opacity-70" />
                 <span className="sr-only">Toggle</span>
               </Button>
             </div>
@@ -71,9 +78,10 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
         <CollapsibleContent>
           <>
             <ExcerciseInput
-              options={muscleGroup?.muscleGroup || ``}
+              key={muscleGroup.muscleGroup}
+              muscleGroup={muscleGroup?.muscleGroup || ``}
               exercises={muscleGroup.exercises}
-              updateWorkouts={(workouts) => handleUpdateWorkouts(workouts)}
+              handleUpdateExercises={(workouts) => handleUpdateExercises(workouts)}
             />
           </>
         </CollapsibleContent>

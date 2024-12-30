@@ -10,20 +10,37 @@ export const useUsersApi = () => {
   const updateUser = (userID: string, user: IUser) =>
     updateItem(`${USERS_ENDPOINT}/one`, user, null, { id: userID });
 
-  const deleteUser = (userID: string) => deleteItem(`${USERS_ENDPOINT}/one`, userID);
+  const deleteUser = (userID: string) =>
+    deleteItem<ApiResponse<any>>(`${USERS_ENDPOINT}/one?id=${userID}`);
+
+  const deleteManyUsers = (userIds: string[]) => {
+    return deleteItem(`${USERS_ENDPOINT}/many`, undefined, undefined, { userIds });
+  };
 
   const getUser = (id: string) => {
-    console.log("user id", id);
     return fetchData<ApiResponse<IUser>>(USERS_ENDPOINT + "/one", { userId: id }).then(
       (res) => res.data
     );
+  };
+
+  const updateUserField = <K extends keyof IUser>(
+    userId: string,
+    fieldName: K,
+    value: IUser[K]
+  ) => {
+    return updateItem<ApiResponse<IUser>>(USERS_ENDPOINT + `/one/field?userId=${userId}`, {
+      fieldName,
+      value,
+    });
   };
 
   const getAllUsers = () => fetchData<ApiResponse<IUser[]>>(USERS_ENDPOINT).then((res) => res.data);
 
   return {
     addUser,
+    updateUserField,
     updateUser,
+    deleteManyUsers,
     deleteUser,
     getUser,
     getAllUsers,

@@ -67,11 +67,13 @@ const proteinItems = [
 type CustomItemSelectionProps = {
   onItemToggle: (selectedItems: string[]) => void;
   selectedItems?: string[];
+  items: any[];
 };
 
 export const CustomItemSelection: FC<CustomItemSelectionProps> = ({
   onItemToggle,
   selectedItems,
+  items,
 }) => {
   const [selected, setSelectedItems] = useState<string[]>(selectedItems || []);
 
@@ -89,16 +91,17 @@ export const CustomItemSelection: FC<CustomItemSelectionProps> = ({
 
   return (
     <div className="flex flex-wrap items-center p-2  max-h-48 custom-scrollbar overflow-y-scroll gap-4">
-      {proteinItems.map((item, index) => (
+      {(!items || items?.length == 0) && <div className="text-red-500">אין פריטים</div>}
+      {items?.map((item, index) => (
         <Badge
-          key={index}
-          onClick={() => toggleSelect(item)}
+          key={item._id || index}
+          onClick={() => toggleSelect(item.name)}
           className={`cursor-pointer  flex item-center justify-center ${
-            selected.includes(item) ? "bg-green-500  text-white" : ""
+            selected.includes(item.name) ? "bg-green-500  text-white" : ""
           }`}
         >
-          {item}
-          {selected.includes(item) ? (
+          {item.name}
+          {selected.includes(item.name) ? (
             <FaCheck size={12} className="inline mr-1" />
           ) : (
             <FaPlus size={12} className="inline mr-1" />

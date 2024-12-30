@@ -1,5 +1,3 @@
-import { UserPlan } from "@/enums/User";
-
 export interface IUser {
   _id?: string;
   firstName: string;
@@ -8,8 +6,11 @@ export interface IUser {
   phone: string;
   dietaryType?: string[];
   password?: string;
-  dateJoined?: Date;
+  dateJoined: Date;
   dateFinished: Date;
   planType: string;
   remindIn: number;
+  isChecked: boolean;
+  checkInAt: number;
+  hasAccess: boolean;
 }

@@ -1,9 +1,9 @@
 import TemplateTabs from "@/components/templates/TemplateTabs";
 import { useDietPlanPresetApi } from "@/hooks/api/useDietPlanPresetsApi";
 import useMenuItemApi from "@/hooks/api/useMenuItemApi";
-import React from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ITabs } from "@/interfaces/interfaces";
+import { QueryKeys } from "@/enums/QueryKeys";
 
 const DietPlanTemplatePage = () => {
   const { deleteMenuItem } = useMenuItemApi();
@@ -14,7 +14,7 @@ const DietPlanTemplatePage = () => {
   const deleteDietPlan = useMutation({
     mutationFn: deleteDietPlanPreset,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`dietPlans`] });
+      queryClient.invalidateQueries({ queryKey: [QueryKeys.DIET_PLAN_PRESETS] });
     },
   });
   const deleteCarbs = useMutation({
@@ -47,7 +47,7 @@ const DietPlanTemplatePage = () => {
       {
         name: `תפריטים`,
         value: `dietPlanPresets`,
-        queryKey: `dietPlans`,
+        queryKey: QueryKeys.DIET_PLAN_PRESETS,
       },
       {
         name: `חלבונים`,

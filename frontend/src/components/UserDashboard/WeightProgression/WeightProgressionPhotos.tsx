@@ -3,17 +3,15 @@ import { useWeighInPhotosApi } from "@/hooks/api/useWeighInPhotosApi";
 import { FC, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { FullscreenImage } from "./FullscreenImage";
-
-export interface Photo {
-  id: string;
-  filename: string;
-  contentType: string;
-  data?: string; // Base64 encoded image data
-}
+import { buildPhotoUrls } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { FULL_DAY_STALE_TIME } from "@/constants/constants";
+import Loader from "@/components/ui/Loader";
 
 interface WeightProgressionPhotosProps {
   onClickPhoto?: (photo: string) => void;
 }
+
 type SelectedFullscreenImage = {
   photo: string;
   index: number;
@@ -21,17 +19,35 @@ type SelectedFullscreenImage = {
 
 export const WeightProgressionPhotos: FC<WeightProgressionPhotosProps> = ({ onClickPhoto }) => {
   const { id } = useParams();
-  const { getWeighInPhotosById } = useWeighInPhotosApi();
+  const { getUserImageUrls } = useWeighInPhotosApi();
 
-  const [photos, setPhotos] = useState<Photo[]>([]);
   const [fullScreenImage, setFullScreenImage] = useState<SelectedFullscreenImage | null>(null);
+
+  const handleGetPhotos = async () => {
+    try {
+      const userImageUrls = await getUserImageUrls(id!);
+      const urls = buildPhotoUrls(userImageUrls.data);
+
+      return urls;
+    } catch (error) {
+      console.error("Failed to load images:", error);
+      return [];
+    }
+  };
+
+  const {
+    data: photos = [],
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: [id + "-photos"],
+    queryFn: handleGetPhotos,
+    enabled: !!id,
+    staleTime: FULL_DAY_STALE_TIME,
+  });
 
   const maxPhotosIndex = photos.length - 1;
   const minPhotosIndex = 0;
-
-  const handleBuildPhotoURI = (photo: Photo) => {
-    return `data:${photo.contentType};base64,${photo.data}`;
-  };
 
   const handleKeyDown = (e: KeyboardEvent) => {
     switch (e.key) {
@@ -51,12 +67,10 @@ export const WeightProgressionPhotos: FC<WeightProgressionPhotosProps> = ({ onCl
     if (!fullScreenImage) return;
     const currIndex = fullScreenImage.index;
 
-    if ((key === "ArrowLeft" || key == "previous") && currIndex > minPhotosIndex) {
-      const prevPhoto = photos[currIndex - 1];
-      setFullScreenImage({ photo: handleBuildPhotoURI(prevPhoto), index: currIndex - 1 });
-    } else if ((key === "ArrowRight" || key == "next") && currIndex < maxPhotosIndex) {
-      const nextPhoto = photos[currIndex + 1];
-      setFullScreenImage({ photo: handleBuildPhotoURI(nextPhoto), index: currIndex + 1 });
+    if ((key === "ArrowLeft" || key === "previous") && currIndex > minPhotosIndex) {
+      setFullScreenImage({ photo: photos[currIndex - 1], index: currIndex - 1 });
+    } else if ((key === "ArrowRight" || key === "next") && currIndex < maxPhotosIndex) {
+      setFullScreenImage({ photo: photos[currIndex + 1], index: currIndex + 1 });
     }
   };
 
@@ -70,21 +84,6 @@ export const WeightProgressionPhotos: FC<WeightProgressionPhotosProps> = ({ onCl
   };
 
   useEffect(() => {
-    const fetchPhotos = async () => {
-      if (!id) return;
-
-      try {
-        const response = await getWeighInPhotosById(id);
-        setPhotos(response.data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    fetchPhotos();
-  }, []);
-
-  useEffect(() => {
     if (fullScreenImage) {
       document.addEventListener("keydown", handleKeyDown);
     } else {
@@ -96,6 +95,8 @@ export const WeightProgressionPhotos: FC<WeightProgressionPhotosProps> = ({ onCl
     };
   }, [fullScreenImage]);
 
+  if (isLoading) return <Loader size="large" />;
+
   return (
     <>
       {photos.length > 0 && (
@@ -104,24 +105,21 @@ export const WeightProgressionPhotos: FC<WeightProgressionPhotosProps> = ({ onCl
             <CardTitle>תמונות</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-wrap items-center gap-2 rounded">
-            {photos.map((photo, i) => {
-              const photoURI = handleBuildPhotoURI(photo);
-              return (
-                <Card
-                  onClick={() => handleClickPhoto(photoURI, i)}
-                  className="w-[200px] cursor-pointer"
-                  key={i}
-                >
-                  <img src={photoURI} alt={photo.filename} />
-                </Card>
-              );
-            })}
+            {photos.map((photo, i) => (
+              <Card
+                onClick={() => handleClickPhoto(photo, i)}
+                className="w-[200px] cursor-pointer"
+                key={i}
+              >
+                <img src={photo} alt={`Photo ${i + 1}`} />
+              </Card>
+            ))}
           </CardContent>
         </Card>
       )}
       {photos.length == 0 && (
         <div className="size-full items-center justify-center">
-          <h1 className="text-center"> אין תמונות</h1>
+          <h1 className="text-center">אין תמונות</h1>
         </div>
       )}
       {fullScreenImage && (

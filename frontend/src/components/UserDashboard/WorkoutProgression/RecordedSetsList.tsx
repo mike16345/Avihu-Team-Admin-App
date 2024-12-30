@@ -1,9 +1,7 @@
 import { IRecordedSet } from "@/interfaces/IWorkout";
 import { Collapsible, CollapsibleContent } from "@radix-ui/react-collapsible";
 import { FC, useState } from "react";
-import { FaChevronDown } from "react-icons/fa";
 import { SetDetails } from "./SetDetails";
-import { Button } from "@/components/ui/button";
 import SetDropDownHeader from "./SetDropDownHeader";
 
 interface RecordedSetsListProps {

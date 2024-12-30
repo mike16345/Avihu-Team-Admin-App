@@ -4,35 +4,36 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
 import { useWeighInsApi } from "@/hooks/api/useWeighInsApi";
 import { useParams } from "react-router";
 import { CurrentWeighIn } from "./CurrentWeighIn";
-import { WeightProgressionPhotos } from "./WeightProgressionPhotos";
 import { useQuery } from "@tanstack/react-query";
 import Loader from "@/components/ui/Loader";
 import ErrorPage from "@/pages/ErrorPage";
-import { MIN_STALE_TIME } from "@/constants/constants";
+import { HOUR_STALE_TIME } from "@/constants/constants";
+import { createRetryFunction } from "@/lib/utils";
+import { QueryKeys } from "@/enums/QueryKeys";
+import { WeightProgressionPhotos } from "./WeightProgressionPhotos";
 
 export const WeightProgression = () => {
   const { id } = useParams();
 
   const { getWeighInsByUserId } = useWeighInsApi();
 
-  if (!id) return;
-  const queryWeighIns = useQuery({
-    queryKey: ["weighIns"],
-    staleTime: MIN_STALE_TIME,
-    queryFn: () => getWeighInsByUserId(id),
+  const { data, error, isLoading } = useQuery({
+    queryKey: [QueryKeys.WEIGH_INS + id],
+    staleTime: HOUR_STALE_TIME,
+    enabled: !!id,
+    queryFn: () => getWeighInsByUserId(id!),
+    retry: createRetryFunction(404),
   });
 
-  if (queryWeighIns.isLoading) return <Loader size="large" />;
-  if (queryWeighIns.isError) return <ErrorPage message={queryWeighIns.error.message} />;
-
-  const weighIns = queryWeighIns.data;
-  console.log("weighins", weighIns);
+  if (isLoading) return <Loader size="large" />;
+  if (error && error?.status !== 404) return <ErrorPage message={error} />;
+  const weighIns = data || [];
 
   return (
     <>
       <div className="flex flex-col gap-8">
         <div className="size-full flex items-center ">
-          {weighIns && (
+          {!!weighIns?.length && (
             <Card className="size-full">
               <CardHeader>
                 <CardTitle>מעקב שקילה</CardTitle>
@@ -46,14 +47,14 @@ export const WeightProgression = () => {
               </CardContent>
             </Card>
           )}
-          {!weighIns && (
+          {weighIns?.length == 0 && (
             <div className="size-full">
               <h1 className="text-center">אין מעקב שקילה</h1>
             </div>
           )}
         </div>
 
-        {/* <WeightProgressionPhotos /> */}
+        <WeightProgressionPhotos />
       </div>
     </>
   );

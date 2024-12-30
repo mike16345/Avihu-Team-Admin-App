@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { IMuscleGroupWorkouts, IExercise } from "@/interfaces/IWorkoutPlan";
+import { IMuscleGroupWorkouts } from "@/interfaces/IWorkoutPlan";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { Button } from "../ui/button";
 import DeleteButton from "./buttons/DeleteButton";
@@ -8,6 +8,7 @@ import { FaChevronDown } from "react-icons/fa";
 import { MuscleGroupContainer } from "./MuscleGroupContainer";
 import DeleteModal from "@/components/Alerts/DeleteModal";
 import { useIsEditableContext } from "@/context/useIsEditableContext";
+import { useWorkoutPlanContext } from "@/context/useWorkoutPlanContext";
 
 interface WorkoutContainerProps {
   title: string;
@@ -21,63 +22,92 @@ interface WorkoutContainerProps {
 const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
   handleSave,
   title,
-  initialMuscleGroups,
   handlePlanNameChange,
   handleDeleteWorkout,
 }) => {
   const { isEditable } = useIsEditableContext();
+  const { workout, setWorkoutPlan } = useWorkoutPlanContext();
 
   const [planName, setPlanName] = useState<string | undefined>();
-  console.log("muscle groups", initialMuscleGroups);
-  const [muscleGroups, setMuscleGroups] = useState<IMuscleGroupWorkouts[]>(initialMuscleGroups);
+  const [muscleGroups, setMuscleGroups] = useState<IMuscleGroupWorkouts[]>(workout.muscleGroups);
+  const [tempMuscleGroupDetails, setTempMuscleGroupDetails] = useState<any>(undefined);
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isMuscleGroupChangedModalOpen, setIsMuscleGroupChangedModalOpen] = useState(false);
 
   const addWorkout = () => {
-    const newObject: IMuscleGroupWorkouts = {
+    const newMuscleGroup: IMuscleGroupWorkouts = {
       muscleGroup: ``,
       exercises: [],
     };
 
-    if (muscleGroups[0] == undefined) {
-      setMuscleGroups([newObject]);
-      handleSave([newObject]);
+    if (!muscleGroups[0]) {
+      setMuscleGroups([newMuscleGroup]);
+      handleSave([newMuscleGroup]);
       return;
     }
 
-    setMuscleGroups([...muscleGroups, newObject]);
-    handleSave([...muscleGroups, newObject]);
+    setMuscleGroups([...muscleGroups, newMuscleGroup]);
+    handleSave([...muscleGroups, newMuscleGroup]);
+    setWorkoutPlan((prevPlan) => {
+      const updatedWorkoutPlan = {
+        ...prevPlan,
+        muscleGroups: [...prevPlan.muscleGroups, newMuscleGroup],
+      };
+      updatedWorkoutPlan.muscleGroups.push(newMuscleGroup);
+
+      return updatedWorkoutPlan;
+    });
   };
 
-  const updateWorkouts = (i: number, workoutsObject: IExercise[]) => {
-    const updatedWorkouts = [...muscleGroups];
+  const handleUpdateWorkout = <K extends keyof IMuscleGroupWorkouts>(
+    key: K,
+    value: IMuscleGroupWorkouts[K],
+    index: number
+  ) => {
+    const updatedMuscleGroups = [...muscleGroups];
 
-    updatedWorkouts[i] = {
-      ...muscleGroups[i],
-      exercises: workoutsObject,
+    updatedMuscleGroups[index] = {
+      ...muscleGroups[index],
+      [key]: value,
     };
 
-    setMuscleGroups(updatedWorkouts);
-    handleSave(updatedWorkouts);
+    if (key == `muscleGroup`) updatedMuscleGroups[index].exercises = [];
+
+    setMuscleGroups(updatedMuscleGroups);
+    handleSave(updatedMuscleGroups);
+    setWorkoutPlan((prevPlan) => {
+      const updatedWorkoutPlan = { ...prevPlan };
+      updatedWorkoutPlan.muscleGroups = updatedMuscleGroups;
+
+      return updatedWorkoutPlan;
+    });
   };
 
-  const updateMuscleGroup = (i: number, value: string) => {
-    const updatedWorkouts = [...muscleGroups];
+  const handleMuscleGroupChange = (value: string, index: number) => {
+    const currentMuscleGroup = muscleGroups[index].muscleGroup;
+    const currentExercises = muscleGroups[index].exercises;
 
-    updatedWorkouts[i] = {
-      ...muscleGroups[i],
-      muscleGroup: value,
-    };
+    if (currentMuscleGroup !== value && currentExercises.length) {
+      setTempMuscleGroupDetails({ value, index });
+      setIsMuscleGroupChangedModalOpen(true);
+      return;
+    }
 
-    setMuscleGroups(updatedWorkouts);
-    handleSave(updatedWorkouts);
+    handleUpdateWorkout(`muscleGroup`, value, index);
   };
 
   const deleteMuscleGroup = (index: number) => {
-    const muscleGroupCopy = muscleGroups.filter((_, i) => i !== index);
+    const filteredMuscleGroups = muscleGroups.filter((_, i) => i !== index);
 
-    setMuscleGroups(muscleGroupCopy);
-    handleSave(muscleGroupCopy);
+    setMuscleGroups(filteredMuscleGroups);
+    handleSave(filteredMuscleGroups);
+    setWorkoutPlan((prevPlan) => {
+      const updatedWorkoutPlan = { ...prevPlan };
+      updatedWorkoutPlan.muscleGroups = filteredMuscleGroups;
+
+      return updatedWorkoutPlan;
+    });
   };
 
   return (
@@ -112,15 +142,19 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
             </div>
           </div>
           <CollapsibleContent className="flex flex-col gap-4">
-            {muscleGroups.map((workout, i) => (
-              <MuscleGroupContainer
-                key={i}
-                muscleGroup={workout}
-                handleUpdateWorkouts={(workouts) => updateWorkouts(i, workouts)}
-                handleUpdateMuscleGroup={(value) => updateMuscleGroup(i, value)}
-                handleDeleteMuscleGroup={() => deleteMuscleGroup(i)}
-              />
-            ))}
+            {muscleGroups.map((muscleGroup, i) => {
+              return (
+                <MuscleGroupContainer
+                  key={muscleGroup?._id || muscleGroup.muscleGroup}
+                  muscleGroup={muscleGroup}
+                  handleUpdateExercises={(workouts) =>
+                    handleUpdateWorkout("exercises", workouts, i)
+                  }
+                  handleUpdateMuscleGroup={(value) => handleMuscleGroupChange(value, i)}
+                  handleDeleteMuscleGroup={() => deleteMuscleGroup(i)}
+                />
+              );
+            })}
             {isEditable && (
               <div>
                 <Button onClick={addWorkout}>הוסף קבוצת שריר</Button>
@@ -131,9 +165,25 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
       </div>
 
       <DeleteModal
-        isModalOpen={isDeleteModalOpen}
-        setIsModalOpen={setIsDeleteModalOpen}
-        onConfirm={handleDeleteWorkout}
+        isModalOpen={isDeleteModalOpen || isMuscleGroupChangedModalOpen}
+        setIsModalOpen={isDeleteModalOpen ? setIsDeleteModalOpen : setIsMuscleGroupChangedModalOpen}
+        alertMessage={
+          isMuscleGroupChangedModalOpen ? (
+            <>
+              פעולה זו אינה ניתנת לביטול.<br></br> שינוי קבוצת השריר תמחק את כל התרגילים בקבוצת
+              השריר הקיימת<br></br>האם אתה בטוח שאתה רוצה להמשיך?
+            </>
+          ) : undefined
+        }
+        onConfirm={
+          isDeleteModalOpen
+            ? handleDeleteWorkout
+            : () => {
+                const { value, index } = tempMuscleGroupDetails;
+                handleUpdateWorkout(`muscleGroup`, value, index);
+                setIsMuscleGroupChangedModalOpen(false);
+              }
+        }
       />
     </>
   );

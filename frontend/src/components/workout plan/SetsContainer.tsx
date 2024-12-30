@@ -16,7 +16,6 @@ const SetsContainer: React.FC<SetContainerProps> = ({ updateSets, existingSets }
   const [componentSets, setComponentSets] = useState<ISet[]>(
     existingSets || [
       {
-        id: 1,
         minReps: 0,
         maxReps: 0,
       },
@@ -42,7 +41,6 @@ const SetsContainer: React.FC<SetContainerProps> = ({ updateSets, existingSets }
 
   const createSet = () => {
     const newSet: ISet = {
-      id: componentSets.length + 1,
       minReps: 0,
       maxReps: 0,
     };
@@ -52,10 +50,9 @@ const SetsContainer: React.FC<SetContainerProps> = ({ updateSets, existingSets }
 
   const removeSet = (index: number) => {
     const filteredArr = componentSets.filter((_, i) => i !== index);
-    const newArr = filteredArr.map((set, i) => ({ ...set, id: i + 1 }));
 
-    setComponentSets(newArr);
-    updateSets(newArr);
+    setComponentSets(filteredArr);
+    updateSets(filteredArr);
   };
 
   return (
@@ -63,7 +60,7 @@ const SetsContainer: React.FC<SetContainerProps> = ({ updateSets, existingSets }
       <h2 className="underline font-bold pt-2">סטים:</h2>
       <div className="flex flex-col gap-2">
         {componentSets.map((set, i) => (
-          <div key={i} className="flex gap-4 justify-center items-center w-fit">
+          <div key={set?._id || i} className="flex gap-4 justify-center items-center w-fit">
             <SetsInput
               setNumber={i + 1}
               handleChange={(e) => handleChange(e, i)}

@@ -13,6 +13,12 @@ import {
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { IUser } from "@/interfaces/IUser";
+import { useUsersApi } from "@/hooks/api/useUsersApi";
+import { useState } from "react";
+import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
+import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
+import DeleteModal from "@/components/Alerts/DeleteModal";
 
 export const columns: ColumnDef<IUser>[] = [
   {
@@ -67,6 +73,40 @@ export const columns: ColumnDef<IUser>[] = [
     accessorKey: "phone",
     header: "פלאפון",
   },
+  {
+    accessorKey: "hasAccess",
+    header: "רשות",
+    cell: ({ row }) => {
+      const { updateUserField } = useUsersApi();
+      const [isChecked, setIsChecked] = useState(row.original.hasAccess);
+
+      const handleChangeAccess = async (hasAccess: boolean) => {
+        setIsChecked(hasAccess);
+        await updateUserField(row.original._id!, "hasAccess", hasAccess)
+          .then((res) => {
+            setIsChecked(res.data.hasAccess);
+            toast.success(
+              `הגישה לאפליקציה ${res.data.hasAccess ? "ניתנה" : "נחסמה "}  ל- ${
+                row.original.firstName
+              } ${row.original.lastName}`
+            );
+          })
+          .catch((err) => {
+            console.log("error", err);
+            toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE);
+            setIsChecked(!hasAccess);
+          });
+      };
+
+      return (
+        <Switch
+          dir="rtl"
+          checked={isChecked}
+          onCheckedChange={(value: any) => handleChangeAccess(Boolean(value))}
+        />
+      );
+    },
+  },
 
   {
     accessorKey: "dateJoined",
@@ -74,8 +114,7 @@ export const columns: ColumnDef<IUser>[] = [
     cell: ({ row }) => {
       const user = row.original;
 
-      return format(user.dateJoined || user.createdAt, "PPP", { locale: he });
-      //temporary fix since avihu still has createdAt not dateJoined
+      return format(user.dateJoined, "PPP", { locale: he });
     },
   },
   {
@@ -94,26 +133,34 @@ export const columns: ColumnDef<IUser>[] = [
       const handleDeleteUser = table.options.meta?.handleDeleteData;
       const handleViewUser = table.options.meta?.handleViewData;
 
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuSeparator />
+      const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-            <DropdownMenuItem onClick={() => handleViewUser && handleViewUser(user)}>
-              View user
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleDeleteUser && handleDeleteUser(user)}>
-              Delete User
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      return (
+        <>
+          <DropdownMenu dir="rtl">
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuLabel>פעולות</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem onClick={() => handleViewUser && handleViewUser(user)}>
+                צפה
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsDeleteModalOpen(true)}>מחק</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <DeleteModal
+            isModalOpen={isDeleteModalOpen}
+            setIsModalOpen={setIsDeleteModalOpen}
+            onConfirm={() => handleDeleteUser && handleDeleteUser(user)}
+            onCancel={() => setIsDeleteModalOpen(false)}
+          />
+        </>
       );
     },
   },

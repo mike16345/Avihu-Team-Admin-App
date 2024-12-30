@@ -27,9 +27,6 @@ export const SetDetails = ({ set }: { set: IRecordedSet; index: number }) => {
           תוכנית:
           <span className="font-normal text-muted-foreground ms-1">{set.plan}</span>
         </p>
-        <p>
-          פטק: <span className="font-normal text-muted-foreground ms-1">{set.note}</span>
-        </p>
       </CardContent>
     </Card>
   );
