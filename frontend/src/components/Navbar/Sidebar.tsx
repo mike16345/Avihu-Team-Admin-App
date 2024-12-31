@@ -19,6 +19,7 @@ type LinkProps = {
 export const Sidebar = () => {
   const location = useLocation();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+
   const links: LinkProps[] = [
     {
       to: "/",

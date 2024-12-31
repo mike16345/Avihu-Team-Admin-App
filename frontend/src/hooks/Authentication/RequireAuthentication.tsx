@@ -15,7 +15,13 @@ function RequireAuth({ children }: RequireAuthProps) {
   if (loading) return <Loader variant="standard" />;
 
   return (
-    <>{authed ? children : <Navigate to="/login" replace state={{ path: location.pathname }} />}</>
+    <>
+      {!authed && location.pathname !== "/login" ? (
+        <Navigate to="/login" replace state={{ path: location.pathname }} />
+      ) : (
+        children
+      )}
+    </>
   );
 }
 
