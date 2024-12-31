@@ -8,6 +8,7 @@ import { CustomTooltip } from "../ui/custom-tooltip";
 import { Button } from "../ui/button";
 import { Sheet, SheetTrigger, SheetContent } from "../ui/sheet";
 import { PanelLeft } from "lucide-react";
+import Settings from "../Settings/Settings";
 
 type LinkProps = {
   to: string;
@@ -76,6 +77,7 @@ export const Sidebar = () => {
           })}
         </nav>
         <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-4">
+          <Settings />
           <ModeToggle />
         </nav>
       </aside>
@@ -86,8 +88,12 @@ export const Sidebar = () => {
             <span className="sr-only">Toggle Menu</span>
           </Button>
         </SheetTrigger>
-        <SheetContent dir="rtl" side="right" className=" sm:max-w-xs">
-          <nav className="grid gap-6 text-lg font-medium p-4">
+        <SheetContent
+          dir="rtl"
+          side="right"
+          className=" sm:max-w-xs flex flex-col justify-between "
+        >
+          <nav className="grid gap-6 text-lg font-medium ">
             {links.map((link) => {
               return (
                 <Link
@@ -102,7 +108,8 @@ export const Sidebar = () => {
               );
             })}
           </nav>
-          <nav className="mt-auto ">
+          <nav className=" flex items-center p-3 gap-4 ">
+            <Settings />
             <ModeToggle />
           </nav>
         </SheetContent>
