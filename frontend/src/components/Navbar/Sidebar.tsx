@@ -8,7 +8,8 @@ import { CustomTooltip } from "../ui/custom-tooltip";
 import { Button } from "../ui/button";
 import { Sheet, SheetTrigger, SheetContent } from "../ui/sheet";
 import { PanelLeft } from "lucide-react";
-import Settings from "../Settings/Settings";
+import LogoutButton from "./LogoutButton";
+import useAuth from "@/hooks/Authentication/useAuth";
 
 type LinkProps = {
   to: string;
@@ -17,6 +18,7 @@ type LinkProps = {
 };
 
 export const Sidebar = () => {
+  const { logout } = useAuth();
   const location = useLocation();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
@@ -78,7 +80,7 @@ export const Sidebar = () => {
           })}
         </nav>
         <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-4">
-          <Settings />
+          <LogoutButton onLogout={logout} />
           <ModeToggle />
         </nav>
       </aside>
@@ -110,7 +112,7 @@ export const Sidebar = () => {
             })}
           </nav>
           <nav className=" flex items-center p-3 gap-4 ">
-            <Settings />
+            <LogoutButton onLogout={logout} />
             <ModeToggle />
           </nav>
         </SheetContent>

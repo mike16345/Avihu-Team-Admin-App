@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -15,6 +14,9 @@ import useAuth from "@/hooks/Authentication/useAuth";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import secureLocalStorage from "react-secure-storage";
+import CustomButton from "../ui/CustomButton";
+import { Eye, EyeOff } from "lucide-react";
+import { toast } from "sonner";
 
 export const description =
   "A simple login form with email and password. The submit button says 'Sign in'.";
@@ -35,9 +37,12 @@ export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<LoginFormErrors>({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+
     if (!validateEmail(email)) {
       setErrors({
         ...errors,
@@ -45,14 +50,22 @@ export default function LoginForm() {
       });
       return;
     }
+    setIsLoading(true);
 
-    console.log({ email, password });
-    loginUser(email, password)
-      .then((res) => {
-        secureLocalStorage.setItem(USER_TOKEN_STORAGE_KEY, res.data);
-      })
-      .then(() => login())
-      .then(() => navigate("/"));
+    try {
+      const res = await loginUser(email, password);
+      secureLocalStorage.setItem(USER_TOKEN_STORAGE_KEY, res.data);
+      await login();
+      navigate("/");
+
+      setIsLoading(false);
+      console.log("res data", res.data);
+      toast.success(`ברוך הבא ${res.data.data.user.firstName}`);
+    } catch (err: any) {
+      setIsLoading(false);
+      console.log(err);
+      toast.error(err.data.message);
+    }
 
     setErrors({});
   };
@@ -79,22 +92,34 @@ export default function LoginForm() {
         </div>
         <div className="grid gap-2">
           <Label htmlFor="password">סיסמה</Label>
-          <Input
-            placeholder="סיסמה"
-            id="password"
-            type="password"
-            onChange={(e) => {
-              setPassword(e.target.value);
-            }}
-            required
-          />
+          <div className="relative">
+            <span
+              onClick={() => setIsPasswordVisible((prev) => !prev)}
+              className="absolute cursor-pointer inset-y-0 left-0 pl-3 flex items-center"
+            >
+              {isPasswordVisible ? <EyeOff /> : <Eye />}
+            </span>
+            <Input
+              placeholder="סיסמה"
+              id="password"
+              type={isPasswordVisible ? "text" : "password"}
+              onChange={(e) => {
+                setPassword(e.target.value);
+              }}
+              required
+              className="pl-10 "
+            />
+          </div>
           {errors.password && <p className="text-red-500">{errors.password}</p>}
         </div>
       </CardContent>
       <CardFooter>
-        <Button onClick={handleSubmit} className="w-full font-bold">
-          כניסה
-        </Button>
+        <CustomButton
+          title="כניסה"
+          isLoading={isLoading}
+          onClick={handleSubmit}
+          className="w-full font-bold"
+        />
       </CardFooter>
     </Card>
   );
