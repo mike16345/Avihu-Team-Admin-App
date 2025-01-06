@@ -1,11 +1,18 @@
 import "./App.css";
-import { HelloWorld } from "./components/HelloWorld";
+import { Sidebar } from "./components/Navbar/Sidebar";
+import { AppRoutes } from "./routes/AppRoutes";
+import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
 
 function App() {
-
   return (
-    <div>
-      <HelloWorld/>
+    <div className="flex size-full ">
+      <div>
+        <Sidebar />
+      </div>
+      <div className="size-full py-8 px-4 xs:p-8 overflow-y-auto custom-scrollbar ">
+        <AppRoutes />
+      </div>
+      {/* <ReactQueryDevtoolsPanel /> */}
     </div>
   );
 }

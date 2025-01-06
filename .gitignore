@@ -396,3 +396,10 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+
+#env
+*.local
+
+# Test file
+**/test.tsx
