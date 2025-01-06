@@ -141,7 +141,7 @@ export const ViewDietPlanPage = () => {
   console.log("plan before render", plan);
   return (
     <div className=" flex flex-col gap-4 size-full hide-scrollbar overflow-y-auto">
-      <div className="mb-4">
+      <div className="my-6">
         <h1 className="text-2xl font-semibold ">עריכת תפריט תזונה</h1>
         {user && <BasicUserDetails user={user} />}
       </div>
@@ -167,7 +167,7 @@ export const ViewDietPlanPage = () => {
           {plan.meals.length > 0 && (
             <div>
               <CustomButton
-                className="font-bold"
+                className="font-bold w-full sm:w-32"
                 variant="success"
                 onClick={handleSubmit}
                 title="שמור תפריט"

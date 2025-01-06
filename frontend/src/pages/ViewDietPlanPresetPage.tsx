@@ -127,7 +127,7 @@ export const ViewDietPlanPresetPage = () => {
 
   return (
     <div className=" flex flex-col gap-4 size-full hide-scrollbar overflow-y-auto">
-      <h1 className="text-2xl font-semibold mb-4">עריכת תפריט תזונה</h1>
+      <h1 className="text-2xl font-semibold my-6">עריכת תפריט תזונה</h1>
       <BackButton navLink={MainRoutes.DIET_PLANS} />
       <div className="w-1/3 mr-1">
         <Form {...presetNameForm}>
@@ -154,7 +154,7 @@ export const ViewDietPlanPresetPage = () => {
       {dietPlan.meals.length > 0 && (
         <div>
           <CustomButton
-            className="font-bold"
+            className="font-bold sm:w-32 w-full"
             variant="success"
             title="שמור תפריט"
             isLoading={createPreset.isPending || updatePreset.isPending}

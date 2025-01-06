@@ -33,7 +33,7 @@ const shortcuts = [
 
 const AdminDashboard = () => {
   return (
-    <div className="size-full">
+    <div className="size-full py-6 px-3">
       <h1 className="text-4xl font-bold">עמוד מאמן</h1>
       <div className="flex flex-col pt-4 gap-2">
         <h2 className="font-bold text-xl">פעולות מהירות</h2>
