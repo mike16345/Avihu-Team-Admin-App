@@ -11,7 +11,11 @@ function App() {
 
   return (
     <div className="flex size-full ">
-      {authed && <Sidebar />}
+      {authed && (
+        <div className="sm:block sm:static absolute h-full">
+          <Sidebar />
+        </div>
+      )}
       <div className="size-full py-8 px-4 xs:p-8 overflow-y-auto custom-scrollbar ">
         <RequireAuth>
           <AppRoutes />

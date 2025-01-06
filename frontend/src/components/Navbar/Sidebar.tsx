@@ -86,7 +86,7 @@ export const Sidebar = () => {
       </aside>
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetTrigger asChild>
-          <Button size="icon" variant="outline" className="sm:hidden m-2">
+          <Button size="icon" variant="outline" className="sm:hidden absolute top-5 right-8">
             <PanelLeft className="h-5 w-5" />
             <span className="sr-only">Toggle Menu</span>
           </Button>

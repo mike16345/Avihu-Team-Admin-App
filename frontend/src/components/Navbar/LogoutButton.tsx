@@ -10,7 +10,7 @@ interface LogoutButtonProps {
 const LogoutButton: FC<LogoutButtonProps> = ({ onLogout }) => {
   return (
     <CustomTooltip
-      side="left"
+      side="top"
       tooltipContent={"יציאה"}
       tooltipTrigger={
         <Button onClick={onLogout} variant={"outline"} size="icon">
