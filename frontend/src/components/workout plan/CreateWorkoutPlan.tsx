@@ -175,88 +175,87 @@ const CreateWorkoutPlan: React.FC = () => {
     return <ErrorPage message={existingWorkoutPlan.error.message} />;
 
   return (
-    <>
-      <div className="flex flex-col gap-4 px-20 py-4   w-full ">
-        <div className=" w-full flex justify-between items-center">
-          <h1 className="text-4xl">תוכנית אימון</h1>
+    <div className="flex flex-col gap-4  p-4 h-full ">
+      <div className=" w-full flex justify-between items-center">
+        <h1 className="text-4xl">תוכנית אימון</h1>
 
-          <BackButton navLink={MainRoutes.USERS + `/${id}?tab=${weightTab}`} />
-          <Toggle
-            onClick={() => toggleIsEditable()}
-            className="px-3 rounded cursor-pointer absolute top-5 left-32"
-          >
-            <BsFillPencilFill />
-          </Toggle>
-        </div>
-        <p>
-          {isEditable
-            ? `כאן תוכל לערוך תוכנית אימון קיימת ללקוח שלך`
-            : `כאן תוכל לצפות בתוכנית האימון הקיימת של לקוח זה`}
-        </p>
-        {user && <BasicUserDetails user={user} />}
-        <div className="flex flex-col gap-4">
-          <div className="w-1/4">
-            {isEditable && (
-              <ComboBox
-                value={selectedPreset}
-                options={workoutPresetsOptions}
-                onSelect={(currentValue) => {
-                  setWorkoutPlan(currentValue.workoutPlans);
-                  setSelectedPreset(currentValue.name);
-                }}
-              />
-            )}
-          </div>
-          <div className="flex flex-col-reverse md:flex-row justify-between gap-8">
-            <div className="flex flex-col w-full">
-              {workoutPlan.map((workout, i) => {
-                return (
-                  <Fragment key={workout?._id || i}>
-                    <WorkoutPlanContainerWrapper workoutPlan={workout}>
-                      <WorkoutPlanContainer
-                        initialMuscleGroups={workout.muscleGroups}
-                        handleSave={(muscleGroups) => {
-                          handleSave(i, muscleGroups);
-                        }}
-                        title={workout.planName}
-                        handlePlanNameChange={(newName) => handlePlanNameChange(newName, i)}
-                        handleDeleteWorkout={() => handleDeleteWorkout(i)}
-                      />
-                    </WorkoutPlanContainerWrapper>
-                  </Fragment>
-                );
-              })}
-            </div>
-
-            <TipAdder
-              tips={workoutTips}
-              saveTips={(tips) => setWorkoutTips(tips)}
-              isEditable={isEditable}
-            />
-          </div>
-          <div className="w-full flex items-center justify-center">
-            {isEditable && (
-              <Button onClick={handleAddWorkout}>
-                <div className="flex flex-col items-center font-bold">
-                  הוסף אימון
-                  <BsPlusCircleFill />
-                </div>
-              </Button>
-            )}
-          </div>
-        </div>
-        {isEditable && (
-          <div className="flex justify-end">
-            <CustomButton
-              variant="success"
-              onClick={() => updateWorkoutPlan.mutate()}
-              title="שמור תוכנית אימון"
-              isLoading={updateWorkoutPlan.isPending}
-            />
-          </div>
-        )}
+        <BackButton navLink={MainRoutes.USERS + `/${id}?tab=${weightTab}`} />
+        <Toggle
+          onClick={() => toggleIsEditable()}
+          className="px-3 rounded cursor-pointer absolute top-5 left-32"
+        >
+          <BsFillPencilFill />
+        </Toggle>
       </div>
-    </>
+      <p>
+        {isEditable
+          ? `כאן תוכל לערוך תוכנית אימון קיימת ללקוח שלך`
+          : `כאן תוכל לצפות בתוכנית האימון הקיימת של לקוח זה`}
+      </p>
+      {user && <BasicUserDetails user={user} />}
+      <div className="flex flex-col gap-4 border-b-2">
+        <div className="sm:w-1/4">
+          {isEditable && (
+            <ComboBox
+              value={selectedPreset}
+              options={workoutPresetsOptions}
+              onSelect={(currentValue) => {
+                setWorkoutPlan(currentValue.workoutPlans);
+                setSelectedPreset(currentValue.name);
+              }}
+            />
+          )}
+        </div>
+        <div className="flex flex-col-reverse md:flex-row justify-between gap-8">
+          <div className="flex flex-col w-full">
+            {workoutPlan.map((workout, i) => {
+              return (
+                <Fragment key={workout?._id || i}>
+                  <WorkoutPlanContainerWrapper workoutPlan={workout}>
+                    <WorkoutPlanContainer
+                      initialMuscleGroups={workout.muscleGroups}
+                      handleSave={(muscleGroups) => {
+                        handleSave(i, muscleGroups);
+                      }}
+                      title={workout.planName}
+                      handlePlanNameChange={(newName) => handlePlanNameChange(newName, i)}
+                      handleDeleteWorkout={() => handleDeleteWorkout(i)}
+                    />
+                  </WorkoutPlanContainerWrapper>
+                </Fragment>
+              );
+            })}
+          </div>
+
+          <TipAdder
+            tips={workoutTips}
+            saveTips={(tips) => setWorkoutTips(tips)}
+            isEditable={isEditable}
+          />
+        </div>
+        <div className="w-full flex items-center justify-center mb-2">
+          {isEditable && (
+            <Button className="w-full sm:w-32" onClick={handleAddWorkout}>
+              <div className="flex flex-col items-center font-bold">
+                הוסף אימון
+                <BsPlusCircleFill />
+              </div>
+            </Button>
+          )}
+        </div>
+      </div>
+      {isEditable && (
+        <div className="flex justify-end">
+          <CustomButton
+            className="w-full sm:w-32"
+            variant="success"
+            onClick={() => updateWorkoutPlan.mutate()}
+            title="שמור תוכנית אימון"
+            isLoading={updateWorkoutPlan.isPending}
+          />
+        </div>
+      )}
+    </div>
   );
 };
 
