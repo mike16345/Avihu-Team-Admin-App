@@ -14,3 +14,12 @@ export interface IUser {
   checkInAt: number;
   hasAccess: boolean;
 }
+
+export interface ISession extends Document {
+  _id: string;
+  userId: string;
+  type: "login";
+  data?: any; // Additional session-specific data
+  createdAt: Date;
+  updatedAt: Date;
+}

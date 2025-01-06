@@ -64,8 +64,8 @@ const UserFormPage = () => {
   if (isLoading) return <Loader size="large" />;
 
   return (
-    <div>
-      <h1 className="font-bold text-2xl">פרטי משתמש</h1>
+    <div className="p-8 flex flex-col gap-4">
+      <h1 className="font-bold text-3xl">פרטי משתמש</h1>
       <BackButton navLink={`${MainRoutes.USERS}/${id || ``}?tab=${weightTab}`} />
       <UserForm
         existingUser={user}

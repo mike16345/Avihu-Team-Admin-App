@@ -10,6 +10,7 @@ import UserFormPage from "@/pages/UserFormPage";
 import AdminDashboard from "@/pages/AdminDashboard";
 import BlogPage from "@/pages/BlogPage";
 import BlogEditor from "@/components/Blog/BlogEditor";
+import LoginPage from "@/pages/LoginPage";
 
 export const AppRoutes = () => {
   return (
