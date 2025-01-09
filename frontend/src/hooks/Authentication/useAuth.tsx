@@ -9,9 +9,6 @@ interface AuthContext {
   logout: () => Promise<void>;
 }
 
-interface AuthProps {
-  checkToken?: Promise<any>;
-}
 type CheckToken = (token: any) => Promise<any>;
 
 const authContext = createContext<AuthContext | undefined>(undefined);
@@ -74,7 +71,7 @@ export function AuthConsumer(): AuthContext {
   if (context === undefined) {
     throw new Error("AuthConsumer must be used within an AuthProvider");
   }
-  
+
   return context;
 }
 

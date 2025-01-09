@@ -105,8 +105,8 @@ const DietPlanTemplatePage = () => {
   };
 
   return (
-    <div>
-      <h1 className="text-2xl pb-5">תפריטים</h1>
+    <div className="flex flex-col gap-3 sm:p-0 p-6">
+      <h1 className="text-2xl ">תפריטים</h1>
       <TemplateTabs tabs={tabs} />
     </div>
   );

@@ -112,7 +112,7 @@ export function DataTableHebrew<TData, TValue>({
               onChange={(event) => table.getColumn("שם")?.setFilterValue(event.target.value)}
               className="max-w-sm"
             />
-            <div className=" shrink-0 text-sm text-muted-foreground">
+            <div className=" shrink-0 text-sm text-muted-foreground sm:text-right text-center">
               {table.getFilteredSelectedRowModel().rows.length} {"תוך "}
               {table.getFilteredRowModel().rows.length} שורות נבחרו.
             </div>

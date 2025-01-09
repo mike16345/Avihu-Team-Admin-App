@@ -59,7 +59,6 @@ export default function LoginForm() {
       navigate("/");
 
       setIsLoading(false);
-      console.log("res data", res.data);
       toast.success(`ברוך הבא ${res.data.data.user.firstName}`);
     } catch (err: any) {
       setIsLoading(false);
@@ -72,55 +71,61 @@ export default function LoginForm() {
 
   return (
     <Card className="w-full max-w-sm">
-      <CardHeader>
-        <CardTitle className="text-2xl">כניסה</CardTitle>
-        <CardDescription>אנא הכנס מייל וסיסמה כדי להתחבר.</CardDescription>
-      </CardHeader>
-      <CardContent className="grid gap-4">
-        <div className="grid gap-2">
-          <Label htmlFor="email">מייל</Label>
-          <Input
-            id="email"
-            type="email"
-            onChange={(e) => {
-              setEmail(e.target.value);
-            }}
-            placeholder="m@example.com"
-            required
-          />
-          {errors.email && <p className="text-red-500">{errors.email}</p>}
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="password">סיסמה</Label>
-          <div className="relative">
-            <span
-              onClick={() => setIsPasswordVisible((prev) => !prev)}
-              className="absolute cursor-pointer inset-y-0 left-0 pl-3 flex items-center"
-            >
-              {isPasswordVisible ? <EyeOff /> : <Eye />}
-            </span>
+      <form onSubmit={handleSubmit} method="POST" action="#">
+        <CardHeader>
+          <CardTitle className="text-2xl">כניסה</CardTitle>
+          <CardDescription>אנא הכנס מייל וסיסמה כדי להתחבר.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <div className="grid gap-2">
+            <Label htmlFor="email">מייל</Label>
             <Input
-              placeholder="סיסמה"
-              id="password"
-              type={isPasswordVisible ? "text" : "password"}
+              name="email"
+              id="email"
+              type="email"
               onChange={(e) => {
-                setPassword(e.target.value);
+                setEmail(e.target.value);
               }}
+              placeholder="m@example.com"
+              autoComplete="email"
               required
-              className="pl-10 "
             />
+            {errors.email && <p className="text-red-500">{errors.email}</p>}
           </div>
-          {errors.password && <p className="text-red-500">{errors.password}</p>}
-        </div>
-      </CardContent>
-      <CardFooter>
-        <CustomButton
-          title="כניסה"
-          isLoading={isLoading}
-          onClick={handleSubmit}
-          className="w-full font-bold"
-        />
-      </CardFooter>
+          <div className="grid gap-2">
+            <Label htmlFor="password">סיסמה</Label>
+            <div className="relative">
+              <span
+                onClick={() => setIsPasswordVisible((prev) => !prev)}
+                className="absolute cursor-pointer inset-y-0 left-0 pl-3 flex items-center"
+              >
+                {isPasswordVisible ? <EyeOff /> : <Eye />}
+              </span>
+              <Input
+                placeholder="סיסמה"
+                name="password"
+                id="password"
+                type={isPasswordVisible ? "text" : "password"}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                }}
+                autoComplete="current-password"
+                required
+                className="pl-10"
+              />
+            </div>
+            {errors.password && <p className="text-red-500">{errors.password}</p>}
+          </div>
+        </CardContent>
+        <CardFooter>
+          <CustomButton
+            title="כניסה"
+            isLoading={isLoading}
+            type="submit"
+            className="w-full font-bold"
+          />
+        </CardFooter>
+      </form>
     </Card>
   );
 }

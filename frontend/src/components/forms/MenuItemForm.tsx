@@ -157,6 +157,7 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
         <CustomButton
           title="שמור"
           type="submit"
+          variant={"success"}
           className="w-full h-auto"
           isLoading={addNewMenuItem.isPending || updateMenuItem.isPending}
         />

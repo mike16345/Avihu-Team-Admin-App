@@ -24,9 +24,8 @@ export const ExerciseComboBox: FC<IExerciseCombobox> = ({
   handleSelectExercise,
 }) => {
   const options = convertStringsToOptions(exercises);
-  
-  const [open, setOpen] = React.useState(false);
 
+  const [open, setOpen] = React.useState(false);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -35,13 +34,13 @@ export const ExerciseComboBox: FC<IExerciseCombobox> = ({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[200px] justify-between"
+          className="w-full justify-between"
         >
           {selectedExercise !== "" ? selectedExercise : "בחר תרגיל..."}
           <FaSort className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent className="p-0">
         <Command>
           <CommandInput placeholder="חפש קבוצת שריר..." className="h-9" />
           <CommandList>
