@@ -11,8 +11,8 @@ const BlogPage = () => {
 
   return (
     <div>
-      <div className="flex  p-4">
-        <Button onClick={handleCreateNewBlog} className="bg-blue-500 text-white">
+      <div className="flex items-center sm:justify-start justify-center p-4">
+        <Button onClick={handleCreateNewBlog} className="w-full sm:w-32">
           צור בלוג חדש
         </Button>
       </div>
