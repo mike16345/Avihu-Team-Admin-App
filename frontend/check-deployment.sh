@@ -1,10 +1,11 @@
 #!/bin/bash
 
-echo "Branch: $VERCEL_GIT_BRANCH"
+echo "Branch: $VERCEL_GIT_COMMIT_REF"
 echo "Environment: $VERCEL_ENV"
 
-if [ "$VERCEL_GIT_BRANCH" = "devel" ] && [ "$VERCEL_ENV" = "preview" ]; then
-  echo "Skipping build for devel in preview environment"
+# Skip build for 'devel' branch in preview environment
+if [ "$VERCEL_GIT_COMMIT_REF" = "devel" ] && [ "$VERCEL_ENV" = "preview" ]; then
+  echo "Skipping build for devel branch in preview environment"
   exit 0
 else
   echo "Proceeding with build"
