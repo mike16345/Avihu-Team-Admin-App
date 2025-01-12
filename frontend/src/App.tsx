@@ -1,10 +1,10 @@
 import { Route, Routes } from "react-router-dom";
-import "./App.css";
 import { Sidebar } from "./components/Navbar/Sidebar";
 import RequireAuth from "./hooks/Authentication/RequireAuthentication";
 import useAuth from "./hooks/Authentication/useAuth";
 import LoginPage from "./pages/LoginPage";
 import { AppRoutes } from "./routes/AppRoutes";
+import "./App.css";
 
 function App() {
   const { authed } = useAuth();
