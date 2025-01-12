@@ -113,7 +113,6 @@ export function DataTableHebrew<TData, TValue>({
               className="sm:max-w-sm"
             />
           </div>
-
           <DropdownMenu dir="rtl">
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="">
@@ -142,12 +141,16 @@ export function DataTableHebrew<TData, TValue>({
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
+          <div className=" shrink-0 block sm:hidden text-sm text-muted-foreground sm:text-right text-center">
+            {table.getFilteredSelectedRowModel().rows.length} {"תוך "}
+            {table.getFilteredRowModel().rows.length} שורות נבחרו.
+          </div>
         </div>
         <div className="mb-3 text-sm  flex items-center justify-between ">
           <div className="text-muted-foreground">
             דף {pageNumber} תוך {table.getPageCount()}
           </div>
-          <div className=" shrink-0 text-sm text-muted-foreground sm:text-right text-center">
+          <div className=" shrink-0 hidden sm:block text-sm text-muted-foreground sm:text-right text-center">
             {table.getFilteredSelectedRowModel().rows.length} {"תוך "}
             {table.getFilteredRowModel().rows.length} שורות נבחרו.
           </div>
@@ -210,10 +213,9 @@ export function DataTableHebrew<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end gap-1 py-4">
+      <div className="flex items-center justify-between sm:justify-end gap-3 py-4">
         <Button
           variant="outline"
-          size="sm"
           onClick={() => {
             table.previousPage();
             setPageNumber((page) => page - 1);
@@ -224,7 +226,6 @@ export function DataTableHebrew<TData, TValue>({
         </Button>
         <Button
           variant="outline"
-          size="sm"
           onClick={() => {
             table.nextPage();
             setPageNumber((page) => page + 1);
