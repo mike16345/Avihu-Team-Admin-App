@@ -29,7 +29,7 @@ const links = [
 
 const UserInfo: FC<UserInfoProps> = ({ user }) => {
   return (
-    <div className="flex flex-wrap items-center gap-3 sm:justify-between">
+    <div className="flex flex-wrap items-center  gap-3 sm:justify-between">
       <div className="flex flex-col gap-1">
         <BasicUserDetails user={user} />
         <h2 className="text-lg text-muted-foreground font-bold flex items-center gap-2 ">

@@ -41,7 +41,8 @@ export const UserDashboard = () => {
   const currentUser = data || user;
 
   return (
-    <div className="size-full flex flex-col gap-4 sm:p-0 p-6 ">
+    <div className="size-full flex flex-col gap-4  ">
+      <h1 className="text-3xl text-center sm:hidden ">עמוד משתמש</h1>
       <UserInfo user={currentUser} />
       <Tabs dir="rtl" defaultValue={activeTab} className="w-full">
         <TabsList>

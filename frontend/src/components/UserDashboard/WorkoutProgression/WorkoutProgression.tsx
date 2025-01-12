@@ -79,7 +79,7 @@ export const WorkoutProgression = () => {
   if (error) return <ErrorPage message={error.data.message} />;
 
   return (
-    <div className="size-full flex flex-col gap-4 p-4">
+    <div className="size-full flex flex-col gap-4 p-3">
       {recordedWorkouts!.length > 0 && (
         <>
           <MuscleExerciseSelector
