@@ -79,10 +79,10 @@ const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, retrieveO
 
   return (
     <div>
-      <div className="my-2 w-2/4">
+      <div className="my-2 sm:w-2/4">
         <Input placeholder="חיפוש..." onChange={handleSearch} />
       </div>
-      <Table dir="rtl" className="w-3/4">
+      <Table dir="rtl" className="sm:w-3/4">
         <TableHeader>
           <TableRow>
             <TableHead className="text-right">שם</TableHead>

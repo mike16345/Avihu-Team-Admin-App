@@ -74,8 +74,8 @@ const WorkoutsTemplatePage = () => {
   };
 
   return (
-    <div className="flex flex-col gap-3 sm:p-0 p-6">
-      <h1 className="text-2xl ">תבניות אימון</h1>
+    <div className="flex flex-col gap-3 ">
+      <h1 className="text-2xl text-center sm:text-right ">תבניות אימון</h1>
       <TemplateTabs tabs={tabs} />
     </div>
   );
