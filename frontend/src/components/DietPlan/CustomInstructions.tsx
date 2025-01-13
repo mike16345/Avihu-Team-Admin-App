@@ -33,7 +33,7 @@ const CustomInstructions: FC<CustomInstructionsProps> = ({
           value={freeCalories}
           onChange={(e) => onUpdate("freeCalories", Number(e.target.value))}
         />
-        <Label>כמות שומנים ליום (גרם)</Label>
+        <Label>כמות שומנים ליום (מנות)</Label>
 
         <Input
           type="number"
