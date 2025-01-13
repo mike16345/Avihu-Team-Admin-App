@@ -27,7 +27,6 @@ import BackButton from "@/components/ui/BackButton";
 import BasicUserDetails from "@/components/UserDashboard/UserInfo/BasicUserDetails";
 import { useUsersStore } from "@/store/userStore";
 import { weightTab } from "./UserDashboard";
-import { createRetryFunction } from "@/lib/utils";
 
 export const ViewDietPlanPage = () => {
   const navigation = useNavigate();
@@ -78,6 +77,7 @@ export const ViewDietPlanPage = () => {
 
     const { isValid, errors } = validateDietPlan(dietPlanToAdd);
 
+    console.log("diet plan to add", dietPlanToAdd);
     if (!isValid) {
       toast.error(`יש בעיה בקלט.`);
       return;

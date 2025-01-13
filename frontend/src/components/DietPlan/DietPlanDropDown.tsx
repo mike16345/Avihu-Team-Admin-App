@@ -86,11 +86,8 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
   const handleToggleCustomItem = (selectedItems: string[], type: keyof OmittedIMeal) => {
     const item = form.getValues()[type];
     if (!item) return;
-    const customItems = selectedItems.map((selectedItem) => {
-      return { item: selectedItem, quantity: item.quantity };
-    });
 
-    setValue(type, { ...item, customItems: customItems });
+    setValue(type, { ...item, customItems: selectedItems });
     handleInputChange(type, item.quantity);
   };
 
@@ -168,9 +165,7 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
                   {showCustomSelection.totalProtein && (
                     <CustomItemSelection
                       items={customItems.protein}
-                      selectedItems={form
-                        ?.getValues("totalProtein.customItems")
-                        ?.map((s) => s.item)}
+                      selectedItems={form?.getValues("totalProtein.customItems")?.map((s) => s._id)}
                       onItemToggle={(selectedItems) =>
                         handleToggleCustomItem(selectedItems, "totalProtein")
                       }
@@ -220,7 +215,7 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
                   {showCustomSelection.totalCarbs && (
                     <CustomItemSelection
                       items={customItems.carbs}
-                      selectedItems={form?.getValues("totalCarbs.customItems")?.map((s) => s.item)}
+                      selectedItems={form?.getValues("totalCarbs.customItems")?.map((s) => s._id)}
                       onItemToggle={(selectedItems) =>
                         handleToggleCustomItem(selectedItems, "totalCarbs")
                       }
