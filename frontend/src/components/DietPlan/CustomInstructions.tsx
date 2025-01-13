@@ -1,8 +1,7 @@
-import { FC, useState } from "react";
+import { FC } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { Textarea } from "../ui/textarea";
 import TipAdder from "../ui/TipAdder";
 
 interface CustomInstructionsProps {

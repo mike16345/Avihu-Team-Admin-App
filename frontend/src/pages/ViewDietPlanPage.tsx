@@ -39,7 +39,25 @@ export const ViewDietPlanPage = () => {
   const queryClient = useQueryClient();
 
   const [isNewPlan, setIsNewPlan] = useState(false);
-  const [dietPlan, setDietPlan] = useState<IDietPlan | null>(null);
+
+  const { isLoading, error, data } = useQuery({
+    queryKey: [`${QueryKeys.USER_DIET_PLAN}${id}`],
+    enabled: !!id,
+    staleTime: FULL_DAY_STALE_TIME,
+    queryFn: () =>
+      getDietPlanByUserId(id!)
+        .then((plan) => {
+          setDietPlan(plan);
+          return plan;
+        })
+        .catch((e) => {
+          setIsNewPlan(true);
+          setDietPlan(defaultDietPlan);
+
+          return defaultDietPlan;
+        }),
+  });
+  const [dietPlan, setDietPlan] = useState<IDietPlan | undefined>(data);
 
   const updateDietPlan = (dietPlan: IDietPlan) => setDietPlan(dietPlan);
 
@@ -69,6 +87,7 @@ export const ViewDietPlanPage = () => {
   });
 
   const handleSubmit = () => {
+    console.log("dietplan", dietPlan);
     if (!dietPlan) return;
     const dietPlanToAdd = {
       ...dietPlan,
@@ -77,7 +96,6 @@ export const ViewDietPlanPage = () => {
 
     const { isValid, errors } = validateDietPlan(dietPlanToAdd);
 
-    console.log("diet plan to add", dietPlanToAdd);
     if (!isValid) {
       toast.error(`יש בעיה בקלט.`);
       return;
@@ -100,26 +118,6 @@ export const ViewDietPlanPage = () => {
     queryFn: () => getAllDietPlanPresets(),
   });
 
-  const { isLoading, error, data } = useQuery({
-    queryKey: [`${QueryKeys.USER_DIET_PLAN}${id}`],
-    enabled: !!id,
-    staleTime: FULL_DAY_STALE_TIME,
-    queryFn: () =>
-      getDietPlanByUserId(id!)
-        .then((plan) => {
-          console.log("plan data", plan);
-          console.log("plan", plan);
-          setDietPlan(plan);
-          return plan;
-        })
-        .catch((e) => {
-          setIsNewPlan(true);
-          setDietPlan(defaultDietPlan);
-
-          return defaultDietPlan;
-        }),
-  });
-
   const handleSelect = (presetName: string) => {
     const selectedPreset = dietPlanPresets.data?.data.find((preset) => preset.name === presetName);
 
@@ -138,7 +136,6 @@ export const ViewDietPlanPage = () => {
   if (error) return <ErrorPage message={error.message} />;
   const plan = dietPlan || data || defaultDietPlan;
 
-  console.log("plan before render", plan);
   return (
     <div className=" flex flex-col gap-4 size-full hide-scrollbar overflow-y-auto">
       <div className="my-6">

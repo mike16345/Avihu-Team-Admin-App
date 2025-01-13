@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { Badge } from "../ui/badge";
 import { FaCheck, FaPlus } from "react-icons/fa";
 
@@ -16,21 +16,16 @@ export const CustomItemSelection: FC<CustomItemSelectionProps> = ({
   const [selected, setSelectedItems] = useState<string[]>(selectedItems || []);
 
   const toggleSelect = (item: string) => {
-    console.log("item", item);
     setSelectedItems((prevSelectedItems) => {
       const selected = prevSelectedItems.includes(item)
         ? prevSelectedItems.filter((i) => i !== item)
         : [...prevSelectedItems, item];
-
-      console.log("selected", selected);
 
       onItemToggle(selected);
 
       return selected;
     });
   };
-
-  // console.log("custom items", items);
 
   return (
     <div className="flex flex-wrap items-center p-2 max-h-48 custom-scrollbar overflow-y-scroll gap-4">

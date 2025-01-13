@@ -22,8 +22,6 @@ import { mealSchema } from "./DietPlanSchema";
 type ShowCustomSelectionType = {
   totalProtein: boolean;
   totalCarbs: boolean;
-  totalFats: boolean;
-  totalVeggies: boolean;
 };
 
 type DietPlanDropDownProps = {
@@ -165,7 +163,7 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
                   {showCustomSelection.totalProtein && (
                     <CustomItemSelection
                       items={customItems.protein}
-                      selectedItems={form?.getValues("totalProtein.customItems")?.map((s) => s._id)}
+                      selectedItems={form?.getValues("totalProtein.customItems")}
                       onItemToggle={(selectedItems) =>
                         handleToggleCustomItem(selectedItems, "totalProtein")
                       }
@@ -175,7 +173,6 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
               )}
             />
 
-            {/* Similar logic for other fields, such as totalCarbs, totalFats, and totalVeggies */}
             <FormField
               control={control}
               name="totalCarbs.quantity"
@@ -215,7 +212,7 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
                   {showCustomSelection.totalCarbs && (
                     <CustomItemSelection
                       items={customItems.carbs}
-                      selectedItems={form?.getValues("totalCarbs.customItems")?.map((s) => s._id)}
+                      selectedItems={form?.getValues("totalCarbs.customItems")}
                       onItemToggle={(selectedItems) =>
                         handleToggleCustomItem(selectedItems, "totalCarbs")
                       }
