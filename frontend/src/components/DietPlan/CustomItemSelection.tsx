@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useState } from "react";
 import { Badge } from "../ui/badge";
 import { FaCheck, FaPlus } from "react-icons/fa";
 
@@ -23,29 +23,33 @@ export const CustomItemSelection: FC<CustomItemSelectionProps> = ({
 
       onItemToggle(selected);
 
+      console.log("selectedItems", selected);
+
       return selected;
     });
   };
 
   return (
-    <div className="flex flex-wrap items-center p-2 max-h-48 custom-scrollbar overflow-y-scroll gap-4">
-      {(!items || items?.length == 0) && <div className="text-red-500">אין פריטים</div>}
-      {items?.map((item, index) => (
-        <Badge
-          key={item._id || index}
-          onClick={() => toggleSelect(item._id)}
-          className={`cursor-pointer  flex item-center justify-center ${
-            selected.includes(item._id) ? "bg-green-500  text-white" : ""
-          }`}
-        >
-          {item.name}
-          {selected.includes(item._id) ? (
-            <FaCheck size={12} className="inline mr-1" />
-          ) : (
-            <FaPlus size={12} className="inline mr-1" />
-          )}
-        </Badge>
-      ))}
+    <div className="space-y-2">
+      <div className="flex flex-wrap items-center p-2 max-h-48 custom-scrollbar overflow-y-scroll gap-4">
+        {(!items || items?.length == 0) && <div className="text-destructive">אין פריטים</div>}
+        {items?.map((item, index) => (
+          <Badge
+            key={item._id || index}
+            onClick={() => toggleSelect(item._id)}
+            className={`cursor-pointer  flex item-center justify-center ${
+              selected.includes(item._id) ? "bg-success  text-white" : ""
+            }`}
+          >
+            {item.name}
+            {selected.includes(item._id) ? (
+              <FaCheck size={12} className="inline mr-1" />
+            ) : (
+              <FaPlus size={12} className="inline mr-1" />
+            )}
+          </Badge>
+        ))}
+      </div>
     </div>
   );
 };

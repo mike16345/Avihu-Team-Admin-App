@@ -10,13 +10,12 @@ const dietItemSchema = z.object({
   quantity: z.coerce.number().min(0, { message: "Quantity must be 0 or more." }),
   unit: z.enum(["grams", "spoons"]),
   customItems: z.array(z.string()).optional(),
+  extraItems: z.array(z.string()).optional(),
 });
 
 const mealSchema = z.object({
   totalProtein: dietItemSchema,
   totalCarbs: dietItemSchema,
-  totalFats: dietItemSchema.optional(),
-  totalVeggies: dietItemSchema.optional(),
 });
 
 const dietPlanSchema = z.object({

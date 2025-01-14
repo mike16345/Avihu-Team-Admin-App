@@ -145,7 +145,7 @@ export const ViewDietPlanPage = () => {
 
       <BackButton navLink={MainRoutes.USERS + `/${id}?tab=${weightTab}`} />
       <Select onValueChange={(val) => handleSelect(val)}>
-        <SelectTrigger dir="rtl" className="w-[350px] mr-1">
+        <SelectTrigger dir="rtl" className="sm:w-[350px] mr-1">
           <SelectValue placeholder="בחר תפריט" />
         </SelectTrigger>
         <SelectContent dir="rtl">

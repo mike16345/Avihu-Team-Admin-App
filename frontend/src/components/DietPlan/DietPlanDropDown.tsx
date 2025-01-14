@@ -14,10 +14,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "../ui/input";
 import { CustomItemSelectionRadio } from "./CustomItemSelectionRadio";
-import { CustomItems, DietItemUnit, IMeal } from "@/interfaces/IDietPlan";
+import { CustomItems, DietItemUnit, IDietItem, IMeal } from "@/interfaces/IDietPlan";
 import { CustomItemSelection } from "./CustomItemSelection";
 import { DietItemUnitRadio } from "./DietItemUnitRadio";
 import { mealSchema } from "./DietPlanSchema";
+import ExtraItems from "./ExtraItems";
 
 type ShowCustomSelectionType = {
   totalProtein: boolean;
@@ -81,11 +82,15 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
     setDietPlan(updatedMeal);
   };
 
-  const handleToggleCustomItem = (selectedItems: string[], type: keyof OmittedIMeal) => {
+  const handleToggleCustomItem = (
+    selectedItems: string[],
+    type: keyof OmittedIMeal,
+    key: keyof IDietItem
+  ) => {
     const item = form.getValues()[type];
     if (!item) return;
 
-    setValue(type, { ...item, customItems: selectedItems });
+    setValue(type, { ...item, [key]: selectedItems });
     handleInputChange(type, item.quantity);
   };
 
@@ -161,13 +166,22 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
                     />
                   </div>
                   {showCustomSelection.totalProtein && (
-                    <CustomItemSelection
-                      items={customItems.protein}
-                      selectedItems={form?.getValues("totalProtein.customItems")}
-                      onItemToggle={(selectedItems) =>
-                        handleToggleCustomItem(selectedItems, "totalProtein")
-                      }
-                    />
+                    <div className="space-y-2">
+                      <CustomItemSelection
+                        items={customItems.protein}
+                        selectedItems={form?.getValues("totalProtein.customItems")}
+                        onItemToggle={(selectedItems) =>
+                          handleToggleCustomItem(selectedItems, "totalProtein", "customItems")
+                        }
+                      />
+                      <ExtraItems
+                        existingItems={form?.getValues("totalProtein.extraItems")}
+                        onAddItem={(items) =>
+                          handleToggleCustomItem(items, "totalProtein", "extraItems")
+                        }
+                        trigger={<Button type="button">פריטים נוספים</Button>}
+                      />
+                    </div>
                   )}
                 </FormItem>
               )}
@@ -210,13 +224,22 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
                   </div>
 
                   {showCustomSelection.totalCarbs && (
-                    <CustomItemSelection
-                      items={customItems.carbs}
-                      selectedItems={form?.getValues("totalCarbs.customItems")}
-                      onItemToggle={(selectedItems) =>
-                        handleToggleCustomItem(selectedItems, "totalCarbs")
-                      }
-                    />
+                    <div className="space-y-2">
+                      <CustomItemSelection
+                        items={customItems.carbs}
+                        selectedItems={form?.getValues("totalCarbs.customItems")}
+                        onItemToggle={(selectedItems) =>
+                          handleToggleCustomItem(selectedItems, "totalCarbs", "customItems")
+                        }
+                      />
+                      <ExtraItems
+                        existingItems={form.getValues("totalCarbs.extraItems")}
+                        onAddItem={(items) =>
+                          handleToggleCustomItem(items, "totalCarbs", "extraItems")
+                        }
+                        trigger={<Button type="button">פריטים נוספים</Button>}
+                      />
+                    </div>
                   )}
                 </FormItem>
               )}
