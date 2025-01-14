@@ -36,6 +36,7 @@ export const columns: ColumnDef<IUser>[] = [
     cell: ({ row }) => (
       <Checkbox
         className="mr-4"
+        id="row-checkbox"
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
         aria-label="Select row"
@@ -79,9 +80,11 @@ export const columns: ColumnDef<IUser>[] = [
     cell: ({ row }) => {
       const { updateUserField } = useUsersApi();
       const [isChecked, setIsChecked] = useState(row.original.hasAccess);
+      const [isToggling, setIsToggling] = useState(false);
 
       const handleChangeAccess = async (hasAccess: boolean) => {
         setIsChecked(hasAccess);
+        setIsToggling(true);
         await updateUserField(row.original._id!, "hasAccess", hasAccess)
           .then((res) => {
             setIsChecked(res.data.hasAccess);
@@ -90,9 +93,11 @@ export const columns: ColumnDef<IUser>[] = [
                 row.original.firstName
               } ${row.original.lastName}`
             );
+            setIsToggling(false);
           })
           .catch((err) => {
             console.log("error", err);
+            setIsToggling(false);
             toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE);
             setIsChecked(!hasAccess);
           });
@@ -101,6 +106,8 @@ export const columns: ColumnDef<IUser>[] = [
       return (
         <Switch
           dir="rtl"
+          disabled={isToggling}
+          id="access-switch"
           checked={isChecked}
           onCheckedChange={(value: any) => handleChangeAccess(Boolean(value))}
         />

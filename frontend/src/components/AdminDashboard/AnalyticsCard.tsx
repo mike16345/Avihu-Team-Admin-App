@@ -1,10 +1,8 @@
 import React from "react";
-import { Button } from "../ui/button";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import useAnalyticsApi from "@/hooks/api/useAnalyticsApi";
-import { HOUR_STALE_TIME } from "@/constants/constants";
 import Loader from "../ui/Loader";
 import ErrorPage from "@/pages/ErrorPage";
 import { QueryKeys } from "@/enums/QueryKeys";
@@ -57,12 +55,15 @@ const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ title, dataKey }) => {
           </div>
         )}
         {data?.data.map((item: any, i: number) => (
-          <div key={i} className="w-full flex items-center justify-between border-b-2">
-            <div className="flex gap-5 items-center py-5 px-2">
+          <div
+            key={i}
+            onDoubleClick={() => navigate(`${actions[dataKey]?.navUrl}${item._id}`)}
+            className="w-full flex items-center justify-between hover:bg-accent cursor-pointer border-b-2"
+          >
+            <div className="flex gap-2 sm:gap-5 items-center py-5 px-2">
               <p>{item.firstName}</p>
               <p>{item.lastName}</p>
             </div>
-            <Button onClick={() => navigate(`${actions[dataKey]?.navUrl}${item._id}`)}>צפה</Button>
           </div>
         ))}
       </CardContent>

@@ -139,11 +139,11 @@ const WorkoutPreset = () => {
 
   return (
     <EditableContextProvider isEdit={true}>
-      <div className="flex flex-col gap-4 p-5 overflow-y-scroll hide-scrollbar w-5/6 max-h-[95vh] ">
-        <h1 className="text-5xl">תבנית אימון</h1>
+      <div className="flex flex-col gap-4 p-4 overflow-y-scroll hide-scrollbar h-full">
+        <h1 className="text-4xl">תבנית אימון</h1>
         <BackButton navLink={MainRoutes.WORKOUT_PLANS_PRESETS} />
         <p>{isEdit ? `כאן תוכל לערוך תבנית אימון קיימת` : `  כאן תוכל ליצור תבנית אימון חדשה`}</p>
-        <div className="flex flex-col gap-2 px-2 py-4">
+        <div className="flex flex-col gap-2 py-4">
           <div className="w-full py-4 border-b-2 mb-2">
             <Form {...workoutForm}>
               <form>
@@ -153,9 +153,11 @@ const WorkoutPreset = () => {
                   render={({ field }) => {
                     return (
                       <FormItem>
-                        <FormLabel className="font-bold underline pb-3">שם התבנית:</FormLabel>
+                        <FormLabel className="font-bold text-lg underline pb-3">
+                          שם התבנית:
+                        </FormLabel>
                         <FormControl>
-                          <Input className="w-2/4" {...field} placeholder="שם..." />
+                          <Input className="sm:w-2/4" {...field} placeholder="שם..." />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -179,8 +181,8 @@ const WorkoutPreset = () => {
               </WorkoutPlanContainerWrapper>
             </Fragment>
           ))}
-          <div className="w-full flex items-center justify-center">
-            <Button onClick={handleAddWorkout}>
+          <div className="w-full mt-2 flex items-center justify-center">
+            <Button className="w-full sm:w-32" onClick={handleAddWorkout}>
               <div className="flex flex-col items-center font-bold">
                 הוסף אימון
                 <BsPlusCircleFill />
@@ -192,6 +194,7 @@ const WorkoutPreset = () => {
           <CustomButton
             onClick={workoutForm.handleSubmit((values) => workoutPlanMutator.mutate(values))}
             variant="success"
+            className="w-full sm:w-32"
             title="שמור תוכנית אימון"
             isLoading={workoutPlanMutator.isPending}
             type="submit"

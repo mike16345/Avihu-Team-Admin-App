@@ -9,23 +9,23 @@ interface AddButtonProps {
 
 const AddButton: React.FC<AddButtonProps> = ({ onClick, tip }) => {
   return (
-    <div
-      className=" bg-accent rounded border-t-2  flex justify-center p-1 my-2 cursor-pointer"
-      onClick={onClick}
-    >
-      <TooltipProvider delayDuration={100}>
-        <Tooltip>
-          <TooltipTrigger>
+    <TooltipProvider delayDuration={100}>
+      <Tooltip>
+        <TooltipTrigger className="w-full">
+          <div
+            className=" bg-accent rounded border-t-2  flex justify-center px-1 py-1.5  my-2 cursor-pointer"
+            onClick={onClick}
+          >
             <Button className="text-sm rounded-full h-5 bg-success hover:bg-success hover:font-bold  text-secondary-foreground">
               +
             </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>{tip}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    </div>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{tip}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
 

@@ -8,6 +8,8 @@ import { CustomTooltip } from "../ui/custom-tooltip";
 import { Button } from "../ui/button";
 import { Sheet, SheetTrigger, SheetContent } from "../ui/sheet";
 import { PanelLeft } from "lucide-react";
+import LogoutButton from "./LogoutButton";
+import useAuth from "@/hooks/Authentication/useAuth";
 
 type LinkProps = {
   to: string;
@@ -16,8 +18,10 @@ type LinkProps = {
 };
 
 export const Sidebar = () => {
+  const { logout } = useAuth();
   const location = useLocation();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+
   const links: LinkProps[] = [
     {
       to: "/",
@@ -76,18 +80,23 @@ export const Sidebar = () => {
           })}
         </nav>
         <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-4">
+          <LogoutButton onLogout={logout} />
           <ModeToggle />
         </nav>
       </aside>
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetTrigger asChild>
-          <Button size="icon" variant="outline" className="sm:hidden m-2">
+          <Button size="icon" variant="outline" className="sm:hidden absolute top-5 right-8">
             <PanelLeft className="h-5 w-5" />
             <span className="sr-only">Toggle Menu</span>
           </Button>
         </SheetTrigger>
-        <SheetContent dir="rtl" side="right" className=" sm:max-w-xs">
-          <nav className="grid gap-6 text-lg font-medium p-4">
+        <SheetContent
+          dir="rtl"
+          side="right"
+          className=" sm:max-w-xs flex flex-col justify-between "
+        >
+          <nav className="grid gap-6 text-lg font-medium ">
             {links.map((link) => {
               return (
                 <Link
@@ -102,7 +111,8 @@ export const Sidebar = () => {
               );
             })}
           </nav>
-          <nav className="mt-auto ">
+          <nav className=" flex items-center p-3 gap-4 ">
+            <LogoutButton onLogout={logout} />
             <ModeToggle />
           </nav>
         </SheetContent>

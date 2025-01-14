@@ -27,7 +27,6 @@ import BackButton from "@/components/ui/BackButton";
 import BasicUserDetails from "@/components/UserDashboard/UserInfo/BasicUserDetails";
 import { useUsersStore } from "@/store/userStore";
 import { weightTab } from "./UserDashboard";
-import { createRetryFunction } from "@/lib/utils";
 
 export const ViewDietPlanPage = () => {
   const navigation = useNavigate();
@@ -40,7 +39,25 @@ export const ViewDietPlanPage = () => {
   const queryClient = useQueryClient();
 
   const [isNewPlan, setIsNewPlan] = useState(false);
-  const [dietPlan, setDietPlan] = useState<IDietPlan | null>(null);
+
+  const { isLoading, error, data } = useQuery({
+    queryKey: [`${QueryKeys.USER_DIET_PLAN}${id}`],
+    enabled: !!id,
+    staleTime: FULL_DAY_STALE_TIME,
+    queryFn: () =>
+      getDietPlanByUserId(id!)
+        .then((plan) => {
+          setDietPlan(plan);
+          return plan;
+        })
+        .catch((e) => {
+          setIsNewPlan(true);
+          setDietPlan(defaultDietPlan);
+
+          return defaultDietPlan;
+        }),
+  });
+  const [dietPlan, setDietPlan] = useState<IDietPlan | undefined>(data);
 
   const updateDietPlan = (dietPlan: IDietPlan) => setDietPlan(dietPlan);
 
@@ -70,6 +87,7 @@ export const ViewDietPlanPage = () => {
   });
 
   const handleSubmit = () => {
+    console.log("dietplan", dietPlan);
     if (!dietPlan) return;
     const dietPlanToAdd = {
       ...dietPlan,
@@ -100,26 +118,6 @@ export const ViewDietPlanPage = () => {
     queryFn: () => getAllDietPlanPresets(),
   });
 
-  const { isLoading, error, data } = useQuery({
-    queryKey: [`${QueryKeys.USER_DIET_PLAN}${id}`],
-    enabled: !!id,
-    staleTime: FULL_DAY_STALE_TIME,
-    queryFn: () =>
-      getDietPlanByUserId(id!)
-        .then((plan) => {
-          console.log("plan data", plan);
-          console.log("plan", plan);
-          setDietPlan(plan);
-          return plan;
-        })
-        .catch((e) => {
-          setIsNewPlan(true);
-          setDietPlan(defaultDietPlan);
-
-          return defaultDietPlan;
-        }),
-  });
-
   const handleSelect = (presetName: string) => {
     const selectedPreset = dietPlanPresets.data?.data.find((preset) => preset.name === presetName);
 
@@ -138,17 +136,16 @@ export const ViewDietPlanPage = () => {
   if (error) return <ErrorPage message={error.message} />;
   const plan = dietPlan || data || defaultDietPlan;
 
-  console.log("plan before render", plan);
   return (
     <div className=" flex flex-col gap-4 size-full hide-scrollbar overflow-y-auto">
-      <div className="mb-4">
+      <div className="my-6">
         <h1 className="text-2xl font-semibold ">עריכת תפריט תזונה</h1>
         {user && <BasicUserDetails user={user} />}
       </div>
 
       <BackButton navLink={MainRoutes.USERS + `/${id}?tab=${weightTab}`} />
       <Select onValueChange={(val) => handleSelect(val)}>
-        <SelectTrigger dir="rtl" className="w-[350px] mr-1">
+        <SelectTrigger dir="rtl" className="sm:w-[350px] mr-1">
           <SelectValue placeholder="בחר תפריט" />
         </SelectTrigger>
         <SelectContent dir="rtl">
@@ -167,7 +164,7 @@ export const ViewDietPlanPage = () => {
           {plan.meals.length > 0 && (
             <div>
               <CustomButton
-                className="font-bold"
+                className="font-bold w-full sm:w-32"
                 variant="success"
                 onClick={handleSubmit}
                 title="שמור תפריט"

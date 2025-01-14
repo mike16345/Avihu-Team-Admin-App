@@ -9,6 +9,7 @@ import { MuscleGroupContainer } from "./MuscleGroupContainer";
 import DeleteModal from "@/components/Alerts/DeleteModal";
 import { useIsEditableContext } from "@/context/useIsEditableContext";
 import { useWorkoutPlanContext } from "@/context/useWorkoutPlanContext";
+import AddButton from "./buttons/AddButton";
 
 interface WorkoutContainerProps {
   title: string;
@@ -114,10 +115,10 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
     <>
       <div className={` border-b-2 last:border-b-0  rounded py-2 `}>
         <Collapsible defaultOpen={isOpen} open={isOpen} onOpenChange={setIsOpen}>
-          <div className="flex items-center justify-between gap-4 w-full font-bold text-lg px-2 py-3 ">
+          <div className="flex items-center justify-between gap-4 w-full font-bold text-lg  py-3 ">
             {isEditable ? (
               <Input
-                className="w-64"
+                className="w-full sm:w-64"
                 onClick={(e) => e.stopPropagation()}
                 onChange={(e) => setPlanName(e.target.value)}
                 onBlur={(e) => handlePlanNameChange(e.target.value)}
@@ -141,7 +142,7 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
               </Button>
             </div>
           </div>
-          <CollapsibleContent className="flex flex-col gap-4">
+          <CollapsibleContent className="flex flex-col gap-4 ">
             {muscleGroups.map((muscleGroup, i) => {
               return (
                 <MuscleGroupContainer
@@ -155,11 +156,7 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
                 />
               );
             })}
-            {isEditable && (
-              <div>
-                <Button onClick={addWorkout}>הוסף קבוצת שריר</Button>
-              </div>
-            )}
+            {isEditable && <AddButton tip="הוסף קבוצת שריר" onClick={addWorkout} />}
           </CollapsibleContent>
         </Collapsible>
       </div>

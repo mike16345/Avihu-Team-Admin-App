@@ -84,8 +84,8 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
 
   return (
     <Form {...userForm}>
-      <form onSubmit={userForm.handleSubmit(onSubmit)} className="space-y-4 p-10  w-[80%]">
-        <div className="flex gap-4">
+      <form onSubmit={userForm.handleSubmit(onSubmit)} className="space-y-5   ">
+        <div className="flex items-center gap-4">
           <FormField
             control={userForm.control}
             name="firstName"
@@ -113,7 +113,7 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
             )}
           />
         </div>
-        <div className="flex gap-4">
+        <div className="flex items-center gap-4">
           <FormField
             control={userForm.control}
             name="phone"
@@ -145,7 +145,7 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
           control={userForm.control}
           name="planType"
           render={({ field }) => (
-            <FormItem className="w-[40%]">
+            <FormItem className="sm:w-1/2">
               <FormLabel>סוג תוכנית</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
@@ -169,7 +169,7 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
             const remindIn = getRemindInDate(field.value);
 
             return (
-              <FormItem className="w-[40%]">
+              <FormItem className="sm:w-1/2">
                 <FormLabel>בדיקה תקופתית</FormLabel>
                 <Select key={remindIn} onValueChange={field.onChange}>
                   <FormControl>
@@ -213,7 +213,7 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
           control={userForm.control}
           name="dietaryType"
           render={({ field }) => (
-            <FormItem className="w-[50%]">
+            <FormItem className="sm:w-2/4">
               <FormControl>
                 <DietaryTypeSelector
                   existingItems={field.value}
@@ -225,7 +225,13 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
             </FormItem>
           )}
         />
-        <CustomButton title="שמור משתמש" type="submit" isLoading={pending} />
+        <CustomButton
+          title="שמור משתמש"
+          type="submit"
+          className=" sm:w-32 w-full"
+          variant={"success"}
+          isLoading={pending}
+        />
       </form>
     </Form>
   );

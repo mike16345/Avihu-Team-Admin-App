@@ -27,7 +27,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { FilterIcon } from "lucide-react";
+import { FilterIcon, Trash2Icon } from "lucide-react";
 import { RowData } from "@tanstack/react-table";
 
 interface DataTableProps<TData, TValue> {
@@ -104,20 +104,15 @@ export function DataTableHebrew<TData, TValue>({
   return (
     <>
       <div className="flex flex-col ">
-        <div className="w-full flex flex-col gap-2 md:gap-0 md:flex-row md:justify-between md:items-center py-4">
-          <div className="flex flex-col md:flex-row md:items-center md:gap-4">
+        <div className="w-full flex flex-col gap-2 sm:gap-0 sm:flex-row sm:justify-between sm:items-center py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
             <Input
               placeholder="חיפוש..."
               value={(table.getColumn("שם")?.getFilterValue() as string) ?? ""}
               onChange={(event) => table.getColumn("שם")?.setFilterValue(event.target.value)}
-              className="max-w-sm"
+              className="sm:max-w-sm"
             />
-            <div className=" shrink-0 text-sm text-muted-foreground">
-              {table.getFilteredSelectedRowModel().rows.length} {"תוך "}
-              {table.getFilteredRowModel().rows.length} שורות נבחרו.
-            </div>
           </div>
-
           <DropdownMenu dir="rtl">
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="">
@@ -146,19 +141,27 @@ export function DataTableHebrew<TData, TValue>({
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
+          <div className=" shrink-0 block sm:hidden text-sm text-muted-foreground sm:text-right text-center">
+            {table.getFilteredSelectedRowModel().rows.length} {"תוך "}
+            {table.getFilteredRowModel().rows.length} שורות נבחרו.
+          </div>
         </div>
         <div className="mb-3 text-sm  flex items-center justify-between ">
           <div className="text-muted-foreground">
             דף {pageNumber} תוך {table.getPageCount()}
           </div>
-          {/* {Object.keys(rowSelection).length > 0 && (
+          <div className=" shrink-0 hidden sm:block text-sm text-muted-foreground sm:text-right text-center">
+            {table.getFilteredSelectedRowModel().rows.length} {"תוך "}
+            {table.getFilteredRowModel().rows.length} שורות נבחרו.
+          </div>
+          {Object.keys(rowSelection).length > 0 && (
             <div
               onClick={handleDeleteRows}
               className="cursor-pointer hover:scale-[1.03] text-foreground "
             >
               <Trash2Icon className="cursor-pointer" />
             </div>
-          )} */}
+          )}
           {actionButton}
         </div>
       </div>
@@ -185,7 +188,12 @@ export function DataTableHebrew<TData, TValue>({
                 <TableRow
                   key={row.id}
                   className={getRowClassName(row.original)}
-                  onDoubleClick={(e) => handleViewData(row.original)}
+                  onDoubleClick={(e) => {
+                    const target = e.target as HTMLElement;
+                    if (target.id == "row-checkbox" || target.id == "access-switch") return;
+
+                    handleViewData(row.original);
+                  }}
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
@@ -205,10 +213,9 @@ export function DataTableHebrew<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end gap-1 py-4">
+      <div className="flex items-center justify-between sm:justify-end gap-3 py-4">
         <Button
           variant="outline"
-          size="sm"
           onClick={() => {
             table.previousPage();
             setPageNumber((page) => page - 1);
@@ -219,7 +226,6 @@ export function DataTableHebrew<TData, TValue>({
         </Button>
         <Button
           variant="outline"
-          size="sm"
           onClick={() => {
             table.nextPage();
             setPageNumber((page) => page + 1);

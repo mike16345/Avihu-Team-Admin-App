@@ -130,11 +130,11 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
 
   return (
     <>
-      <div className="w-full flex flex-col gap-3 px-2 py-4">
-        <div className="grid xl:grid-cols-2 gap-4">
+      <div className="w-full flex flex-col gap-3 py-4">
+        <div className="grid lg:grid-cols-2 gap-4">
           {exerciseObjs.map((item, i) => (
             <Fragment key={item._id || item.name + i}>
-              <Card className=" p-6 max-h-[575px] overflow-y-auto custom-scrollbar">
+              <Card className=" sm:p-6 max-h-[575px] overflow-y-auto custom-scrollbar">
                 <CardHeader>
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center justify-between">
@@ -225,7 +225,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
             </Fragment>
           ))}
           {isEditable && (
-            <div className="h-[550px]">
+            <div className="h-[575px]">
               <AddWorkoutPlanCard onClick={() => handleAddExcercise()} />
             </div>
           )}

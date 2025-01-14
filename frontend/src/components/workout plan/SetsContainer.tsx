@@ -80,7 +80,7 @@ const SetsContainer: React.FC<SetContainerProps> = ({ updateSets, existingSets }
         ))}
       </div>
       {isEditable && (
-        <div>
+        <div className="border-t-2">
           <AddButton tip="הוסף סט" onClick={createSet} />
         </div>
       )}

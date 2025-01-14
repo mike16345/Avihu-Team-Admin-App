@@ -52,9 +52,6 @@ export const WorkoutPlanSkeletonCard = () => {
           </div>
         </div>
       </CardContent>
-      {/* <CardFooter className="justify-end">
-        <Button>הוסף תרגיל</Button>
-      </CardFooter> */}
     </Card>
   );
 };

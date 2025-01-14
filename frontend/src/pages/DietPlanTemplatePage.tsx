@@ -17,24 +17,28 @@ const DietPlanTemplatePage = () => {
       queryClient.invalidateQueries({ queryKey: [QueryKeys.DIET_PLAN_PRESETS] });
     },
   });
+
   const deleteCarbs = useMutation({
     mutationFn: deleteMenuItem,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`carbs`] });
     },
   });
+  
   const deleteFats = useMutation({
     mutationFn: deleteMenuItem,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`fats`] });
     },
   });
+  
   const deleteVegetables = useMutation({
     mutationFn: deleteMenuItem,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`vegetables`] });
     },
   });
+  
   const deleteProteins = useMutation({
     mutationFn: deleteMenuItem,
     onSuccess: () => {
@@ -105,8 +109,8 @@ const DietPlanTemplatePage = () => {
   };
 
   return (
-    <div>
-      <h1 className="text-2xl pb-5">תפריטים</h1>
+    <div className="flex flex-col gap-3">
+      <h1 className="text-2xl sm:text-right text-center">תפריטים</h1>
       <TemplateTabs tabs={tabs} />
     </div>
   );

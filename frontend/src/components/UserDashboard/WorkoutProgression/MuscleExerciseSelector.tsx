@@ -22,7 +22,7 @@ export const MuscleExerciseSelector: FC<MuscleExerciseSelectorProps> = ({
   onSelectMuscleGroup,
 }) => {
   const { id } = useParams();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [_, setSearchParams] = useSearchParams();
 
   const muscleGroups = recordedWorkouts.map((workout) => workout.muscleGroup);
   const muscleGroupRecordedSets = recordedWorkouts.find(
@@ -65,7 +65,7 @@ export const MuscleExerciseSelector: FC<MuscleExerciseSelectorProps> = ({
 
   return (
     <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-8">
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 sm:w-[200px]">
         <Label>קבוצת שריר</Label>
         <MuscleGroupCombobox
           muscleGroups={muscleGroups}
@@ -73,7 +73,7 @@ export const MuscleExerciseSelector: FC<MuscleExerciseSelectorProps> = ({
           handleSelectMuscleGroup={handleSelectMuscleGroup}
         />
       </div>
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 sm:w-[200px]">
         <Label>תרגיל</Label>
         <ExerciseComboBox
           selectedExercise={selectedExercise}

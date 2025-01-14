@@ -1,12 +1,8 @@
 import TemplateTabs from "@/components/templates/TemplateTabs";
-import TemplateTabsSkeleton from "@/components/ui/skeletons/TemplateTabsSkeleton";
 import useExercisePresetApi from "@/hooks/api/useExercisePresetApi";
 import useMuscleGroupsApi from "@/hooks/api/useMuscleGroupsApi";
 import { useWorkoutPlanPresetApi } from "@/hooks/api/useWorkoutPlanPresetsApi";
-import { IWorkoutPlanPreset } from "@/interfaces/IWorkoutPlan";
-import React, { useState } from "react";
-import ErrorPage from "./ErrorPage";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ITabs } from "@/interfaces/interfaces";
 import { QueryKeys } from "@/enums/QueryKeys";
 
@@ -78,12 +74,10 @@ const WorkoutsTemplatePage = () => {
   };
 
   return (
-    <>
-      <div>
-        <h1 className="text-2xl pb-5">תבניות אימון</h1>
-        <TemplateTabs tabs={tabs} />
-      </div>
-    </>
+    <div className="flex flex-col gap-3 ">
+      <h1 className="text-2xl text-center sm:text-right ">תבניות אימון</h1>
+      <TemplateTabs tabs={tabs} />
+    </div>
   );
 };
 

@@ -34,10 +34,10 @@ const shortcuts = [
 const AdminDashboard = () => {
   return (
     <div className="size-full">
-      <h1 className="text-4xl font-bold">עמוד מאמן</h1>
+      <h1 className="text-4xl font-bold sm:text-right text-center">עמוד מאמן</h1>
       <div className="flex flex-col pt-4 gap-2">
         <h2 className="font-bold text-xl">פעולות מהירות</h2>
-        <div className="flex flex-wrap items-center gap-5">
+        <div className="flex flex-col  sm:flex-row  sm:flex-wrap sm:items-center gap-5">
           {shortcuts.map((item) => (
             <div key={item.navLink} className="flex justify-center items-center ">
               <Shortcut actionName={item.actionName} icon={item.icon} navLink={item.navLink} />
@@ -45,7 +45,7 @@ const AdminDashboard = () => {
           ))}
         </div>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 py-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 py-4">
         <UserCheckIn />
 
         <div className="px-8 ">
