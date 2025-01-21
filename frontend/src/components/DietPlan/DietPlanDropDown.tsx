@@ -162,6 +162,7 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
                       }
                     />
                     <DietItemUnitRadio
+                      value={form.getValues("totalProtein.unit")}
                       onChangeSelection={(val: DietItemUnit) => handleSetUnit(val, "totalProtein")}
                     />
                   </div>
@@ -219,6 +220,7 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
                       }
                     />
                     <DietItemUnitRadio
+                      value={form.getValues("totalCarbs.unit")}
                       onChangeSelection={(val: DietItemUnit) => handleSetUnit(val, "totalCarbs")}
                     />
                   </div>
