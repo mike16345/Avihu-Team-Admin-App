@@ -61,8 +61,9 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
   const [isOpen, setIsOpen] = useState(false);
 
   const initialShowCustomSelection = useMemo(() => {
-    const showProtein = !!meal.totalProtein.customItems?.length;
-    const showCarbs = !!meal.totalCarbs.customItems?.length;
+    const showProtein =
+      !!meal.totalProtein.customItems?.length || !!meal.totalProtein.extraItems?.length;
+    const showCarbs = !!meal.totalCarbs.customItems?.length || !!meal.totalCarbs.extraItems?.length;
 
     return {
       totalProtein: showProtein,
