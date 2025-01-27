@@ -28,8 +28,12 @@ import { QueryKeys } from "@/enums/QueryKeys";
 import CustomButton from "@/components/ui/CustomButton";
 import BackButton from "@/components/ui/BackButton";
 
+const MAX_NAME_LENGTH = 75;
 const workoutFormSchema = z.object({
-  name: z.string().min(1).max(25),
+  name: z
+    .string()
+    .min(1)
+    .max(MAX_NAME_LENGTH, `שם התבנית חייב להיות פחות מ-${MAX_NAME_LENGTH} אותיות`),
 });
 
 const WorkoutPreset = () => {
