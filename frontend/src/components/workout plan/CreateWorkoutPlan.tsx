@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useMemo, useState } from "react";
+import React, { Fragment, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import {
   ICompleteWorkoutPlan,
   IMuscleGroupWorkouts,
@@ -34,11 +34,15 @@ import { useUsersStore } from "@/store/userStore";
 import { IUser } from "@/interfaces/IUser";
 import { useUsersApi } from "@/hooks/api/useUsersApi";
 import { weightTab } from "@/pages/UserDashboard";
+import { useDirtyFormContext } from "@/context/useFormContext";
+import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 
 const CreateWorkoutPlan: React.FC = () => {
+  const { setIsDirty } = useDirtyFormContext();
   const { id } = useParams();
   const navigation = useNavigate();
   const queryClient = useQueryClient();
+
   const [user, setUser] = useState<IUser>();
 
   const { users } = useUsersStore();
@@ -53,8 +57,24 @@ const CreateWorkoutPlan: React.FC = () => {
   const [workoutPlan, setWorkoutPlan] = useState<IWorkoutPlan[]>([]);
   const [workoutTips, setWorkoutTips] = useState<string[]>([]);
 
-  const existingWorkoutPlan = useQuery({
-    queryFn: () => getWorkoutPlanByUserId(id || ``),
+  const handleGetWorkoutPlan = async () => {
+    try {
+      const plan = await getWorkoutPlanByUserId(id || ``);
+      if (plan.data && workoutPlan.length == 0) {
+        setWorkoutPlan(plan.data.workoutPlans);
+        setWorkoutTips(plan.data.tips || []);
+        setIsCreate(false);
+        setIsEditable(false);
+      }
+
+      return plan;
+    } catch (err: any) {
+      throw err;
+    }
+  };
+
+  const { isError, error, isLoading, data } = useQuery({
+    queryFn: handleGetWorkoutPlan,
     staleTime: FULL_DAY_STALE_TIME,
     queryKey: [QueryKeys.USER_WORKOUT_PLAN + `${id}`],
     enabled: !!id,
@@ -111,19 +131,13 @@ const CreateWorkoutPlan: React.FC = () => {
     onError,
   });
 
-  if (existingWorkoutPlan.data?.data && workoutPlan.length == 0) {
-    setWorkoutPlan(existingWorkoutPlan.data.data.workoutPlans);
-    setWorkoutTips(existingWorkoutPlan.data.data.tips || []);
-    setIsCreate(false);
-    setIsEditable(false);
-  }
-
   const handlePlanNameChange = (newName: string, index: number) => {
     const newWorkoutPlan = workoutPlan.map((workout, i) =>
       i == index ? { ...workout, planName: newName } : workout
     );
 
     setWorkoutPlan(newWorkoutPlan);
+    setIsDirty(true);
   };
 
   const handleAddWorkout = () => {
@@ -133,12 +147,14 @@ const CreateWorkoutPlan: React.FC = () => {
     };
 
     setWorkoutPlan([...workoutPlan, newObject]);
+    setIsDirty(true);
   };
 
   const handleDeleteWorkout = (index: number) => {
     const filteredArr = workoutPlan.filter((_, i) => i !== index);
 
     setWorkoutPlan(filteredArr);
+    setIsDirty(true);
   };
 
   const handleSave = (index: number, workouts: IMuscleGroupWorkouts[]) => {
@@ -156,6 +172,12 @@ const CreateWorkoutPlan: React.FC = () => {
         ];
       }
     });
+    setIsDirty(true);
+  };
+
+  const handleSaveTip = (tips: string[]) => {
+    setWorkoutTips(tips);
+    setIsDirty(true);
   };
 
   useEffect(() => {
@@ -167,12 +189,20 @@ const CreateWorkoutPlan: React.FC = () => {
     fetchUser();
   }, []);
 
-  if (existingWorkoutPlan.isLoading) return <Loader size="large" />;
-  if (
-    existingWorkoutPlan.isError &&
-    existingWorkoutPlan.error?.data?.message !== `Workout plan not found!`
-  )
-    return <ErrorPage message={existingWorkoutPlan.error.message} />;
+  useLayoutEffect(() => {
+    if (data) {
+      setWorkoutPlan(data.data.workoutPlans);
+      setWorkoutTips(data.data.tips || []);
+      setIsCreate(false);
+      setIsEditable(false);
+    }
+  }, []);
+
+  useUnsavedChangesWarning();
+
+  if (isLoading) return <Loader size="large" />;
+  if (isError && error?.data?.message !== `Workout plan not found!`)
+    return <ErrorPage message={error.message} />;
 
   return (
     <div className="flex flex-col gap-4  p-4 h-full ">
@@ -202,6 +232,7 @@ const CreateWorkoutPlan: React.FC = () => {
               onSelect={(currentValue) => {
                 setWorkoutPlan(currentValue.workoutPlans);
                 setSelectedPreset(currentValue.name);
+                setIsDirty(true);
               }}
             />
           )}
@@ -227,11 +258,7 @@ const CreateWorkoutPlan: React.FC = () => {
             })}
           </div>
 
-          <TipAdder
-            tips={workoutTips}
-            saveTips={(tips) => setWorkoutTips(tips)}
-            isEditable={isEditable}
-          />
+          <TipAdder tips={workoutTips} saveTips={handleSaveTip} isEditable={isEditable} />
         </div>
         <div className="w-full flex items-center justify-center mb-2">
           {isEditable && (
