@@ -6,7 +6,6 @@ export const useUnsavedChangesWarning = () => {
 
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      console.log("is dirty", isDirty);
       if (!isDirty) return;
 
       event.preventDefault();

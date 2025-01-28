@@ -34,11 +34,8 @@ import { useUsersStore } from "@/store/userStore";
 import { IUser } from "@/interfaces/IUser";
 import { useUsersApi } from "@/hooks/api/useUsersApi";
 import { weightTab } from "@/pages/UserDashboard";
-import { useDirtyFormContext } from "@/context/useFormContext";
-import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 
 const CreateWorkoutPlan: React.FC = () => {
-  const { setIsDirty } = useDirtyFormContext();
   const { id } = useParams();
   const navigation = useNavigate();
   const queryClient = useQueryClient();
@@ -137,7 +134,6 @@ const CreateWorkoutPlan: React.FC = () => {
     );
 
     setWorkoutPlan(newWorkoutPlan);
-    setIsDirty(true);
   };
 
   const handleAddWorkout = () => {
@@ -147,14 +143,12 @@ const CreateWorkoutPlan: React.FC = () => {
     };
 
     setWorkoutPlan([...workoutPlan, newObject]);
-    setIsDirty(true);
   };
 
   const handleDeleteWorkout = (index: number) => {
     const filteredArr = workoutPlan.filter((_, i) => i !== index);
 
     setWorkoutPlan(filteredArr);
-    setIsDirty(true);
   };
 
   const handleSave = (index: number, workouts: IMuscleGroupWorkouts[]) => {
@@ -172,12 +166,10 @@ const CreateWorkoutPlan: React.FC = () => {
         ];
       }
     });
-    setIsDirty(true);
   };
 
   const handleSaveTip = (tips: string[]) => {
     setWorkoutTips(tips);
-    setIsDirty(true);
   };
 
   useEffect(() => {
@@ -197,8 +189,6 @@ const CreateWorkoutPlan: React.FC = () => {
       setIsEditable(false);
     }
   }, []);
-
-  useUnsavedChangesWarning();
 
   if (isLoading) return <Loader size="large" />;
   if (isError && error?.data?.message !== `Workout plan not found!`)
@@ -232,7 +222,6 @@ const CreateWorkoutPlan: React.FC = () => {
               onSelect={(currentValue) => {
                 setWorkoutPlan(currentValue.workoutPlans);
                 setSelectedPreset(currentValue.name);
-                setIsDirty(true);
               }}
             />
           )}

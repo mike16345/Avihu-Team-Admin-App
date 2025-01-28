@@ -1,3 +1,4 @@
+import { DirtyFormProvider } from "@/context/useFormContext";
 import { WorkoutPlanContextProvider } from "@/context/useWorkoutPlanContext";
 import { IWorkoutPlan } from "@/interfaces/IWorkoutPlan";
 import { FC, PropsWithChildren } from "react";
@@ -11,7 +12,9 @@ const WorkoutPlanContainerWrapper: FC<WorkoutPlanContainerWrapperProps> = ({
   children,
 }) => {
   return (
-    <WorkoutPlanContextProvider workoutPlan={workoutPlan}>{children}</WorkoutPlanContextProvider>
+    <WorkoutPlanContextProvider workoutPlan={workoutPlan}>
+      <DirtyFormProvider>{children}</DirtyFormProvider>
+    </WorkoutPlanContextProvider>
   );
 };
 
