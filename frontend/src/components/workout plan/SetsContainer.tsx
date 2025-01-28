@@ -40,10 +40,7 @@ const SetsContainer: React.FC<SetContainerProps> = ({ updateSets, existingSets }
   };
 
   const createSet = () => {
-    const newSet: ISet = {
-      minReps: 0,
-      maxReps: 0,
-    };
+    const newSet: ISet = componentSets[componentSets.length - 1];
     setComponentSets([...componentSets, newSet]);
     updateSets([...componentSets, newSet]);
   };

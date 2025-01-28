@@ -22,6 +22,7 @@ export interface IExercise {
   _id?: string;
   tipFromTrainer?: string;
   linkToVideo?: string;
+  exerciseMethod?: string;
   name: string;
   sets: ISet[];
 }
@@ -42,6 +43,7 @@ export interface IExercisePresetItem {
   name: string;
   muscleGroup: string;
   tipFromTrainer?: string;
+  exerciseMethod?: string;
   linkToVideo: string;
 }
 export interface IMuscleGroupItem {

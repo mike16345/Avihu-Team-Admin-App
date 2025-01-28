@@ -34,7 +34,15 @@ const datePresets = [
   { name: `חודש`, timeInDays: `30` },
   { name: `חודשיים`, timeInDays: `60` },
   { name: `שלושה חודשים`, timeInDays: `90` },
-  { name: `חצי שנה`, timeInDays: `180` },
+  { name: `ארבעה חודשים`, timeInDays: `120` },
+  { name: `חמישה חודשים`, timeInDays: `150` },
+  { name: `שישה חודשים`, timeInDays: `180` },
+  { name: `שבעה חודשים`, timeInDays: `210` },
+  { name: `שמונה חודשים`, timeInDays: `240` },
+  { name: `תשעה חודשים`, timeInDays: `270` },
+  { name: `עשרה חודשים`, timeInDays: `300` },
+  { name: `אחד עשר חודשים`, timeInDays: `330` },
+  { name: `שנה`, timeInDays: `360` },
 ];
 
 const userSchema = z.object({
