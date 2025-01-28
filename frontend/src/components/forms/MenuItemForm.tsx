@@ -27,13 +27,18 @@ interface MenuItemFormProps {
   foodGroup: string;
 }
 
+const MAX_SERVING_TYPES = 2;
+const MIN_SERVING_TYPES = 1;
+
 const servingItemSchema = z.object({
   spoons: z.coerce
     .number({ message: `שדה זה הינו שדה חובה` })
-    .positive({ message: `אנא הכנס מספר הגבוה מ-0` }),
+    .positive({ message: `אנא הכנס מספר הגבוה מ-0` })
+    .optional(),
   grams: z.coerce
     .number({ message: `שדה זה הינו שדה חובה` })
-    .positive({ message: `אנא הכנס מספר הגבוה מ-0` }),
+    .positive({ message: `אנא הכנס מספר הגבוה מ-0` })
+    .optional(),
 });
 
 const menuItemSchema = z.object({
@@ -49,10 +54,7 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
     resolver: zodResolver(menuItemSchema),
     defaultValues: {
       name: "",
-      oneServing: {
-        spoons: 0,
-        grams: 0,
-      },
+      oneServing: {},
     },
   });
 
@@ -115,6 +117,26 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
       foodGroup,
       dietaryType: dietaryTypes,
     };
+
+    const servingTypesKeys = Object.keys(menuItemObject.oneServing);
+
+    if (servingTypesKeys.length > MAX_SERVING_TYPES) {
+      servingTypesKeys.forEach((key) => {
+        let keyType = key as keyof typeof menuItemObject.oneServing;
+
+        if (menuItemObject.oneServing[keyType] == 0) {
+          delete menuItemObject.oneServing[keyType];
+        }
+      });
+    }
+
+    if (servingTypesKeys.length <= MAX_SERVING_TYPES) {
+      if (objectId) {
+        updateMenuItem.mutate({ menuItemObject, objectId });
+      } else {
+        addNewMenuItem.mutate(menuItemObject);
+      }
+    }
     if (objectId) {
       updateMenuItem.mutate({ menuItemObject, objectId });
     } else {
@@ -141,13 +163,13 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
             <FormItem>
               <FormLabel>שם פריט</FormLabel>
               <FormControl>
-                <Input placeholder="הכנס פריט כאן..." {...field} />
+                <Input placeholder="הכנס פריט כאן..." min={0} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <div className="flex gap-5">
+        <div className="flex items-center justify-center gap-5">
           <FormField
             control={menuItemForm.control}
             name="oneServing.grams"
@@ -155,7 +177,35 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
               <FormItem>
                 <FormLabel>גרם במנה</FormLabel>
                 <FormControl>
-                  <Input type="number" placeholder="80g" {...field} />
+                  <Input type="number" placeholder="80g" min={0} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={menuItemForm.control}
+            name="oneServing.spoons"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>כפות במנה</FormLabel>
+                <FormControl>
+                  <Input type="number" placeholder="1" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        <div className="flex items-center justify-center gap-5">
+          <FormField
+            control={menuItemForm.control}
+            name="oneServing.grams"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>גרם במנה</FormLabel>
+                <FormControl>
+                  <Input type="number" placeholder="80g" min={0} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
