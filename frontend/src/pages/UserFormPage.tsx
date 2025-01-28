@@ -4,7 +4,7 @@ import Loader from "@/components/ui/Loader";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { MainRoutes } from "@/enums/Routes";
 import { useUsersApi } from "@/hooks/api/useUsersApi";
-import { IUser } from "@/interfaces/IUser";
+import { IUser, IUserPost } from "@/interfaces/IUser";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";

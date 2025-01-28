@@ -1,19 +1,23 @@
-export interface IUser {
-  _id?: string;
+export interface IBaseUser {
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
   dietaryType?: string[];
-  password?: string;
-  dateJoined: Date;
   dateFinished: Date;
   planType: string;
   remindIn: number;
+}
+
+export interface IUser extends IBaseUser {
+  _id?: string;
+  dateJoined: Date;
   isChecked: boolean;
   checkInAt: number;
   hasAccess: boolean;
 }
+
+export interface IUserPost extends IBaseUser {}
 
 export interface ISession extends Document {
   _id: string;
