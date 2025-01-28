@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import {
   Form,
   FormControl,
@@ -11,14 +11,15 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Input } from "../ui/input";
-import { Button } from "../ui/button";
 import { toast } from "sonner";
 import useMenuItemApi from "@/hooks/api/useMenuItemApi";
 import DietaryTypeSelector from "../templates/dietTemplates/DietaryTypeSelector";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { IMenuItem } from "@/interfaces/IDietPlan";
 import CustomButton from "../ui/CustomButton";
+import { FULL_DAY_STALE_TIME } from "@/constants/constants";
+import MenuItemFormSkeleton from "../ui/skeletons/MenuItemFormSkeleton";
 
 interface MenuItemFormProps {
   objectId?: string;
@@ -58,9 +59,33 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
   const { reset } = menuItemForm;
 
   const queryClient = useQueryClient();
+  const handleGetMenuItem = async () => {
+    if (!objectId) return;
+
+    try {
+      const res = await getOneMenuItem(foodGroup, objectId);
+      setDietaryTypes(res.data.dietaryType);
+      reset(res.data);
+
+      return res.data;
+    } catch (error: any) {
+      throw error;
+    }
+  };
+
+  const { data, isLoading } = useQuery({
+    queryKey: [objectId],
+    queryFn: () => handleGetMenuItem(),
+    enabled: !!objectId,
+    staleTime: FULL_DAY_STALE_TIME,
+  });
 
   const successFunc = () => {
-    queryClient.invalidateQueries({ queryKey: [foodGroup] });
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: [foodGroup] }),
+      queryClient.invalidateQueries({ queryKey: [objectId] }),
+    ]);
+
     toast.success(`פריט נשמר בהצלחה!`);
     closeSheet();
   };
@@ -77,6 +102,7 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
     onSuccess: successFunc,
     onError: errFunc,
   });
+
   const addNewMenuItem = useMutation({
     mutationFn: addMenuItem,
     onSuccess: successFunc,
@@ -97,14 +123,13 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
   };
 
   useEffect(() => {
-    if (!objectId) return;
-    getOneMenuItem(foodGroup, objectId)
-      .then((res) => {
-        setDietaryTypes(res.data.dietaryType);
-        reset(res.data);
-      })
-      .catch((err) => console.log(err));
+    if (!data) return;
+
+    setDietaryTypes(data.dietaryType);
+    reset(data);
   }, []);
+
+  if (isLoading) return <MenuItemFormSkeleton />;
 
   return (
     <Form {...menuItemForm}>
