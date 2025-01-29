@@ -16,7 +16,7 @@ import useMenuItemApi from "@/hooks/api/useMenuItemApi";
 import DietaryTypeSelector from "../templates/dietTemplates/DietaryTypeSelector";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { IMenuItem } from "@/interfaces/IDietPlan";
+import { IMenuItem, IServingItem } from "@/interfaces/IDietPlan";
 import CustomButton from "../ui/CustomButton";
 import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 import MenuItemFormSkeleton from "../ui/skeletons/MenuItemFormSkeleton";
@@ -74,6 +74,19 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
 
   const queryClient = useQueryClient();
 
+  const handleInitShowSelections = (servingTypes: IServingItem) => {
+    let currentSelections = structuredClone(showServingSelections);
+    const keys = Object.keys(currentSelections);
+
+    for (const key of keys) {
+      if (key !== "_id") {
+        currentSelections[key] = servingTypes[key] > 0;
+      }
+    }
+
+    setShowServingSelections(currentSelections);
+  };
+
   const handleGetMenuItem = async () => {
     if (!objectId) return;
 
@@ -82,6 +95,7 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
 
       setDietaryTypes(res.data.dietaryType);
       reset(res.data);
+      handleInitShowSelections(res.data.oneServing);
 
       return res.data;
     } catch (error: any) {
@@ -148,7 +162,6 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
     const newObject = structuredClone({ ...showServingSelections, [type]: true });
 
     setShowServingSelections(newObject);
-    menuItemForm.setValue(`oneServing.${type}`, 0);
   };
 
   const onSubmit = (values: z.infer<typeof menuItemSchema>) => {
@@ -160,15 +173,20 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
 
     console.log("menu item object before", menuItemObject);
 
+    menuItemObject = cleanMenuItemObject(menuItemObject);
     const servingTypesKeys = Object.keys(menuItemObject.oneServing);
     const isValidLength =
-      servingTypesKeys.length <= MAX_SERVING_TYPES && servingTypesKeys.length > MIN_SERVING_TYPES;
+      servingTypesKeys.length <= MAX_SERVING_TYPES && servingTypesKeys.length >= MIN_SERVING_TYPES;
+    const minAllowed = MIN_SERVING_TYPES + (MAX_SERVING_TYPES - MIN_SERVING_TYPES);
 
-    if (!isValidLength) {
-      menuItemObject = cleanMenuItemObject(menuItemObject);
-    }
-
+    console.log("serving types:", servingTypesKeys.length);
     console.log("menu item object after", menuItemObject);
+    if (!isValidLength) {
+      toast.error(`יש לבחור עד ${minAllowed} סוגי הגשה`, {
+        description: "נא למחוק עד שיש בין 1-2",
+      });
+      return;
+    }
 
     if (objectId) {
       updateMenuItem.mutate({ menuItemObject, objectId });
@@ -181,6 +199,7 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
     if (!data) return;
 
     setDietaryTypes(data.dietaryType);
+    handleInitShowSelections(data.oneServing);
     reset(data);
   }, []);
 
