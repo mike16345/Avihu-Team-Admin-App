@@ -21,10 +21,10 @@ import CustomButton from "../ui/CustomButton";
 import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 import MenuItemFormSkeleton from "../ui/skeletons/MenuItemFormSkeleton";
 import { menuItemSchema } from "@/schemas/menuItemSchema";
-import DeleteButton from "../workout plan/buttons/DeleteButton";
 import { convertStringsToOptions, servingTypeToString } from "@/lib/utils";
-import AddButton from "../workout plan/buttons/AddButton";
-import CommandListDialog from "../Dialogs/CommandListDialog";
+import CustomDropdownMenu from "../Dropdown/DropdownMenu";
+import { Button } from "../ui/button";
+import { MoreHorizontal } from "lucide-react";
 
 interface MenuItemFormProps {
   objectId?: string;
@@ -32,35 +32,20 @@ interface MenuItemFormProps {
   foodGroup: string;
 }
 
-const MAX_SERVING_TYPES = 2;
-const MIN_SERVING_TYPES = 1;
+const selections = ["grams", "spoons", "cups", "pieces", "scoops"];
 
 const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodGroup }) => {
   const { getOneMenuItem, addMenuItem, editMenuItem } = useMenuItemApi();
   const [dietaryTypes, setDietaryTypes] = useState<string[]>([]);
-  const [showServingSelections, setShowServingSelections] = useState({
-    grams: true,
-    spoons: true,
-    scoops: false,
-    pieces: false,
-    cups: false,
-  });
+  const [showServingSelections, setShowServingSelections] = useState(["grams", "spoons"]);
 
   const availableSelections = useMemo(() => {
-    const filteredItems = Object.keys(showServingSelections)
-      .map((val) => {
-        if (!showServingSelections[val]) {
-          return val;
-        }
-      })
-      .filter((val) => val !== undefined);
-
-    console.log("filteredItems", filteredItems);
+    const filteredItems = selections.filter((selection) => {
+      return !showServingSelections.includes(selection);
+    });
 
     return convertStringsToOptions(filteredItems, servingTypeToString);
   }, [showServingSelections]);
-
-  console.log("available", availableSelections);
 
   const menuItemForm = useForm<z.infer<typeof menuItemSchema>>({
     resolver: zodResolver(menuItemSchema),
@@ -75,12 +60,13 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
   const queryClient = useQueryClient();
 
   const handleInitShowSelections = (servingTypes: IServingItem) => {
-    let currentSelections = structuredClone(showServingSelections);
-    const keys = Object.keys(currentSelections);
+    let currentSelections = [];
 
-    for (const key of keys) {
-      if (key !== "_id") {
-        currentSelections[key] = servingTypes[key] > 0;
+    for (const selection of selections) {
+      let key = selection as keyof IServingItem;
+
+      if (servingTypes[key] && servingTypes[key] > 0) {
+        currentSelections.push(selection);
       }
     }
 
@@ -139,29 +125,31 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
     onError: errFunc,
   });
 
-  const cleanMenuItemObject = (menuItemObject: any) => {
+  const cleanMenuItemObject = (menuItemObject: IMenuItem) => {
     const newMenuItemObject = { ...menuItemObject, oneServing: { ...menuItemObject.oneServing } };
 
     for (const key in newMenuItemObject.oneServing) {
-      if (!newMenuItemObject.oneServing[key]) {
-        delete newMenuItemObject.oneServing[key];
+      const typedKey = key as keyof IServingItem;
+
+      if (!newMenuItemObject.oneServing[typedKey]) {
+        delete newMenuItemObject.oneServing[typedKey];
       }
     }
 
     return newMenuItemObject;
   };
 
-  const handleRemoveServingSelection = (type: string) => {
-    const newObject = structuredClone({ ...showServingSelections, [type]: false });
+  const handleChangeServingSelection = (option: string, prevOption: string, index: number) => {
+    const newArr = [...showServingSelections];
+    const optionKey = option as keyof IServingItem;
+    const prevOptionKey = prevOption as keyof IServingItem;
+    const prevOptionValue = menuItemForm.getValues(`oneServing.${prevOptionKey}`);
 
-    setShowServingSelections(newObject);
-    menuItemForm.setValue(`oneServing.${type}`, undefined);
-  };
+    newArr[index] = option;
+    setShowServingSelections(newArr);
 
-  const handleAddServingSelection = (type: string) => {
-    const newObject = structuredClone({ ...showServingSelections, [type]: true });
-
-    setShowServingSelections(newObject);
+    menuItemForm.setValue(`oneServing.${optionKey}`, prevOptionValue);
+    menuItemForm.setValue(`oneServing.${prevOptionKey}`, undefined);
   };
 
   const onSubmit = (values: z.infer<typeof menuItemSchema>) => {
@@ -170,23 +158,7 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
       foodGroup,
       dietaryType: dietaryTypes,
     };
-
-    console.log("menu item object before", menuItemObject);
-
     menuItemObject = cleanMenuItemObject(menuItemObject);
-    const servingTypesKeys = Object.keys(menuItemObject.oneServing);
-    const isValidLength =
-      servingTypesKeys.length <= MAX_SERVING_TYPES && servingTypesKeys.length >= MIN_SERVING_TYPES;
-    const minAllowed = MIN_SERVING_TYPES + (MAX_SERVING_TYPES - MIN_SERVING_TYPES);
-
-    console.log("serving types:", servingTypesKeys.length);
-    console.log("menu item object after", menuItemObject);
-    if (!isValidLength) {
-      toast.error(`יש לבחור עד ${minAllowed} סוגי הגשה`, {
-        description: "נא למחוק עד שיש בין 1-2",
-      });
-      return;
-    }
 
     if (objectId) {
       updateMenuItem.mutate({ menuItemObject, objectId });
@@ -223,26 +195,28 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
         />
 
         <div className="grid grid-cols-2 gap-4">
-          {Object.keys(showServingSelections)
-            .filter((key) => showServingSelections[key])
-            .map((key, index, arr) => (
+          {showServingSelections.map((key, i) => {
+            const typedKey = key as keyof IServingItem;
+
+            return (
               <FormField
                 key={key}
                 control={menuItemForm.control}
-                name={`oneServing.${key}`}
+                name={`oneServing.${typedKey}`}
                 render={({ field }) => {
-                  const isOnlyItemInCol = index == arr.length - 1 && arr.length % 2 == 1;
-
                   return (
-                    <FormItem className={isOnlyItemInCol ? "col-span-2" : ""}>
+                    <FormItem>
                       <div className="flex items-center justify-between">
                         <FormLabel>{servingTypeToString(key)} במנה</FormLabel>
-                        <DeleteButton
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handleRemoveServingSelection(key);
-                          }}
-                          tip="מחק"
+                        <CustomDropdownMenu
+                          handleOptionClick={(val) => handleChangeServingSelection(val, key, i)}
+                          options={availableSelections}
+                          trigger={
+                            <Button type="button" variant="ghost" className="h-8 w-8 p-0">
+                              <span className="sr-only">Open menu</span>
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          }
                         />
                       </div>
                       <FormControl>
@@ -253,17 +227,9 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
                   );
                 }}
               />
-            ))}
+            );
+          })}
         </div>
-
-        {availableSelections.length > 0 && (
-          <CommandListDialog
-            title="בחר סוג למנה"
-            handleChange={handleAddServingSelection}
-            items={availableSelections}
-            trigger={<AddButton tip="הוסף סוג" onClick={() => null} />}
-          />
-        )}
 
         <DietaryTypeSelector
           saveSelected={(selectedItems) => setDietaryTypes(selectedItems)}
