@@ -97,8 +97,9 @@ export const ViewDietPlanPresetPage = () => {
   const updateDietPlan = (dietPlan: IDietPlan) => setDietPlan(dietPlan);
 
   useEffect(() => {
-    setIsLoading(true);
     if (id) {
+      setIsLoading(true);
+
       getDietPlanPreset(id)
         .then((dietPlan) => {
           setDietPlan(dietPlan.data);

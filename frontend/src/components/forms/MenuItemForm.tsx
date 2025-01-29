@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Form,
   FormControl,
@@ -20,6 +20,11 @@ import { IMenuItem } from "@/interfaces/IDietPlan";
 import CustomButton from "../ui/CustomButton";
 import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 import MenuItemFormSkeleton from "../ui/skeletons/MenuItemFormSkeleton";
+import { menuItemSchema } from "@/schemas/menuItemSchema";
+import DeleteButton from "../workout plan/buttons/DeleteButton";
+import { convertStringsToOptions, servingTypeToString } from "@/lib/utils";
+import AddButton from "../workout plan/buttons/AddButton";
+import CommandListDialog from "../Dialogs/CommandListDialog";
 
 interface MenuItemFormProps {
   objectId?: string;
@@ -30,25 +35,32 @@ interface MenuItemFormProps {
 const MAX_SERVING_TYPES = 2;
 const MIN_SERVING_TYPES = 1;
 
-const servingItemSchema = z.object({
-  spoons: z.coerce
-    .number({ message: `שדה זה הינו שדה חובה` })
-    .positive({ message: `אנא הכנס מספר הגבוה מ-0` })
-    .optional(),
-  grams: z.coerce
-    .number({ message: `שדה זה הינו שדה חובה` })
-    .positive({ message: `אנא הכנס מספר הגבוה מ-0` })
-    .optional(),
-});
-
-const menuItemSchema = z.object({
-  name: z.string().min(1, { message: `חובה לתת לפריט שם` }),
-  oneServing: servingItemSchema,
-});
-
 const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodGroup }) => {
   const { getOneMenuItem, addMenuItem, editMenuItem } = useMenuItemApi();
   const [dietaryTypes, setDietaryTypes] = useState<string[]>([]);
+  const [showServingSelections, setShowServingSelections] = useState({
+    grams: true,
+    spoons: true,
+    scoops: false,
+    pieces: false,
+    cups: false,
+  });
+
+  const availableSelections = useMemo(() => {
+    const filteredItems = Object.keys(showServingSelections)
+      .map((val) => {
+        if (!showServingSelections[val]) {
+          return val;
+        }
+      })
+      .filter((val) => val !== undefined);
+
+    console.log("filteredItems", filteredItems);
+
+    return convertStringsToOptions(filteredItems, servingTypeToString);
+  }, [showServingSelections]);
+
+  console.log("available", availableSelections);
 
   const menuItemForm = useForm<z.infer<typeof menuItemSchema>>({
     resolver: zodResolver(menuItemSchema),
@@ -61,11 +73,13 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
   const { reset } = menuItemForm;
 
   const queryClient = useQueryClient();
+
   const handleGetMenuItem = async () => {
     if (!objectId) return;
 
     try {
       const res = await getOneMenuItem(foodGroup, objectId);
+
       setDietaryTypes(res.data.dietaryType);
       reset(res.data);
 
@@ -111,32 +125,51 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
     onError: errFunc,
   });
 
+  const cleanMenuItemObject = (menuItemObject: any) => {
+    const newMenuItemObject = { ...menuItemObject, oneServing: { ...menuItemObject.oneServing } };
+
+    for (const key in newMenuItemObject.oneServing) {
+      if (!newMenuItemObject.oneServing[key]) {
+        delete newMenuItemObject.oneServing[key];
+      }
+    }
+
+    return newMenuItemObject;
+  };
+
+  const handleRemoveServingSelection = (type: string) => {
+    const newObject = structuredClone({ ...showServingSelections, [type]: false });
+
+    setShowServingSelections(newObject);
+    menuItemForm.setValue(`oneServing.${type}`, undefined);
+  };
+
+  const handleAddServingSelection = (type: string) => {
+    const newObject = structuredClone({ ...showServingSelections, [type]: true });
+
+    setShowServingSelections(newObject);
+    menuItemForm.setValue(`oneServing.${type}`, 0);
+  };
+
   const onSubmit = (values: z.infer<typeof menuItemSchema>) => {
-    const menuItemObject = {
+    let menuItemObject = {
       ...values,
       foodGroup,
       dietaryType: dietaryTypes,
     };
 
+    console.log("menu item object before", menuItemObject);
+
     const servingTypesKeys = Object.keys(menuItemObject.oneServing);
+    const isValidLength =
+      servingTypesKeys.length <= MAX_SERVING_TYPES && servingTypesKeys.length > MIN_SERVING_TYPES;
 
-    if (servingTypesKeys.length > MAX_SERVING_TYPES) {
-      servingTypesKeys.forEach((key) => {
-        let keyType = key as keyof typeof menuItemObject.oneServing;
-
-        if (menuItemObject.oneServing[keyType] == 0) {
-          delete menuItemObject.oneServing[keyType];
-        }
-      });
+    if (!isValidLength) {
+      menuItemObject = cleanMenuItemObject(menuItemObject);
     }
 
-    if (servingTypesKeys.length <= MAX_SERVING_TYPES) {
-      if (objectId) {
-        updateMenuItem.mutate({ menuItemObject, objectId });
-      } else {
-        addNewMenuItem.mutate(menuItemObject);
-      }
-    }
+    console.log("menu item object after", menuItemObject);
+
     if (objectId) {
       updateMenuItem.mutate({ menuItemObject, objectId });
     } else {
@@ -169,62 +202,50 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
             </FormItem>
           )}
         />
-        <div className="flex items-center justify-center gap-5">
-          <FormField
-            control={menuItemForm.control}
-            name="oneServing.grams"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>גרם במנה</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="80g" min={0} {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={menuItemForm.control}
-            name="oneServing.spoons"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>כפות במנה</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="1" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+
+        <div className="grid grid-cols-2 gap-4">
+          {Object.keys(showServingSelections)
+            .filter((key) => showServingSelections[key])
+            .map((key, index, arr) => (
+              <FormField
+                key={key}
+                control={menuItemForm.control}
+                name={`oneServing.${key}`}
+                render={({ field }) => {
+                  const isOnlyItemInCol = index == arr.length - 1 && arr.length % 2 == 1;
+
+                  return (
+                    <FormItem className={isOnlyItemInCol ? "col-span-2" : ""}>
+                      <div className="flex items-center justify-between">
+                        <FormLabel>{servingTypeToString(key)} במנה</FormLabel>
+                        <DeleteButton
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleRemoveServingSelection(key);
+                          }}
+                          tip="מחק"
+                        />
+                      </div>
+                      <FormControl>
+                        <Input type="number" min={0} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+            ))}
         </div>
-        <div className="flex items-center justify-center gap-5">
-          <FormField
-            control={menuItemForm.control}
-            name="oneServing.grams"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>גרם במנה</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="80g" min={0} {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+
+        {availableSelections.length > 0 && (
+          <CommandListDialog
+            title="בחר סוג למנה"
+            handleChange={handleAddServingSelection}
+            items={availableSelections}
+            trigger={<AddButton tip="הוסף סוג" onClick={() => null} />}
           />
-          <FormField
-            control={menuItemForm.control}
-            name="oneServing.spoons"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>כפות במנה</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="1" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        )}
+
         <DietaryTypeSelector
           saveSelected={(selectedItems) => setDietaryTypes(selectedItems)}
           existingItems={dietaryTypes}
