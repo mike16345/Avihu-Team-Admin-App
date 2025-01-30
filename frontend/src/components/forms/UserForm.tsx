@@ -20,7 +20,7 @@ import { useForm } from "react-hook-form";
 import { Input } from "../ui/input";
 import DatePicker from "../ui/DatePicker";
 import DietaryTypeSelector from "../templates/dietTemplates/DietaryTypeSelector";
-import { IUser } from "@/interfaces/IUser";
+import { IUser, IUserPost } from "@/interfaces/IUser";
 import CustomButton from "../ui/CustomButton";
 
 const remindInOptions = [
@@ -50,7 +50,7 @@ const userSchema = z.object({
 
 interface UserFormProps {
   existingUser: IUser | null;
-  saveInfo: (user: IUser) => void;
+  saveInfo: (user: IUserPost) => void;
   pending?: boolean;
 }
 
@@ -60,6 +60,7 @@ function getRemindInDate(remindIn: number) {
 }
 
 const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) => {
+  const userFinishDate = existingUser ? new Date(existingUser.dateFinished) : undefined;
   const userForm = useForm<z.infer<typeof userSchema>>({
     resolver: zodResolver(userSchema),
     defaultValues: {
@@ -70,7 +71,7 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
       planType: existingUser?.planType || ``,
       dietaryType: existingUser?.dietaryType || [],
       remindIn: existingUser?.remindIn,
-      dateFinished: existingUser && new Date(existingUser?.dateFinished),
+      dateFinished: userFinishDate,
     },
   });
 
@@ -79,7 +80,9 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
   } = userForm;
 
   const onSubmit = (values: z.infer<typeof userSchema>) => {
-    saveInfo(values);
+    const user: IUserPost = { ...values, email: values.email.toLowerCase() };
+
+    saveInfo(user);
   };
 
   return (

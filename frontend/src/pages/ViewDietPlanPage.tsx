@@ -87,12 +87,12 @@ export const ViewDietPlanPage = () => {
   });
 
   const handleSubmit = () => {
-    console.log("dietplan", dietPlan);
     if (!dietPlan) return;
     const dietPlanToAdd = {
       ...dietPlan,
       userId: id,
     };
+    console.log("diet plan to add", dietPlanToAdd);
 
     const { isValid, errors } = validateDietPlan(dietPlanToAdd);
 

@@ -25,17 +25,22 @@ type ShowCustomSelectionType = {
   totalCarbs: boolean;
 };
 
-type DietPlanDropDownProps = {
+type CustomValues = {
+  totalProtein: string[];
+  totalCarbs: string[];
+};
+
+type MealDropDownProps = {
   mealNumber: number;
   meal: IMeal;
   customItems: CustomItems;
   onDelete: () => void;
   setDietPlan: (meal: IMeal) => void;
 };
-
+type ItemSelection = "Custom" | "Fixed";
 type OmittedIMeal = Omit<IMeal, "_id">;
 
-export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
+export const MealDropDown: FC<MealDropDownProps> = ({
   mealNumber,
   meal,
   customItems,
@@ -45,6 +50,16 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
   const initialFormValues = useMemo(() => {
     return meal;
   }, [meal]);
+
+  const [initialCustomItems, setInitialCustomItems] = useState<CustomValues>({
+    totalProtein: meal.totalProtein.customItems || [],
+    totalCarbs: meal.totalCarbs.customItems || [],
+  });
+
+  const [initialExtraItems, setInitialExtraItems] = useState<CustomValues>({
+    totalProtein: meal.totalProtein.extraItems || [],
+    totalCarbs: meal.totalCarbs.extraItems || [],
+  });
 
   const form = useForm<OmittedIMeal>({
     resolver: zodResolver(mealSchema),
@@ -61,8 +76,9 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
   const [isOpen, setIsOpen] = useState(false);
 
   const initialShowCustomSelection = useMemo(() => {
-    const showProtein = !!meal.totalProtein.customItems?.length;
-    const showCarbs = !!meal.totalCarbs.customItems?.length;
+    const showProtein =
+      !!meal.totalProtein.customItems?.length || !!meal.totalProtein.extraItems?.length;
+    const showCarbs = !!meal.totalCarbs.customItems?.length || !!meal.totalCarbs.extraItems?.length;
 
     return {
       totalProtein: showProtein,
@@ -90,6 +106,22 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
     const item = form.getValues()[type];
     if (!item) return;
 
+    if (key == "customItems") {
+      setInitialCustomItems((prev) => {
+        return {
+          ...prev,
+          [type]: selectedItems,
+        };
+      });
+    } else if (key == "extraItems") {
+      setInitialExtraItems((prev) => {
+        return {
+          ...prev,
+          [type]: selectedItems,
+        };
+      });
+    }
+
     setValue(type, { ...item, [key]: selectedItems });
     handleInputChange(type, item.quantity);
   };
@@ -100,6 +132,42 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
 
     setValue(type, { ...itemToSet, unit: unit });
     handleInputChange(type, itemToSet.quantity);
+  };
+
+  const handleChangeItemSelectionType = (
+    type: ItemSelection,
+    field: keyof ShowCustomSelectionType
+  ) => {
+    const item = form.getValues()[field];
+    let meal: OmittedIMeal = {
+      ...form.getValues(),
+    };
+
+    setShowCustomSelection((prev) => ({ ...prev, [field]: type == "Custom" }));
+
+    if (type == "Custom") {
+      const val = {
+        ...item,
+        customItems: initialCustomItems[field],
+        extraItems: initialExtraItems[field],
+      };
+
+      setValue(field, {
+        ...item,
+        ...val,
+      });
+      meal = { ...meal, [field]: val };
+    } else {
+      const val = {
+        ...item,
+        customItems: [],
+        extraItems: [],
+      };
+
+      setValue(field, { ...item, ...val });
+      meal = { ...meal, [field]: val };
+    }
+    setDietPlan(meal);
   };
 
   useEffect(() => {
@@ -154,14 +222,12 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
                   <div className="flex items-center justify-between">
                     <CustomItemSelectionRadio
                       defaultValue={showCustomSelection.totalProtein ? "Custom" : "Fixed"}
-                      onChangeSelection={(val: string) =>
-                        setShowCustomSelection({
-                          ...showCustomSelection,
-                          totalProtein: val === "Custom",
-                        })
+                      onChangeSelection={(val: ItemSelection) =>
+                        handleChangeItemSelectionType(val, "totalProtein")
                       }
                     />
                     <DietItemUnitRadio
+                      value={form.getValues("totalProtein.unit")}
                       onChangeSelection={(val: DietItemUnit) => handleSetUnit(val, "totalProtein")}
                     />
                   </div>
@@ -211,14 +277,12 @@ export const DietPlanDropDown: FC<DietPlanDropDownProps> = ({
                   <div className="flex items-center justify-between">
                     <CustomItemSelectionRadio
                       defaultValue={showCustomSelection.totalCarbs ? "Custom" : "Fixed"}
-                      onChangeSelection={(val: string) =>
-                        setShowCustomSelection({
-                          ...showCustomSelection,
-                          totalCarbs: val === "Custom",
-                        })
+                      onChangeSelection={(val: ItemSelection) =>
+                        handleChangeItemSelectionType(val, "totalCarbs")
                       }
                     />
                     <DietItemUnitRadio
+                      value={form.getValues("totalCarbs.unit")}
                       onChangeSelection={(val: DietItemUnit) => handleSetUnit(val, "totalCarbs")}
                     />
                   </div>
