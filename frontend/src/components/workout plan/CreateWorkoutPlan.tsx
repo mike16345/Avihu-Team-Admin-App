@@ -1,9 +1,8 @@
 import React, { Fragment, useEffect, useMemo, useState } from "react";
 import {
+  ICardioPlan,
   ICompleteWorkoutPlan,
-  IComplexCardioType,
   IMuscleGroupWorkouts,
-  ISimpleCardioType,
   IWorkoutPlan,
   IWorkoutPlanPreset,
 } from "@/interfaces/IWorkoutPlan";
@@ -57,9 +56,10 @@ const CreateWorkoutPlan: React.FC = () => {
   const [isCreate, setIsCreate] = useState(true);
   const [workoutPlan, setWorkoutPlan] = useState<IWorkoutPlan[]>([]);
   const [workoutTips, setWorkoutTips] = useState<string[]>([]);
-  const [cardioPlan, setCardioPlan] = useState<ISimpleCardioType | IComplexCardioType>(
-    defaultSimpleCardioOption
-  );
+  const [cardioPlan, setCardioPlan] = useState<ICardioPlan>({
+    type: `simple`,
+    plan: defaultSimpleCardioOption,
+  });
 
   const existingWorkoutPlan = useQuery({
     queryFn: () => getWorkoutPlanByUserId(id || ``),

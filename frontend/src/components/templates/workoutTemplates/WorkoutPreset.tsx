@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { IMuscleGroupWorkouts, IWorkoutPlan } from "@/interfaces/IWorkoutPlan";
+import { ICardioPlan, IMuscleGroupWorkouts, IWorkoutPlan } from "@/interfaces/IWorkoutPlan";
 import { Fragment, useEffect, useState } from "react";
 import { BsPlusCircleFill } from "react-icons/bs";
 import { Input } from "@/components/ui/input";
@@ -27,6 +27,9 @@ import { MainRoutes } from "@/enums/Routes";
 import { QueryKeys } from "@/enums/QueryKeys";
 import CustomButton from "@/components/ui/CustomButton";
 import BackButton from "@/components/ui/BackButton";
+import { defaultSimpleCardioOption } from "@/constants/cardioOptions";
+import CardioWrapper from "@/components/workout plan/cardio/CardioWrapper";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const workoutFormSchema = z.object({
   name: z.string().min(1).max(25),
@@ -63,6 +66,10 @@ const WorkoutPreset = () => {
   };
 
   const [workoutPlan, setWorkoutPlan] = useState<IWorkoutPlan[]>([]);
+  const [cardioPlan, setCardioPlan] = useState<ICardioPlan>({
+    type: `simple`,
+    plan: defaultSimpleCardioOption,
+  });
 
   const handlePlanNameChange = (newName: string, index: number) => {
     const newWorkoutPlan = workoutPlan.map((workout, i) =>
@@ -107,6 +114,7 @@ const WorkoutPreset = () => {
     const postObject = {
       name: values.name,
       workoutPlans: [...workoutPlan],
+      cardio: cardioPlan,
     };
 
     const cleanedObject = cleanWorkoutObject(postObject);
@@ -132,6 +140,7 @@ const WorkoutPreset = () => {
     getWorkoutPlanPresetById(id)
       .then((res) => {
         setWorkoutPlan(res.workoutPlans);
+        setCardioPlan(res.cardio);
         workoutForm.setValue("name", res.name);
       })
       .catch((err) => console.error(err));
@@ -168,28 +177,43 @@ const WorkoutPreset = () => {
             </Form>
           </div>
 
-          {workoutPlan.map((workout, i) => (
-            <Fragment key={workout?._id || workout.planName + i}>
-              <WorkoutPlanContainerWrapper workoutPlan={workout}>
-                <WorkoutContainer
-                  initialMuscleGroups={workout.muscleGroups}
-                  handleSave={(workouts) => handleSave(i, workouts)}
-                  title={workout.planName}
-                  handlePlanNameChange={(newName) => handlePlanNameChange(newName, i)}
-                  handleDeleteWorkout={() => handleDeleteWorkout(i)}
-                />
-              </WorkoutPlanContainerWrapper>
-            </Fragment>
-          ))}
-          <div className="w-full mt-2 flex items-center justify-center">
-            <Button className="w-full sm:w-32" onClick={handleAddWorkout}>
-              <div className="flex flex-col items-center font-bold">
-                הוסף אימון
-                <BsPlusCircleFill />
+          <Tabs defaultValue="workout" className="" dir="rtl">
+            <TabsList>
+              <TabsTrigger value="workout">אימונים</TabsTrigger>
+              <TabsTrigger value="cardio">אירובי</TabsTrigger>
+            </TabsList>
+            <TabsContent value="cardio">
+              <CardioWrapper
+                cardioPlan={cardioPlan}
+                updateCardio={(cardioObject) => setCardioPlan(cardioObject)}
+              />
+            </TabsContent>
+            <TabsContent value="workout">
+              {workoutPlan.map((workout, i) => (
+                <Fragment key={workout?._id || workout.planName + i}>
+                  <WorkoutPlanContainerWrapper workoutPlan={workout}>
+                    <WorkoutContainer
+                      initialMuscleGroups={workout.muscleGroups}
+                      handleSave={(workouts) => handleSave(i, workouts)}
+                      title={workout.planName}
+                      handlePlanNameChange={(newName) => handlePlanNameChange(newName, i)}
+                      handleDeleteWorkout={() => handleDeleteWorkout(i)}
+                    />
+                  </WorkoutPlanContainerWrapper>
+                </Fragment>
+              ))}
+              <div className="w-full mt-2 flex items-center justify-center">
+                <Button className="w-full sm:w-32" onClick={handleAddWorkout}>
+                  <div className="flex flex-col items-center font-bold">
+                    הוסף אימון
+                    <BsPlusCircleFill />
+                  </div>
+                </Button>
               </div>
-            </Button>
-          </div>
+            </TabsContent>
+          </Tabs>
         </div>
+
         <div className="flex justify-end">
           <CustomButton
             onClick={workoutForm.handleSubmit((values) => workoutPlanMutator.mutate(values))}

@@ -1,12 +1,13 @@
 import { ICardioWeek, ICardioWorkout } from "@/interfaces/IWorkoutPlan";
 import React, { useState } from "react";
 import CardioExercise from "./CardioExercise";
-import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { FaChevronDown } from "react-icons/fa";
 import DeleteButton from "../buttons/DeleteButton";
 import { toast } from "sonner";
 import { removeItemAtIndex } from "@/utils/utils";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronsUpDown } from "lucide-react";
 
 interface CardioWeekWrapperProps {
   week: ICardioWeek;
@@ -90,19 +91,35 @@ const CardioWeekWrapper: React.FC<CardioWeekWrapperProps> = ({ week, setWeek, de
           </Button>
         </div>
       </div>
-      <CollapsibleContent className=" bg-accent p-5 rounded-lg">
+      <CollapsibleContent
+        className={`${isOpen ? `bg-accent` : `bg-background`} p-5 rounded-lg flex flex-col gap-5`}
+      >
         {week.workouts.map((workout, i) => (
-          <div key={i} className="border-b-2 last:border-0 pt-5">
-            <h2 className="font-bold">{workout.name}</h2>
-            <CardioExercise
-              isLastItem={i == week.workouts.length - 1}
-              existingItem={workout}
-              addExercise={addExercise}
-              deleteExercise={() => removeExercise(i)}
-              updateExercise={(key, val) => updateCardioWeek(key, val, i)}
-            />
-          </div>
+          <Collapsible key={i} className=" py-5 bg-background rounded-md ">
+            <div className="flex items-center justify-between space-x-4 px-4 pb-2">
+              <h2 className="font-bold">{workout.name}</h2>
+              <div className="flex gap-5 items-center">
+                <DeleteButton tip="הסר אימון" onClick={() => removeExercise(i)} />
+                <CollapsibleTrigger asChild className="bg-accent">
+                  <Button variant="ghost" size="sm" className="w-9 p-0">
+                    <ChevronsUpDown className="h-4 w-4" />
+                    <span className="sr-only">Toggle</span>
+                  </Button>
+                </CollapsibleTrigger>
+              </div>
+            </div>
+            <CollapsibleContent className="border-t-2">
+              <CardioExercise
+                isLastItem={i == week.workouts.length - 1}
+                existingItem={workout}
+                updateExercise={(key, val) => updateCardioWeek(key, val, i)}
+              />
+            </CollapsibleContent>
+          </Collapsible>
         ))}
+        <Button variant="outline" className="w-fit" onClick={addExercise}>
+          הוסף אימון
+        </Button>
       </CollapsibleContent>
     </Collapsible>
   );

@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import FixedCardioContainer from "./FixedCardioContainer";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import CardioWeekWrapper from "./CardioWeekWrapper";
-import { ICardioWeek, IComplexCardioType, ISimpleCardioType } from "@/interfaces/IWorkoutPlan";
+import { ICardioPlan, ICardioWeek, ISimpleCardioType } from "@/interfaces/IWorkoutPlan";
 import {
   Dialog,
   DialogContent,
@@ -18,70 +18,77 @@ import { toast } from "sonner";
 import { removeItemAtIndex } from "@/utils/utils";
 
 interface CardioWrapperProps {
-  updateCardio: (cardio: IComplexCardioType | ISimpleCardioType) => void;
-  cardioPlan: IComplexCardioType | ISimpleCardioType;
+  updateCardio: (cardio: ICardioPlan) => void;
+  cardioPlan: ICardioPlan;
 }
 
 const CardioWrapper: React.FC<CardioWrapperProps> = ({ cardioPlan, updateCardio }) => {
-  const [cardioType, setCardioType] = useState(cardioPlan?.weeks ? `complex` : `standard`);
   const [openModal, setOpenModal] = useState(false);
   const [tempCardioType, setTempCardioType] = useState<string | null>(null);
 
   const updateComplexCardioPlan = (week: ICardioWeek, index: number) => {
-    const newObject = {
+    const newObject: ICardioPlan = {
       ...cardioPlan,
-      weeks: cardioPlan.weeks.map((w, i) => (i === index ? week : w)),
+      plan: {
+        ...cardioPlan.plan,
+        weeks: cardioPlan.plan.weeks.map((w, i) => (i === index ? week : w)),
+      },
     };
+
+    // Update cardio plan
     updateCardio(newObject);
   };
 
   const addWeek = () => {
-    if (cardioPlan.weeks.length >= 4) {
+    if (cardioPlan.plan.weeks.length >= 4) {
       toast.error("אי אפשר להוסיף יותר מארבעה שבועות באימון");
       return;
     }
 
-    const newObject = {
+    const newWeek: ICardioWeek = {
+      ...cardioPlan.plan.weeks[cardioPlan.plan.weeks.length - 1], // Copy last week's structure
+      week: `שבוע ${cardioPlan.plan.weeks.length + 1}`,
+    };
+
+    const newObject: ICardioPlan = {
       ...cardioPlan,
-      weeks: [
-        ...cardioPlan.weeks,
-        {
-          ...cardioPlan.weeks[cardioPlan.weeks.length - 1],
-          week: `שבוע ${cardioPlan.weeks.length + 1}`,
-        },
-      ],
+      plan: {
+        ...cardioPlan.plan,
+        weeks: [...cardioPlan.plan.weeks, newWeek],
+      },
     };
 
     updateCardio(newObject);
   };
 
   const removeWeek = (index: number) => {
-    if (cardioPlan.weeks.length === 1) {
+    if (cardioPlan.plan.weeks.length === 1) {
       toast.error(`אימון אירובי חייב לכלול לפחות שבוע אחד.`);
       return;
     }
-
-    // Remove the specified week from the weeks array
-    const newObject = {
-      ...cardioPlan,
-      weeks: removeItemAtIndex(index, cardioPlan.weeks),
-    };
-
-    // Update the name of each week to "שבוע [index+1]" format
-    newObject.weeks = newObject.weeks.map((week, idx) => ({
+    const updatedWeeks = removeItemAtIndex(index, cardioPlan.plan.weeks).map((week, idx) => ({
       ...week,
       week: `שבוע ${idx + 1}`,
     }));
+
+    // Construct the updated cardioPlan object
+    const newObject: ICardioPlan = {
+      ...cardioPlan,
+      plan: {
+        ...cardioPlan.plan,
+        weeks: updatedWeeks,
+      },
+    };
 
     // Update cardio plan
     updateCardio(newObject);
   };
 
   const updateSimpleCardioPlan = (cardioObject: ISimpleCardioType) => {
-    const newObject = { ...cardioObject };
+    const newObject = { ...cardioPlan, plan: cardioObject };
 
     if (cardioObject.minsPerWeek && cardioObject.timesPerWeek) {
-      newObject.minsPerWorkout = cardioObject.minsPerWeek / cardioObject.timesPerWeek;
+      newObject.plan.minsPerWorkout = cardioObject.minsPerWeek / cardioObject.timesPerWeek;
     }
 
     updateCardio(newObject);
@@ -92,9 +99,11 @@ const CardioWrapper: React.FC<CardioWrapperProps> = ({ cardioPlan, updateCardio 
     setOpenModal(true);
   };
 
-  const onCardioTypeChange = (type: string) => {
-    setCardioType(type);
-    updateCardio(type == `standard` ? defaultSimpleCardioOption : defaultComplexCardioOption);
+  const onCardioTypeChange = (type: `simple` | `complex`) => {
+    updateCardio({
+      type,
+      plan: type == `simple` ? defaultSimpleCardioOption : defaultComplexCardioOption,
+    });
     setOpenModal(false);
   };
 
@@ -103,14 +112,14 @@ const CardioWrapper: React.FC<CardioWrapperProps> = ({ cardioPlan, updateCardio 
       <div className="gap-5 flex flex-col">
         <RadioGroup
           className="flex pt-5"
-          defaultValue="standard"
+          defaultValue="simple"
           dir="rtl"
-          value={cardioType}
+          value={cardioPlan.type}
           onValueChange={(val) => handleCardioTypeChange(val)}
         >
           <div className="flex items-center gap-2">
-            <RadioGroupItem value="standard" id="standard" />
-            <Label htmlFor="standard">קבוע</Label>
+            <RadioGroupItem value="simple" id="simple" />
+            <Label htmlFor="simple">קבוע</Label>
           </div>
           <div className="flex items-center gap-2">
             <RadioGroupItem value="complex" id="complex" />
@@ -118,15 +127,15 @@ const CardioWrapper: React.FC<CardioWrapperProps> = ({ cardioPlan, updateCardio 
           </div>
         </RadioGroup>
 
-        {cardioType == `standard` && (
+        {cardioPlan.type == `simple` && (
           <FixedCardioContainer
-            existingObject={cardioPlan}
+            existingObject={cardioPlan.plan}
             updateWorkout={(obj) => updateSimpleCardioPlan(obj)}
           />
         )}
-        {cardioType == `complex` && (
+        {cardioPlan.type == `complex` && (
           <>
-            {cardioPlan?.weeks.map((week, i) => (
+            {cardioPlan?.plan?.weeks?.map((week, i) => (
               <CardioWeekWrapper
                 deleteWeek={() => removeWeek(i)}
                 key={i}

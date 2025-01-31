@@ -10,16 +10,12 @@ import { FaMinus, FaPlus } from "react-icons/fa";
 interface CardioExerciseProps {
   existingItem: ICardioWorkout;
   updateExercise: <K extends keyof ICardioWorkout>(key: K, val: ICardioWorkout[K]) => void;
-  addExercise: () => void;
-  deleteExercise: () => void;
   isLastItem: boolean;
 }
 
 const CardioExercise: React.FC<CardioExerciseProps> = ({
   existingItem,
   updateExercise,
-  addExercise,
-  deleteExercise,
   isLastItem,
 }) => {
   return (
@@ -60,14 +56,6 @@ const CardioExercise: React.FC<CardioExerciseProps> = ({
           onChange={(e) => updateExercise("tips", e.target.value)}
         ></Input>
       </div>
-      {isLastItem && (
-        <Button onClick={addExercise} variant={"success"} className="rounded-lg">
-          <FaPlus />
-        </Button>
-      )}
-      <Button onClick={deleteExercise} variant={"destructive"} className="rounded-lg">
-        <FaMinus />
-      </Button>
     </div>
   );
 };

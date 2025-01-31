@@ -8,8 +8,13 @@ export interface IWorkoutPlan {
 export interface ICompleteWorkoutPlan {
   userId?: string;
   workoutPlans: IWorkoutPlan[];
-  cardio: IComplexCardioType | ISimpleCardioType;
+  cardio: ICardioPlan;
   tips?: string[];
+}
+
+export interface ICardioPlan {
+  type: `simple` | `complex`;
+  plan: IComplexCardioType | ISimpleCardioType;
 }
 
 export interface ISet {
@@ -38,7 +43,7 @@ export interface IWorkoutPlanPreset {
   name: string;
   tips?: string[];
   workoutPlans: IWorkoutPlan[];
-  cardio: IComplexCardioType | ISimpleCardioType;
+  cardio: ICardioPlan;
 }
 
 export interface IExercisePresetItem {
