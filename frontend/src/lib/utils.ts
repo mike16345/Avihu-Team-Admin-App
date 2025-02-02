@@ -125,6 +125,8 @@ export const servingTypeToString = (type: string) => {
       return "סקופים";
     case "cups":
       return "כוסות";
+    case "teaSpoons":
+      return "כפיות";
     default:
       return type;
   }

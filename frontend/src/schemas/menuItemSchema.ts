@@ -24,6 +24,10 @@ const servingItemSchema = z.object({
     .number({ message: SERVING_TYPES_ERROR_MESSAGE })
     .positive({ message: LESS_THAN_ONE_ERROR_MESSAGE })
     .optional(),
+  teaSpoons: z.coerce
+    .number({ message: SERVING_TYPES_ERROR_MESSAGE })
+    .positive({ message: LESS_THAN_ONE_ERROR_MESSAGE })
+    .optional(),
 });
 
 export const menuItemSchema = z.object({

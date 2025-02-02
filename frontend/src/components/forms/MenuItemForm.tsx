@@ -32,7 +32,7 @@ interface MenuItemFormProps {
   foodGroup: string;
 }
 
-const selections = ["grams", "spoons", "cups", "pieces", "scoops"];
+const selections = ["grams", "spoons", "cups", "pieces", "scoops", "teaSpoons"];
 
 const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodGroup }) => {
   const { getOneMenuItem, addMenuItem, editMenuItem } = useMenuItemApi();
