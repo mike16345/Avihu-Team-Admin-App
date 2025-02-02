@@ -55,7 +55,7 @@ export const ExerciseComboBox: FC<IExerciseCombobox> = ({
                     setOpen(false);
                   }}
                 >
-                  {exercise.name}
+                  {exercise.label}
                   <FaCheck
                     className={cn(
                       "mr-auto h-4 w-4",

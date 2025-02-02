@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import PresetSheet from "./PresetSheet";
 import { useNavigate } from "react-router-dom";
-import { UseMutationResult, useQuery } from "@tanstack/react-query";
+import { Query, UseMutationResult, useQuery } from "@tanstack/react-query";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { ITabs } from "@/interfaces/interfaces";
 import useMenuItemApi from "@/hooks/api/useMenuItemApi";

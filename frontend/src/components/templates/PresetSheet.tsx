@@ -7,7 +7,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import ExerciseForm from "@/components/forms/ExerciseForm";
-import MuscleGroupForm from "@/components/forms/MuscleGroupForm";
+import MusceGroupForm from "@/components/forms/MusceGroupForm";
 import MenuItemForm from "../forms/MenuItemForm";
 
 interface PresetSheetProps {
@@ -20,20 +20,20 @@ interface PresetSheetProps {
 const PresetSheet: React.FC<PresetSheetProps> = ({ form, id, isOpen, onCloseSheet }) => {
   return (
     <Sheet open={isOpen} onOpenChange={() => onCloseSheet()}>
-      <SheetContent className="hide-scrollbar overflow-y-auto space-y-2" dir="rtl">
+      <SheetContent dir="rtl">
         <SheetHeader>
-          <SheetTitle className="text-right text-3xl">הוסף פריט</SheetTitle>
-          <SheetDescription className="text-right">
+          <SheetTitle className="text-right text-3xl pt-4">הוסף פריט</SheetTitle>
+          <SheetDescription className="pt-3 text-right">
             כאן ניתן להוסיף פריטים לרשימה הקיימת במערכת
           </SheetDescription>
+          {form == `Exercise` && <ExerciseForm objectId={id} closeSheet={() => onCloseSheet()} />}
+          {form == `muscleGroup` && (
+            <MusceGroupForm objectId={id} closeSheet={() => onCloseSheet()} />
+          )}
+          {(form == `fats` || form == `vegetables` || form == `carbs` || form == `protein`) && (
+            <MenuItemForm objectId={id} closeSheet={() => onCloseSheet()} foodGroup={form} />
+          )}
         </SheetHeader>
-        {form == `Exercise` && <ExerciseForm objectId={id} closeSheet={() => onCloseSheet()} />}
-        {form == `muscleGroup` && (
-          <MuscleGroupForm objectId={id} closeSheet={() => onCloseSheet()} />
-        )}
-        {(form == `fats` || form == `vegetables` || form == `carbs` || form == `protein`) && (
-          <MenuItemForm objectId={id} closeSheet={() => onCloseSheet()} foodGroup={form} />
-        )}
       </SheetContent>
     </Sheet>
   );

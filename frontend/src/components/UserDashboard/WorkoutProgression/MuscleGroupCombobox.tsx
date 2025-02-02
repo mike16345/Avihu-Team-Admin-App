@@ -58,7 +58,7 @@ export function MuscleGroupCombobox({
                     setOpen(false);
                   }}
                 >
-                  {muscleGroup.name}
+                  {muscleGroup.label}
                   <FaCheck
                     className={cn(
                       "mr-auto h-4 w-4",

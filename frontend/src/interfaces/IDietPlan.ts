@@ -34,14 +34,11 @@ export interface IDietPlanPreset extends IDietPlan {
   name: string;
 }
 
-export type DietItemUnit = "grams" | "spoons" | "pieces" | "scoops" | "cups";
+export type DietItemUnit = "grams" | "spoons";
 
 export interface IServingItem {
-  spoons?: number;
-  grams?: number;
-  pieces?: number;
-  scoops?: number;
-  cups?: number;
+  spoons: number;
+  grams: number;
 }
 
 export interface IMenuItem {
