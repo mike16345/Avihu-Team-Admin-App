@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { removeItemAtIndex } from "@/utils/utils";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronsUpDown } from "lucide-react";
+import { useIsEditableContext } from "@/context/useIsEditableContext";
 
 interface CardioWeekWrapperProps {
   week: ICardioWeek;
@@ -17,6 +18,7 @@ interface CardioWeekWrapperProps {
 
 const CardioWeekWrapper: React.FC<CardioWeekWrapperProps> = ({ week, setWeek, deleteWeek }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { isEditable } = useIsEditableContext();
 
   const updateCardioWeek = <K extends keyof ICardioWorkout>(
     key: K,
@@ -24,8 +26,6 @@ const CardioWeekWrapper: React.FC<CardioWeekWrapperProps> = ({ week, setWeek, de
     index: number
   ) => {
     const newObject = { ...week.workouts[index], [key]: value };
-
-    console.log("Updated workout object:", newObject);
 
     const newWeek = {
       ...week,
@@ -79,7 +79,7 @@ const CardioWeekWrapper: React.FC<CardioWeekWrapperProps> = ({ week, setWeek, de
       <div className="flex items-center justify-between gap-4 w-full font-bold text-lg  py-3 px-5">
         <h1 className="font-bold text-xl underline">{week.week}</h1>
         <div className="flex gap-5">
-          <DeleteButton tip="הסר " onClick={deleteWeek} />
+          {isEditable &&<DeleteButton tip="הסר " onClick={deleteWeek} />}
           <Button
             onClick={() => setIsOpen((state) => !state)}
             variant="ghost"
@@ -99,7 +99,7 @@ const CardioWeekWrapper: React.FC<CardioWeekWrapperProps> = ({ week, setWeek, de
             <div className="flex items-center justify-between space-x-4 px-4 pb-2">
               <h2 className="font-bold">{workout.name}</h2>
               <div className="flex gap-5 items-center">
-                <DeleteButton tip="הסר אימון" onClick={() => removeExercise(i)} />
+               {isEditable && <DeleteButton tip="הסר אימון" onClick={() => removeExercise(i)} />}
                 <CollapsibleTrigger asChild className="bg-accent">
                   <Button variant="ghost" size="sm" className="w-9 p-0">
                     <ChevronsUpDown className="h-4 w-4" />
@@ -110,16 +110,15 @@ const CardioWeekWrapper: React.FC<CardioWeekWrapperProps> = ({ week, setWeek, de
             </div>
             <CollapsibleContent className="border-t-2">
               <CardioExercise
-                isLastItem={i == week.workouts.length - 1}
                 existingItem={workout}
                 updateExercise={(key, val) => updateCardioWeek(key, val, i)}
               />
             </CollapsibleContent>
           </Collapsible>
         ))}
-        <Button variant="outline" className="w-fit" onClick={addExercise}>
+        {isEditable &&<Button variant="outline" className="w-fit" onClick={addExercise}>
           הוסף אימון
-        </Button>
+        </Button>}
       </CollapsibleContent>
     </Collapsible>
   );

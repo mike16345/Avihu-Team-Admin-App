@@ -1,6 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useIsEditableContext } from "@/context/useIsEditableContext";
 import { ISimpleCardioType } from "@/interfaces/IWorkoutPlan";
 import React, { useState } from "react";
 
@@ -14,6 +15,7 @@ const FixedCardioContainer: React.FC<FixedCardioContainerProps> = ({
   existingObject,
 }) => {
   const [cardioDetails, setCardioDetails] = useState<ISimpleCardioType>(existingObject);
+  const { isEditable } = useIsEditableContext();
 
   const handleObjectChange = <K extends keyof ISimpleCardioType>(
     key: K,
@@ -33,7 +35,7 @@ const FixedCardioContainer: React.FC<FixedCardioContainerProps> = ({
         <Label htmlFor="minsPerWeek" className="font-bold underline">
           כמות אירובי לשבוע (דק'):
         </Label>
-        <Input
+        {isEditable?<Input
           placeholder="הכנס זמן בדקות.."
           name="minsPerWeek"
           id="minsPerWeek"
@@ -41,13 +43,16 @@ const FixedCardioContainer: React.FC<FixedCardioContainerProps> = ({
           min={0}
           value={existingObject.minsPerWeek}
           onChange={(e) => handleObjectChange("minsPerWeek", Number(e.target.value))}
-        ></Input>
+        ></Input> :
+        <div className="border-4 border-background rounded-md py-2 px-4 ">
+          {existingObject?.minsPerWeek||`לא הוגדר`}
+          </div>}
       </div>
       <div>
         <Label htmlFor="timesPerWeek" className="font-bold underline">
           כמות פעמים לשבוע:
         </Label>
-        <Input
+        {isEditable?<Input
           placeholder="כמה אימונים בשבוע.."
           name="timesPerWeek"
           id="timesPerWeek"
@@ -55,19 +60,25 @@ const FixedCardioContainer: React.FC<FixedCardioContainerProps> = ({
           min={0}
           value={existingObject.timesPerWeek}
           onChange={(e) => handleObjectChange("timesPerWeek", Number(e.target.value))}
-        ></Input>
+        ></Input>:
+        <div className="border-4 border-background rounded-md py-2 px-4 ">
+          {existingObject?.timesPerWeek||`לא הוגדר`}
+          </div>}
       </div>
       <div>
         <Label htmlFor="tips" className="font-bold underline">
           דגשים:
         </Label>
-        <Textarea
+        {isEditable?<Textarea
           placeholder="דגשים...."
           name="tips"
           id="tips"
           value={existingObject.tips}
           onChange={(e) => handleObjectChange("tips", e.target.value)}
-        ></Textarea>
+        ></Textarea>:
+        <div className="border-4 border-background rounded-md py-2 px-4 ">
+          {existingObject?.tips||`לא הוגדר`}
+          </div>}
       </div>
     </div>
   );

@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { defaultComplexCardioOption, defaultSimpleCardioOption } from "@/constants/cardioOptions";
 import { toast } from "sonner";
 import { removeItemAtIndex } from "@/utils/utils";
+import { useIsEditableContext } from "@/context/useIsEditableContext";
 
 interface CardioWrapperProps {
   updateCardio: (cardio: ICardioPlan) => void;
@@ -25,6 +26,7 @@ interface CardioWrapperProps {
 const CardioWrapper: React.FC<CardioWrapperProps> = ({ cardioPlan, updateCardio }) => {
   const [openModal, setOpenModal] = useState(false);
   const [tempCardioType, setTempCardioType] = useState<string | null>(null);
+  const { isEditable } = useIsEditableContext();
 
   const updateComplexCardioPlan = (week: ICardioWeek, index: number) => {
     const newObject: ICardioPlan = {
@@ -109,8 +111,8 @@ const CardioWrapper: React.FC<CardioWrapperProps> = ({ cardioPlan, updateCardio 
 
   return (
     <>
-      <div className="gap-5 flex flex-col">
-        <RadioGroup
+      <div className="gap-5 flex flex-col pb-5">
+        {isEditable && <RadioGroup
           className="flex pt-5"
           defaultValue="simple"
           dir="rtl"
@@ -125,7 +127,7 @@ const CardioWrapper: React.FC<CardioWrapperProps> = ({ cardioPlan, updateCardio 
             <RadioGroupItem value="complex" id="complex" />
             <Label htmlFor="complex">בחירה</Label>
           </div>
-        </RadioGroup>
+        </RadioGroup>}
 
         {cardioPlan.type == `simple` && (
           <FixedCardioContainer
@@ -143,9 +145,9 @@ const CardioWrapper: React.FC<CardioWrapperProps> = ({ cardioPlan, updateCardio 
                 setWeek={(obj) => updateComplexCardioPlan(obj, i)}
               />
             ))}
-            <Button onClick={addWeek} className="w-fit mb-4">
+            {isEditable &&<Button onClick={addWeek} className="w-fit mb-4">
               הוסף שבוע
-            </Button>
+            </Button>}
           </>
         )}
       </div>
