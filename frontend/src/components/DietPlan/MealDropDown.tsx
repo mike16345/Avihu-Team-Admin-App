@@ -126,14 +126,6 @@ export const MealDropDown: FC<MealDropDownProps> = ({
     handleInputChange(type, item.quantity);
   };
 
-  const handleSetUnit = (unit: DietItemUnit, type: keyof OmittedIMeal) => {
-    const itemToSet = form.getValues()[type];
-    if (!itemToSet) return;
-
-    setValue(type, { ...itemToSet, unit: unit });
-    handleInputChange(type, itemToSet.quantity);
-  };
-
   const handleChangeItemSelectionType = (
     type: ItemSelection,
     field: keyof ShowCustomSelectionType
@@ -219,16 +211,12 @@ export const MealDropDown: FC<MealDropDownProps> = ({
                     <FormMessage>{errors.totalProtein.quantity.message}</FormMessage>
                   )}
 
-                  <div className="flex items-center justify-between">
+                  <div className="flex">
                     <CustomItemSelectionRadio
                       defaultValue={showCustomSelection.totalProtein ? "Custom" : "Fixed"}
                       onChangeSelection={(val: ItemSelection) =>
                         handleChangeItemSelectionType(val, "totalProtein")
                       }
-                    />
-                    <DietItemUnitRadio
-                      value={form.getValues("totalProtein.unit")}
-                      onChangeSelection={(val: DietItemUnit) => handleSetUnit(val, "totalProtein")}
                     />
                   </div>
                   {showCustomSelection.totalProtein && (
@@ -274,16 +262,12 @@ export const MealDropDown: FC<MealDropDownProps> = ({
                     <FormMessage>{errors.totalCarbs.quantity.message}</FormMessage>
                   )}
 
-                  <div className="flex items-center justify-between">
+                  <div className="flex ">
                     <CustomItemSelectionRadio
                       defaultValue={showCustomSelection.totalCarbs ? "Custom" : "Fixed"}
                       onChangeSelection={(val: ItemSelection) =>
                         handleChangeItemSelectionType(val, "totalCarbs")
                       }
-                    />
-                    <DietItemUnitRadio
-                      value={form.getValues("totalCarbs.unit")}
-                      onChangeSelection={(val: DietItemUnit) => handleSetUnit(val, "totalCarbs")}
                     />
                   </div>
 

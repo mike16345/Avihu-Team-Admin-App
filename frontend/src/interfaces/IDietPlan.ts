@@ -10,7 +10,6 @@ export interface ICustomItem {
 
 export interface IDietItem {
   quantity: number;
-  unit: DietItemUnit;
   customItems?: string[];
   extraItems?: string[];
 }
