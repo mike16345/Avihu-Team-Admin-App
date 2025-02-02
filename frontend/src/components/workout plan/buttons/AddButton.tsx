@@ -14,15 +14,21 @@ const AddButton: React.FC<AddButtonProps> = ({ onClick, tip }) => {
         <TooltipTrigger className="w-full">
           <div
             className=" bg-accent rounded border-t-2  flex justify-center px-1 py-1.5  my-2 cursor-pointer"
-            onClick={onClick}
+            onClick={(e) => {
+              e.preventDefault();
+              onClick();
+            }}
           >
-            <Button className="text-sm rounded-full h-5 bg-success hover:bg-success hover:font-bold  text-secondary-foreground">
+            <Button
+              type="button"
+              className="text-sm rounded-full h-5 bg-success hover:bg-success hover:font-bold  text-secondary-foreground"
+            >
               +
             </Button>
           </div>
         </TooltipTrigger>
         <TooltipContent>
-          <p>{tip}</p>
+          <span>{tip}</span>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

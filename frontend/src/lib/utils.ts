@@ -49,8 +49,14 @@ export function getElapsedSeconds(timestamp: number) {
   return `${days}d ${hours % 24}h ${remainingMinutes}m ${remainingSeconds.toFixed(0)}s`;
 }
 
-export const convertStringsToOptions = (data: string[]) => {
-  return data.map((item, index) => ({ value: item, label: item }));
+export const convertStringsToOptions = (
+  data: string[],
+  convertNameToLabel?: Function
+): Option[] => {
+  return data.map((item) => {
+    const label = convertNameToLabel?.(item) || item;
+    return { value: item, name: label };
+  });
 };
 
 export const convertItemsToOptions = (
@@ -105,4 +111,21 @@ export const buildPhotoUrl = (url: string) => {
   const cloudfrontUrl = import.meta.env.VITE_CLOUDFRONT_URL;
 
   return `${cloudfrontUrl}/images/${url}`;
+};
+
+export const servingTypeToString = (type: string) => {
+  switch (type) {
+    case "spoons":
+      return "כפות";
+    case "grams":
+      return "גרם";
+    case "pieces":
+      return "חתיכות";
+    case "scoops":
+      return "סקופים";
+    case "cups":
+      return "כוסות";
+    default:
+      return type;
+  }
 };
