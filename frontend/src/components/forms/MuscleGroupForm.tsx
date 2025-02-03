@@ -11,7 +11,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Input } from "../ui/input";
-import { Button } from "../ui/button";
 import useMuscleGroupsApi from "@/hooks/api/useMuscleGroupsApi";
 import { toast } from "sonner";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
@@ -19,7 +18,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { IMuscleGroupItem } from "@/interfaces/IWorkoutPlan";
 import CustomButton from "../ui/CustomButton";
 
-interface MusceGroupFormProps {
+interface MuscleGroupFormProps {
   objectId?: string;
   closeSheet: () => void;
 }
@@ -28,7 +27,7 @@ const muscleGroupSchema = z.object({
   name: z.string().min(1, { message: `אנא בחר שם לקבוצת השריר` }),
 });
 
-const MusceGroupForm: React.FC<MusceGroupFormProps> = ({ objectId, closeSheet }) => {
+const MuscleGroupForm: React.FC<MuscleGroupFormProps> = ({ objectId, closeSheet }) => {
   const { getMuscleGroupById, addMuscleGroup, updateMuscleGroup } = useMuscleGroupsApi();
   const queryClient = useQueryClient();
 
@@ -109,4 +108,4 @@ const MusceGroupForm: React.FC<MusceGroupFormProps> = ({ objectId, closeSheet })
   );
 };
 
-export default MusceGroupForm;
+export default MuscleGroupForm;

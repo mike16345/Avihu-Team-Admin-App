@@ -10,6 +10,8 @@ import DeleteModal from "@/components/Alerts/DeleteModal";
 import { useIsEditableContext } from "@/context/useIsEditableContext";
 import { useWorkoutPlanContext } from "@/context/useWorkoutPlanContext";
 import AddButton from "./buttons/AddButton";
+import { useDirtyFormContext } from "@/context/useFormContext";
+import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 
 interface WorkoutContainerProps {
   title: string;
@@ -26,6 +28,7 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
   handlePlanNameChange,
   handleDeleteWorkout,
 }) => {
+  const { setIsDirty } = useDirtyFormContext();
   const { isEditable } = useIsEditableContext();
   const { workout, setWorkoutPlan } = useWorkoutPlanContext();
 
@@ -59,6 +62,7 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
 
       return updatedWorkoutPlan;
     });
+    setIsDirty(true);
   };
 
   const handleUpdateWorkout = <K extends keyof IMuscleGroupWorkouts>(
@@ -83,6 +87,7 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
 
       return updatedWorkoutPlan;
     });
+    setIsDirty(true);
   };
 
   const handleMuscleGroupChange = (value: string, index: number) => {
@@ -96,6 +101,7 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
     }
 
     handleUpdateWorkout(`muscleGroup`, value, index);
+    setIsDirty(true);
   };
 
   const deleteMuscleGroup = (index: number) => {
@@ -109,7 +115,15 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
 
       return updatedWorkoutPlan;
     });
+    setIsDirty(true);
   };
+
+  const handleChangeName = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPlanName(e.target.value);
+    setIsDirty(true);
+  };
+
+  useUnsavedChangesWarning();
 
   return (
     <>
@@ -120,7 +134,7 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
               <Input
                 className="w-full sm:w-64"
                 onClick={(e) => e.stopPropagation()}
-                onChange={(e) => setPlanName(e.target.value)}
+                onChange={handleChangeName}
                 onBlur={(e) => handlePlanNameChange(e.target.value)}
                 value={planName ? planName : planName == `` ? planName : title}
               />

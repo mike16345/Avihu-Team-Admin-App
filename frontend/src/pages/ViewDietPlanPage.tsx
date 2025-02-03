@@ -87,12 +87,12 @@ export const ViewDietPlanPage = () => {
   });
 
   const handleSubmit = () => {
-    console.log("dietplan", dietPlan);
     if (!dietPlan) return;
     const dietPlanToAdd = {
       ...dietPlan,
       userId: id,
     };
+    console.log("diet plan to add", dietPlanToAdd);
 
     const { isValid, errors } = validateDietPlan(dietPlanToAdd);
 
@@ -122,13 +122,10 @@ export const ViewDietPlanPage = () => {
     const selectedPreset = dietPlanPresets.data?.data.find((preset) => preset.name === presetName);
 
     if (!selectedPreset) return;
-    const { meals, totalCalories, freeCalories, customInstructions } = selectedPreset;
+    const { name: _, ...rest } = selectedPreset;
 
     setDietPlan({
-      meals,
-      totalCalories,
-      freeCalories,
-      customInstructions,
+      ...rest,
     });
   };
 

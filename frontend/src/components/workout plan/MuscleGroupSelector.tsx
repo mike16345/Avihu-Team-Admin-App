@@ -84,35 +84,34 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
       </DialogTrigger>
       <DialogContent onClick={(e) => e.stopPropagation()}>
         <DialogHeader>
-          <DialogTitle dir="rtl" className="text-center underline pb-6">
+          <DialogTitle dir="rtl" className="text-center underline">
             בחר קבוצת שריר
           </DialogTitle>
-          <DialogDescription className="w-full flex justify-center py-4 z-50 ">
-            <Command>
-              <CommandEmpty></CommandEmpty>
-              <CommandInput dir="rtl" placeholder="בחר קבוצת שריר..." />
-              <CommandList>
-                <CommandGroup dir="rtl">
-                  {muscleGroupsQuery.isLoading && <Loader size="medium" />}
-                  {muscleGroupOptions?.map((option, i) => (
-                    <CommandItem
-                      key={option.name + i}
-                      className="text-lg font-bold"
-                      value={option.name}
-                      onSelect={(name) => {
-                        if (value?.toLowerCase() == name.toLowerCase()) return; // Return if value is the same as previous value.
-                        updateSelection(option.value);
-                        setOpen(false);
-                      }}
-                    >
-                      {option.name}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </DialogDescription>
+          <DialogDescription className="w-full flex justify-center  z-50 "></DialogDescription>
         </DialogHeader>
+        <Command>
+          <CommandEmpty></CommandEmpty>
+          <CommandInput dir="rtl" placeholder="בחר קבוצת שריר..." />
+          <CommandList>
+            <CommandGroup dir="rtl">
+              {muscleGroupsQuery.isLoading && <Loader size="medium" />}
+              {muscleGroupOptions?.map((option, i) => (
+                <CommandItem
+                  key={option.name + i}
+                  className="text-lg font-bold border-b-2"
+                  value={option.name}
+                  onSelect={(name) => {
+                    if (value?.toLowerCase() == name.toLowerCase()) return; // Return if value is the same as previous value.
+                    updateSelection(option.value);
+                    setOpen(false);
+                  }}
+                >
+                  {option.name}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
       </DialogContent>
     </Dialog>
   );

@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useMemo, useState } from "react";
+import React, { Fragment, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import {
   ICardioPlan,
   ICompleteWorkoutPlan,
@@ -43,6 +43,7 @@ const CreateWorkoutPlan: React.FC = () => {
   const { id } = useParams();
   const navigation = useNavigate();
   const queryClient = useQueryClient();
+
   const [user, setUser] = useState<IUser>();
 
   const { users } = useUsersStore();
@@ -61,8 +62,27 @@ const CreateWorkoutPlan: React.FC = () => {
     plan: defaultSimpleCardioOption,
   });
 
-  const existingWorkoutPlan = useQuery({
-    queryFn: () => getWorkoutPlanByUserId(id || ``),
+  const handleGetWorkoutPlan = async () => {
+    try {
+      const plan = await getWorkoutPlanByUserId(id || ``);
+      if (plan.data && workoutPlan.length == 0) {
+        setWorkoutPlan(plan.data.workoutPlans);
+        setWorkoutTips(plan.data.tips || []);
+        setIsCreate(false);
+        setIsEditable(false);
+      }
+      if (plan.data.cardio) {
+        setCardioPlan(plan.data.cardio);
+      }
+
+      return plan;
+    } catch (err: any) {
+      throw err;
+    }
+  };
+
+  const { isError, error, isLoading, data } = useQuery({
+    queryFn: handleGetWorkoutPlan,
     staleTime: FULL_DAY_STALE_TIME,
     queryKey: [QueryKeys.USER_WORKOUT_PLAN + `${id}`],
     enabled: !!id,
@@ -120,16 +140,6 @@ const CreateWorkoutPlan: React.FC = () => {
     onError,
   });
 
-  if (existingWorkoutPlan.data?.data && workoutPlan.length == 0) {
-    setWorkoutPlan(existingWorkoutPlan.data.data.workoutPlans);
-    if (existingWorkoutPlan.data.data.cardio) {
-      setCardioPlan(existingWorkoutPlan.data.data.cardio);
-    }
-    setWorkoutTips(existingWorkoutPlan.data.data.tips || []);
-    setIsCreate(false);
-    setIsEditable(false);
-  }
-
   const handlePlanNameChange = (newName: string, index: number) => {
     const newWorkoutPlan = workoutPlan.map((workout, i) =>
       i == index ? { ...workout, planName: newName } : workout
@@ -170,6 +180,10 @@ const CreateWorkoutPlan: React.FC = () => {
     });
   };
 
+  const handleSaveTip = (tips: string[]) => {
+    setWorkoutTips(tips);
+  };
+
   useEffect(() => {
     const fetchUser = async () => {
       const user = users.find((user) => user._id === id) || (await getUser(id || ""));
@@ -179,12 +193,18 @@ const CreateWorkoutPlan: React.FC = () => {
     fetchUser();
   }, []);
 
-  if (existingWorkoutPlan.isLoading) return <Loader size="large" />;
-  if (
-    existingWorkoutPlan.isError &&
-    existingWorkoutPlan.error?.data?.message !== `Workout plan not found!`
-  )
-    return <ErrorPage message={existingWorkoutPlan.error.message} />;
+  useLayoutEffect(() => {
+    if (data) {
+      setWorkoutPlan(data.data.workoutPlans);
+      setWorkoutTips(data.data.tips || []);
+      setIsCreate(false);
+      setIsEditable(false);
+    }
+  }, []);
+
+  if (isLoading) return <Loader size="large" />;
+  if (isError && error?.data?.message !== `Workout plan not found!`)
+    return <ErrorPage message={error.message} />;
 
   return (
     <div className="flex flex-col gap-4  p-4 h-full ">
@@ -252,11 +272,8 @@ const CreateWorkoutPlan: React.FC = () => {
                 })}
               </div>
 
-              <TipAdder
-                tips={workoutTips}
-                saveTips={(tips) => setWorkoutTips(tips)}
-                isEditable={isEditable}
-              />
+              <TipAdder tips={workoutTips} saveTips={handleSaveTip} isEditable={isEditable} />
+
             </div>
             <div className="w-full flex items-center justify-center mb-2">
               {isEditable && (

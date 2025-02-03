@@ -1,11 +1,11 @@
 import { deleteItem, fetchData, sendData, updateItem } from "@/API/api";
-import { ISession, IUser } from "@/interfaces/IUser";
+import { ISession, IUser, IUserPost } from "@/interfaces/IUser";
 import { ApiResponse } from "@/types/types";
 
 const USERS_ENDPOINT = "users";
 
 export const useUsersApi = () => {
-  const addUser = (user: IUser) => sendData<IUser>(USERS_ENDPOINT, user);
+  const addUser = (user: IUserPost) => sendData<IUser>(USERS_ENDPOINT, user);
 
   const updateUser = (userID: string, user: IUser) =>
     updateItem(`${USERS_ENDPOINT}/one`, user, null, { id: userID });

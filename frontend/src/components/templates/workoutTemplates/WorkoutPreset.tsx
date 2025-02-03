@@ -1,6 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { ICardioPlan, IMuscleGroupWorkouts, IWorkoutPlan } from "@/interfaces/IWorkoutPlan";
-import { Fragment, useEffect, useState } from "react";
+import {
+  ICardioPlan,
+  IMuscleGroupWorkouts,
+  IWorkoutPlan,
+  IWorkoutPlanPreset,
+} from "@/interfaces/IWorkoutPlan";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { BsPlusCircleFill } from "react-icons/bs";
 import { Input } from "@/components/ui/input";
 import { useNavigate, useParams } from "react-router-dom";
@@ -22,23 +27,34 @@ import WorkoutContainer from "@/components/workout plan/WorkoutPlanContainer";
 import { EditableContextProvider } from "@/context/useIsEditableContext";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import WorkoutPlanContainerWrapper from "@/components/Wrappers/WorkoutPlanContainerWrapper";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MainRoutes } from "@/enums/Routes";
 import { QueryKeys } from "@/enums/QueryKeys";
 import CustomButton from "@/components/ui/CustomButton";
 import BackButton from "@/components/ui/BackButton";
+import ComboBox from "@/components/ui/combo-box";
+import { FULL_DAY_STALE_TIME } from "@/constants/constants";
+import { convertItemsToOptions } from "@/lib/utils";
 import { defaultSimpleCardioOption } from "@/constants/cardioOptions";
 import CardioWrapper from "@/components/workout plan/cardio/CardioWrapper";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+const MAX_NAME_LENGTH = 75;
+const MIN_NAME_LENGTH = 2;
+
 const workoutFormSchema = z.object({
-  name: z.string().min(1).max(25),
+  name: z
+    .string()
+    .min(MIN_NAME_LENGTH, `שם התבנית חייב להיות לפחות  ${MIN_NAME_LENGTH} אותיות`)
+    .max(MAX_NAME_LENGTH, `שם התבנית חייב להיות פחות מ-${MAX_NAME_LENGTH} אותיות`),
 });
 
 const WorkoutPreset = () => {
   const { id } = useParams();
   const navigation = useNavigate();
   const isEdit = id !== undefined;
+
+  const [selectedPreset, setSelectedPreset] = useState<IWorkoutPlanPreset | null>(null);
 
   const workoutForm = useForm<any>({
     resolver: zodResolver(workoutFormSchema),
@@ -48,8 +64,24 @@ const WorkoutPreset = () => {
   });
 
   const queryClient = useQueryClient();
-  const { addWorkoutPlanPreset, getWorkoutPlanPresetById, updateWorkoutPlanPreset } =
-    useWorkoutPlanPresetApi();
+
+  const {
+    addWorkoutPlanPreset,
+    getAllWorkoutPlanPresets,
+    getWorkoutPlanPresetById,
+    updateWorkoutPlanPreset,
+  } = useWorkoutPlanPresetApi();
+
+  const workoutPlanPresets = useQuery({
+    queryFn: getAllWorkoutPlanPresets,
+    staleTime: FULL_DAY_STALE_TIME,
+    queryKey: [QueryKeys.WORKOUT_PRESETS],
+  });
+
+  const workoutPresetsOptions = useMemo(
+    () => convertItemsToOptions(workoutPlanPresets.data?.data || [], "name"),
+    [workoutPlanPresets.data]
+  );
 
   const onSuccess = () => {
     toast.success(`תבנית אימון נשמרה בהצלחה!`);
@@ -154,27 +186,38 @@ const WorkoutPreset = () => {
         <p>{isEdit ? `כאן תוכל לערוך תבנית אימון קיימת` : `  כאן תוכל ליצור תבנית אימון חדשה`}</p>
         <div className="flex flex-col gap-2 py-4">
           <div className="w-full py-4 border-b-2 mb-2">
-            <Form {...workoutForm}>
-              <form>
-                <FormField
-                  control={workoutForm.control}
-                  name="name"
-                  render={({ field }) => {
-                    return (
-                      <FormItem>
-                        <FormLabel className="font-bold text-lg underline pb-3">
-                          שם התבנית:
-                        </FormLabel>
-                        <FormControl>
-                          <Input className="sm:w-2/4" {...field} placeholder="שם..." />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    );
+            <div className="space-y-4">
+              <Form {...workoutForm}>
+                <form>
+                  <FormField
+                    control={workoutForm.control}
+                    name="name"
+                    render={({ field }) => {
+                      return (
+                        <FormItem>
+                          <FormLabel className="font-bold text-lg pb-3">שם התבנית</FormLabel>
+                          <FormControl>
+                            <Input className="sm:w-2/4" {...field} placeholder="שם..." />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
+                  />
+                </form>
+              </Form>
+              <div className="space-y-2 sm:w-2/4">
+                <span>תבניות</span>
+                <ComboBox
+                  value={selectedPreset}
+                  options={workoutPresetsOptions}
+                  onSelect={(currentValue) => {
+                    setWorkoutPlan(currentValue.workoutPlans);
+                    setSelectedPreset(currentValue.name);
                   }}
                 />
-              </form>
-            </Form>
+              </div>
+            </div>
           </div>
 
           <Tabs defaultValue="workout" className="" dir="rtl">
