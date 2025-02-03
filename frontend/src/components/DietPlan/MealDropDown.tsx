@@ -14,9 +14,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "../ui/input";
 import { CustomItemSelectionRadio } from "./CustomItemSelectionRadio";
-import { CustomItems, DietItemUnit, IDietItem, IMeal } from "@/interfaces/IDietPlan";
+import { CustomItems, IDietItem, IMeal } from "@/interfaces/IDietPlan";
 import { CustomItemSelection } from "./CustomItemSelection";
-import { DietItemUnitRadio } from "./DietItemUnitRadio";
 import { mealSchema } from "./DietPlanSchema";
 import ExtraItems from "./ExtraItems";
 

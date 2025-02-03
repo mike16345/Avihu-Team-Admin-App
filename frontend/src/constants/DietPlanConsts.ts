@@ -1,8 +1,8 @@
 import { IDietPlan, IMeal } from "@/interfaces/IDietPlan";
 
 export const defaultMeal: IMeal = {
-  totalProtein: { quantity: 1, unit: "grams", customItems: [] },
-  totalCarbs: { quantity: 1, unit: "grams", customItems: [] },
+  totalProtein: { quantity: 1, customItems: [] },
+  totalCarbs: { quantity: 1, customItems: [] },
 };
 
 export const defaultDietPlan: IDietPlan = {
