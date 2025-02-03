@@ -122,13 +122,10 @@ export const ViewDietPlanPage = () => {
     const selectedPreset = dietPlanPresets.data?.data.find((preset) => preset.name === presetName);
 
     if (!selectedPreset) return;
-    const { meals, totalCalories, freeCalories, customInstructions } = selectedPreset;
+    const { name: _, ...rest } = selectedPreset;
 
     setDietPlan({
-      meals,
-      totalCalories,
-      freeCalories,
-      customInstructions,
+      ...rest,
     });
   };
 

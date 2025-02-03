@@ -69,6 +69,10 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
         currentSelections.push(selection);
       }
     }
+    // In case he wants to add another selection
+    if (currentSelections.length == 1) {
+      currentSelections.push(selections.filter((item) => item !== currentSelections[0])[0]);
+    }
 
     setShowServingSelections(currentSelections);
   };
