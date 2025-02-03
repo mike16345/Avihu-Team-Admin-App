@@ -3,15 +3,16 @@ import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Label } from "../ui/label";
 
 type DietItemUnitRadioProps = {
+  value: string;
   onChangeSelection: Function;
 };
 
-export const DietItemUnitRadio: FC<DietItemUnitRadioProps> = ({ onChangeSelection }) => {
+export const DietItemUnitRadio: FC<DietItemUnitRadioProps> = ({ value, onChangeSelection }) => {
   return (
     <RadioGroup
       onValueChange={(val) => onChangeSelection(val)}
       className="flex flex-col "
-      defaultValue="grams"
+      defaultValue={value}
     >
       <div className="flex items-center space-x-2">
         <RadioGroupItem value="grams" id="Grams" />

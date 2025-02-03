@@ -15,7 +15,7 @@ export const CustomItemSelectionRadio: FC<CustomInstructionsRadioProps> = ({
   return (
     <RadioGroup
       onValueChange={(val) => onChangeSelection(val)}
-      className="flex flex-col "
+      className="flex items-center gap-3 "
       defaultValue={defaultValue}
     >
       <div className="flex items-center space-x-2">

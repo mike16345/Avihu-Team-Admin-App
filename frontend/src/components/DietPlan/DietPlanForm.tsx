@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { DietPlanDropDown } from "./DietPlanDropDown";
+import { MealDropDown } from "./MealDropDown";
 import DeleteModal from "../Alerts/DeleteModal";
 import { CustomItems, IDietPlan, IMeal } from "@/interfaces/IDietPlan";
 import { Button } from "../ui/button";
@@ -63,7 +63,7 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ dietPlan, updateDietPlan })
             {dietPlan.meals.map((meal, index) => {
               return (
                 <div key={meal?._id || index} className={`border-b`}>
-                  <DietPlanDropDown
+                  <MealDropDown
                     customItems={customItems}
                     mealNumber={index + 1}
                     meal={meal}

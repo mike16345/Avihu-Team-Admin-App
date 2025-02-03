@@ -403,3 +403,6 @@ FodyWeavers.xsd
 
 # Test file
 **/test.tsx
+
+# npmrc
+.npmrc

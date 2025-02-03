@@ -10,7 +10,6 @@ export interface ICustomItem {
 
 export interface IDietItem {
   quantity: number;
-  unit: DietItemUnit;
   customItems?: string[];
   extraItems?: string[];
 }
@@ -34,11 +33,14 @@ export interface IDietPlanPreset extends IDietPlan {
   name: string;
 }
 
-export type DietItemUnit = "grams" | "spoons";
+export type DietItemUnit = "grams" | "spoons" | "pieces" | "scoops" | "cups";
 
 export interface IServingItem {
-  spoons: number;
-  grams: number;
+  spoons?: number;
+  grams?: number;
+  pieces?: number;
+  scoops?: number;
+  cups?: number;
 }
 
 export interface IMenuItem {

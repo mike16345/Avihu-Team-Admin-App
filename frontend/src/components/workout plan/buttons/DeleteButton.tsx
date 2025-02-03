@@ -19,11 +19,15 @@ const DeleteButton: React.FC<DeleteButtonProps> = ({ tip, onClick, disabled = fa
       <Tooltip>
         <TooltipTrigger className="flex items-center justify-center">
           <Button
+            type="button"
             variant={"ghost"}
             disabled={disabled}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
-            onClick={(e) => onClick(e)}
+            onClick={(e) => {
+              e.preventDefault();
+              onClick(e);
+            }}
             className={`flex rounded items-center justify-center size-full p-3   hover:bg-accent ${
               disabled && "opacity-30"
             }`}
