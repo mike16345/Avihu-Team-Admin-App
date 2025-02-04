@@ -1,6 +1,10 @@
+import { useGetQueryData } from "@/hooks/useGetQueryData";
+import { IUser } from "@/interfaces/IUser";
+import { extractDateAndNumber } from "@/lib/utils";
 import { FC } from "react";
 import { FaArrowLeft, FaArrowRight, FaDownload } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
+import { useLocation, useParams } from "react-router-dom";
 
 interface FullscreenImageProps {
   img: string;
@@ -17,6 +21,9 @@ export const FullscreenImage: FC<FullscreenImageProps> = ({
   onArrowPress,
   onClose,
 }) => {
+  const { id } = useParams();
+  const user = useLocation().state || useGetQueryData<IUser>([id || ""]);
+
   const downloadFile = async (url: string, filename: string) => {
     const response = await fetch(url, {
       method: "GET",
@@ -38,7 +45,11 @@ export const FullscreenImage: FC<FullscreenImageProps> = ({
   };
 
   const handleDownload = () => {
-    const filename = `user-image.jpg`;
+    const name = user ? `${user?.firstName}-${user?.lastName}`.replace(" ", "") : "לקוח";
+    const { date, number } = extractDateAndNumber(img);
+
+    const filename = `${name}-${date}-${number}.jpg`;
+
     downloadFile(img, filename);
   };
 
