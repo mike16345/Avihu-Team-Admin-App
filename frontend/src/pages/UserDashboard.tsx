@@ -22,10 +22,11 @@ export const UserDashboard = () => {
 
   const tabName = searchParams.get("tab")?.trim();
   const [activeTab, setActiveTab] = useState(tabName);
+  const queryKey = id || "oneUser";
 
   const { data, isLoading, isError, error } = useQuery({
     enabled: !user,
-    queryKey: [id || "oneUser"],
+    queryKey: [queryKey],
     staleTime: MIN_STALE_TIME,
     queryFn: () => getUser(id || ""),
   });

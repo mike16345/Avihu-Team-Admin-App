@@ -35,11 +35,7 @@ export const WeightProgressionPhotos: FC<WeightProgressionPhotosProps> = ({ onCl
     }
   };
 
-  const {
-    data: photos = [],
-    isLoading,
-    isError,
-  } = useQuery({
+  const { data: photos = [], isLoading } = useQuery({
     queryKey: [id + "-photos"],
     queryFn: handleGetPhotos,
     enabled: !!id,
