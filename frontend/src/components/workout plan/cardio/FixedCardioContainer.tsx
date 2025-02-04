@@ -35,50 +35,59 @@ const FixedCardioContainer: React.FC<FixedCardioContainerProps> = ({
         <Label htmlFor="minsPerWeek" className="font-bold underline">
           כמות אירובי לשבוע (דק'):
         </Label>
-        {isEditable?<Input
-          placeholder="הכנס זמן בדקות.."
-          name="minsPerWeek"
-          id="minsPerWeek"
-          type="number"
-          min={0}
-          value={existingObject.minsPerWeek}
-          onChange={(e) => handleObjectChange("minsPerWeek", Number(e.target.value))}
-        ></Input> :
-        <div className="border-4 border-background rounded-md py-2 px-4 ">
-          {existingObject?.minsPerWeek||`לא הוגדר`}
-          </div>}
+        {isEditable ? (
+          <Input
+            placeholder="הכנס זמן בדקות.."
+            name="minsPerWeek"
+            id="minsPerWeek"
+            type="number"
+            min={0}
+            value={existingObject.minsPerWeek}
+            onChange={(e) => handleObjectChange("minsPerWeek", Number(e.target.value))}
+          ></Input>
+        ) : (
+          <div className="border-2 border-background rounded-md py-2 px-4 ">
+            {existingObject?.minsPerWeek || `לא הוגדר`}
+          </div>
+        )}
       </div>
       <div>
         <Label htmlFor="timesPerWeek" className="font-bold underline">
           כמות פעמים לשבוע:
         </Label>
-        {isEditable?<Input
-          placeholder="כמה אימונים בשבוע.."
-          name="timesPerWeek"
-          id="timesPerWeek"
-          type="number"
-          min={0}
-          value={existingObject.timesPerWeek}
-          onChange={(e) => handleObjectChange("timesPerWeek", Number(e.target.value))}
-        ></Input>:
-        <div className="border-4 border-background rounded-md py-2 px-4 ">
-          {existingObject?.timesPerWeek||`לא הוגדר`}
-          </div>}
+        {isEditable ? (
+          <Input
+            placeholder="כמה אימונים בשבוע.."
+            name="timesPerWeek"
+            id="timesPerWeek"
+            type="number"
+            min={0}
+            value={existingObject.timesPerWeek}
+            onChange={(e) => handleObjectChange("timesPerWeek", Number(e.target.value))}
+          ></Input>
+        ) : (
+          <div className="border-2 border-background rounded-md py-2 px-4 ">
+            {existingObject?.timesPerWeek || `לא הוגדר`}
+          </div>
+        )}
       </div>
       <div>
         <Label htmlFor="tips" className="font-bold underline">
           דגשים:
         </Label>
-        {isEditable?<Textarea
-          placeholder="דגשים...."
-          name="tips"
-          id="tips"
-          value={existingObject.tips}
-          onChange={(e) => handleObjectChange("tips", e.target.value)}
-        ></Textarea>:
-        <div className="border-4 border-background rounded-md py-2 px-4 ">
-          {existingObject?.tips||`לא הוגדר`}
-          </div>}
+        {isEditable ? (
+          <Textarea
+            placeholder="דגשים...."
+            name="tips"
+            id="tips"
+            value={existingObject.tips}
+            onChange={(e) => handleObjectChange("tips", e.target.value)}
+          ></Textarea>
+        ) : (
+          <div className="border-2 border-background rounded-md py-2 px-4 ">
+            {existingObject?.tips || `לא הוגדר`}
+          </div>
+        )}
       </div>
     </div>
   );

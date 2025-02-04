@@ -112,22 +112,24 @@ const CardioWrapper: React.FC<CardioWrapperProps> = ({ cardioPlan, updateCardio 
   return (
     <>
       <div className="gap-5 flex flex-col pb-5">
-        {isEditable && <RadioGroup
-          className="flex pt-5"
-          defaultValue="simple"
-          dir="rtl"
-          value={cardioPlan.type}
-          onValueChange={(val) => handleCardioTypeChange(val)}
-        >
-          <div className="flex items-center gap-2">
-            <RadioGroupItem value="simple" id="simple" />
-            <Label htmlFor="simple">קבוע</Label>
-          </div>
-          <div className="flex items-center gap-2">
-            <RadioGroupItem value="complex" id="complex" />
-            <Label htmlFor="complex">בחירה</Label>
-          </div>
-        </RadioGroup>}
+        {isEditable && (
+          <RadioGroup
+            className="flex pt-5"
+            defaultValue="simple"
+            dir="rtl"
+            value={cardioPlan.type}
+            onValueChange={(val) => handleCardioTypeChange(val)}
+          >
+            <div className="flex items-center gap-2">
+              <RadioGroupItem value="simple" id="simple" />
+              <Label htmlFor="simple">קבוע</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <RadioGroupItem value="complex" id="complex" />
+              <Label htmlFor="complex">בחירה</Label>
+            </div>
+          </RadioGroup>
+        )}
 
         {cardioPlan.type == `simple` && (
           <FixedCardioContainer
@@ -145,9 +147,11 @@ const CardioWrapper: React.FC<CardioWrapperProps> = ({ cardioPlan, updateCardio 
                 setWeek={(obj) => updateComplexCardioPlan(obj, i)}
               />
             ))}
-            {isEditable &&<Button onClick={addWeek} className="w-fit mb-4">
-              הוסף שבוע
-            </Button>}
+            {isEditable && (
+              <Button onClick={addWeek} className="w-fit mb-4">
+                הוסף שבוע
+              </Button>
+            )}
           </>
         )}
       </div>
@@ -161,7 +165,11 @@ const CardioWrapper: React.FC<CardioWrapperProps> = ({ cardioPlan, updateCardio 
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="ghost" className="me-5" onClick={() => setOpenModal(false)}>
+            <Button
+              variant="ghost"
+              className="me-5 w-full sm:w-fit"
+              onClick={() => setOpenModal(false)}
+            >
               לא, תודה
             </Button>
             <Button onClick={() => onCardioTypeChange(tempCardioType || ``)}>
