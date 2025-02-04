@@ -39,6 +39,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CardioWrapper from "./cardio/CardioWrapper";
 import { defaultSimpleCardioOption } from "@/constants/cardioOptions";
 
+const defaultCardioPlan: ICardioPlan = {
+  type: `simple`,
+  plan: defaultSimpleCardioOption,
+};
+
 const CreateWorkoutPlan: React.FC = () => {
   const { id } = useParams();
   const navigation = useNavigate();
@@ -57,10 +62,7 @@ const CreateWorkoutPlan: React.FC = () => {
   const [isCreate, setIsCreate] = useState(true);
   const [workoutPlan, setWorkoutPlan] = useState<IWorkoutPlan[]>([]);
   const [workoutTips, setWorkoutTips] = useState<string[]>([]);
-  const [cardioPlan, setCardioPlan] = useState<ICardioPlan>({
-    type: `simple`,
-    plan: defaultSimpleCardioOption,
-  });
+  const [cardioPlan, setCardioPlan] = useState<ICardioPlan | null>(id ? null : defaultCardioPlan);
 
   const handleGetWorkoutPlan = async () => {
     try {
@@ -68,11 +70,9 @@ const CreateWorkoutPlan: React.FC = () => {
       if (plan.data && workoutPlan.length == 0) {
         setWorkoutPlan(plan.data.workoutPlans);
         setWorkoutTips(plan.data.tips || []);
+        setCardioPlan(plan.data.cardio || defaultCardioPlan);
         setIsCreate(false);
         setIsEditable(false);
-      }
-      if (plan.data.cardio) {
-        setCardioPlan(plan.data.cardio);
       }
 
       return plan;
@@ -197,6 +197,7 @@ const CreateWorkoutPlan: React.FC = () => {
     if (data) {
       setWorkoutPlan(data.data.workoutPlans);
       setWorkoutTips(data.data.tips || []);
+      setCardioPlan(data.data.cardio || defaultCardioPlan);
       setIsCreate(false);
       setIsEditable(false);
     }
@@ -273,7 +274,6 @@ const CreateWorkoutPlan: React.FC = () => {
               </div>
 
               <TipAdder tips={workoutTips} saveTips={handleSaveTip} isEditable={isEditable} />
-
             </div>
             <div className="w-full flex items-center justify-center mb-2">
               {isEditable && (
