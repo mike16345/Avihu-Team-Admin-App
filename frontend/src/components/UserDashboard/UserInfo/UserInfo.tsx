@@ -42,9 +42,10 @@ const UserInfo: FC<UserInfoProps> = ({ user }) => {
         </h2>
       </div>
       <ul className="flex flex-col sm:text-sm sm:w-fit w-full">
-        {links.map((link) => {
+        {links.map((link, i) => {
           return (
             <Link
+              key={link.path + `-${i}`}
               className="flex items-center justify-between sm:w-40 hover:bg-secondary font-bold px-2 py-0.5 rounded-md"
               to={link.path + user._id}
             >
