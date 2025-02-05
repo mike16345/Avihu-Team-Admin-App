@@ -1,5 +1,6 @@
 import React, { Fragment, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import {
+  ICardioPlan,
   ICompleteWorkoutPlan,
   IMuscleGroupWorkouts,
   IWorkoutPlan,
@@ -34,6 +35,14 @@ import { useUsersStore } from "@/store/userStore";
 import { IUser } from "@/interfaces/IUser";
 import { useUsersApi } from "@/hooks/api/useUsersApi";
 import { weightTab } from "@/pages/UserDashboard";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import CardioWrapper from "./cardio/CardioWrapper";
+import { defaultSimpleCardioOption } from "@/constants/cardioOptions";
+
+const defaultCardioPlan: ICardioPlan = {
+  type: `simple`,
+  plan: defaultSimpleCardioOption,
+};
 
 const CreateWorkoutPlan: React.FC = () => {
   const { id } = useParams();
@@ -53,6 +62,7 @@ const CreateWorkoutPlan: React.FC = () => {
   const [isCreate, setIsCreate] = useState(true);
   const [workoutPlan, setWorkoutPlan] = useState<IWorkoutPlan[]>([]);
   const [workoutTips, setWorkoutTips] = useState<string[]>([]);
+  const [cardioPlan, setCardioPlan] = useState<ICardioPlan | null>(id ? null : defaultCardioPlan);
 
   const handleGetWorkoutPlan = async () => {
     try {
@@ -60,6 +70,7 @@ const CreateWorkoutPlan: React.FC = () => {
       if (plan.data && workoutPlan.length == 0) {
         setWorkoutPlan(plan.data.workoutPlans);
         setWorkoutTips(plan.data.tips || []);
+        setCardioPlan(plan.data.cardio || defaultCardioPlan);
         setIsCreate(false);
         setIsEditable(false);
       }
@@ -96,6 +107,7 @@ const CreateWorkoutPlan: React.FC = () => {
     const postObject: ICompleteWorkoutPlan = {
       workoutPlans: [...workoutPlan],
       tips: workoutTips,
+      cardio: cardioPlan,
     };
 
     const cleanedPostObject = cleanWorkoutObject(postObject);
@@ -185,6 +197,7 @@ const CreateWorkoutPlan: React.FC = () => {
     if (data) {
       setWorkoutPlan(data.data.workoutPlans);
       setWorkoutTips(data.data.tips || []);
+      setCardioPlan(data.data.cardio || defaultCardioPlan);
       setIsCreate(false);
       setIsEditable(false);
     }
@@ -226,39 +239,54 @@ const CreateWorkoutPlan: React.FC = () => {
             />
           )}
         </div>
-        <div className="flex flex-col-reverse md:flex-row justify-between gap-8">
-          <div className="flex flex-col w-full">
-            {workoutPlan.map((workout, i) => {
-              return (
-                <Fragment key={workout?._id || i}>
-                  <WorkoutPlanContainerWrapper workoutPlan={workout}>
-                    <WorkoutPlanContainer
-                      initialMuscleGroups={workout.muscleGroups}
-                      handleSave={(muscleGroups) => {
-                        handleSave(i, muscleGroups);
-                      }}
-                      title={workout.planName}
-                      handlePlanNameChange={(newName) => handlePlanNameChange(newName, i)}
-                      handleDeleteWorkout={() => handleDeleteWorkout(i)}
-                    />
-                  </WorkoutPlanContainerWrapper>
-                </Fragment>
-              );
-            })}
-          </div>
+        <Tabs defaultValue="workout" className="" dir="rtl">
+          <TabsList>
+            <TabsTrigger value="workout">אימונים</TabsTrigger>
+            <TabsTrigger value="cardio">אירובי</TabsTrigger>
+          </TabsList>
+          <TabsContent value="cardio">
+            <CardioWrapper
+              cardioPlan={cardioPlan}
+              updateCardio={(cardioObject) => setCardioPlan(cardioObject)}
+            />
+          </TabsContent>
 
-          <TipAdder tips={workoutTips} saveTips={handleSaveTip} isEditable={isEditable} />
-        </div>
-        <div className="w-full flex items-center justify-center mb-2">
-          {isEditable && (
-            <Button className="w-full sm:w-32" onClick={handleAddWorkout}>
-              <div className="flex flex-col items-center font-bold">
-                הוסף אימון
-                <BsPlusCircleFill />
+          <TabsContent value="workout">
+            <div className="flex flex-col-reverse md:flex-row justify-between gap-8">
+              <div className="flex flex-col w-full">
+                {workoutPlan.map((workout, i) => {
+                  return (
+                    <Fragment key={workout?._id || i}>
+                      <WorkoutPlanContainerWrapper workoutPlan={workout}>
+                        <WorkoutPlanContainer
+                          initialMuscleGroups={workout.muscleGroups}
+                          handleSave={(muscleGroups) => {
+                            handleSave(i, muscleGroups);
+                          }}
+                          title={workout.planName}
+                          handlePlanNameChange={(newName) => handlePlanNameChange(newName, i)}
+                          handleDeleteWorkout={() => handleDeleteWorkout(i)}
+                        />
+                      </WorkoutPlanContainerWrapper>
+                    </Fragment>
+                  );
+                })}
               </div>
-            </Button>
-          )}
-        </div>
+
+              <TipAdder tips={workoutTips} saveTips={handleSaveTip} isEditable={isEditable} />
+            </div>
+            <div className="w-full flex items-center justify-center mb-2">
+              {isEditable && (
+                <Button className="w-full sm:w-32" onClick={handleAddWorkout}>
+                  <div className="flex flex-col items-center font-bold">
+                    הוסף אימון
+                    <BsPlusCircleFill />
+                  </div>
+                </Button>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
       {isEditable && (
         <div className="flex justify-end">

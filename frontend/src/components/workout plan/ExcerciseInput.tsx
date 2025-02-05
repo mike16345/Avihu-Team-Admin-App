@@ -15,6 +15,7 @@ import { useQuery } from "@tanstack/react-query";
 import { convertItemsToOptions, createRetryFunction } from "@/lib/utils";
 import ComboBox from "../ui/combo-box";
 import { FULL_DAY_STALE_TIME } from "@/constants/constants";
+import { exerciseMethods } from "@/constants/exerciseMethods";
 
 interface ExcerciseInputProps {
   muscleGroup?: string;
@@ -68,6 +69,8 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
     value: IExercise[K],
     index: number
   ) => {
+    console.log(value);
+
     const updatedExercises = exerciseObjs.map((workout, i) =>
       i === index ? { ...workout, [key]: value } : workout
     );
@@ -77,11 +80,17 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
   };
 
   const handleUpdateExercise = (index: number, updatedExercise: IExercisePresetItem) => {
-    const { name, linkToVideo, tipFromTrainer } = updatedExercise;
+    const { name, linkToVideo, tipFromTrainer, exerciseMethod } = updatedExercise;
 
     setExerciseObjs((prevExercises) => {
       const updatedExercises = [...prevExercises];
-      updatedExercises[index] = { ...prevExercises[index], name, linkToVideo, tipFromTrainer };
+      updatedExercises[index] = {
+        ...prevExercises[index],
+        name,
+        linkToVideo,
+        tipFromTrainer,
+        exerciseMethod,
+      };
 
       handleUpdateExercises(updatedExercises);
       return updatedExercises;
@@ -161,6 +170,25 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
                       </div>
                     ) : (
                       <p className="font-bold">{item.name}</p>
+                    )}
+                    <label className="font-bold underline pt-5">שיטת אימון:</label>
+                    {isEditable ? (
+                      <div className="w-fit flex gap-5">
+                        <ComboBox
+                          options={exerciseMethods}
+                          value={item.exerciseMethod}
+                          onSelect={(exercise) =>
+                            handleUpdateWorkoutObject("exerciseMethod", exercise, i)
+                          }
+                        />
+                        <Button
+                          onClick={() => handleUpdateWorkoutObject("exerciseMethod", undefined, i)}
+                        >
+                          נקה
+                        </Button>
+                      </div>
+                    ) : (
+                      <p className="font-bold">{item.exerciseMethod}</p>
                     )}
                   </div>
                 </CardHeader>

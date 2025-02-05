@@ -8,7 +8,13 @@ export interface IWorkoutPlan {
 export interface ICompleteWorkoutPlan {
   userId?: string;
   workoutPlans: IWorkoutPlan[];
+  cardio: ICardioPlan;
   tips?: string[];
+}
+
+export interface ICardioPlan {
+  type: `simple` | `complex`;
+  plan: IComplexCardioType | ISimpleCardioType;
 }
 
 export interface ISet {
@@ -22,6 +28,7 @@ export interface IExercise {
   _id?: string;
   tipFromTrainer?: string;
   linkToVideo?: string;
+  exerciseMethod?: string;
   name: string;
   sets: ISet[];
 }
@@ -36,14 +43,40 @@ export interface IWorkoutPlanPreset {
   name: string;
   tips?: string[];
   workoutPlans: IWorkoutPlan[];
+  cardio: ICardioPlan;
 }
 
 export interface IExercisePresetItem {
   name: string;
   muscleGroup: string;
   tipFromTrainer?: string;
+  exerciseMethod?: string;
   linkToVideo: string;
 }
 export interface IMuscleGroupItem {
   name: string;
+}
+
+export interface ISimpleCardioType {
+  minsPerWeek: number;
+  timesPerWeek: number;
+  minsPerWorkout?: number;
+  tips?: string;
+}
+
+export interface ICardioWorkout {
+  name: string;
+  warmUpAmount?: number;
+  distance: number;
+  cardioExercise: string;
+  tips?: string;
+}
+
+export interface ICardioWeek {
+  week: string;
+  workouts: ICardioWorkout[];
+}
+export interface IComplexCardioType {
+  weeks: ICardioWeek[];
+  tips?: string;
 }

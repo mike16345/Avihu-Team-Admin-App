@@ -26,6 +26,9 @@ export const parseErrorFromObject = (errorObject: any) => {
     muscleGroups: string;
     exercises: string;
     sets: string;
+    cardio:string;
+    weeks:string;
+    workouts:string;
   };
 
   // Type for customMessages object
@@ -37,6 +40,9 @@ export const parseErrorFromObject = (errorObject: any) => {
     muscleGroups: string;
     exercises: string;
     workoutPlans: string;
+    minsPerWeek:string;
+    timesPerWeek:string;
+    distance:string
   };
 
   // Hebrew translations for path components
@@ -45,6 +51,9 @@ export const parseErrorFromObject = (errorObject: any) => {
     muscleGroups: "קבוצת שריר",
     exercises: "תרגיל",
     sets: "סט",
+    cardio:'אירובי',
+    weeks:'שבוע',
+    workouts:`אימון`
   };
 
   // Custom error messages for specific fields
@@ -56,6 +65,9 @@ export const parseErrorFromObject = (errorObject: any) => {
     muscleGroups: "חסר קבוצת שריר", // Custom message for muscleGroups
     exercises: "חסר תרגיל", // Custom message for exercises
     workoutPlans: "חסר אימון",
+    minsPerWeek:'חסר מספר דקות לשבוע',
+    timesPerWeek:'חסר מספר אימונים בשבוע',
+    distance:'חסר מרחק'
   };
 
   // Extract error message and path
@@ -102,11 +114,17 @@ export const parseErrorFromObject = (errorObject: any) => {
     if (part === lastPart) continue;
 
     if (typeof part === "number") {
+
       readablePath += `${part} `;
     } else if (i === pathParts.length - 1) {
+
       readablePath += ` `;
     } else if (typeof pathParts[i + 1] === "number") {
+
       readablePath += `${part} `;
+    } else if(part=='plan'){
+
+        readablePath += ` `
     } else {
       readablePath += `${part}, `;
     }

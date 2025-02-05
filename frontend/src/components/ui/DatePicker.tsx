@@ -36,6 +36,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
   onChangeDate,
 }) => {
   const [date, setDate] = useState<Date>();
+  const [openPopover, setOpenPopover] = useState(false);
   const handleSelect = (date?: Date) => {
     if (!date) return;
     if (noPrevDates) {
@@ -45,6 +46,12 @@ const DatePicker: React.FC<DatePickerProps> = ({
     onChangeDate(date);
   };
 
+  const closePopover = () => {
+    if (!openPopover) return;
+
+    setOpenPopover(false);
+  };
+
   useEffect(() => {
     if (!selectedDate) return;
 
@@ -52,9 +59,10 @@ const DatePicker: React.FC<DatePickerProps> = ({
   }, [selectedDate]);
 
   return (
-    <Popover>
-      <PopoverTrigger asChild>
+    <Popover open={openPopover} onOpenChange={closePopover}>
+      <PopoverTrigger onClick={() => setOpenPopover(true)} asChild>
         <Button
+          onClick={() => setOpenPopover(true)}
           variant={"outline"}
           className={cn(
             "sm:w-1/2 justify-start text-left font-normal",
@@ -65,11 +73,12 @@ const DatePicker: React.FC<DatePickerProps> = ({
           {date ? format(date, "PPP", { locale: he }) : <span>בחר תאריך</span>}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="flex w-auto flex-col space-y-2 p-2">
+      <PopoverContent className="flex w-auto h-[400px] flex-col space-y-2 p-2">
         <Select
           onValueChange={(value) => {
             setDate(addDays(new Date(), parseInt(value)));
             onChangeDate(addDays(new Date(), parseInt(value)));
+            closePopover();
           }}
         >
           {presets && (
