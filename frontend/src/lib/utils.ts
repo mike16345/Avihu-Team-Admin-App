@@ -131,3 +131,17 @@ export const servingTypeToString = (type: string) => {
       return type;
   }
 };
+
+export function extractDateAndNumber(url: string) {
+  const regex = /(\d{4}-\d{2}-\d{2})\/(\d+)/;
+  const match = url.match(regex);
+
+  if (match) {
+    const date = match[1];
+    const number = match[2];
+    
+    return { date, number };
+  } else {
+    throw new Error('Invalid URL format');
+  }
+}
