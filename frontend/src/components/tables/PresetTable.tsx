@@ -116,16 +116,21 @@ const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, retrieveO
         <TableFooter className="p-2 flex items-start">
           <Pagination>
             <PaginationPrevious onClick={handlePrevPage} className="cursor-pointer" />
-            {Array.from({ length: totalPages }, (_, index) => (
-              <PaginationLink
-                key={index}
-                onClick={() => handlePageChange(index + 1)}
-                isActive={index + 1 === currentPage}
-                className="cursor-pointer"
-              >
-                {index + 1}
-              </PaginationLink>
-            ))}
+            {Array.from({ length: Math.min(10, totalPages) }, (_, index) => {
+              const startPage = Math.max(1, Math.min(currentPage - 4, totalPages - 9)); // Ensure it stays within range
+              const pageNumber = startPage + index;
+
+              return (
+                <PaginationLink
+                  key={pageNumber}
+                  onClick={() => handlePageChange(pageNumber)}
+                  isActive={pageNumber === currentPage}
+                  className="cursor-pointer"
+                >
+                  {pageNumber}
+                </PaginationLink>
+              );
+            })}
             <PaginationNext onClick={handleNextPage} className="cursor-pointer" />
           </Pagination>
           <Select
