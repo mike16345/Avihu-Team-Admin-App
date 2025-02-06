@@ -3,11 +3,10 @@ import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import tailwindcss from "tailwindcss";
 import svgr from "vite-plugin-svgr";
-import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
-  base: "/",
-  plugins: [react(), svgr(), VitePWA()],
+  base: "./",
+  plugins: [react(), svgr()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
