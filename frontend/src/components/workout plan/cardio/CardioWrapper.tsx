@@ -28,6 +28,7 @@ const CardioWrapper: React.FC<CardioWrapperProps> = ({ cardioPlan, updateCardio 
   const [tempCardioType, setTempCardioType] = useState<string | null>(null);
   const { isEditable } = useIsEditableContext();
 
+
   const updateComplexCardioPlan = (week: ICardioWeek, index: number) => {
     const newObject: ICardioPlan = {
       ...cardioPlan,
@@ -131,13 +132,13 @@ const CardioWrapper: React.FC<CardioWrapperProps> = ({ cardioPlan, updateCardio 
           </RadioGroup>
         )}
 
-        {cardioPlan.type == `simple` && (
+        {cardioPlan && cardioPlan?.type == `simple` && (
           <FixedCardioContainer
             existingObject={cardioPlan.plan}
             updateWorkout={(obj) => updateSimpleCardioPlan(obj)}
           />
         )}
-        {cardioPlan.type == `complex` && (
+        {cardioPlan && cardioPlan?.type == `complex` && (
           <>
             {cardioPlan?.plan?.weeks?.map((week, i) => (
               <CardioWeekWrapper
