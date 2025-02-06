@@ -62,7 +62,7 @@ const CreateWorkoutPlan: React.FC = () => {
   const [isCreate, setIsCreate] = useState(true);
   const [workoutPlan, setWorkoutPlan] = useState<IWorkoutPlan[]>([]);
   const [workoutTips, setWorkoutTips] = useState<string[]>([]);
-  const [cardioPlan, setCardioPlan] = useState<ICardioPlan | null>(id ? null : defaultCardioPlan);
+  const [cardioPlan, setCardioPlan] = useState<ICardioPlan>(defaultCardioPlan);
 
   const handleGetWorkoutPlan = async () => {
     try {
@@ -202,6 +202,7 @@ const CreateWorkoutPlan: React.FC = () => {
       setIsEditable(false);
     }
   }, []);
+
 
   if (isLoading) return <Loader size="large" />;
   if (isError && error?.data?.message !== `Workout plan not found!`)
