@@ -236,6 +236,9 @@ const CreateWorkoutPlan: React.FC = () => {
               onSelect={(currentValue) => {
                 setWorkoutPlan(currentValue.workoutPlans);
                 setSelectedPreset(currentValue.name);
+                if(currentValue.cardio){
+                  setCardioPlan(currentValue.cardio)
+                }
               }}
             />
           )}
