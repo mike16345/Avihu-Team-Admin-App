@@ -1,4 +1,4 @@
-import { IWorkoutPlan, IWorkoutPlanPreset } from "@/interfaces/IWorkoutPlan";
+import { IWorkoutPlan } from "@/interfaces/IWorkoutPlan";
 import React, {
   createContext,
   useContext,
@@ -7,7 +7,7 @@ import React, {
   Dispatch,
   SetStateAction,
 } from "react";
-
+  
 interface WorkoutPlanContextProps {
   workout: IWorkoutPlan;
   setWorkoutPlan: Dispatch<SetStateAction<IWorkoutPlan>>;

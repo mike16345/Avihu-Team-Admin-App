@@ -34,7 +34,7 @@ interface PresetTableProps {
 const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, retrieveObjectId }) => {
   const [displayData, setDisplayData] = useState<any[]>(data);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const totalPages = Math.ceil(displayData.length / itemsPerPage);
 
@@ -78,7 +78,7 @@ const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, retrieveO
   }, [data]);
 
   return (
-    <div>
+    <>
       <div className="my-2 sm:w-2/4">
         <Input placeholder="חיפוש..." onChange={handleSearch} />
       </div>
@@ -143,7 +143,7 @@ const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, retrieveO
           </Select>
         </TableFooter>
       </Table>
-    </div>
+    </>
   );
 };
 
