@@ -2,7 +2,7 @@ import { IMuscleGroupWorkouts, IExercise } from "@/interfaces/IWorkoutPlan";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { FC, useState } from "react";
 import { ChevronsUpDown } from "lucide-react";
-import DeleteButton from "./buttons/DeleteButton";
+import DeleteButton from "../ui/buttons/DeleteButton";
 import ExcerciseInput from "./ExcerciseInput";
 import MuscleGroupSelector from "./MuscleGroupSelector";
 import DeleteModal from "../Alerts/DeleteModal";
