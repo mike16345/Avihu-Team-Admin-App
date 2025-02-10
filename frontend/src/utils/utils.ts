@@ -7,3 +7,12 @@ export function poundsToKg(pounds: number) {
 export const removeItemAtIndex = <T>(index: number, array: T[]): T[] => {
   return array.filter((_, i) => i !== index);
 };
+
+export const duplicateItem=(index:number, array:any[])=>{
+  const duplicatedItem=array[index];
+  const newArray=[...array];
+
+  newArray.push(duplicatedItem);
+
+  return newArray
+}

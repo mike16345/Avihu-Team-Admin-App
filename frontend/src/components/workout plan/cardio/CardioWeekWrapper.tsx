@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import CardioExercise from "./CardioExercise";
 import { Button } from "@/components/ui/button";
 import { FaChevronDown } from "react-icons/fa";
-import DeleteButton from "../buttons/DeleteButton";
+import DeleteButton from "../../ui/buttons/DeleteButton";
 import { toast } from "sonner";
 import { removeItemAtIndex } from "@/utils/utils";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";

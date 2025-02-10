@@ -1,9 +1,12 @@
 import React, { useState } from "react";
 import SetsInput from "./SetsInput";
 import { ISet } from "@/interfaces/IWorkoutPlan";
-import AddButton from "./buttons/AddButton";
-import DeleteButton from "./buttons/DeleteButton";
+import AddButton from "../ui/buttons/AddButton";
+import DeleteButton from "../ui/buttons/DeleteButton";
 import { useIsEditableContext } from "@/context/useIsEditableContext";
+import { duplicateItem, removeItemAtIndex } from "@/utils/utils";
+import { MdContentCopy } from "react-icons/md";
+import CopyButton from "../ui/buttons/CopyButton";
 
 interface SetContainerProps {
   updateSets: (componentSets: ISet[]) => void;
@@ -40,17 +43,27 @@ const SetsContainer: React.FC<SetContainerProps> = ({ updateSets, existingSets }
   };
 
   const createSet = () => {
-    const newSet: ISet = componentSets[componentSets.length - 1];
+    const newSet: ISet = {
+        minReps: 0,
+        maxReps: 0,
+      };
     setComponentSets([...componentSets, newSet]);
     updateSets([...componentSets, newSet]);
   };
 
   const removeSet = (index: number) => {
-    const filteredArr = componentSets.filter((_, i) => i !== index);
+    const filteredArr = removeItemAtIndex(index,componentSets)
 
     setComponentSets(filteredArr);
     updateSets(filteredArr);
   };
+
+  const copySet=(index:number)=>{
+    const newSetArray=duplicateItem(index,componentSets)
+
+    setComponentSets(newSetArray);
+    updateSets(newSetArray);
+  }
 
   return (
     <div className="flex flex-col gap-2 w-fit">
@@ -65,6 +78,7 @@ const SetsContainer: React.FC<SetContainerProps> = ({ updateSets, existingSets }
               minReps={set.minReps}
             />
             {isEditable && (
+              <>
               <div className="mt-5">
                 <DeleteButton
                   disabled={componentSets.length == 1}
@@ -72,6 +86,10 @@ const SetsContainer: React.FC<SetContainerProps> = ({ updateSets, existingSets }
                   onClick={() => removeSet(i)}
                 />
               </div>
+              <div className="mt-5">
+                <CopyButton tip="שכפל סט" onClick={()=>copySet(i)}/>
+              </div>
+              </>
             )}
           </div>
         ))}

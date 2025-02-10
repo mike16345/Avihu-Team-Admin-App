@@ -2,14 +2,14 @@ import React, { useState } from "react";
 import { IMuscleGroupWorkouts } from "@/interfaces/IWorkoutPlan";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { Button } from "../ui/button";
-import DeleteButton from "./buttons/DeleteButton";
+import DeleteButton from "../ui/buttons/DeleteButton";
 import { Input } from "../ui/input";
 import { FaChevronDown } from "react-icons/fa";
 import { MuscleGroupContainer } from "./MuscleGroupContainer";
 import DeleteModal from "@/components/Alerts/DeleteModal";
 import { useIsEditableContext } from "@/context/useIsEditableContext";
 import { useWorkoutPlanContext } from "@/context/useWorkoutPlanContext";
-import AddButton from "./buttons/AddButton";
+import AddButton from "../ui/buttons/AddButton";
 import { useDirtyFormContext } from "@/context/useFormContext";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 
