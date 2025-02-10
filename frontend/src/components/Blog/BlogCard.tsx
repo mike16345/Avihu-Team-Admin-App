@@ -2,7 +2,7 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { IBlogResponse } from "@/interfaces/IBlog";
 import { buildPhotoUrl } from "@/lib/utils";
-import DeleteButton from "../workout plan/buttons/DeleteButton";
+import DeleteButton from "../ui/buttons/DeleteButton";
 
 interface BlogCardProps {
   blog: IBlogResponse;
