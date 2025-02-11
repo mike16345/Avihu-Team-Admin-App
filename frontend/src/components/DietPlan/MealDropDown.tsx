@@ -18,6 +18,7 @@ import { CustomItems, IDietItem, IMeal } from "@/interfaces/IDietPlan";
 import { CustomItemSelection } from "./CustomItemSelection";
 import { mealSchema } from "./DietPlanSchema";
 import ExtraItems from "./ExtraItems";
+import { useDirtyFormContext } from "@/context/useFormContext";
 
 type ShowCustomSelectionType = {
   totalProtein: boolean;
@@ -46,6 +47,9 @@ export const MealDropDown: FC<MealDropDownProps> = ({
   onDelete,
   setDietPlan,
 }) => {
+  const { errors: submissionErrors } = useDirtyFormContext();
+  console.log("errors", submissionErrors);
+
   const initialFormValues = useMemo(() => {
     return meal;
   }, [meal]);

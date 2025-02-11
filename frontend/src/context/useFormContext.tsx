@@ -3,14 +3,21 @@ import { createContext, useContext, useState, ReactNode } from "react";
 interface FormContextType {
   isDirty: boolean;
   setIsDirty: (dirty: boolean) => void;
+  errors?: any;
+  setErrors: (errors: any) => void;
 }
 
 const FormContext = createContext<FormContextType | undefined>(undefined);
 
 export const DirtyFormProvider = ({ children }: { children: ReactNode }) => {
   const [isDirty, setIsDirty] = useState(false);
+  const [errors, setErrors] = useState();
 
-  return <FormContext.Provider value={{ isDirty, setIsDirty }}>{children}</FormContext.Provider>;
+  return (
+    <FormContext.Provider value={{ isDirty, errors, setErrors, setIsDirty }}>
+      {children}
+    </FormContext.Provider>
+  );
 };
 
 export const useDirtyFormContext = (): FormContextType => {

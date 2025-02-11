@@ -27,9 +27,11 @@ import BackButton from "@/components/ui/BackButton";
 import BasicUserDetails from "@/components/UserDashboard/UserInfo/BasicUserDetails";
 import { useUsersStore } from "@/store/userStore";
 import { weightTab } from "./UserDashboard";
+import { useDirtyFormContext } from "@/context/useFormContext";
 
 export const ViewDietPlanPage = () => {
   const navigation = useNavigate();
+  const { setErrors } = useDirtyFormContext();
   const { id } = useParams();
   const { users } = useUsersStore();
   const user = users.find((user) => user._id === id);
@@ -64,7 +66,7 @@ export const ViewDietPlanPage = () => {
     staleTime: FULL_DAY_STALE_TIME,
     queryFn: handleGetDietPlan,
   });
-  
+
   const [dietPlan, setDietPlan] = useState<IDietPlan | undefined>(data);
 
   const updateDietPlan = (dietPlan: IDietPlan) => setDietPlan(dietPlan);
@@ -100,9 +102,9 @@ export const ViewDietPlanPage = () => {
       ...dietPlan,
       userId: id,
     };
-    console.log("diet plan to add", dietPlanToAdd);
 
     const { isValid, errors } = validateDietPlan(dietPlanToAdd);
+    setErrors(errors);
 
     if (!isValid) {
       toast.error(`יש בעיה בקלט.`);

@@ -1,7 +1,7 @@
-import React from "react";
 import { Route, Routes } from "react-router-dom";
 import { ViewDietPlanPresetPage } from "@/pages/ViewDietPlanPresetPage";
 import WorkoutPreset from "@/components/templates/workoutTemplates/WorkoutPreset";
+import DietPlanWrapper from "@/components/DietPlan/DietPlanWrapper";
 
 const PresetRoutes = () => {
   return (
@@ -9,8 +9,22 @@ const PresetRoutes = () => {
       <Routes>
         <Route path="/workoutPlans/" element={<WorkoutPreset />} />
         <Route path="/workoutPlans/:id" element={<WorkoutPreset />} />
-        <Route path="/dietPlans/" element={<ViewDietPlanPresetPage />} />
-        <Route path="/dietPlans/:id" element={<ViewDietPlanPresetPage />} />
+        <Route
+          path="/dietPlans/"
+          element={
+            <DietPlanWrapper>
+              <ViewDietPlanPresetPage />
+            </DietPlanWrapper>
+          }
+        />
+        <Route
+          path="/dietPlans/:id"
+          element={
+            <DietPlanWrapper>
+              <ViewDietPlanPresetPage />
+            </DietPlanWrapper>
+          }
+        />
       </Routes>
     </>
   );
