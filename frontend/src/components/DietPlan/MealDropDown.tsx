@@ -47,9 +47,6 @@ export const MealDropDown: FC<MealDropDownProps> = ({
   onDelete,
   setDietPlan,
 }) => {
-  const { errors: submissionErrors } = useDirtyFormContext();
-  console.log("errors", submissionErrors);
-
   const initialFormValues = useMemo(() => {
     return meal;
   }, [meal]);
