@@ -139,9 +139,28 @@ export function extractDateAndNumber(url: string) {
   if (match) {
     const date = match[1];
     const number = match[2];
-    
+
     return { date, number };
   } else {
-    throw new Error('Invalid URL format');
+    throw new Error("Invalid URL format");
   }
 }
+
+export const extractVideoId = (url: string): string => {
+  let videoId: string = "";
+
+  // Check if URL contains ?v=
+  if (url.includes("?v=")) {
+    videoId = url.split("?v=")[1]?.split("&")[0];
+  }
+  // Check if it's a short YouTube URL
+  else if (url.startsWith("https://youtu.be/")) {
+    videoId = url.split("https://youtu.be/")[1]?.split("?")[0];
+  }
+
+  return videoId;
+};
+
+export const getYouTubeThumbnail = (id: string) => {
+  return `https://img.youtube.com/vi/${id}/maxresdefault.jpg`;
+};

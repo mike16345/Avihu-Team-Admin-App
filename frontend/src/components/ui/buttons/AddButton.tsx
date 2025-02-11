@@ -1,5 +1,5 @@
 import React from "react";
-import { Button } from "../../ui/button";
+import { Button } from "../button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface AddButtonProps {

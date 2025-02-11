@@ -49,7 +49,13 @@ const CardioWrapper: React.FC<CardioWrapperProps> = ({ cardioPlan, updateCardio 
     }
 
     const newWeek: ICardioWeek = {
-      ...cardioPlan.plan.weeks[cardioPlan.plan.weeks.length - 1], // Copy last week's structure
+      workouts:[
+        {
+          name:`אימון 1`,
+          cardioExercise:`הליכה מהירה`,
+          distance:0
+        }
+      ], // Copy last week's structure
       week: `שבוע ${cardioPlan.plan.weeks.length + 1}`,
     };
 
