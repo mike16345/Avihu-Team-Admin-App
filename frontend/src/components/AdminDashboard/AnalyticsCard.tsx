@@ -6,6 +6,7 @@ import useAnalyticsApi from "@/hooks/api/useAnalyticsApi";
 import Loader from "../ui/Loader";
 import ErrorPage from "@/pages/ErrorPage";
 import { QueryKeys } from "@/enums/QueryKeys";
+import { HOUR_STALE_TIME } from "@/constants/constants";
 
 interface AnalyticsCardProps {
   title: string;
@@ -38,7 +39,7 @@ const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ title, dataKey }) => {
     queryFn: () => actions[dataKey].queryFunc(actions[dataKey].key),
     queryKey: [dataKey],
     enabled: !!actions[dataKey],
-    // staleTime: HOUR_STALE_TIME,
+    staleTime: HOUR_STALE_TIME,
   });
 
   return (
