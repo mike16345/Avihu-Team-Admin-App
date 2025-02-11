@@ -12,7 +12,12 @@ import { useIsEditableContext } from "@/context/useIsEditableContext";
 import DeleteModal from "../Alerts/DeleteModal";
 import { Button } from "../ui/button";
 import { useQuery } from "@tanstack/react-query";
-import { convertItemsToOptions, createRetryFunction } from "@/lib/utils";
+import {
+  convertItemsToOptions,
+  createRetryFunction,
+  extractVideoId,
+  getYouTubeThumbnail,
+} from "@/lib/utils";
 import ComboBox from "../ui/combo-box";
 import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 import { exerciseMethods } from "@/constants/exerciseMethods";
@@ -170,6 +175,12 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
                       </div>
                     ) : (
                       <p className="font-bold">{item.name}</p>
+                    )}
+                    {item.linkToVideo && (
+                      <img
+                        className="rounded mt-2"
+                        src={getYouTubeThumbnail(extractVideoId(item.linkToVideo || ""))}
+                      />
                     )}
                     <label className="font-bold underline pt-5">שיטת אימון:</label>
                     {isEditable ? (
