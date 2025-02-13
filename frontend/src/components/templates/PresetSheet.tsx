@@ -9,6 +9,7 @@ import {
 import ExerciseForm from "@/components/forms/ExerciseForm";
 import MuscleGroupForm from "@/components/forms/MuscleGroupForm";
 import MenuItemForm from "../forms/MenuItemForm";
+import ExerciseMethodsForm from "../forms/ExerciseMethodsForm";
 
 interface PresetSheetProps {
   form?: string;
@@ -30,6 +31,9 @@ const PresetSheet: React.FC<PresetSheetProps> = ({ form, id, isOpen, onCloseShee
         {form == `Exercise` && <ExerciseForm objectId={id} closeSheet={() => onCloseSheet()} />}
         {form == `muscleGroup` && (
           <MuscleGroupForm objectId={id} closeSheet={() => onCloseSheet()} />
+        )}
+        {form == `exercisesMethods` && (
+          <ExerciseMethodsForm objectId={id} closeSheet={() => onCloseSheet()} />
         )}
         {(form == `fats` || form == `vegetables` || form == `carbs` || form == `protein`) && (
           <MenuItemForm objectId={id} closeSheet={() => onCloseSheet()} foodGroup={form} />

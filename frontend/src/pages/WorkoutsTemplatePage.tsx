@@ -50,6 +50,11 @@ const WorkoutsTemplatePage = () => {
         value: `exercises`,
         queryKey: `exercises`,
       },
+      {
+        name: `שיטות אימון`,
+        value: `exercisesMethods`,
+        queryKey: `exercisesMethods`,
+      },
     ],
     tabContent: [
       {
@@ -68,6 +73,12 @@ const WorkoutsTemplatePage = () => {
         value: `exercises`,
         btnPrompt: `הוסף תרגיל`,
         sheetForm: `Exercise`,
+        deleteFunc: deleteExistingExercise,
+      },
+      {
+        value: `exercisesMethods`,
+        btnPrompt: `הוסף שיטת אימון`,
+        sheetForm: `exercisesMethods`,
         deleteFunc: deleteExistingExercise,
       },
     ],
