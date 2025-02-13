@@ -54,7 +54,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
 
   const exerciseMethodsQuery = useQuery({
     queryKey: [QueryKeys.EXERCISE_METHODS],
-    queryFn: () => getAllExerciseMethods().then(res=>formatExerciseMethods(res)),
+    queryFn: () => getAllExerciseMethods(),
     staleTime: FULL_DAY_STALE_TIME,
     retry: createRetryFunction(404,2),
   });
@@ -154,7 +154,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
   };
 
   const formatExerciseMethods=(methods)=>{
-    const newValues = methods.data.data.map(e => { 
+    const newValues = methods.map(e => { 
             const { title, description, ...rest } = e; 
             return {
                 ...rest,
@@ -166,7 +166,11 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
         setExerciseMethods(newValues);
   }
 
-
+  useEffect(()=>{
+    if((exerciseMethodsQuery?.data?.data.length>1) && !exerciseMethods){
+      formatExerciseMethods(exerciseMethodsQuery?.data?.data)
+    }
+  },[exerciseMethodsQuery])
 
   return (
     <>

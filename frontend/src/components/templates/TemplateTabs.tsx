@@ -111,12 +111,6 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
     setIsSheetOpen(true);
   }, [selectedObjectId]);
 
-  useEffect(()=>{
-    if (apiData.data?.data[0].title){
-      apiData.data.data.map(e=>e.name=e.title)
-    }
-  },[apiData])
-
   if (apiData.isError) return <ErrorPage message={apiData.error.message} />;
 
   return (
