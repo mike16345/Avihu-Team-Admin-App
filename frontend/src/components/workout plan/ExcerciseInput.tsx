@@ -20,7 +20,9 @@ import {
 } from "@/lib/utils";
 import ComboBox from "../ui/combo-box";
 import { FULL_DAY_STALE_TIME } from "@/constants/constants";
-import { exerciseMethods } from "@/constants/exerciseMethods";
+import { QueryKeys } from "@/enums/QueryKeys";
+import useExerciseMethodApi from "@/hooks/api/useExerciseMethodsApi";
+import { Option } from "@/types/types";
 
 interface ExcerciseInputProps {
   muscleGroup?: string;
@@ -37,7 +39,9 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const { getExerciseByMuscleGroup } = useExercisePresetApi();
+  const {getAllExerciseMethods}=useExerciseMethodApi()
   const exerciseIndexToDelete = useRef<number | null>(null);
+  const [exerciseMethods,setExerciseMethods]=useState<Option[]|null>(null)
 
   const doQuery = !!muscleGroup && isEditable;
   const exerciseQuery = useQuery({
@@ -46,6 +50,13 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
     staleTime: FULL_DAY_STALE_TIME,
     enabled: doQuery,
     retry: createRetryFunction(404),
+  });
+
+  const exerciseMethodsQuery = useQuery({
+    queryKey: [QueryKeys.EXERCISE_METHODS],
+    queryFn: () => getAllExerciseMethods().then(res=>formatExerciseMethods(res)),
+    staleTime: FULL_DAY_STALE_TIME,
+    retry: createRetryFunction(404,2),
   });
 
   const exerciseOptions = useMemo(() => {
@@ -142,6 +153,21 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
     });
   };
 
+  const formatExerciseMethods=(methods)=>{
+    const newValues = methods.data.data.map(e => { 
+            const { title, description, ...rest } = e; 
+            return {
+                ...rest,
+                name: title,
+                value: title
+            };
+        });
+
+        setExerciseMethods(newValues);
+  }
+
+
+
   return (
     <>
       <div className="w-full flex flex-col gap-3 py-4">
@@ -186,7 +212,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
                     {isEditable ? (
                       <div className="w-fit flex gap-5">
                         <ComboBox
-                          options={exerciseMethods}
+                          options={exerciseMethods||[]}
                           value={item.exerciseMethod}
                           onSelect={(exercise) =>
                             handleUpdateWorkoutObject("exerciseMethod", exercise, i)
