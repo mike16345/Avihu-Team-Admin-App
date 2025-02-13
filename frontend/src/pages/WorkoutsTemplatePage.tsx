@@ -5,11 +5,13 @@ import { useWorkoutPlanPresetApi } from "@/hooks/api/useWorkoutPlanPresetsApi";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ITabs } from "@/interfaces/interfaces";
 import { QueryKeys } from "@/enums/QueryKeys";
+import useExerciseMethodApi from "@/hooks/api/useExerciseMethodsApi";
 
 const WorkoutsTemplatePage = () => {
   const { deleteExercise } = useExercisePresetApi();
   const { deleteWorkoutPlanPreset } = useWorkoutPlanPresetApi();
   const { deleteMuscleGroup } = useMuscleGroupsApi();
+  const { deleteExerciseMethod } = useExerciseMethodApi();
 
   const queryClient = useQueryClient();
 
@@ -30,6 +32,12 @@ const WorkoutsTemplatePage = () => {
     mutationFn: deleteExercise,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`exercises`] });
+    },
+  });
+  const deleteExistingExerciseMethod = useMutation({
+    mutationFn: deleteExerciseMethod,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QueryKeys.EXERCISE_METHODS] });
     },
   });
 
@@ -53,7 +61,7 @@ const WorkoutsTemplatePage = () => {
       {
         name: `שיטות אימון`,
         value: `exercisesMethods`,
-        queryKey: `exercisesMethods`,
+        queryKey: QueryKeys.EXERCISE_METHODS,
       },
     ],
     tabContent: [
@@ -79,7 +87,7 @@ const WorkoutsTemplatePage = () => {
         value: `exercisesMethods`,
         btnPrompt: `הוסף שיטת אימון`,
         sheetForm: `exercisesMethods`,
-        deleteFunc: deleteExistingExercise,
+        deleteFunc: deleteExistingExerciseMethod,
       },
     ],
   };

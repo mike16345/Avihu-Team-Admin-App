@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from "react-hook-form";
-import React from 'react'
+import React, { useEffect } from 'react'
 import { z } from 'zod';
 import {
   Form,
@@ -14,6 +14,11 @@ import { Input } from '../ui/input';
 import CustomButton from '../ui/CustomButton';
 import { Textarea } from '../ui/textarea';
 import { toast } from 'sonner';
+import useExerciseMethodApi from '@/hooks/api/useExerciseMethodsApi';
+import { QueryKeys } from '@/enums/QueryKeys';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { ERROR_MESSAGES } from '@/enums/ErrorMessages';
+import { IExerciseMethod } from '@/interfaces/IWorkoutPlan';
 
 interface ExerciseMethodsFormProps {
   objectId?: string;
@@ -26,8 +31,11 @@ const ExerciseMethodsSchema = z.object({
 });
 
 const ExerciseMethodsForm:React.FC<ExerciseMethodsFormProps> = ({closeSheet,objectId}) => {
-    /* const onSuccess = (e: any) => {
-    queryClient.invalidateQueries({ queryKey: [`muscleGroups`] });
+  const { addExerciseMethod, updateExerciseMethod,getExerciseMethodById}=useExerciseMethodApi()
+   const queryClient = useQueryClient();
+
+    const onSuccess = (e: any) => {
+    queryClient.invalidateQueries({ queryKey: [QueryKeys.EXERCISE_METHODS] });
     toast.success(`פריט נשמר בהצלחה!`);
     closeSheet();
   };
@@ -38,18 +46,18 @@ const ExerciseMethodsForm:React.FC<ExerciseMethodsFormProps> = ({closeSheet,obje
       description: e.data.message,
     });
   };
-  const addNewMuscleGroup = useMutation({
-    mutationFn: addMuscleGroup,
+  const addNewExerciseMethod = useMutation({
+    mutationFn: addExerciseMethod,
     onSuccess,
     onError,
   });
 
-  const updateAMuscleGroup = useMutation({
-    mutationFn: ({ objectId, values }: { objectId: string; values: IMuscleGroupItem }) =>
-      updateMuscleGroup(objectId, values),
+  const editExerciseMethod = useMutation({
+    mutationFn: ({ objectId, values }: { objectId: string; values: IExerciseMethod }) =>
+      updateExerciseMethod(objectId, values),
     onSuccess,
     onError,
-  }); */
+  });
 
   const exercisesMethodsForm = useForm<z.infer<typeof ExerciseMethodsSchema>>({
       resolver: zodResolver(ExerciseMethodsSchema),
@@ -62,13 +70,20 @@ const ExerciseMethodsForm:React.FC<ExerciseMethodsFormProps> = ({closeSheet,obje
     const { reset } = exercisesMethodsForm;
 
     const onSubmit = (values: z.infer<typeof ExerciseMethodsSchema>) => {
-        toast.success(`${values.title} ${values.description}`)
-        /* if (objectId) {
-          updateAMuscleGroup.mutate({ objectId, values });
+        if (objectId) {
+          editExerciseMethod.mutate({ objectId, values });
         } else {
-          addNewMuscleGroup.mutate(values);
-        } */
+          addNewExerciseMethod.mutate(values);
+        }
       };
+
+    useEffect(() => {
+        if (!objectId) return;
+    
+        getExerciseMethodById(objectId)
+          .then((res) => reset(res.data))
+          .catch((err) => console.log(err));
+      }, []);
 
 
   return (
@@ -104,7 +119,7 @@ const ExerciseMethodsForm:React.FC<ExerciseMethodsFormProps> = ({closeSheet,obje
           className="w-full"
           type="submit"
           title="שמור"
-          /* isLoading={updateAMuscleGroup.isPending || addNewMuscleGroup.isPending} */
+          isLoading={addNewExerciseMethod.isPending || editExerciseMethod.isPending}
         />
       </form>
     </Form>

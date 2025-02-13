@@ -80,3 +80,8 @@ export interface IComplexCardioType {
   weeks: ICardioWeek[];
   tips?: string;
 }
+
+export interface IExerciseMethod{
+  title:string,
+  description:string
+}
