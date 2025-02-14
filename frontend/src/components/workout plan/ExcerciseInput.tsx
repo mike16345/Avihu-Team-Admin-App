@@ -21,6 +21,7 @@ import {
 import ComboBox from "../ui/combo-box";
 import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 import { exerciseMethods } from "@/constants/exerciseMethods";
+import { useDragToSwap } from "@/hooks/useDraggableList";
 
 interface ExcerciseInputProps {
   muscleGroup?: string;
@@ -34,7 +35,6 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
   exercises,
 }) => {
   const { isEditable } = useIsEditableContext();
-
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const { getExerciseByMuscleGroup } = useExercisePresetApi();
   const exerciseIndexToDelete = useRef<number | null>(null);
@@ -68,6 +68,13 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
       },
     ]
   );
+  const handleOnSwap = (swappedExercises: IExercise[]) => {
+    setExerciseObjs(swappedExercises);
+    handleUpdateExercises(swappedExercises);
+  };
+
+  const { isDragging, handleDragEnd, handleDragOver, handleDragEnter, handleDragStart } =
+    useDragToSwap<IExercise>(exerciseObjs, handleOnSwap);
 
   const handleUpdateWorkoutObject = <K extends keyof IExercise>(
     key: K,
@@ -148,7 +155,16 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
         <div className="grid lg:grid-cols-2 gap-4">
           {exerciseObjs.map((item, i) => (
             <Fragment key={item._id || item.name + i}>
-              <Card className=" sm:p-6 max-h-[575px] overflow-y-auto custom-scrollbar">
+              <Card
+                draggable
+                onDragStart={(e) => handleDragStart(e, i)}
+                onDragEnter={() => handleDragEnter(i)}
+                onDragEnd={() => handleDragEnd()}
+                onDragOver={(e) => handleDragOver(e)}
+                className={` sm:p-6 ${
+                  isDragging ? "cursor-grabbing" : "cursor-grab"
+                }  max-h-[575px] overflow-y-auto custom-scrollbar`}
+              >
                 <CardHeader>
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center justify-between">

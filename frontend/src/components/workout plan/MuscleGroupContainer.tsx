@@ -1,6 +1,6 @@
 import { IMuscleGroupWorkouts, IExercise } from "@/interfaces/IWorkoutPlan";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
-import { FC, useState } from "react";
+import { ComponentProps, FC, useState } from "react";
 import { ChevronsUpDown } from "lucide-react";
 import DeleteButton from "../ui/buttons/DeleteButton";
 import ExcerciseInput from "./ExcerciseInput";
@@ -8,8 +8,9 @@ import MuscleGroupSelector from "./MuscleGroupSelector";
 import DeleteModal from "../Alerts/DeleteModal";
 import { useIsEditableContext } from "@/context/useIsEditableContext";
 import { Button } from "../ui/button";
+import { CollapsibleProps } from "@radix-ui/react-collapsible";
 
-interface IMuscleGroupContainerProps {
+interface IMuscleGroupContainerProps extends CollapsibleProps {
   muscleGroup: IMuscleGroupWorkouts;
   handleUpdateMuscleGroup: (value: string) => void;
   handleUpdateExercises: (exerciseObjects: IExercise[]) => void;
@@ -21,6 +22,7 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
   handleUpdateMuscleGroup,
   handleUpdateExercises,
   handleDeleteMuscleGroup,
+  ...props
 }) => {
   const { isEditable } = useIsEditableContext();
 
@@ -34,6 +36,7 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
       open={openMuscleGroupContainer}
       onOpenChange={setOpenMuscleGroupContainer}
       className=" rounded pl-4 py-4  border-b-2 last:border-b-0 "
+      {...props}
     >
       <>
         <div className="flex w-full items-center ">

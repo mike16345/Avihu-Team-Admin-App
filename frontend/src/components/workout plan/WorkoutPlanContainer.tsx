@@ -12,6 +12,7 @@ import { useWorkoutPlanContext } from "@/context/useWorkoutPlanContext";
 import AddButton from "../ui/buttons/AddButton";
 import { useDirtyFormContext } from "@/context/useFormContext";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
+import { useDragToSwap } from "@/hooks/useDraggableList";
 
 interface WorkoutContainerProps {
   title: string;
@@ -38,6 +39,15 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isMuscleGroupChangedModalOpen, setIsMuscleGroupChangedModalOpen] = useState(false);
+
+  const handleOnSwap = (swappedMuscleGroups: IMuscleGroupWorkouts[]) => {
+    setMuscleGroups(swappedMuscleGroups);
+    handleSave(swappedMuscleGroups);
+    setIsDirty(true);
+  };
+
+  const { isDragging, handleDragEnd, handleDragOver, handleDragEnter, handleDragStart } =
+    useDragToSwap<IMuscleGroupWorkouts>(muscleGroups, handleOnSwap);
 
   const addWorkout = () => {
     const newMuscleGroup: IMuscleGroupWorkouts = {
@@ -160,6 +170,11 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
             {muscleGroups.map((muscleGroup, i) => {
               return (
                 <MuscleGroupContainer
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, i)}
+                  onDragEnter={() => handleDragEnter(i)}
+                  onDragEnd={() => handleDragEnd()}
+                  onDragOver={(e) => handleDragOver(e)}
                   key={muscleGroup?._id || muscleGroup.muscleGroup}
                   muscleGroup={muscleGroup}
                   handleUpdateExercises={(workouts) =>
