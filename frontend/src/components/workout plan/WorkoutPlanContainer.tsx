@@ -12,7 +12,8 @@ import { useWorkoutPlanContext } from "@/context/useWorkoutPlanContext";
 import AddButton from "../ui/buttons/AddButton";
 import { useDirtyFormContext } from "@/context/useFormContext";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
-import { useDragToSwap } from "@/hooks/useDraggableList";
+import { SortableItem } from "../DragAndDrop/SortableItem";
+import { DragDropWrapper } from "../Wrappers/DragDropWrapper";
 
 interface WorkoutContainerProps {
   title: string;
@@ -39,15 +40,6 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isMuscleGroupChangedModalOpen, setIsMuscleGroupChangedModalOpen] = useState(false);
-
-  const handleOnSwap = (swappedMuscleGroups: IMuscleGroupWorkouts[]) => {
-    setMuscleGroups(swappedMuscleGroups);
-    handleSave(swappedMuscleGroups);
-    setIsDirty(true);
-  };
-
-  const { isDragging, handleDragEnd, handleDragOver, handleDragEnter, handleDragStart } =
-    useDragToSwap<IMuscleGroupWorkouts>(muscleGroups, handleOnSwap);
 
   const addWorkout = () => {
     const newMuscleGroup: IMuscleGroupWorkouts = {
@@ -167,24 +159,28 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
             </div>
           </div>
           <CollapsibleContent className="flex flex-col gap-4 ">
-            {muscleGroups.map((muscleGroup, i) => {
-              return (
-                <MuscleGroupContainer
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, i)}
-                  onDragEnter={() => handleDragEnter(i)}
-                  onDragEnd={() => handleDragEnd()}
-                  onDragOver={(e) => handleDragOver(e)}
-                  key={muscleGroup?._id || muscleGroup.muscleGroup}
-                  muscleGroup={muscleGroup}
-                  handleUpdateExercises={(workouts) =>
-                    handleUpdateWorkout("exercises", workouts, i)
-                  }
-                  handleUpdateMuscleGroup={(value) => handleMuscleGroupChange(value, i)}
-                  handleDeleteMuscleGroup={() => deleteMuscleGroup(i)}
-                />
-              );
-            })}
+            <DragDropWrapper
+              strategy="vertical"
+              items={muscleGroups}
+              setItems={setMuscleGroups}
+              idKey="_id"
+            >
+              {({ item, index }) => (
+                <SortableItem className="border-b-2 last:border-b-0" item={item} idKey="_id">
+                  {() => (
+                    <MuscleGroupContainer
+                      key={item?._id || item.muscleGroup}
+                      muscleGroup={item}
+                      handleUpdateExercises={(workouts) =>
+                        handleUpdateWorkout("exercises", workouts, index)
+                      }
+                      handleUpdateMuscleGroup={(value) => handleMuscleGroupChange(value, index)}
+                      handleDeleteMuscleGroup={() => deleteMuscleGroup(index)}
+                    />
+                  )}
+                </SortableItem>
+              )}
+            </DragDropWrapper>
             {isEditable && <AddButton tip="הוסף קבוצת שריר" onClick={addWorkout} />}
           </CollapsibleContent>
         </Collapsible>

@@ -35,7 +35,7 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
     <Collapsible
       open={openMuscleGroupContainer}
       onOpenChange={setOpenMuscleGroupContainer}
-      className=" rounded pl-4 py-4  border-b-2 last:border-b-0 "
+      className=" rounded pl-4 py-4 "
       {...props}
     >
       <>
