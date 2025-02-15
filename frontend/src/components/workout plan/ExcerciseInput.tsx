@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { IExercisePresetItem, ISet, IExercise } from "@/interfaces/IWorkoutPlan";
@@ -147,7 +147,14 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
     <>
       <div className="w-full flex flex-col gap-3 py-4">
         <div className="grid lg:grid-cols-2 gap-4">
-          <DragDropWrapper items={exerciseObjs} setItems={setExerciseObjs} idKey="_id">
+          <DragDropWrapper
+            items={exerciseObjs}
+            setItems={(items) => {
+              setExerciseObjs(items);
+              handleUpdateExercises(items);
+            }}
+            idKey="_id"
+          >
             {({ item, index }) => (
               <SortableItem item={item} idKey="_id">
                 {() => (

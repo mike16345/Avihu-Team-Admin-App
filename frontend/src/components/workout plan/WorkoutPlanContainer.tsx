@@ -162,7 +162,16 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
             <DragDropWrapper
               strategy="vertical"
               items={muscleGroups}
-              setItems={setMuscleGroups}
+              setItems={(items) => {
+                setMuscleGroups(items);
+                handleSave(items);
+                setWorkoutPlan((prevPlan) => {
+                  const updatedWorkoutPlan = { ...prevPlan };
+                  updatedWorkoutPlan.muscleGroups = items;
+
+                  return updatedWorkoutPlan;
+                });
+              }}
               idKey="_id"
             >
               {({ item, index }) => (
