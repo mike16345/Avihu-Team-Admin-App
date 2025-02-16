@@ -21,19 +21,21 @@ const WorkoutsTemplatePage = () => {
       queryClient.invalidateQueries({ queryKey: [QueryKeys.WORKOUT_PRESETS] });
     },
   });
+
   const deleteExistingMuscleGroup = useMutation({
     mutationFn: deleteMuscleGroup,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`muscleGroups`] });
+      queryClient.invalidateQueries({ queryKey: [QueryKeys.MUSCLE_GROUP] });
     },
   });
 
   const deleteExistingExercise = useMutation({
     mutationFn: deleteExercise,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`exercises`] });
+      queryClient.invalidateQueries({ queryKey: [QueryKeys.EXERCISES] });
     },
   });
+
   const deleteExistingExerciseMethod = useMutation({
     mutationFn: deleteExerciseMethod,
     onSuccess: () => {
@@ -51,12 +53,12 @@ const WorkoutsTemplatePage = () => {
       {
         name: `קבוצות שריר`,
         value: `muscleGroups`,
-        queryKey: `muscleGroups`,
+        queryKey: QueryKeys.MUSCLE_GROUP,
       },
       {
         name: `תרגילים`,
         value: `exercises`,
-        queryKey: `exercises`,
+        queryKey: QueryKeys.EXERCISES,
       },
       {
         name: `שיטות אימון`,

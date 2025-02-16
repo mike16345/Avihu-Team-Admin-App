@@ -39,9 +39,9 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const { getExerciseByMuscleGroup } = useExercisePresetApi();
-  const {getAllExerciseMethods}=useExerciseMethodApi()
+  const { getAllExerciseMethods } = useExerciseMethodApi();
   const exerciseIndexToDelete = useRef<number | null>(null);
-  const [exerciseMethods,setExerciseMethods]=useState<Option[]|null>(null)
+  const [exerciseMethods, setExerciseMethods] = useState<Option[] | null>(null);
 
   const doQuery = !!muscleGroup && isEditable;
   const exerciseQuery = useQuery({
@@ -52,11 +52,11 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
     retry: createRetryFunction(404),
   });
 
-  const exerciseMethodsQuery = useQuery({
+  const { data: exerciseMethodResponse } = useQuery({
     queryKey: [QueryKeys.EXERCISE_METHODS],
     queryFn: () => getAllExerciseMethods(),
     staleTime: FULL_DAY_STALE_TIME,
-    retry: createRetryFunction(404,2),
+    retry: createRetryFunction(404, 2),
   });
 
   const exerciseOptions = useMemo(() => {
@@ -153,24 +153,24 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
     });
   };
 
-  const formatExerciseMethods=(methods)=>{
-    const newValues = methods.map(e => { 
-            const { title, description, ...rest } = e; 
-            return {
-                ...rest,
-                name: title,
-                value: title
-            };
-        });
+  const formatExerciseMethods = (methods) => {
+    const newValues = methods.map((e) => {
+      const { title, description, ...rest } = e;
+      return {
+        ...rest,
+        name: title,
+        value: title,
+      };
+    });
 
-        setExerciseMethods(newValues);
-  }
+    setExerciseMethods(newValues);
+  };
 
-  useEffect(()=>{
-    if((exerciseMethodsQuery?.data?.data.length>1) && !exerciseMethods){
-      formatExerciseMethods(exerciseMethodsQuery?.data?.data)
-    }
-  },[exerciseMethodsQuery])
+  useEffect(() => {
+    if (!exerciseMethodResponse?.data?.length || exerciseMethods) return;
+
+    formatExerciseMethods(exerciseMethodResponse.data);
+  }, [exerciseMethodResponse, exerciseMethods]);
 
   return (
     <>
@@ -216,7 +216,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
                     {isEditable ? (
                       <div className="w-fit flex gap-5">
                         <ComboBox
-                          options={exerciseMethods||[]}
+                          options={exerciseMethods || []}
                           value={item.exerciseMethod}
                           onSelect={(exercise) =>
                             handleUpdateWorkoutObject("exerciseMethod", exercise, i)

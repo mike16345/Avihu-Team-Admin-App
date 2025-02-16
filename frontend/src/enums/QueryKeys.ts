@@ -10,4 +10,7 @@ export enum QueryKeys {
   EXPIRING_USERS = "expiringUsers", // QueryKeys.EXPIRING_USERS +
   NO_DIET_PLAN = "no-diet-plan", // QueryKeys.NO_DIET_PLAN +
   NO_WORKOUT_PLAN = "no-workout-plan", // QueryKeys.NO_WORKOUT_PLAN +
+  MENU_ITEMS = "menu-items-", //add foodgroup or id here
+  EXERCISES = "exercises-", //add  id here
+  MUSCLE_GROUP = "muscle-group-", //add  id here
 }

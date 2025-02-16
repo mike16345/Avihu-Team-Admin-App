@@ -48,8 +48,8 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
     [`vegetables`]: getMenuItems,
     [QueryKeys.DIET_PLAN_PRESETS]: getAllDietPlanPresets,
     [QueryKeys.WORKOUT_PRESETS]: getAllWorkoutPlanPresets,
-    [`exercises`]: getExercisePresets,
-    [`muscleGroups`]: getAllMuscleGroups,
+    [QueryKeys.EXERCISES]: getExercisePresets,
+    [QueryKeys.MUSCLE_GROUP]: getAllMuscleGroups,
     [QueryKeys.EXERCISE_METHODS]: getAllExerciseMethods,
   };
 
@@ -60,7 +60,7 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
     staleTime: Infinity,
     queryFn: () => apiFunc(queryKey),
     enabled: !!apiFunc,
-    retry:3
+    retry: 3,
   });
 
   const deleteItem = (

@@ -1,7 +1,7 @@
-import { zodResolver } from '@hookform/resolvers/zod';
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import React, { useEffect } from 'react'
-import { z } from 'zod';
+import React, { useEffect } from "react";
+import { z } from "zod";
 import {
   Form,
   FormControl,
@@ -10,31 +10,34 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from '../ui/input';
-import CustomButton from '../ui/CustomButton';
-import { Textarea } from '../ui/textarea';
-import { toast } from 'sonner';
-import useExerciseMethodApi from '@/hooks/api/useExerciseMethodsApi';
-import { QueryKeys } from '@/enums/QueryKeys';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ERROR_MESSAGES } from '@/enums/ErrorMessages';
-import { IExerciseMethod } from '@/interfaces/IWorkoutPlan';
+import { Input } from "../ui/input";
+import CustomButton from "../ui/CustomButton";
+import { Textarea } from "../ui/textarea";
+import { toast } from "sonner";
+import useExerciseMethodApi from "@/hooks/api/useExerciseMethodsApi";
+import { QueryKeys } from "@/enums/QueryKeys";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
+import { IExerciseMethod } from "@/interfaces/IWorkoutPlan";
+import { ExerciseMethodsSchema } from "@/schemas/exerciseMethodSchema";
 
 interface ExerciseMethodsFormProps {
   objectId?: string;
   closeSheet: () => void;
 }
 
-const ExerciseMethodsSchema = z.object({
-  title: z.string().min(1, { message: `אנא בחר שם לשיטת אימון` }),
-  description: z.string().min(1, { message: `אנא הקלד תיאור לשיטת אימון` }),
-});
+const ExerciseMethodsForm: React.FC<ExerciseMethodsFormProps> = ({ closeSheet, objectId }) => {
+  const { addExerciseMethod, updateExerciseMethod, getExerciseMethodById } = useExerciseMethodApi();
+  const queryClient = useQueryClient();
 
-const ExerciseMethodsForm:React.FC<ExerciseMethodsFormProps> = ({closeSheet,objectId}) => {
-  const { addExerciseMethod, updateExerciseMethod,getExerciseMethodById}=useExerciseMethodApi()
-   const queryClient = useQueryClient();
+  const { data } = useQuery({
+    queryKey: [QueryKeys.EXERCISE_METHODS + objectId],
+    queryFn: () => getExerciseMethodById(objectId || ``),
+    enabled: !!objectId,
+    retry: 2,
+  });
 
-    const onSuccess = (e: any) => {
+  const onSuccess = (e: any) => {
     queryClient.invalidateQueries({ queryKey: [QueryKeys.EXERCISE_METHODS] });
     toast.success(`פריט נשמר בהצלחה!`);
     closeSheet();
@@ -46,6 +49,7 @@ const ExerciseMethodsForm:React.FC<ExerciseMethodsFormProps> = ({closeSheet,obje
       description: e.data.message,
     });
   };
+
   const addNewExerciseMethod = useMutation({
     mutationFn: addExerciseMethod,
     onSuccess,
@@ -60,34 +64,31 @@ const ExerciseMethodsForm:React.FC<ExerciseMethodsFormProps> = ({closeSheet,obje
   });
 
   const exercisesMethodsForm = useForm<z.infer<typeof ExerciseMethodsSchema>>({
-      resolver: zodResolver(ExerciseMethodsSchema),
-      defaultValues: {
-        title: "",
-        description:""
-      },
-    });
+    resolver: zodResolver(ExerciseMethodsSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+    },
+  });
 
-    const { reset } = exercisesMethodsForm;
+  const { reset } = exercisesMethodsForm;
 
-    const onSubmit = (values: z.infer<typeof ExerciseMethodsSchema>) => {
-        if (objectId) {
-          editExerciseMethod.mutate({ objectId, values });
-        } else {
-          addNewExerciseMethod.mutate(values);
-        }
-      };
+  const onSubmit = (values: z.infer<typeof ExerciseMethodsSchema>) => {
+    if (objectId) {
+      editExerciseMethod.mutate({ objectId, values });
+    } else {
+      addNewExerciseMethod.mutate(values);
+    }
+  };
 
-    useEffect(() => {
-        if (!objectId) return;
-    
-        getExerciseMethodById(objectId)
-          .then((res) => reset(res.data))
-          .catch((err) => console.log(err));
-      }, []);
+  useEffect(() => {
+    if (!data?.data) return;
 
+    reset(data.data);
+  }, [data]);
 
   return (
-     <Form {...exercisesMethodsForm}>
+    <Form {...exercisesMethodsForm}>
       <form onSubmit={exercisesMethodsForm.handleSubmit(onSubmit)} className="space-y-4 text-right">
         <FormField
           control={exercisesMethodsForm.control}
@@ -123,7 +124,7 @@ const ExerciseMethodsForm:React.FC<ExerciseMethodsFormProps> = ({closeSheet,obje
         />
       </form>
     </Form>
-  )
-}
+  );
+};
 
-export default ExerciseMethodsForm
+export default ExerciseMethodsForm;
