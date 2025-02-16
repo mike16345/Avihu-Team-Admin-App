@@ -7,6 +7,7 @@ import {
   useSensor,
   MouseSensor,
   TouchSensor,
+  PointerActivationConstraint,
 } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -49,7 +50,7 @@ export function DragDropWrapper<T extends Record<string, any>>({
   children,
   strategy = "rectSorting",
 }: DragDropWrapperProps<T>) {
-  const delayConstraint = { delay: 100, tolerance: 5 };
+  const delayConstraint: PointerActivationConstraint = { delay: 300, tolerance: 10 };
 
   const mouseSensor = useSensor(MouseSensor, {
     activationConstraint: delayConstraint,

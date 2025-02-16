@@ -11,7 +11,7 @@ interface SortableItemProps<T> {
 }
 
 export function SortableItem<T>({ item, idKey, className, children }: SortableItemProps<T>) {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: item[idKey] as UniqueIdentifier,
     animateLayoutChanges: () => false,
   });
@@ -23,7 +23,7 @@ export function SortableItem<T>({ item, idKey, className, children }: SortableIt
         transform: CSS.Transform.toString(transform),
         transition,
       }}
-      className={twMerge(className)}
+      className={twMerge(className, ` ${isDragging ? "cursor-grabbing" : "cursor-grab"}`)}
       {...attributes}
       {...listeners}
     >
