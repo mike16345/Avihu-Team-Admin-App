@@ -180,7 +180,7 @@ const WorkoutPreset = () => {
 
   return (
     <EditableContextProvider isEdit={true}>
-      <div className="flex flex-col gap-4 p-4 overflow-y-scroll hide-scrollbar h-full">
+      <div className="flex flex-col gap-4 p-4  h-full">
         <h1 className="text-4xl">תבנית אימון</h1>
         <BackButton navLink={MainRoutes.WORKOUT_PLANS_PRESETS} />
         <p>{isEdit ? `כאן תוכל לערוך תבנית אימון קיימת` : `  כאן תוכל ליצור תבנית אימון חדשה`}</p>

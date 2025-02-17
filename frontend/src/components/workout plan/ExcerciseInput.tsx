@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { IExercisePresetItem, ISet, IExercise } from "@/interfaces/IWorkoutPlan";
@@ -23,6 +23,8 @@ import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 import { QueryKeys } from "@/enums/QueryKeys";
 import useExerciseMethodApi from "@/hooks/api/useExerciseMethodsApi";
 import { Option } from "@/types/types";
+import { SortableItem } from "../DragAndDrop/SortableItem";
+import { DragDropWrapper } from "../Wrappers/DragDropWrapper";
 
 interface ExcerciseInputProps {
   muscleGroup?: string;
@@ -36,7 +38,6 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
   exercises,
 }) => {
   const { isEditable } = useIsEditableContext();
-
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const { getExerciseByMuscleGroup } = useExercisePresetApi();
   const { getAllExerciseMethods } = useExerciseMethodApi();
@@ -176,123 +177,139 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
     <>
       <div className="w-full flex flex-col gap-3 py-4">
         <div className="grid lg:grid-cols-2 gap-4">
-          {exerciseObjs.map((item, i) => (
-            <Fragment key={item._id || item.name + i}>
-              <Card className=" sm:p-6 max-h-[575px] overflow-y-auto custom-scrollbar">
-                <CardHeader>
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-center justify-between">
-                      <h2 className="font-bold underline">תרגיל:</h2>
-                      {isEditable && (
-                        <Button
-                          variant={"ghost"}
-                          onClick={() => {
-                            exerciseIndexToDelete.current = i;
-                            setIsDeleteModalOpen(true);
-                          }}
-                        >
-                          <IoClose size={22} />
-                        </Button>
-                      )}
-                    </div>
-                    {isEditable ? (
-                      <div className="w-fit">
-                        <ComboBox
-                          options={exerciseOptions}
-                          value={item.name}
-                          onSelect={(exercise) => handleUpdateExercise(i, exercise)}
-                        />
+          <DragDropWrapper
+            items={exerciseObjs}
+            setItems={(items) => {
+              setExerciseObjs(items);
+              handleUpdateExercises(items);
+            }}
+            idKey="_id"
+          >
+            {({ item, index }) => (
+              <SortableItem item={item} idKey="_id">
+                {() => (
+                  <Card
+                    key={item._id || item.name + index}
+                    className={` sm:p-6 max-h-[575px] overflow-y-auto custom-scrollbar`}
+                  >
+                    <CardHeader>
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center justify-between">
+                          <h2 className="font-bold underline">תרגיל:</h2>
+                          {isEditable && (
+                            <Button
+                              variant={"ghost"}
+                              onClick={() => {
+                                exerciseIndexToDelete.current = index;
+                                setIsDeleteModalOpen(true);
+                              }}
+                            >
+                              <IoClose size={22} />
+                            </Button>
+                          )}
+                        </div>
+                        {isEditable ? (
+                          <div className="w-fit">
+                            <ComboBox
+                              options={exerciseOptions}
+                              value={item.name}
+                              onSelect={(exercise) => handleUpdateExercise(index, exercise)}
+                            />
+                          </div>
+                        ) : (
+                          <p className="font-bold">{item.name}</p>
+                        )}
+                        {item.linkToVideo && (
+                          <img
+                            className="rounded mt-2"
+                            src={getYouTubeThumbnail(extractVideoId(item.linkToVideo || ""))}
+                          />
+                        )}
+                        <label className="font-bold underline pt-5">שיטת אימון:</label>
+                        {isEditable ? (
+                          <div className="w-fit flex gap-5">
+                            <ComboBox
+                              options={exerciseMethods}
+                              value={item.exerciseMethod}
+                              onSelect={(exercise) =>
+                                handleUpdateWorkoutObject("exerciseMethod", exercise, index)
+                              }
+                            />
+                            <Button
+                              onClick={() =>
+                                handleUpdateWorkoutObject("exerciseMethod", undefined, index)
+                              }
+                            >
+                              נקה
+                            </Button>
+                          </div>
+                        ) : (
+                          <p className="font-bold">{item.exerciseMethod}</p>
+                        )}
                       </div>
-                    ) : (
-                      <p className="font-bold">{item.name}</p>
-                    )}
-                    {item.linkToVideo && (
-                      <img
-                        className="rounded mt-2"
-                        src={getYouTubeThumbnail(extractVideoId(item.linkToVideo || ""))}
+                    </CardHeader>
+                    <CardContent className="flex flex-col gap-4 ">
+                      <SetsContainer
+                        existingSets={item.sets}
+                        updateSets={(setsArr: ISet[]) => updateSets(setsArr, index)}
                       />
-                    )}
-                    <label className="font-bold underline pt-5">שיטת אימון:</label>
-                    {isEditable ? (
-                      <div className="w-fit flex gap-5">
-                        <ComboBox
-                          options={exerciseMethods || []}
-                          value={item.exerciseMethod}
-                          onSelect={(exercise) =>
-                            handleUpdateWorkoutObject("exerciseMethod", exercise, i)
-                          }
-                        />
-                        <Button
-                          onClick={() => handleUpdateWorkoutObject("exerciseMethod", undefined, i)}
-                        >
-                          נקה
-                        </Button>
+                      <div className=" flex flex-col gap-4">
+                        <div>
+                          <Label className="font-bold underline">לינק לסרטון</Label>
+                          {isEditable ? (
+                            <Input
+                              readOnly={!isEditable}
+                              placeholder="הכנס לינק כאן..."
+                              name="linkToVideo"
+                              value={item.linkToVideo}
+                              onChange={(e) =>
+                                handleUpdateWorkoutObject("linkToVideo", e.target.value, index)
+                              }
+                            />
+                          ) : (
+                            <a
+                              onClick={(e) => {
+                                const target = e.target as HTMLAnchorElement;
+                                if (!target || !target.href || !target.href.includes("youtube")) {
+                                  e.preventDefault();
+                                  return;
+                                }
+                              }}
+                              target="_blank"
+                              href={item.linkToVideo}
+                              className="py-1 block border-b-2 text-ellipsis break-words whitespace-normal"
+                            >
+                              {item.linkToVideo == `` ? `לא קיים` : item.linkToVideo}
+                            </a>
+                          )}
+                        </div>
+                        <div>
+                          <Label className="font-bold underline">דגשים</Label>
+                          {isEditable ? (
+                            <Textarea
+                              readOnly={!isEditable}
+                              placeholder="דגשים למתאמן..."
+                              name="tipFromTrainer"
+                              value={item.tipFromTrainer}
+                              onChange={(e) =>
+                                handleUpdateWorkoutObject("tipFromTrainer", e.target.value, index)
+                              }
+                            />
+                          ) : (
+                            <p className="py-1 border-b-2 text-ellipsis break-words whitespace-normal">
+                              {item.tipFromTrainer?.replace(" ", "").length == 0
+                                ? `לא קיים`
+                                : item.tipFromTrainer}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    ) : (
-                      <p className="font-bold">{item.exerciseMethod}</p>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent className="flex flex-col gap-4 ">
-                  <SetsContainer
-                    existingSets={item.sets}
-                    updateSets={(setsArr: ISet[]) => updateSets(setsArr, i)}
-                  />
-                  <div className=" flex flex-col gap-4">
-                    <div>
-                      <Label className="font-bold underline">לינק לסרטון</Label>
-                      {isEditable ? (
-                        <Input
-                          readOnly={!isEditable}
-                          placeholder="הכנס לינק כאן..."
-                          name="linkToVideo"
-                          value={item.linkToVideo}
-                          onChange={(e) =>
-                            handleUpdateWorkoutObject("linkToVideo", e.target.value, i)
-                          }
-                        />
-                      ) : (
-                        <a
-                          onClick={(e) => {
-                            const target = e.target as HTMLAnchorElement;
-                            if (!target || !target.href || !target.href.includes("youtube")) {
-                              e.preventDefault();
-                              return;
-                            }
-                          }}
-                          target="_blank"
-                          href={item.linkToVideo}
-                          className="py-1 block border-b-2 text-ellipsis break-words whitespace-normal"
-                        >
-                          {item.linkToVideo == `` ? `לא קיים` : item.linkToVideo}
-                        </a>
-                      )}
-                    </div>
-                    <div>
-                      <Label className="font-bold underline">דגשים</Label>
-                      {isEditable ? (
-                        <Textarea
-                          readOnly={!isEditable}
-                          placeholder="דגשים למתאמן..."
-                          name="tipFromTrainer"
-                          value={item.tipFromTrainer}
-                          onChange={(e) =>
-                            handleUpdateWorkoutObject("tipFromTrainer", e.target.value, i)
-                          }
-                        />
-                      ) : (
-                        <p className="py-1 border-b-2 text-ellipsis break-words whitespace-normal">
-                          {item.tipFromTrainer?.replace(" ", "").length == 0
-                            ? `לא קיים`
-                            : item.tipFromTrainer}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </Fragment>
-          ))}
+                    </CardContent>
+                  </Card>
+                )}
+              </SortableItem>
+            )}
+          </DragDropWrapper>
           {isEditable && (
             <div className="h-[575px]">
               <AddWorkoutPlanCard onClick={() => handleAddExcercise()} />
