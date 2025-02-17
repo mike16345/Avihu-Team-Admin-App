@@ -18,6 +18,7 @@ import useMuscleGroupsApi from "@/hooks/api/useMuscleGroupsApi";
 import useExercisePresetApi from "@/hooks/api/useExercisePresetApi";
 import { QueryKeys } from "@/enums/QueryKeys";
 import useExerciseMethodApi from "@/hooks/api/useExerciseMethodsApi";
+import { createRetryFunction } from "@/lib/utils";
 
 interface TemplateTabsProps {
   tabs: ITabs;
@@ -60,7 +61,7 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
     staleTime: Infinity,
     queryFn: () => apiFunc(queryKey),
     enabled: !!apiFunc,
-    retry: 3,
+    retry: createRetryFunction(404, 2),
   });
 
   const deleteItem = (

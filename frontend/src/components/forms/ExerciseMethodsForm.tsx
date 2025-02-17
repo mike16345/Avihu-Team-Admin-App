@@ -20,6 +20,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { IExerciseMethod } from "@/interfaces/IWorkoutPlan";
 import { ExerciseMethodsSchema } from "@/schemas/exerciseMethodSchema";
+import { createRetryFunction } from "@/lib/utils";
 
 interface ExerciseMethodsFormProps {
   objectId?: string;
@@ -34,7 +35,8 @@ const ExerciseMethodsForm: React.FC<ExerciseMethodsFormProps> = ({ closeSheet, o
     queryKey: [QueryKeys.EXERCISE_METHODS + objectId],
     queryFn: () => getExerciseMethodById(objectId || ``),
     enabled: !!objectId,
-    retry: 2,
+    staleTime: Infinity,
+    retry: createRetryFunction(404, 2),
   });
 
   const onSuccess = (e: any) => {
