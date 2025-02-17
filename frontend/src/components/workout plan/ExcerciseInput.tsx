@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { IExercisePresetItem, ISet, IExercise } from "@/interfaces/IWorkoutPlan";
@@ -86,8 +86,6 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
     value: IExercise[K],
     index: number
   ) => {
-    console.log(value);
-
     const updatedExercises = exerciseObjs.map((workout, i) =>
       i === index ? { ...workout, [key]: value } : workout
     );
@@ -155,14 +153,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
   };
 
   const formatExerciseMethods = (methods) => {
-    const newValues = methods.map((e) => {
-      const { title, description, ...rest } = e;
-      return {
-        ...rest,
-        name: title,
-        value: title,
-      };
-    });
+    const newValues = convertItemsToOptions(methods, `title`, `title`);
 
     setExerciseMethods(newValues);
   };
@@ -171,7 +162,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
     if (!exerciseMethodResponse?.data?.length || exerciseMethods) return;
 
     formatExerciseMethods(exerciseMethodResponse.data);
-  }, [exerciseMethodResponse, exerciseMethods]);
+  }, [exerciseMethodResponse]);
 
   return (
     <>

@@ -39,6 +39,9 @@ const ExerciseMethodsForm: React.FC<ExerciseMethodsFormProps> = ({ closeSheet, o
 
   const onSuccess = (e: any) => {
     queryClient.invalidateQueries({ queryKey: [QueryKeys.EXERCISE_METHODS] });
+    if (objectId) {
+      queryClient.invalidateQueries({ queryKey: [QueryKeys.EXERCISE_METHODS + objectId] });
+    }
     toast.success(`פריט נשמר בהצלחה!`);
     closeSheet();
   };
