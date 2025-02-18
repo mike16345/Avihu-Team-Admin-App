@@ -172,7 +172,7 @@ const WorkoutPreset = () => {
     getWorkoutPlanPresetById(id)
       .then((res) => {
         setWorkoutPlan(res.workoutPlans);
-        setCardioPlan(res.cardio);
+        if (res.cardio) setCardioPlan(res.cardio);
         workoutForm.setValue("name", res.name);
       })
       .catch((err) => console.error(err));
