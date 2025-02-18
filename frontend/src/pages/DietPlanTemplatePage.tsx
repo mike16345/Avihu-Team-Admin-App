@@ -24,21 +24,21 @@ const DietPlanTemplatePage = () => {
       queryClient.invalidateQueries({ queryKey: [`carbs`] });
     },
   });
-  
+
   const deleteFats = useMutation({
     mutationFn: deleteMenuItem,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`fats`] });
     },
   });
-  
+
   const deleteVegetables = useMutation({
     mutationFn: deleteMenuItem,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`vegetables`] });
     },
   });
-  
+
   const deleteProteins = useMutation({
     mutationFn: deleteMenuItem,
     onSuccess: () => {

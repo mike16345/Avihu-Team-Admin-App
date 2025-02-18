@@ -68,7 +68,9 @@ const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, retrieveO
     if (!value) {
       setDisplayData(data);
     }
-    const filteredArr = data.filter((item) => item.name.includes(value));
+    const filteredArr = data.filter((item) => 
+       (item.name?.includes(value) || item.title?.includes(value))
+    );
 
     setDisplayData(filteredArr);
   };
@@ -102,7 +104,7 @@ const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, retrieveO
               }}
             >
               <TableCell className="flex justify-between items-center px-3">
-                <div className="pr-4">{data.name}</div>
+                <div className="pr-4">{data.title||data.name}</div>
                 <div>
                   <TableActions
                     handleDelete={() => handleDelete(data._id)}

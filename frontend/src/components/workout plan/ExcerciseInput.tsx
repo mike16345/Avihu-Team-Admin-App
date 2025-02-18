@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { IExercisePresetItem, ISet, IExercise } from "@/interfaces/IWorkoutPlan";
@@ -20,7 +20,9 @@ import {
 } from "@/lib/utils";
 import ComboBox from "../ui/combo-box";
 import { FULL_DAY_STALE_TIME } from "@/constants/constants";
-import { exerciseMethods } from "@/constants/exerciseMethods";
+import { QueryKeys } from "@/enums/QueryKeys";
+import useExerciseMethodApi from "@/hooks/api/useExerciseMethodsApi";
+import { Option } from "@/types/types";
 import { SortableItem } from "../DragAndDrop/SortableItem";
 import { DragDropWrapper } from "../Wrappers/DragDropWrapper";
 
@@ -38,7 +40,9 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
   const { isEditable } = useIsEditableContext();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const { getExerciseByMuscleGroup } = useExercisePresetApi();
+  const { getAllExerciseMethods } = useExerciseMethodApi();
   const exerciseIndexToDelete = useRef<number | null>(null);
+  const [exerciseMethods, setExerciseMethods] = useState<Option[] | null>(null);
 
   const doQuery = !!muscleGroup && isEditable;
   const exerciseQuery = useQuery({
@@ -47,6 +51,13 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
     staleTime: FULL_DAY_STALE_TIME,
     enabled: doQuery,
     retry: createRetryFunction(404),
+  });
+
+  const { data: exerciseMethodResponse } = useQuery({
+    queryKey: [QueryKeys.EXERCISE_METHODS],
+    queryFn: () => getAllExerciseMethods(),
+    staleTime: FULL_DAY_STALE_TIME,
+    retry: createRetryFunction(404, 2),
   });
 
   const exerciseOptions = useMemo(() => {
@@ -75,8 +86,6 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
     value: IExercise[K],
     index: number
   ) => {
-    console.log(value);
-
     const updatedExercises = exerciseObjs.map((workout, i) =>
       i === index ? { ...workout, [key]: value } : workout
     );
@@ -142,6 +151,18 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
       return updatedWorkouts;
     });
   };
+
+  const formatExerciseMethods = (methods) => {
+    const newValues = convertItemsToOptions(methods, `title`, `title`);
+
+    setExerciseMethods(newValues);
+  };
+
+  useEffect(() => {
+    if (!exerciseMethodResponse?.data?.length || exerciseMethods) return;
+
+    formatExerciseMethods(exerciseMethodResponse.data);
+  }, [exerciseMethodResponse]);
 
   return (
     <>
