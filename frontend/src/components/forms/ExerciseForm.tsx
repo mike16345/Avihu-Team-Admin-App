@@ -25,6 +25,7 @@ import { IExercisePresetItem, IMuscleGroupItem } from "@/interfaces/IWorkoutPlan
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import CustomButton from "../ui/CustomButton";
+import { QueryKeys } from "@/enums/QueryKeys";
 
 interface ExerciseFormProps {
   objectId?: string;
@@ -61,7 +62,7 @@ const ExerciseForm: React.FC<ExerciseFormProps> = ({ objectId, closeSheet }) => 
   const queryClient = useQueryClient();
 
   const successFunc = (message: string) => {
-    queryClient.invalidateQueries({ queryKey: [`exercises`] });
+    queryClient.invalidateQueries({ queryKey: [QueryKeys.EXERCISES] });
     toast.success(message);
     closeSheet();
   };

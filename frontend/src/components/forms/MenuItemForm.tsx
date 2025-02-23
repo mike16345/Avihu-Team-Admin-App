@@ -32,7 +32,7 @@ interface MenuItemFormProps {
   foodGroup: string;
 }
 
-const selections = ["grams", "spoons", "cups", "pieces", "scoops", "teaSpoons"];
+const selections = ["grams", "spoons", "cups", "pieces", "scoops", "teaSpoons", "units"];
 
 const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodGroup }) => {
   const { getOneMenuItem, addMenuItem, editMenuItem } = useMenuItemApi();
@@ -60,7 +60,7 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
   const queryClient = useQueryClient();
 
   const handleInitShowSelections = (servingTypes: IServingItem) => {
-    let currentSelections = [];
+    let currentSelections: string[] = [];
 
     for (const selection of selections) {
       let key = selection as keyof IServingItem;
@@ -73,7 +73,9 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
     if (currentSelections.length == 1) {
       currentSelections.push(selections.filter((item) => item !== currentSelections[0])[0]);
     }
-
+    if (currentSelections.length == 0) {
+      currentSelections = ["grams", "spoons"];
+    }
     setShowServingSelections(currentSelections);
   };
 
@@ -162,6 +164,7 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
       foodGroup,
       dietaryType: dietaryTypes,
     };
+
     menuItemObject = cleanMenuItemObject(menuItemObject);
 
     if (objectId) {

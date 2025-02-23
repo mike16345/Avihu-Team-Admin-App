@@ -65,7 +65,7 @@ export const MuscleExerciseSelector: FC<MuscleExerciseSelectorProps> = ({
 
   return (
     <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-8">
-      <div className="flex flex-col gap-1 sm:w-[200px]">
+      <div className="flex flex-col gap-1 ">
         <Label>קבוצת שריר</Label>
         <MuscleGroupCombobox
           muscleGroups={muscleGroups}
@@ -73,7 +73,7 @@ export const MuscleExerciseSelector: FC<MuscleExerciseSelectorProps> = ({
           handleSelectMuscleGroup={handleSelectMuscleGroup}
         />
       </div>
-      <div className="flex flex-col gap-1 sm:w-[200px]">
+      <div className="flex flex-col gap-1">
         <Label>תרגיל</Label>
         <ExerciseComboBox
           selectedExercise={selectedExercise}

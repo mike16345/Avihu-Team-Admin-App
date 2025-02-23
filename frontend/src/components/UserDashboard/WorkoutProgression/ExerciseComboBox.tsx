@@ -37,7 +37,7 @@ export const ExerciseComboBox: FC<IExerciseCombobox> = ({
           className="w-full justify-between"
         >
           {selectedExercise !== "" ? selectedExercise : "בחר תרגיל..."}
-          <FaSort className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <FaSort className="mr-4 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-0">
