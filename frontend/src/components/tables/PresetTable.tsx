@@ -34,7 +34,7 @@ interface PresetTableProps {
 const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, retrieveObjectId }) => {
   const [displayData, setDisplayData] = useState<any[]>(data);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const totalPages = Math.ceil(displayData.length / itemsPerPage);
 
@@ -80,7 +80,7 @@ const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, retrieveO
   }, [data]);
 
   return (
-    <div>
+    <>
       <div className="my-2 sm:w-2/4">
         <Input placeholder="חיפוש..." onChange={handleSearch} />
       </div>
@@ -118,16 +118,21 @@ const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, retrieveO
         <TableFooter className="p-2 flex items-start">
           <Pagination>
             <PaginationPrevious onClick={handlePrevPage} className="cursor-pointer" />
-            {Array.from({ length: totalPages }, (_, index) => (
-              <PaginationLink
-                key={index}
-                onClick={() => handlePageChange(index + 1)}
-                isActive={index + 1 === currentPage}
-                className="cursor-pointer"
-              >
-                {index + 1}
-              </PaginationLink>
-            ))}
+            {Array.from({ length: Math.min(10, totalPages) }, (_, index) => {
+              const startPage = Math.max(1, Math.min(currentPage - 4, totalPages - 9)); // Ensure it stays within range
+              const pageNumber = startPage + index;
+
+              return (
+                <PaginationLink
+                  key={pageNumber}
+                  onClick={() => handlePageChange(pageNumber)}
+                  isActive={pageNumber === currentPage}
+                  className="cursor-pointer"
+                >
+                  {pageNumber}
+                </PaginationLink>
+              );
+            })}
             <PaginationNext onClick={handleNextPage} className="cursor-pointer" />
           </Pagination>
           <Select
@@ -145,7 +150,7 @@ const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, retrieveO
           </Select>
         </TableFooter>
       </Table>
-    </div>
+    </>
   );
 };
 

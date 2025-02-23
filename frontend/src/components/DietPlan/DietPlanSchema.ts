@@ -1,13 +1,12 @@
 import { IDietPlan } from "@/interfaces/IDietPlan";
 import { z } from "zod";
 
-const customItemsSchema = z.object({
-  item: z.string(),
-  quantity: z.coerce.number(),
-});
+const MIN_QUANTITY = 0;
 
 const dietItemSchema = z.object({
-  quantity: z.coerce.number().min(0, { message: "Quantity must be 0 or more." }),
+  quantity: z.coerce
+    .number()
+    .min(MIN_QUANTITY, { message: `חובה לשים כמות גדול מ-${MIN_QUANTITY}` }),
   customItems: z.array(z.string()).optional(),
   extraItems: z.array(z.string()).optional(),
 });
@@ -36,4 +35,5 @@ function validateDietPlan(dietPlan: IDietPlan) {
     errors: result?.error?.format(),
   };
 }
+
 export { mealSchema, validateDietPlan, dietPlanSchema };

@@ -18,6 +18,7 @@ import { CustomItems, IDietItem, IMeal } from "@/interfaces/IDietPlan";
 import { CustomItemSelection } from "./CustomItemSelection";
 import { mealSchema } from "./DietPlanSchema";
 import ExtraItems from "./ExtraItems";
+import { useDirtyFormContext } from "@/context/useFormContext";
 
 type ShowCustomSelectionType = {
   totalProtein: boolean;

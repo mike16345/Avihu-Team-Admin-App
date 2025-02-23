@@ -10,7 +10,7 @@ import UserFormPage from "@/pages/UserFormPage";
 import AdminDashboard from "@/pages/AdminDashboard";
 import BlogPage from "@/pages/BlogPage";
 import BlogEditor from "@/components/Blog/BlogEditor";
-import LoginPage from "@/pages/LoginPage";
+import DietPlanWrapper from "@/components/DietPlan/DietPlanWrapper";
 
 export const AppRoutes = () => {
   return (
@@ -24,7 +24,14 @@ export const AppRoutes = () => {
         <Route path="/users/add" element={<UserFormPage />} />
         <Route path="/users/edit/:id" element={<UserFormPage />} />
         <Route path="/users/:id" element={<UserDashboard />} />
-        <Route path="/diet-plans/:id" element={<ViewDietPlanPage />} />
+        <Route
+          path="/diet-plans/:id"
+          element={
+            <DietPlanWrapper>
+              <ViewDietPlanPage />
+            </DietPlanWrapper>
+          }
+        />
         <Route path="/workout-plans/:id" element={<CreateWorkoutPlanWrapper />} />
         <Route path="/workoutPlans" element={<WorkoutsTemplatePage />} />
         <Route path="/dietPlans/" element={<DietPlanTemplatePage />} />
