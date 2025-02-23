@@ -5,11 +5,13 @@ import { useWorkoutPlanPresetApi } from "@/hooks/api/useWorkoutPlanPresetsApi";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ITabs } from "@/interfaces/interfaces";
 import { QueryKeys } from "@/enums/QueryKeys";
+import useExerciseMethodApi from "@/hooks/api/useExerciseMethodsApi";
 
 const WorkoutsTemplatePage = () => {
   const { deleteExercise } = useExercisePresetApi();
   const { deleteWorkoutPlanPreset } = useWorkoutPlanPresetApi();
   const { deleteMuscleGroup } = useMuscleGroupsApi();
+  const { deleteExerciseMethod } = useExerciseMethodApi();
 
   const queryClient = useQueryClient();
 
@@ -19,17 +21,25 @@ const WorkoutsTemplatePage = () => {
       queryClient.invalidateQueries({ queryKey: [QueryKeys.WORKOUT_PRESETS] });
     },
   });
+
   const deleteExistingMuscleGroup = useMutation({
     mutationFn: deleteMuscleGroup,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`muscleGroups`] });
+      queryClient.invalidateQueries({ queryKey: [QueryKeys.MUSCLE_GROUP] });
     },
   });
 
   const deleteExistingExercise = useMutation({
     mutationFn: deleteExercise,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`exercises`] });
+      queryClient.invalidateQueries({ queryKey: [QueryKeys.EXERCISES] });
+    },
+  });
+
+  const deleteExistingExerciseMethod = useMutation({
+    mutationFn: deleteExerciseMethod,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QueryKeys.EXERCISE_METHODS] });
     },
   });
 
@@ -43,12 +53,17 @@ const WorkoutsTemplatePage = () => {
       {
         name: `קבוצות שריר`,
         value: `muscleGroups`,
-        queryKey: `muscleGroups`,
+        queryKey: QueryKeys.MUSCLE_GROUP,
       },
       {
         name: `תרגילים`,
         value: `exercises`,
-        queryKey: `exercises`,
+        queryKey: QueryKeys.EXERCISES,
+      },
+      {
+        name: `שיטות אימון`,
+        value: `exercisesMethods`,
+        queryKey: QueryKeys.EXERCISE_METHODS,
       },
     ],
     tabContent: [
@@ -69,6 +84,12 @@ const WorkoutsTemplatePage = () => {
         btnPrompt: `הוסף תרגיל`,
         sheetForm: `Exercise`,
         deleteFunc: deleteExistingExercise,
+      },
+      {
+        value: `exercisesMethods`,
+        btnPrompt: `הוסף שיטת אימון`,
+        sheetForm: `exercisesMethods`,
+        deleteFunc: deleteExistingExerciseMethod,
       },
     ],
   };

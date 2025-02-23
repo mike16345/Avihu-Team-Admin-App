@@ -1,6 +1,6 @@
 import { useDietPlanApi } from "@/hooks/api/useDietPlanApi";
 import { IDietPlan } from "@/interfaces/IDietPlan";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useParams } from "react-router";
 import { defaultDietPlan } from "@/constants/DietPlanConsts";
@@ -27,9 +27,11 @@ import BackButton from "@/components/ui/BackButton";
 import BasicUserDetails from "@/components/UserDashboard/UserInfo/BasicUserDetails";
 import { useUsersStore } from "@/store/userStore";
 import { weightTab } from "./UserDashboard";
+import { useDirtyFormContext } from "@/context/useFormContext";
 
 export const ViewDietPlanPage = () => {
   const navigation = useNavigate();
+  const { setErrors } = useDirtyFormContext();
   const { id } = useParams();
   const { users } = useUsersStore();
   const user = users.find((user) => user._id === id);
@@ -40,23 +42,31 @@ export const ViewDietPlanPage = () => {
 
   const [isNewPlan, setIsNewPlan] = useState(false);
 
+  const handleGetDietPlan = async () => {
+    if (!id) return;
+
+    try {
+      const plan = await getDietPlanByUserId(id);
+
+      setIsNewPlan(false);
+      setDietPlan(plan);
+
+      return plan;
+    } catch (err) {
+      setDietPlan(defaultDietPlan);
+      setIsNewPlan(true);
+
+      return defaultDietPlan;
+    }
+  };
+
   const { isLoading, error, data } = useQuery({
     queryKey: [`${QueryKeys.USER_DIET_PLAN}${id}`],
     enabled: !!id,
     staleTime: FULL_DAY_STALE_TIME,
-    queryFn: () =>
-      getDietPlanByUserId(id!)
-        .then((plan) => {
-          setDietPlan(plan);
-          return plan;
-        })
-        .catch((e) => {
-          setIsNewPlan(true);
-          setDietPlan(defaultDietPlan);
-
-          return defaultDietPlan;
-        }),
+    queryFn: handleGetDietPlan,
   });
+
   const [dietPlan, setDietPlan] = useState<IDietPlan | undefined>(data);
 
   const updateDietPlan = (dietPlan: IDietPlan) => setDietPlan(dietPlan);
@@ -92,9 +102,9 @@ export const ViewDietPlanPage = () => {
       ...dietPlan,
       userId: id,
     };
-    console.log("diet plan to add", dietPlanToAdd);
 
     const { isValid, errors } = validateDietPlan(dietPlanToAdd);
+    setErrors(errors);
 
     if (!isValid) {
       toast.error(`יש בעיה בקלט.`);
@@ -129,9 +139,18 @@ export const ViewDietPlanPage = () => {
     });
   };
 
+  useEffect(() => {
+    if (data) {
+      setDietPlan(data);
+      setIsNewPlan(false);
+    } else {
+      setIsNewPlan(true);
+      setDietPlan(defaultDietPlan);
+    }
+  }, []);
+
   if (isLoading || dietPlanPresets.isLoading) return <Loader size="large" />;
   if (error) return <ErrorPage message={error.message} />;
-  const plan = dietPlan || data || defaultDietPlan;
 
   return (
     <div className=" flex flex-col gap-4 size-full hide-scrollbar overflow-y-auto">
@@ -155,10 +174,10 @@ export const ViewDietPlanPage = () => {
         </SelectContent>
       </Select>
 
-      {plan && (
+      {dietPlan && (
         <>
-          <DietPlanForm dietPlan={plan} updateDietPlan={updateDietPlan} />
-          {plan.meals.length > 0 && (
+          <DietPlanForm dietPlan={dietPlan} updateDietPlan={updateDietPlan} />
+          {dietPlan && dietPlan.meals.length > 0 && (
             <div>
               <CustomButton
                 className="font-bold w-full sm:w-32"

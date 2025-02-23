@@ -17,6 +17,8 @@ import { useWorkoutPlanPresetApi } from "@/hooks/api/useWorkoutPlanPresetsApi";
 import useMuscleGroupsApi from "@/hooks/api/useMuscleGroupsApi";
 import useExercisePresetApi from "@/hooks/api/useExercisePresetApi";
 import { QueryKeys } from "@/enums/QueryKeys";
+import useExerciseMethodApi from "@/hooks/api/useExerciseMethodsApi";
+import { createRetryFunction } from "@/lib/utils";
 
 interface TemplateTabsProps {
   tabs: ITabs;
@@ -29,6 +31,7 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
   const { getAllWorkoutPlanPresets } = useWorkoutPlanPresetApi();
   const { getAllMuscleGroups } = useMuscleGroupsApi();
   const { getExercisePresets } = useExercisePresetApi();
+  const { getAllExerciseMethods } = useExerciseMethodApi();
 
   const [selectedForm, setSelectedForm] = useState<string | undefined>();
   const [selectedObjectId, setSelectedObjectId] = useState<string>();
@@ -46,8 +49,9 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
     [`vegetables`]: getMenuItems,
     [QueryKeys.DIET_PLAN_PRESETS]: getAllDietPlanPresets,
     [QueryKeys.WORKOUT_PRESETS]: getAllWorkoutPlanPresets,
-    [`exercises`]: getExercisePresets,
-    [`muscleGroups`]: getAllMuscleGroups,
+    [QueryKeys.EXERCISES]: getExercisePresets,
+    [QueryKeys.MUSCLE_GROUP]: getAllMuscleGroups,
+    [QueryKeys.EXERCISE_METHODS]: getAllExerciseMethods,
   };
 
   const apiFunc = apiHooks[queryKey];
@@ -57,6 +61,7 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
     staleTime: Infinity,
     queryFn: () => apiFunc(queryKey),
     enabled: !!apiFunc,
+    retry: createRetryFunction(404, 2),
   });
 
   const deleteItem = (

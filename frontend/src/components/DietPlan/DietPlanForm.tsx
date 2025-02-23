@@ -6,6 +6,8 @@ import { Button } from "../ui/button";
 import { defaultMeal } from "@/constants/DietPlanConsts";
 import CustomInstructions from "./CustomInstructions";
 import useMenuItemApi from "@/hooks/api/useMenuItemApi";
+import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
+import { useDirtyFormContext } from "@/context/useFormContext";
 
 interface DietPlanFormProps {
   updateDietPlan: (dietPlan: IDietPlan) => void;
@@ -14,6 +16,7 @@ interface DietPlanFormProps {
 
 const DietPlanForm: React.FC<DietPlanFormProps> = ({ dietPlan, updateDietPlan }) => {
   const { getAllMenuItems } = useMenuItemApi();
+  const { setIsDirty } = useDirtyFormContext();
 
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [mealToDelete, setMealToDelete] = useState<number | null>(null);
@@ -26,6 +29,7 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ dietPlan, updateDietPlan })
     if (!dietPlan) return;
 
     updateDietPlan({ ...dietPlan, meals: [...dietPlan.meals, defaultMeal] });
+    setIsDirty(true);
   };
 
   const handleDeleteMeal = () => {
@@ -33,6 +37,7 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ dietPlan, updateDietPlan })
 
     updateDietPlan({ ...dietPlan, meals: dietPlan.meals.filter((_, i) => i !== mealToDelete) });
     setMealToDelete(null);
+    setIsDirty(true);
   };
 
   const handleSetMeal = (meal: IMeal, mealNumber: number) => {
@@ -42,6 +47,7 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ dietPlan, updateDietPlan })
 
     newMeals[mealNumber] = meal;
     updateDietPlan({ ...dietPlan, meals: newMeals });
+    setIsDirty(true);
   };
 
   useEffect(() => {
@@ -49,6 +55,8 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ dietPlan, updateDietPlan })
       setCustomItems(items);
     });
   }, []);
+
+  useUnsavedChangesWarning();
 
   return (
     <div className=" flex flex-col gap-4 w-full h-auto">
@@ -83,7 +91,10 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ dietPlan, updateDietPlan })
           freeCalories={dietPlan.freeCalories || 0}
           fatsPerDay={dietPlan.fatsPerDay || 0}
           veggiesPerDay={dietPlan.veggiesPerDay || 0}
-          onUpdate={(key, val) => updateDietPlan({ ...dietPlan, [key]: val })}
+          onUpdate={(key, val) => {
+            setIsDirty(true);
+            updateDietPlan({ ...dietPlan, [key]: val });
+          }}
         />
       </div>
 

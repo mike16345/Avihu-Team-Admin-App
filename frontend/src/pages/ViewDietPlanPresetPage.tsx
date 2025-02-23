@@ -27,12 +27,16 @@ import { QueryKeys } from "@/enums/QueryKeys";
 import { useNavigate } from "react-router-dom";
 import { MainRoutes } from "@/enums/Routes";
 import BackButton from "@/components/ui/BackButton";
+import { useDirtyFormContext } from "@/context/useFormContext";
+import { validateDietPlan } from "@/components/DietPlan/DietPlanSchema";
 
 const presetNameShcema = z.object({
   name: z.string().min(1, { message: `בחר שם לתפריט` }).max(25),
 });
 
 export const ViewDietPlanPresetPage = () => {
+  const { setErrors } = useDirtyFormContext();
+
   const navigation = useNavigate();
   const { id } = useParams();
   const { getDietPlanPreset, updateDietPlanPreset, addDietPlanPreset } = useDietPlanPresetApi();
@@ -82,6 +86,14 @@ export const ViewDietPlanPresetPage = () => {
       ...dietPlan,
       name: values.name,
     };
+
+    const { isValid, errors } = validateDietPlan(dietPlan);
+
+    if (!isValid) {
+      console.log("error", errors);
+      setErrors(errors);
+      return;
+    }
 
     if (isNewPlan) {
       createPreset.mutate(dietPlanToAdd);
