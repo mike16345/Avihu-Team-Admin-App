@@ -67,7 +67,7 @@ export interface ISimpleCardioType {
 export interface ICardioWorkout {
   name: string;
   warmUpAmount?: number;
-  distance: number;
+  distance: string;
   cardioExercise: string;
   tips?: string;
 }
@@ -79,4 +79,9 @@ export interface ICardioWeek {
 export interface IComplexCardioType {
   weeks: ICardioWeek[];
   tips?: string;
+}
+
+export interface IExerciseMethod {
+  title: string;
+  description: string;
 }

@@ -28,7 +28,6 @@ const CardioWrapper: React.FC<CardioWrapperProps> = ({ cardioPlan, updateCardio 
   const [tempCardioType, setTempCardioType] = useState<string | null>(null);
   const { isEditable } = useIsEditableContext();
 
-
   const updateComplexCardioPlan = (week: ICardioWeek, index: number) => {
     const newObject: ICardioPlan = {
       ...cardioPlan,
@@ -49,12 +48,12 @@ const CardioWrapper: React.FC<CardioWrapperProps> = ({ cardioPlan, updateCardio 
     }
 
     const newWeek: ICardioWeek = {
-      workouts:[
+      workouts: [
         {
-          name:`אימון 1`,
-          cardioExercise:`הליכה מהירה`,
-          distance:0
-        }
+          name: `אימון 1`,
+          cardioExercise: `הליכה מהירה`,
+          distance: 0,
+        },
       ], // Copy last week's structure
       week: `שבוע ${cardioPlan.plan.weeks.length + 1}`,
     };

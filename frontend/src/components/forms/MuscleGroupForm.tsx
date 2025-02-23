@@ -17,6 +17,7 @@ import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { IMuscleGroupItem } from "@/interfaces/IWorkoutPlan";
 import CustomButton from "../ui/CustomButton";
+import { QueryKeys } from "@/enums/QueryKeys";
 
 interface MuscleGroupFormProps {
   objectId?: string;
@@ -32,7 +33,7 @@ const MuscleGroupForm: React.FC<MuscleGroupFormProps> = ({ objectId, closeSheet 
   const queryClient = useQueryClient();
 
   const onSuccess = (e: any) => {
-    queryClient.invalidateQueries({ queryKey: [`muscleGroups`] });
+    queryClient.invalidateQueries({ queryKey: [QueryKeys.MUSCLE_GROUP] });
     toast.success(`פריט נשמר בהצלחה!`);
     closeSheet();
   };

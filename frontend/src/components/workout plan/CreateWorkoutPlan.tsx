@@ -203,13 +203,12 @@ const CreateWorkoutPlan: React.FC = () => {
     }
   }, []);
 
-
   if (isLoading) return <Loader size="large" />;
   if (isError && error?.data?.message !== `Workout plan not found!`)
     return <ErrorPage message={error.message} />;
 
   return (
-    <div className="flex flex-col gap-4  p-4 h-full ">
+    <div className="flex flex-col gap-4 p-4 h-full ">
       <div className=" w-full flex justify-between items-center">
         <h1 className="text-4xl">תוכנית אימון</h1>
 
@@ -236,8 +235,8 @@ const CreateWorkoutPlan: React.FC = () => {
               onSelect={(currentValue) => {
                 setWorkoutPlan(currentValue.workoutPlans);
                 setSelectedPreset(currentValue.name);
-                if(currentValue.cardio){
-                  setCardioPlan(currentValue.cardio)
+                if (currentValue.cardio) {
+                  setCardioPlan(currentValue.cardio);
                 }
               }}
             />
