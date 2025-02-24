@@ -255,8 +255,8 @@ const CreateWorkoutPlan: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="workout">
-            <div className="flex flex-col-reverse md:flex-row justify-between gap-8">
-              <div className="flex flex-col w-full">
+            <div className="flex flex-col-reverse md:flex-row gap-6">
+              <div className="flex flex-col sm:w-[80%] w-full">
                 {workoutPlan.map((workout, i) => {
                   return (
                     <Fragment key={workout?._id || i}>
@@ -276,7 +276,9 @@ const CreateWorkoutPlan: React.FC = () => {
                 })}
               </div>
 
-              <TipAdder tips={workoutTips} saveTips={handleSaveTip} isEditable={isEditable} />
+              <div className="w-full sm:w-[20%]">
+                <TipAdder tips={workoutTips} saveTips={handleSaveTip} isEditable={isEditable} />
+              </div>
             </div>
             <div className="w-full flex items-center justify-center mb-2">
               {isEditable && (

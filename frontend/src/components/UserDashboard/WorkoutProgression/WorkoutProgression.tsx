@@ -76,11 +76,12 @@ export const WorkoutProgression = () => {
   }, [searchParams]);
 
   if (isLoading) return <Loader />;
-  if (error) return <ErrorPage message={error.data.message} />;
+  if (error && error?.data?.message !== "No records found for user!")
+    return <ErrorPage message={error.data.message} />;
 
   return (
     <div className="size-full flex flex-col gap-4 p-3">
-      {recordedWorkouts!.length > 0 && (
+      {!!recordedWorkouts?.length && (
         <>
           <MuscleExerciseSelector
             selectedExercise={selectedExercise}
@@ -103,7 +104,7 @@ export const WorkoutProgression = () => {
           </div>
         </>
       )}
-      {recordedWorkouts!?.length == 0 && <h1 className="text-center">לא הקליטו אימונים</h1>}
+      {!recordedWorkouts?.length && <h1 className="text-center">לא הקליטו אימונים</h1>}
     </div>
   );
 };
