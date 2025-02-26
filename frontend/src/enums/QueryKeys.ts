@@ -13,4 +13,6 @@ export enum QueryKeys {
   MENU_ITEMS = "menu-items-", //add foodgroup or id here
   EXERCISES = "exercises-", //add  id here
   MUSCLE_GROUP = "muscle-group-", //add  id here
+  USERS = "users",
+  USERS_TO_CHECK = "users-to-check",
 }
