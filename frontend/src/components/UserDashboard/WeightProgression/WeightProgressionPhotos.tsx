@@ -1,12 +1,9 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { useWeighInPhotosApi } from "@/hooks/api/useWeighInPhotosApi";
 import { FC, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { FullscreenImage } from "./FullscreenImage";
-import { buildPhotoUrls } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
-import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 import Loader from "@/components/ui/Loader";
+import useUserWeighInPhotosQuery from "@/hooks/queries/weighInPhotos/useUserWeighInPhotosQuery";
 
 interface WeightProgressionPhotosProps {
   onClickPhoto?: (photo: string) => void;
@@ -19,28 +16,9 @@ type SelectedFullscreenImage = {
 
 export const WeightProgressionPhotos: FC<WeightProgressionPhotosProps> = ({ onClickPhoto }) => {
   const { id } = useParams();
-  const { getUserImageUrls } = useWeighInPhotosApi();
+  const { data: photos = [], isLoading } = useUserWeighInPhotosQuery(id);
 
   const [fullScreenImage, setFullScreenImage] = useState<SelectedFullscreenImage | null>(null);
-
-  const handleGetPhotos = async () => {
-    try {
-      const userImageUrls = await getUserImageUrls(id!);
-      const urls = buildPhotoUrls(userImageUrls.data);
-
-      return urls;
-    } catch (error) {
-      console.error("Failed to load images:", error);
-      return [];
-    }
-  };
-
-  const { data: photos = [], isLoading } = useQuery({
-    queryKey: [id + "-photos"],
-    queryFn: handleGetPhotos,
-    enabled: !!id,
-    staleTime: FULL_DAY_STALE_TIME,
-  });
 
   const maxPhotosIndex = photos.length - 1;
   const minPhotosIndex = 0;
