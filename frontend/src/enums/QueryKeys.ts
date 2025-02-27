@@ -5,7 +5,7 @@ export enum QueryKeys {
   DIET_PLAN_PRESETS = "diet-plan-presets",
   EXERCISE_METHODS = "exercise-methods-",
   WEIGH_INS = "weigh-ins-", // QueryKeys.WEIGH_INS + userId
-  RECORDED_WORKOUTS = "recored-workouts-", // QueryKeys.RECORDED_WORKOUTS + userId
+  RECORDED_WORKOUTS = "recorded-workouts-", // QueryKeys.RECORDED_WORKOUTS + userId
   BLOGS = "blogs-", // QueryKeys.BLOGS + blogId
   EXPIRING_USERS = "expiringUsers", // QueryKeys.EXPIRING_USERS +
   NO_DIET_PLAN = "no-diet-plan", // QueryKeys.NO_DIET_PLAN +

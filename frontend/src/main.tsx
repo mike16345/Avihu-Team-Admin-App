@@ -12,14 +12,14 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
-    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
       <PersistQueryClientProvider client={queryClient} persistOptions={{ persister: persister }}>
         <AuthProviderWrapper>
           <App />
         </AuthProviderWrapper>
         <Toaster dir="rtl" richColors position="bottom-left" />
+        {/* <ReactQueryDevtools client={queryClient} /> */}
       </PersistQueryClientProvider>
-      <ReactQueryDevtools client={queryClient} />
     </ThemeProvider>
   </BrowserRouter>
 );
