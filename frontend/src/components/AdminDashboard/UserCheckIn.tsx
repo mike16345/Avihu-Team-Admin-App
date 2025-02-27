@@ -56,7 +56,7 @@ const UserCheckIn = () => {
       <CardHeader>
         <CardTitle>לקוחות לבדיקה</CardTitle>
       </CardHeader>
-      <CardContent className="h-48 overflow-y-auto  ">
+      <CardContent className="max-h-[70vh] overflow-y-auto  ">
         {isLoading && <Loader size="large" />}
         {users?.map((user) => (
           <div
