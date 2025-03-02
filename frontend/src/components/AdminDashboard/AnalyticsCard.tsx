@@ -42,11 +42,11 @@ const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ title, dataKey }) => {
   });
 
   return (
-    <Card dir="rtl">
+    <Card dir="rtl" className="h-full">
       <CardHeader>
         <CardTitle>{title}</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col h-48 overflow-y-auto ">
+      <CardContent className="flex flex-col h-full overflow-y-auto">
         {isError && <ErrorPage message={error.message} />}
         {isLoading && <Loader size="large" />}
         {data?.data.length == 0 && (
