@@ -13,7 +13,7 @@ const UserFormPage = () => {
   const { id } = useParams();
 
   const { data: user, isLoading } = useUserQuery(id);
-  const editUser = useUpdateUser();
+  const editUser = useUpdateUser(id || "");
   const addNewUser = useAddUser();
 
   const handleSaveUser = (user: IUser) => {

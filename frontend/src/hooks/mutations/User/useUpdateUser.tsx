@@ -7,14 +7,14 @@ import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-const useUpdateUser = () => {
+const useUpdateUser = (id: string) => {
   const { updateUser } = useUsersApi();
   const navigation = useNavigate();
   const queryClient = useQueryClient();
 
   const onSuccess = () => {
     toast.success(`משתמש נשמר בהצלחה!`);
-    queryClient.invalidateQueries({ queryKey: [QueryKeys.USERS] });
+    queryClient.invalidateQueries({ queryKey: [QueryKeys.USERS, id] });
     navigation(MainRoutes.USERS);
   };
 
