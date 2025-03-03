@@ -7,6 +7,7 @@ import Loader from "../ui/Loader";
 import ErrorPage from "@/pages/ErrorPage";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { HOUR_STALE_TIME } from "@/constants/constants";
+import { weightTab } from "@/pages/UserDashboard";
 
 interface AnalyticsCardProps {
   title: string;
@@ -32,6 +33,7 @@ const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ title, dataKey }) => {
       key: "expiringUsers",
       queryFunc: getUsersExpringThisMonth,
       navUrl: `/users/`,
+      query: `?tab=${weightTab}`,
     },
   };
 
@@ -58,7 +60,9 @@ const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ title, dataKey }) => {
         {data?.data.map((item: any, i: number) => (
           <div
             key={i}
-            onDoubleClick={() => navigate(`${actions[dataKey]?.navUrl}${item._id}`)}
+            onDoubleClick={() =>
+              navigate(`${actions[dataKey]?.navUrl}${item._id}${actions[dataKey].query || ""}`)
+            }
             className="w-full flex items-center justify-between hover:bg-accent cursor-pointer border-b-2"
           >
             <div className="flex gap-2 sm:gap-5 items-center py-5 px-2">
