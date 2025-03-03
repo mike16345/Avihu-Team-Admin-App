@@ -10,7 +10,7 @@ interface ITabContent {
   value: string;
   btnPrompt: string;
   sheetForm: string;
-  deleteFunc: UseMutationResult<unknown, Error, string, unknown>;
+  deleteFunc: UseMutationResult<any, any, any, any>;
 }
 
 export interface ITabs {

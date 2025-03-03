@@ -56,6 +56,9 @@ export interface IExercisePresetItem {
 export interface IMuscleGroupItem {
   name: string;
 }
+export interface ICardioExerciseItem {
+  name: string;
+}
 
 export interface ISimpleCardioType {
   minsPerWeek: number;
@@ -70,7 +73,6 @@ export interface ICardioWorkout {
   distance: string;
   cardioExercise: string;
   tips?: string;
-  exerciseMethod?: string;
 }
 
 export interface ICardioWeek {
