@@ -41,14 +41,14 @@ const BlogList: React.FC = () => {
   const handleDeleteBlog = () => {
     if (!blogToDelete) return;
     deleteBlog(blogToDelete)
-      .then((res) => {
-        console.log("deleted blog", res);
-        toast.success("Successfully deleted blog");
+      .then(() => {
+        toast.success("בלוג נמחק בהצלחה!");
         query.invalidateQueries({ queryKey: [QueryKeys.BLOGS] });
+        query.invalidateQueries({ queryKey: [QueryKeys.BLOGS, blogToDelete._id] });
       })
       .catch((err) => {
         console.error("error deleting blog", err);
-        toast.error("Failed to delete blog");
+        toast.error("לא הצלחנו למחוק את הבלוג");
       });
   };
 

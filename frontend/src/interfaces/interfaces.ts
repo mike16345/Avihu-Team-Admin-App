@@ -31,3 +31,8 @@ export interface PaginationResult<T> {
   hasNextPage: boolean;
   hasPreviousPage: boolean;
 }
+
+export interface IMutationProps<T> {
+  onSuccess?: (result: T) => void;
+  onError?: (error: Error) => void;
+}

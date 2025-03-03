@@ -56,6 +56,7 @@ const BlogEditor = () => {
     queryKey: [QueryKeys.BLOGS, id],
     queryFn: () => getBlogById(id!),
     enabled: !!id && !stateBlog,
+    staleTime: Infinity,
   });
 
   const handleFieldChange = <K extends keyof IBlog>(field: K, value: IBlog[K]) => {
@@ -95,10 +96,13 @@ const BlogEditor = () => {
     }
   };
 
-  const onSuccess = () => {
-    query.invalidateQueries({ queryKey: [QueryKeys.BLOGS] });
+  const onSuccess = async () => {
     toast.success(`פוסט נשמר בהצלחה!`);
     navigate("/blogs");
+    await Promise.all([
+      query.invalidateQueries({ queryKey: [QueryKeys.BLOGS] }),
+      query.invalidateQueries({ queryKey: [QueryKeys.BLOGS, id] }),
+    ]);
   };
 
   const onError = () => {

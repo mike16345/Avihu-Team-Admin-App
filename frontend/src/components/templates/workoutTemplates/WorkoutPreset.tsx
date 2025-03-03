@@ -78,6 +78,32 @@ const WorkoutPreset = () => {
     queryKey: [QueryKeys.WORKOUT_PRESETS],
   });
 
+  const getWorkoutPresetById = async () => {
+    if (!id) return;
+
+    try {
+      const workoutPreset = await getWorkoutPlanPresetById(id);
+      initWorkoutPreset(workoutPreset);
+
+      return workoutPreset;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const initWorkoutPreset = (workoutPreset: IWorkoutPlanPreset) => {
+    setWorkoutPlan(workoutPreset.workoutPlans);
+    setCardioPlan(workoutPreset.cardio);
+    workoutForm.setValue("name", workoutPreset.name);
+  };
+
+  const { data: fetchedWorkoutPreset } = useQuery({
+    queryKey: [QueryKeys.WORKOUT_PRESETS, id],
+    queryFn: getWorkoutPresetById,
+    enabled: isEdit,
+    staleTime: Infinity,
+  });
+
   const workoutPresetsOptions = useMemo(
     () => convertItemsToOptions(workoutPlanPresets.data?.data || [], "name"),
     [workoutPlanPresets.data]
@@ -167,16 +193,11 @@ const WorkoutPreset = () => {
   });
 
   useEffect(() => {
-    if (!id) return;
+    // Ensure it only runs if plan is undefined and the data was fetched
+    if (!fetchedWorkoutPreset || workoutPlan.length > 0) return;
 
-    getWorkoutPlanPresetById(id)
-      .then((res) => {
-        setWorkoutPlan(res.workoutPlans);
-        if (res.cardio) setCardioPlan(res.cardio);
-        workoutForm.setValue("name", res.name);
-      })
-      .catch((err) => console.error(err));
-  }, []);
+    initWorkoutPreset(fetchedWorkoutPreset);
+  }, [fetchedWorkoutPreset]);
 
   return (
     <EditableContextProvider isEdit={true}>
