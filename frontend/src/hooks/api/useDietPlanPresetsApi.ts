@@ -9,7 +9,10 @@ export const useDietPlanPresetApi = () => {
     sendData<ApiResponse<IDietPlanPreset>>(DIET_PLAN_PRESET_ENDPOINT, dietPlan);
 
   const updateDietPlanPreset = (planId: string, dietPlan: IDietPlanPreset) =>
-    updateItem(`${DIET_PLAN_PRESET_ENDPOINT}/one?id=${planId}`, dietPlan);
+    updateItem<ApiResponse<IDietPlanPreset>>(
+      `${DIET_PLAN_PRESET_ENDPOINT}/one?id=${planId}`,
+      dietPlan
+    );
 
   const deleteDietPlanPreset = (planId: string) =>
     deleteItem(`${DIET_PLAN_PRESET_ENDPOINT}/one?id=${planId}`);

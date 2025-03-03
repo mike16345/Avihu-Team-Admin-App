@@ -10,6 +10,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import ErrorPage from "@/pages/ErrorPage";
 import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 import { weightTab } from "@/pages/UserDashboard";
+import { QueryKeys } from "@/enums/QueryKeys";
 
 const UserCheckIn = () => {
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ const UserCheckIn = () => {
     error,
     data: users,
   } = useQuery({
-    queryKey: ["usersToCheck"],
+    queryKey: [QueryKeys.USERS_TO_CHECK],
     staleTime: FULL_DAY_STALE_TIME,
     queryFn: getAllCheckInUsers,
   });
@@ -33,7 +34,7 @@ const UserCheckIn = () => {
     onSuccess: (data) => {
       toast.success(`משתמש סומן בהצלחה!`);
       queryClient.setQueryData<UsersCheckIn[] | undefined>(
-        ["usersToCheck"],
+        [QueryKeys.USERS_TO_CHECK],
         (oldData) => oldData?.filter((user) => user._id !== data._id) ?? []
       );
     },

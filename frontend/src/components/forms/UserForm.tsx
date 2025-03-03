@@ -57,7 +57,7 @@ const userSchema = z.object({
 });
 
 interface UserFormProps {
-  existingUser: IUser | null;
+  existingUser?: IUser;
   saveInfo: (user: IUserPost) => void;
   pending?: boolean;
 }
