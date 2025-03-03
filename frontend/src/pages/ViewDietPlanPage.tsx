@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/select";
 import { useDietPlanPresetApi } from "@/hooks/api/useDietPlanPresetsApi";
 import { validateDietPlan } from "@/components/DietPlan/DietPlanSchema";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import CustomButton from "@/components/ui/CustomButton";
 import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 import { useNavigate } from "react-router-dom";
@@ -29,8 +29,6 @@ import { useUsersStore } from "@/store/userStore";
 import { weightTab } from "./UserDashboard";
 import { useDirtyFormContext } from "@/context/useFormContext";
 import useAddDietPlanPreset from "@/hooks/mutations/DietPlans/useAddDietPlanPreset";
-import DeleteModal from "@/components/Alerts/DeleteModal";
-import { Input } from "@/components/ui/input";
 import InputModal from "@/components/ui/InputModal";
 import { invalidateQueryKeys } from "@/QueryClient/queryClient";
 import useUpdateDietPlan from "@/hooks/mutations/DietPlans/useUpdateDietPlan";
