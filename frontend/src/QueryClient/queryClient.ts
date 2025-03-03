@@ -6,4 +6,10 @@ const queryClient = new QueryClient({
   },
 });
 
+export const invalidateQueryKeys = (keys: string[]) => {
+  keys.forEach((key) => {
+    queryClient.invalidateQueries({ queryKey: [key] });
+  });
+};
+
 export default queryClient;
