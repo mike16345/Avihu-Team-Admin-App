@@ -1,5 +1,5 @@
 import { useDietPlanApi } from "@/hooks/api/useDietPlanApi";
-import { IDietPlan } from "@/interfaces/IDietPlan";
+import { IDietPlan, IDietPlanPreset } from "@/interfaces/IDietPlan";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useParams } from "react-router";
@@ -28,6 +28,13 @@ import BasicUserDetails from "@/components/UserDashboard/UserInfo/BasicUserDetai
 import { useUsersStore } from "@/store/userStore";
 import { weightTab } from "./UserDashboard";
 import { useDirtyFormContext } from "@/context/useFormContext";
+import useAddDietPlanPreset from "@/hooks/mutations/DietPlans/useAddDietPlanPreset";
+import DeleteModal from "@/components/Alerts/DeleteModal";
+import { Input } from "@/components/ui/input";
+import InputModal from "@/components/ui/InputModal";
+import { invalidateQueryKeys } from "@/QueryClient/queryClient";
+import useUpdateDietPlan from "@/hooks/mutations/DietPlans/useUpdateDietPlan";
+import useAddDietPlan from "@/hooks/mutations/DietPlans/useAddDietPlan";
 
 export const ViewDietPlanPage = () => {
   const navigation = useNavigate();
@@ -36,11 +43,12 @@ export const ViewDietPlanPage = () => {
   const { users } = useUsersStore();
   const user = users.find((user) => user._id === id);
 
-  const { addDietPlan, updateDietPlanByUserId, getDietPlanByUserId } = useDietPlanApi();
+  const { getDietPlanByUserId } = useDietPlanApi();
   const { getAllDietPlanPresets } = useDietPlanPresetApi();
   const queryClient = useQueryClient();
 
   const [isNewPlan, setIsNewPlan] = useState(false);
+  const [openPresetModal, setOpenPresetModal] = useState(false);
 
   const handleGetDietPlan = async () => {
     if (!id) return;
@@ -73,8 +81,12 @@ export const ViewDietPlanPage = () => {
 
   const onSuccess = () => {
     toast.success("תפריט נשמר בהצלחה!");
-    queryClient.invalidateQueries({ queryKey: [`${QueryKeys.USER_DIET_PLAN}${id}`] });
+    invalidateQueryKeys([`${QueryKeys.USER_DIET_PLAN}${id}`]);
     navigation(MainRoutes.USERS + `/${id}?tab=${weightTab}`);
+  };
+  const presetSuccess = () => {
+    toast.success("תבנית נשמרה בהצלחה!");
+    invalidateQueryKeys([QueryKeys.DIET_PLAN_PRESETS]);
   };
 
   const onError = (e: any) => {
@@ -83,18 +95,9 @@ export const ViewDietPlanPage = () => {
     });
   };
 
-  const createDietPlan = useMutation({
-    mutationFn: addDietPlan,
-    onSuccess: onSuccess,
-    onError: onError,
-  });
-
-  const editDietPlan = useMutation({
-    mutationFn: ({ id, dietPlanToAdd }: { id: string; dietPlanToAdd: IDietPlan }) =>
-      updateDietPlanByUserId(id, dietPlanToAdd),
-    onSuccess: onSuccess,
-    onError: onError,
-  });
+  const createDietPlan = useAddDietPlan({ onSuccess, onError });
+  const editDietPlan = useUpdateDietPlan({ onSuccess, onError });
+  const addDietPlanPreset = useAddDietPlanPreset({ onSuccess: presetSuccess, onError });
 
   const handleSubmit = () => {
     if (!dietPlan) return;
@@ -116,7 +119,7 @@ export const ViewDietPlanPage = () => {
     } else {
       if (!id) return;
 
-      editDietPlan.mutate({ id, dietPlanToAdd });
+      editDietPlan.mutate({ id, cleanedDietPlan: dietPlanToAdd });
       queryClient.invalidateQueries({ queryKey: [QueryKeys.NO_DIET_PLAN] });
     }
   };
@@ -137,6 +140,16 @@ export const ViewDietPlanPage = () => {
     setDietPlan({
       ...rest,
     });
+  };
+
+  const handleAddPreset = (name: string) => {
+    if (!dietPlan) return;
+
+    const preset: IDietPlanPreset = { ...dietPlan, name };
+
+    delete preset.userId;
+
+    addDietPlanPreset.mutate(preset);
   };
 
   useEffect(() => {
@@ -178,18 +191,34 @@ export const ViewDietPlanPage = () => {
         <>
           <DietPlanForm dietPlan={dietPlan} updateDietPlan={updateDietPlan} />
           {dietPlan && dietPlan.meals.length > 0 && (
-            <div>
+            <div className="flex gap-2">
               <CustomButton
                 className="font-bold w-full sm:w-32"
                 variant="success"
                 onClick={handleSubmit}
                 title="שמור תפריט"
-                isLoading={createDietPlan.isPending || editDietPlan.isPending}
+                isLoading={
+                  createDietPlan.isPending || editDietPlan.isPending || addDietPlanPreset.isPending
+                }
+              />
+              <CustomButton
+                className="font-bold w-full sm:w-32"
+                variant="secondary"
+                onClick={() => setOpenPresetModal(true)}
+                title="שמור תפריט כתבנית"
+                isLoading={
+                  addDietPlanPreset.isPending || createDietPlan.isPending || editDietPlan.isPending
+                }
               />
             </div>
           )}
         </>
       )}
+      <InputModal
+        close={() => setOpenPresetModal(false)}
+        open={openPresetModal}
+        submit={(val) => handleAddPreset(val)}
+      />
     </div>
   );
 };
