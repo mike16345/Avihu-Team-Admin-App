@@ -112,7 +112,7 @@ const CreateWorkoutPlan: React.FC = () => {
     const cleanedPostObject = cleanWorkoutObject(postObject);
 
     if (isCreate) {
-      return addWorkoutPlan.mutate(cleanedPostObject);
+      return addWorkoutPlan.mutate({ id, workoutPlan: cleanedPostObject });
     } else {
       return updateWorkoutPlan.mutate({ id, cleanedWorkoutPlan: cleanedPostObject });
     }

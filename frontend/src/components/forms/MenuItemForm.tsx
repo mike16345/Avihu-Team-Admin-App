@@ -25,10 +25,9 @@ import { convertStringsToOptions, servingTypeToString } from "@/lib/utils";
 import CustomDropdownMenu from "../Dropdown/DropdownMenu";
 import { Button } from "../ui/button";
 import { MoreHorizontal } from "lucide-react";
+import { IPresetFormProps } from "@/interfaces/interfaces";
 
-interface MenuItemFormProps {
-  objectId?: string;
-  closeSheet: () => void;
+interface MenuItemFormProps extends IPresetFormProps {
   foodGroup: string;
 }
 

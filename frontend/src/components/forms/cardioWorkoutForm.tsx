@@ -18,13 +18,9 @@ import useUpdateCardiWorkout from "@/hooks/mutations/cardioWorkout/useUpdateCard
 import { onError, onSuccess } from "@/lib/query";
 import useAddCardioWorkout from "@/hooks/mutations/cardioWorkout/useAddCardioWrkout";
 import useGetOneCardioWorkoutQuery from "@/hooks/queries/cardioWorkout/useGetOneCardioWorkoutQuery";
+import { IPresetFormProps } from "@/interfaces/interfaces";
 
-interface CardiWorkoutFormProps {
-  objectId?: string;
-  closeSheet: () => void;
-}
-
-const CardioWorkoutForm: React.FC<CardiWorkoutFormProps> = ({ objectId, closeSheet }) => {
+const CardioWorkoutForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
   const successFunc = () => {
     onSuccess(`פריט נשמר בהצלחה!`, [
       QueryKeys.CARDIO_WORKOUT_PRESET,

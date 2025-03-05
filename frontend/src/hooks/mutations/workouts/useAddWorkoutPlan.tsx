@@ -1,14 +1,14 @@
 import { useWorkoutPlanApi } from "@/hooks/api/useWorkoutPlanApi";
 import { IMutationProps } from "@/interfaces/interfaces";
-import { IWorkoutPlan } from "@/interfaces/IWorkoutPlan";
-import { ApiResponse } from "@/types/types";
+import { ICompleteWorkoutPlan } from "@/interfaces/IWorkoutPlan";
 import { useMutation } from "@tanstack/react-query";
 
-const useAddWorkoutPlan = ({ onSuccess, onError }: IMutationProps<ApiResponse<IWorkoutPlan>>) => {
+const useAddWorkoutPlan = ({ onSuccess, onError }: IMutationProps<ICompleteWorkoutPlan>) => {
   const { addWorkoutPlan } = useWorkoutPlanApi();
 
   return useMutation({
-    mutationFn: addWorkoutPlan,
+    mutationFn: ({ id, workoutPlan }: { id: string; workoutPlan: ICompleteWorkoutPlan }) =>
+      addWorkoutPlan(id, workoutPlan),
     onSuccess: onSuccess,
     onError: onError,
   });

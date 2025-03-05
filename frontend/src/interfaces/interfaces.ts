@@ -40,3 +40,8 @@ export interface IMutationProps<T> {
 export interface IBaseItem {
   name: string;
 }
+
+export interface IPresetFormProps {
+  objectId?: string;
+  closeSheet: () => void;
+}
