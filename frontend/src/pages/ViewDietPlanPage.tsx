@@ -146,6 +146,7 @@ export const ViewDietPlanPage = () => {
     const preset: IDietPlanPreset = { ...dietPlan, name };
 
     delete preset.userId;
+    delete preset._id;
 
     addDietPlanPreset.mutate(preset);
   };
@@ -189,33 +190,31 @@ export const ViewDietPlanPage = () => {
         <>
           <DietPlanForm dietPlan={dietPlan} updateDietPlan={updateDietPlan} />
           {dietPlan && dietPlan.meals.length > 0 && (
-            <div className="flex gap-2">
+            <div className="flex gap-3 flex-col md:flex-row">
+              <CustomButton
+                className="font-bold  sm:w-fit "
+                variant="default"
+                onClick={() => setOpenPresetModal(true)}
+                title="שמור תפריט כתבנית"
+                disabled={createDietPlan.isPending || editDietPlan.isPending}
+                isLoading={addDietPlanPreset.isPending}
+              />
               <CustomButton
                 className="font-bold w-full sm:w-32"
                 variant="success"
                 onClick={handleSubmit}
                 title="שמור תפריט"
-                isLoading={
-                  createDietPlan.isPending || editDietPlan.isPending || addDietPlanPreset.isPending
-                }
-              />
-              <CustomButton
-                className="font-bold w-full sm:w-32"
-                variant="secondary"
-                onClick={() => setOpenPresetModal(true)}
-                title="שמור תפריט כתבנית"
-                isLoading={
-                  addDietPlanPreset.isPending || createDietPlan.isPending || editDietPlan.isPending
-                }
+                disabled={addDietPlanPreset.isPending}
+                isLoading={createDietPlan.isPending || editDietPlan.isPending}
               />
             </div>
           )}
         </>
       )}
       <InputModal
-        close={() => setOpenPresetModal(false)}
+        onClose={() => setOpenPresetModal(false)}
         open={openPresetModal}
-        submit={(val) => handleAddPreset(val)}
+        onSubmit={(val) => handleAddPreset(val)}
       />
     </div>
   );

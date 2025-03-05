@@ -2,13 +2,11 @@ import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { invalidateQueryKeys } from "@/QueryClient/queryClient";
 import { toast } from "sonner";
 
-export const onSuccess = (message: string, keys: any[], navigationFunc?: () => void) => {
+export const onSuccess = (message: string, keys: string[], navigationFunc?: () => void) => {
   toast.success(message);
   invalidateQueryKeys(keys);
 
-  if (!navigationFunc) return;
-
-  navigationFunc();
+  navigationFunc?.();
 };
 
 export const onError = (e: any) => {

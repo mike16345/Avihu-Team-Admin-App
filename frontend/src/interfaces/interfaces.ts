@@ -36,3 +36,7 @@ export interface IMutationProps<T> {
   onSuccess?: (result: T) => void;
   onError?: (error: Error) => void;
 }
+
+export interface IBaseItem {
+  name: string;
+}

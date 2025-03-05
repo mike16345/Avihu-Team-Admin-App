@@ -310,27 +310,29 @@ const CreateWorkoutPlan: React.FC = () => {
         </Tabs>
       </div>
       {isEditable && (
-        <div className="flex justify-end gap-2">
+        <div className="flex flex-col md:flex-row md:justify-end gap-2 py-1">
           <CustomButton
             className="font-bold w-auto sm:w-fit"
-            variant="secondary"
+            variant="default"
             onClick={() => setOpenPresetModal(true)}
             title="שמור תוכנית אימון כתבנית"
-            isLoading={updateWorkoutPlan.isPending || addWorkoutPlanPreset.isPending}
+            disabled={updateWorkoutPlan.isPending || addWorkoutPlan.isPending}
+            isLoading={addWorkoutPlanPreset.isPending}
           />
           <CustomButton
             className="w-full sm:w-32"
             variant="success"
             onClick={handleSubmit}
             title="שמור תוכנית אימון"
-            isLoading={updateWorkoutPlan.isPending || addWorkoutPlanPreset.isPending}
+            disabled={addWorkoutPlanPreset.isPending}
+            isLoading={updateWorkoutPlan.isPending || addWorkoutPlan.isPending}
           />
         </div>
       )}
       <InputModal
-        close={() => setOpenPresetModal(false)}
+        onClose={() => setOpenPresetModal(false)}
         open={openPresetModal}
-        submit={(val) => handleAddPreset(val)}
+        onSubmit={(val) => handleAddPreset(val)}
       />
     </div>
   );

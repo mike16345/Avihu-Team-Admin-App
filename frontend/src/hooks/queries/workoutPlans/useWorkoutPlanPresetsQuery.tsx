@@ -4,14 +4,14 @@ import { ApiResponse } from "@/types/types";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { useWorkoutPlanPresetApi } from "@/hooks/api/useWorkoutPlanPresetsApi";
 
-const useWorkoutPlanPresetsQuery = (condition?: boolean) => {
+const useWorkoutPlanPresetsQuery = (condition = false) => {
   const { getAllWorkoutPlanPresets } = useWorkoutPlanPresetApi();
 
   return useQuery<any, any, ApiResponse<IWorkoutPlanPreset[]>, any>({
     queryFn: () => getAllWorkoutPlanPresets(),
     queryKey: [QueryKeys.WORKOUT_PRESETS],
     staleTime: Infinity,
-    enabled: condition ? condition : true,
+    enabled: !!condition,
   });
 };
 
