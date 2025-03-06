@@ -5,12 +5,11 @@ import Loader from "./Loader";
 interface CustomButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>, ButtonProps {
   title: string;
   isLoading?: boolean;
-  disabled?: boolean;
 }
 
-const CustomButton: React.FC<CustomButtonProps> = ({ title, disabled, isLoading, ...props }) => {
+const CustomButton: React.FC<CustomButtonProps> = ({ title, isLoading, ...props }) => {
   return (
-    <Button {...props} disabled={isLoading || disabled}>
+    <Button {...props} disabled={isLoading || props.disabled}>
       {isLoading ? <Loader variant="button" /> : title}
     </Button>
   );
