@@ -35,13 +35,10 @@ const InputModal: React.FC<InputModalProps> = ({ onClose, open, onSubmit, title,
           <DialogTitle className="text-center pb-2">{title || `בחר שם לתבנית`}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
-        <Input value={value || ``} onChange={(e) => setValue(e.target.value)} />
-        <DialogFooter className="flex m-auto pt-2 gap-3">
-          <Button variant={"success"} onClick={handleSave} className="px-8">
+        <Input value={value} onChange={(e) => setValue(e.target.value)} />
+        <DialogFooter className=" pt-2 gap-3">
+          <Button variant={"success"} onClick={handleSave} className="w-full">
             שמור
-          </Button>
-          <Button variant={"secondary"} onClick={onClose} className="px-8">
-            בטל
           </Button>
         </DialogFooter>
       </DialogContent>
