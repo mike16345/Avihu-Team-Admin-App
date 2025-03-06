@@ -15,10 +15,9 @@ import { BsPlusCircleFill } from "react-icons/bs";
 import { useNavigate, useParams } from "react-router-dom";
 import { Toggle } from "@/components/ui/toggle";
 import { toast } from "sonner";
-import { useWorkoutPlanPresetApi } from "@/hooks/api/useWorkoutPlanPresetsApi";
 import { useIsEditableContext } from "@/context/useIsEditableContext";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 import Loader from "../ui/Loader";
 import ErrorPage from "@/pages/ErrorPage";
@@ -38,6 +37,12 @@ import { weightTab } from "@/pages/UserDashboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CardioWrapper from "./cardio/CardioWrapper";
 import { defaultSimpleCardioOption } from "@/constants/cardioOptions";
+import InputModal from "../ui/InputModal";
+import useAddWorkoutPreset from "@/hooks/mutations/workouts/useAddWorkoutPreset";
+import { invalidateQueryKeys } from "@/QueryClient/queryClient";
+import useUpdateWorkoutPlan from "@/hooks/mutations/workouts/useUpdateWorkoutPlan";
+import useAddWorkoutPlan from "@/hooks/mutations/workouts/useAddWorkoutPlan";
+import useWorkoutPlanPresetsQuery from "@/hooks/queries/workoutPlans/useWorkoutPlanPresetsQuery";
 
 const defaultCardioPlan: ICardioPlan = {
   type: `simple`,
@@ -47,15 +52,13 @@ const defaultCardioPlan: ICardioPlan = {
 const CreateWorkoutPlan: React.FC = () => {
   const { id } = useParams();
   const navigation = useNavigate();
-  const queryClient = useQueryClient();
 
   const [user, setUser] = useState<IUser>();
 
   const { users } = useUsersStore();
 
   const { getUser } = useUsersApi();
-  const { addWorkoutPlan, getWorkoutPlanByUserId, updateWorkoutPlanByUserId } = useWorkoutPlanApi();
-  const { getAllWorkoutPlanPresets } = useWorkoutPlanPresetApi();
+  const { getWorkoutPlanByUserId } = useWorkoutPlanApi();
   const { isEditable, setIsEditable, toggleIsEditable } = useIsEditableContext();
 
   const [selectedPreset, setSelectedPreset] = useState<IWorkoutPlanPreset | null>(null);
@@ -63,6 +66,7 @@ const CreateWorkoutPlan: React.FC = () => {
   const [workoutPlan, setWorkoutPlan] = useState<IWorkoutPlan[]>([]);
   const [workoutTips, setWorkoutTips] = useState<string[]>([]);
   const [cardioPlan, setCardioPlan] = useState<ICardioPlan>(defaultCardioPlan);
+  const [openPresetModal, setOpenPresetModal] = useState(false);
 
   const handleGetWorkoutPlan = async () => {
     try {
@@ -89,12 +93,7 @@ const CreateWorkoutPlan: React.FC = () => {
     retry: createRetryFunction(404),
   });
 
-  const workoutPlanPresets = useQuery({
-    queryFn: getAllWorkoutPlanPresets,
-    staleTime: FULL_DAY_STALE_TIME,
-    enabled: isEditable,
-    queryKey: [QueryKeys.WORKOUT_PRESETS],
-  });
+  const workoutPlanPresets = useWorkoutPlanPresetsQuery(isEditable);
 
   const workoutPresetsOptions = useMemo(
     () => convertItemsToOptions(workoutPlanPresets.data?.data || [], "name"),
@@ -113,17 +112,21 @@ const CreateWorkoutPlan: React.FC = () => {
     const cleanedPostObject = cleanWorkoutObject(postObject);
 
     if (isCreate) {
-      return addWorkoutPlan(id, cleanedPostObject);
+      return addWorkoutPlan.mutate({ id, workoutPlan: cleanedPostObject });
     } else {
-      return updateWorkoutPlanByUserId(id, cleanedPostObject);
+      return updateWorkoutPlan.mutate({ id, cleanedWorkoutPlan: cleanedPostObject });
     }
   };
 
   const onSuccess = () => {
     toast.success(`תכנית אימון נשמרה בהצלחה!`);
     navigation(MainRoutes.USERS + `/${id}?tab=${weightTab}`);
-    queryClient.invalidateQueries({ queryKey: [`${QueryKeys.USER_WORKOUT_PLAN}${id}`] });
-    queryClient.invalidateQueries({ queryKey: [`${QueryKeys.NO_WORKOUT_PLAN}`] });
+    invalidateQueryKeys([`${QueryKeys.USER_WORKOUT_PLAN}${id}`, QueryKeys.NO_WORKOUT_PLAN]);
+  };
+
+  const presetSuccess = () => {
+    toast.success("תבנית נשמרה בהצלחה!");
+    invalidateQueryKeys([QueryKeys.WORKOUT_PRESETS]);
   };
 
   const onError = (error: any) => {
@@ -134,11 +137,9 @@ const CreateWorkoutPlan: React.FC = () => {
     });
   };
 
-  const updateWorkoutPlan = useMutation({
-    mutationFn: handleSubmit,
-    onSuccess,
-    onError,
-  });
+  const updateWorkoutPlan = useUpdateWorkoutPlan({ onSuccess, onError });
+  const addWorkoutPlanPreset = useAddWorkoutPreset({ onError, onSuccess: presetSuccess });
+  const addWorkoutPlan = useAddWorkoutPlan({ onError, onSuccess });
 
   const handlePlanNameChange = (newName: string, index: number) => {
     const newWorkoutPlan = workoutPlan.map((workout, i) =>
@@ -182,6 +183,21 @@ const CreateWorkoutPlan: React.FC = () => {
 
   const handleSaveTip = (tips: string[]) => {
     setWorkoutTips(tips);
+  };
+
+  const handleAddPreset = (name: string) => {
+    if (!workoutPlan) return;
+
+    const preset: IWorkoutPlanPreset = cleanWorkoutObject({
+      workoutPlans: workoutPlan,
+      name,
+      tips: workoutTips,
+      cardio: cardioPlan,
+    });
+
+    delete preset.userId;
+
+    addWorkoutPlanPreset.mutate(preset);
   };
 
   useEffect(() => {
@@ -294,16 +310,30 @@ const CreateWorkoutPlan: React.FC = () => {
         </Tabs>
       </div>
       {isEditable && (
-        <div className="flex justify-end">
+        <div className="flex flex-col md:flex-row md:justify-end gap-2 py-1">
+          <CustomButton
+            className="font-bold w-auto sm:w-fit"
+            variant="default"
+            onClick={() => setOpenPresetModal(true)}
+            title="שמור תוכנית אימון כתבנית"
+            disabled={updateWorkoutPlan.isPending || addWorkoutPlan.isPending}
+            isLoading={addWorkoutPlanPreset.isPending}
+          />
           <CustomButton
             className="w-full sm:w-32"
             variant="success"
-            onClick={() => updateWorkoutPlan.mutate()}
+            onClick={handleSubmit}
             title="שמור תוכנית אימון"
-            isLoading={updateWorkoutPlan.isPending}
+            disabled={addWorkoutPlanPreset.isPending}
+            isLoading={updateWorkoutPlan.isPending || addWorkoutPlan.isPending}
           />
         </div>
       )}
+      <InputModal
+        onClose={() => setOpenPresetModal(false)}
+        open={openPresetModal}
+        onSubmit={(val) => handleAddPreset(val)}
+      />
     </div>
   );
 };

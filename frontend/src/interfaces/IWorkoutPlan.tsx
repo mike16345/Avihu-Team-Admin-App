@@ -1,3 +1,5 @@
+import { IBaseItem } from "./interfaces";
+
 export interface IWorkoutPlan {
   _id?: string;
   userId?: string;
@@ -53,9 +55,8 @@ export interface IExercisePresetItem {
   exerciseMethod?: string;
   linkToVideo: string;
 }
-export interface IMuscleGroupItem {
-  name: string;
-}
+export interface IMuscleGroupItem extends IBaseItem {}
+export interface ICardioExerciseItem extends IBaseItem {}
 
 export interface ISimpleCardioType {
   minsPerWeek: number;
@@ -70,7 +71,6 @@ export interface ICardioWorkout {
   distance: string;
   cardioExercise: string;
   tips?: string;
-  exerciseMethod?: string;
 }
 
 export interface ICardioWeek {

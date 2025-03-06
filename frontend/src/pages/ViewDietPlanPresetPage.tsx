@@ -59,7 +59,7 @@ export const ViewDietPlanPresetPage = () => {
     navigation(MainRoutes.DIET_PLANS);
     toast.success("תפריט נשמר בהצלחה!");
     queryClient.invalidateQueries({ queryKey: [QueryKeys.DIET_PLAN_PRESETS] });
-    queryClient.invalidateQueries({ queryKey: [QueryKeys.DIET_PLAN_PRESETS, id] });
+    queryClient.invalidateQueries({ queryKey: [QueryKeys.DIET_PLAN_PRESETS + id] });
   };
 
   const onError = (e: any) => {

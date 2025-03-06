@@ -19,6 +19,7 @@ import useExercisePresetApi from "@/hooks/api/useExercisePresetApi";
 import { QueryKeys } from "@/enums/QueryKeys";
 import useExerciseMethodApi from "@/hooks/api/useExerciseMethodsApi";
 import { createRetryFunction } from "@/lib/utils";
+import useCardioWorkoutApi from "@/hooks/api/useCardioWorkoutPreset";
 
 interface TemplateTabsProps {
   tabs: ITabs;
@@ -32,6 +33,7 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
   const { getAllMuscleGroups } = useMuscleGroupsApi();
   const { getExercisePresets } = useExercisePresetApi();
   const { getAllExerciseMethods } = useExerciseMethodApi();
+  const { getAllCardioWrkouts } = useCardioWorkoutApi();
 
   const [selectedForm, setSelectedForm] = useState<string | undefined>();
   const [selectedObjectId, setSelectedObjectId] = useState<string>();
@@ -52,6 +54,7 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
     [QueryKeys.EXERCISES]: getExercisePresets,
     [QueryKeys.MUSCLE_GROUP]: getAllMuscleGroups,
     [QueryKeys.EXERCISE_METHODS]: getAllExerciseMethods,
+    [QueryKeys.CARDIO_WORKOUT_PRESET]: getAllCardioWrkouts,
   };
 
   const apiFunc = apiHooks[queryKey];

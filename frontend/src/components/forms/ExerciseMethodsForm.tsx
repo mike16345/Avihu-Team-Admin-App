@@ -21,13 +21,9 @@ import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { IExerciseMethod } from "@/interfaces/IWorkoutPlan";
 import { ExerciseMethodsSchema } from "@/schemas/exerciseMethodSchema";
 import { createRetryFunction } from "@/lib/utils";
+import { IPresetFormProps } from "@/interfaces/interfaces";
 
-interface ExerciseMethodsFormProps {
-  objectId?: string;
-  closeSheet: () => void;
-}
-
-const ExerciseMethodsForm: React.FC<ExerciseMethodsFormProps> = ({ closeSheet, objectId }) => {
+const ExerciseMethodsForm: React.FC<IPresetFormProps> = ({ closeSheet, objectId }) => {
   const { addExerciseMethod, updateExerciseMethod, getExerciseMethodById } = useExerciseMethodApi();
   const queryClient = useQueryClient();
 
