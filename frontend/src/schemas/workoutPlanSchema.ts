@@ -58,3 +58,5 @@ export const fullWorkoutPlanSchema = z.object({
   workoutPlans: z.array(workoutPlanSchema).min(1),
   cardio: cardioPlanSchema,
 });
+
+export type WorkoutSchemaType = z.infer<typeof fullWorkoutPlanSchema>;
