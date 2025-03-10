@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import {
   Form,
   FormControl,
@@ -17,23 +17,19 @@ import {
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Input } from "../ui/input";
-import useExercisePresetApi from "@/hooks/api/useExercisePresetApi";
 import { toast } from "sonner";
-import useMuscleGroupsApi from "@/hooks/api/useMuscleGroupsApi";
-import { IExercisePresetItem, IMuscleGroupItem } from "@/interfaces/IWorkoutPlan";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import CustomButton from "../ui/CustomButton";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { IPresetFormProps } from "@/interfaces/interfaces";
 import { exerciseSchema } from "@/schemas/exerciseSchema";
+import useMuscleGroupsQuery from "@/hooks/queries/MuscleGroups/useMuscleGroupsQuery";
+import useUpdateExercise from "@/hooks/mutations/exercise/useUpdateExercise";
+import useAddExercise from "@/hooks/mutations/exercise/useAddExercise";
+import useExerciseQuery from "@/hooks/queries/exercises/useExerciseQuery";
+import { invalidateQueryKeys } from "@/QueryClient/queryClient";
+import { Input } from "../ui/input";
 
 const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
-  const { getExerciseById, addExercise, updateExercise } = useExercisePresetApi();
-  const { getAllMuscleGroups } = useMuscleGroupsApi();
-  const [muscleGroups, setMuscleGroups] = useState<IMuscleGroupItem[]>();
-
   const exerciseForm = useForm<z.infer<typeof exerciseSchema>>({
     resolver: zodResolver(exerciseSchema),
     defaultValues: {
@@ -44,12 +40,14 @@ const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
     },
   });
 
+  const { data: muscleGroups = [] } = useMuscleGroupsQuery();
+  const { data: exercise } = useExerciseQuery(objectId || "");
+
   const { reset } = exerciseForm;
 
-  const queryClient = useQueryClient();
-
   const successFunc = (message: string) => {
-    queryClient.invalidateQueries({ queryKey: [QueryKeys.EXERCISES] });
+    invalidateQueryKeys([QueryKeys.EXERCISES, QueryKeys.EXERCISES + id]);
+
     toast.success(message);
     closeSheet();
   };
@@ -59,38 +57,29 @@ const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
       description: err.message,
     });
 
-  const addNewExercise = useMutation({
-    mutationFn: addExercise,
+  const addNewExercise = useAddExercise({
     onSuccess: () => successFunc(`פריט נשמר בהצלחה!`),
     onError: errorFunc,
   });
 
-  const editExercise = useMutation({
-    mutationFn: ({ objectId, values }: { objectId: string; values: IExercisePresetItem }) =>
-      updateExercise(objectId, values),
+  const editExercise = useUpdateExercise({
     onSuccess: () => successFunc(`פריט עודכן בהצלחה!`),
     onError: errorFunc,
   });
 
   const onSubmit = (values: z.infer<typeof exerciseSchema>) => {
     if (objectId) {
-      editExercise.mutate({ objectId, values });
+      editExercise.mutate({ id: objectId, exercise: values });
     } else {
       addNewExercise.mutate(values);
     }
   };
 
   useEffect(() => {
-    getAllMuscleGroups()
-      .then((res) => setMuscleGroups(res.data))
-      .catch((err) => console.log(err));
+    if (!exercise) return;
 
-    if (!objectId) return;
-
-    getExerciseById(objectId)
-      .then((res) => reset(res.data))
-      .catch((err) => console.log(err));
-  }, []);
+    reset(exercise.data);
+  }, [exercise]);
 
   return (
     <Form {...exerciseForm}>
