@@ -28,6 +28,7 @@ import useAddExercise from "@/hooks/mutations/exercise/useAddExercise";
 import useExerciseQuery from "@/hooks/queries/exercises/useExerciseQuery";
 import { invalidateQueryKeys } from "@/QueryClient/queryClient";
 import { Input } from "../ui/input";
+import CustomButton from "../ui/CustomButton";
 
 const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
   const exerciseForm = useForm<z.infer<typeof exerciseSchema>>({
@@ -40,13 +41,13 @@ const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
     },
   });
 
-  const { data: muscleGroups = [] } = useMuscleGroupsQuery();
+  const { data: muscleGroups } = useMuscleGroupsQuery();
   const { data: exercise } = useExerciseQuery(objectId || "");
 
   const { reset } = exerciseForm;
 
   const successFunc = (message: string) => {
-    invalidateQueryKeys([QueryKeys.EXERCISES, QueryKeys.EXERCISES + id]);
+    invalidateQueryKeys([QueryKeys.EXERCISES, QueryKeys.EXERCISES + objectId]);
 
     toast.success(message);
     closeSheet();
@@ -136,7 +137,7 @@ const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent dir="rtl">
-                  {muscleGroups?.map((muscleGroup) => (
+                  {muscleGroups?.data?.map((muscleGroup) => (
                     <SelectItem key={muscleGroup.name} value={muscleGroup.name}>
                       {muscleGroup.name}
                     </SelectItem>
