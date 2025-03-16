@@ -68,7 +68,7 @@ export const ViewDietPlanPresetPage = () => {
     });
   };
 
-  const { isLoading, error, data } = useDietPlanPresetQuery(id || "");
+  const { isLoading, error, data } = useDietPlanPresetQuery(id || "undefined");
 
   const createPreset = useAddDietPlanPreset({ onSuccess, onError });
   const updatePreset = useUpdateDietPlanPreset({ onSuccess, onError });
@@ -107,6 +107,7 @@ export const ViewDietPlanPresetPage = () => {
 
   if (isLoading) return <Loader size="large" />;
   if (error) return <ErrorPage message={error.message} />;
+
 
   return (
     <div className=" flex flex-col gap-4 size-full hide-scrollbar overflow-y-auto">
