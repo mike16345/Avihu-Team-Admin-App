@@ -10,7 +10,7 @@ interface ITabContent {
   value: string;
   btnPrompt: string;
   sheetForm: string;
-  deleteFunc: UseMutationResult<unknown, Error, string, unknown>;
+  deleteFunc: UseMutationResult<any, any, any, any>;
 }
 
 export interface ITabs {
@@ -35,4 +35,13 @@ export interface PaginationResult<T> {
 export interface IMutationProps<T> {
   onSuccess?: (result: T) => void;
   onError?: (error: Error) => void;
+}
+
+export interface IBaseItem {
+  name: string;
+}
+
+export interface IPresetFormProps {
+  objectId?: string;
+  closeSheet: () => void;
 }

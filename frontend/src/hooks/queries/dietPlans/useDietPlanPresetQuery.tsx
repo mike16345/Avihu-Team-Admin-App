@@ -6,7 +6,7 @@ const useDietPlanPresetQuery = (id: string) => {
   const { getDietPlanPreset } = useDietPlanPresetApi();
 
   return useQuery({
-    queryKey: [QueryKeys.DIET_PLAN_PRESETS, id],
+    queryKey: [QueryKeys.DIET_PLAN_PRESETS + id],
     queryFn: () => getDietPlanPreset(id),
     enabled: !!id,
     staleTime: Infinity,

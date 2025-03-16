@@ -1,11 +1,9 @@
-import { Button } from "@/components/ui/button";
 import ComboBox from "@/components/ui/combo-box";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { aerobicActivities } from "@/constants/cardioOptions";
 import { useIsEditableContext } from "@/context/useIsEditableContext";
-import useExerciseMethodQuery from "@/hooks/queries/useExerciseMethodQuery";
+import useCardioWorkoutQuery from "@/hooks/queries/cardioWorkout/useCardioWorkoutQuery";
 import { ICardioWorkout } from "@/interfaces/IWorkoutPlan";
 import { convertItemsToOptions } from "@/lib/utils";
 import React, { useEffect, useState } from "react";
@@ -17,16 +15,16 @@ interface CardioExerciseProps {
 
 const CardioExercise: React.FC<CardioExerciseProps> = ({ existingItem, updateExercise }) => {
   const { isEditable } = useIsEditableContext();
-  const { data: exerciseMethodResponse } = useExerciseMethodQuery();
-  const [exerciseMethods, setExerciseMethods] = useState<any[]>([]);
+  const { data: cardioWorkoutResponse } = useCardioWorkoutQuery();
+  const [cardioWorkouts, setCardioWorkouts] = useState<any[]>([]);
 
   useEffect(() => {
-    if (!exerciseMethodResponse?.data) return;
+    if (!cardioWorkoutResponse?.data) return;
 
-    const options = convertItemsToOptions(exerciseMethodResponse.data, `title`, `title`);
+    const options = convertItemsToOptions(cardioWorkoutResponse.data, `name`, `name`);
 
-    setExerciseMethods(options);
-  }, [exerciseMethodResponse]);
+    setCardioWorkouts(options);
+  }, [cardioWorkoutResponse]);
 
   return (
     <>
@@ -51,31 +49,13 @@ const CardioExercise: React.FC<CardioExerciseProps> = ({ existingItem, updateExe
           <Label className="font-bold underline">תרגיל:</Label>
           {isEditable ? (
             <ComboBox
-              options={aerobicActivities}
+              options={cardioWorkouts || []}
               value={existingItem?.cardioExercise}
               onSelect={(val) => updateExercise("cardioExercise", val)}
             />
           ) : (
             <div className="bg-accent rounded-md py-2 px-4 ">
               {existingItem?.cardioExercise || `לא הוגדר`}
-            </div>
-          )}
-        </div>
-
-        <div>
-          <Label className="font-bold underline">שיטת אימון:</Label>
-          {isEditable ? (
-            <div className="md:flex-row gap-2 flex flex-col ">
-              <ComboBox
-                options={exerciseMethods}
-                value={existingItem?.exerciseMethod}
-                onSelect={(val) => updateExercise("exerciseMethod", val)}
-              ></ComboBox>
-              <Button onClick={() => updateExercise(`exerciseMethod`, undefined)}>נקה</Button>
-            </div>
-          ) : (
-            <div className="bg-accent rounded-md py-2 px-4 ">
-              {existingItem?.exerciseMethod || `לא הוגדר`}
             </div>
           )}
         </div>

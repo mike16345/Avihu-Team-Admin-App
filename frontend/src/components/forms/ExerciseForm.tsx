@@ -26,23 +26,10 @@ import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import CustomButton from "../ui/CustomButton";
 import { QueryKeys } from "@/enums/QueryKeys";
+import { IPresetFormProps } from "@/interfaces/interfaces";
+import { exerciseSchema } from "@/schemas/exerciseSchema";
 
-interface ExerciseFormProps {
-  objectId?: string;
-  closeSheet: () => void;
-}
-
-const youtubeLinkRegex =
-  /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:[&?#][^\s]*)?$/;
-
-const exerciseSchema = z.object({
-  name: z.string().min(1, { message: `שם התרגיל חייב להיות תו אחד או יותר` }),
-  muscleGroup: z.string().min(1, { message: `תרגיל חייב להיות משוייך לקבוצת שריר` }),
-  tipFromTrainer: z.string().optional(),
-  linkToVideo: z.string().url({ message: `אנא הכנס לינק תקין!` }).regex(youtubeLinkRegex),
-});
-
-const ExerciseForm: React.FC<ExerciseFormProps> = ({ objectId, closeSheet }) => {
+const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
   const { getExerciseById, addExercise, updateExercise } = useExercisePresetApi();
   const { getAllMuscleGroups } = useMuscleGroupsApi();
   const [muscleGroups, setMuscleGroups] = useState<IMuscleGroupItem[]>();

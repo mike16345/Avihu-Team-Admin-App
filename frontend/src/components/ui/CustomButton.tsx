@@ -9,7 +9,7 @@ interface CustomButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement
 
 const CustomButton: React.FC<CustomButtonProps> = ({ title, isLoading, ...props }) => {
   return (
-    <Button {...props} disabled={isLoading}>
+    <Button {...props} disabled={isLoading || props.disabled}>
       {isLoading ? <Loader variant="button" /> : title}
     </Button>
   );

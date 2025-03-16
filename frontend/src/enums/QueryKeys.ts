@@ -15,4 +15,5 @@ export enum QueryKeys {
   MUSCLE_GROUP = "muscle-group-", //add  id here
   USERS = "users",
   USERS_TO_CHECK = "users-to-check",
+  CARDIO_WORKOUT_PRESET = "cardio-workout-preset-",
 }

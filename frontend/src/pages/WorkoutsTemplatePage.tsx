@@ -1,47 +1,18 @@
 import TemplateTabs from "@/components/templates/TemplateTabs";
-import useExercisePresetApi from "@/hooks/api/useExercisePresetApi";
-import useMuscleGroupsApi from "@/hooks/api/useMuscleGroupsApi";
-import { useWorkoutPlanPresetApi } from "@/hooks/api/useWorkoutPlanPresetsApi";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ITabs } from "@/interfaces/interfaces";
 import { QueryKeys } from "@/enums/QueryKeys";
-import useExerciseMethodApi from "@/hooks/api/useExerciseMethodsApi";
+import useDeleteWorkoutPreset from "@/hooks/mutations/workouts/useDeleteWorkoutPlanPreset";
+import useDeleteMuscleGroup from "@/hooks/mutations/muscleGroup/useDeleteMuscleGroup";
+import useDeleteExercise from "@/hooks/mutations/exercise/useDeleteExercise";
+import useDeleteExerciseMethod from "@/hooks/mutations/exerciseMethod/useDeleteExerciseMethod";
+import useDeleteCardioWorkout from "@/hooks/mutations/cardioWorkout/useDeleteCardioWorkout";
 
 const WorkoutsTemplatePage = () => {
-  const { deleteExercise } = useExercisePresetApi();
-  const { deleteWorkoutPlanPreset } = useWorkoutPlanPresetApi();
-  const { deleteMuscleGroup } = useMuscleGroupsApi();
-  const { deleteExerciseMethod } = useExerciseMethodApi();
-
-  const queryClient = useQueryClient();
-
-  const deleteWorkoutPreset = useMutation({
-    mutationFn: deleteWorkoutPlanPreset,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QueryKeys.WORKOUT_PRESETS] });
-    },
-  });
-
-  const deleteExistingMuscleGroup = useMutation({
-    mutationFn: deleteMuscleGroup,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QueryKeys.MUSCLE_GROUP] });
-    },
-  });
-
-  const deleteExistingExercise = useMutation({
-    mutationFn: deleteExercise,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QueryKeys.EXERCISES] });
-    },
-  });
-
-  const deleteExistingExerciseMethod = useMutation({
-    mutationFn: deleteExerciseMethod,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QueryKeys.EXERCISE_METHODS] });
-    },
-  });
+  const deleteWorkoutPreset = useDeleteWorkoutPreset();
+  const deleteExistingMuscleGroup = useDeleteMuscleGroup();
+  const deleteExistingExercise = useDeleteExercise();
+  const deleteExistingExerciseMethod = useDeleteExerciseMethod();
+  const deleteCardioWorkout = useDeleteCardioWorkout();
 
   const tabs: ITabs = {
     tabHeaders: [
@@ -64,6 +35,11 @@ const WorkoutsTemplatePage = () => {
         name: `שיטות אימון`,
         value: `exercisesMethods`,
         queryKey: QueryKeys.EXERCISE_METHODS,
+      },
+      {
+        name: `אירובי`,
+        value: `cardioWorkouts`,
+        queryKey: QueryKeys.CARDIO_WORKOUT_PRESET,
       },
     ],
     tabContent: [
@@ -90,6 +66,12 @@ const WorkoutsTemplatePage = () => {
         btnPrompt: `הוסף שיטת אימון`,
         sheetForm: `exercisesMethods`,
         deleteFunc: deleteExistingExerciseMethod,
+      },
+      {
+        value: `cardioWorkouts`,
+        btnPrompt: `הוסף תרגיל`,
+        sheetForm: `cardioWorkouts`,
+        deleteFunc: deleteCardioWorkout,
       },
     ],
   };
