@@ -11,6 +11,7 @@ import AdminDashboard from "@/pages/AdminDashboard";
 import BlogPage from "@/pages/BlogPage";
 import BlogEditor from "@/components/Blog/BlogEditor";
 import DietPlanWrapper from "@/components/DietPlan/DietPlanWrapper";
+import Test from "./test";
 
 export const AppRoutes = () => {
   return (
@@ -36,6 +37,7 @@ export const AppRoutes = () => {
         <Route path="/workoutPlans" element={<WorkoutsTemplatePage />} />
         <Route path="/dietPlans/" element={<DietPlanTemplatePage />} />
         <Route path="/presets/*" element={<PresetRoutes />} />
+        <Route path="/test" element={<Test />} />
       </Routes>
     </>
   );

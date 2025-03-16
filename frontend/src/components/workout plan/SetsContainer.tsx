@@ -19,6 +19,7 @@ export const defaultSet: ISet = {
 const SetsContainer: React.FC<SetContainerProps> = ({ parentPath }) => {
   const { fields, append, remove } = useFieldArray<WorkoutSchemaType, `${typeof parentPath}.sets`>({
     name: `${parentPath}.sets`,
+    keyName: "id",
   });
   const { getValues } = useFormContext<WorkoutSchemaType>();
 
@@ -42,9 +43,8 @@ const SetsContainer: React.FC<SetContainerProps> = ({ parentPath }) => {
       <h2 className="underline font-bold pt-2">סטים:</h2>
       <div className="flex flex-col gap-2">
         {fields.map((set, i) => (
-          <div key={set.id} className="flex gap-4 justify-center items-center w-fit">
-            <SetsInput parentPath={`${parentPath}.sets.${i}`} setNumber={i + 1} />
-            <div className="flex items-center mt-5 ">
+          <SetsInput key={set.id} parentPath={`${parentPath}.sets.${i}`} setNumber={i + 1}>
+            <div className="flex items-center mt-6">
               <DeleteButton
                 disabled={fields.length == 1}
                 tip="הסר סט"
@@ -52,7 +52,7 @@ const SetsContainer: React.FC<SetContainerProps> = ({ parentPath }) => {
               />
               <CopyButton tip="שכפל סט" onClick={() => copySet(i)} />
             </div>
-          </div>
+          </SetsInput>
         ))}
       </div>
       <div className="border-t-2">

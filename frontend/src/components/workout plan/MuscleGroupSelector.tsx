@@ -8,10 +8,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { BiPencil } from "react-icons/bi";
-import useMuscleGroupsApi from "@/hooks/api/useMuscleGroupsApi";
-import { useQuery } from "@tanstack/react-query";
 import { convertItemsToOptions } from "@/lib/utils";
-import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 import {
   Command,
   CommandEmpty,
@@ -21,34 +18,33 @@ import {
   CommandList,
 } from "../ui/command";
 import Loader from "../ui/Loader";
-import { useWorkoutPlanContext } from "@/context/useWorkoutPlanContext";
+import { useFormContext } from "react-hook-form";
+import { WorkoutSchemaType } from "@/schemas/workoutPlanSchema";
+import useMuscleGroupsQuery from "@/hooks/queries/MuscleGroups/useMuscleGroupsQuery";
 
 interface MuscleGroupSelectorProps {
   handleDismiss: (value?: string) => void;
   handleChange: (value: string) => void;
   existingMuscleGroup?: string;
+  pathToMuscleGroups: `workoutPlans.${number}.muscleGroups`;
 }
 
 const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
   handleChange,
   handleDismiss,
   existingMuscleGroup,
+  pathToMuscleGroups,
 }) => {
-  const { workout } = useWorkoutPlanContext();
-  const { getAllMuscleGroups } = useMuscleGroupsApi();
+  const { getValues } = useFormContext<WorkoutSchemaType>();
+  const muscleGroups = getValues(pathToMuscleGroups);
+
   const [value, setValue] = useState<string>(existingMuscleGroup || ``);
   const [open, setOpen] = useState(!Boolean(existingMuscleGroup));
 
-  const muscleGroupsQuery = useQuery({
-    queryKey: ["muscleGroups"],
-    queryFn: getAllMuscleGroups,
-    staleTime: FULL_DAY_STALE_TIME,
-  });
+  const muscleGroupsQuery = useMuscleGroupsQuery();
 
   const muscleGroupOptions = useMemo(() => {
-    const muscleGroupsInWorkout = workout.muscleGroups.map(
-      (muscleGroup) => muscleGroup.muscleGroup
-    );
+    const muscleGroupsInWorkout = muscleGroups.map((muscleGroup) => muscleGroup.muscleGroup);
 
     const filteredExistingMuscleGroups = muscleGroupsQuery.data?.data.filter(
       (muscleGroup) =>
@@ -56,7 +52,7 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
     );
 
     return convertItemsToOptions(filteredExistingMuscleGroups || [], "name", "name");
-  }, [muscleGroupsQuery.data, workout.muscleGroups]);
+  }, [muscleGroupsQuery.data, muscleGroups]);
 
   const updateSelection = (selection: string) => {
     handleChange(selection);

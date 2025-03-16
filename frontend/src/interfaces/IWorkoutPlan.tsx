@@ -1,5 +1,7 @@
 import { IBaseItem } from "./interfaces";
 
+export type CardioType = `simple` | `complex`;
+
 export interface IWorkoutPlan {
   _id?: string;
   userId?: string;
@@ -15,7 +17,7 @@ export interface ICompleteWorkoutPlan {
 }
 
 export interface ICardioPlan {
-  type: `simple` | `complex`;
+  type: CardioType;
   plan: IComplexCardioType | ISimpleCardioType;
 }
 
@@ -29,7 +31,7 @@ export interface ISet {
 export interface IExercise {
   _id?: string;
   tipFromTrainer?: string;
-  linkToVideo?: string;
+  linkToVideo: string;
   exerciseMethod?: string;
   name: string;
   sets: ISet[];

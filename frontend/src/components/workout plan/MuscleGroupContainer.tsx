@@ -1,35 +1,38 @@
 import { IMuscleGroupWorkouts, IExercise } from "@/interfaces/IWorkoutPlan";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
-import { ComponentProps, FC, useState } from "react";
+import { FC, useState } from "react";
 import { ChevronsUpDown } from "lucide-react";
 import DeleteButton from "../ui/buttons/DeleteButton";
 import ExcerciseInput from "./ExcerciseInput";
 import MuscleGroupSelector from "./MuscleGroupSelector";
 import DeleteModal from "../Alerts/DeleteModal";
-import { useIsEditableContext } from "@/context/useIsEditableContext";
 import { Button } from "../ui/button";
 import { CollapsibleProps } from "@radix-ui/react-collapsible";
 
 interface IMuscleGroupContainerProps extends CollapsibleProps {
   muscleGroup: IMuscleGroupWorkouts;
   handleUpdateMuscleGroup: (value: string) => void;
-  handleUpdateExercises: (exerciseObjects: IExercise[]) => void;
   handleDeleteMuscleGroup: () => void;
+  parentPath: `workoutPlans.${number}.muscleGroups.${number}`;
 }
 
 export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
   muscleGroup,
   handleUpdateMuscleGroup,
-  handleUpdateExercises,
+  parentPath,
   handleDeleteMuscleGroup,
   ...props
 }) => {
-  const { isEditable } = useIsEditableContext();
-
   const [isDeleteMuscleGroupModalOpen, setIsDeleteMuscleGroupModalOpen] = useState(false);
   const [openMuscleGroupContainer, setOpenMuscleGroupContainer] = useState(
     muscleGroup.exercises.length === 0
   );
+  const path = parentPath.split(".");
+
+  const muscleGroupsPath = (path[0] +
+    "." +
+    path[1] +
+    ".muscleGroups") as `workoutPlans.${number}.muscleGroups`;
 
   return (
     <Collapsible
@@ -44,31 +47,27 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
             <div className="flex  items-center gap-2 ">
               <h4 className=" font-bold">קבוצת שריר -</h4>
 
-              {isEditable ? (
-                <MuscleGroupSelector
-                  handleDismiss={(val) => {
-                    if (!val) {
-                      handleDeleteMuscleGroup();
-                    }
-                  }}
-                  handleChange={(value) => handleUpdateMuscleGroup(value)}
-                  existingMuscleGroup={muscleGroup.muscleGroup}
-                />
-              ) : (
-                <p>{muscleGroup.muscleGroup}</p>
-              )}
+              <MuscleGroupSelector
+                pathToMuscleGroups={muscleGroupsPath}
+                handleDismiss={(val) => {
+                  if (!val) {
+                    handleDeleteMuscleGroup();
+                  }
+                }}
+                handleChange={(value) => handleUpdateMuscleGroup(value)}
+                existingMuscleGroup={muscleGroup.muscleGroup}
+              />
             </div>
             <div className="flex items-center justify-between gap-4">
-              {isEditable && (
-                <DeleteButton
-                  tip="הסר קבוצת שריר"
-                  onClick={() => setIsDeleteMuscleGroupModalOpen(true)}
-                />
-              )}
+              <DeleteButton
+                tip="הסר קבוצת שריר"
+                onClick={() => setIsDeleteMuscleGroupModalOpen(true)}
+              />
 
               <Button
                 onClick={() => setOpenMuscleGroupContainer((open) => !open)}
                 variant="ghost"
+                type="button"
                 size="sm"
                 className={`w-9 p-0 transition`}
               >
@@ -79,14 +78,11 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
           </div>
         </div>
         <CollapsibleContent>
-          <>
-            <ExcerciseInput
-              key={muscleGroup.muscleGroup}
-              muscleGroup={muscleGroup?.muscleGroup || ``}
-              exercises={muscleGroup.exercises}
-              handleUpdateExercises={(workouts) => handleUpdateExercises(workouts)}
-            />
-          </>
+          <ExcerciseInput
+            key={muscleGroup.muscleGroup}
+            parentPath={parentPath}
+            muscleGroup={muscleGroup?.muscleGroup || ``}
+          />
         </CollapsibleContent>
 
         <DeleteModal

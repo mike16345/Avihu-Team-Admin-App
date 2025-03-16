@@ -1,14 +1,24 @@
 import { z } from "zod";
+import { youtubeLinkRegex } from "./exerciseSchema";
 
-export const setSchema = z.object({
-  minReps: z.number().min(1),
-  maxReps: z.number().optional(),
-});
+export const setSchema = z
+  .object({
+    minReps: z.coerce.number().min(1),
+    maxReps: z.coerce.number().optional(),
+  })
+  .refine(
+    (data) =>
+      typeof data.maxReps === "undefined" || data.maxReps == 0 ? true : data.maxReps > data.minReps,
+    {
+      message: "מספר החזרות המקסימלי חייב להיות גדול ממספר החזרות המינימלי",
+      path: ["maxReps"],
+    }
+  );
 
 export const workoutSchema = z.object({
   name: z.string().min(1),
   sets: z.array(setSchema).min(1),
-  linkToVideo: z.string().optional(),
+  linkToVideo: z.string().regex(youtubeLinkRegex),
   tipFromTrainer: z.string().optional(),
   exerciseMethod: z.string().min(1).optional(),
 });
@@ -19,18 +29,18 @@ export const muscleGroupWorkoutPlanSchema = z.object({
 });
 
 export const simpleCardioSchema = z.object({
-  minsPerWeek: z.number().min(1),
-  timesPerWeek: z.number().min(1),
+  minsPerWeek: z.coerce.number().min(1),
+  timesPerWeek: z.coerce.number().min(1),
   minsPerWorkout: z.number().min(1).optional(),
   tips: z.string().optional(),
 });
 
 export const cardioWorkoutSchema = z.object({
   name: z.string().min(1),
-  warmUpAmount: z.number().min(0).optional(),
-  distance: z.number().min(1),
-  cardioExercise: z.string().min(1),
-  tips: z.string().optional(),
+  warmUpAmount: z.coerce.number().min(0).optional(),
+  distance: z.coerce.string().optional(),
+  cardioExercise: z.coerce.string().min(1),
+  tips: z.coerce.string().optional(),
 });
 
 export const cardioWeekSchema = z.object({
