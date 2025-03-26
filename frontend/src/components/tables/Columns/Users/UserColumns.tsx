@@ -19,6 +19,8 @@ import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import DeleteModal from "@/components/Alerts/DeleteModal";
+import { invalidateQueryKeys } from "@/QueryClient/queryClient";
+import { QueryKeys } from "@/enums/QueryKeys";
 
 export const columns: ColumnDef<IUser>[] = [
   {
@@ -88,12 +90,16 @@ export const columns: ColumnDef<IUser>[] = [
         await updateUserField(row.original._id!, "hasAccess", hasAccess)
           .then((res) => {
             setIsChecked(res.data.hasAccess);
+
             toast.success(
               `הגישה לאפליקציה ${res.data.hasAccess ? "ניתנה" : "נחסמה "}  ל- ${
                 row.original.firstName
               } ${row.original.lastName}`
             );
+
             setIsToggling(false);
+
+            invalidateQueryKeys([QueryKeys.USERS, QueryKeys.USERS + res.data._id]);
           })
           .catch((err) => {
             console.log("error", err);
