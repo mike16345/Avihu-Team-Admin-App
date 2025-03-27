@@ -29,6 +29,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { FilterIcon, Trash2Icon } from "lucide-react";
 import { RowData } from "@tanstack/react-table";
+import { usePagination } from "@/hooks/usePagination";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -62,10 +63,10 @@ export function DataTableHebrew<TData, TValue>({
   getRowClassName,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [pageNumber, setPageNumber] = useState<number>(1);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
+  const { pageNumber, goToPage } = usePagination();
 
   const table = useReactTable({
     data,
@@ -93,6 +94,11 @@ export function DataTableHebrew<TData, TValue>({
       rowSelection,
     },
     getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      pagination: {
+        pageIndex: pageNumber - 1,
+      },
+    },
   });
 
   const handleDeleteRows = async () => {
@@ -218,7 +224,7 @@ export function DataTableHebrew<TData, TValue>({
           variant="outline"
           onClick={() => {
             table.previousPage();
-            setPageNumber((page) => page - 1);
+            goToPage(pageNumber - 1);
           }}
           disabled={!table.getCanPreviousPage()}
         >
@@ -228,7 +234,7 @@ export function DataTableHebrew<TData, TValue>({
           variant="outline"
           onClick={() => {
             table.nextPage();
-            setPageNumber((page) => page + 1);
+            goToPage(pageNumber + 1);
           }}
           disabled={!table.getCanNextPage()}
         >
