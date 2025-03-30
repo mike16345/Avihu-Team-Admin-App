@@ -111,4 +111,12 @@ export const fullWorkoutPlanSchema = z.object({
   cardio: cardioPlanSchema,
 });
 
+export const workoutPresetSchema = fullWorkoutPlanSchema.merge(
+  z.object({
+    name: z.string().min(MIN_NAME_LENGTH, { message: ERROR_MESSAGES.stringMin(MIN_NAME_LENGTH) }),
+  })
+);
+
+export type WorkoutPresetSchemaType = z.infer<typeof workoutPresetSchema>;
+
 export type WorkoutSchemaType = z.infer<typeof fullWorkoutPlanSchema>;
