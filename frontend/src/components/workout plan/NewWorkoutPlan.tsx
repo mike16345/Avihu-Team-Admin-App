@@ -80,13 +80,12 @@ const NewWorkoutPlan = ({ children }: { children: React.ReactNode }) => {
 
   const onSubmit = (values: WorkoutSchemaType) => {
     console.log("submitting", values);
-    // if (!id) return Promise.reject();
+    if (!id) return Promise.reject("User ID is required!");
     let workoutPlan = values;
     const cardioPlan = values.cardio.type == "simple" && (values.cardio.plan as ISimpleCardioType);
 
     if (cardioPlan) {
       const minsPerWorkout = cardioPlan.minsPerWeek / cardioPlan.timesPerWeek;
-      console.log("minsPerWeek", minsPerWorkout);
 
       workoutPlan = {
         ...values,
@@ -103,10 +102,11 @@ const NewWorkoutPlan = ({ children }: { children: React.ReactNode }) => {
     const cleanedPostObject = cleanWorkoutObject(workoutPlan);
 
     console.log("cleaning", cleanedPostObject);
-    return;
     if (!data) {
+      console.log("Adding new plan");
       return addWorkoutPlan.mutate({ id, workoutPlan: cleanedPostObject });
     } else {
+      console.log("Updating existing plan");
       return updateWorkoutPlan.mutate({ id, cleanedWorkoutPlan: cleanedPostObject });
     }
   };
@@ -118,7 +118,7 @@ const NewWorkoutPlan = ({ children }: { children: React.ReactNode }) => {
     });
     delete preset.userId;
 
-    // addWorkoutPlanPreset.mutate(preset);
+    addWorkoutPlanPreset.mutate(preset);
   };
 
   const handleFindUser = () => {
@@ -140,13 +140,13 @@ const NewWorkoutPlan = ({ children }: { children: React.ReactNode }) => {
     reset(data.data);
   }, [data]);
 
-  if (Object.keys(form.formState.errors).length > 0) {
-    const error = getNestedError(form.formState.errors);
-    console.log("errors", form.formState.errors);
-    console.log("error", error);
+  // if (Object.keys(form.formState.errors).length > 0) {
+  //   const error = getNestedError(form.formState.errors);
+  //   console.log("errors", form.formState.errors);
+  //   console.log("error", error);
 
-    toast.error(error);
-  }
+  //   toast.error(error);
+  // }
 
   return (
     <Form {...form}>
@@ -175,6 +175,7 @@ const NewWorkoutPlan = ({ children }: { children: React.ReactNode }) => {
             <CustomButton
               className="font-bold w-auto sm:w-fit"
               variant="default"
+              type="button"
               onClick={() => setOpenPresetModal(true)}
               title="שמור תוכנית אימון כתבנית"
               disabled={updateWorkoutPlan.isPending || addWorkoutPlan.isPending}

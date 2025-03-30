@@ -19,10 +19,7 @@ interface WorkoutContainerProps {
 }
 
 const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({ parentPath, onDeleteWorkout }) => {
-  const {
-    formState,
-    control,
-  } = useFormContext<WorkoutSchemaType>();
+  const { control } = useFormContext<WorkoutSchemaType>();
 
   const handleAddMuscleGroup = () => {
     const newMuscleGroup: IMuscleGroupWorkouts = {

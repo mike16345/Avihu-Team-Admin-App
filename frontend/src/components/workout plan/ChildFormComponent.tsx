@@ -6,6 +6,9 @@ import { BsPlusCircleFill } from "react-icons/bs";
 import WorkoutTabs from "./WorkoutTabs";
 import CardioWrapper from "./cardio/CardioWrapper";
 import WorkoutPlanContainer from "./WorkoutPlanContainer";
+import DeleteModal from "../Alerts/DeleteModal";
+import { useRef, useState } from "react";
+import { toast } from "sonner";
 
 const ChildFormComponent = () => {
   const form = useFormContext<z.infer<typeof fullWorkoutPlanSchema>>();
@@ -18,11 +21,24 @@ const ChildFormComponent = () => {
     name: "workoutPlans",
   });
 
-  // const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  // const [isMuscleGroupChangedModalOpen, setIsMuscleGroupChangedModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const workoutIndex = useRef<number | null>(null);
 
   const onAddWorkout = () => {
     addWorkoutPlan({ planName: `אימון ${workoutPlans.length + 1}`, muscleGroups: [] });
+  };
+
+  const onClickDeleteWorkout = (index: number) => {
+    setIsDeleteModalOpen(true);
+    workoutIndex.current = index;
+  };
+
+  const onConfirmDeleteWorkout = () => {
+    if (!workoutIndex.current) return;
+
+    removeWorkoutPlan(workoutIndex.current!);
+    workoutIndex.current = null;
+    toast.success("אימון נמחק בהצלחה!");
   };
 
   return (
@@ -37,7 +53,7 @@ const ChildFormComponent = () => {
                   return (
                     <div key={workoutPlan.id} className="relative w-full">
                       <WorkoutPlanContainer
-                        onDeleteWorkout={(index) => removeWorkoutPlan(index)}
+                        onDeleteWorkout={(index) => onClickDeleteWorkout(index)}
                         parentPath={`workoutPlans.${index}`}
                       />
                     </div>
@@ -56,6 +72,11 @@ const ChildFormComponent = () => {
           />
         </div>
       </div>
+      <DeleteModal
+        isModalOpen={isDeleteModalOpen}
+        setIsModalOpen={setIsDeleteModalOpen}
+        onConfirm={onConfirmDeleteWorkout}
+      />
     </>
   );
 };

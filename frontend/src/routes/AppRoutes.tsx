@@ -12,6 +12,8 @@ import BlogPage from "@/pages/BlogPage";
 import BlogEditor from "@/components/Blog/BlogEditor";
 import DietPlanWrapper from "@/components/DietPlan/DietPlanWrapper";
 import Test from "./test";
+import ChildFormComponent from "@/components/workout plan/ChildFormComponent";
+import NewWorkoutPlan from "@/components/workout plan/NewWorkoutPlan";
 
 export const AppRoutes = () => {
   return (
@@ -33,7 +35,14 @@ export const AppRoutes = () => {
             </DietPlanWrapper>
           }
         />
-        <Route path="/workout-plans/:id" element={<CreateWorkoutPlanWrapper />} />
+        <Route
+          path="/workout-plans/:id"
+          element={
+            <NewWorkoutPlan>
+              <ChildFormComponent />
+            </NewWorkoutPlan>
+          }
+        />
         <Route path="/workoutPlans" element={<WorkoutsTemplatePage />} />
         <Route path="/dietPlans/" element={<DietPlanTemplatePage />} />
         <Route path="/presets/*" element={<PresetRoutes />} />

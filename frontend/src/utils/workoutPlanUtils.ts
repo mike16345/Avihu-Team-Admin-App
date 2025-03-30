@@ -5,7 +5,7 @@ export function cleanWorkoutObject(obj: any): any {
     const cleanedObject: any = {};
     for (const key in obj) {
       if (obj.hasOwnProperty(key)) {
-        if (key === "id" || key === "_id") {
+        if (key === "id" || key === "_id" || key == "__v") {
           continue;
         } else if (key === "maxReps" && !obj[key]) {
           cleanedObject[key] = undefined;
