@@ -6,15 +6,12 @@ import DeleteButton from "../ui/buttons/DeleteButton";
 import { Input } from "../ui/input";
 import { FaChevronDown } from "react-icons/fa";
 import { MuscleGroupContainer } from "./MuscleGroupContainer";
-import DeleteModal from "@/components/Alerts/DeleteModal";
-import { useWorkoutPlanContext } from "@/context/useWorkoutPlanContext";
 import AddButton from "../ui/buttons/AddButton";
-import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 import { SortableItem } from "../DragAndDrop/SortableItem";
 import { DragDropWrapper } from "../Wrappers/DragDropWrapper";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { WorkoutSchemaType } from "@/schemas/workoutPlanSchema";
-import { FormField } from "../ui/form";
+import { FormField, FormItem, FormMessage } from "../ui/form";
 
 interface WorkoutContainerProps {
   parentPath: `workoutPlans.${number}`;
@@ -23,7 +20,7 @@ interface WorkoutContainerProps {
 
 const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({ parentPath, onDeleteWorkout }) => {
   const {
-    formState: { errors },
+    formState,
     control,
   } = useFormContext<WorkoutSchemaType>();
 
@@ -41,6 +38,7 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({ parentPath, onD
     control,
     name: `${parentPath}.muscleGroups`,
   });
+
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -52,7 +50,12 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({ parentPath, onD
               name={`${parentPath}.planName`}
               control={control}
               render={({ field }) => {
-                return <Input {...field} className="w-full sm:w-64" />;
+                return (
+                  <FormItem>
+                    <Input {...field} className="w-full sm:w-64" />
+                    <FormMessage />
+                  </FormItem>
+                );
               }}
             />
 

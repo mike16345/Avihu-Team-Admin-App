@@ -81,7 +81,7 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
           <ExcerciseInput
             key={muscleGroup.muscleGroup}
             parentPath={parentPath}
-            muscleGroup={muscleGroup?.muscleGroup || ``}
+            muscleGroup={muscleGroup?.muscleGroup}
           />
         </CollapsibleContent>
 

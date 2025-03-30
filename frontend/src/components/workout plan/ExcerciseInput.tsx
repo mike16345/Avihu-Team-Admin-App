@@ -24,7 +24,7 @@ interface ExcerciseInputProps {
 }
 
 const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath }) => {
-  const { watch, getValues, setValue, control } = useFormContext<WorkoutSchemaType>();
+  const { watch, getValues, setValue, resetField, control } = useFormContext<WorkoutSchemaType>();
   const {
     fields: exercises,
     append,
@@ -42,7 +42,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const exerciseIndexToDelete = useRef<number | null>(null);
 
-  const handleUpdateExercise = (index: number, updatedExercise: IExercisePresetItem) => {
+  const handleSelectExercise = (index: number, updatedExercise: IExercisePresetItem) => {
     const { name, linkToVideo, tipFromTrainer, exerciseMethod } = updatedExercise;
     const exercise = getValues(`${parentPath}.exercises`)[index];
     const newExercise = {
@@ -56,6 +56,13 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
     update(index, newExercise);
   };
 
+  const handleUpdateExercise = (key: any, value: any, index: number) => {
+    const exercise = getValues(`${parentPath}.exercises`)[index];
+
+    update(index, { ...exercise, [key]: value });
+    setValue(`${parentPath}.exercises.${index}.exerciseMethod`, value);
+  };
+
   const handleAddExcercise = () => {
     const newExercise: IExercise = {
       name: ``,
@@ -64,6 +71,13 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
     };
 
     append(newExercise);
+  };
+
+  const handleMoveExercise = (exercises: IExercise[]) => {
+    replace(exercises);
+    exercises.forEach((exercise, i) => {
+      resetField(`${parentPath}.exercises.${i}.sets`, { defaultValue: exercise.sets });
+    });
   };
 
   const handleDeleteExcercise = () => {
@@ -95,14 +109,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
     <>
       <div className="w-full flex flex-col gap-3 py-4">
         <div className="grid lg:grid-cols-2 gap-4">
-          <DragDropWrapper
-            items={exercises}
-            setItems={(items) => {
-              replace(items);
-              items.forEach((item, i) => setValue(`${parentPath}.exercises.${i}.sets`, item.sets));
-            }}
-            idKey="id"
-          >
+          <DragDropWrapper items={exercises} setItems={handleMoveExercise} idKey="id">
             {({ item, index }) => (
               <SortableItem item={item} idKey="id">
                 {() => {
@@ -129,7 +136,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                             <ComboBox
                               options={exerciseOptions}
                               value={item.name}
-                              onSelect={(exercise) => handleUpdateExercise(index, exercise)}
+                              onSelect={(exercise) => handleSelectExercise(index, exercise)}
                             />
                           </div>
                           {item.linkToVideo && (
@@ -144,18 +151,20 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                               options={exerciseMethods}
                               value={exercise.exerciseMethod}
                               onSelect={(exerciseMethod) => {
-                                setValue(
+                                handleUpdateExercise(
                                   `${parentPath}.exercises.${index}.exerciseMethod`,
-                                  exerciseMethod
+                                  exerciseMethod,
+                                  index
                                 );
                               }}
                             />
                             <Button
                               type="button"
                               onClick={() =>
-                                setValue(
+                                handleUpdateExercise(
                                   `${parentPath}.exercises.${index}.exerciseMethod`,
-                                  undefined
+                                  undefined,
+                                  index
                                 )
                               }
                             >
@@ -171,10 +180,6 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                             control={control}
                             name={`${parentPath}.exercises.${index}.linkToVideo`}
                             render={({ field }) => {
-                              if (index == 0) {
-                                console.log("field", field);
-                                console.log("item", item);
-                              }
                               return (
                                 <FormItem>
                                   <FormLabel>לינק לסרטון</FormLabel>

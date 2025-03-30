@@ -15,7 +15,7 @@ import { weightTab } from "@/pages/UserDashboard";
 import BackButton from "../ui/BackButton";
 import ComboBox from "../ui/combo-box";
 import useWorkoutPlanPresetsQuery from "@/hooks/queries/workoutPlans/useWorkoutPlanPresetsQuery";
-import { convertItemsToOptions } from "@/lib/utils";
+import { convertItemsToOptions, getNestedError } from "@/lib/utils";
 import useAddWorkoutPlan from "@/hooks/mutations/workouts/useAddWorkoutPlan";
 import useUpdateWorkoutPlan from "@/hooks/mutations/workouts/useUpdateWorkoutPlan";
 import { cleanWorkoutObject, parseErrorFromObject } from "@/utils/workoutPlanUtils";
@@ -121,17 +121,18 @@ const NewWorkoutPlan = ({ children }: { children: React.ReactNode }) => {
     // addWorkoutPlanPreset.mutate(preset);
   };
 
-  const user =
-    useMemo(() => {
-      const user = users.find((user) => user._id === id);
+  const handleFindUser = () => {
+    const user = users.find((user) => user._id === id);
 
-      if (!user) {
-        setIsNoUserWithId(true);
-        return;
-      }
+    if (!user) {
+      setIsNoUserWithId(true);
+      return;
+    }
 
-      return user;
-    }, [id]) || userQuery.data;
+    return user;
+  };
+
+  const user = useMemo(handleFindUser, [id]) || userQuery.data;
 
   useEffect(() => {
     if (!data) return;
@@ -139,8 +140,12 @@ const NewWorkoutPlan = ({ children }: { children: React.ReactNode }) => {
     reset(data.data);
   }, [data]);
 
-  if (form.formState.errors) {
+  if (Object.keys(form.formState.errors).length > 0) {
+    const error = getNestedError(form.formState.errors);
     console.log("errors", form.formState.errors);
+    console.log("error", error);
+
+    toast.error(error);
   }
 
   return (

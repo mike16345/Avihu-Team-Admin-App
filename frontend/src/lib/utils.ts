@@ -187,3 +187,18 @@ export const deepClone = <T>(obj: T): T => {
 
   return clonedObj as T;
 };
+
+export const getNestedError = (obj: Record<string, any>, key = "message"): string | null => {
+  if (!obj || typeof obj !== "object") return null;
+
+  if (key in obj) return obj[key];
+
+  for (const value of Object.values(obj)) {
+    if (typeof value === "object") {
+      const nestedMessage = getNestedError(value, key);
+      if (nestedMessage) return nestedMessage;
+    }
+  }
+
+  return null;
+};
