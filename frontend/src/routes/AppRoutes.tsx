@@ -4,7 +4,7 @@ import { ViewDietPlanPage } from "@/pages/ViewDietPlanPage";
 import { Route, Routes } from "react-router";
 import DietPlanTemplatePage from "@/pages/DietPlanTemplatePage";
 import WorkoutsTemplatePage from "@/pages/WorkoutsTemplatePage";
-import { CreateWorkoutPlanWrapper } from "@/components/Wrappers/CreateWorkoutPlanWrapper";
+import CreateWorkoutPlanWrapper from "@/components/Wrappers/CreateWorkoutPlanWrapper";
 import PresetRoutes from "./PresetRoutes";
 import UserFormPage from "@/pages/UserFormPage";
 import AdminDashboard from "@/pages/AdminDashboard";
@@ -12,8 +12,7 @@ import BlogPage from "@/pages/BlogPage";
 import BlogEditor from "@/components/Blog/BlogEditor";
 import DietPlanWrapper from "@/components/DietPlan/DietPlanWrapper";
 import Test from "./test";
-import ChildFormComponent from "@/components/workout plan/ChildFormComponent";
-import NewWorkoutPlan from "@/components/workout plan/NewWorkoutPlan";
+import WorkoutPlans from "@/components/workout plan/WorkoutPlans";
 
 export const AppRoutes = () => {
   return (
@@ -38,9 +37,9 @@ export const AppRoutes = () => {
         <Route
           path="/workout-plans/:id"
           element={
-            <NewWorkoutPlan>
-              <ChildFormComponent />
-            </NewWorkoutPlan>
+            <CreateWorkoutPlanWrapper>
+              <WorkoutPlans />
+            </CreateWorkoutPlanWrapper>
           }
         />
         <Route path="/workoutPlans" element={<WorkoutsTemplatePage />} />
