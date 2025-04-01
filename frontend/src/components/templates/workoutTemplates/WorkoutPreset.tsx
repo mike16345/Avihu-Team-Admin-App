@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import ComboBox from "@/components/ui/combo-box";
 import { convertItemsToOptions, getNestedError } from "@/lib/utils";
 import useWorkoutPlanPresetsQuery from "@/hooks/queries/workoutPlans/useWorkoutPlanPresetsQuery";
-import { IWorkoutPlanPreset } from "@/interfaces/IWorkoutPlan";
+import { ISimpleCardioType, IWorkoutPlanPreset } from "@/interfaces/IWorkoutPlan";
 import { cleanWorkoutObject, parseErrorFromObject } from "@/utils/workoutPlanUtils";
 import useUpdateWorkoutPlanPreset from "@/hooks/mutations/workouts/useUpdateWorkoutPlanPreset";
 import { defaultSimpleCardioOption } from "@/constants/cardioOptions";
@@ -28,6 +28,7 @@ import { toast } from "sonner";
 import { onSuccess } from "@/lib/query";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
+import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 
 export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ children }) => {
   const { id = "" } = useParams();
@@ -55,23 +56,27 @@ export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ childr
     navigation(MainRoutes.WORKOUT_PLANS_PRESETS);
   };
 
+  const onError = (error: any) => {
+    const message = parseErrorFromObject(error?.data || "");
+
+    toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
+      description: message,
+    });
+  };
+
   const addWorkoutPreset = useAddWorkoutPreset({
     onSuccess: () => {
       onSuccess("תבנית נשמר בהצלחה!", [QueryKeys.WORKOUT_PRESETS]);
       onMutateSuccess();
     },
-    onError: (error) => {
-      toast.error(error.message);
-    },
+    onError,
   });
   const updateWorkoutPlanPreset = useUpdateWorkoutPlanPreset({
     onSuccess: () => {
       onSuccess("תבנית עודכן בהצלחה!", [QueryKeys.WORKOUT_PRESETS, QueryKeys.WORKOUT_PRESETS + id]);
       onMutateSuccess();
     },
-    onError: (error) => {
-      toast.error(error.message);
-    },
+    onError,
   });
 
   const [selectedPreset, setSelectedPreset] = useState("");
@@ -91,7 +96,25 @@ export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ childr
   };
 
   const onSubmit = (values: WorkoutPresetSchemaType) => {
-    const cleanedPreset = cleanWorkoutObject(values);
+    let workoutPlan = values;
+    const cardioPlan = values.cardio.type == "simple" && (values.cardio.plan as ISimpleCardioType);
+
+    if (cardioPlan) {
+      const minsPerWorkout = cardioPlan.minsPerWeek / cardioPlan.timesPerWeek;
+
+      workoutPlan = {
+        ...values,
+        cardio: {
+          type: values.cardio.type,
+          plan: {
+            ...cardioPlan,
+            minsPerWorkout,
+          },
+        },
+      };
+    }
+
+    const cleanedPreset = cleanWorkoutObject(workoutPlan);
 
     if (id) {
       updateWorkoutPlanPreset.mutate({ presetId: id, updatedPreset: cleanedPreset });

@@ -15,7 +15,7 @@ import { weightTab } from "@/pages/UserDashboard";
 import BackButton from "../ui/BackButton";
 import ComboBox from "../ui/combo-box";
 import useWorkoutPlanPresetsQuery from "@/hooks/queries/workoutPlans/useWorkoutPlanPresetsQuery";
-import { convertItemsToOptions } from "@/lib/utils";
+import { convertItemsToOptions, getNestedError } from "@/lib/utils";
 import useAddWorkoutPlan from "@/hooks/mutations/workouts/useAddWorkoutPlan";
 import useUpdateWorkoutPlan from "@/hooks/mutations/workouts/useUpdateWorkoutPlan";
 import { cleanWorkoutObject, parseErrorFromObject } from "@/utils/workoutPlanUtils";
@@ -27,6 +27,7 @@ import useAddWorkoutPreset from "@/hooks/mutations/workouts/useAddWorkoutPreset"
 import InputModal from "../ui/InputModal";
 import { defaultSimpleCardioOption } from "@/constants/cardioOptions";
 import { ISimpleCardioType } from "@/interfaces/IWorkoutPlan";
+import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 
 const CreateWorkoutPlanWrapper = ({ children }: { children: React.ReactNode }) => {
   const form = useForm<z.infer<typeof fullWorkoutPlanSchema>>({
@@ -37,7 +38,10 @@ const CreateWorkoutPlanWrapper = ({ children }: { children: React.ReactNode }) =
       workoutPlans: [],
     },
   });
-  const { reset } = form;
+  const {
+    formState: { isDirty },
+    reset,
+  } = form;
   const { id = "" } = useParams();
   const navigation = useNavigate();
   const users = useUsersStore((state) => state.users);
@@ -79,7 +83,6 @@ const CreateWorkoutPlanWrapper = ({ children }: { children: React.ReactNode }) =
   );
 
   const onSubmit = (values: WorkoutSchemaType) => {
-    console.log("submitting", values);
     if (!id) return Promise.reject("User ID is required!");
     let workoutPlan = values;
     const cardioPlan = values.cardio.type == "simple" && (values.cardio.plan as ISimpleCardioType);
@@ -101,12 +104,9 @@ const CreateWorkoutPlanWrapper = ({ children }: { children: React.ReactNode }) =
 
     const cleanedPostObject = cleanWorkoutObject(workoutPlan);
 
-    console.log("cleaning", cleanedPostObject);
     if (!data) {
-      console.log("Adding new plan");
       return addWorkoutPlan.mutate({ id, workoutPlan: cleanedPostObject });
     } else {
-      console.log("Updating existing plan");
       return updateWorkoutPlan.mutate({ id, cleanedWorkoutPlan: cleanedPostObject });
     }
   };
@@ -132,6 +132,11 @@ const CreateWorkoutPlanWrapper = ({ children }: { children: React.ReactNode }) =
     return user;
   };
 
+  const onInvalidSubmit = (e: any) => {
+    const errorMessage = getNestedError(e);
+    toast.error(errorMessage?.title, { description: errorMessage?.description });
+  };
+
   const user = useMemo(handleFindUser, [id]) || userQuery.data;
 
   useEffect(() => {
@@ -140,13 +145,7 @@ const CreateWorkoutPlanWrapper = ({ children }: { children: React.ReactNode }) =
     reset(data.data);
   }, [data]);
 
-  // if (Object.keys(form.formState.errors).length > 0) {
-  //   const error = getNestedError(form.formState.errors);
-  //   console.log("errors", form.formState.errors);
-  //   console.log("error", error);
-
-  //   toast.error(error);
-  // }
+  useUnsavedChangesWarning(isDirty);
 
   return (
     <Form {...form}>
@@ -169,7 +168,7 @@ const CreateWorkoutPlanWrapper = ({ children }: { children: React.ReactNode }) =
             }}
           />
         </div>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+        <form onSubmit={form.handleSubmit(onSubmit, onInvalidSubmit)}>
           {children}
           <div className="flex flex-col md:flex-row md:justify-end gap-2 py-1">
             <CustomButton
