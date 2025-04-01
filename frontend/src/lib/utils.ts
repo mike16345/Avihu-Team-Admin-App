@@ -188,15 +188,47 @@ export const deepClone = <T>(obj: T): T => {
   return clonedObj as T;
 };
 
-export const getNestedError = (obj: Record<string, any>, key = "message"): string | null => {
+type HebrewPathTranslations = {
+  workoutPlans: string;
+  muscleGroups: string;
+  exercises: string;
+  sets: string;
+  cardio: string;
+  weeks: string;
+  workouts: string;
+};
+
+const hebrewPathTranslations: HebrewPathTranslations = {
+  workoutPlans: "אימון",
+  muscleGroups: "קבוצת שריר",
+  exercises: "תרגיל",
+  sets: "סט",
+  cardio: "אירובי",
+  weeks: "שבוע",
+  workouts: `אימון`,
+};
+
+export const getNestedError = (
+  obj: Record<string, any>,
+  key = "message",
+  path: (string | number)[] = []
+): { title: string; description: string } | null => {
   if (!obj || typeof obj !== "object") return null;
 
-  if (key in obj) return obj[key];
+  if (key in obj) {
+    return {
+      title: `שגיאה ב- ${path.join(" ")}`,
+      description: obj[key],
+    };
+  }
 
-  for (const value of Object.values(obj)) {
+  for (const [k, value] of Object.entries(obj)) {
     if (typeof value === "object") {
-      const nestedMessage = getNestedError(value, key);
-      if (nestedMessage) return nestedMessage;
+      const formattedKey = isNaN(Number(k))
+        ? hebrewPathTranslations[k as keyof HebrewPathTranslations]
+        : `${Number(k) + 1}`;
+      const nestedError = getNestedError(value, key, [...path, `${formattedKey}`]);
+      if (nestedError) return nestedError;
     }
   }
 

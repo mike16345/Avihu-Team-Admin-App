@@ -119,8 +119,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                     <Card className={` sm:p-4 max-h-[575px] overflow-y-auto custom-scrollbar`}>
                       <CardHeader>
                         <div className="flex flex-col gap-1 w-full">
-                          <div className="flex items-center justify-between w-full">
-                            <h2 className="font-bold underline">תרגיל:</h2>
+                          <div className="flex items-center justify-end w-full">
                             <Button
                               type="button"
                               variant={"ghost"}
@@ -133,10 +132,24 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                             </Button>
                           </div>
                           <div className="w-fit">
-                            <ComboBox
-                              options={exerciseOptions}
-                              value={item.name}
-                              onSelect={(exercise) => handleSelectExercise(index, exercise)}
+                            <FormField
+                              name={`${parentPath}.exercises.${index}.name`}
+                              render={({ field }) => {
+                                return (
+                                  <FormItem>
+                                    <FormLabel>תרגיל</FormLabel>
+                                    <ComboBox
+                                      options={exerciseOptions}
+                                      value={field.value}
+                                      onSelect={(exercise) => {
+                                        handleSelectExercise(index, exercise);
+                                        field.onChange(exercise.name);
+                                      }}
+                                    />
+                                    <FormMessage />
+                                  </FormItem>
+                                );
+                              }}
                             />
                           </div>
                           {item.linkToVideo && (

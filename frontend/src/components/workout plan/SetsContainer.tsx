@@ -42,7 +42,7 @@ const SetsContainer: React.FC<SetContainerProps> = ({ parentPath }) => {
   return (
     <div className="flex flex-col gap-2 w-fit">
       <h2 className="underline font-bold pt-2">סטים:</h2>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-4">
         {fields.map((set, i) => (
           <SetsInput key={set.id} parentPath={`${parentPath}.sets.${i}`} setNumber={i + 1}>
             <div className="flex items-center mt-6">

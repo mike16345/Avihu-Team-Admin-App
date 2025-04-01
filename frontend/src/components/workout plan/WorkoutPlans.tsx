@@ -29,13 +29,14 @@ const WorkoutPlans = () => {
   };
 
   const onClickDeleteWorkout = (index: number) => {
-    setIsDeleteModalOpen(true);
     workoutIndex.current = index;
+    setIsDeleteModalOpen(true);
   };
 
   const onConfirmDeleteWorkout = () => {
-    if (!workoutIndex.current) return;
+    if (workoutIndex.current == null) return;
 
+    console.log("deleting workout", workoutIndex.current);
     removeWorkoutPlan(workoutIndex.current!);
     workoutIndex.current = null;
     toast.success("אימון נמחק בהצלחה!");

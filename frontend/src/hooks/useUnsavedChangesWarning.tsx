@@ -1,9 +1,6 @@
 import { useEffect } from "react";
-import { useDirtyFormContext } from "@/context/useFormContext";
 
-export const useUnsavedChangesWarning = () => {
-  const { isDirty } = useDirtyFormContext();
-
+export const useUnsavedChangesWarning = (isDirty = false) => {
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
       if (!isDirty) return;

@@ -1,7 +1,7 @@
 import { PropsWithChildren, useEffect, useMemo, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import useWorkoutPlanPresetQuery from "@/hooks/queries/workoutPlans/useWorkoutPlanPresetQuery";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import BackButton from "@/components/ui/BackButton";
 import { MainRoutes } from "@/enums/Routes";
 import {
@@ -16,17 +16,23 @@ import CustomButton from "@/components/ui/CustomButton";
 import useAddWorkoutPreset from "@/hooks/mutations/workouts/useAddWorkoutPreset";
 import { Input } from "@/components/ui/input";
 import ComboBox from "@/components/ui/combo-box";
-import { convertItemsToOptions } from "@/lib/utils";
+import { convertItemsToOptions, getNestedError } from "@/lib/utils";
 import useWorkoutPlanPresetsQuery from "@/hooks/queries/workoutPlans/useWorkoutPlanPresetsQuery";
 import { IWorkoutPlanPreset } from "@/interfaces/IWorkoutPlan";
-import { cleanWorkoutObject } from "@/utils/workoutPlanUtils";
+import { cleanWorkoutObject, parseErrorFromObject } from "@/utils/workoutPlanUtils";
 import useUpdateWorkoutPlanPreset from "@/hooks/mutations/workouts/useUpdateWorkoutPlanPreset";
 import { defaultSimpleCardioOption } from "@/constants/cardioOptions";
 import { WorkoutPresetSchemaType, workoutPresetSchema } from "@/schemas/workoutPlanSchema";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { onSuccess } from "@/lib/query";
+import { QueryKeys } from "@/enums/QueryKeys";
+import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 
 export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ children }) => {
   const { id = "" } = useParams();
+  const navigation = useNavigate();
+
   const form = useForm<WorkoutPresetSchemaType>({
     resolver: zodResolver(workoutPresetSchema),
     defaultValues: {
@@ -35,12 +41,38 @@ export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ childr
       cardio: { type: "simple", plan: defaultSimpleCardioOption },
     },
   });
-  const { reset, handleSubmit } = form;
+  const {
+    formState: { isDirty },
+    getValues,
+    reset,
+    handleSubmit,
+  } = form;
 
   const { data: workoutPlanPresets } = useWorkoutPlanPresetsQuery();
   const { data } = useWorkoutPlanPresetQuery(id);
-  const addWorkoutPreset = useAddWorkoutPreset({});
-  const updateWorkoutPlanPreset = useUpdateWorkoutPlanPreset();
+
+  const onMutateSuccess = () => {
+    navigation(MainRoutes.WORKOUT_PLANS_PRESETS);
+  };
+
+  const addWorkoutPreset = useAddWorkoutPreset({
+    onSuccess: () => {
+      onSuccess("תבנית נשמר בהצלחה!", [QueryKeys.WORKOUT_PRESETS]);
+      onMutateSuccess();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+  const updateWorkoutPlanPreset = useUpdateWorkoutPlanPreset({
+    onSuccess: () => {
+      onSuccess("תבנית עודכן בהצלחה!", [QueryKeys.WORKOUT_PRESETS, QueryKeys.WORKOUT_PRESETS + id]);
+      onMutateSuccess();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
 
   const [selectedPreset, setSelectedPreset] = useState("");
 
@@ -51,8 +83,9 @@ export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ childr
 
   const handleSelectPreset = (preset: IWorkoutPlanPreset) => {
     reset({
+      name: getValues("name"),
       workoutPlans: preset.workoutPlans,
-      cardio: preset.cardio,
+      cardio: preset.cardio || { type: "simple", plan: defaultSimpleCardioOption },
     });
     setSelectedPreset(preset.name);
   };
@@ -67,11 +100,18 @@ export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ childr
     }
   };
 
+  const onInvalidSubmit = (e: any) => {
+    const errorMessage = getNestedError(e);
+    toast.error(errorMessage?.title, { description: errorMessage?.description });
+  };
+
   useEffect(() => {
     if (!data) return;
 
     reset(data);
   }, [data]);
+
+  useUnsavedChangesWarning(isDirty);
 
   return (
     <>
@@ -79,7 +119,7 @@ export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ childr
         <h1 className="text-4xl">תבנית אימון</h1>
         <BackButton navLink={MainRoutes.WORKOUT_PLANS_PRESETS} />
         <Form {...form}>
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <form onSubmit={handleSubmit(onSubmit, onInvalidSubmit)}>
             <div className="w-full py-4 border-b-2 mb-2">
               <div className="space-y-4">
                 <FormField
