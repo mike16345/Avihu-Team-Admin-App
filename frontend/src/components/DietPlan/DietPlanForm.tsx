@@ -65,7 +65,7 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ dietPlan, updateDietPlan })
           הוסף ארוחה
         </Button>
       </div>
-      <div className="w-full flex flex-col sm:flex-row gap-12 ">
+      <div className="w-full flex flex-col sm:flex-row gap-8 ">
         {dietPlan && (
           <div className="sm:w-3/4 w-full flex flex-col gap-8 ">
             {dietPlan.meals.map((meal, index) => {
@@ -86,16 +86,18 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ dietPlan, updateDietPlan })
             })}
           </div>
         )}
-        <CustomInstructions
-          instructions={dietPlan.customInstructions}
-          freeCalories={dietPlan.freeCalories || 0}
-          fatsPerDay={dietPlan.fatsPerDay || 0}
-          veggiesPerDay={dietPlan.veggiesPerDay || 0}
-          onUpdate={(key, val) => {
-            setIsDirty(true);
-            updateDietPlan({ ...dietPlan, [key]: val });
-          }}
-        />
+        <div className="sm:w-1/4">
+          <CustomInstructions
+            instructions={dietPlan.customInstructions}
+            freeCalories={dietPlan.freeCalories || 0}
+            fatsPerDay={dietPlan.fatsPerDay || 0}
+            veggiesPerDay={dietPlan.veggiesPerDay || 0}
+            onUpdate={(key, val) => {
+              setIsDirty(true);
+              updateDietPlan({ ...dietPlan, [key]: val });
+            }}
+          />
+        </div>
       </div>
 
       <DeleteModal
