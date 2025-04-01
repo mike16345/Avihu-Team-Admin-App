@@ -25,6 +25,7 @@ const WorkoutPlans: FC<IWorkoutPlanProps> = ({ displayTips = false }) => {
     control: form.control,
     name: "workoutPlans",
   });
+  const { setValue, watch } = form;
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const workoutIndex = useRef<number | null>(null);
@@ -75,7 +76,14 @@ const WorkoutPlans: FC<IWorkoutPlanProps> = ({ displayTips = false }) => {
                     </Button>
                   </div>
                 </div>
-                {displayTips && <TipAdder />}
+                {displayTips && (
+                  <div className="w-[20%]">
+                    <TipAdder
+                      tips={watch("tips") || []}
+                      saveTips={(tips) => setValue("tips", tips)}
+                    />
+                  </div>
+                )}
               </div>
             }
           />

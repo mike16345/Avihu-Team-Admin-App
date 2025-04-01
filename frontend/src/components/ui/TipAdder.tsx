@@ -1,27 +1,28 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "./button";
-import { useFormContext } from "react-hook-form";
-import { WorkoutSchemaType } from "@/schemas/workoutPlanSchema";
 import DeleteButton from "./buttons/DeleteButton";
 
-const TipAdder: React.FC = () => {
-  const [newTip, setNewTip] = useState("");
-  const { setValue, watch } = useFormContext<WorkoutSchemaType>();
+interface TipAdderProps {
+  saveTips: (tips: string[]) => void;
+  tips: string[];
+}
 
-  const tips = watch("tips") || [];
+const TipAdder: React.FC<TipAdderProps> = ({ tips = [], saveTips }) => {
+  const [newTip, setNewTip] = useState<string>("");
 
   const addTip = () => {
     if (!newTip.trim()) return;
-    
-    setValue("tips", [...tips, newTip]);
+
+    const newTipsArr = [...tips, newTip];
+
+    saveTips(newTipsArr);
     setNewTip("");
   };
 
   const removeTip = (index: number) => {
-    setValue(
-      "tips",
-      tips.filter((_, i) => i !== index)
-    );
+    const newTipsArr = tips.filter((_, i) => i !== index);
+
+    saveTips(newTipsArr);
   };
 
   useEffect(() => {
@@ -39,24 +40,23 @@ const TipAdder: React.FC = () => {
   }, []);
 
   return (
-    <div className="border-2 rounded p-4 flex flex-col gap-4 h-fit">
+    <div className="border-2 rounded  p-4 flex flex-col gap-4 ">
       <h2 className="font-bold">דגשים</h2>
-      <ul className="px-4 w-full max-h-32 overflow-y-auto">
+      <ul className="w-full overflow-y-auto">
         {tips.length === 0 ? (
           <h2 className="text-center">לא הוספו טיפים!</h2>
         ) : (
-          tips.map((tip, index) => (
-            <div
-              key={index}
-              className="list-disc flex justify-between py-1 border-b-2 items-center"
-            >
-              <li className="text-wrap">{tip}</li>
-              <DeleteButton onClick={() => removeTip(index)} tip="הסר דגש" />
-            </div>
+          tips.map((tip, i) => (
+            <li key={i} className="list-disc py-1 border-b-2 flex items-center gap-2">
+              <span className="break-words whitespace-normal flex-1 overflow-hidden text-ellipsis">
+                {tip}
+              </span>
+              <DeleteButton tip="הסר דגש" onClick={() => removeTip(i)} />
+            </li>
           ))
         )}
       </ul>
-      <div className="flex flex-col gap-2">
+      <>
         <input
           className="border-2 rounded p-1 bg-secondary"
           placeholder="דגש חדש.."
@@ -64,19 +64,14 @@ const TipAdder: React.FC = () => {
           onChange={(e) => setNewTip(e.target.value)}
         />
         <div className="flex justify-center gap-2">
-          <Button
-            className="w-full"
-            type="button"
-            variant="secondary"
-            onClick={() => setValue("tips", [])}
-          >
+          <Button className="w-full" type="button" variant="secondary" onClick={() => saveTips([])}>
             נקה
           </Button>
           <Button className="w-full" type="button" onClick={addTip}>
             הוספה
           </Button>
         </div>
-      </div>
+      </>
     </div>
   );
 };
