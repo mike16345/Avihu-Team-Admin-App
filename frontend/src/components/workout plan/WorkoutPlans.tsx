@@ -7,10 +7,15 @@ import WorkoutTabs from "./WorkoutTabs";
 import CardioWrapper from "./cardio/CardioWrapper";
 import WorkoutPlanContainer from "./WorkoutPlanContainer";
 import DeleteModal from "../Alerts/DeleteModal";
-import { useRef, useState } from "react";
+import { FC, useRef, useState } from "react";
 import { toast } from "sonner";
+import TipAdder from "../ui/TipAdder";
 
-const WorkoutPlans = () => {
+interface IWorkoutPlanProps {
+  displayTips?: boolean;
+}
+
+const WorkoutPlans: FC<IWorkoutPlanProps> = ({ displayTips = false }) => {
   const form = useFormContext<z.infer<typeof fullWorkoutPlanSchema>>();
   const {
     fields: workoutPlans,
@@ -49,25 +54,28 @@ const WorkoutPlans = () => {
           <WorkoutTabs
             cardioPlan={<CardioWrapper />}
             workoutPlan={
-              <div className="flex flex-col sm:w-[80%] w-full">
-                {workoutPlans.map((workoutPlan, index) => {
-                  return (
-                    <div key={workoutPlan.id} className="relative w-full">
-                      <WorkoutPlanContainer
-                        onDeleteWorkout={(index) => onClickDeleteWorkout(index)}
-                        parentPath={`workoutPlans.${index}`}
-                      />
-                    </div>
-                  );
-                })}
-                <div className="w-full flex items-center justify-center mb-2">
-                  <Button type="button" className="w-full sm:w-32" onClick={onAddWorkout}>
-                    <div className="flex flex-col items-center font-bold">
-                      הוסף אימון
-                      <BsPlusCircleFill />
-                    </div>
-                  </Button>
+              <div className="flex flex-col-reverse sm:flex-row gap-6">
+                <div className={`flex flex-col ${displayTips && "w-[80%]"} w-full`}>
+                  {workoutPlans.map((workoutPlan, index) => {
+                    return (
+                      <div key={workoutPlan.id} className="relative w-full">
+                        <WorkoutPlanContainer
+                          onDeleteWorkout={(index) => onClickDeleteWorkout(index)}
+                          parentPath={`workoutPlans.${index}`}
+                        />
+                      </div>
+                    );
+                  })}
+                  <div className="w-full flex items-center justify-center mb-2">
+                    <Button type="button" className="w-full sm:w-32" onClick={onAddWorkout}>
+                      <div className="flex flex-col items-center font-bold">
+                        הוסף אימון
+                        <BsPlusCircleFill />
+                      </div>
+                    </Button>
+                  </div>
                 </div>
+                {displayTips && <TipAdder />}
               </div>
             }
           />

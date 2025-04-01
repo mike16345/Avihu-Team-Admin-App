@@ -104,7 +104,9 @@ export const workoutPlanSchema = z.object({
 });
 
 export const fullWorkoutPlanSchema = z.object({
-  tips: z.array(z.string()).optional(),
+  tips: z.array(
+    z.string().min(MIN_NAME_LENGTH, { message: ERROR_MESSAGES.stringMin(MIN_NAME_LENGTH) })
+  ).optional(),
   workoutPlans: z
     .array(workoutPlanSchema)
     .min(MIN_WORKOUTS, { message: ERROR_MESSAGES.arrayMin(MIN_WORKOUTS, "תכניות אימון") }),

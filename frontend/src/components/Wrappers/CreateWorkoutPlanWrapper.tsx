@@ -1,5 +1,4 @@
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { fullWorkoutPlanSchema, WorkoutSchemaType } from "@/schemas/workoutPlanSchema";
 import { Form } from "../ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,7 +29,7 @@ import { ISimpleCardioType } from "@/interfaces/IWorkoutPlan";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 
 const CreateWorkoutPlanWrapper = ({ children }: { children: React.ReactNode }) => {
-  const form = useForm<z.infer<typeof fullWorkoutPlanSchema>>({
+  const form = useForm<WorkoutSchemaType>({
     resolver: zodResolver(fullWorkoutPlanSchema),
     defaultValues: {
       tips: [],

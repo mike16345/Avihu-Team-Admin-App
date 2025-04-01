@@ -38,7 +38,7 @@ export const AppRoutes = () => {
           path="/workout-plans/:id"
           element={
             <CreateWorkoutPlanWrapper>
-              <WorkoutPlans />
+              <WorkoutPlans displayTips />
             </CreateWorkoutPlanWrapper>
           }
         />
