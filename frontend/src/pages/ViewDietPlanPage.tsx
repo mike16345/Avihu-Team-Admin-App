@@ -33,13 +33,15 @@ import InputModal from "@/components/ui/InputModal";
 import { invalidateQueryKeys } from "@/QueryClient/queryClient";
 import useUpdateDietPlan from "@/hooks/mutations/DietPlans/useUpdateDietPlan";
 import useAddDietPlan from "@/hooks/mutations/DietPlans/useAddDietPlan";
+import useUserQuery from "@/hooks/queries/user/useUserQuery";
 
 export const ViewDietPlanPage = () => {
   const navigation = useNavigate();
   const { setErrors } = useDirtyFormContext();
   const { id } = useParams();
   const { users } = useUsersStore();
-  const user = users.find((user) => user._id === id);
+  const { data: fetchedUser } = useUserQuery(id);
+  const user = users.find((user) => user._id === id) || fetchedUser;
 
   const { getDietPlanByUserId } = useDietPlanApi();
   const { getAllDietPlanPresets } = useDietPlanPresetApi();
