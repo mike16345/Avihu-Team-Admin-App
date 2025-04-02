@@ -189,6 +189,8 @@ export const deepClone = <T>(obj: T): T => {
 };
 
 type HebrewPathTranslations = {
+  planName: string;
+  name: string;
   workoutPlans: string;
   muscleGroups: string;
   exercises: string;
@@ -196,9 +198,19 @@ type HebrewPathTranslations = {
   cardio: string;
   weeks: string;
   workouts: string;
+  root: string;
+  minReps: string;
+  maxReps: string;
+  linkToVideo: string;
 };
 
 const hebrewPathTranslations: HebrewPathTranslations = {
+  root: "",
+  planName: "שם אימון",
+  name: "שם",
+  minReps: "מינימום חזרות",
+  linkToVideo: "לינק לסרטון",
+  maxReps: "מקסימום חזרות",
   workoutPlans: "אימון",
   muscleGroups: "קבוצת שריר",
   exercises: "תרגיל",

@@ -4,7 +4,7 @@ const ERROR_MESSAGES = {
   required: "שדה זה הינו חובה",
   stringMin: (min: number) => `הטקסט חייב להיות באורך של לפחות ${min} תווים`,
   stringMax: (max: number) => `הטקסט יכול להיות עד ${max} תווים בלבד`,
-  arrayMin: (min: number, fieldName = "רשימה") => `${fieldName} חייבת להכיל לפחות ${min} פריטים`,
+  arrayMin: (min: number, fieldName = "רשימה") => `${fieldName} צריכה להכיל לפחות ${min} פריטים`,
   enumError: (validValues: string[]) =>
     `ערך לא  חוקי. נא לבחור אחד מהבאים: ${validValues.join(", ")}`,
   youtubeLink:
