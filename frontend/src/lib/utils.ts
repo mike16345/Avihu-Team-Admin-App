@@ -2,6 +2,7 @@ import { Option } from "@/types/types";
 import { AxiosError } from "axios";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { ZodError } from "zod";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -244,5 +245,15 @@ export const getNestedError = (
     }
   }
 
+  return null;
+};
+
+export const getNestedZodError = (error: ZodError) => {
+  const fieldErrors = error.flatten().fieldErrors;
+  const firstField = Object.keys(fieldErrors)[0];
+  
+  if (firstField && fieldErrors[firstField]) {
+    return fieldErrors[firstField][0];
+  }
   return null;
 };

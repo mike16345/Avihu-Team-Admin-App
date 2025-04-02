@@ -34,6 +34,8 @@ import { invalidateQueryKeys } from "@/QueryClient/queryClient";
 import useUpdateDietPlan from "@/hooks/mutations/DietPlans/useUpdateDietPlan";
 import useAddDietPlan from "@/hooks/mutations/DietPlans/useAddDietPlan";
 import useUserQuery from "@/hooks/queries/user/useUserQuery";
+import { presetNameSchema } from "@/schemas/dietPlanPresetSchema";
+import { getNestedZodError } from "@/lib/utils";
 
 export const ViewDietPlanPage = () => {
   const navigation = useNavigate();
@@ -144,6 +146,12 @@ export const ViewDietPlanPage = () => {
 
   const handleAddPreset = (name: string) => {
     if (!dietPlan) return;
+    const { error } = presetNameSchema.safeParse({ name: name });
+    if (error) {
+      const nestedError = getNestedZodError(error);
+
+      return toast.error(JSON.stringify(nestedError));
+    }
 
     const preset: IDietPlanPreset = { ...dietPlan, name };
 
