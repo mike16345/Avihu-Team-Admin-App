@@ -11,6 +11,10 @@ const DietPlanTemplatePage = () => {
 
   const queryClient = useQueryClient();
 
+  const onDeleteMenuItemSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: [QueryKeys.MENU_ITEMS] });
+  };
+
   const deleteDietPlan = useMutation({
     mutationFn: deleteDietPlanPreset,
     onSuccess: () => {
@@ -22,6 +26,7 @@ const DietPlanTemplatePage = () => {
     mutationFn: deleteMenuItem,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`carbs`] });
+      onDeleteMenuItemSuccess();
     },
   });
 
@@ -29,6 +34,7 @@ const DietPlanTemplatePage = () => {
     mutationFn: deleteMenuItem,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`fats`] });
+      onDeleteMenuItemSuccess();
     },
   });
 
@@ -36,6 +42,7 @@ const DietPlanTemplatePage = () => {
     mutationFn: deleteMenuItem,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`vegetables`] });
+      onDeleteMenuItemSuccess();
     },
   });
 
@@ -43,6 +50,7 @@ const DietPlanTemplatePage = () => {
     mutationFn: deleteMenuItem,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`protein`] });
+      onDeleteMenuItemSuccess();
     },
   });
 

@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { MealDropDown } from "./MealDropDown";
 import DeleteModal from "../Alerts/DeleteModal";
-import { CustomItems, IDietPlan, IMeal } from "@/interfaces/IDietPlan";
+import { IDietPlan, IMeal } from "@/interfaces/IDietPlan";
 import { Button } from "../ui/button";
 import { defaultMeal } from "@/constants/DietPlanConsts";
 import CustomInstructions from "./CustomInstructions";
-import useMenuItemApi from "@/hooks/api/useMenuItemApi";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 import { useDirtyFormContext } from "@/context/useFormContext";
+import useMenuItemsQuery from "@/hooks/queries/menuItems/useMenuItemsQuery";
 
 interface DietPlanFormProps {
   updateDietPlan: (dietPlan: IDietPlan) => void;
@@ -15,15 +15,11 @@ interface DietPlanFormProps {
 }
 
 const DietPlanForm: React.FC<DietPlanFormProps> = ({ dietPlan, updateDietPlan }) => {
-  const { getAllMenuItems } = useMenuItemApi();
   const { setIsDirty } = useDirtyFormContext();
 
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [mealToDelete, setMealToDelete] = useState<number | null>(null);
-  const [customItems, setCustomItems] = useState<CustomItems>({
-    protein: [],
-    carbs: [],
-  });
+  const { data: customItems } = useMenuItemsQuery();
 
   const handleAddMeal = () => {
     if (!dietPlan) return;
@@ -49,12 +45,6 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ dietPlan, updateDietPlan })
     updateDietPlan({ ...dietPlan, meals: newMeals });
     setIsDirty(true);
   };
-
-  useEffect(() => {
-    getAllMenuItems().then((items) => {
-      setCustomItems(items);
-    });
-  }, []);
 
   useUnsavedChangesWarning();
 
