@@ -62,6 +62,7 @@ const CardioWeekWrapper: React.FC<CardioWeekWrapperProps> = ({
           <Button
             onClick={() => setIsOpen((state) => !state)}
             variant="ghost"
+            type="button"
             size="sm"
             className={`w-9 p-0 transition ${isOpen ? "rotate-180" : "rotate-0"}`}
           >
@@ -80,7 +81,7 @@ const CardioWeekWrapper: React.FC<CardioWeekWrapperProps> = ({
               <div className="flex gap-5 items-center">
                 <DeleteButton tip="הסר אימון" onClick={() => removeExercise(i)} />
                 <CollapsibleTrigger asChild className="bg-accent">
-                  <Button variant="ghost" size="sm" className="w-9 p-0">
+                  <Button type="button" variant="ghost" size="sm" className="w-9 p-0">
                     <ChevronsUpDown className="h-4 w-4" />
                     <span className="sr-only">Toggle</span>
                   </Button>
