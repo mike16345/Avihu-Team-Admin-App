@@ -8,7 +8,7 @@ const useDietPlanPresetQuery = (id: string) => {
   return useQuery({
     queryKey: [QueryKeys.DIET_PLAN_PRESETS + id],
     queryFn: () => getDietPlanPreset(id),
-    enabled: !!id,
+    enabled: id !== "undefined",
     staleTime: Infinity,
   });
 };
