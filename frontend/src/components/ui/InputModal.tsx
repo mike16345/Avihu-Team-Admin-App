@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,6 +9,11 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "./button";
 import { Input } from "./input";
+import ERROR_MESSAGES from "@/utils/errorMessages";
+import { useForm } from "react-hook-form";
+import { Form, FormField, FormItem, FormMessage } from "./form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 interface InputModalProps {
   open: boolean;
@@ -18,13 +23,25 @@ interface InputModalProps {
   description?: string;
 }
 
+const nameSchema = z.object({
+  name: z
+    .string()
+    .min(1, ERROR_MESSAGES.stringMin(1))
+    .refine((value) => value.trim().length > 0, ERROR_MESSAGES.noSpacesAllowed),
+});
+type NameSchemaType = z.infer<typeof nameSchema>;
+
 const InputModal: React.FC<InputModalProps> = ({ onClose, open, onSubmit, title, description }) => {
-  const [value, setValue] = useState<string>("");
+  const form = useForm<NameSchemaType>({
+    defaultValues: {
+      name: "",
+    },
+    resolver: zodResolver(nameSchema),
+  });
 
-  const handleSave = () => {
-    if (!value) return;
-
-    onSubmit(value);
+  const handleSave = (value: NameSchemaType) => {
+    console.log("saving", value);
+    onSubmit(value.name);
     onClose();
   };
 
@@ -35,12 +52,26 @@ const InputModal: React.FC<InputModalProps> = ({ onClose, open, onSubmit, title,
           <DialogTitle className="text-center pb-2">{title || `בחר שם לתבנית`}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
-        <Input value={value} onChange={(e) => setValue(e.target.value)} />
-        <DialogFooter className=" pt-2 gap-3">
-          <Button variant={"success"} onClick={handleSave} className="w-full">
-            שמור
-          </Button>
-        </DialogFooter>
+        <Form {...form}>
+          <form className="space-y-4" onSubmit={form.handleSubmit(handleSave)}>
+            <FormField
+              name="name"
+              render={({ field }) => {
+                return (
+                  <FormItem>
+                    <Input {...field} />
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
+            <DialogFooter className=" pt-2 gap-3">
+              <Button variant={"success"} type="submit" className="w-full">
+                שמור
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
