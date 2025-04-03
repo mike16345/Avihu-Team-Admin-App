@@ -67,7 +67,7 @@ export const cardioWorkoutSchema = z.object({
     .number()
     .min(0, { message: ERROR_MESSAGES.minNumber(0) })
     .optional(),
-  distance: z.coerce.string().optional(),
+  distance: z.coerce.string().min(1, ERROR_MESSAGES.stringMin(1)),
   cardioExercise: z.coerce
     .string()
     .min(MIN_NAME_LENGTH, { message: ERROR_MESSAGES.stringMin(MIN_NAME_LENGTH) }),
@@ -104,9 +104,9 @@ export const workoutPlanSchema = z.object({
 });
 
 export const fullWorkoutPlanSchema = z.object({
-  tips: z.array(
-    z.string().min(MIN_NAME_LENGTH, { message: ERROR_MESSAGES.stringMin(MIN_NAME_LENGTH) })
-  ).optional(),
+  tips: z
+    .array(z.string().min(MIN_NAME_LENGTH, { message: ERROR_MESSAGES.stringMin(MIN_NAME_LENGTH) }))
+    .optional(),
   workoutPlans: z
     .array(workoutPlanSchema)
     .min(MIN_WORKOUTS, { message: ERROR_MESSAGES.arrayMin(MIN_WORKOUTS, "תכניות אימון") }),

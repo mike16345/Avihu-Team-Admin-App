@@ -1,5 +1,9 @@
 import { useForm } from "react-hook-form";
-import { fullWorkoutPlanSchema, WorkoutSchemaType } from "@/schemas/workoutPlanSchema";
+import {
+  fullWorkoutPlanSchema,
+  workoutPresetSchema,
+  WorkoutSchemaType,
+} from "@/schemas/workoutPlanSchema";
 import { Form } from "../ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "../ui/CustomButton";
@@ -14,7 +18,12 @@ import { weightTab } from "@/pages/UserDashboard";
 import BackButton from "../ui/BackButton";
 import ComboBox from "../ui/combo-box";
 import useWorkoutPlanPresetsQuery from "@/hooks/queries/workoutPlans/useWorkoutPlanPresetsQuery";
-import { convertItemsToOptions, getNestedError } from "@/lib/utils";
+import {
+  convertItemsToOptions,
+  getNestedError,
+  getNestedZodError,
+  getZodErrorIssues,
+} from "@/lib/utils";
 import useAddWorkoutPlan from "@/hooks/mutations/workouts/useAddWorkoutPlan";
 import useUpdateWorkoutPlan from "@/hooks/mutations/workouts/useUpdateWorkoutPlan";
 import { cleanWorkoutObject, parseErrorFromObject } from "@/utils/workoutPlanUtils";
@@ -27,6 +36,27 @@ import InputModal from "../ui/InputModal";
 import { defaultSimpleCardioOption } from "@/constants/cardioOptions";
 import { ISimpleCardioType } from "@/interfaces/IWorkoutPlan";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
+
+const calculateMinPerWorkout = (workout: WorkoutSchemaType) => {
+  let workoutPlan = workout;
+  if (workoutPlan.cardio.type == "complex") return workoutPlan;
+  const cardioPlan = workoutPlan.cardio.plan as ISimpleCardioType;
+
+  const minsPerWorkout = cardioPlan.minsPerWeek / cardioPlan.timesPerWeek;
+
+  workoutPlan = {
+    ...workoutPlan,
+    cardio: {
+      type: workoutPlan.cardio.type,
+      plan: {
+        ...cardioPlan,
+        minsPerWorkout,
+      },
+    },
+  };
+
+  return workoutPlan;
+};
 
 const CreateWorkoutPlanWrapper = ({ children }: { children: React.ReactNode }) => {
   const form = useForm<WorkoutSchemaType>({
@@ -83,24 +113,7 @@ const CreateWorkoutPlanWrapper = ({ children }: { children: React.ReactNode }) =
 
   const onSubmit = (values: WorkoutSchemaType) => {
     if (!id) return Promise.reject("User ID is required!");
-    let workoutPlan = values;
-    const cardioPlan = values.cardio.type == "simple" && (values.cardio.plan as ISimpleCardioType);
-
-    if (cardioPlan) {
-      const minsPerWorkout = cardioPlan.minsPerWeek / cardioPlan.timesPerWeek;
-
-      workoutPlan = {
-        ...values,
-        cardio: {
-          type: values.cardio.type,
-          plan: {
-            ...cardioPlan,
-            minsPerWorkout,
-          },
-        },
-      };
-    }
-
+    const workoutPlan = calculateMinPerWorkout(values);
     const cleanedPostObject = cleanWorkoutObject(workoutPlan);
 
     if (!data) {
@@ -111,11 +124,18 @@ const CreateWorkoutPlanWrapper = ({ children }: { children: React.ReactNode }) =
   };
 
   const handleAddPreset = (name: string) => {
-    const preset = cleanWorkoutObject({
-      name,
-      ...form.getValues(),
-    });
-    delete preset.userId;
+    const workoutPlan = calculateMinPerWorkout(form.getValues());
+    const preset = cleanWorkoutObject(
+      {
+        ...workoutPlan,
+        name,
+      },
+      "userId"
+    );
+    const { error } = workoutPresetSchema.safeParse(preset);
+    const nestedError = error ? getZodErrorIssues(error?.issues)[0] : null;
+    if (nestedError)
+      return toast.error(nestedError?.title, { description: nestedError?.description });
 
     addWorkoutPlanPreset.mutate(preset);
   };
@@ -133,6 +153,7 @@ const CreateWorkoutPlanWrapper = ({ children }: { children: React.ReactNode }) =
 
   const onInvalidSubmit = (e: any) => {
     const errorMessage = getNestedError(e);
+
     toast.error(errorMessage?.title, { description: errorMessage?.description });
   };
 

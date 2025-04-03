@@ -1,8 +1,9 @@
+import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { Option } from "@/types/types";
 import { AxiosError } from "axios";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { ZodError } from "zod";
+import { ZodError, ZodIssue } from "zod";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -203,9 +204,13 @@ type HebrewPathTranslations = {
   minReps: string;
   maxReps: string;
   linkToVideo: string;
+  plan: string;
+  timesPerWeek: string;
+  minsPerWeek: string;
+  warmUpAmount: string;
 };
 
-const hebrewPathTranslations: HebrewPathTranslations = {
+const hebrewPathTranslations: Partial<HebrewPathTranslations> = {
   root: "",
   planName: "שם אימון",
   name: "שם",
@@ -219,8 +224,12 @@ const hebrewPathTranslations: HebrewPathTranslations = {
   cardio: "אירובי",
   weeks: "שבוע",
   workouts: `אימון`,
+  minsPerWeek: "כמות לשבוע",
+  timesPerWeek: "פעמים בשבוע",
+  warmUpAmount: "זמן חימום",
 };
 
+// Use for onInvalidSubmit
 export const getNestedError = (
   obj: Record<string, any>,
   key = "message",
@@ -237,10 +246,11 @@ export const getNestedError = (
 
   for (const [k, value] of Object.entries(obj)) {
     if (typeof value === "object") {
+      console.log("k", k);
       const formattedKey = isNaN(Number(k))
         ? hebrewPathTranslations[k as keyof HebrewPathTranslations]
         : `${Number(k) + 1}`;
-      const nestedError = getNestedError(value, key, [...path, `${formattedKey}`]);
+      const nestedError = getNestedError(value, key, [...path, `${formattedKey || ""}`]);
       if (nestedError) return nestedError;
     }
   }
@@ -248,12 +258,36 @@ export const getNestedError = (
   return null;
 };
 
+// Use for schema.safeParse()
+export const getZodErrorIssues = (issues: ZodIssue[]) => {
+  return issues.map((issue) => ({
+    title:
+      "שגיאה ב- " +
+      issue.path
+        .map(
+          (key) => (typeof key === "string" ? hebrewPathTranslations[key] || key : key + 1) // Convert numbers to 1-based index
+        )
+        .join(" "),
+    description: issue.message,
+  }));
+};
+
 export const getNestedZodError = (error: ZodError) => {
-  const fieldErrors = error.flatten().fieldErrors;
+  const { fieldErrors } = error.flatten();
+
   const firstField = Object.keys(fieldErrors)[0];
-  
+
   if (firstField && fieldErrors[firstField]) {
-    return fieldErrors[firstField][0];
+    const translated = hebrewPathTranslations[firstField as any] || firstField;
+
+    return {
+      title: `שגיאה ב- ${translated}`,
+      description: fieldErrors[firstField][0],
+    };
   }
-  return null;
+
+  return {
+    title: ERROR_MESSAGES.GENERIC_ERROR_MESSAGE,
+    description: "",
+  };
 };

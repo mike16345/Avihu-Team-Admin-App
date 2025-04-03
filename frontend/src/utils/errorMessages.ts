@@ -10,6 +10,7 @@ const ERROR_MESSAGES = {
   youtubeLink:
     "הלינק חייב להיות לינק תקין של YouTube, לדוגמה: https://www.youtube.com/watch?v=videoId או https://youtu.be/videoId",
   maxReps: "מספר החזרות המקסימלי חייב להיות גדול ממספר החזרות המינימלי",
+  noSpacesAllowed: "לא ניתן לשים רווחים בלבד",
 };
 
 export default ERROR_MESSAGES;

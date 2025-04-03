@@ -148,9 +148,9 @@ export const ViewDietPlanPage = () => {
     if (!dietPlan) return;
     const { error } = presetNameSchema.safeParse({ name: name });
     if (error) {
-      const nestedError = getNestedZodError(error);
+      const { title, description } = getNestedZodError(error);
 
-      return toast.error(JSON.stringify(nestedError));
+      return toast.error(title, { description });
     }
 
     const preset: IDietPlanPreset = { ...dietPlan, name };
