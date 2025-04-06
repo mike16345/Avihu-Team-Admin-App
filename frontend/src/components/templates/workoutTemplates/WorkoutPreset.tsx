@@ -57,7 +57,7 @@ export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ childr
   };
 
   const onError = (error: any) => {
-    const message = parseErrorFromObject(error?.data || "");
+    const message = error?.data?.message || parseErrorFromObject(error?.data || "");
 
     toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
       description: message,
