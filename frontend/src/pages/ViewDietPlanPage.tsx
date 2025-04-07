@@ -1,6 +1,6 @@
 import { useDietPlanApi } from "@/hooks/api/useDietPlanApi";
 import { IDietPlan, IDietPlanPreset } from "@/interfaces/IDietPlan";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { useParams } from "react-router";
 import { defaultDietPlan } from "@/constants/DietPlanConsts";
@@ -69,7 +69,7 @@ export const ViewDietPlanPage = () => {
   const { isLoading, error, data } = useQuery({
     queryKey: [`${QueryKeys.USER_DIET_PLAN}${id}`],
     enabled: !!id,
-    staleTime: FULL_DAY_STALE_TIME,
+    staleTime: 1000,
     queryFn: handleGetDietPlan,
   });
 
@@ -150,16 +150,6 @@ export const ViewDietPlanPage = () => {
 
     addDietPlanPreset.mutate(preset);
   };
-
-  useEffect(() => {
-    if (data) {
-      setDietPlan(data);
-      setIsNewPlan(false);
-    } else {
-      setIsNewPlan(true);
-      setDietPlan(defaultDietPlan);
-    }
-  }, []);
 
   if (isLoading || dietPlanPresets.isLoading) return <Loader size="large" />;
   if (error) return <ErrorPage message={error.message} />;
