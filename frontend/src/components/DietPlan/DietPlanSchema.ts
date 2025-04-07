@@ -25,7 +25,6 @@ const dietPlanSchema = z.object({
 });
 
 function validateDietPlan(dietPlan: IDietPlan) {
-  console.log("diet plan", dietPlan);
   const result = dietPlanSchema.safeParse(dietPlan);
   if (result.error) {
     console.error("Validation failed:", result.error);

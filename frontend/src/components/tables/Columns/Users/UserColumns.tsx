@@ -102,7 +102,6 @@ export const columns: ColumnDef<IUser>[] = [
             invalidateQueryKeys([QueryKeys.USERS, QueryKeys.USERS + res.data._id]);
           })
           .catch((err) => {
-            console.log("error", err);
             setIsToggling(false);
             toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE);
             setIsChecked(!hasAccess);

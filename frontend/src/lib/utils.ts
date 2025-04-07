@@ -246,7 +246,6 @@ export const getNestedError = (
 
   for (const [k, value] of Object.entries(obj)) {
     if (typeof value === "object") {
-      console.log("k", k);
       const formattedKey = isNaN(Number(k))
         ? hebrewPathTranslations[k as keyof HebrewPathTranslations]
         : `${Number(k) + 1}`;

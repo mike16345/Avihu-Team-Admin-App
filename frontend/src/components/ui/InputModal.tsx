@@ -40,7 +40,6 @@ const InputModal: React.FC<InputModalProps> = ({ onClose, open, onSubmit, title,
   });
 
   const handleSave = (value: NameSchemaType) => {
-    console.log("saving", value);
     onSubmit(value.name);
     onClose();
   };

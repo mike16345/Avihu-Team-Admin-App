@@ -33,8 +33,6 @@ const CardioWrapper: React.FC = () => {
   const [openModal, setOpenModal] = useState(false);
   const [tempCardioType, setTempCardioType] = useState<CardioType | null>(null);
 
-  console.log("cardio plan", cardioPlan);
-
   const addWeek = () => {
     if (weeks.length >= 4) {
       toast.error("אי אפשר להוסיף יותר מארבעה שבועות באימון");

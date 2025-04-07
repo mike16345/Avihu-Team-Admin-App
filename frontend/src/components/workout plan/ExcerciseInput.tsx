@@ -59,8 +59,6 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
   const handleUpdateExercise = (key: any, value: any, index: number) => {
     const exercise = getValues(`${parentPath}.exercises`)[index];
     const path = `${parentPath}.exercises.${index}.${key}`;
-    console.log("path", path);
-    console.log("key", key);
 
     update(index, { ...exercise, [key]: value });
     setValue(path, value);
