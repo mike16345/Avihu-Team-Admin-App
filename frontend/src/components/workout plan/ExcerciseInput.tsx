@@ -76,6 +76,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
   const handleMoveExercise = (exercises: IExercise[]) => {
     replace(exercises);
     exercises.forEach((exercise, i) => {
+      resetField(`${parentPath}.exercises.${i}.name`, { defaultValue: exercise.name });
       resetField(`${parentPath}.exercises.${i}.sets`, { defaultValue: exercise.sets });
     });
   };

@@ -1,4 +1,4 @@
-import { IMuscleGroupWorkouts, IExercise } from "@/interfaces/IWorkoutPlan";
+import { IMuscleGroupWorkouts } from "@/interfaces/IWorkoutPlan";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { FC, useState } from "react";
 import { ChevronsUpDown } from "lucide-react";

@@ -1,6 +1,8 @@
 import { USER_TOKEN_STORAGE_KEY } from "@/constants/constants";
 import { useEffect, useState, useContext, createContext } from "react";
 import secureLocalStorage from "react-secure-storage";
+import useCheckUserSessionQuery from "../queries/auth/useCheckUserSessionQuery";
+import { ISession } from "@/interfaces/IUser";
 
 interface AuthContext {
   authed: boolean;
@@ -9,29 +11,37 @@ interface AuthContext {
   logout: () => Promise<void>;
 }
 
-type CheckToken = (token: any) => Promise<any>;
-
 const authContext = createContext<AuthContext | undefined>(undefined);
 
-function useAuth(checkToken?: CheckToken): AuthContext {
+function useAuth(): AuthContext {
   const [authed, setAuthed] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState<ISession | null>(null);
+
+  const { data } = useCheckUserSessionQuery(token);
 
   const checkUserToken = () => {
     const userToken = secureLocalStorage.getItem(USER_TOKEN_STORAGE_KEY);
 
     if (!userToken || userToken === "undefined") {
       setAuthed(false);
+      setLoading(false);
     } else {
       setAuthed(true);
-      checkToken?.(userToken);
+      setToken(userToken as ISession);
     }
   };
 
   useEffect(() => {
     checkUserToken();
-    setTimeout(() => setLoading(false), 1000);
   }, []);
+
+  useEffect(() => {
+    if (!data) return;
+
+    setAuthed(data.isValid);
+    setTimeout(() => setLoading(false), 500);
+  }, [data]);
 
   return {
     authed,
@@ -53,14 +63,8 @@ function useAuth(checkToken?: CheckToken): AuthContext {
   };
 }
 
-export function AuthProvider({
-  children,
-  checkToken,
-}: {
-  children: React.ReactNode;
-  checkToken?: CheckToken;
-}) {
-  const auth = useAuth(checkToken);
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const auth = useAuth();
 
   return <authContext.Provider value={auth}>{children}</authContext.Provider>;
 }
