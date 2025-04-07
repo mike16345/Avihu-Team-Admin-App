@@ -17,7 +17,7 @@ export const defaultSet: ISet = {
 };
 
 const SetsContainer: React.FC<SetContainerProps> = ({ parentPath }) => {
-  const { getValues, control } = useFormContext<WorkoutSchemaType>();
+  const { getValues, setValue, control } = useFormContext<WorkoutSchemaType>();
   const { fields, append, remove } = useFieldArray<WorkoutSchemaType, `${typeof parentPath}.sets`>({
     name: `${parentPath}.sets`,
     control,
@@ -33,10 +33,12 @@ const SetsContainer: React.FC<SetContainerProps> = ({ parentPath }) => {
   };
 
   const copySet = (index: number) => {
-    const item = getValues(`${parentPath}.sets.${index}`);
+    const sets = getValues(`${parentPath}.sets`);
+    const item = sets[index];
     const newSet = deepClone(item);
 
     append(newSet);
+    setValue(`${parentPath}.sets`, [...sets, item]);
   };
 
   return (

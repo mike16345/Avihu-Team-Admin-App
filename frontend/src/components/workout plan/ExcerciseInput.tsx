@@ -58,9 +58,12 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
 
   const handleUpdateExercise = (key: any, value: any, index: number) => {
     const exercise = getValues(`${parentPath}.exercises`)[index];
+    const path = `${parentPath}.exercises.${index}.${key}`;
+    console.log("path", path);
+    console.log("key", key);
 
     update(index, { ...exercise, [key]: value });
-    setValue(`${parentPath}.exercises.${index}.exerciseMethod`, value);
+    setValue(path, value);
   };
 
   const handleAddExcercise = () => {
@@ -75,9 +78,13 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
 
   const handleMoveExercise = (exercises: IExercise[]) => {
     replace(exercises);
+    console.log("exercises", exercises);
     exercises.forEach((exercise, i) => {
       resetField(`${parentPath}.exercises.${i}.name`, { defaultValue: exercise.name });
       resetField(`${parentPath}.exercises.${i}.sets`, { defaultValue: exercise.sets });
+      resetField(`${parentPath}.exercises.${i}.tipFromTrainer`, {
+        defaultValue: exercise.tipFromTrainer,
+      });
     });
   };
 
@@ -165,21 +172,13 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                               options={exerciseMethods}
                               value={exercise.exerciseMethod}
                               onSelect={(exerciseMethod) => {
-                                handleUpdateExercise(
-                                  `${parentPath}.exercises.${index}.exerciseMethod`,
-                                  exerciseMethod,
-                                  index
-                                );
+                                handleUpdateExercise("exerciseMethod", exerciseMethod, index);
                               }}
                             />
                             <Button
                               type="button"
                               onClick={() =>
-                                handleUpdateExercise(
-                                  `${parentPath}.exercises.${index}.exerciseMethod`,
-                                  undefined,
-                                  index
-                                )
+                                handleUpdateExercise("exerciseMethod", undefined, index)
                               }
                             >
                               נקה
@@ -216,7 +215,11 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                                   <FormLabel>דגשים</FormLabel>
                                   <Textarea
                                     {...field}
-                                    value={exercise.tipFromTrainer}
+                                    onChange={(e) => {
+                                      const value = e.target.value;
+                                      handleUpdateExercise("tipFromTrainer", value, index);
+                                    }}
+                                    value={field.value}
                                     placeholder="דגשים למתאמן..."
                                   />
                                   <FormMessage />
