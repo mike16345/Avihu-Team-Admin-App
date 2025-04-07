@@ -172,10 +172,14 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
                   return updatedWorkoutPlan;
                 });
               }}
-              idKey="_id"
+              idKey="muscleGroup"
             >
               {({ item, index }) => (
-                <SortableItem className="border-b-2 last:border-b-0" item={item} idKey="_id">
+                <SortableItem
+                  className="border-b-2 last:border-b-0"
+                  item={item}
+                  idKey="muscleGroup"
+                >
                   {() => (
                     <MuscleGroupContainer
                       key={item?._id || item.muscleGroup}

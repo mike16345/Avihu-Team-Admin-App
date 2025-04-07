@@ -174,10 +174,10 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
               setExerciseObjs(items);
               handleUpdateExercises(items);
             }}
-            idKey="_id"
+            idKey="name"
           >
             {({ item, index }) => (
-              <SortableItem item={item} idKey="_id">
+              <SortableItem item={item} idKey="name">
                 {() => (
                   <Card
                     key={item._id || item.name + index}
