@@ -82,7 +82,12 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
   };
 
   const handleMoveExercise = (exercises: IExercise[]) => {
-    replace(exercises);
+    const clonedExercises = exercises.map((exercise) => ({
+      ...exercise,
+      sets: exercise.sets.map((set) => ({ ...set })),
+    }));
+
+    replace(clonedExercises);
   };
 
   const handleDeleteExcercise = () => {
@@ -109,6 +114,9 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
 
     return convertItemsToOptions(exerciseMethodResponse?.data, `title`, `title`);
   }, [exerciseMethodResponse]);
+
+  console.log("Exercises:", watch(`${parentPath}.exercises`));
+  console.log("field array exercises", exercises);
 
   return (
     <>
@@ -141,16 +149,15 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                           <div className="w-fit">
                             <FormField
                               name={`${parentPath}.exercises.${index}.name`}
-                              render={({ field }) => {
+                              render={() => {
                                 return (
                                   <FormItem>
                                     <FormLabel>תרגיל</FormLabel>
                                     <ComboBox
                                       options={exerciseOptions}
-                                      value={field.value}
+                                      value={item.name}
                                       onSelect={(exercise) => {
                                         handleSelectExercise(index, exercise);
-                                        field.onChange(exercise.name);
                                       }}
                                     />
                                     <FormMessage />
@@ -186,7 +193,10 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                         </div>
                       </CardHeader>
                       <CardContent className="flex flex-col gap-4 ">
-                        <SetsContainer parentPath={`${parentPath}.exercises.${index}`} />
+                        <SetsContainer
+                          key={item?._id + "-sets"}
+                          parentPath={`${parentPath}.exercises.${index}`}
+                        />
                         <div className=" flex flex-col gap-4">
                           <FormField
                             control={control}
@@ -212,7 +222,11 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                               return (
                                 <FormItem>
                                   <FormLabel>דגשים</FormLabel>
-                                  <Textarea {...field} placeholder="דגשים למתאמן..." />
+                                  <Textarea
+                                    {...field}
+                                    value={item.tipFromTrainer}
+                                    placeholder="דגשים למתאמן..."
+                                  />
                                   <FormMessage />
                                 </FormItem>
                               );
@@ -227,7 +241,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
             )}
           </DragDropWrapper>
           <div className="h-[575px]">
-            <AddWorkoutPlanCard onClick={handleAddExcercise} />
+            <AddWorkoutPlanCard onClick={() => handleAddExcercise()} />
           </div>
         </div>
       </div>
