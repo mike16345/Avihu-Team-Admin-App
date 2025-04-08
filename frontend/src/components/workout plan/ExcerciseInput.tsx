@@ -152,7 +152,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                               render={() => {
                                 return (
                                   <FormItem>
-                                    <FormLabel>תרגיל</FormLabel>
+                                    <FormLabel className="font-bold underline">תרגיל</FormLabel>
                                     <ComboBox
                                       options={exerciseOptions}
                                       value={item.name}

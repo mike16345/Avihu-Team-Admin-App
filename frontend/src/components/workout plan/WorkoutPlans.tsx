@@ -55,10 +55,13 @@ const WorkoutPlans: FC<IWorkoutPlanProps> = ({ displayTips = false }) => {
             cardioPlan={<CardioWrapper />}
             workoutPlan={
               <div className="flex flex-col-reverse sm:flex-row gap-6">
-                <div className={`flex flex-col ${displayTips && "w-[80%]"} w-full`}>
+                <div className={`flex flex-col ${displayTips && "w-[80%]"} gap-4 w-full`}>
                   {workoutPlans.map((workoutPlan, index) => {
                     return (
-                      <div key={workoutPlan.id} className="relative w-full">
+                      <div
+                        key={workoutPlan.id}
+                        className="relative w-full border-b-2 last:border-b-0 rounded"
+                      >
                         <WorkoutPlanContainer
                           onDeleteWorkout={(index) => onClickDeleteWorkout(index)}
                           parentPath={`workoutPlans.${index}`}
