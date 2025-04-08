@@ -7,6 +7,7 @@ import CopyButton from "../ui/buttons/CopyButton";
 import { WorkoutSchemaType } from "@/schemas/workoutPlanSchema";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { deepClone } from "@/lib/utils";
+
 interface SetContainerProps {
   parentPath: `workoutPlans.${number}.muscleGroups.${number}.exercises.${number}`;
 }
@@ -17,15 +18,16 @@ export const defaultSet: ISet = {
 };
 
 const SetsContainer: React.FC<SetContainerProps> = ({ parentPath }) => {
-  const { getValues, setValue, control } = useFormContext<WorkoutSchemaType>();
+  const { getValues, watch, setValue, control } = useFormContext<WorkoutSchemaType>();
   const { fields, append, remove } = useFieldArray<WorkoutSchemaType, `${typeof parentPath}.sets`>({
     name: `${parentPath}.sets`,
     control,
-    keyName: "id",
   });
 
+  const sets = watch(`${parentPath}.sets`);
+
   const createSet = () => {
-    append(defaultSet);
+    append({ ...defaultSet });
   };
 
   const removeSet = (index: number) => {
@@ -45,8 +47,8 @@ const SetsContainer: React.FC<SetContainerProps> = ({ parentPath }) => {
     <div className="flex flex-col gap-2 w-fit">
       <h2 className="underline font-bold pt-2">סטים:</h2>
       <div className="flex flex-col gap-4">
-        {fields.map((set, i) => (
-          <SetsInput key={set.id} parentPath={`${parentPath}.sets.${i}`} setNumber={i + 1}>
+        {sets.map((_, i) => (
+          <SetsInput key={i} parentPath={`${parentPath}.sets.${i}`} setNumber={i + 1}>
             <div className="flex items-center mt-6">
               <DeleteButton
                 disabled={fields.length == 1}

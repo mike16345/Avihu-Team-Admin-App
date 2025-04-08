@@ -51,6 +51,7 @@ export interface IWorkoutPlanPreset {
 }
 
 export interface IExercisePresetItem {
+  _id?: string;
   name: string;
   muscleGroup: string;
   tipFromTrainer?: string;

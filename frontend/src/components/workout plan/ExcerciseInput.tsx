@@ -8,7 +8,12 @@ import { Card, CardContent, CardHeader } from "../ui/card";
 import { AddWorkoutPlanCard } from "./AddWorkoutPlanCard";
 import DeleteModal from "../Alerts/DeleteModal";
 import { Button } from "../ui/button";
-import { convertItemsToOptions, extractVideoId, getYouTubeThumbnail } from "@/lib/utils";
+import {
+  convertItemsToOptions,
+  extractVideoId,
+  generateUUID,
+  getYouTubeThumbnail,
+} from "@/lib/utils";
 import ComboBox from "../ui/combo-box";
 import { SortableItem } from "../DragAndDrop/SortableItem";
 import { DragDropWrapper } from "../Wrappers/DragDropWrapper";
@@ -43,17 +48,18 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
   const exerciseIndexToDelete = useRef<number | null>(null);
 
   const handleSelectExercise = (index: number, updatedExercise: IExercisePresetItem) => {
-    const { name, linkToVideo, tipFromTrainer, exerciseMethod } = updatedExercise;
+    const { name, linkToVideo, tipFromTrainer, exerciseMethod, _id } = updatedExercise;
     const exercise = getValues(`${parentPath}.exercises`)[index];
     const newExercise = {
       ...exercise,
+      _id: _id || generateUUID(),
       name,
       linkToVideo,
       tipFromTrainer,
       exerciseMethod,
     };
 
-    update(index, newExercise);
+    resetField(`${parentPath}.exercises.${index}`, { defaultValue: newExercise });
   };
 
   const handleUpdateExercise = (key: any, value: any, index: number) => {
@@ -69,6 +75,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
       name: ``,
       sets: [defaultSet],
       linkToVideo: "",
+      _id: generateUUID(),
     };
 
     append(newExercise);
@@ -76,14 +83,6 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
 
   const handleMoveExercise = (exercises: IExercise[]) => {
     replace(exercises);
-    console.log("exercises", exercises);
-    exercises.forEach((exercise, i) => {
-      resetField(`${parentPath}.exercises.${i}.name`, { defaultValue: exercise.name });
-      resetField(`${parentPath}.exercises.${i}.sets`, { defaultValue: exercise.sets });
-      resetField(`${parentPath}.exercises.${i}.tipFromTrainer`, {
-        defaultValue: exercise.tipFromTrainer,
-      });
-    });
   };
 
   const handleDeleteExcercise = () => {
@@ -115,12 +114,14 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
     <>
       <div className="w-full flex flex-col gap-3 py-4">
         <div className="grid lg:grid-cols-2 gap-4">
-          <DragDropWrapper items={exercises} setItems={handleMoveExercise} idKey="id">
+          <DragDropWrapper
+            items={watch(`${parentPath}.exercises`) || []}
+            setItems={handleMoveExercise}
+            idKey="_id"
+          >
             {({ item, index }) => (
-              <SortableItem item={item} idKey="id">
+              <SortableItem item={item} idKey="_id">
                 {() => {
-                  const exercise = watch(`${parentPath}.exercises.${index}`);
-
                   return (
                     <Card className={` sm:p-4 max-h-[575px] overflow-y-auto custom-scrollbar`}>
                       <CardHeader>
@@ -168,7 +169,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                           <div className="w-fit flex gap-5">
                             <ComboBox
                               options={exerciseMethods}
-                              value={exercise.exerciseMethod}
+                              value={item.exerciseMethod}
                               onSelect={(exerciseMethod) => {
                                 handleUpdateExercise("exerciseMethod", exerciseMethod, index);
                               }}
@@ -196,7 +197,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                                   <FormLabel>לינק לסרטון</FormLabel>
                                   <Input
                                     {...field}
-                                    value={exercise.linkToVideo}
+                                    value={item.linkToVideo}
                                     placeholder="הכנס לינק כאן..."
                                   />
                                   <FormMessage />
@@ -211,15 +212,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                               return (
                                 <FormItem>
                                   <FormLabel>דגשים</FormLabel>
-                                  <Textarea
-                                    {...field}
-                                    onChange={(e) => {
-                                      const value = e.target.value;
-                                      handleUpdateExercise("tipFromTrainer", value, index);
-                                    }}
-                                    value={field.value}
-                                    placeholder="דגשים למתאמן..."
-                                  />
+                                  <Textarea {...field} placeholder="דגשים למתאמן..." />
                                   <FormMessage />
                                 </FormItem>
                               );
@@ -234,7 +227,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
             )}
           </DragDropWrapper>
           <div className="h-[575px]">
-            <AddWorkoutPlanCard onClick={() => handleAddExcercise()} />
+            <AddWorkoutPlanCard onClick={handleAddExcercise} />
           </div>
         </div>
       </div>
