@@ -24,6 +24,8 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
   ...props
 }) => {
   const [isDeleteMuscleGroupModalOpen, setIsDeleteMuscleGroupModalOpen] = useState(false);
+  const [isChangingMuscleGroup, setIsChangingMuscleGroup] = useState(false);
+  const [muscleGroupToSwapTo, setMuscleGroupToSwapTo] = useState<string | null>(null);
   const [openMuscleGroupContainer, setOpenMuscleGroupContainer] = useState(
     muscleGroup.exercises.length === 0
   );
@@ -33,6 +35,13 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
     "." +
     path[1] +
     ".muscleGroups") as `workoutPlans.${number}.muscleGroups`;
+
+  const handleSwapMuscleGroup = (newMuscleGroup: string) => {
+    if (muscleGroup.exercises.length == 0) return handleUpdateMuscleGroup(newMuscleGroup);
+
+    setIsChangingMuscleGroup(true);
+    setMuscleGroupToSwapTo(newMuscleGroup);
+  };
 
   return (
     <Collapsible
@@ -50,11 +59,9 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
               <MuscleGroupSelector
                 pathToMuscleGroups={muscleGroupsPath}
                 handleDismiss={(val) => {
-                  if (!val) {
-                    handleDeleteMuscleGroup();
-                  }
+                  if (!val) handleDeleteMuscleGroup();
                 }}
-                handleChange={(value) => handleUpdateMuscleGroup(value)}
+                handleChange={handleSwapMuscleGroup}
                 existingMuscleGroup={muscleGroup.muscleGroup}
               />
             </div>
@@ -86,11 +93,21 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
         </CollapsibleContent>
 
         <DeleteModal
-          isModalOpen={isDeleteMuscleGroupModalOpen}
-          setIsModalOpen={setIsDeleteMuscleGroupModalOpen}
+          isModalOpen={isDeleteMuscleGroupModalOpen || isChangingMuscleGroup}
+          setIsModalOpen={
+            isChangingMuscleGroup ? setIsChangingMuscleGroup : setIsDeleteMuscleGroupModalOpen
+          }
+          alertMessage={
+            isChangingMuscleGroup ? (
+              <>ביצוע פעולה זו ימחק את כל התרגילים שיצרת עבור קבוצת השריר הזו.</>
+            ) : undefined
+          }
           onConfirm={() => {
-            setIsDeleteMuscleGroupModalOpen(false);
-            handleDeleteMuscleGroup();
+            if (isChangingMuscleGroup && muscleGroupToSwapTo !== null) {
+              handleUpdateMuscleGroup(muscleGroupToSwapTo);
+            } else {
+              handleDeleteMuscleGroup();
+            }
           }}
         />
       </>
