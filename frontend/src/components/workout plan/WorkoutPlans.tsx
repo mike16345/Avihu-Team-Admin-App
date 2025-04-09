@@ -1,6 +1,5 @@
 import { useFieldArray, useFormContext } from "react-hook-form";
-import { fullWorkoutPlanSchema } from "@/schemas/workoutPlanSchema";
-import { z } from "zod";
+import { WorkoutSchemaType } from "@/schemas/workoutPlanSchema";
 import { Button } from "../ui/button";
 import { BsPlusCircleFill } from "react-icons/bs";
 import WorkoutTabs from "./WorkoutTabs";
@@ -10,28 +9,40 @@ import DeleteModal from "../Alerts/DeleteModal";
 import { FC, useRef, useState } from "react";
 import { toast } from "sonner";
 import TipAdder from "../ui/TipAdder";
+import { DragDropWrapper } from "../Wrappers/DragDropWrapper";
+import { SortableItem } from "../DragAndDrop/SortableItem";
+import { generateUUID } from "@/lib/utils";
+import { IWorkoutPlan } from "@/interfaces/IWorkoutPlan";
 
 interface IWorkoutPlanProps {
   displayTips?: boolean;
 }
 
 const WorkoutPlans: FC<IWorkoutPlanProps> = ({ displayTips = false }) => {
-  const form = useFormContext<z.infer<typeof fullWorkoutPlanSchema>>();
+  const form = useFormContext<WorkoutSchemaType>();
+  const { control, setValue, watch } = form;
   const {
-    fields: workoutPlans,
     append: addWorkoutPlan,
     remove: removeWorkoutPlan,
+    replace,
   } = useFieldArray({
-    control: form.control,
+    control,
     name: "workoutPlans",
   });
-  const { setValue, watch } = form;
+
+  const workoutPlans = watch("workoutPlans") as IWorkoutPlan[];
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const workoutIndex = useRef<number | null>(null);
 
   const onAddWorkout = () => {
-    addWorkoutPlan({ planName: `אימון ${workoutPlans.length + 1}`, muscleGroups: [] });
+    const newWorkoutPlan: IWorkoutPlan = {
+      planName: `אימון ${workoutPlans.length + 1}`,
+      muscleGroups: [],
+      _id: generateUUID(),
+    };
+
+    addWorkoutPlan(newWorkoutPlan);
   };
 
   const onClickDeleteWorkout = (index: number) => {
@@ -56,19 +67,29 @@ const WorkoutPlans: FC<IWorkoutPlanProps> = ({ displayTips = false }) => {
             workoutPlan={
               <div className="flex flex-col-reverse sm:flex-row gap-6">
                 <div className={`flex flex-col ${displayTips && "w-[80%]"} gap-4 w-full`}>
-                  {workoutPlans.map((workoutPlan, index) => {
-                    return (
-                      <div
-                        key={workoutPlan.id}
+                  <DragDropWrapper
+                    items={workoutPlans}
+                    strategy="vertical"
+                    idKey="_id"
+                    setItems={replace}
+                  >
+                    {({ item, index }) => (
+                      <SortableItem
                         className="relative w-full border-b-2 last:border-b-0 rounded"
+                        idKey={"_id"}
+                        item={item}
                       >
-                        <WorkoutPlanContainer
-                          onDeleteWorkout={(index) => onClickDeleteWorkout(index)}
-                          parentPath={`workoutPlans.${index}`}
-                        />
-                      </div>
-                    );
-                  })}
+                        {() => {
+                          return (
+                            <WorkoutPlanContainer
+                              onDeleteWorkout={(index) => onClickDeleteWorkout(index)}
+                              parentPath={`workoutPlans.${index}`}
+                            />
+                          );
+                        }}
+                      </SortableItem>
+                    )}
+                  </DragDropWrapper>
                   <div className="w-full flex items-center justify-center mb-2">
                     <Button type="button" className="w-full sm:w-32" onClick={onAddWorkout}>
                       <div className="flex flex-col items-center font-bold">

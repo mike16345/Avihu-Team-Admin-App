@@ -30,6 +30,7 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({ parentPath, onD
 
   const [isOpen, setIsOpen] = useState(false);
   const muscleGroups = watch(`${parentPath}.muscleGroups`) as IMuscleGroupWorkouts[];
+  const planName = watch(`${parentPath}.planName`);
 
   const handleAddMuscleGroup = () => {
     const newMuscleGroup: IMuscleGroupWorkouts = {
@@ -52,7 +53,7 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({ parentPath, onD
               render={({ field }) => {
                 return (
                   <FormItem>
-                    <Input {...field} className="w-full sm:w-64" />
+                    <Input {...field} value={planName} className="w-full sm:w-64" />
                     <FormMessage />
                   </FormItem>
                 );
