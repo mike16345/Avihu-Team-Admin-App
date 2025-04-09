@@ -29,14 +29,11 @@ interface ExcerciseInputProps {
 }
 
 const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath }) => {
-  const { watch, getValues, setValue, resetField, control } = useFormContext<WorkoutSchemaType>();
-  const {
-    fields: exercises,
-    append,
-    remove,
-    update,
-    replace,
-  } = useFieldArray<WorkoutSchemaType, `${typeof parentPath}.exercises`>({
+  const { watch, getValues, resetField, control } = useFormContext<WorkoutSchemaType>();
+  const { append, remove, update, replace } = useFieldArray<
+    WorkoutSchemaType,
+    `${typeof parentPath}.exercises`
+  >({
     name: `${parentPath}.exercises`,
     control,
   });
@@ -46,6 +43,8 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const exerciseIndexToDelete = useRef<number | null>(null);
+
+  const exercises = watch(`${parentPath}.exercises`) as IExercise[];
 
   const handleSelectExercise = (index: number, updatedExercise: IExercisePresetItem) => {
     const { name, linkToVideo, tipFromTrainer, exerciseMethod, _id } = updatedExercise;
@@ -64,10 +63,8 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
 
   const handleUpdateExercise = (key: any, value: any, index: number) => {
     const exercise = getValues(`${parentPath}.exercises`)[index];
-    const path = `${parentPath}.exercises.${index}.${key}`;
 
     update(index, { ...exercise, [key]: value });
-    setValue(path, value);
   };
 
   const handleAddExcercise = () => {
@@ -115,18 +112,11 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
     return convertItemsToOptions(exerciseMethodResponse?.data, `title`, `title`);
   }, [exerciseMethodResponse]);
 
-  console.log("Exercises:", watch(`${parentPath}.exercises`));
-  console.log("field array exercises", exercises);
-
   return (
     <>
       <div className="w-full flex flex-col gap-3 py-4">
         <div className="grid lg:grid-cols-2 gap-4">
-          <DragDropWrapper
-            items={watch(`${parentPath}.exercises`) || []}
-            setItems={handleMoveExercise}
-            idKey="_id"
-          >
+          <DragDropWrapper items={exercises || []} setItems={handleMoveExercise} idKey="_id">
             {({ item, index }) => (
               <SortableItem item={item} idKey="_id">
                 {() => {
