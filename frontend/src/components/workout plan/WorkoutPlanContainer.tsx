@@ -12,6 +12,7 @@ import { DragDropWrapper } from "../Wrappers/DragDropWrapper";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { WorkoutSchemaType } from "@/schemas/workoutPlanSchema";
 import { FormField, FormItem, FormMessage } from "../ui/form";
+import { generateUUID } from "@/lib/utils";
 
 interface WorkoutContainerProps {
   parentPath: `workoutPlans.${number}`;
@@ -19,24 +20,26 @@ interface WorkoutContainerProps {
 }
 
 const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({ parentPath, onDeleteWorkout }) => {
-  const { control } = useFormContext<WorkoutSchemaType>();
-
-  const handleAddMuscleGroup = () => {
-    const newMuscleGroup: IMuscleGroupWorkouts = {
-      muscleGroup: ``,
-      exercises: [],
-    };
-
-    append(newMuscleGroup);
-  };
+  const { control, watch } = useFormContext<WorkoutSchemaType>();
   const workoutIndex = parentPath.split(".")[1];
 
-  const { fields, replace, append, remove, update } = useFieldArray({
+  const { replace, append, remove, update } = useFieldArray({
     control,
     name: `${parentPath}.muscleGroups`,
   });
 
   const [isOpen, setIsOpen] = useState(false);
+  const muscleGroups = watch(`${parentPath}.muscleGroups`) as IMuscleGroupWorkouts[];
+
+  const handleAddMuscleGroup = () => {
+    const newMuscleGroup: IMuscleGroupWorkouts = {
+      muscleGroup: ``,
+      exercises: [],
+      _id: generateUUID(),
+    };
+
+    append(newMuscleGroup);
+  };
 
   return (
     <>
@@ -73,20 +76,20 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({ parentPath, onD
           <CollapsibleContent className="flex flex-col gap-4 ">
             <DragDropWrapper
               strategy="vertical"
-              items={fields}
+              items={muscleGroups}
               setItems={(items) => {
                 replace(items);
               }}
-              idKey="id"
+              idKey="_id"
             >
               {({ item, index }) => (
-                <SortableItem className="border-b-2 last:border-b-0" item={item} idKey="id">
+                <SortableItem className="border-b-2 last:border-b-0" item={item} idKey="_id">
                   {() => (
                     <MuscleGroupContainer
-                      key={item.id}
+                      key={item._id}
                       muscleGroup={item}
                       handleUpdateMuscleGroup={(muscleGroup) => {
-                        update(index, { muscleGroup: muscleGroup, exercises: [] });
+                        update(index, { ...item, muscleGroup: muscleGroup, exercises: [] });
                       }}
                       handleDeleteMuscleGroup={() => remove(index)}
                       parentPath={`${parentPath}.muscleGroups.${index}`}
