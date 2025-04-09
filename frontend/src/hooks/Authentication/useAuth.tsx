@@ -3,6 +3,8 @@ import { useEffect, useState, useContext, createContext } from "react";
 import secureLocalStorage from "react-secure-storage";
 import useCheckUserSessionQuery from "../queries/auth/useCheckUserSessionQuery";
 import { ISession } from "@/interfaces/IUser";
+import { useQueryClient } from "@tanstack/react-query";
+import { QueryKeys } from "@/enums/QueryKeys";
 
 interface AuthContext {
   authed: boolean;
@@ -14,6 +16,8 @@ interface AuthContext {
 const authContext = createContext<AuthContext | undefined>(undefined);
 
 function useAuth(): AuthContext {
+  const queryClient = useQueryClient();
+
   const [authed, setAuthed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState<ISession | null>(null);
@@ -27,7 +31,6 @@ function useAuth(): AuthContext {
       setAuthed(false);
       setLoading(false);
     } else {
-      setAuthed(true);
       setToken(userToken as ISession);
     }
   };
@@ -40,7 +43,7 @@ function useAuth(): AuthContext {
     if (!data) return;
 
     setAuthed(data.isValid);
-    setTimeout(() => setLoading(false), 500);
+    setLoading(false);
   }, [data]);
 
   return {
@@ -56,6 +59,7 @@ function useAuth(): AuthContext {
       return new Promise<void>((resolve) => {
         secureLocalStorage.clear();
         sessionStorage.clear();
+        queryClient.invalidateQueries({ queryKey: [QueryKeys.USER_LOGIN_SESSION] });
         setAuthed(false);
         resolve();
       });
