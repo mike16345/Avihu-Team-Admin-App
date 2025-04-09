@@ -16,7 +16,7 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { useDietPlanPresetApi } from "@/hooks/api/useDietPlanPresetsApi";
-import { validateDietPlan } from "@/components/DietPlan/DietPlanSchema";
+import { dietPlanSchema } from "@/components/DietPlan/DietPlanSchema";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import CustomButton from "@/components/ui/CustomButton";
 import { FULL_DAY_STALE_TIME } from "@/constants/constants";
@@ -27,7 +27,6 @@ import BackButton from "@/components/ui/BackButton";
 import BasicUserDetails from "@/components/UserDashboard/UserInfo/BasicUserDetails";
 import { useUsersStore } from "@/store/userStore";
 import { weightTab } from "./UserDashboard";
-import { useDirtyFormContext } from "@/context/useFormContext";
 import useAddDietPlanPreset from "@/hooks/mutations/DietPlans/useAddDietPlanPreset";
 import InputModal from "@/components/ui/InputModal";
 import { invalidateQueryKeys } from "@/QueryClient/queryClient";
@@ -39,7 +38,6 @@ import { getNestedZodError } from "@/lib/utils";
 
 export const ViewDietPlanPage = () => {
   const navigation = useNavigate();
-  const { setErrors } = useDirtyFormContext();
   const { id } = useParams();
   const { users } = useUsersStore();
   const { data: fetchedUser } = useUserQuery(id);
@@ -77,6 +75,13 @@ export const ViewDietPlanPage = () => {
     queryFn: handleGetDietPlan,
   });
 
+  const dietPlanPresets = useQuery({
+    queryKey: [QueryKeys.DIET_PLAN_PRESETS],
+    enabled: !!id,
+    staleTime: FULL_DAY_STALE_TIME,
+    queryFn: () => getAllDietPlanPresets(),
+  });
+
   const [dietPlan, setDietPlan] = useState<IDietPlan | undefined>(data);
 
   const updateDietPlan = (dietPlan: IDietPlan) => setDietPlan(dietPlan);
@@ -108,12 +113,12 @@ export const ViewDietPlanPage = () => {
       userId: id,
     };
 
-    const { isValid, errors } = validateDietPlan(dietPlanToAdd);
-    setErrors(errors);
+    const { error } = dietPlanSchema.safeParse(dietPlanToAdd);
 
-    if (!isValid) {
-      toast.error(`יש בעיה בקלט.`);
-      return;
+    if (error) {
+      const { title, description } = getNestedZodError(error);
+
+      return toast.error(title, { description });
     }
 
     if (isNewPlan) {
@@ -125,13 +130,6 @@ export const ViewDietPlanPage = () => {
       queryClient.invalidateQueries({ queryKey: [QueryKeys.NO_DIET_PLAN] });
     }
   };
-
-  const dietPlanPresets = useQuery({
-    queryKey: [QueryKeys.DIET_PLAN_PRESETS],
-    enabled: !!id,
-    staleTime: FULL_DAY_STALE_TIME,
-    queryFn: () => getAllDietPlanPresets(),
-  });
 
   const handleSelect = (presetName: string) => {
     const selectedPreset = dietPlanPresets.data?.data.find((preset) => preset.name === presetName);
@@ -147,13 +145,14 @@ export const ViewDietPlanPage = () => {
   const handleAddPreset = (name: string) => {
     if (!dietPlan) return;
     const { error } = presetNameSchema.safeParse({ name: name });
+    
     if (error) {
       const { title, description } = getNestedZodError(error);
 
       return toast.error(title, { description });
     }
 
-    const preset: IDietPlanPreset = { ...dietPlan, name };
+    const preset: any = { ...dietPlan, name };
 
     delete preset.userId;
     delete preset._id;

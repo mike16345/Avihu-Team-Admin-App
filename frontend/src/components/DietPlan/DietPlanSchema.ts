@@ -1,4 +1,5 @@
 import { IDietPlan } from "@/interfaces/IDietPlan";
+import ERROR_MESSAGES from "@/utils/errorMessages";
 import { z } from "zod";
 
 const MIN_QUANTITY = 0;
@@ -19,8 +20,11 @@ const mealSchema = z.object({
 const dietPlanSchema = z.object({
   meals: z.array(mealSchema),
   totalCalories: z.coerce.number().min(0).optional(),
-  freeCalories: z.coerce.number().min(0),
-  fatsPerDay: z.coerce.number().min(0).optional(),
+  freeCalories: z.coerce.number().min(0, { message: ERROR_MESSAGES.minNumber(0) }),
+  fatsPerDay: z.coerce
+    .number()
+    .min(0, { message: ERROR_MESSAGES.minNumber(0) })
+    .optional(),
   customInstructions: z.array(z.string()).optional(),
 });
 

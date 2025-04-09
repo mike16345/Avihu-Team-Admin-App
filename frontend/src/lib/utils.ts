@@ -190,27 +190,7 @@ export const deepClone = <T>(obj: T): T => {
   return clonedObj as T;
 };
 
-type HebrewPathTranslations = {
-  planName: string;
-  name: string;
-  workoutPlans: string;
-  muscleGroups: string;
-  exercises: string;
-  sets: string;
-  cardio: string;
-  weeks: string;
-  workouts: string;
-  root: string;
-  minReps: string;
-  maxReps: string;
-  linkToVideo: string;
-  plan: string;
-  timesPerWeek: string;
-  minsPerWeek: string;
-  warmUpAmount: string;
-};
-
-const hebrewPathTranslations: Partial<HebrewPathTranslations> = {
+const hebrewPathTranslations: Record<string, string> = {
   root: "",
   planName: "שם אימון",
   name: "שם",
@@ -227,9 +207,11 @@ const hebrewPathTranslations: Partial<HebrewPathTranslations> = {
   minsPerWeek: "כמות לשבוע",
   timesPerWeek: "פעמים בשבוע",
   warmUpAmount: "זמן חימום",
+  freeCalories: "קלוריות חופשיות",
+  fatsPerDay: "שומנים ליום",
+  veggiesPerDay: "ירקות ליום",
 };
 
-// Use for onInvalidSubmit
 export const getNestedError = (
   obj: Record<string, any>,
   key = "message",
@@ -246,9 +228,7 @@ export const getNestedError = (
 
   for (const [k, value] of Object.entries(obj)) {
     if (typeof value === "object") {
-      const formattedKey = isNaN(Number(k))
-        ? hebrewPathTranslations[k as keyof HebrewPathTranslations]
-        : `${Number(k) + 1}`;
+      const formattedKey = isNaN(Number(k)) ? hebrewPathTranslations[k] : `${Number(k) + 1}`;
       const nestedError = getNestedError(value, key, [...path, `${formattedKey || ""}`]);
       if (nestedError) return nestedError;
     }
