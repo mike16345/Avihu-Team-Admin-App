@@ -6,6 +6,7 @@ import { FC, useState } from "react";
 interface IAddWorkoutPlanProps {
   onClick: () => void;
 }
+
 export const AddWorkoutPlanCard: FC<IAddWorkoutPlanProps> = ({ onClick }) => {
   const [isTooltipOpen, setIsToolTipOpen] = useState(false);
 
@@ -19,8 +20,8 @@ export const AddWorkoutPlanCard: FC<IAddWorkoutPlanProps> = ({ onClick }) => {
       <CardContent className="size-full flex items-center justify-center ">
         <TooltipProvider delayDuration={100}>
           <Tooltip open={isTooltipOpen} onOpenChange={setIsToolTipOpen}>
-            <TooltipTrigger>
-              <FaPlus size={20} className="" />
+            <TooltipTrigger type="button">
+              <FaPlus size={20} />
             </TooltipTrigger>
             <TooltipContent>הוסף תרגיל</TooltipContent>
           </Tooltip>

@@ -11,7 +11,7 @@ const AddButton: React.FC<AddButtonProps> = ({ onClick, tip }) => {
   return (
     <TooltipProvider delayDuration={100}>
       <Tooltip>
-        <TooltipTrigger className="w-full">
+        <TooltipTrigger type="button" className="w-full">
           <div
             className=" bg-accent rounded border-t-2  flex justify-center px-1 py-1.5  my-2 cursor-pointer"
             onClick={(e) => {

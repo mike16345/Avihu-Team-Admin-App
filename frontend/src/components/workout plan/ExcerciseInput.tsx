@@ -1,69 +1,103 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Label } from "@/components/ui/label";
+import React, { useMemo, useRef, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
-import { IExercisePresetItem, ISet, IExercise } from "@/interfaces/IWorkoutPlan";
-import SetsContainer from "./SetsContainer";
+import { IExercisePresetItem, IExercise } from "@/interfaces/IWorkoutPlan";
+import SetsContainer, { defaultSet } from "./SetsContainer";
 import { Input } from "../ui/input";
 import { IoClose } from "react-icons/io5";
 import { Card, CardContent, CardHeader } from "../ui/card";
 import { AddWorkoutPlanCard } from "./AddWorkoutPlanCard";
-import useExercisePresetApi from "@/hooks/api/useExercisePresetApi";
-import { useIsEditableContext } from "@/context/useIsEditableContext";
 import DeleteModal from "../Alerts/DeleteModal";
 import { Button } from "../ui/button";
-import { useQuery } from "@tanstack/react-query";
 import {
   convertItemsToOptions,
-  createRetryFunction,
   extractVideoId,
+  generateUUID,
   getYouTubeThumbnail,
 } from "@/lib/utils";
 import ComboBox from "../ui/combo-box";
-import { FULL_DAY_STALE_TIME } from "@/constants/constants";
-import { QueryKeys } from "@/enums/QueryKeys";
-import useExerciseMethodApi from "@/hooks/api/useExerciseMethodsApi";
-import { Option } from "@/types/types";
 import { SortableItem } from "../DragAndDrop/SortableItem";
 import { DragDropWrapper } from "../Wrappers/DragDropWrapper";
+import { WorkoutSchemaType } from "@/schemas/workoutPlanSchema";
+import { useFieldArray, useFormContext } from "react-hook-form";
+import useMuscleGroupExercisesQuery from "@/hooks/queries/exercises/useMuscleGroupExercisesQuery";
+import useExerciseMethodQuery from "@/hooks/queries/exercises/useExerciseMethodQuery";
+import { FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
 
 interface ExcerciseInputProps {
   muscleGroup?: string;
-  handleUpdateExercises: (workouts: IExercise[]) => void;
-  exercises?: IExercise[];
+  parentPath: `workoutPlans.${number}.muscleGroups.${number}`;
 }
 
-const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
-  muscleGroup,
-  handleUpdateExercises,
-  exercises,
-}) => {
-  const { isEditable } = useIsEditableContext();
+const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath }) => {
+  const { watch, getValues, resetField, control } = useFormContext<WorkoutSchemaType>();
+  const { append, remove, update, replace } = useFieldArray<
+    WorkoutSchemaType,
+    `${typeof parentPath}.exercises`
+  >({
+    name: `${parentPath}.exercises`,
+    control,
+  });
+
+  const exerciseQuery = useMuscleGroupExercisesQuery(muscleGroup);
+  const { data: exerciseMethodResponse } = useExerciseMethodQuery();
+
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const { getExerciseByMuscleGroup } = useExercisePresetApi();
-  const { getAllExerciseMethods } = useExerciseMethodApi();
   const exerciseIndexToDelete = useRef<number | null>(null);
-  const [exerciseMethods, setExerciseMethods] = useState<Option[] | null>(null);
 
-  const doQuery = !!muscleGroup && isEditable;
-  const exerciseQuery = useQuery({
-    queryKey: [`exercise-${muscleGroup}`],
-    queryFn: () => getExerciseByMuscleGroup(muscleGroup!).then((res) => res.data),
-    staleTime: FULL_DAY_STALE_TIME,
-    enabled: doQuery,
-    retry: createRetryFunction(404),
-  });
+  const exercises = watch(`${parentPath}.exercises`) as IExercise[];
 
-  const { data: exerciseMethodResponse } = useQuery({
-    queryKey: [QueryKeys.EXERCISE_METHODS],
-    queryFn: () => getAllExerciseMethods(),
-    staleTime: FULL_DAY_STALE_TIME,
-    retry: createRetryFunction(404, 2),
-  });
+  const handleSelectExercise = (index: number, updatedExercise: IExercisePresetItem) => {
+    const { name, linkToVideo, tipFromTrainer, exerciseMethod, _id } = updatedExercise;
+    const exercise = getValues(`${parentPath}.exercises`)[index];
+    const newExercise = {
+      ...exercise,
+      _id: _id || generateUUID(),
+      name,
+      linkToVideo,
+      tipFromTrainer,
+      exerciseMethod,
+    };
+
+    resetField(`${parentPath}.exercises.${index}`, { defaultValue: newExercise });
+  };
+
+  const handleUpdateExercise = (key: any, value: any, index: number) => {
+    const exercise = getValues(`${parentPath}.exercises`)[index];
+
+    update(index, { ...exercise, [key]: value });
+  };
+
+  const handleAddExcercise = () => {
+    const newExercise: IExercise = {
+      name: ``,
+      sets: [defaultSet],
+      linkToVideo: "",
+      _id: generateUUID(),
+    };
+
+    append(newExercise);
+  };
+
+  const handleMoveExercise = (exercises: IExercise[]) => {
+    const clonedExercises = exercises.map((exercise) => ({
+      ...exercise,
+      sets: exercise.sets.map((set) => ({ ...set })),
+    }));
+
+    replace(clonedExercises);
+  };
+
+  const handleDeleteExcercise = () => {
+    if (exerciseIndexToDelete.current === null) return;
+
+    remove(exerciseIndexToDelete.current);
+    exerciseIndexToDelete.current = null;
+  };
 
   const exerciseOptions = useMemo(() => {
     if (!exerciseQuery.data) return [];
-    const exercisesInMuscleGroup = exercises?.map((exercise) => exercise.name);
 
+    const exercisesInMuscleGroup = exercises?.map((exercise) => exercise.name);
     const filteredExistingExercises = exerciseQuery.data?.filter(
       (exercise) =>
         exercisesInMuscleGroup?.find((exerciseName) => exercise.name == exerciseName) == undefined
@@ -72,123 +106,27 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
     return convertItemsToOptions(filteredExistingExercises || [], "name");
   }, [exerciseQuery.data, exercises]);
 
-  const [exerciseObjs, setExerciseObjs] = useState<IExercise[]>(
-    exercises || [
-      {
-        name: ``,
-        sets: [],
-      },
-    ]
-  );
+  const exerciseMethods = useMemo(() => {
+    if (!exerciseMethodResponse?.data?.length) return [];
 
-  const handleUpdateWorkoutObject = <K extends keyof IExercise>(
-    key: K,
-    value: IExercise[K],
-    index: number
-  ) => {
-    const updatedExercises = exerciseObjs.map((workout, i) =>
-      i === index ? { ...workout, [key]: value } : workout
-    );
-
-    setExerciseObjs(updatedExercises);
-    handleUpdateExercises(updatedExercises);
-  };
-
-  const handleUpdateExercise = (index: number, updatedExercise: IExercisePresetItem) => {
-    const { name, linkToVideo, tipFromTrainer, exerciseMethod } = updatedExercise;
-
-    setExerciseObjs((prevExercises) => {
-      const updatedExercises = [...prevExercises];
-      updatedExercises[index] = {
-        ...prevExercises[index],
-        name,
-        linkToVideo,
-        tipFromTrainer,
-        exerciseMethod,
-      };
-
-      handleUpdateExercises(updatedExercises);
-      return updatedExercises;
-    });
-  };
-
-  const handleAddExcercise = () => {
-    const newExercise: IExercise = {
-      name: ``,
-      sets: [
-        {
-          minReps: 0,
-          maxReps: 0,
-        },
-      ],
-    };
-
-    const updatedExercises = [...exerciseObjs, newExercise];
-
-    setExerciseObjs(updatedExercises);
-    handleUpdateExercises(updatedExercises);
-  };
-
-  const handleDeleteExcercise = () => {
-    if (exerciseIndexToDelete.current === null) return;
-
-    const updatedExercises = exerciseObjs.filter((_, i) => i !== exerciseIndexToDelete.current);
-
-    setExerciseObjs(updatedExercises);
-    handleUpdateExercises(updatedExercises);
-    exerciseIndexToDelete.current = null;
-  };
-
-  const updateSets = (setsArr: ISet[], index: number) => {
-    setExerciseObjs((prevExercises) => {
-      const updatedWorkouts = [...prevExercises];
-      updatedWorkouts[index] = {
-        ...prevExercises[index],
-        sets: setsArr,
-      };
-
-      handleUpdateExercises(updatedWorkouts);
-      return updatedWorkouts;
-    });
-  };
-
-  const formatExerciseMethods = (methods) => {
-    const newValues = convertItemsToOptions(methods, `title`, `title`);
-
-    setExerciseMethods(newValues);
-  };
-
-  useEffect(() => {
-    if (!exerciseMethodResponse?.data?.length || exerciseMethods) return;
-
-    formatExerciseMethods(exerciseMethodResponse.data);
+    return convertItemsToOptions(exerciseMethodResponse?.data, `title`, `title`);
   }, [exerciseMethodResponse]);
 
   return (
     <>
       <div className="w-full flex flex-col gap-3 py-4">
         <div className="grid lg:grid-cols-2 gap-4">
-          <DragDropWrapper
-            items={exerciseObjs}
-            setItems={(items) => {
-              setExerciseObjs(items);
-              handleUpdateExercises(items);
-            }}
-            idKey="_id"
-          >
+          <DragDropWrapper items={exercises || []} setItems={handleMoveExercise} idKey="_id">
             {({ item, index }) => (
               <SortableItem item={item} idKey="_id">
-                {() => (
-                  <Card
-                    key={item._id || item.name + index}
-                    className={` sm:p-6 max-h-[575px] overflow-y-auto custom-scrollbar`}
-                  >
-                    <CardHeader>
-                      <div className="flex flex-col gap-1">
-                        <div className="flex items-center justify-between">
-                          <h2 className="font-bold underline">תרגיל:</h2>
-                          {isEditable && (
+                {() => {
+                  return (
+                    <Card className={` sm:p-4 max-h-[575px] overflow-y-auto custom-scrollbar`}>
+                      <CardHeader>
+                        <div className="flex flex-col gap-1 w-full">
+                          <div className="flex items-center justify-end w-full">
                             <Button
+                              type="button"
                               variant={"ghost"}
                               onClick={() => {
                                 exerciseIndexToDelete.current = index;
@@ -197,115 +135,104 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({
                             >
                               <IoClose size={22} />
                             </Button>
-                          )}
-                        </div>
-                        {isEditable ? (
+                          </div>
                           <div className="w-fit">
-                            <ComboBox
-                              options={exerciseOptions}
-                              value={item.name}
-                              onSelect={(exercise) => handleUpdateExercise(index, exercise)}
+                            <FormField
+                              name={`${parentPath}.exercises.${index}.name`}
+                              render={() => {
+                                return (
+                                  <FormItem>
+                                    <FormLabel className="font-bold underline">תרגיל</FormLabel>
+                                    <ComboBox
+                                      options={exerciseOptions}
+                                      value={item.name}
+                                      onSelect={(exercise) => {
+                                        handleSelectExercise(index, exercise);
+                                      }}
+                                    />
+                                    <FormMessage />
+                                  </FormItem>
+                                );
+                              }}
                             />
                           </div>
-                        ) : (
-                          <p className="font-bold">{item.name}</p>
-                        )}
-                        {item.linkToVideo && (
-                          <img
-                            className="rounded mt-2"
-                            src={getYouTubeThumbnail(extractVideoId(item.linkToVideo || ""))}
-                          />
-                        )}
-                        <label className="font-bold underline pt-5">שיטת אימון:</label>
-                        {isEditable ? (
+                          {item.linkToVideo && (
+                            <img
+                              className="rounded mt-2"
+                              src={getYouTubeThumbnail(extractVideoId(item.linkToVideo || ""))}
+                            />
+                          )}
+                          <label className="font-bold underline pt-5">שיטת אימון:</label>
                           <div className="w-fit flex gap-5">
                             <ComboBox
                               options={exerciseMethods}
                               value={item.exerciseMethod}
-                              onSelect={(exercise) =>
-                                handleUpdateWorkoutObject("exerciseMethod", exercise, index)
-                              }
+                              onSelect={(exerciseMethod) => {
+                                handleUpdateExercise("exerciseMethod", exerciseMethod, index);
+                              }}
                             />
                             <Button
+                              type="button"
                               onClick={() =>
-                                handleUpdateWorkoutObject("exerciseMethod", undefined, index)
+                                handleUpdateExercise("exerciseMethod", undefined, index)
                               }
                             >
                               נקה
                             </Button>
                           </div>
-                        ) : (
-                          <p className="font-bold">{item.exerciseMethod}</p>
-                        )}
-                      </div>
-                    </CardHeader>
-                    <CardContent className="flex flex-col gap-4 ">
-                      <SetsContainer
-                        existingSets={item.sets}
-                        updateSets={(setsArr: ISet[]) => updateSets(setsArr, index)}
-                      />
-                      <div className=" flex flex-col gap-4">
-                        <div>
-                          <Label className="font-bold underline">לינק לסרטון</Label>
-                          {isEditable ? (
-                            <Input
-                              readOnly={!isEditable}
-                              placeholder="הכנס לינק כאן..."
-                              name="linkToVideo"
-                              value={item.linkToVideo}
-                              onChange={(e) =>
-                                handleUpdateWorkoutObject("linkToVideo", e.target.value, index)
-                              }
-                            />
-                          ) : (
-                            <a
-                              onClick={(e) => {
-                                const target = e.target as HTMLAnchorElement;
-                                if (!target || !target.href || !target.href.includes("youtube")) {
-                                  e.preventDefault();
-                                  return;
-                                }
-                              }}
-                              target="_blank"
-                              href={item.linkToVideo}
-                              className="py-1 block border-b-2 text-ellipsis break-words whitespace-normal"
-                            >
-                              {item.linkToVideo == `` ? `לא קיים` : item.linkToVideo}
-                            </a>
-                          )}
                         </div>
-                        <div>
-                          <Label className="font-bold underline">דגשים</Label>
-                          {isEditable ? (
-                            <Textarea
-                              readOnly={!isEditable}
-                              placeholder="דגשים למתאמן..."
-                              name="tipFromTrainer"
-                              value={item.tipFromTrainer}
-                              onChange={(e) =>
-                                handleUpdateWorkoutObject("tipFromTrainer", e.target.value, index)
-                              }
-                            />
-                          ) : (
-                            <p className="py-1 border-b-2 text-ellipsis break-words whitespace-normal">
-                              {item.tipFromTrainer?.replace(" ", "").length == 0
-                                ? `לא קיים`
-                                : item.tipFromTrainer}
-                            </p>
-                          )}
+                      </CardHeader>
+                      <CardContent className="flex flex-col gap-4 ">
+                        <SetsContainer
+                          key={item?._id + "-sets"}
+                          parentPath={`${parentPath}.exercises.${index}`}
+                        />
+                        <div className=" flex flex-col gap-4">
+                          <FormField
+                            control={control}
+                            name={`${parentPath}.exercises.${index}.linkToVideo`}
+                            render={({ field }) => {
+                              return (
+                                <FormItem>
+                                  <FormLabel>לינק לסרטון</FormLabel>
+                                  <Input
+                                    {...field}
+                                    value={item.linkToVideo}
+                                    placeholder="הכנס לינק כאן..."
+                                  />
+                                  <FormMessage />
+                                </FormItem>
+                              );
+                            }}
+                          />
+                          <FormField
+                            control={control}
+                            name={`${parentPath}.exercises.${index}.tipFromTrainer`}
+                            render={({ field }) => {
+                              return (
+                                <FormItem>
+                                  <FormLabel>דגשים</FormLabel>
+                                  <Textarea
+                                    {...field}
+                                    value={item.tipFromTrainer}
+                                    placeholder="דגשים למתאמן..."
+                                  />
+                                  <FormMessage />
+                                </FormItem>
+                              );
+                            }}
+                          />
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
+                      </CardContent>
+                    </Card>
+                  );
+                }}
               </SortableItem>
             )}
           </DragDropWrapper>
-          {isEditable && (
-            <div className="h-[575px]">
-              <AddWorkoutPlanCard onClick={() => handleAddExcercise()} />
-            </div>
-          )}
+          <div className="h-[575px]">
+            <AddWorkoutPlanCard onClick={() => handleAddExcercise()} />
+          </div>
         </div>
       </div>
       <DeleteModal

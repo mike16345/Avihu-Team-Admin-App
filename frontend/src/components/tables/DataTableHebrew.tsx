@@ -171,7 +171,7 @@ export function DataTableHebrew<TData, TValue>({
           {actionButton}
         </div>
       </div>
-      <div className="rounded-md border max-h-[75vh] overflow-auto">
+      <div className="rounded-md border min-h-[60vh] max-h-[60vh] overflow-auto">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

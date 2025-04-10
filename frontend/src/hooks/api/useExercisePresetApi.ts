@@ -17,7 +17,7 @@ const useExercisePresetApi = () => {
     });
 
   const updateExercise = (id: string, newExercise: IExercisePresetItem) =>
-    updateItem(EXERCISE_PRESETS_ENDPOINT + `/one`, newExercise, null, { id });
+    updateItem<IExercisePresetItem>(EXERCISE_PRESETS_ENDPOINT + `/one`, newExercise, null, { id });
 
   const addExercise = (newExercise: IExercisePresetItem) =>
     sendData<IExercisePresetItem>(EXERCISE_PRESETS_ENDPOINT, newExercise);

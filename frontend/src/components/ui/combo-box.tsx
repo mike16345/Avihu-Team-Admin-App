@@ -37,7 +37,7 @@ const ComboBox: FC<ComboBoxProps> = ({ onSelect, options, value }) => {
                   value={option.name}
                   onSelect={(name) => {
                     setOpen(false);
-                    if (value?.toLowerCase() == name.toLowerCase()) return; // Return
+                    if (value?.toLowerCase() == name.toLowerCase()) return;
                     onSelect(option.value);
                   }}
                 >

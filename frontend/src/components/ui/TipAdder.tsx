@@ -1,25 +1,22 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "./button";
-import { BsTrash3 } from "react-icons/bs";
+import DeleteButton from "./buttons/DeleteButton";
 
 interface TipAdderProps {
   saveTips: (tips: string[]) => void;
   tips: string[];
-  isEditable?: boolean;
 }
 
-const TipAdder: React.FC<TipAdderProps> = ({ tips, saveTips, isEditable = true }) => {
-  const [newTip, setNewTip] = useState<string | undefined>();
+const TipAdder: React.FC<TipAdderProps> = ({ tips = [], saveTips }) => {
+  const [newTip, setNewTip] = useState<string>("");
 
   const addTip = () => {
-    if (!newTip) return;
+    if (!newTip.trim()) return;
 
-    const newTipsArr = [...tips];
-
-    newTipsArr.push(newTip);
+    const newTipsArr = [...tips, newTip];
 
     saveTips(newTipsArr);
-    setNewTip(``);
+    setNewTip("");
   };
 
   const removeTip = (index: number) => {
@@ -28,46 +25,53 @@ const TipAdder: React.FC<TipAdderProps> = ({ tips, saveTips, isEditable = true }
     saveTips(newTipsArr);
   };
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
   return (
-    <div className="border-2 rounded  p-4 flex flex-col gap-4 h-fit">
+    <div className="border-2 rounded  p-4 flex flex-col gap-4 ">
       <h2 className="font-bold">דגשים</h2>
-      <ul className="px-4 w-full max-h-32 overflow-y-auto">
+      <ul className="w-full overflow-y-auto">
         {tips.length === 0 ? (
           <h2 className="text-center">לא הוספו טיפים!</h2>
         ) : (
           tips.map((tip, i) => (
-            <div key={i} className="list-disc flex justify-between py-1 border-b-2 items-center">
-              <li className="text-wrap">{tip}</li>
-              {isEditable && (
-                <div
-                  className="hover:bg-secondary rounded p-1 cursor-pointer"
-                  onClick={() => removeTip(i)}
-                >
-                  <BsTrash3 />
-                </div>
-              )}
-            </div>
+            <li key={i} className="list-disc py-1 border-b-2 flex items-center gap-2">
+              <span className="break-words whitespace-normal flex-1 overflow-hidden text-ellipsis">
+                {tip}
+              </span>
+              <DeleteButton tip="הסר דגש" onClick={() => removeTip(i)} />
+            </li>
           ))
         )}
       </ul>
-      {isEditable && (
-        <>
-          <input
-            className="border-2 rounded p-1 bg-secondary"
-            placeholder="דגש חדש.."
-            value={newTip}
-            onChange={(e) => setNewTip(e.target.value)}
-          ></input>
-          <div className="flex justify-center gap-2">
-            <Button className="w-full" variant="secondary" onClick={() => saveTips([])}>
-              נקה
-            </Button>
-            <Button className="w-full" onClick={addTip}>
-              הוספה
-            </Button>
-          </div>
-        </>
-      )}
+      <>
+        <input
+          className="border-2 rounded p-1 bg-secondary"
+          placeholder="דגש חדש.."
+          value={newTip}
+          onChange={(e) => setNewTip(e.target.value)}
+        />
+        <div className="flex justify-center gap-2">
+          <Button className="w-full" type="button" variant="secondary" onClick={() => saveTips([])}>
+            נקה
+          </Button>
+          <Button className="w-full" type="button" onClick={addTip}>
+            הוספה
+          </Button>
+        </div>
+      </>
     </div>
   );
 };

@@ -1,11 +1,11 @@
-export function cleanWorkoutObject(obj: any): any {
+export function cleanWorkoutObject(obj: any, keyToRemove?: string): any {
   if (Array.isArray(obj)) {
     return obj.map((item) => cleanWorkoutObject(item));
   } else if (typeof obj === "object" && obj !== null) {
     const cleanedObject: any = {};
     for (const key in obj) {
       if (obj.hasOwnProperty(key)) {
-        if (key === "id" || key === "_id") {
+        if (key === "id" || key === "_id" || key == "__v" || key == keyToRemove) {
           continue;
         } else if (key === "maxReps" && !obj[key]) {
           cleanedObject[key] = undefined;

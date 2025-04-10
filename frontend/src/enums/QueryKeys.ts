@@ -16,4 +16,5 @@ export enum QueryKeys {
   USERS = "users",
   USERS_TO_CHECK = "users-to-check",
   CARDIO_WORKOUT_PRESET = "cardio-workout-preset-",
+  USER_LOGIN_SESSION = "user-login-session",
 }

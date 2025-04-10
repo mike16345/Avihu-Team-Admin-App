@@ -23,8 +23,6 @@ export const CustomItemSelection: FC<CustomItemSelectionProps> = ({
 
       onItemToggle(selected);
 
-      console.log("selectedItems", selected);
-
       return selected;
     });
   };

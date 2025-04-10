@@ -9,7 +9,6 @@ import ErrorPage from "./ErrorPage";
 import { Input } from "@/components/ui/input";
 import { removeIdsAndVersions } from "@/utils/dietPlanUtils";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import {
@@ -31,10 +30,7 @@ import { validateDietPlan } from "@/components/DietPlan/DietPlanSchema";
 import useDietPlanPresetQuery from "@/hooks/queries/dietPlans/useDietPlanPresetQuery";
 import useAddDietPlanPreset from "@/hooks/mutations/DietPlans/useAddDietPlanPreset";
 import useUpdateDietPlanPreset from "@/hooks/mutations/DietPlans/useUpdateDietPlanPreset";
-
-const presetNameShcema = z.object({
-  name: z.string().min(1, { message: `בחר שם לתפריט` }).max(25),
-});
+import { presetNameSchema, PresetNameSchemaType } from "@/schemas/dietPlanPresetSchema";
 
 export const ViewDietPlanPresetPage = () => {
   const { setErrors } = useDirtyFormContext();
@@ -46,8 +42,8 @@ export const ViewDietPlanPresetPage = () => {
   const [isNewPlan, setIsNewPlan] = useState(true);
   const [dietPlan, setDietPlan] = useState<IDietPlan>(defaultDietPlan);
 
-  const presetNameForm = useForm<z.infer<typeof presetNameShcema>>({
-    resolver: zodResolver(presetNameShcema),
+  const presetNameForm = useForm<PresetNameSchemaType>({
+    resolver: zodResolver(presetNameSchema),
     defaultValues: {
       name: "",
     },
@@ -73,7 +69,7 @@ export const ViewDietPlanPresetPage = () => {
   const createPreset = useAddDietPlanPreset({ onSuccess, onError });
   const updatePreset = useUpdateDietPlanPreset({ onSuccess, onError });
 
-  const handleSubmit = (values: z.infer<typeof presetNameShcema>) => {
+  const handleSubmit = (values: PresetNameSchemaType) => {
     const dietPlanToAdd = {
       ...dietPlan,
       name: values.name,
@@ -107,7 +103,6 @@ export const ViewDietPlanPresetPage = () => {
 
   if (isLoading) return <Loader size="large" />;
   if (error) return <ErrorPage message={error.message} />;
-
 
   return (
     <div className=" flex flex-col gap-4 size-full hide-scrollbar overflow-y-auto">

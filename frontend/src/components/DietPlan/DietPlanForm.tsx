@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { MealDropDown } from "./MealDropDown";
 import DeleteModal from "../Alerts/DeleteModal";
-import { CustomItems, IDietPlan, IMeal } from "@/interfaces/IDietPlan";
+import { IDietPlan, IMeal } from "@/interfaces/IDietPlan";
 import { Button } from "../ui/button";
 import { defaultMeal } from "@/constants/DietPlanConsts";
 import CustomInstructions from "./CustomInstructions";
-import useMenuItemApi from "@/hooks/api/useMenuItemApi";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 import { useDirtyFormContext } from "@/context/useFormContext";
+import useMenuItemsQuery from "@/hooks/queries/menuItems/useMenuItemsQuery";
 
 interface DietPlanFormProps {
   updateDietPlan: (dietPlan: IDietPlan) => void;
@@ -15,15 +15,11 @@ interface DietPlanFormProps {
 }
 
 const DietPlanForm: React.FC<DietPlanFormProps> = ({ dietPlan, updateDietPlan }) => {
-  const { getAllMenuItems } = useMenuItemApi();
   const { setIsDirty } = useDirtyFormContext();
 
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [mealToDelete, setMealToDelete] = useState<number | null>(null);
-  const [customItems, setCustomItems] = useState<CustomItems>({
-    protein: [],
-    carbs: [],
-  });
+  const { data: customItems } = useMenuItemsQuery();
 
   const handleAddMeal = () => {
     if (!dietPlan) return;
@@ -50,12 +46,6 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ dietPlan, updateDietPlan })
     setIsDirty(true);
   };
 
-  useEffect(() => {
-    getAllMenuItems().then((items) => {
-      setCustomItems(items);
-    });
-  }, []);
-
   useUnsavedChangesWarning();
 
   return (
@@ -65,7 +55,7 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ dietPlan, updateDietPlan })
           הוסף ארוחה
         </Button>
       </div>
-      <div className="w-full flex flex-col sm:flex-row gap-12 ">
+      <div className="w-full flex flex-col sm:flex-row gap-8 ">
         {dietPlan && (
           <div className="sm:w-3/4 w-full flex flex-col gap-8 ">
             {dietPlan.meals.map((meal, index) => {
@@ -86,16 +76,18 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ dietPlan, updateDietPlan })
             })}
           </div>
         )}
-        <CustomInstructions
-          instructions={dietPlan.customInstructions}
-          freeCalories={dietPlan.freeCalories || 0}
-          fatsPerDay={dietPlan.fatsPerDay || 0}
-          veggiesPerDay={dietPlan.veggiesPerDay || 0}
-          onUpdate={(key, val) => {
-            setIsDirty(true);
-            updateDietPlan({ ...dietPlan, [key]: val });
-          }}
-        />
+        <div className="sm:w-1/4">
+          <CustomInstructions
+            instructions={dietPlan.customInstructions}
+            freeCalories={dietPlan.freeCalories || 0}
+            fatsPerDay={dietPlan.fatsPerDay || 0}
+            veggiesPerDay={dietPlan.veggiesPerDay || 0}
+            onUpdate={(key, val) => {
+              setIsDirty(true);
+              updateDietPlan({ ...dietPlan, [key]: val });
+            }}
+          />
+        </div>
       </div>
 
       <DeleteModal
