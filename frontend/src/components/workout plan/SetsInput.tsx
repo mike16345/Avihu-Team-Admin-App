@@ -1,55 +1,47 @@
-import React from "react";
-import { Label } from "@/components/ui/label";
+import React, { ReactNode } from "react";
 import { Input } from "@/components/ui/input";
-import { useIsEditableContext } from "@/context/useIsEditableContext";
+import { useFormContext } from "react-hook-form";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
 
 interface SetInputProps {
   setNumber: number;
-  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  maxReps?: number;
-  minReps: number;
+  children?: ReactNode;
+  parentPath: `workoutPlans.${number}.muscleGroups.${number}.exercises.${number}.sets.${number}`;
 }
 
-const SetsInput: React.FC<SetInputProps> = ({ setNumber, handleChange, maxReps, minReps }) => {
-  const { isEditable } = useIsEditableContext();
+const SetsInput: React.FC<SetInputProps> = ({ setNumber, parentPath, children }) => {
+  const { control } = useFormContext();
 
   return (
-    <div className="flex items-center gap-3">
-      <div className="mt-5 font-semibold">סט {setNumber}</div>
-      <div>
-        <Label>מינימום חזרות</Label>
-        {isEditable ? (
-          <Input
-            readOnly={!isEditable}
-            name="minReps"
-            type="number"
-            min={0}
-            className="w-28"
-            placeholder="8/10/12..."
-            value={minReps}
-            onChange={(e) => handleChange(e)}
-          />
-        ) : (
-          <p className="py-1 border-b-2 text-center">{minReps}</p>
+    <div className="flex items-center gap-2">
+      <div className="w-10 mt-6 font-semibold">סט {setNumber}</div>
+      <FormField
+        control={control}
+        name={`${parentPath}.minReps`}
+        render={({ field }) => (
+          <FormItem className="w-28">
+            <FormLabel>מינימום חזרות</FormLabel>
+            <FormControl>
+              <Input {...field} type="number" min={0} placeholder="8/10/12..." />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
         )}
-      </div>
-      <div>
-        <Label>מקסימום חזרות</Label>
-        {isEditable ? (
-          <Input
-            readOnly={!isEditable}
-            name="maxReps"
-            type="number"
-            className="w-28"
-            min={0}
-            placeholder="8/10/12..."
-            value={maxReps}
-            onChange={(e) => handleChange(e)}
-          />
-        ) : (
-          <p className="py-1 border-b-2 text-center">{maxReps || `לא קיים`}</p>
+      />
+      <FormField
+        control={control}
+        name={`${parentPath}.maxReps`}
+        render={({ field }) => (
+          <FormItem className="w-28">
+            <FormLabel>מקסימום חזרות</FormLabel>
+            <FormControl>
+              <Input {...field} type="number" min={0} placeholder="8/10/12..." />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
         )}
-      </div>
+      />
+      {children}
     </div>
   );
 };

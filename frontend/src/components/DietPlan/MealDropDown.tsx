@@ -18,7 +18,7 @@ import { CustomItems, IDietItem, IMeal } from "@/interfaces/IDietPlan";
 import { CustomItemSelection } from "./CustomItemSelection";
 import { mealSchema } from "./DietPlanSchema";
 import ExtraItems from "./ExtraItems";
-import { useDirtyFormContext } from "@/context/useFormContext";
+import DeleteButton from "../ui/buttons/DeleteButton";
 
 type ShowCustomSelectionType = {
   totalProtein: boolean;
@@ -171,10 +171,7 @@ export const MealDropDown: FC<MealDropDownProps> = ({
       <div className="flex items-center justify-between w-full">
         <h4 className="text-sm font-bold">ארוחה {mealNumber}</h4>
         <div className="flex items-center">
-          <Button onClick={onDelete} variant="ghost" size="sm" className="w-9 p-0">
-            <FaTrash className="h-4 w-4" />
-            <span className="sr-only">Delete</span>
-          </Button>
+          <DeleteButton tip="הסר ארוחה" onClick={onDelete} />
 
           <Button
             onClick={() => setIsOpen((state) => !state)}

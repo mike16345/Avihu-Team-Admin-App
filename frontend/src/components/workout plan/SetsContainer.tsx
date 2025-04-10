@@ -1,104 +1,68 @@
-import React, { useState } from "react";
+import React from "react";
 import SetsInput from "./SetsInput";
 import { ISet } from "@/interfaces/IWorkoutPlan";
 import AddButton from "../ui/buttons/AddButton";
 import DeleteButton from "../ui/buttons/DeleteButton";
-import { useIsEditableContext } from "@/context/useIsEditableContext";
-import { duplicateItem, removeItemAtIndex } from "@/utils/utils";
-import { MdContentCopy } from "react-icons/md";
 import CopyButton from "../ui/buttons/CopyButton";
+import { WorkoutSchemaType } from "@/schemas/workoutPlanSchema";
+import { useFieldArray, useFormContext } from "react-hook-form";
+import { deepClone } from "@/lib/utils";
 
 interface SetContainerProps {
-  updateSets: (componentSets: ISet[]) => void;
-  existingSets?: ISet[];
+  parentPath: `workoutPlans.${number}.muscleGroups.${number}.exercises.${number}`;
 }
 
-const SetsContainer: React.FC<SetContainerProps> = ({ updateSets, existingSets }) => {
-  const { isEditable } = useIsEditableContext();
+export const defaultSet: ISet = {
+  minReps: 0,
+  maxReps: 0,
+};
 
-  const [componentSets, setComponentSets] = useState<ISet[]>(
-    existingSets || [
-      {
-        minReps: 0,
-        maxReps: 0,
-      },
-    ]
-  );
+const SetsContainer: React.FC<SetContainerProps> = ({ parentPath }) => {
+  const { getValues, watch, setValue, control } = useFormContext<WorkoutSchemaType>();
+  const { fields, append, remove } = useFieldArray<WorkoutSchemaType, `${typeof parentPath}.sets`>({
+    name: `${parentPath}.sets`,
+    control,
+  });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
-    const { name, value } = e.target;
-
-    const updatedSets = componentSets.map((set, i) => {
-      if (i === index) {
-        return {
-          ...set,
-          [name]: value,
-        };
-      }
-      return set;
-    });
-
-    setComponentSets(updatedSets);
-    updateSets(updatedSets);
-  };
+  const sets = watch(`${parentPath}.sets`);
 
   const createSet = () => {
-    const newSet: ISet = {
-        minReps: 0,
-        maxReps: 0,
-      };
-    setComponentSets([...componentSets, newSet]);
-    updateSets([...componentSets, newSet]);
+    append({ ...defaultSet });
   };
 
   const removeSet = (index: number) => {
-    const filteredArr = removeItemAtIndex(index,componentSets)
-
-    setComponentSets(filteredArr);
-    updateSets(filteredArr);
+    remove(index);
   };
 
-  const copySet=(index:number)=>{
-    const newSetArray=duplicateItem(index,componentSets)
+  const copySet = (index: number) => {
+    const sets = getValues(`${parentPath}.sets`);
+    const item = sets[index];
+    const newSet = deepClone(item);
 
-    setComponentSets(newSetArray);
-    updateSets(newSetArray);
-  }
+    append(newSet);
+    setValue(`${parentPath}.sets`, [...sets, item]);
+  };
 
   return (
     <div className="flex flex-col gap-2 w-fit">
       <h2 className="underline font-bold pt-2">סטים:</h2>
-      <div className="flex flex-col gap-2">
-        {componentSets.map((set, i) => (
-          <div key={set?._id || i} className="flex gap-4 justify-center items-center w-fit">
-            <SetsInput
-              setNumber={i + 1}
-              handleChange={(e) => handleChange(e, i)}
-              maxReps={set.maxReps}
-              minReps={set.minReps}
-            />
-            {isEditable && (
-              <>
-              <div className="mt-5">
-                <DeleteButton
-                  disabled={componentSets.length == 1}
-                  tip="הסר סט"
-                  onClick={() => removeSet(i)}
-                />
-              </div>
-              <div className="mt-5">
-                <CopyButton tip="שכפל סט" onClick={()=>copySet(i)}/>
-              </div>
-              </>
-            )}
-          </div>
+      <div className="flex flex-col gap-4">
+        {sets.map((_, i) => (
+          <SetsInput key={i} parentPath={`${parentPath}.sets.${i}`} setNumber={i + 1}>
+            <div className="flex items-center mt-6">
+              <DeleteButton
+                disabled={fields.length == 1}
+                tip="הסר סט"
+                onClick={() => removeSet(i)}
+              />
+              <CopyButton tip="שכפל סט" onClick={() => copySet(i)} />
+            </div>
+          </SetsInput>
         ))}
       </div>
-      {isEditable && (
-        <div className="border-t-2">
-          <AddButton tip="הוסף סט" onClick={createSet} />
-        </div>
-      )}
+      <div className="border-t-2">
+        <AddButton tip="הוסף סט" onClick={createSet} />
+      </div>
     </div>
   );
 };

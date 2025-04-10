@@ -17,7 +17,7 @@ const DeleteButton: React.FC<DeleteButtonProps> = ({ tip, onClick, disabled = fa
   return (
     <TooltipProvider delayDuration={100}>
       <Tooltip>
-        <TooltipTrigger className="flex items-center justify-center">
+        <TooltipTrigger type="button" className="flex items-center justify-center">
           <Button
             type="button"
             variant={"ghost"}

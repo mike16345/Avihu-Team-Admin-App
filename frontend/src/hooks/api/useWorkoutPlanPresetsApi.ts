@@ -20,7 +20,7 @@ export const useWorkoutPlanPresetApi = () => {
     deleteItem(WORKOUT_PLAN_PRESETS_ENDPOINT + `/one`, { presetId });
 
   const updateWorkoutPlanPreset = (presetId: string, workoutPlanPreset: IWorkoutPlanPreset) =>
-    updateItem(WORKOUT_PLAN_PRESETS_ENDPOINT + `/one`, workoutPlanPreset, null, { presetId });
+    updateItem<ApiResponse<IWorkoutPlanPreset>>(WORKOUT_PLAN_PRESETS_ENDPOINT + `/one`, workoutPlanPreset, null, { presetId });
 
   return {
     getAllWorkoutPlanPresets,

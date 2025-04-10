@@ -68,6 +68,7 @@ export function DragDropWrapper<T extends Record<string, any>>({
 
     const oldIndex = items.findIndex((item) => item[idKey] === active.id);
     const newIndex = items.findIndex((item) => item[idKey] === over.id);
+    
     setItems(arrayMove(items, oldIndex, newIndex));
   };
 

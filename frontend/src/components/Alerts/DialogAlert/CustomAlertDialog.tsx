@@ -61,8 +61,8 @@ const CustomAlertDialog: React.FC<CustomAlertDialogProps> = ({
           {...alertDialogFooterProps}
           className={cn("gap-2", alertDialogFooterProps?.className)}
         >
-          <AlertDialogCancel {...alertDialogCancelProps} />
-          <AlertDialogAction {...alertDialogActionProps} />
+          <AlertDialogCancel {...alertDialogCancelProps} type="button" />
+          <AlertDialogAction {...alertDialogActionProps} type="button" />
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

@@ -45,7 +45,6 @@ const ExerciseMethodsForm: React.FC<IPresetFormProps> = ({ closeSheet, objectId 
   };
 
   const onError = (e: any) => {
-    console.log("error", e);
     toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
       description: e.data.message,
     });
