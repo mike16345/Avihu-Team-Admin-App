@@ -142,8 +142,8 @@ export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ childr
         <h1 className="text-4xl">תבנית אימון</h1>
         <BackButton navLink={MainRoutes.WORKOUT_PLANS_PRESETS} />
         <Form {...form}>
-          <form onSubmit={handleSubmit(onSubmit, onInvalidSubmit)}>
-            <div className="w-full py-4 border-b-2 mb-2">
+          <form className="flex flex-col gap-3" onSubmit={handleSubmit(onSubmit, onInvalidSubmit)}>
+            <div className="w-full ">
               <div className="space-y-4">
                 <FormField
                   control={form.control}
@@ -160,7 +160,7 @@ export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ childr
                     );
                   }}
                 />
-                <div className="space-y-2 sm:w-2/4">
+                <div className="space-y-2 sm:w-fit sm:min-w-24">
                   <span>תבניות</span>
                   <ComboBox
                     value={selectedPreset}
@@ -173,7 +173,7 @@ export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ childr
               </div>
             </div>
 
-            {children}
+            <div className="border-b-2 rounded">{children}</div>
             <div className="flex sm:justify-end py-1.5">
               <CustomButton
                 className="w-full sm:w-32"

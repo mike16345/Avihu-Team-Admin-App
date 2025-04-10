@@ -60,7 +60,7 @@ const WorkoutPlans: FC<IWorkoutPlanProps> = ({ displayTips = false }) => {
 
   return (
     <>
-      <div className="size-full flex flex-col p-6  min-h-screen">
+      <div className="size-full flex flex-col p-1.5">
         <div className="size-full">
           <WorkoutTabs
             cardioPlan={<CardioWrapper />}

@@ -18,12 +18,7 @@ import { weightTab } from "@/pages/UserDashboard";
 import BackButton from "../ui/BackButton";
 import ComboBox from "../ui/combo-box";
 import useWorkoutPlanPresetsQuery from "@/hooks/queries/workoutPlans/useWorkoutPlanPresetsQuery";
-import {
-  convertItemsToOptions,
-  getNestedError,
-  getNestedZodError,
-  getZodErrorIssues,
-} from "@/lib/utils";
+import { convertItemsToOptions, getNestedError, getZodErrorIssues } from "@/lib/utils";
 import useAddWorkoutPlan from "@/hooks/mutations/workouts/useAddWorkoutPlan";
 import useUpdateWorkoutPlan from "@/hooks/mutations/workouts/useUpdateWorkoutPlan";
 import { cleanWorkoutObject, parseErrorFromObject } from "@/utils/workoutPlanUtils";
@@ -169,27 +164,29 @@ const CreateWorkoutPlanWrapper = ({ children }: { children: React.ReactNode }) =
 
   return (
     <Form {...form}>
-      <div className="flex flex-col gap-2 w-full">
-        <h1 className="text-4xl">תוכנית אימון</h1>
-        <BackButton navLink={MainRoutes.USERS + `/${id}?tab=${weightTab}`} />
+      <div className="flex flex-col gap-4 w-full">
+        <div className="space-y-2">
+          <h1 className="text-4xl">תוכנית אימון</h1>
+          <BackButton navLink={MainRoutes.USERS + `/${id}?tab=${weightTab}`} />
 
-        {user && <BasicUserDetails user={user} />}
-        <div className="sm:w-1/4">
-          <ComboBox
-            value={selectedPreset}
-            options={workoutPresetsOptions}
-            onSelect={(preset) => {
-              reset({
-                ...preset,
-                cardio: preset.cardio || { type: "simple", plan: defaultSimpleCardioOption },
-              });
+          {user && <BasicUserDetails user={user} />}
+          <div className="sm:w-fit sm:min-w-40">
+            <ComboBox
+              value={selectedPreset}
+              options={workoutPresetsOptions}
+              onSelect={(preset) => {
+                reset({
+                  ...preset,
+                  cardio: preset.cardio || { type: "simple", plan: defaultSimpleCardioOption },
+                });
 
-              setSelectedPreset(preset.name);
-            }}
-          />
+                setSelectedPreset(preset.name);
+              }}
+            />
+          </div>
         </div>
-        <form onSubmit={form.handleSubmit(onSubmit, onInvalidSubmit)}>
-          {children}
+        <form className="space-y-2" onSubmit={form.handleSubmit(onSubmit, onInvalidSubmit)}>
+          <div className="border-b-2 rounded">{children}</div>
           <div className="flex flex-col md:flex-row md:justify-end gap-2 py-1">
             <CustomButton
               className="font-bold w-auto sm:w-fit"
