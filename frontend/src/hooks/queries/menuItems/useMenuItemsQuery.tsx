@@ -8,10 +8,6 @@ const useMenuItemsQuery = () => {
   return useQuery({
     queryKey: [QueryKeys.MENU_ITEMS],
     queryFn: getAllMenuItems,
-    initialData: {
-      protein: [],
-      carbs: [],
-    },
     staleTime: Infinity,
   });
 };
