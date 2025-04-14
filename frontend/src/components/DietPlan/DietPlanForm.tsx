@@ -62,7 +62,7 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ dietPlan, updateDietPlan })
               return (
                 <div key={meal?._id || index} className={`border-b`}>
                   <MealDropDown
-                    customItems={customItems}
+                    customItems={customItems || { protein: [], carbs: [] }}
                     mealNumber={index + 1}
                     meal={meal}
                     setDietPlan={(meal: IMeal) => handleSetMeal(meal, index)}
