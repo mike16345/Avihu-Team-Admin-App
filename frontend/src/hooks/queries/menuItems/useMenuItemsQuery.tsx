@@ -8,7 +8,7 @@ const useMenuItemsQuery = () => {
   return useQuery({
     queryKey: [QueryKeys.MENU_ITEMS],
     queryFn: getAllMenuItems,
-    staleTime: Infinity,
+    staleTime:1000 * 5
   });
 };
 
