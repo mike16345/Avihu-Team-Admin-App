@@ -33,8 +33,7 @@ const shortcuts = [
 
 const AdminDashboard = () => {
   return (
-    <div className="size-full ">
-      <h1 className="text-4xl font-bold sm:text-right text-center">עמוד מאמן</h1>
+    <>
       <div className="flex flex-col pt-4 gap-2">
         <div className="flex flex-col  sm:flex-row  sm:flex-wrap sm:items-center gap-5">
           {shortcuts.map((item) => (
@@ -44,7 +43,7 @@ const AdminDashboard = () => {
           ))}
         </div>
       </div>
-      <div className="grid grid-cols-1  h-[80vh]  sm:grid-cols-2 gap-10 py-4">
+      <div className="grid grid-cols-1 max-h-[70vh] sm:grid-cols-2 gap-10 py-4">
         <UserCheckIn />
 
         <div className="px-8">
@@ -60,7 +59,7 @@ const AdminDashboard = () => {
           />
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
