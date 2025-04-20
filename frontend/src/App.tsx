@@ -13,7 +13,7 @@ function App() {
   return (
     <SidebarProvider className="flex size-full">
       {authed && <AppSidebar />}
-      <div className="size-full p-4  overflow-y-auto custom-scrollbar ">
+      <div className="size-full p-4 overflow-y-auto custom-scrollbar ">
         {authed && <SidebarTrigger />}
         <RequireAuth>
           <AppRoutes />
