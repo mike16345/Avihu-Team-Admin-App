@@ -8,6 +8,7 @@ import ErrorPage from "@/pages/ErrorPage";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { HOUR_STALE_TIME } from "@/constants/constants";
 import { weightTab } from "@/pages/UserDashboard";
+import { userFullName } from "@/lib/utils";
 
 interface AnalyticsCardProps {
   title: string;
@@ -45,11 +46,11 @@ const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ title, dataKey }) => {
   });
 
   return (
-    <Card dir="rtl" className="h-full">
+    <Card dir="rtl" className=" max-h-[75vh] overflow-y-auto">
       <CardHeader>
         <CardTitle>{title}</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col h-full overflow-y-auto">
+      <CardContent>
         {isError && <ErrorPage message={error.message} />}
         {isLoading && <Loader size="large" />}
         {data?.data.length == 0 && (
@@ -63,12 +64,9 @@ const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ title, dataKey }) => {
             onDoubleClick={() =>
               navigate(`${actions[dataKey]?.navUrl}${item._id}${actions[dataKey].query || ""}`)
             }
-            className="w-full flex items-center justify-between hover:bg-accent cursor-pointer border-b-2"
+            className="w-full flex items-center p-3 hover:bg-accent cursor-pointer border-b-2"
           >
-            <div className="flex gap-2 sm:gap-5 items-center py-5 px-2">
-              <p>{item.firstName}</p>
-              <p>{item.lastName}</p>
-            </div>
+            {userFullName(item)}
           </div>
         ))}
       </CardContent>

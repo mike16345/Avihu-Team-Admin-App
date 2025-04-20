@@ -167,11 +167,8 @@ export const ViewDietPlanPage = () => {
   if (isLoading || dietPlanPresets.isLoading) return <Loader size="large" />;
 
   return (
-    <div className=" flex flex-col gap-4 size-full hide-scrollbar overflow-y-auto">
-      <div className="my-6">
-        <h1 className="text-2xl font-semibold ">עריכת תפריט תזונה</h1>
-        {user && <BasicUserDetails user={user} />}
-      </div>
+    <div className=" flex flex-col gap-4 size-full">
+      {user && <BasicUserDetails user={user} />}
 
       <BackButton navLink={MainRoutes.USERS + `/${id}?tab=${weightTab}`} />
       <Select onValueChange={(val) => handleSelect(val)}>
@@ -190,27 +187,28 @@ export const ViewDietPlanPage = () => {
 
       {dietPlan && (
         <>
-          <DietPlanForm dietPlan={dietPlan} updateDietPlan={updateDietPlan} />
-          {dietPlan && dietPlan.meals.length > 0 && (
-            <div className="flex gap-3 flex-col md:flex-row">
-              <CustomButton
-                className="font-bold  sm:w-fit "
-                variant="default"
-                onClick={() => setOpenPresetModal(true)}
-                title="שמור תפריט כתבנית"
-                disabled={createDietPlan.isPending || editDietPlan.isPending}
-                isLoading={addDietPlanPreset.isPending}
-              />
-              <CustomButton
-                className="font-bold w-full sm:w-32"
-                variant="success"
-                onClick={handleSubmit}
-                title="שמור תפריט"
-                disabled={addDietPlanPreset.isPending}
-                isLoading={createDietPlan.isPending || editDietPlan.isPending}
-              />
-            </div>
-          )}
+          <DietPlanForm dietPlan={dietPlan} updateDietPlan={updateDietPlan}>
+            {dietPlan && dietPlan.meals.length > 0 && (
+              <div className="flex gap-3 flex-col md:flex-row">
+                <CustomButton
+                  className="font-bold  sm:w-fit "
+                  variant="default"
+                  onClick={() => setOpenPresetModal(true)}
+                  title="שמור תפריט כתבנית"
+                  disabled={createDietPlan.isPending || editDietPlan.isPending}
+                  isLoading={addDietPlanPreset.isPending}
+                />
+                <CustomButton
+                  className="font-bold w-full sm:w-32"
+                  variant="success"
+                  onClick={handleSubmit}
+                  title="שמור תפריט"
+                  disabled={addDietPlanPreset.isPending}
+                  isLoading={createDietPlan.isPending || editDietPlan.isPending}
+                />
+              </div>
+            )}
+          </DietPlanForm>
         </>
       )}
       <InputModal

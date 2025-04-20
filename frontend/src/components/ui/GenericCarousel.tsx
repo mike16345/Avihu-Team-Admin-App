@@ -13,12 +13,10 @@ interface GenericCarouselProps {
 
 const GenericCarousel: React.FC<GenericCarouselProps> = ({ carouselItems }) => {
   return (
-    <Carousel dir="ltr" className="h-full shadow-md">
-      <CarouselContent className="  h-[77vh]">
+    <Carousel dir="ltr" className="shadow-md">
+      <CarouselContent>
         {carouselItems.map((item, i) => (
-          <CarouselItem className="h-full" key={i}>
-            {item}
-          </CarouselItem>
+          <CarouselItem key={i}>{item}</CarouselItem>
         ))}
       </CarouselContent>
       <CarouselPrevious />
