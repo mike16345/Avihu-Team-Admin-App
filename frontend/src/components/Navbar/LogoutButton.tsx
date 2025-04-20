@@ -1,24 +1,16 @@
 import { Button } from "../ui/button";
 import { BiExit } from "react-icons/bi";
-import { CustomTooltip } from "../ui/custom-tooltip";
 import { FC } from "react";
+import useAuth from "@/hooks/Authentication/useAuth";
 
-interface LogoutButtonProps {
-  onLogout: () => void;
-}
+const LogoutButton: FC = () => {
+  const { logout } = useAuth();
 
-const LogoutButton: FC<LogoutButtonProps> = ({ onLogout }) => {
   return (
-    <CustomTooltip
-      side="top"
-      tooltipContent={"יציאה"}
-      tooltipTrigger={
-        <Button onClick={onLogout} variant={"outline"} size="icon">
-          <BiExit size={24} />
-          <span className="sr-only">יציאה</span>
-        </Button>
-      }
-    />
+    <Button className="w-full flex items-center gap-2" onClick={logout} variant={"outline"}>
+      <span>יציאה</span>
+      <BiExit />
+    </Button>
   );
 };
 

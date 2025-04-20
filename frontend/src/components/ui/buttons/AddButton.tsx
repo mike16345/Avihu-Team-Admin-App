@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "../button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Plus } from "lucide-react";
 
 interface AddButtonProps {
   onClick: any;
@@ -21,9 +22,9 @@ const AddButton: React.FC<AddButtonProps> = ({ onClick, tip }) => {
           >
             <Button
               type="button"
-              className="text-sm rounded-full h-5 bg-success hover:bg-success hover:font-bold  text-secondary-foreground"
+              className="rounded-full h-5 bg-success hover:bg-success hover:font-bold  text-secondary-foreground"
             >
-              +
+              <Plus size={14} />
             </Button>
           </div>
         </TooltipTrigger>
