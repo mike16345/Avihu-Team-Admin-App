@@ -34,6 +34,7 @@ import useUserQuery from "@/hooks/queries/user/useUserQuery";
 import { presetNameSchema } from "@/schemas/dietPlanPresetSchema";
 import { createRetryFunction, getNestedZodError } from "@/lib/utils";
 import useDietPlanPresetsQuery from "@/hooks/queries/dietPlans/useDietPlanPresetsQuery";
+import { cleanWorkoutObject } from "@/utils/workoutPlanUtils";
 
 export const ViewDietPlanPage = () => {
   const navigation = useNavigate();
@@ -114,13 +115,14 @@ export const ViewDietPlanPage = () => {
 
       return toast.error(title, { description });
     }
+    const cleanedDietPlan = cleanWorkoutObject(dietPlanToAdd);
 
     if (isNewPlan) {
-      createDietPlan.mutate(dietPlanToAdd);
+      createDietPlan.mutate(cleanedDietPlan);
     } else {
       if (!id) return;
 
-      editDietPlan.mutate({ id, cleanedDietPlan: dietPlanToAdd });
+      editDietPlan.mutate({ id, cleanedDietPlan });
       queryClient.invalidateQueries({ queryKey: [QueryKeys.NO_DIET_PLAN] });
     }
   };
