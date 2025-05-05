@@ -89,10 +89,10 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="flex flex-row items-center">
-        <ModeToggle />
         <div className="flex-1">
           <LogoutButton />
         </div>
+        <ModeToggle />
       </SidebarFooter>
     </Sidebar>
   );

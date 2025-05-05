@@ -186,7 +186,6 @@ const CreateWorkoutPlanWrapper = ({ children }: { children: React.ReactNode }) =
           </div>
         </div>
         <form className="space-y-2" onSubmit={form.handleSubmit(onSubmit, onInvalidSubmit)}>
-          <div className="border-b-2 rounded">{children}</div>
           <div className="flex flex-col md:flex-row md:justify-end gap-2 py-1">
             <CustomButton
               className="font-bold w-auto sm:w-fit"
@@ -206,6 +205,7 @@ const CreateWorkoutPlanWrapper = ({ children }: { children: React.ReactNode }) =
               isLoading={updateWorkoutPlan.isPending || addWorkoutPlan.isPending}
             />
           </div>
+          {children}
         </form>
       </div>
       <InputModal

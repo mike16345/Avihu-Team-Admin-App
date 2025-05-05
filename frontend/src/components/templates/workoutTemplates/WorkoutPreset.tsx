@@ -143,6 +143,16 @@ export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ childr
         <BackButton navLink={MainRoutes.WORKOUT_PLANS_PRESETS} />
         <Form {...form}>
           <form className="flex flex-col gap-3" onSubmit={handleSubmit(onSubmit, onInvalidSubmit)}>
+            <div className="flex sm:justify-end py-1.5">
+              <CustomButton
+                className="w-full sm:w-32"
+                variant="success"
+                type="submit"
+                title="שמור תוכנית אימון"
+                disabled={addWorkoutPreset.isPending || updateWorkoutPlanPreset.isPending}
+                isLoading={addWorkoutPreset.isPending || updateWorkoutPlanPreset.isPending}
+              />
+            </div>
             <div className="w-full ">
               <div className="space-y-4">
                 <FormField
@@ -174,16 +184,6 @@ export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ childr
             </div>
 
             <div className="border-b-2 rounded">{children}</div>
-            <div className="flex sm:justify-end py-1.5">
-              <CustomButton
-                className="w-full sm:w-32"
-                variant="success"
-                type="submit"
-                title="שמור תוכנית אימון"
-                disabled={addWorkoutPreset.isPending || updateWorkoutPlanPreset.isPending}
-                isLoading={addWorkoutPreset.isPending || updateWorkoutPlanPreset.isPending}
-              />
-            </div>
           </form>
         </Form>
       </div>
