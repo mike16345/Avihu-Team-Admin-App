@@ -1,21 +1,17 @@
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { QueryKeys } from "@/enums/QueryKeys";
-import { MainRoutes } from "@/enums/Routes";
 import { useUsersApi } from "@/hooks/api/useUsersApi";
 import { IUser } from "@/interfaces/IUser";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 const useUpdateUser = (id: string) => {
   const { updateUser } = useUsersApi();
-  const navigation = useNavigate();
   const queryClient = useQueryClient();
 
   const onSuccess = () => {
     toast.success(`משתמש נשמר בהצלחה!`);
     queryClient.invalidateQueries({ queryKey: [QueryKeys.USERS, id] });
-    navigation(MainRoutes.USERS);
   };
 
   const onError = (e: any) => {
