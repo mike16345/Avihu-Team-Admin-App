@@ -95,13 +95,13 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
 
   return (
     <Form {...userForm}>
-      <form onSubmit={userForm.handleSubmit(onSubmit)} className="space-y-5   ">
-        <div className="flex items-center gap-4">
+      <form onSubmit={userForm.handleSubmit(onSubmit)} className="space-y-5">
+        <div className="flex items-center gap-4 sm:w-1/2">
           <FormField
             control={userForm.control}
             name="firstName"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="w-full">
                 <FormLabel>שם פרטי</FormLabel>
                 <FormControl>
                   <Input placeholder="שם פרטי..." {...field} />
@@ -114,7 +114,7 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
             control={userForm.control}
             name="lastName"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="w-full">
                 <FormLabel>שם משפחה</FormLabel>
                 <FormControl>
                   <Input placeholder="שם משפחה..." {...field} />
@@ -124,12 +124,12 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
             )}
           />
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 sm:w-1/2">
           <FormField
             control={userForm.control}
             name="phone"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="w-full">
                 <FormLabel>טלפון</FormLabel>
                 <FormControl>
                   <Input placeholder="מספר טלפון..." {...field} />
@@ -142,7 +142,7 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
             control={userForm.control}
             name="email"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="w-full">
                 <FormLabel>אימייל</FormLabel>
                 <FormControl>
                   <Input placeholder="israel@example.com" {...field} />

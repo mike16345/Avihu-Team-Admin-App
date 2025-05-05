@@ -2,7 +2,7 @@ import { USER_TOKEN_STORAGE_KEY } from "@/constants/constants";
 import { useEffect, useState, useContext, createContext } from "react";
 import secureLocalStorage from "react-secure-storage";
 import useCheckUserSessionQuery from "../queries/auth/useCheckUserSessionQuery";
-import { ISession, IUser } from "@/interfaces/IUser";
+import { ISession } from "@/interfaces/IUser";
 import { useQueryClient } from "@tanstack/react-query";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { useUsersStore } from "@/store/userStore";
