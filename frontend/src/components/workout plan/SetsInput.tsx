@@ -19,7 +19,7 @@ const SetsInput: React.FC<SetInputProps> = ({ setNumber, parentPath, children })
         control={control}
         name={`${parentPath}.minReps`}
         render={({ field }) => (
-          <FormItem className="w-28">
+          <FormItem className="w-24">
             <FormLabel>מינימום חזרות</FormLabel>
             <FormControl>
               <Input {...field} type="number" min={0} placeholder="8/10/12..." />
@@ -32,7 +32,7 @@ const SetsInput: React.FC<SetInputProps> = ({ setNumber, parentPath, children })
         control={control}
         name={`${parentPath}.maxReps`}
         render={({ field }) => (
-          <FormItem className="w-28">
+          <FormItem className="w-24">
             <FormLabel>מקסימום חזרות</FormLabel>
             <FormControl>
               <Input {...field} type="number" min={0} placeholder="8/10/12..." />
