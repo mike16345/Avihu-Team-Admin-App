@@ -7,6 +7,11 @@ import "./App.css";
 import { AppSidebar } from "./components/Sidebar/AppSidebar";
 import { SidebarProvider, SidebarTrigger } from "./components/ui/sidebar";
 
+/**
+ * Renders the main application layout with authentication, sidebar, and routing.
+ *
+ * Displays the sidebar and sidebar trigger when the user is authenticated, and enforces authentication for main application routes. Provides a separate route for the login page.
+ */
 function App() {
   const { authed } = useAuth();
 

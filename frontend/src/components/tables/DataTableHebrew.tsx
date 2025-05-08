@@ -53,6 +53,22 @@ declare module "@tanstack/table-core" {
   }
 }
 
+/**
+ * Renders a fully featured, RTL, Hebrew-localized data table with sorting, filtering, pagination, row selection, and customizable actions.
+ *
+ * The table supports column visibility toggling, bulk row deletion, and double-click row viewing. UI elements and messages are presented in Hebrew, and the layout is optimized for right-to-left display.
+ *
+ * @param columns - Column definitions for the table.
+ * @param data - Array of data objects to display in the table.
+ * @param actionButton - Optional React node rendered alongside table controls for custom actions.
+ * @param handleViewData - Callback invoked when a row is double-clicked, receiving the row's data.
+ * @param handleDeleteData - Callback invoked to delete a row or multiple selected rows.
+ * @param handleViewNestedData - Callback for viewing nested data related to a row.
+ * @param handleSetData - Callback for updating a row's data.
+ * @param getRowClassName - Function returning a CSS class name for a given row's data.
+ *
+ * @returns A React element rendering the interactive data table with all controls and features.
+ */
 export function DataTableHebrew<TData, TValue>({
   columns,
   data,

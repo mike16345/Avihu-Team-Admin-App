@@ -20,6 +20,18 @@ const initialState: ThemeProviderState = {
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
+/**
+ * Provides theme context to its children, managing "light", "dark", or "system" theme selection and persistence.
+ *
+ * Initializes the theme from localStorage or a default value, updates the document's root class to reflect the current theme, and exposes the theme state and setter via context.
+ *
+ * @param children - React nodes to receive theme context.
+ * @param defaultTheme - The initial theme if none is stored; defaults to "light".
+ * @param storageKey - The localStorage key for persisting the theme; defaults to "vite-ui-theme".
+ *
+ * @remark
+ * When the theme is set to "system", the provider automatically applies the user's system color scheme preference.
+ */
 export function ThemeProvider({
   children,
   defaultTheme = "light",

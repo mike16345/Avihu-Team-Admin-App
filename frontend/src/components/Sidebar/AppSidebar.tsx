@@ -51,6 +51,11 @@ const items: LinkProps[] = [
   },
 ];
 
+/**
+ * Renders the application sidebar with user information, navigation links, and footer controls.
+ *
+ * Displays the current user's full name if logged in, highlights the active navigation link based on the current route, and provides logout and theme mode toggle controls in the footer.
+ */
 export function AppSidebar() {
   const currentUser = useUsersStore((state) => state.currentUser);
   const location = useLocation();

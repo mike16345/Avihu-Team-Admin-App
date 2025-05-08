@@ -16,6 +16,13 @@ interface AuthContext {
 
 const authContext = createContext<AuthContext | undefined>(undefined);
 
+/**
+ * Provides authentication state and actions for managing user login and logout in a React application.
+ *
+ * Synchronizes authentication status with secure local storage and a global user store, validates user sessions, and exposes methods to log in and log out.
+ *
+ * @returns The current authentication context, including status flags and login/logout methods.
+ */
 function useAuth(): AuthContext {
   const queryClient = useQueryClient();
   const setCurrentUser = useUsersStore((state) => state.setCurrentUser);
