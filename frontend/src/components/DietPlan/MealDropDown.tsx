@@ -230,7 +230,11 @@ export const MealDropDown: FC<MealDropDownProps> = ({
                         onAddItem={(items) =>
                           handleToggleCustomItem(items, "totalProtein", "extraItems")
                         }
-                        trigger={<Button type="button">פריטים נוספים</Button>}
+                        trigger={
+                          <Button variant={"secondary"} type="button">
+                            פריטים נוספים
+                          </Button>
+                        }
                       />
                     </div>
                   )}
