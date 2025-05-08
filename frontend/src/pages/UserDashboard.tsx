@@ -3,12 +3,10 @@ import { WeightProgression } from "@/components/UserDashboard/WeightProgression/
 import { WorkoutProgression } from "@/components/UserDashboard/WorkoutProgression/WorkoutProgression";
 import Loader from "@/components/ui/Loader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MIN_STALE_TIME } from "@/constants/constants";
-import { useUsersApi } from "@/hooks/api/useUsersApi";
-import { useQuery } from "@tanstack/react-query";
 import { useLocation, useParams, useSearchParams } from "react-router-dom";
 import ErrorPage from "./ErrorPage";
 import { useState } from "react";
+import useUserQuery from "@/hooks/queries/user/useUserQuery";
 
 export const weightTab = "מעקב שקילה";
 export const workoutTab = "מעקב אימון";
@@ -18,18 +16,10 @@ export const UserDashboard = () => {
   const { id } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const { getUser } = useUsersApi();
-
   const tabName = searchParams.get("tab")?.trim();
   const [activeTab, setActiveTab] = useState(tabName);
-  const queryKey = id || "oneUser";
 
-  const { data, isLoading, isError, error } = useQuery({
-    enabled: !user,
-    queryKey: [queryKey],
-    staleTime: MIN_STALE_TIME,
-    queryFn: () => getUser(id || ""),
-  });
+  const { data, isLoading, isError, error } = useUserQuery(id, !user);
 
   const handleSwitchTabs = (tab: string) => {
     setActiveTab(tab);

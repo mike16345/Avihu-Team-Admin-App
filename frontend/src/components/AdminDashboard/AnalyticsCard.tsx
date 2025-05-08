@@ -42,7 +42,7 @@ const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ title, dataKey }) => {
     queryFn: () => actions[dataKey].queryFunc(actions[dataKey].key),
     queryKey: [dataKey],
     enabled: !!actions[dataKey],
-    staleTime: HOUR_STALE_TIME,
+    staleTime: HOUR_STALE_TIME * 6,
   });
 
   return (

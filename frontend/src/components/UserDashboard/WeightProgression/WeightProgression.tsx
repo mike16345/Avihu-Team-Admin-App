@@ -19,7 +19,7 @@ export const WeightProgression = () => {
 
   const { data, error, isLoading } = useQuery({
     queryKey: [QueryKeys.WEIGH_INS + id],
-    staleTime: HOUR_STALE_TIME,
+    staleTime: HOUR_STALE_TIME * 6,
     enabled: !!id,
     queryFn: () => getWeighInsByUserId(id!),
     retry: createRetryFunction(404),

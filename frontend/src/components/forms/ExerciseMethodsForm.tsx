@@ -22,6 +22,7 @@ import { IExerciseMethod } from "@/interfaces/IWorkoutPlan";
 import { ExerciseMethodsSchema } from "@/schemas/exerciseMethodSchema";
 import { createRetryFunction } from "@/lib/utils";
 import { IPresetFormProps } from "@/interfaces/interfaces";
+import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 
 const ExerciseMethodsForm: React.FC<IPresetFormProps> = ({ closeSheet, objectId }) => {
   const { addExerciseMethod, updateExerciseMethod, getExerciseMethodById } = useExerciseMethodApi();
@@ -31,7 +32,7 @@ const ExerciseMethodsForm: React.FC<IPresetFormProps> = ({ closeSheet, objectId 
     queryKey: [QueryKeys.EXERCISE_METHODS + objectId],
     queryFn: () => getExerciseMethodById(objectId || ``),
     enabled: !!objectId,
-    staleTime: Infinity,
+    staleTime: FULL_DAY_STALE_TIME,
     retry: createRetryFunction(404, 2),
   });
 
