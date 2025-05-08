@@ -1,21 +1,21 @@
-import React, { useState } from "react";
+import React, { PropsWithChildren, useState } from "react";
 import { MealDropDown } from "./MealDropDown";
 import DeleteModal from "../Alerts/DeleteModal";
 import { IDietPlan, IMeal } from "@/interfaces/IDietPlan";
-import { Button } from "../ui/button";
 import { defaultMeal } from "@/constants/DietPlanConsts";
 import CustomInstructions from "./CustomInstructions";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 import { useDirtyFormContext } from "@/context/useFormContext";
 import useMenuItemsQuery from "@/hooks/queries/menuItems/useMenuItemsQuery";
+import AddButton from "../ui/buttons/AddButton";
 
-interface DietPlanFormProps {
+interface DietPlanFormProps extends PropsWithChildren {
   updateDietPlan: (dietPlan: IDietPlan) => void;
   dietPlan: IDietPlan;
 }
 
-const DietPlanForm: React.FC<DietPlanFormProps> = ({ dietPlan, updateDietPlan }) => {
-  const { setIsDirty } = useDirtyFormContext();
+const DietPlanForm: React.FC<DietPlanFormProps> = ({ dietPlan, updateDietPlan, children }) => {
+  const { isDirty, setIsDirty } = useDirtyFormContext();
 
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [mealToDelete, setMealToDelete] = useState<number | null>(null);
@@ -46,34 +46,33 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ dietPlan, updateDietPlan })
     setIsDirty(true);
   };
 
-  useUnsavedChangesWarning();
+  useUnsavedChangesWarning(isDirty);
 
   return (
     <div className=" flex flex-col gap-4 w-full h-auto">
-      <div>
-        <Button className="font-bold" onClick={handleAddMeal}>
-          הוסף ארוחה
-        </Button>
-      </div>
-      <div className="w-full flex flex-col sm:flex-row gap-8 ">
+      <div className="w-full flex flex-col sm:flex-row gap-4">
         {dietPlan && (
-          <div className="sm:w-3/4 w-full flex flex-col gap-8 ">
-            {dietPlan.meals.map((meal, index) => {
-              return (
-                <div key={meal?._id || index} className={`border-b`}>
-                  <MealDropDown
-                    customItems={customItems || { protein: [], carbs: [] }}
-                    mealNumber={index + 1}
-                    meal={meal}
-                    setDietPlan={(meal: IMeal) => handleSetMeal(meal, index)}
-                    onDelete={() => {
-                      setMealToDelete(index);
-                      setOpenDeleteModal(true);
-                    }}
-                  />
-                </div>
-              );
-            })}
+          <div className="sm:w-3/4 w-full flex flex-col gap-2 ">
+            <div className="space-y-4">
+              {dietPlan.meals.map((meal, index) => {
+                return (
+                  <div key={meal?._id || index} className={`border-b`}>
+                    <MealDropDown
+                      customItems={customItems || { protein: [], carbs: [] }}
+                      mealNumber={index + 1}
+                      meal={meal}
+                      setDietPlan={(meal: IMeal) => handleSetMeal(meal, index)}
+                      onDelete={() => {
+                        setMealToDelete(index);
+                        setOpenDeleteModal(true);
+                      }}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+            <AddButton tip="הוסף ארוחה" onClick={handleAddMeal} />
+            {children}
           </div>
         )}
         <div className="sm:w-1/4">
@@ -89,7 +88,6 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ dietPlan, updateDietPlan })
           />
         </div>
       </div>
-
       <DeleteModal
         onConfirm={() => handleDeleteMeal()}
         onCancel={() => setMealToDelete(null)}

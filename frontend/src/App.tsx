@@ -1,22 +1,20 @@
 import { Route, Routes } from "react-router-dom";
-import { Sidebar } from "./components/Navbar/Sidebar";
 import RequireAuth from "./hooks/Authentication/RequireAuthentication";
 import useAuth from "./hooks/Authentication/useAuth";
 import LoginPage from "./pages/LoginPage";
 import { AppRoutes } from "./routes/AppRoutes";
 import "./App.css";
+import { AppSidebar } from "./components/Sidebar/AppSidebar";
+import { SidebarProvider, SidebarTrigger } from "./components/ui/sidebar";
 
 function App() {
   const { authed } = useAuth();
 
   return (
-    <div className="flex size-full ">
-      {authed && (
-        <div className="sm:block sm:static absolute h-full">
-          <Sidebar />
-        </div>
-      )}
-      <div className="size-full p-8 overflow-y-auto custom-scrollbar ">
+    <SidebarProvider className="flex size-full">
+      {authed && <AppSidebar />}
+      <div className="size-full p-4 overflow-y-auto custom-scrollbar ">
+        {authed && <SidebarTrigger />}
         <RequireAuth>
           <AppRoutes />
         </RequireAuth>
@@ -24,7 +22,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
         </Routes>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }
 

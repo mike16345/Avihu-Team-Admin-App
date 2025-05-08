@@ -1,4 +1,5 @@
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
+import { IUser } from "@/interfaces/IUser";
 import { Option } from "@/types/types";
 import { AxiosError } from "axios";
 import { type ClassValue, clsx } from "clsx";
@@ -278,4 +279,10 @@ export const generateUUID = () => {
 
     return v.toString(16);
   });
+};
+
+export const userFullName = (user: IUser) => {
+  if (!user) return "";
+
+  return user.firstName?.trim() + " " + user.lastName?.trim();
 };

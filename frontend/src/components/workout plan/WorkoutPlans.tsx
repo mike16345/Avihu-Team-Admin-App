@@ -65,7 +65,7 @@ const WorkoutPlans: FC<IWorkoutPlanProps> = ({ displayTips = false }) => {
           <WorkoutTabs
             cardioPlan={<CardioWrapper />}
             workoutPlan={
-              <div className="flex flex-col-reverse sm:flex-row gap-6">
+              <div className="flex flex-col sm:flex-row gap-6">
                 <div className={`flex flex-col ${displayTips && "w-[80%]"} gap-4 w-full`}>
                   <DragDropWrapper
                     items={workoutPlans}
@@ -100,7 +100,7 @@ const WorkoutPlans: FC<IWorkoutPlanProps> = ({ displayTips = false }) => {
                   </div>
                 </div>
                 {displayTips && (
-                  <div className="w-[20%]">
+                  <div className="sm:w-[20%] w-full">
                     <TipAdder
                       tips={watch("tips") || []}
                       saveTips={(tips) => setValue("tips", tips)}

@@ -12,7 +12,7 @@ const Shortcut: React.FC<ShortcutProps> = ({ icon, actionName, navLink }) => {
 
   return (
     <div
-      className="flex p-2 justify-between items-center bg-accent h-14 sm:h-16 w-full rounded-full cursor-pointer hover:opacity-70"
+      className="flex p-2 justify-between items-center bg-accent h-12 sm:h-14 w-full rounded-full cursor-pointer hover:opacity-70"
       onClick={() => navigate(navLink)}
     >
       <p className="font-bold px-4 text-lg">{actionName}</p>

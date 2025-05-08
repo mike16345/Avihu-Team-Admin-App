@@ -1,3 +1,4 @@
+import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 import { QueryKeys } from "@/enums/QueryKeys";
 import useExercisePresetApi from "@/hooks/api/useExercisePresetApi";
 import { useQuery } from "@tanstack/react-query";
@@ -9,7 +10,7 @@ const useExerciseQuery = (id: string) => {
     queryKey: [QueryKeys.EXERCISES + id],
     queryFn: () => getExerciseById(id),
     enabled: !!id,
-    staleTime: Infinity,
+    staleTime: FULL_DAY_STALE_TIME / 2,
   });
 };
 

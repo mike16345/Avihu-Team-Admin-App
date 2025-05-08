@@ -1,4 +1,4 @@
-import { MIN_STALE_TIME } from "@/constants/constants";
+import { FULL_DAY_STALE_TIME, MIN_STALE_TIME } from "@/constants/constants";
 import { useWeighInPhotosApi } from "@/hooks/api/useWeighInPhotosApi";
 import { buildPhotoUrls } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -22,7 +22,7 @@ const useUserWeighInPhotosQuery = (id?: string) => {
     queryKey: [id + "-photos"],
     queryFn: handleGetPhotos,
     enabled: !!id,
-    staleTime: MIN_STALE_TIME,
+    staleTime: FULL_DAY_STALE_TIME / 2,
   });
 };
 

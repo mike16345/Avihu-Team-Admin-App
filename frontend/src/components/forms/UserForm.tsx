@@ -22,6 +22,7 @@ import DatePicker from "../ui/DatePicker";
 import DietaryTypeSelector from "../templates/dietTemplates/DietaryTypeSelector";
 import { IUser, IUserPost } from "@/interfaces/IUser";
 import CustomButton from "../ui/CustomButton";
+import userSchema from "@/schemas/userSchema";
 
 const remindInOptions = [
   { value: `604800`, name: `שבוע` },
@@ -44,17 +45,6 @@ const datePresets = [
   { name: `אחד עשר חודשים`, timeInDays: `330` },
   { name: `שנה`, timeInDays: `360` },
 ];
-
-const userSchema = z.object({
-  firstName: z.string().min(2, { message: "אנא הכנס שם פרטי" }),
-  lastName: z.string().min(2, { message: "אנא הכנס שם משפחה" }),
-  phone: z.string().regex(/^0[0-9]{9}$/, { message: "אנא הכנס מספר טלפון תקין" }),
-  email: z.string().email({ message: "כתובת מייל אינה תקינה" }),
-  dateFinished: z.date({ message: "בחר תאריך סיום" }),
-  planType: z.string().min(1, { message: "בחר סוג תוכנית" }),
-  remindIn: z.coerce.number(),
-  dietaryType: z.string().array().optional(),
-});
 
 interface UserFormProps {
   existingUser?: IUser;
@@ -95,13 +85,13 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
 
   return (
     <Form {...userForm}>
-      <form onSubmit={userForm.handleSubmit(onSubmit)} className="space-y-5   ">
-        <div className="flex items-center gap-4">
+      <form onSubmit={userForm.handleSubmit(onSubmit)} className="space-y-5">
+        <div className="flex items-center gap-4 sm:w-1/2">
           <FormField
             control={userForm.control}
             name="firstName"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="w-full">
                 <FormLabel>שם פרטי</FormLabel>
                 <FormControl>
                   <Input placeholder="שם פרטי..." {...field} />
@@ -114,7 +104,7 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
             control={userForm.control}
             name="lastName"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="w-full">
                 <FormLabel>שם משפחה</FormLabel>
                 <FormControl>
                   <Input placeholder="שם משפחה..." {...field} />
@@ -124,15 +114,15 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
             )}
           />
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 sm:w-1/2">
           <FormField
             control={userForm.control}
             name="phone"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="w-full">
                 <FormLabel>טלפון</FormLabel>
                 <FormControl>
-                  <Input placeholder="מספר טלפון..." {...field} />
+                  <Input dir="ltr" className="text-center" placeholder="טלפון" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -142,10 +132,10 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
             control={userForm.control}
             name="email"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="w-full">
                 <FormLabel>אימייל</FormLabel>
                 <FormControl>
-                  <Input placeholder="israel@example.com" {...field} />
+                  <Input className=" text-center" placeholder="israel@example.com" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

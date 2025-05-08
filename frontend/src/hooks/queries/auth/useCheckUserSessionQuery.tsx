@@ -2,6 +2,7 @@ import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { useUsersApi } from "@/hooks/api/useUsersApi";
 import { ISession } from "@/interfaces/IUser";
+import { createRetryFunction } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 
 const useCheckUserSessionQuery = (token: ISession | null) => {
@@ -12,6 +13,7 @@ const useCheckUserSessionQuery = (token: ISession | null) => {
     queryFn: () => checkUserSessionToken(token!),
     enabled: !!token,
     staleTime: FULL_DAY_STALE_TIME / 2,
+    retry: createRetryFunction(401, 2),
   });
 };
 

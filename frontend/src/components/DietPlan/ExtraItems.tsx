@@ -87,7 +87,9 @@ const ExtraItems: FC<ExtraItemsProps> = ({ trigger, existingItems = [], onAddIte
 
   return (
     <>
-      <div onClick={() => setIsSheetOpen(true)}>{trigger}</div>
+      <div className="w-fit" onClick={() => setIsSheetOpen(true)}>
+        {trigger}
+      </div>
       <Sheet open={isSheetOpen} onOpenChange={onCloseSheet}>
         <SheetContent dir="rtl">
           <SheetHeader>

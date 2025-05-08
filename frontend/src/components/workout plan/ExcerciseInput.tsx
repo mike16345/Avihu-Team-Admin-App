@@ -122,10 +122,11 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                 {() => {
                   return (
                     <Card className={` sm:p-4 max-h-[575px] overflow-y-auto custom-scrollbar`}>
-                      <CardHeader>
+                      <CardHeader className="sm:p-4">
                         <div className="flex flex-col gap-1 w-full">
                           <div className="flex items-center justify-end w-full">
                             <Button
+                              className="px-1.5 py-1.5"
                               type="button"
                               variant={"ghost"}
                               onClick={() => {

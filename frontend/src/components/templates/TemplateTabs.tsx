@@ -20,6 +20,7 @@ import { QueryKeys } from "@/enums/QueryKeys";
 import useExerciseMethodApi from "@/hooks/api/useExerciseMethodsApi";
 import { createRetryFunction } from "@/lib/utils";
 import useCardioWorkoutApi from "@/hooks/api/useCardioWorkoutPreset";
+import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 
 interface TemplateTabsProps {
   tabs: ITabs;
@@ -61,7 +62,7 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
 
   const apiData = useQuery({
     queryKey: [queryKey],
-    staleTime: Infinity,
+    staleTime: FULL_DAY_STALE_TIME,
     queryFn: () => apiFunc(queryKey),
     enabled: !!apiFunc,
     retry: createRetryFunction(404, 2),
