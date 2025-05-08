@@ -9,7 +9,7 @@ const useMenuItemsQuery = () => {
   return useQuery({
     queryKey: [QueryKeys.MENU_ITEMS],
     queryFn: getAllMenuItems,
-    staleTime: HOUR_STALE_TIME / 2,
+    staleTime: HOUR_STALE_TIME,
   });
 };
 

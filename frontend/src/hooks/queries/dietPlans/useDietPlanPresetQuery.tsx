@@ -1,3 +1,4 @@
+import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { useDietPlanPresetApi } from "@/hooks/api/useDietPlanPresetsApi";
 import { createRetryFunction } from "@/lib/utils";
@@ -10,7 +11,7 @@ const useDietPlanPresetQuery = (id: string) => {
     queryKey: [QueryKeys.DIET_PLAN_PRESETS + id],
     queryFn: () => getDietPlanPreset(id),
     enabled: id !== "undefined",
-    staleTime: Infinity,
+    staleTime: FULL_DAY_STALE_TIME / 2,
     retry: createRetryFunction(404, 2),
   });
 };

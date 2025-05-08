@@ -8,7 +8,7 @@ const useDietPlanPresetsQuery = () => {
 
   return useQuery({
     queryKey: [QueryKeys.DIET_PLAN_PRESETS],
-    staleTime: FULL_DAY_STALE_TIME,
+    staleTime: FULL_DAY_STALE_TIME / 2,
     queryFn: () => getAllDietPlanPresets(),
   });
 };
