@@ -19,7 +19,7 @@ export const UserDashboard = () => {
   const tabName = searchParams.get("tab")?.trim();
   const [activeTab, setActiveTab] = useState(tabName);
 
-  const { data, isLoading, isError, error } = useUserQuery(id, !user);
+  const { data, isLoading, isError, error } = useUserQuery(id || "oneUser", !user);
 
   const handleSwitchTabs = (tab: string) => {
     setActiveTab(tab);
