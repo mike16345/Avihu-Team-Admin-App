@@ -75,6 +75,9 @@ export const columns: ColumnDef<IUser>[] = [
   {
     accessorKey: "phone",
     header: "פלאפון",
+    cell(row) {
+      return <span dir="ltr">{String(row.renderValue())}</span>;
+    },
   },
   {
     accessorKey: "hasAccess",

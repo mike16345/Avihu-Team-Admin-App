@@ -5,6 +5,7 @@ import useCheckUserSessionQuery from "../queries/auth/useCheckUserSessionQuery";
 import { ISession } from "@/interfaces/IUser";
 import { useQueryClient } from "@tanstack/react-query";
 import { QueryKeys } from "@/enums/QueryKeys";
+import { useUsersStore } from "@/store/userStore";
 
 interface AuthContext {
   authed: boolean;
@@ -17,6 +18,7 @@ const authContext = createContext<AuthContext | undefined>(undefined);
 
 function useAuth(): AuthContext {
   const queryClient = useQueryClient();
+  const setCurrentUser = useUsersStore((state) => state.setCurrentUser);
 
   const [authed, setAuthed] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -31,7 +33,10 @@ function useAuth(): AuthContext {
       setAuthed(false);
       setLoading(false);
     } else {
-      setToken(userToken as ISession);
+      const token = userToken as ISession;
+
+      setToken(token);
+      setCurrentUser(token?.data?.user || null);
     }
   };
 
@@ -43,6 +48,7 @@ function useAuth(): AuthContext {
     if (!data) return;
 
     setAuthed(data.isValid);
+    if (!data.isValid) setCurrentUser(null);
     setLoading(false);
   }, [data]);
 

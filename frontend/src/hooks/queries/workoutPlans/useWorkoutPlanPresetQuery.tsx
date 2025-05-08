@@ -1,3 +1,4 @@
+import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { useWorkoutPlanPresetApi } from "@/hooks/api/useWorkoutPlanPresetsApi";
 import { useQuery } from "@tanstack/react-query";
@@ -9,7 +10,7 @@ const useWorkoutPlanPresetQuery = (id: string) => {
     queryKey: [QueryKeys.WORKOUT_PRESETS, id],
     queryFn: () => getWorkoutPlanPresetById(id),
     enabled: !!id,
-    staleTime: Infinity,
+    staleTime: FULL_DAY_STALE_TIME,
   });
 };
 

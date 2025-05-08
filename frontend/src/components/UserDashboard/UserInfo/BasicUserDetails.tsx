@@ -3,7 +3,7 @@ import { FC } from "react";
 
 const BasicUserDetails: FC<{ user: IUser }> = ({ user }) => {
   return (
-    <div className="flex flex-col gap-1 ">
+    <div className="w-fit">
       <h1 className="text-2xl font-bold flex items-center gap-2 ">
         לקוח:
         <span className="font-normal">{(user && `${user.firstName}  ${user.lastName}`) || ""}</span>

@@ -1,4 +1,4 @@
-import { MIN_STALE_TIME } from "@/constants/constants";
+import { HOUR_STALE_TIME, MIN_STALE_TIME } from "@/constants/constants";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { useUsersApi } from "@/hooks/api/useUsersApi";
 import { useUsersStore } from "@/store/userStore";
@@ -10,7 +10,7 @@ const useUsersQuery = () => {
 
   return useQuery({
     queryKey: [QueryKeys.USERS],
-    staleTime: MIN_STALE_TIME,
+    staleTime: HOUR_STALE_TIME,
     queryFn: () =>
       getAllUsers()
         .then((users) => {

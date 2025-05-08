@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import ReactQuill, { Quill } from "react-quill-new";
+import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,7 @@ import BackButton from "../ui/BackButton";
 import { QueryKeys } from "@/enums/QueryKeys";
 import CustomButton from "../ui/CustomButton";
 import Loader from "../ui/Loader";
+import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 
 const formats = [
   "font",
@@ -56,7 +57,7 @@ const BlogEditor = () => {
     queryKey: [QueryKeys.BLOGS, id],
     queryFn: () => getBlogById(id!),
     enabled: !!id && !stateBlog,
-    staleTime: Infinity,
+    staleTime: FULL_DAY_STALE_TIME,
   });
 
   const handleFieldChange = <K extends keyof IBlog>(field: K, value: IBlog[K]) => {

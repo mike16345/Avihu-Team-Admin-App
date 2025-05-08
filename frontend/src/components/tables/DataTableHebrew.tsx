@@ -27,9 +27,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { FilterIcon, Trash2Icon } from "lucide-react";
+import { FilterIcon } from "lucide-react";
 import { RowData } from "@tanstack/react-table";
 import { usePagination } from "@/hooks/usePagination";
+import DeleteButton from "../ui/buttons/DeleteButton";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -108,25 +109,43 @@ export function DataTableHebrew<TData, TValue>({
   };
 
   return (
-    <>
-      <div className="flex flex-col ">
-        <div className="w-full flex flex-col gap-2 sm:gap-0 sm:flex-row sm:justify-between sm:items-center py-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
-            <Input
-              placeholder="חיפוש..."
-              value={(table.getColumn("שם")?.getFilterValue() as string) ?? ""}
-              onChange={(event) => table.getColumn("שם")?.setFilterValue(event.target.value)}
-              className="sm:max-w-sm"
-            />
+    <div className="space-y-1">
+      <div className="w-full flex flex-col gap-2 sm:gap-0 sm:flex-row sm:justify-between sm:items-center">
+        <Input
+          placeholder="חיפוש..."
+          value={(table.getColumn("שם")?.getFilterValue() as string) ?? ""}
+          onChange={(event) => table.getColumn("שם")?.setFilterValue(event.target.value)}
+          className="sm:w-72"
+        />
+
+        <div className=" shrink-0 block sm:hidden text-sm text-muted-foreground sm:text-right text-center">
+          {table.getFilteredSelectedRowModel().rows.length} {"תוך "}
+          {table.getFilteredRowModel().rows.length} שורות נבחרו.
+        </div>
+        <div className="text-sm  flex items-center gap-4 ">
+          <div className="text-muted-foreground">
+            דף {pageNumber} תוך {table.getPageCount()}
           </div>
+          {Object.keys(rowSelection).length > 0 && (
+            <div className=" shrink-0 hidden sm:block text-sm text-muted-foreground sm:text-right text-center">
+              {table.getFilteredSelectedRowModel().rows.length} {"תוך "}
+              {table.getFilteredRowModel().rows.length} שורות נבחרו.
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center gap-3">
+          {Object.keys(rowSelection).length > 0 && (
+            <DeleteButton onClick={handleDeleteRows} tip="הסר משתמשים" />
+          )}
           <DropdownMenu dir="rtl">
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="">
+              <Button variant="outline">
                 סינון עמודות
                 <FilterIcon size={15} className="mr-2" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent>
               {table
                 .getAllColumns()
                 .filter((column) => column.getCanHide())
@@ -147,31 +166,11 @@ export function DataTableHebrew<TData, TValue>({
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
-          <div className=" shrink-0 block sm:hidden text-sm text-muted-foreground sm:text-right text-center">
-            {table.getFilteredSelectedRowModel().rows.length} {"תוך "}
-            {table.getFilteredRowModel().rows.length} שורות נבחרו.
-          </div>
-        </div>
-        <div className="mb-3 text-sm  flex items-center justify-between ">
-          <div className="text-muted-foreground">
-            דף {pageNumber} תוך {table.getPageCount()}
-          </div>
-          <div className=" shrink-0 hidden sm:block text-sm text-muted-foreground sm:text-right text-center">
-            {table.getFilteredSelectedRowModel().rows.length} {"תוך "}
-            {table.getFilteredRowModel().rows.length} שורות נבחרו.
-          </div>
-          {Object.keys(rowSelection).length > 0 && (
-            <div
-              onClick={handleDeleteRows}
-              className="cursor-pointer hover:scale-[1.03] text-foreground "
-            >
-              <Trash2Icon className="cursor-pointer" />
-            </div>
-          )}
+
           {actionButton}
         </div>
       </div>
-      <div className="rounded-md border min-h-[60vh] max-h-[60vh] overflow-auto">
+      <div className="rounded-md border min-h-[60vh] max-h-[65vh] overflow-auto">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -241,6 +240,6 @@ export function DataTableHebrew<TData, TValue>({
           הבא
         </Button>
       </div>
-    </>
+    </div>
   );
 }

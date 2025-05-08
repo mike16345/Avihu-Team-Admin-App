@@ -186,22 +186,23 @@ const CreateWorkoutPlanWrapper = ({ children }: { children: React.ReactNode }) =
           </div>
         </div>
         <form className="space-y-2" onSubmit={form.handleSubmit(onSubmit, onInvalidSubmit)}>
-          <div className="border-b-2 rounded">{children}</div>
-          <div className="flex flex-col md:flex-row md:justify-end gap-2 py-1">
+          {children}
+
+          <div className="flex flex-col sm:flex-row sm:justify-end sm:sticky sm:bottom-0 gap-2 py-1">
             <CustomButton
-              className="font-bold w-auto sm:w-fit"
-              variant="default"
+              className=" w-auto sm:w-fit"
+              variant="secondary"
               type="button"
               onClick={() => setOpenPresetModal(true)}
-              title="שמור תוכנית אימון כתבנית"
+              title="שמור תוכנית כתבנית"
               disabled={updateWorkoutPlan.isPending || addWorkoutPlan.isPending}
               isLoading={addWorkoutPlanPreset.isPending}
             />
             <CustomButton
-              className="w-full sm:w-32"
+              className="w-full font-bold sm:w-32"
               variant="success"
               type="submit"
-              title="שמור תוכנית אימון"
+              title="שמור תוכנית"
               disabled={addWorkoutPlanPreset.isPending}
               isLoading={updateWorkoutPlan.isPending || addWorkoutPlan.isPending}
             />

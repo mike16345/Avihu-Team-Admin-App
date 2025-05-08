@@ -105,10 +105,9 @@ export const ViewDietPlanPresetPage = () => {
   if (error) return <ErrorPage message={error.message} />;
 
   return (
-    <div className=" flex flex-col gap-4 size-full hide-scrollbar overflow-y-auto">
-      <h1 className="text-2xl font-semibold my-6">עריכת תפריט תזונה</h1>
+    <div className=" flex flex-col gap-4 size-full ">
       <BackButton navLink={MainRoutes.DIET_PLANS} />
-      <div className="w-1/3 mr-1">
+      <div className="w-1/3 ">
         <Form {...presetNameForm}>
           <form>
             <FormField
@@ -129,9 +128,8 @@ export const ViewDietPlanPresetPage = () => {
           </form>
         </Form>
       </div>
-      <DietPlanForm dietPlan={dietPlan} updateDietPlan={updateDietPlan} />
-      {dietPlan.meals.length > 0 && (
-        <div>
+      <DietPlanForm dietPlan={dietPlan} updateDietPlan={updateDietPlan}>
+        {dietPlan.meals.length > 0 && (
           <CustomButton
             className="font-bold sm:w-32 w-full"
             variant="success"
@@ -139,8 +137,8 @@ export const ViewDietPlanPresetPage = () => {
             isLoading={createPreset.isPending || updatePreset.isPending}
             onClick={presetNameForm.handleSubmit(handleSubmit)}
           />
-        </div>
-      )}
+        )}
+      </DietPlanForm>
     </div>
   );
 };

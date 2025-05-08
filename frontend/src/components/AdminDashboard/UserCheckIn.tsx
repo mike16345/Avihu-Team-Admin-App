@@ -52,33 +52,34 @@ const UserCheckIn = () => {
   if (isError) return <ErrorPage message={error?.message} />;
 
   return (
-    <Card dir="rtl" className=" shadow-md ">
+    <Card className=" shadow-md max-h-[75vh] overflow-y-auto  ">
       <CardHeader>
         <CardTitle>לקוחות לבדיקה</CardTitle>
       </CardHeader>
-      <CardContent className="max-h-[70vh] overflow-y-auto  ">
+      <CardContent>
         {isLoading && <Loader size="large" />}
-        {users?.map((user) => (
-          <div
-            key={user._id}
-            onDoubleClick={() => navigate(`/users/${user._id}?tab=${weightTab}`)}
-            className="w-full flex  cursor-pointer justify-between items-center border-b-2 p-5 hover:bg-accent"
-          >
-            <div className="flex font-bold gap-1 ">
-              <h2>{user.firstName}</h2>
-              <h2>{user.lastName}</h2>
-            </div>
+        {users &&
+          users?.map((user) => (
             <div
-              className="cursor-pointer p-2 hover:opacity-40"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleCheckChange(user._id);
-              }}
+              key={user._id}
+              onDoubleClick={() => navigate(`/users/${user._id}?tab=${weightTab}`)}
+              className="w-full cursor-pointer flex  justify-between items-center border-b-2 p-3 hover:bg-accent"
             >
-              <FaCheck className="text-green-600" />
+              <div className="flex items-center gap-1 ">
+                <h2>{user.firstName}</h2>
+                <h2>{user.lastName}</h2>
+              </div>
+              <div
+                className="hover:opacity-40"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCheckChange(user._id);
+                }}
+              >
+                <FaCheck className="text-success" />
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
         {users?.length === 0 && (
           <div className="size-full flex items-center justify-center">
             <h2 className=" text-center text-xl  font-bold text-success">
