@@ -8,7 +8,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { BiPencil } from "react-icons/bi";
-import { convertItemsToOptions } from "@/lib/utils";
+import { convertItemsToOptions, removePointerEventsFromBody } from "@/lib/utils";
 import {
   Command,
   CommandEmpty,
@@ -57,14 +57,16 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
   const updateSelection = (selection: string) => {
     handleChange(selection);
     setValue(selection);
+    setOpen(false);
+    removePointerEventsFromBody();
   };
 
   return (
     <Dialog
       open={open}
       onOpenChange={(open) => {
-        handleDismiss(value);
         setOpen(open);
+        handleDismiss(value);
       }}
     >
       <DialogTrigger
@@ -99,7 +101,6 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
                   onSelect={(name) => {
                     if (value?.toLowerCase() == name.toLowerCase()) return; // Return if value is the same as previous value.
                     updateSelection(option.value);
-                    setOpen(false);
                   }}
                 >
                   {option.name}

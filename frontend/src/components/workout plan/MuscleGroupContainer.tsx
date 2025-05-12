@@ -57,10 +57,10 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
               <h4 className=" font-bold">קבוצת שריר -</h4>
 
               <MuscleGroupSelector
-                pathToMuscleGroups={muscleGroupsPath}
                 handleDismiss={(val) => {
                   if (!val) handleDeleteMuscleGroup();
                 }}
+                pathToMuscleGroups={muscleGroupsPath}
                 handleChange={handleSwapMuscleGroup}
                 existingMuscleGroup={muscleGroup.muscleGroup}
               />
