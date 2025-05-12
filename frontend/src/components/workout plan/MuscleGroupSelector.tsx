@@ -23,6 +23,7 @@ import { WorkoutSchemaType } from "@/schemas/workoutPlanSchema";
 import useMuscleGroupsQuery from "@/hooks/queries/MuscleGroups/useMuscleGroupsQuery";
 
 interface MuscleGroupSelectorProps {
+  handleDismiss: (value?: string) => void;
   handleChange: (value: string) => void;
   existingMuscleGroup?: string;
   pathToMuscleGroups: `workoutPlans.${number}.muscleGroups`;
@@ -30,6 +31,7 @@ interface MuscleGroupSelectorProps {
 
 const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
   handleChange,
+  handleDismiss,
   existingMuscleGroup,
   pathToMuscleGroups,
 }) => {
@@ -60,7 +62,13 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(open) => {
+        setOpen(open);
+        handleDismiss(value);
+      }}
+    >
       <DialogTrigger
         className="w-[180px] border hover:border-secondary-foreground rounded py-1 px-2"
         onClick={() => setOpen(true)}
