@@ -8,7 +8,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { BiPencil } from "react-icons/bi";
-import { convertItemsToOptions } from "@/lib/utils";
+import { convertItemsToOptions, removePointerEventsFromBody } from "@/lib/utils";
 import {
   Command,
   CommandEmpty,
@@ -23,7 +23,6 @@ import { WorkoutSchemaType } from "@/schemas/workoutPlanSchema";
 import useMuscleGroupsQuery from "@/hooks/queries/MuscleGroups/useMuscleGroupsQuery";
 
 interface MuscleGroupSelectorProps {
-  handleDismiss: (value?: string) => void;
   handleChange: (value: string) => void;
   existingMuscleGroup?: string;
   pathToMuscleGroups: `workoutPlans.${number}.muscleGroups`;
@@ -31,7 +30,6 @@ interface MuscleGroupSelectorProps {
 
 const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
   handleChange,
-  handleDismiss,
   existingMuscleGroup,
   pathToMuscleGroups,
 }) => {
@@ -57,16 +55,12 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
   const updateSelection = (selection: string) => {
     handleChange(selection);
     setValue(selection);
+    setOpen(false);
+    removePointerEventsFromBody();
   };
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(open) => {
-        handleDismiss(value);
-        setOpen(open);
-      }}
-    >
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         className="w-[180px] border hover:border-secondary-foreground rounded py-1 px-2"
         onClick={() => setOpen(true)}
@@ -99,7 +93,6 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
                   onSelect={(name) => {
                     if (value?.toLowerCase() == name.toLowerCase()) return; // Return if value is the same as previous value.
                     updateSelection(option.value);
-                    setOpen(false);
                   }}
                 >
                   {option.name}

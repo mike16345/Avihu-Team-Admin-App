@@ -58,9 +58,6 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
 
               <MuscleGroupSelector
                 pathToMuscleGroups={muscleGroupsPath}
-                handleDismiss={(val) => {
-                  if (!val) handleDeleteMuscleGroup();
-                }}
                 handleChange={handleSwapMuscleGroup}
                 existingMuscleGroup={muscleGroup.muscleGroup}
               />
