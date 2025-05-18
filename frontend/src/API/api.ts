@@ -19,7 +19,6 @@ async function request<T>(
     headers: { ["X-Api-Key"]: API_AUTH_TOKEN, ...headers },
   };
 
-  console.log("request", request);
   try {
     const response = await axiosInstance.request<T>(request);
 
