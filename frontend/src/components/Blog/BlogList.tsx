@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { BlogCard } from "./BlogCard";
-import { IBlog } from "@/interfaces/IBlog";
+import { IBlogResponse } from "@/interfaces/IBlog";
 import { useNavigate } from "react-router-dom";
 import DeleteModal from "../Alerts/DeleteModal";
 import { toast } from "sonner";
@@ -16,22 +16,22 @@ const BlogList: React.FC = () => {
   const navigate = useNavigate();
   const query = useQueryClient();
 
-  const { data, isFetchingNextPage, isLoading, isError, error, fetchNextPage, hasNextPage } =
+  const { data, isFetchingNextPage, isLoading, isError, error, hasNextPage, fetchNextPage } =
     useBlogsQuery();
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [blogToDelete, setBlogToDelete] = useState<(IBlog & { _id: string }) | null>(null);
+  const [blogToDelete, setBlogToDelete] = useState<IBlogResponse | null>(null);
 
-  const handleBlogClick = (blog: IBlog & { _id: string }) => {
+  const handleBlogClick = (blog: IBlogResponse) => {
     navigate(`/blogs/create/${blog._id}`, { state: { blog } });
   };
 
-  const handleOpenDeleteModal = (blog: IBlog & { _id: string }) => {
+  const handleOpenDeleteModal = (blog: IBlogResponse) => {
     setBlogToDelete(blog);
     setIsDeleteModalOpen(true);
   };
 
-  const onError = (e: any) => {
+  const onError = (_: any) => {
     toast.error("לא הצלחנו למחוק את הבלוג");
   };
 

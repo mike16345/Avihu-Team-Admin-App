@@ -96,7 +96,7 @@ export const useBlogsApi = () => {
         blog.imageUrl = await handleUploadImageToS3(blog.title, image);
       }
 
-      await sendData<ApiResponse<{}>>(BLOGS_API_URL, blog);
+      return await sendData<ApiResponse<IBlogResponse>>(BLOGS_API_URL, blog);
     } catch (error) {
       throw error;
     }
