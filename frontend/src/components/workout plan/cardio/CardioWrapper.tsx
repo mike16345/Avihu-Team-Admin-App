@@ -1,21 +1,27 @@
 import React, { useState } from "react";
 import FixedCardioContainer from "./FixedCardioContainer";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import CardioWeekWrapper from "./CardioWeekWrapper";
-import {
-  CardioType,
-  ICardioPlan,
-  ICardioWeek,
-  IComplexCardioType,
-  ISimpleCardioType,
-} from "@/interfaces/IWorkoutPlan";
+import { CardioType, ICardioWeek, IComplexCardioType } from "@/interfaces/IWorkoutPlan";
 import { Button } from "@/components/ui/button";
 import { defaultComplexCardioOption, defaultSimpleCardioOption } from "@/constants/cardioOptions";
 import { toast } from "sonner";
 import type { WorkoutSchemaType } from "@/schemas/workoutPlanSchema";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import CustomAlertDialog from "@/components/Alerts/DialogAlert/CustomAlertDialog";
+import CustomRadioGroup, { IRadioItem } from "@/components/ui/CustomRadioGroup";
+
+const radioItems: IRadioItem<string>[] = [
+  {
+    label: "קבוע",
+    id: "simple",
+    value: "simple",
+  },
+  {
+    label: "בחירה",
+    id: "complex",
+    value: "complex",
+  },
+];
 
 const CardioWrapper: React.FC = () => {
   const {
@@ -27,7 +33,7 @@ const CardioWrapper: React.FC = () => {
     name: "cardio.plan.weeks",
   });
 
-  const { watch, setValue } = useFormContext<WorkoutSchemaType>();
+  const { watch, getValues, setValue } = useFormContext<WorkoutSchemaType>();
   const cardioPlan = watch("cardio");
 
   const [openModal, setOpenModal] = useState(false);
@@ -83,22 +89,14 @@ const CardioWrapper: React.FC = () => {
   return (
     <>
       <div className="flex flex-col gap-5 pb-5">
-        <RadioGroup
+        <CustomRadioGroup
+          items={radioItems}
           value={cardioPlan.type}
           onValueChange={(val: CardioType) => handleCardioTypeChange(val)}
           className="flex items-center pt-5"
           defaultValue="simple"
           dir="rtl"
-        >
-          <div className="flex items-center gap-2">
-            <RadioGroupItem type="button" value="simple" id="simple" />
-            <Label htmlFor="simple">קבוע</Label>
-          </div>
-          <div className="flex items-center gap-2">
-            <RadioGroupItem type="button" value="complex" id="complex" />
-            <Label htmlFor="complex">בחירה</Label>
-          </div>
-        </RadioGroup>
+        />
 
         {cardioPlan.type == `simple` && <FixedCardioContainer />}
 
