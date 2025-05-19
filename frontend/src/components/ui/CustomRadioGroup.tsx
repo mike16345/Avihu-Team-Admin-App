@@ -16,7 +16,7 @@ interface CustomRadioGroupProps extends RadioGroupProps {
 
 const CustomRadioGroup: FC<CustomRadioGroupProps> = ({ items, ...props }) => {
   return (
-    <RadioGroup className={cn(`flex flex-col `, props.className)} {...props}>
+    <RadioGroup dir="rtl" className={cn(`flex flex-col `, props.className)} {...props}>
       {items.map((item) => {
         return (
           <div className="flex items-center gap-2 ">
