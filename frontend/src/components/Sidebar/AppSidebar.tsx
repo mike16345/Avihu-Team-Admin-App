@@ -5,7 +5,6 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -36,7 +35,7 @@ const items: LinkProps[] = [
   },
   {
     url: "/blogs",
-    title: "בלוגים",
+    title: "שיעורים",
     icon: Edit,
   },
   {
