@@ -10,21 +10,14 @@ import { toast } from "sonner";
 import { QueryKeys } from "@/enums/QueryKeys";
 import Loader from "../ui/Loader";
 import ErrorPage from "@/pages/ErrorPage";
+import useBlogsQuery from "@/hooks/queries/blogs/useBlogsQuery";
 
 const BlogList: React.FC = () => {
   const navigate = useNavigate();
   const query = useQueryClient();
-  const { getPaginatedPosts, deleteBlog } = useBlogsApi();
+  const { deleteBlog } = useBlogsApi();
 
-  const { data, isLoading, isError, error, fetchNextPage, hasNextPage } = useInfiniteQuery({
-    queryKey: [QueryKeys.BLOGS],
-    initialPageParam: { page: 1, limit: 10 },
-    queryFn: ({ pageParam = { page: 1, limit: 10 } }) => getPaginatedPosts(pageParam),
-    getNextPageParam: (lastPage: PaginationResult<IBlog>) => {
-      return lastPage.hasNextPage ? { page: lastPage.currentPage + 1, limit: 10 } : undefined;
-    },
-    staleTime: Infinity,
-  });
+  const { data, isLoading, isError, error, fetchNextPage, hasNextPage } = useBlogsQuery();
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [blogToDelete, setBlogToDelete] = useState<(IBlog & { _id: string }) | null>(null);
