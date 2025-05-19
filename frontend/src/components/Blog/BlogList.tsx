@@ -1,8 +1,6 @@
 import React, { useState } from "react";
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { BlogCard } from "./BlogCard";
-import { PaginationResult } from "@/interfaces/interfaces";
-import { useBlogsApi } from "@/hooks/api/useBlogsApi";
 import { IBlog } from "@/interfaces/IBlog";
 import { useNavigate } from "react-router-dom";
 import DeleteModal from "../Alerts/DeleteModal";
@@ -11,13 +9,15 @@ import { QueryKeys } from "@/enums/QueryKeys";
 import Loader from "../ui/Loader";
 import ErrorPage from "@/pages/ErrorPage";
 import useBlogsQuery from "@/hooks/queries/blogs/useBlogsQuery";
+import useDeleteBlog from "@/hooks/mutations/blogs/useDeleteBlog";
+import CustomButton from "../ui/CustomButton";
 
 const BlogList: React.FC = () => {
   const navigate = useNavigate();
   const query = useQueryClient();
-  const { deleteBlog } = useBlogsApi();
 
-  const { data, isLoading, isError, error, fetchNextPage, hasNextPage } = useBlogsQuery();
+  const { data, isFetchingNextPage, isLoading, isError, error, fetchNextPage, hasNextPage } =
+    useBlogsQuery();
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [blogToDelete, setBlogToDelete] = useState<(IBlog & { _id: string }) | null>(null);
@@ -31,22 +31,25 @@ const BlogList: React.FC = () => {
     setIsDeleteModalOpen(true);
   };
 
+  const onError = (e: any) => {
+    toast.error("לא הצלחנו למחוק את הבלוג");
+  };
+
+  const onSuccess = (blog: any) => {
+    toast.success("בלוג נמחק בהצלחה!");
+    query.invalidateQueries({ queryKey: [QueryKeys.BLOGS] });
+    query.invalidateQueries({ queryKey: [QueryKeys.BLOGS, blog._id] });
+  };
+
+  const deleteBlogMutation = useDeleteBlog({ onSuccess, onError });
+
   const handleDeleteBlog = () => {
     if (!blogToDelete) return;
-    deleteBlog(blogToDelete)
-      .then(() => {
-        toast.success("בלוג נמחק בהצלחה!");
-        query.invalidateQueries({ queryKey: [QueryKeys.BLOGS] });
-        query.invalidateQueries({ queryKey: [QueryKeys.BLOGS, blogToDelete._id] });
-      })
-      .catch((err) => {
-        console.error("error deleting blog", err);
-        toast.error("לא הצלחנו למחוק את הבלוג");
-      });
+    deleteBlogMutation.mutate(blogToDelete);
   };
 
   if (isLoading) return <Loader />;
-  if (isError) return <ErrorPage message={error?.response?.data?.message} />;
+  if (isError) return <ErrorPage message={error?.message} />;
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4">
@@ -64,12 +67,12 @@ const BlogList: React.FC = () => {
         <div className="col-span-full text-center text-xl">אין בלוגים כרגע</div>
       )}
       {hasNextPage && (
-        <button
+        <CustomButton
+          title="הצג עוד"
+          isLoading={isFetchingNextPage}
           onClick={() => fetchNextPage()}
           className="col-span-full mt-4 py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          Load More
-        </button>
+        />
       )}
       <DeleteModal
         isModalOpen={isDeleteModalOpen}

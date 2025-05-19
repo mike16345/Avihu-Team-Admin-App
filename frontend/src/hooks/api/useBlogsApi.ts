@@ -70,10 +70,10 @@ export const useBlogsApi = () => {
     }
   };
 
-  const deleteBlog = async (blog: IBlog & { _id: string }) => {
+  const deleteBlog = async (blog: IBlogResponse) => {
     await handleDeletePhoto(`images/` + blog.imageUrl);
 
-    return await deleteItem(`${BLOGS_API_URL}/one?id=${blog._id}`);
+    return await deleteItem<ApiResponse<IBlogResponse>>(`${BLOGS_API_URL}/one?id=${blog._id}`);
   };
 
   const handleUploadImageToS3 = async (name: string, image: string) => {
