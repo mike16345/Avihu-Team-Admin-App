@@ -3,15 +3,30 @@ import { Popover, PopoverTrigger, PopoverContent } from "./popover";
 import { ChevronsUpDown } from "lucide-react";
 import { FC, useEffect, useState } from "react";
 import { Button } from "./button";
-import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "./command";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "./command";
 
 interface ComboBoxProps {
   options: Option[];
   value: any;
   onSelect: (val: any) => void;
+  inputPlaceholder?: string;
+  listEmptyMessage?: string;
 }
 
-const ComboBox: FC<ComboBoxProps> = ({ onSelect, options, value }) => {
+const ComboBox: FC<ComboBoxProps> = ({
+  onSelect,
+  options,
+  value,
+  listEmptyMessage = "אין פריטים",
+  inputPlaceholder = "חפש...",
+}) => {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -28,7 +43,9 @@ const ComboBox: FC<ComboBoxProps> = ({ onSelect, options, value }) => {
       </PopoverTrigger>
       <PopoverContent className="w-full p-0">
         <Command>
-          <CommandInput dir="rtl" placeholder="בחר סוג תוכנית..." />
+          <CommandEmpty>{listEmptyMessage}</CommandEmpty>
+          <CommandInput dir="rtl" placeholder={inputPlaceholder} />
+
           <CommandList>
             <CommandGroup dir="rtl">
               {options?.map((option, i) => (
