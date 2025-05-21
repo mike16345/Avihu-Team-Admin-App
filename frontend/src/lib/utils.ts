@@ -292,3 +292,7 @@ export function removePointerEventsFromBody() {
     document.body.style.pointerEvents = "";
   }
 }
+
+export function isUndefined(variable: any) {
+  return variable == undefined || variable == "undefined" || variable == null;
+}
