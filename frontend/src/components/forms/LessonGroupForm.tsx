@@ -2,7 +2,7 @@ import lessonGroupSchema, { LessonGroupSchemaType } from "@/schemas/lessonGroupS
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FC, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { Form, FormField, FormItem } from "../ui/form";
+import { Form, FormMessage, FormField, FormItem, FormControl, FormLabel } from "../ui/form";
 import { Input } from "../ui/input";
 import { IPresetFormProps } from "@/interfaces/interfaces";
 import useLessonGroupQuery from "@/hooks/queries/lessonGroups/useLessonGroupQuery";
@@ -66,7 +66,11 @@ const LessonGroupForm: FC<LessonGroupFormProps> = ({ objectId, closeSheet }) => 
           render={({ field }) => {
             return (
               <FormItem>
-                <Input {...field} />
+                <FormLabel>שם</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
               </FormItem>
             );
           }}
