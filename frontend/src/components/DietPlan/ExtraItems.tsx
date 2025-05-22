@@ -1,6 +1,5 @@
 import { FC, useState } from "react";
 import { Badge } from "../ui/badge";
-import { FaTimes, FaEdit } from "react-icons/fa";
 import {
   Sheet,
   SheetContent,
@@ -22,6 +21,8 @@ import {
 import { Input } from "@/components/ui/input";
 import CustomButton from "@/components/ui/CustomButton";
 import { Button } from "../ui/button";
+import DeleteButton from "../ui/buttons/DeleteButton";
+import { cn } from "@/lib/utils";
 
 const nameSchema = z.object({
   name: z.string().min(1, "יש להכניס שם פריט").max(50, "השם ארוך מדי"),
@@ -70,13 +71,14 @@ const ExtraItems: FC<ExtraItemsProps> = ({ trigger, existingItems = [], onAddIte
   const removeExtraItem = (item: string) => {
     const updatedItems = extraItems.filter((i) => i !== item);
     setExtraItems(updatedItems);
+    setEditItem(null);
     onAddItem(updatedItems);
+    formControl.reset();
   };
 
   const startEditItem = (item: string) => {
     setEditItem(item);
     formControl.setValue("name", item);
-    setIsSheetOpen(true);
   };
 
   const onCloseSheet = () => {
@@ -96,7 +98,7 @@ const ExtraItems: FC<ExtraItemsProps> = ({ trigger, existingItems = [], onAddIte
             <SheetTitle className="text-right text-3xl pt-4">
               {editItem ? "ערוך פריט" : "הוסף פריט"}
             </SheetTitle>
-            <SheetDescription className="pt-3 text-right">
+            <SheetDescription className="text-right">
               {editItem
                 ? "כאן ניתן לערוך פריט קיים במערכת"
                 : "כאן ניתן להוסיף פריטים לרשימה הקיימת במערכת"}
@@ -104,7 +106,7 @@ const ExtraItems: FC<ExtraItemsProps> = ({ trigger, existingItems = [], onAddIte
           </SheetHeader>
           <div className="space-y-4">
             <Form {...formControl}>
-              <form onSubmit={formControl.handleSubmit(onSubmit)} className="space-y-4 text-right">
+              <form onSubmit={formControl.handleSubmit(onSubmit)} className="space-y-3 text-right">
                 <FormField
                   control={formControl.control}
                   name="name"
@@ -112,7 +114,27 @@ const ExtraItems: FC<ExtraItemsProps> = ({ trigger, existingItems = [], onAddIte
                     <FormItem>
                       <FormLabel>שם פריט</FormLabel>
                       <FormControl>
-                        <Input placeholder="הכנס פריט כאן..." {...field} />
+                        <div className="flex items-center gap-2">
+                          <Input
+                            className={cn(
+                              "transition-all duration-300 ease-in-out",
+                              editItem ? "w-[calc(100%-2.5rem)]" : "w-full"
+                            )}
+                            placeholder="הכנס פריט כאן..."
+                            {...field}
+                          />
+                          <div
+                            className={cn(
+                              "overflow-hidden transition-[width] duration-300 ease-in-out flex-shrink-0",
+                              editItem ? "w-10" : "w-0"
+                            )}
+                          >
+                            <DeleteButton
+                              tip="הסר פריט"
+                              onClick={() => removeExtraItem(editItem!)}
+                            />
+                          </div>
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -120,46 +142,38 @@ const ExtraItems: FC<ExtraItemsProps> = ({ trigger, existingItems = [], onAddIte
                 />
                 <div className="flex items-center gap-2">
                   {editItem && (
-                    <Button className="w-full" onClick={() => setEditItem(null)}>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="w-full"
+                      onClick={() => {
+                        setEditItem(null);
+                      }}
+                    >
                       בטל
                     </Button>
                   )}
                   <CustomButton
                     title={editItem ? "עדכן" : "שמור"}
                     type="submit"
-                    variant={"success"}
-                    className={`h-auto editItem  w-full`}
+                    variant="success"
+                    className="w-full h-auto"
                   />
                 </div>
               </form>
             </Form>
 
             <div className="space-y-2">
-              <h3 className="text-lg font-medium text-secondary">פריטים נוספים</h3>
-              <div className="flex flex-wrap items-center gap-4">
+              <h3 className="text-lg font-medium">פריטים נוספים</h3>
+              <div className="flex flex-wrap items-center gap-2">
                 {extraItems.length === 0 && <div className="text-muted">אין פריטים נוספים</div>}
                 {extraItems.map((item) => (
                   <Badge
                     key={item}
-                    className="w-fit text-white cursor-pointer justify-between relative inline-flex items-center  py-1 transition-all duration-300 ease-in-out group "
+                    onClick={() => startEditItem(item)}
+                    className="w-fit text-white cursor-pointer inline-flex items-center justify-center py-1 px-2"
                   >
-                    <div className="flex items-center justify-center w-0 overflow-hidden transition-all duration-300 ease-in-out group-hover:w-6 ">
-                      <FaTimes
-                        size={14}
-                        className="text-red-500 hover:text-red-400 transition-colors"
-                        onClick={() => removeExtraItem(item)}
-                      />
-                    </div>
-
                     <span className="text-center whitespace-nowrap">{item}</span>
-
-                    <div className="flex items-center justify-center w-0 overflow-hidden transition-all duration-300 ease-in-out group-hover:w-6 ">
-                      <FaEdit
-                        size={14}
-                        className=" text-secondary hover:text-white transition-colors"
-                        onClick={() => startEditItem(item)}
-                      />
-                    </div>
                   </Badge>
                 ))}
               </div>
