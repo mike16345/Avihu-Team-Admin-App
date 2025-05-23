@@ -11,6 +11,7 @@ import {
   CommandItem,
   CommandList,
 } from "./command";
+import Loader from "./Loader";
 
 interface ComboBoxProps {
   options: Option[];
@@ -18,12 +19,14 @@ interface ComboBoxProps {
   onSelect: (val: any) => void;
   inputPlaceholder?: string;
   listEmptyMessage?: string;
+  isLoading?: boolean;
 }
 
 const ComboBox: FC<ComboBoxProps> = ({
   onSelect,
   options,
   value,
+  isLoading,
   listEmptyMessage = "אין פריטים",
   inputPlaceholder = "חפש...",
 }) => {
@@ -42,10 +45,13 @@ const ComboBox: FC<ComboBoxProps> = ({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0">
-        <Command>
-          <CommandEmpty>{listEmptyMessage}</CommandEmpty>
+        <Command shouldFilter={false}>
+          {isLoading && <Loader />}
           <CommandInput dir="rtl" placeholder={inputPlaceholder} />
 
+          {options.length == 0 && (
+            <div className="flex-1 flex place-content-center p-3 text-sm">{listEmptyMessage}</div>
+          )}
           <CommandList>
             <CommandGroup dir="rtl">
               {options?.map((option, i) => (
