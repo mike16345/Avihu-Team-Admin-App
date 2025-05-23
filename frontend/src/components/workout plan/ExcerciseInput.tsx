@@ -73,6 +73,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
       sets: [defaultSet],
       linkToVideo: "",
       _id: generateUUID(),
+      restTime: 60,
     };
 
     append(newExercise);
@@ -181,6 +182,26 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                               נקה
                             </Button>
                           </div>
+                          <FormField
+                            control={control}
+                            name={`${parentPath}.exercises.${index}.restTime`}
+                            render={({ field }) => {
+                              return (
+                                <FormItem>
+                                  <FormLabel>זמן מנוחה (שנ'):</FormLabel>
+                                  <Input
+                                    type="number"
+                                    min={1}
+                                    max={300}
+                                    {...field}
+                                    value={item.restTime}
+                                    placeholder="זמן מנוחה..."
+                                  />
+                                  <FormMessage />
+                                </FormItem>
+                              );
+                            }}
+                          />
                         </div>
                       </CardHeader>
                       <CardContent className="flex flex-col gap-4 ">

@@ -35,6 +35,7 @@ export interface IExercise {
   exerciseMethod?: string;
   name: string;
   sets: ISet[];
+  restTime: number;
 }
 
 export interface IMuscleGroupWorkouts {
