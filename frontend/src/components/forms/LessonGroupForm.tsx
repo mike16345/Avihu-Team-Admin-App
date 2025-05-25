@@ -49,13 +49,13 @@ const LessonGroupForm: FC<LessonGroupFormProps> = ({ objectId, closeSheet }) => 
 
   const isPending = addLessonGroup.isPending || updateLessonGroup.isPending;
 
-  if (isLoading) return <Loader />;
-
   useEffect(() => {
     if (!data) return;
 
     reset(data.data);
   }, [data]);
+
+  if (isLoading) return <Loader />;
 
   return (
     <Form {...form}>

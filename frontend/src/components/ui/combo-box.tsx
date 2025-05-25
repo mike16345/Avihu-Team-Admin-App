@@ -3,14 +3,7 @@ import { Popover, PopoverTrigger, PopoverContent } from "./popover";
 import { ChevronsUpDown } from "lucide-react";
 import { FC, useEffect, useState } from "react";
 import { Button } from "./button";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "./command";
+import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "./command";
 import Loader from "./Loader";
 
 interface ComboBoxProps {
@@ -46,12 +39,12 @@ const ComboBox: FC<ComboBoxProps> = ({
       </PopoverTrigger>
       <PopoverContent className="w-full p-0">
         <Command shouldFilter={false}>
-          {isLoading && <Loader />}
           <CommandInput dir="rtl" placeholder={inputPlaceholder} />
 
-          {options.length == 0 && (
+          {options.length == 0 && !isLoading && (
             <div className="flex-1 flex place-content-center p-3 text-sm">{listEmptyMessage}</div>
           )}
+          {isLoading && <Loader className="p-2" />}
           <CommandList>
             <CommandGroup dir="rtl">
               {options?.map((option, i) => (

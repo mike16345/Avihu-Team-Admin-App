@@ -1,14 +1,16 @@
+import { cn } from "@/lib/utils";
 import React from "react";
 interface LoaderProps {
   size?: `small` | `medium` | `large` | `xl`;
   variant?: `standard` | `button`;
+  className?: string;
 }
 
-const Loader: React.FC<LoaderProps> = ({ size = `medium`, variant = `standard` }) => {
-  const pxSize = size === `small` ? 12 : size === `medium` ? 16 : size === `large` ? 20 : 24;
+const Loader: React.FC<LoaderProps> = ({ size = `medium`, variant = `standard`, className }) => {
+  const pxSize = size === `small` ? 10 : size === `medium` ? 12 : size === `large` ? 20 : 24;
 
   return (
-    <div className="w-full h-full flex items-center justify-center">
+    <div className={cn(`w-full h-full flex items-center justify-center `, className)}>
       <div className="flex flex-col gap-5 items-center">
         <div
           className={

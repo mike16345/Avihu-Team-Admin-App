@@ -10,9 +10,8 @@ const useLessonGroupsApi = () => {
   };
 
   const updateLessonGroup = (id: string, group: ILessonGroup) => {
-    return updateItem<ApiResponse<ILessonGroup>>(LESSON_GROUP_API_ENDPOINT + "/one", {
-      id,
-      group,
+    return updateItem<ApiResponse<ILessonGroup>>(`${LESSON_GROUP_API_ENDPOINT}/one?id=${id}`, {
+      name: group.name,
     });
   };
 

@@ -11,7 +11,8 @@ const useUpdateLessonGroup = ({
   const { updateLessonGroup } = useLessonGroupsApi();
 
   return useMutation({
-    mutationFn: ({ id, group }: { id: string; group: string }) => updateLessonGroup(id, { group }),
+    mutationFn: ({ id, group }: { id: string; group: string }) =>
+      updateLessonGroup(id, { name: group }),
     onSuccess,
     onError,
   });

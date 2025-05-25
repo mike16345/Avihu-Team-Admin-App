@@ -1,7 +1,7 @@
 export interface IBlog {
   title: string;
   content: string;
-  type?: string;
+  group?: string;
   imageUrl?: string;
   link?: string;
 }

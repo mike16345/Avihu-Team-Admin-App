@@ -71,10 +71,6 @@ const BlogEditor = () => {
   const updateBlogMutation = useUpdateBlog({ onSuccess, onError });
 
   const handleFieldChange = <K extends keyof IBlog>(field: K, value: IBlog[K]) => {
-    if (field == "type") {
-      console.log("type", value);
-    }
-
     setBlog((prev) => ({
       ...prev,
       [field]: value,
@@ -118,6 +114,13 @@ const BlogEditor = () => {
 
   const handleChangeMediaType = (type: MediaType) => {
     setMediaType(type);
+    if (type == "image") return;
+
+    if (blog.imageUrl && isEdit && isImageFromCloudFront) {
+      setImageToDelete(blog.imageUrl);
+    } else {
+      handleFieldChange("imageUrl", undefined);
+    }
   };
 
   const generatePhotoUrl = (url: string) => (isImageFromCloudFront ? buildPhotoUrl(url) : url);
@@ -131,12 +134,8 @@ const BlogEditor = () => {
   useEffect(() => {
     if (!fetchedBlog) return;
 
-    setBlog({
-      title: fetchedBlog.title,
-      content: fetchedBlog.content,
-      imageUrl: fetchedBlog.imageUrl,
-    });
-    setIsImageFromCloudFront(true);
+    setBlog({ ...fetchedBlog });
+    setIsImageFromCloudFront(!!fetchedBlog.imageUrl);
     setIsEdit(true);
   }, [fetchedBlog]);
 
@@ -153,14 +152,15 @@ const BlogEditor = () => {
       />
       <div className="sm:w-1/2">
         <ComboBox
+          isLoading={isBlogGroupsLoading}
           options={blogGroupItems}
-          onSelect={(val) => handleFieldChange("type", val)}
-          value={blog.type}
+          onSelect={(val) => handleFieldChange("group", val)}
+          value={blog.group}
           inputPlaceholder="בחר קבוצה..."
           listEmptyMessage="אין קבוצות כרגע"
         />
       </div>
-      <div className="flex flex-col ">
+      <div className="flex flex-col gap-2">
         <CustomRadioGroup
           className="flex items-center"
           defaultValue="link"
@@ -180,10 +180,11 @@ const BlogEditor = () => {
         )}
         {mediaType == "link" && (
           <>
-            <Label className="font-semibold">תמונה</Label>
+            <Label className="font-semibold">לינק</Label>
             <Input
               type="text"
-              className="sm:w-1/2 cursor-pointer"
+              placeholder=".../https://youtube.com"
+              className="sm:w-1/2"
               onChange={(e) => handleFieldChange("link", e.target.value)}
             />
           </>
