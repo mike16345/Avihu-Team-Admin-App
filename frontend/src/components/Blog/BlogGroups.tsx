@@ -8,6 +8,7 @@ import { Button } from "../ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { toast } from "sonner";
+import BackButton from "../ui/BackButton";
 
 const BlogGroups = () => {
   const queryClient = useQueryClient();
@@ -38,6 +39,8 @@ const BlogGroups = () => {
 
   return (
     <div>
+      <BackButton navLink="/blogs" />
+
       <Button onClick={() => handleViewLessonGroup()} className="my-4">
         הוסף קבוצה
       </Button>

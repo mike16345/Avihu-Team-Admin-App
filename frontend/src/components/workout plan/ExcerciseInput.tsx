@@ -160,7 +160,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                           {item.linkToVideo && (
                             <img
                               className="rounded mt-2"
-                              src={getYouTubeThumbnail(extractVideoId(item.linkToVideo || ""))}
+                              src={getYouTubeThumbnail(item.linkToVideo || "")}
                             />
                           )}
                           <label className="font-bold underline pt-5">שיטת אימון:</label>

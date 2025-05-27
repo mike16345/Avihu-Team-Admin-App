@@ -12,11 +12,15 @@ import useBlogsQuery from "@/hooks/queries/blogs/useBlogsQuery";
 import useDeleteBlog from "@/hooks/mutations/blogs/useDeleteBlog";
 import CustomButton from "../ui/CustomButton";
 
-const BlogList: React.FC = () => {
+interface BlogListProps {
+  blogs: IBlogResponse[];
+}
+
+const BlogList: React.FC<BlogListProps> = ({ blogs }) => {
   const navigate = useNavigate();
   const query = useQueryClient();
 
-  const { data, isFetchingNextPage, isLoading, isError, error, hasNextPage, fetchNextPage } =
+  const { isFetchingNextPage, isLoading, isError, error, hasNextPage, fetchNextPage } =
     useBlogsQuery();
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -31,8 +35,10 @@ const BlogList: React.FC = () => {
     setIsDeleteModalOpen(true);
   };
 
-  const onError = (_: any) => {
-    toast.error("לא הצלחנו למחוק את הבלוג");
+  const onError = (e: any) => {
+    toast.error("לא הצלחנו למחוק את הבלוג", {
+      description: e?.message,
+    });
   };
 
   const onSuccess = (blog: any) => {
@@ -53,17 +59,15 @@ const BlogList: React.FC = () => {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4">
-      {data?.pages.map((page) =>
-        page.results.map((blog) => (
-          <BlogCard
-            key={blog._id}
-            blog={blog}
-            onDelete={() => handleOpenDeleteModal(blog)}
-            onClick={() => handleBlogClick(blog)}
-          />
-        ))
-      )}
-      {(!data?.pages[0].results || data?.pages[0].results.length == 0) && (
+      {blogs.map((blog) => (
+        <BlogCard
+          key={blog._id}
+          blog={blog}
+          onDelete={() => handleOpenDeleteModal(blog)}
+          onClick={() => handleBlogClick(blog)}
+        />
+      ))}
+      {blogs.length == 0 && (
         <div className="col-span-full text-center text-xl">אין בלוגים כרגע</div>
       )}
       {hasNextPage && (
