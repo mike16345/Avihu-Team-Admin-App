@@ -2,7 +2,7 @@ import BlogList from "@/components/Blog/BlogList";
 import { Button } from "@/components/ui/button";
 import CustomButton from "@/components/ui/CustomButton";
 import Loader from "@/components/ui/Loader";
-import FilterItems from "@/hooks/FilterItems";
+import FilterItems from "@/components/ui/FilterItems";
 import useBlogsQuery from "@/hooks/queries/blogs/useBlogsQuery";
 import useLessonGroupsQuery from "@/hooks/queries/lessonGroups/useLessonGroupsQuery";
 import { ILessonGroup } from "@/interfaces/IBlog";
@@ -32,6 +32,7 @@ const BlogPage = () => {
 
   const blogs = useMemo(() => {
     if (selectedGroups.length === 0) return allBlogs;
+
     const selectedGroupIds = new Set(selectedGroups.map((group) => group.name));
 
     return allBlogs.filter((blog) => blog.group && selectedGroupIds.has(blog.group));
@@ -40,7 +41,7 @@ const BlogPage = () => {
   if (isLoading) return <Loader />;
 
   return (
-    <div>
+    <>
       <div className="flex items-center sm:justify-start justify-center p-4">
         <div className="w-full flex flex-col gap-3 sm:flex-row sm:items-center justify-between">
           <Button onClick={handleCreateNewBlog} className="w-full sm:w-32">
@@ -63,17 +64,18 @@ const BlogPage = () => {
         </div>
       </div>
       <BlogList blogs={blogs} />
+
       {hasNextPage && (
         <div className="flex justify-center p-4">
           <CustomButton
             title={isFetchingNextPage ? "טוען..." : "טען עוד"}
             onClick={() => fetchNextPage()}
-            isLoading={true}
+            isLoading={isFetchingNextPage}
             variant="default"
           />
         </div>
       )}
-    </div>
+    </>
   );
 };
 

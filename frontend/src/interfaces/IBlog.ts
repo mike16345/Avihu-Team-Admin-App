@@ -1,6 +1,9 @@
+import UserPlanTypes from "@/enums/UserPlanTypes";
+
 export interface IBlog {
   title: string;
   content: string;
+  planType?: UserPlanTypes;
   group?: string;
   imageUrl?: string;
   link?: string;

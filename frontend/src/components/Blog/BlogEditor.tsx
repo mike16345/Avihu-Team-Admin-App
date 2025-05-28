@@ -18,11 +18,15 @@ import TextEditor from "./TextEditor";
 import CustomRadioGroup, { IRadioItem } from "../ui/CustomRadioGroup";
 import ComboBox from "../ui/combo-box";
 import useLessonGroupsQuery from "@/hooks/queries/lessonGroups/useLessonGroupsQuery";
+import UserPlanTypes from "@/enums/UserPlanTypes";
+import { Option } from "@/types/types";
 
 type MediaType = "link" | "image";
-const defaultBlog = {
+
+const defaultBlog: IBlog = {
   title: "",
   content: "",
+  planType: UserPlanTypes.GENERAL,
   imageUrl: undefined,
 };
 
@@ -38,6 +42,13 @@ const radioItems: IRadioItem<string>[] = [
     value: "image",
   },
 ];
+
+const planTypes: Option[] = Object.values(UserPlanTypes).map((type) => {
+  return {
+    name: type,
+    value: type,
+  };
+});
 
 const BlogEditor = () => {
   const navigate = useNavigate();
@@ -82,6 +93,7 @@ const BlogEditor = () => {
     if (!file) return;
 
     const reader = new FileReader();
+
     reader.onload = () => {
       if (reader.result) {
         setIsImageFromCloudFront(false);
@@ -142,79 +154,87 @@ const BlogEditor = () => {
   if (isLoading) return <Loader variant="standard" />;
 
   return (
-    <div className="flex flex-col gap-4 p-8">
-      <BackButton navLink="/blogs" />
-      <Label className="font-semibold">כותרת</Label>
-      <Input
-        className="sm:w-1/2 "
-        value={blog.title}
-        onChange={(e) => handleFieldChange("title", e.target.value)}
-      />
-      <div className="sm:w-1/2">
-        <ComboBox
-          isLoading={isBlogGroupsLoading}
-          options={blogGroupItems}
-          onSelect={(val) => handleFieldChange("group", val)}
-          value={blog.group}
-          inputPlaceholder="בחר קבוצה..."
-          listEmptyMessage="אין קבוצות כרגע"
+    <div className="flex justify-between p-4 pb-8">
+      <div className="flex-1 flex flex-col gap-2 ">
+        <BackButton navLink="/blogs" />
+        <Label className="font-semibold">כותרת</Label>
+        <Input
+          className="sm:w-2/3 "
+          value={blog.title}
+          onChange={(e) => handleFieldChange("title", e.target.value)}
         />
-      </div>
-      <div className="flex flex-col gap-2">
-        <CustomRadioGroup
-          className="flex items-center"
-          defaultValue="link"
-          items={radioItems}
-          onValueChange={handleChangeMediaType}
-        />
-        {mediaType == "image" && (
-          <>
-            <Label className="font-semibold">תמונה</Label>
-            <Input
-              type="file"
-              accept="image/*"
-              className="sm:w-1/2 cursor-pointer"
-              onChange={handleImageUpload}
-            />
-          </>
-        )}
-        {mediaType == "link" && (
-          <>
-            <Label className="font-semibold">לינק</Label>
-            <Input
-              type="text"
-              placeholder=".../https://youtube.com"
-              className="sm:w-1/2"
-              onChange={(e) => handleFieldChange("link", e.target.value)}
-            />
-          </>
-        )}
-      </div>
-      {(image || blog.imageUrl) && (
-        <div className="flex flex-col gap-4 mt-2 relative sm:w-1/4">
-          <img
-            src={generatePhotoUrl(image || blog.imageUrl || "")}
-            alt="Selected"
-            className="w-full rounded-md"
+
+        <div className="flex flex-col gap-3 sm:w-2/3">
+          <Label className="font-semibold">תוכנית</Label>
+
+          <ComboBox
+            options={planTypes}
+            onSelect={(val) => handleFieldChange("planType", val)}
+            value={blog.planType}
+            inputPlaceholder="בחר תוכנית..."
           />
-          <Button className="bg-destructive text-base rounded" onClick={handleRemoveImage}>
-            הסר
-          </Button>
+          <Label className="font-semibold">קבוצה</Label>
+          <ComboBox
+            isLoading={isBlogGroupsLoading}
+            options={blogGroupItems}
+            onSelect={(val) => handleFieldChange("group", val)}
+            value={blog.group}
+            inputPlaceholder="בחר קבוצה..."
+            listEmptyMessage="אין קבוצות כרגע"
+          />
         </div>
-      )}
-      <Label className="font-semibold">תוכן</Label>
-      <TextEditor content={blog.content} onChange={(val) => handleFieldChange("content", val)} />
-      <div className="flex items-center justify-end gap-3">
-        <Button variant={"secondary"} onClick={() => navigate("/blogs")}>
-          בטל
-        </Button>
-        <CustomButton
-          isLoading={addBlogMutation.isPending || updateBlogMutation.isPending}
-          title="שמור"
-          variant={"success"}
-          onClick={handleSave}
-        />
+        <div className="flex flex-col gap-2 sm:2/3">
+          {mediaType == "image" && (
+            <>
+              <Label className="font-semibold">תמונה</Label>
+              <Input
+                type="file"
+                accept="image/*"
+                className="sm:2/3 cursor-pointer"
+                onChange={handleImageUpload}
+              />
+            </>
+          )}
+          {mediaType == "link" && (
+            <>
+              <Label className="font-semibold">לינק</Label>
+              <Input
+                type="text"
+                placeholder=".../https://youtube.com"
+                className="sm:w-2/3"
+                onChange={(e) => handleFieldChange("link", e.target.value)}
+              />
+            </>
+          )}
+          <CustomRadioGroup
+            className="flex w-fit items-center"
+            defaultValue="link"
+            items={radioItems}
+            onValueChange={handleChangeMediaType}
+          />
+        </div>
+        {(image || blog.imageUrl) && (
+          <div className="flex flex-col gap-4 mt-2 relative sm:w-1/4">
+            <img
+              src={generatePhotoUrl(image || blog.imageUrl || "")}
+              alt="Selected"
+              className="w-full rounded-md"
+            />
+            <Button className="bg-destructive text-base rounded" onClick={handleRemoveImage}>
+              הסר
+            </Button>
+          </div>
+        )}
+        <Label className="font-semibold">תוכן</Label>
+        <TextEditor content={blog.content} onChange={(val) => handleFieldChange("content", val)} />
       </div>
+      <CustomButton
+        className="w-32 h-fit"
+        isLoading={addBlogMutation.isPending || updateBlogMutation.isPending}
+        title="שמור"
+        variant={"success"}
+        onClick={handleSave}
+      />
     </div>
   );
 };
