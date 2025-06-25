@@ -9,7 +9,7 @@ const useExerciseQuery = (id: string) => {
   return useQuery({
     queryKey: [QueryKeys.EXERCISES + id],
     queryFn: () => getExerciseById(id),
-    enabled: !!id,
+    enabled: id !== "undefined",
     staleTime: FULL_DAY_STALE_TIME / 2,
   });
 };

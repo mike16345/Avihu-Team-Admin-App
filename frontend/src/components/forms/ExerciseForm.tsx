@@ -42,7 +42,7 @@ const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
   });
 
   const { data: muscleGroups } = useMuscleGroupsQuery();
-  const { data: exercise } = useExerciseQuery(objectId || "");
+  const { data: exercise } = useExerciseQuery(objectId || "undefined");
 
   const { reset } = exerciseForm;
 
