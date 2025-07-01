@@ -5,10 +5,5 @@
     "enabled": true,
     "allowedBranches": ["master", "devel"]
   },
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
-  ]
+  "rewrites": [{ "source": "/(.*)", "destination": "/" }]
 }

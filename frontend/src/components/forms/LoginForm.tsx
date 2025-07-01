@@ -62,7 +62,7 @@ export default function LoginForm() {
       toast.success(`ברוך הבא ${res.data.data.user.firstName}`);
     } catch (err: any) {
       setIsLoading(false);
-      toast.error(err.data.message);
+      toast.error(err?.data?.message);
     }
 
     setErrors({});
