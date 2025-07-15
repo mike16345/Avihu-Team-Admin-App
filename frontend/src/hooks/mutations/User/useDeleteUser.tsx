@@ -21,9 +21,8 @@ const useDeleteUser = () => {
       await handleDeleteManyPhotos(urls);
       return await deleteUser(userId);
     } catch (err: any) {
-      toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE);
       console.error(err);
-      return;
+      throw err;
     }
   };
 
