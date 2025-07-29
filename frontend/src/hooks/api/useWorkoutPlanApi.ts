@@ -13,7 +13,12 @@ export const useWorkoutPlanApi = () => {
     updateItem(`${WORKOUT_PLAN_ENDPOINT}/one`, workoutPlan, null, { userId });
 
   const updateWorkoutPlanByUserId = (userId: string, workoutPlan: ICompleteWorkoutPlan) =>
-    updateItem(`${WORKOUT_PLAN_ENDPOINT}/one/user`, workoutPlan, null, { userId });
+    updateItem<ApiResponse<ICompleteWorkoutPlan>>(
+      `${WORKOUT_PLAN_ENDPOINT}/one/user`,
+      workoutPlan,
+      null,
+      { userId }
+    );
 
   const deleteWorkoutPlan = (userId: string) =>
     deleteItem(`${WORKOUT_PLAN_ENDPOINT}/one`, { userId });
