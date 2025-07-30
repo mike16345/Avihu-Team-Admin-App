@@ -19,7 +19,12 @@ export const useWeighInPhotosApi = () => {
     axiosInstance.get<Photo[]>(WEIGH_IN_PHOTOS_ENDPOINT + id);
 
   const getUserImageUrls = (userId: string) => {
-    return fetchData<ApiResponse<string[]>>(USER_IMAGE_URLS_ENDPOINT + "/user?userId=" + userId);
+    return fetchData<ApiResponse<string[]>>(
+      USER_IMAGE_URLS_ENDPOINT + "/user?userId=" + userId
+    ).catch((error) => {
+      if (error.status == 404) return { data: [] };
+      else throw error;
+    });
   };
 
   return {
