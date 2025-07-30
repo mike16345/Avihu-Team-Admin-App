@@ -47,7 +47,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
   const exercises = watch(`${parentPath}.exercises`) as IExercise[];
 
   const handleSelectExercise = (index: number, updatedExercise: IExercisePresetItem) => {
-    const { name, linkToVideo, tipFromTrainer, exerciseMethod, _id } = updatedExercise;
+    const { name, linkToVideo, exerciseMethod, _id } = updatedExercise;
     const exercise = getValues(`${parentPath}.exercises`)[index];
     const newExercise = {
       ...exercise,
@@ -55,7 +55,6 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
       exerciseId: _id!,
       name,
       linkToVideo,
-      tipFromTrainer,
       exerciseMethod,
     };
 

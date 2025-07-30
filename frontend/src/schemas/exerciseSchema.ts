@@ -6,6 +6,5 @@ export const youtubeLinkRegex =
 export const exerciseSchema = z.object({
   name: z.string().min(1, { message: `שם התרגיל חייב להיות תו אחד או יותר` }),
   muscleGroup: z.string().min(1, { message: `תרגיל חייב להיות משוייך לקבוצת שריר` }),
-  tipFromTrainer: z.string().optional(),
   linkToVideo: z.string().url({ message: `אנא הכנס לינק תקין!` }).regex(youtubeLinkRegex),
 });

@@ -57,7 +57,6 @@ export interface IExercisePresetItem {
   exerciseId?: { name: string; linkToVideo: string; _id: string } | string;
   name: string;
   muscleGroup: string;
-  tipFromTrainer?: string;
   exerciseMethod?: string;
   linkToVideo: string;
 }

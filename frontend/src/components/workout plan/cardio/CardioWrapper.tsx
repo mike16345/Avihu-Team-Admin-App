@@ -3,13 +3,7 @@ import FixedCardioContainer from "./FixedCardioContainer";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import CardioWeekWrapper from "./CardioWeekWrapper";
-import {
-  CardioType,
-  ICardioPlan,
-  ICardioWeek,
-  IComplexCardioType,
-  ISimpleCardioType,
-} from "@/interfaces/IWorkoutPlan";
+import { CardioType, ICardioWeek, IComplexCardioType } from "@/interfaces/IWorkoutPlan";
 import { Button } from "@/components/ui/button";
 import { defaultComplexCardioOption, defaultSimpleCardioOption } from "@/constants/cardioOptions";
 import { toast } from "sonner";
