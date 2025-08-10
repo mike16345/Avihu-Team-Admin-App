@@ -17,6 +17,8 @@ import secureLocalStorage from "react-secure-storage";
 import CustomButton from "../ui/CustomButton";
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
+import queryClient from "@/QueryClient/queryClient";
+import { QueryKeys } from "@/enums/QueryKeys";
 
 export const description =
   "A simple login form with email and password. The submit button says 'Sign in'.";
@@ -57,12 +59,13 @@ export default function LoginForm() {
       secureLocalStorage.setItem(USER_TOKEN_STORAGE_KEY, res.data);
       await login();
       navigate("/");
+      queryClient.invalidateQueries({ queryKey: [QueryKeys.USER_LOGIN_SESSION] });
 
       setIsLoading(false);
       toast.success(`ברוך הבא ${res.data.data.user.firstName}`);
     } catch (err: any) {
       setIsLoading(false);
-      toast.error(err.data.message);
+      toast.error(err?.data?.message);
     }
 
     setErrors({});

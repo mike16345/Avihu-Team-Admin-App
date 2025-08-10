@@ -23,7 +23,6 @@ const useDeleteUser = () => {
       return await deleteUser(userId);
     } catch (err: any) {
       toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE);
-      throw err;
     }
   };
 
