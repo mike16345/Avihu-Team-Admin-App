@@ -16,7 +16,7 @@ const CopyButton: React.FC<CopyButtonProps> = ({ tip, onClick, disabled = false 
   return (
     <TooltipProvider delayDuration={100}>
       <Tooltip>
-        <TooltipTrigger className="flex items-center justify-center">
+        <TooltipTrigger type="button" className="flex items-center justify-center">
           <Button
             type="button"
             variant={"ghost"}

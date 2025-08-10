@@ -30,6 +30,7 @@ export interface ISet {
 
 export interface IExercise {
   _id?: string;
+  exerciseId: { name: string; linkToVideo: string; _id: string } | string;
   tipFromTrainer?: string;
   linkToVideo: string;
   exerciseMethod?: string;
@@ -53,12 +54,13 @@ export interface IWorkoutPlanPreset {
 
 export interface IExercisePresetItem {
   _id?: string;
+  exerciseId?: { name: string; linkToVideo: string; _id: string } | string;
   name: string;
   muscleGroup: string;
-  tipFromTrainer?: string;
   exerciseMethod?: string;
   linkToVideo: string;
 }
+
 export interface IMuscleGroupItem extends IBaseItem {}
 export interface ICardioExerciseItem extends IBaseItem {}
 

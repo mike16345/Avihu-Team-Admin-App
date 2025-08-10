@@ -30,9 +30,18 @@ export const setSchema = z
   );
 
 export const workoutSchema = z.object({
-  name: z.string().min(MIN_NAME_LENGTH, { message: ERROR_MESSAGES.stringMin(MIN_NAME_LENGTH) }),
+  name: z
+    .string()
+    .min(MIN_NAME_LENGTH, { message: ERROR_MESSAGES.stringMin(MIN_NAME_LENGTH) })
+    .optional(),
   sets: z.array(setSchema).min(MIN_SETS, { message: ERROR_MESSAGES.arrayMin(MIN_SETS, "סטים") }),
-  linkToVideo: z.string().regex(youtubeLinkRegex, { message: ERROR_MESSAGES.youtubeLink }),
+  exerciseId: z
+    .string()
+    .or(z.object({ name: z.string(), linkToVideo: z.string(), _id: z.string() })),
+  linkToVideo: z
+    .string()
+    .regex(youtubeLinkRegex, { message: ERROR_MESSAGES.youtubeLink })
+    .optional(),
   tipFromTrainer: z.string().optional(),
   exerciseMethod: z
     .string()

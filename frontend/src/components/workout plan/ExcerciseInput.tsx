@@ -47,14 +47,14 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
   const exercises = watch(`${parentPath}.exercises`) as IExercise[];
 
   const handleSelectExercise = (index: number, updatedExercise: IExercisePresetItem) => {
-    const { name, linkToVideo, tipFromTrainer, exerciseMethod, _id } = updatedExercise;
+    const { name, linkToVideo, exerciseMethod, _id } = updatedExercise;
     const exercise = getValues(`${parentPath}.exercises`)[index];
     const newExercise = {
       ...exercise,
       _id: _id || generateUUID(),
+      exerciseId: _id!,
       name,
       linkToVideo,
-      tipFromTrainer,
       exerciseMethod,
     };
 
@@ -68,8 +68,9 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
   };
 
   const handleAddExcercise = () => {
-    const newExercise: IExercise = {
+    const newExercise = {
       name: ``,
+      exerciseId: "",
       sets: [defaultSet],
       linkToVideo: "",
       _id: generateUUID(),
@@ -121,6 +122,9 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
             {({ item, index }) => (
               <SortableItem item={item} idKey="_id">
                 {() => {
+                  const { name, linkToVideo } =
+                    typeof item.exerciseId == "object" ? item.exerciseId : item;
+
                   return (
                     <Card className={` sm:p-4 max-h-[575px] overflow-y-auto custom-scrollbar`}>
                       <CardHeader className="sm:p-4">
@@ -135,7 +139,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                                 setIsDeleteModalOpen(true);
                               }}
                             >
-                              <IoClose size={22} />
+                              <IoClose size={24} />
                             </Button>
                           </div>
                           <div className="w-fit">
@@ -147,7 +151,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                                     <FormLabel className="font-bold underline">תרגיל</FormLabel>
                                     <ComboBox
                                       options={exerciseOptions}
-                                      value={item.name}
+                                      value={name}
                                       onSelect={(exercise) => {
                                         handleSelectExercise(index, exercise);
                                       }}
@@ -158,10 +162,10 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                               }}
                             />
                           </div>
-                          {item.linkToVideo && (
+                          {linkToVideo && (
                             <img
                               className="rounded mt-2"
-                              src={getYouTubeThumbnail(extractVideoId(item.linkToVideo || ""))}
+                              src={getYouTubeThumbnail(extractVideoId(linkToVideo))}
                             />
                           )}
                           <label className="font-bold underline pt-5">שיטת אימון:</label>
@@ -219,7 +223,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                                   <FormLabel>לינק לסרטון</FormLabel>
                                   <Input
                                     {...field}
-                                    value={item.linkToVideo}
+                                    value={linkToVideo}
                                     placeholder="הכנס לינק כאן..."
                                   />
                                   <FormMessage />

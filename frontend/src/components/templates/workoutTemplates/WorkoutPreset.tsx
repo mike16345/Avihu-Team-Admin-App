@@ -114,12 +114,10 @@ export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ childr
       };
     }
 
-    const cleanedPreset = cleanWorkoutObject(workoutPlan);
-
     if (id) {
-      updateWorkoutPlanPreset.mutate({ presetId: id, updatedPreset: cleanedPreset });
+      updateWorkoutPlanPreset.mutate({ presetId: id, updatedPreset: workoutPlan });
     } else {
-      addWorkoutPreset.mutate(cleanedPreset);
+      addWorkoutPreset.mutate(workoutPlan);
     }
   };
 

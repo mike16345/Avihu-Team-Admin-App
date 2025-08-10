@@ -29,7 +29,7 @@ import { QueryKeys } from "@/enums/QueryKeys";
 import useAddWorkoutPreset from "@/hooks/mutations/workouts/useAddWorkoutPreset";
 import InputModal from "../ui/InputModal";
 import { defaultSimpleCardioOption } from "@/constants/cardioOptions";
-import { ISimpleCardioType } from "@/interfaces/IWorkoutPlan";
+import { ICompleteWorkoutPlan, ISimpleCardioType } from "@/interfaces/IWorkoutPlan";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 
 const calculateMinPerWorkout = (workout: WorkoutSchemaType) => {
@@ -108,25 +108,20 @@ const CreateWorkoutPlanWrapper = ({ children }: { children: React.ReactNode }) =
 
   const onSubmit = (values: WorkoutSchemaType) => {
     if (!id) return Promise.reject("User ID is required!");
-    const workoutPlan = calculateMinPerWorkout(values);
-    const cleanedPostObject = cleanWorkoutObject(workoutPlan);
+    const workoutPlan = calculateMinPerWorkout(values) as ICompleteWorkoutPlan;
 
     if (!data) {
-      return addWorkoutPlan.mutate({ id, workoutPlan: cleanedPostObject });
+      return addWorkoutPlan.mutate({ id, workoutPlan: workoutPlan });
     } else {
-      return updateWorkoutPlan.mutate({ id, cleanedWorkoutPlan: cleanedPostObject });
+      return updateWorkoutPlan.mutate({ id, cleanedWorkoutPlan: workoutPlan });
     }
   };
 
   const handleAddPreset = (name: string) => {
     const workoutPlan = calculateMinPerWorkout(form.getValues());
-    const preset = cleanWorkoutObject(
-      {
-        ...workoutPlan,
-        name,
-      },
-      "userId"
-    );
+    const { userId, ...rest } = workoutPlan as ICompleteWorkoutPlan;
+    const preset = { name, ...rest };
+
     const { error } = workoutPresetSchema.safeParse(preset);
     const nestedError = error ? getZodErrorIssues(error?.issues)[0] : null;
     if (nestedError)
