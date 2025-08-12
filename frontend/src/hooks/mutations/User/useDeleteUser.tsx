@@ -18,11 +18,11 @@ const useDeleteUser = () => {
       const userImageUrls = await getUserImageUrls(userId);
       const urls = userImageUrls.data.map((url) => `images/${url}`);
 
-      await handleDeleteManyPhotos(urls);
+      if (urls.length) await handleDeleteManyPhotos(urls);
+
       return await deleteUser(userId);
     } catch (err: any) {
-      console.error(err);
-      throw err;
+      toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE);
     }
   };
 

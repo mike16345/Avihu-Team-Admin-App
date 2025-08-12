@@ -3,6 +3,7 @@ import { youtubeLinkRegex } from "./exerciseSchema";
 import ERROR_MESSAGES from "@/utils/errorMessages";
 
 const MIN_REPS = 1;
+const MIN_REST_TIME = 1;
 const MIN_SETS = 1;
 const MIN_WORKOUTS = 1;
 const MIN_EXERCISES = 1;
@@ -11,6 +12,7 @@ const MIN_TIME_PER_WEEK = 1;
 const MIN_TIMES_PER_WEEK = 1;
 const MIN_TIME_PER_WORKOUT = 1;
 const MAX_PLAN_NAME_LENGTH = 75;
+const MAX_REST_TIME = 300;
 const CARDIO_TYPES = ["simple", "complex"];
 
 export const setSchema = z
@@ -28,14 +30,27 @@ export const setSchema = z
   );
 
 export const workoutSchema = z.object({
-  name: z.string().min(MIN_NAME_LENGTH, { message: ERROR_MESSAGES.stringMin(MIN_NAME_LENGTH) }),
+  name: z
+    .string()
+    .min(MIN_NAME_LENGTH, { message: ERROR_MESSAGES.stringMin(MIN_NAME_LENGTH) })
+    .optional(),
   sets: z.array(setSchema).min(MIN_SETS, { message: ERROR_MESSAGES.arrayMin(MIN_SETS, "סטים") }),
-  linkToVideo: z.string().regex(youtubeLinkRegex, { message: ERROR_MESSAGES.youtubeLink }),
+  exerciseId: z
+    .string()
+    .or(z.object({ name: z.string(), linkToVideo: z.string(), _id: z.string() })),
+  linkToVideo: z
+    .string()
+    .regex(youtubeLinkRegex, { message: ERROR_MESSAGES.youtubeLink })
+    .optional(),
   tipFromTrainer: z.string().optional(),
   exerciseMethod: z
     .string()
     .min(MIN_NAME_LENGTH, { message: ERROR_MESSAGES.stringMin(MIN_NAME_LENGTH) })
     .optional(),
+  restTime: z.coerce
+    .number()
+    .min(MIN_REST_TIME, { message: ERROR_MESSAGES.minNumber(MIN_REST_TIME) })
+    .max(MAX_REST_TIME, { message: ERROR_MESSAGES.maxNumber(MAX_REST_TIME) }),
 });
 
 export const muscleGroupWorkoutPlanSchema = z.object({

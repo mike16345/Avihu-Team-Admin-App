@@ -37,7 +37,6 @@ const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
       name: "",
       muscleGroup: "",
       linkToVideo: "",
-      tipFromTrainer: "",
     },
   });
 
@@ -111,19 +110,7 @@ const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
             </FormItem>
           )}
         />
-        <FormField
-          control={exerciseForm.control}
-          name="tipFromTrainer"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>דגשים</FormLabel>
-              <FormControl>
-                <Input placeholder="דגשים לתרגיל..." {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
         <FormField
           control={exerciseForm.control}
           name="muscleGroup"
