@@ -59,6 +59,7 @@ export interface IExercisePresetItem {
   muscleGroup: string;
   exerciseMethod?: string;
   linkToVideo: string;
+  imageUrl?: string;
 }
 
 export interface IMuscleGroupItem extends IBaseItem {}
