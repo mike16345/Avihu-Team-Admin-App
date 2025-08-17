@@ -9,6 +9,7 @@ import { AddWorkoutPlanCard } from "./AddWorkoutPlanCard";
 import DeleteModal from "../Alerts/DeleteModal";
 import { Button } from "../ui/button";
 import {
+  buildPhotoUrl,
   convertItemsToOptions,
   extractVideoId,
   generateUUID,
@@ -122,7 +123,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
             {({ item, index }) => (
               <SortableItem item={item} idKey="_id">
                 {() => {
-                  const { name, linkToVideo } =
+                  const { name, linkToVideo, imageUrl } =
                     typeof item.exerciseId == "object" ? item.exerciseId : item;
 
                   return (
@@ -165,7 +166,11 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                           {linkToVideo && (
                             <img
                               className="rounded mt-2"
-                              src={getYouTubeThumbnail(extractVideoId(linkToVideo))}
+                              src={
+                                imageUrl
+                                  ? buildPhotoUrl(imageUrl)
+                                  : getYouTubeThumbnail(extractVideoId(linkToVideo))
+                              }
                             />
                           )}
                           <label className="font-bold underline pt-5">שיטת אימון:</label>
