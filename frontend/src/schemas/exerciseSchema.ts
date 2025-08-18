@@ -7,4 +7,5 @@ export const exerciseSchema = z.object({
   name: z.string().min(1, { message: `שם התרגיל חייב להיות תו אחד או יותר` }),
   muscleGroup: z.string().min(1, { message: `תרגיל חייב להיות משוייך לקבוצת שריר` }),
   linkToVideo: z.string().url({ message: `אנא הכנס לינק תקין!` }).regex(youtubeLinkRegex),
+  imageUrl: z.string().optional(),
 });

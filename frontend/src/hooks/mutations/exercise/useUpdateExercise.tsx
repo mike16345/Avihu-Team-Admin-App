@@ -7,8 +7,17 @@ const useUpdateExercise = ({ onSuccess, onError }: IMutationProps<IExercisePrese
   const { updateExercise } = useExercisePresetApi();
 
   return useMutation({
-    mutationFn: ({ id, exercise }: { id: string; exercise: IExercisePresetItem }) =>
-      updateExercise(id, exercise),
+    mutationFn: ({
+      id,
+      exercise,
+      imageToDelete,
+      imageToUpload,
+    }: {
+      id: string;
+      exercise: IExercisePresetItem;
+      imageToUpload?: string;
+      imageToDelete?: string;
+    }) => updateExercise(id, exercise, imageToUpload, imageToDelete),
     onSuccess,
     onError,
   });
