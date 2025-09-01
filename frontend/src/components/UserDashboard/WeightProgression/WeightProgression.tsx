@@ -11,6 +11,8 @@ import { HOUR_STALE_TIME } from "@/constants/constants";
 import { createRetryFunction } from "@/lib/utils";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { WeightProgressionPhotos } from "./WeightProgressionPhotos";
+import GenericCarousel from "@/components/ui/GenericCarousel";
+import ProgressNoteContainer from "../ProgressNotes/ProgressNoteContainer";
 
 export const WeightProgression = () => {
   const { id } = useParams();
@@ -41,7 +43,11 @@ export const WeightProgression = () => {
               <CardContent className="flex flex-col  gap-2">
                 <div className="flex flex-col items-center lg:flex-row gap-2">
                   <WeightCalendar weighIns={weighIns} />
-                  <WeightChart weighIns={weighIns} />
+
+                  <GenericCarousel
+                    hideControls
+                    carouselItems={[<WeightChart weighIns={weighIns} />, <ProgressNoteContainer />]}
+                  />
                 </div>
                 <CurrentWeighIn weighIn={weighIns[weighIns.length - 1]} />
               </CardContent>
