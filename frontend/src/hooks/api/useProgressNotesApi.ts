@@ -1,4 +1,4 @@
-import { deleteItem, fetchData, sendData } from "@/API/api";
+import { deleteItem, fetchData, sendData, updateItem } from "@/API/api";
 import { IProgressNote, IProgressNotes } from "@/interfaces/IProgress";
 import { ApiResponse } from "@/types/types";
 
@@ -11,8 +11,11 @@ export const useProgressNotesApi = () => {
   const addProgressNote = async (note: IProgressNote & { userId: string }) =>
     await sendData<ApiResponse<IProgressNotes>>(`${PROGRESS_NOTE_ENDPOINT}`, note);
 
+  const updateProgressNote = async (note: IProgressNote & { userId: string; noteId: string }) =>
+    await updateItem<ApiResponse<IProgressNotes>>(`${PROGRESS_NOTE_ENDPOINT}`, note);
+
   const deleteProgressNote = async (userId: string, noteId: string) =>
     await deleteItem<ApiResponse<void>>(`${PROGRESS_NOTE_ENDPOINT}`, { userId, noteId });
 
-  return { getProgressNotesByUserId, addProgressNote, deleteProgressNote };
+  return { getProgressNotesByUserId, addProgressNote, deleteProgressNote, updateProgressNote };
 };
