@@ -17,7 +17,7 @@ const GenericCarousel: React.FC<GenericCarouselProps> = ({
   hideControls = false,
 }) => {
   return (
-    <Carousel dir="ltr" className="shadow-md flex-1">
+    <Carousel dir="ltr" className="flex-1">
       <CarouselContent>
         {carouselItems.map((item, i) => (
           <CarouselItem key={i}>{item}</CarouselItem>
