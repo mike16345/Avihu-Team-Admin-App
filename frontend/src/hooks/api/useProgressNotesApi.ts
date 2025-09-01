@@ -1,7 +1,6 @@
 import { deleteItem, fetchData, sendData, updateItem } from "@/API/api";
 import {
   IPostProgressNoteObject,
-  IProgressNote,
   IProgressNotes,
   IPutProgressNoteObject,
 } from "@/interfaces/IProgress";
