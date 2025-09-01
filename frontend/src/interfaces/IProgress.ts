@@ -15,3 +15,12 @@ export interface IProgressNotes {
   userId: string;
   progressNotes: IProgressNote[];
 }
+
+export interface IPostProgressNoteObject extends IProgressNote {
+  userId: string;
+}
+
+export interface IPutProgressNoteObject extends IPostProgressNoteObject {
+  userId: string;
+  noteId: string;
+}
