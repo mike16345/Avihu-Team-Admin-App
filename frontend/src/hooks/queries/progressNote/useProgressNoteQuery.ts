@@ -8,7 +8,7 @@ import { IProgressNotes } from "@/interfaces/IProgress";
 const useProgressNoteQuery = (userId: string) => {
   const { getProgressNotesByUserId } = useProgressNotesApi();
 
-  return useQuery<any, any, ApiResponse<IProgressNotes[]>, any>({
+  return useQuery<any, any, ApiResponse<IProgressNotes>, any>({
     queryFn: () => getProgressNotesByUserId(userId),
     queryKey: [QueryKeys.USER_PROGRESS_NOTES + userId],
     staleTime: FULL_DAY_STALE_TIME / 2,

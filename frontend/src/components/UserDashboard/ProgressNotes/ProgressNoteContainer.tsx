@@ -2,6 +2,9 @@ import { IProgressNote } from "@/interfaces/IProgress";
 import Note from "./Note";
 import AddButton from "@/components/ui/buttons/AddButton";
 import ProgressNoteForm from "./ProgressNoteForm";
+import useProgressNoteQuery from "@/hooks/queries/progressNote/useProgressNoteQuery";
+import { useParams } from "react-router-dom";
+import { useEffect } from "react";
 
 export const mockProgressNotes: IProgressNote[] = [
   {
@@ -81,15 +84,18 @@ export const mockProgressNotes: IProgressNote[] = [
 ];
 
 const ProgressNoteContainer = () => {
-  /* const { id } = useParams();
-  const { data, isError, isLoading, error } = useProgressNoteQuery(id); */
+  const { id } = useParams();
+  const { data, isError, isLoading, error } = useProgressNoteQuery(id);
+
+  useEffect(() => {
+    console.log("data", data);
+  }, [data]);
 
   return (
     <>
       <div className="max-h-[55vh] overflow-y-auto space-y-5 p-2" dir="rtl">
-        {mockProgressNotes.map((note, i) => (
-          <Note key={i} progressNote={note} />
-        ))}
+        {data?.data &&
+          data.data.progressNotes.map((note, i) => <Note key={i} progressNote={note} />)}
       </div>
 
       <AddButton onClick={() => {}} tip="הוסף פתק" />
