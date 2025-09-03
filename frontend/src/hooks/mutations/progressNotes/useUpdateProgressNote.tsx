@@ -4,13 +4,12 @@ import { onError, onSuccess } from "@/lib/query";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { IPutProgressNoteObject } from "@/interfaces/IProgress";
 
-const useUpdateProgressNote = (noteToUpdate: IPutProgressNoteObject) => {
+const useUpdateProgressNote = (userId: string) => {
   const { updateProgressNote } = useProgressNotesApi();
 
   return useMutation({
-    mutationFn: () => updateProgressNote(noteToUpdate),
-    onSuccess: () =>
-      onSuccess("פתק עודכן בהצלחה!", [QueryKeys.USER_PROGRESS_NOTES + noteToUpdate.userId]),
+    mutationFn: (noteToUpdate: IPutProgressNoteObject) => updateProgressNote(noteToUpdate),
+    onSuccess: () => onSuccess("פתק עודכן בהצלחה!", [QueryKeys.USER_PROGRESS_NOTES + userId]),
     onError: onError,
   });
 };

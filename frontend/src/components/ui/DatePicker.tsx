@@ -96,7 +96,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
             </>
           )}
         </Select>
-        <div className="rounded-md border">
+        <div className={`rounded-md ${presets && "border"}`}>
           <Calendar mode="single" dir="ltr" selected={date} onSelect={handleSelect} />
         </div>
       </PopoverContent>

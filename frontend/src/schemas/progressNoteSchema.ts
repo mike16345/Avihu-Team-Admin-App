@@ -7,7 +7,7 @@ export const ProgressOptions = z
   .optional();
 
 export const progressNoteSchema = z.object({
-  date: z.date(),
+  date: z.coerce.date(),
   trainer: z.string({ message: REQUIRED_FIELD_MESSAGE }),
   content: z.string({ message: REQUIRED_FIELD_MESSAGE }),
   diet: ProgressOptions,

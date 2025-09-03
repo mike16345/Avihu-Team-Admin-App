@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Form,
   FormControl,
@@ -13,37 +13,60 @@ import { useForm } from "react-hook-form";
 import { progressNoteSchema } from "@/schemas/progressNoteSchema";
 import { Input } from "@/components/ui/input";
 import CustomButton from "@/components/ui/CustomButton";
-import moment from "moment-timezone";
 import { convertStringsToOptions } from "@/lib/utils";
 import CustomSelect from "@/components/ui/CustomSelect";
 import { Textarea } from "@/components/ui/textarea";
+import DatePicker from "@/components/ui/DatePicker";
+import { useProgressNoteContext } from "@/context/useProgressNoteContext";
+import useAddProgressNote from "@/hooks/mutations/progressNotes/useAddProgressNote";
+import useUpdateProgressNote from "@/hooks/mutations/progressNotes/useUpdateProgressNote";
+import { useParams } from "react-router-dom";
 
 const progressOptions = convertStringsToOptions(["25", "50", "75", "100"]);
 
 const ProgressNoteForm = () => {
+  const { id } = useParams();
+  const { progressNote } = useProgressNoteContext();
+  const addNote = useAddProgressNote(id || "");
+  const updateNote = useUpdateProgressNote(id || "");
+
+  const [isEdit, setIsEdit] = useState(false);
+
   const progressNoteForm = useForm<z.infer<typeof progressNoteSchema>>({
     resolver: zodResolver(progressNoteSchema),
     defaultValues: {
-      date: moment().format("YYYY-MM-DD"),
+      date: new Date(),
       content: undefined,
       trainer: undefined,
-      cardio: undefined,
-      diet: undefined,
-      workouts: undefined,
     },
   });
 
   const { reset } = progressNoteForm;
 
   const onSubmit = (values: z.infer<typeof progressNoteSchema>) => {
-    console.log("success", values);
+    const note = { ...values, userId: id || "" };
+
+    if (isEdit) {
+      if (!progressNote?._id) return;
+
+      updateNote.mutate({ ...note, noteId: progressNote?._id });
+    } else {
+      addNote.mutate(note);
+    }
   };
+
+  useEffect(() => {
+    if (!progressNote) return setIsEdit(false);
+
+    setIsEdit(true);
+    reset(progressNote);
+  }, [progressNote]);
 
   return (
     <Form {...progressNoteForm}>
       <form
         onSubmit={progressNoteForm.handleSubmit(onSubmit)}
-        className="space-y-4 w-fit"
+        className="space-y-4 w-full"
         dir="rtl"
       >
         <FormField
@@ -51,9 +74,12 @@ const ProgressNoteForm = () => {
           name="date"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>תאריך</FormLabel>
+              <FormLabel className="block">תאריך</FormLabel>
               <FormControl>
-                <Input type="date" placeholder="הכנס פריט כאן..." {...field} />
+                <DatePicker
+                  selectedDate={field.value}
+                  onChangeDate={(date: Date) => field.onChange(date)}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -72,57 +98,59 @@ const ProgressNoteForm = () => {
             </FormItem>
           )}
         />
-        <FormField
-          control={progressNoteForm.control}
-          name="diet"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>תזונה</FormLabel>
-              <FormControl>
-                <CustomSelect
-                  items={progressOptions}
-                  selectedValue={field.value?.toString()}
-                  onValueChange={(val) => field.onChange(+val)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={progressNoteForm.control}
-          name="cardio"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>אירובי</FormLabel>
-              <FormControl>
-                <CustomSelect
-                  items={progressOptions}
-                  selectedValue={field.value?.toString()}
-                  onValueChange={(val) => field.onChange(+val)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={progressNoteForm.control}
-          name="workouts"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>אימונים</FormLabel>
-              <FormControl>
-                <CustomSelect
-                  items={progressOptions}
-                  selectedValue={field.value?.toString()}
-                  onValueChange={(val) => field.onChange(+val)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="flex gap-5 w-full flex-wrap">
+          <FormField
+            control={progressNoteForm.control}
+            name="diet"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>תזונה</FormLabel>
+                <FormControl>
+                  <CustomSelect
+                    items={progressOptions}
+                    selectedValue={field.value?.toString()}
+                    onValueChange={(val) => field.onChange(+val)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={progressNoteForm.control}
+            name="cardio"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>אירובי</FormLabel>
+                <FormControl>
+                  <CustomSelect
+                    items={progressOptions}
+                    selectedValue={field.value?.toString()}
+                    onValueChange={(val) => field.onChange(+val)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={progressNoteForm.control}
+            name="workouts"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>אימונים</FormLabel>
+                <FormControl>
+                  <CustomSelect
+                    items={progressOptions}
+                    selectedValue={field.value?.toString()}
+                    onValueChange={(val) => field.onChange(+val)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
         <FormField
           control={progressNoteForm.control}
           name="content"
@@ -136,7 +164,12 @@ const ProgressNoteForm = () => {
             </FormItem>
           )}
         />
-        <CustomButton className="w-full" type="submit" title="שמור" />
+        <CustomButton
+          className="w-full"
+          type="submit"
+          title="שמור"
+          isLoading={addNote.isPending || updateNote.isPending}
+        />
       </form>
     </Form>
   );

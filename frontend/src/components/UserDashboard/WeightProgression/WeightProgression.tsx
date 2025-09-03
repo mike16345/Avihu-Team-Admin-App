@@ -12,7 +12,7 @@ import { createRetryFunction } from "@/lib/utils";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { WeightProgressionPhotos } from "./WeightProgressionPhotos";
 import GenericCarousel from "@/components/ui/GenericCarousel";
-import ProgressNoteContainer from "../ProgressNotes/ProgressNoteContainer";
+import ProgressNoteWrapper from "../ProgressNotes/ProgressNoteWrapper";
 
 export const WeightProgression = () => {
   const { id } = useParams();
@@ -46,7 +46,7 @@ export const WeightProgression = () => {
 
                   <GenericCarousel
                     hideControls
-                    carouselItems={[<WeightChart weighIns={weighIns} />, <ProgressNoteContainer />]}
+                    carouselItems={[<WeightChart weighIns={weighIns} />, <ProgressNoteWrapper />]}
                   />
                 </div>
                 <CurrentWeighIn weighIn={weighIns[weighIns.length - 1]} />

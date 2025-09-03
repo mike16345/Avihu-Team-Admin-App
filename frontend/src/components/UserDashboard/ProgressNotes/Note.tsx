@@ -5,14 +5,17 @@ import moment from "moment-timezone";
 import React, { useMemo } from "react";
 import { HiOutlinePencilSquare } from "react-icons/hi2";
 import ProgressTracker from "./ProgressTracker";
+import { useProgressNoteContext } from "@/context/useProgressNoteContext";
 
 interface NoteProps {
   progressNote: IProgressNote;
 }
 
 const Note: React.FC<NoteProps> = ({
-  progressNote: { content, date, trainer, cardio, diet, workouts },
+  progressNote: { content, date, trainer, cardio, diet, workouts, _id },
 }) => {
+  const { handleProgressNoteEdit } = useProgressNoteContext();
+
   const progressTrackers = useMemo(() => {
     const items = [];
 
@@ -23,6 +26,10 @@ const Note: React.FC<NoteProps> = ({
     return items;
   }, [cardio, workouts, diet]);
 
+  const handleEdit = () => {
+    handleProgressNoteEdit({ content, date, trainer, cardio, diet, workouts, _id });
+  };
+
   return (
     <div className="border shadow rounded-lg  p-2 relative">
       <div className="absolute flex gap-1 left-0 pe-2">
@@ -30,6 +37,7 @@ const Note: React.FC<NoteProps> = ({
           type="button"
           variant={"ghost"}
           className="flex rounded items-center justify-center size-full p-3"
+          onClick={handleEdit}
         >
           <HiOutlinePencilSquare />
         </Button>

@@ -1,10 +1,10 @@
 import { IProgressNote } from "@/interfaces/IProgress";
 import Note from "./Note";
 import AddButton from "@/components/ui/buttons/AddButton";
-import ProgressNoteForm from "./ProgressNoteForm";
 import useProgressNoteQuery from "@/hooks/queries/progressNote/useProgressNoteQuery";
 import { useParams } from "react-router-dom";
-import { useEffect } from "react";
+import ProgressSheet from "./ProgressSheet";
+import { useProgressNoteContext } from "@/context/useProgressNoteContext";
 
 export const mockProgressNotes: IProgressNote[] = [
   {
@@ -85,22 +85,19 @@ export const mockProgressNotes: IProgressNote[] = [
 
 const ProgressNoteContainer = () => {
   const { id } = useParams();
-  const { data, isError, isLoading, error } = useProgressNoteQuery(id);
-
-  useEffect(() => {
-    console.log("data", data);
-  }, [data]);
+  const { setOpenProgressSheeet } = useProgressNoteContext();
+  const { data: progressNoteRes, isError, isLoading, error } = useProgressNoteQuery(id);
 
   return (
     <>
       <div className="max-h-[55vh] overflow-y-auto space-y-5 p-2" dir="rtl">
-        {data?.data &&
-          data.data.progressNotes.map((note, i) => <Note key={i} progressNote={note} />)}
+        {progressNoteRes?.data &&
+          progressNoteRes.data.progressNotes.map((note, i) => <Note key={i} progressNote={note} />)}
       </div>
 
-      <AddButton onClick={() => {}} tip="הוסף פתק" />
+      <AddButton onClick={() => setOpenProgressSheeet(true)} tip="הוסף פתק" />
 
-      <ProgressNoteForm />
+      <ProgressSheet />
     </>
   );
 };
