@@ -10,10 +10,10 @@ import ErrorPage from "@/pages/ErrorPage";
 const ProgressNoteContainer = () => {
   const { id } = useParams();
   const { setOpenProgressSheeet } = useProgressNoteContext();
-  const { data: progressNoteRes, isError, isLoading } = useProgressNoteQuery(id);
+  const { data: progressNoteRes, isError, isLoading, error } = useProgressNoteQuery(id);
 
   if (isLoading) return <Loader size="medium" />;
-  if (isError) return <ErrorPage />;
+  if (isError && error?.status !== 404) return <ErrorPage />;
 
   return (
     <>
@@ -23,7 +23,7 @@ const ProgressNoteContainer = () => {
             <Note key={i} progressNote={note} />
           ))}
 
-        {progressNoteRes?.data.progressNotes.length == 0 && (
+        {(!progressNoteRes?.data || progressNoteRes?.data.progressNotes.length == 0) && (
           <h1 className="text-center">לא נמצאו פתקים למשתמש!</h1>
         )}
       </div>
