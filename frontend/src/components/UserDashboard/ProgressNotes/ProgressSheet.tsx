@@ -16,7 +16,9 @@ const ProgressSheet = () => {
       <SheetContent dir="rtl" className="hide-scrollbar overflow-y-auto space-y-2">
         <SheetHeader>
           <SheetTitle className="text-right text-3xl">פתק מעקב</SheetTitle>
-          <SheetDescription className="text-right">תכתוב קצת על השתמש</SheetDescription>
+          <SheetDescription className="text-right">
+            טופס זה מאפשר לך לשמור הערות התקדמות אישיות לצורך מעקב וניהול.
+          </SheetDescription>
         </SheetHeader>
 
         <ProgressNoteForm />
