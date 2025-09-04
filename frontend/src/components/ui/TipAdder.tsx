@@ -57,7 +57,7 @@ const TipAdder: React.FC<TipAdderProps> = ({ tips = [], saveTips }) => {
         )}
       </ul>
       <>
-        <input
+        <textarea
           className="border-2 rounded p-1 bg-secondary"
           placeholder="דגש חדש.."
           value={newTip}
