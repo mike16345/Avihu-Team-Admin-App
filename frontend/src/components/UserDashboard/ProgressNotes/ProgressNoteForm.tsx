@@ -21,23 +21,29 @@ import { useProgressNoteContext } from "@/context/useProgressNoteContext";
 import useAddProgressNote from "@/hooks/mutations/progressNotes/useAddProgressNote";
 import useUpdateProgressNote from "@/hooks/mutations/progressNotes/useUpdateProgressNote";
 import { useParams } from "react-router-dom";
+import { useUsersStore } from "@/store/userStore";
 
 const progressOptions = convertStringsToOptions(["25", "50", "75", "100"]);
 
 const ProgressNoteForm = () => {
   const { id } = useParams();
+  const { currentUser } = useUsersStore();
   const { progressNote } = useProgressNoteContext();
   const addNote = useAddProgressNote(id || "");
   const updateNote = useUpdateProgressNote(id || "");
 
   const [isEdit, setIsEdit] = useState(false);
 
+  const initalTrainerName = currentUser
+    ? `${currentUser.firstName} ${currentUser.lastName}`
+    : undefined;
+
   const progressNoteForm = useForm<z.infer<typeof progressNoteSchema>>({
     resolver: zodResolver(progressNoteSchema),
     defaultValues: {
       date: new Date(),
       content: undefined,
-      trainer: undefined,
+      trainer: initalTrainerName,
     },
   });
 
@@ -98,7 +104,7 @@ const ProgressNoteForm = () => {
             </FormItem>
           )}
         />
-        <div className="flex gap-5 w-full flex-wrap">
+        <div className="flex gap-5 w-full flex-wrap justify-around">
           <FormField
             control={progressNoteForm.control}
             name="diet"
@@ -165,6 +171,7 @@ const ProgressNoteForm = () => {
           )}
         />
         <CustomButton
+          variant="success"
           className="w-full"
           type="submit"
           title="שמור"
