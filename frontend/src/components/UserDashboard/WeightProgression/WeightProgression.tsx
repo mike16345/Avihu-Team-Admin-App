@@ -11,7 +11,7 @@ import { HOUR_STALE_TIME } from "@/constants/constants";
 import { createRetryFunction } from "@/lib/utils";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { WeightProgressionPhotos } from "./WeightProgressionPhotos";
-import GenericCarousel from "@/components/ui/GenericCarousel";
+import GenericCarousel from "@/components/ui/carousel/GenericCarousel";
 import ProgressNoteWrapper from "../ProgressNotes/ProgressNoteWrapper";
 
 export const WeightProgression = () => {
@@ -45,6 +45,7 @@ export const WeightProgression = () => {
                   <WeightCalendar weighIns={weighIns} />
 
                   <GenericCarousel
+                    dotPlacement="Top"
                     hideControls
                     carouselItems={[<WeightChart weighIns={weighIns} />, <ProgressNoteWrapper />]}
                   />
