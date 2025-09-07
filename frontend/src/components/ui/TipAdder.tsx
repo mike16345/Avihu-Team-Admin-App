@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "./button";
 import DeleteButton from "./buttons/DeleteButton";
+import { Textarea } from "./textarea";
 
 interface TipAdderProps {
   saveTips: (tips: string[]) => void;
@@ -57,7 +58,7 @@ const TipAdder: React.FC<TipAdderProps> = ({ tips = [], saveTips }) => {
         )}
       </ul>
       <>
-        <textarea
+        <Textarea
           className="border-2 rounded p-1 bg-secondary"
           placeholder="דגש חדש.."
           value={newTip}
