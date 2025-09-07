@@ -51,7 +51,10 @@ const ProgressNoteForm = () => {
     },
   });
 
-  const { reset } = progressNoteForm;
+  const {
+    reset,
+    formState: { isDirty },
+  } = progressNoteForm;
 
   const onSubmit = (values: z.infer<typeof progressNoteSchema>) => {
     if (!id) return;
@@ -182,6 +185,7 @@ const ProgressNoteForm = () => {
           className="w-full"
           type="submit"
           title="שמור"
+          disabled={!isDirty}
           isLoading={addNote.isPending || updateNote.isPending}
         />
       </form>

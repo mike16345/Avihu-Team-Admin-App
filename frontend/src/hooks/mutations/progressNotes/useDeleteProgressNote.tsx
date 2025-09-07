@@ -3,11 +3,11 @@ import { useMutation } from "@tanstack/react-query";
 import { onError, onSuccess } from "@/lib/query";
 import { QueryKeys } from "@/enums/QueryKeys";
 
-const useDeleteProgressNote = (userId: string, noteId: string) => {
+const useDeleteProgressNote = (userId: string) => {
   const { deleteProgressNote } = useProgressNotesApi();
 
   return useMutation({
-    mutationFn: () => deleteProgressNote(userId, noteId),
+    mutationFn: (noteId: string) => deleteProgressNote(userId, noteId),
     onSuccess: () => onSuccess("פתק נמחק בהצלחה!", [QueryKeys.USER_PROGRESS_NOTES + userId]),
     onError: onError,
   });

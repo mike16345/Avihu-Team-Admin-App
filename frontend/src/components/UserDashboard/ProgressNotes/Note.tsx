@@ -22,7 +22,7 @@ const Note: React.FC<NoteProps> = ({
 }) => {
   const { id } = useParams();
   const { handleProgressNoteEdit } = useProgressNoteContext();
-  const deleteNote = useDeleteProgressNote(id || "", _id || "");
+  const deleteNote = useDeleteProgressNote(id || "");
 
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
@@ -43,7 +43,7 @@ const Note: React.FC<NoteProps> = ({
   const handleDelete = () => {
     if (!id || !_id) return;
 
-    deleteNote.mutate();
+    deleteNote.mutate(_id);
   };
 
   return (

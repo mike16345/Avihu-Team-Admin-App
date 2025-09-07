@@ -12,7 +12,7 @@ interface ProgressNoteContextProps {
   progressNote: IProgressNote | null;
   setProgressNote: Dispatch<SetStateAction<IProgressNote | null>>;
   openProgressSheet: boolean;
-  setOpenProgressSheeet: Dispatch<SetStateAction<boolean>>;
+  setOpenProgressSheet: Dispatch<SetStateAction<boolean>>;
   handleProgressNoteEdit: (note: IProgressNote) => void;
   handleCloseProgressSheet: () => void;
 }
@@ -23,16 +23,16 @@ export const ProgressNoteContextProvider: React.FC<{
   children: ReactNode;
 }> = ({ children }) => {
   const [progressNote, setProgressNote] = useState<IProgressNote | null>(null);
-  const [openProgressSheet, setOpenProgressSheeet] = useState(false);
+  const [openProgressSheet, setOpenProgressSheet] = useState(false);
 
   const handleProgressNoteEdit = (note: IProgressNote) => {
     setProgressNote(note);
-    setOpenProgressSheeet(true);
+    setOpenProgressSheet(true);
   };
 
   const handleCloseProgressSheet = () => {
     setProgressNote(null);
-    setOpenProgressSheeet(false);
+    setOpenProgressSheet(false);
   };
 
   return (
@@ -40,7 +40,7 @@ export const ProgressNoteContextProvider: React.FC<{
       value={{
         progressNote,
         setProgressNote,
-        setOpenProgressSheeet,
+        setOpenProgressSheet,
         openProgressSheet,
         handleCloseProgressSheet,
         handleProgressNoteEdit,
