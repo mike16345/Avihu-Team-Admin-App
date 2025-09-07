@@ -82,10 +82,10 @@ export const WeightProgressionPhotos: FC<WeightProgressionPhotosProps> = ({ onCl
             {photos.map((photo, i) => (
               <Card
                 onClick={() => handleClickPhoto(photo, i)}
-                className="w-[200px] cursor-pointer"
+                className="w-[200px]  cursor-pointer"
                 key={i}
               >
-                <img src={photo} alt={`Photo ${i + 1}`} />
+                <img className="rounded" src={photo} alt={`Photo ${i + 1}`} />
               </Card>
             ))}
           </CardContent>
