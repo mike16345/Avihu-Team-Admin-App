@@ -54,7 +54,9 @@ const ProgressNoteForm = () => {
   const { reset } = progressNoteForm;
 
   const onSubmit = (values: z.infer<typeof progressNoteSchema>) => {
-    const note = { ...values, userId: id || "" };
+    if (!id) return;
+
+    const note = { ...values, userId: id };
 
     if (isEdit) {
       if (!progressNote?._id) return;

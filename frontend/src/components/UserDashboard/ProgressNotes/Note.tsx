@@ -38,6 +38,8 @@ const Note: React.FC<NoteProps> = ({
   };
 
   const handleDelete = () => {
+    if (!id || !_id) return;
+
     deleteNote.mutate();
   };
 

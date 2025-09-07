@@ -47,7 +47,10 @@ export const WeightProgression = () => {
                   <GenericCarousel
                     dotPlacement="Top"
                     hideControls
-                    carouselItems={[<WeightChart weighIns={weighIns} />, <ProgressNoteWrapper />]}
+                    carouselItems={[
+                      <WeightChart key="weigh-in-chart" weighIns={weighIns} />,
+                      <ProgressNoteWrapper key="progress-wrapper" />,
+                    ]}
                   />
                 </div>
                 <CurrentWeighIn weighIn={weighIns[weighIns.length - 1]} />

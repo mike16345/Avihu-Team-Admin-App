@@ -8,8 +8,8 @@ export const ProgressOptions = z
 
 export const progressNoteSchema = z.object({
   date: z.coerce.date(),
-  trainer: z.string({ message: REQUIRED_FIELD_MESSAGE }),
-  content: z.string({ message: REQUIRED_FIELD_MESSAGE }),
+  trainer: z.string().min(1, REQUIRED_FIELD_MESSAGE),
+  content: z.string().min(1, REQUIRED_FIELD_MESSAGE),
   diet: ProgressOptions,
   workouts: ProgressOptions,
   cardio: ProgressOptions,

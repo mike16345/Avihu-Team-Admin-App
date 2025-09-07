@@ -19,8 +19,8 @@ const ProgressNoteContainer = () => {
     <>
       <div className="max-h-[55vh] overflow-y-auto space-y-5 p-2" dir="rtl">
         {progressNoteRes?.data.progressNotes.length !== 0 &&
-          progressNoteRes?.data.progressNotes.map((note, i) => (
-            <Note key={i} progressNote={note} />
+          progressNoteRes?.data.progressNotes.map((note) => (
+            <Note key={note._id} progressNote={note} />
           ))}
 
         {(!progressNoteRes?.data || progressNoteRes?.data.progressNotes.length == 0) && (
