@@ -9,13 +9,16 @@ import { useProgressNoteContext } from "@/context/useProgressNoteContext";
 import DeleteModal from "@/components/Alerts/DeleteModal";
 import useDeleteProgressNote from "@/hooks/mutations/progressNotes/useDeleteProgressNote";
 import { useParams } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 interface NoteProps {
   progressNote: IProgressNote;
+  className?: string;
 }
 
 const Note: React.FC<NoteProps> = ({
   progressNote: { content, date, trainer, cardio, diet, workouts, _id },
+  className,
 }) => {
   const { id } = useParams();
   const { handleProgressNoteEdit } = useProgressNoteContext();
@@ -45,22 +48,24 @@ const Note: React.FC<NoteProps> = ({
 
   return (
     <>
-      <div className="border shadow rounded-lg  p-2 relative">
-        <div className="absolute flex gap-1 left-0 pe-2">
-          <Button
-            type="button"
-            variant={"ghost"}
-            className="flex rounded items-center justify-center size-full p-3"
-            onClick={handleEdit}
-          >
-            <HiOutlinePencilSquare />
-          </Button>
+      <div className={cn("border shadow rounded-lg p-2 ", className)}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1">
+            <span className="font-bold text-lg">{moment(date).format("DD/MM/YY")}</span>
+            <span className="text-sm"> - {trainer}</span>
+          </div>
+          <div className="flex items-center">
+            <Button
+              type="button"
+              variant={"ghost"}
+              className="flex rounded items-center justify-center size-full p-3"
+              onClick={handleEdit}
+            >
+              <HiOutlinePencilSquare />
+            </Button>
 
-          <DeleteButton onClick={() => setOpenDeleteDialog(true)} tip="מחק פתק" />
-        </div>
-        <div className="flex items-center gap-1">
-          <span className="font-bold text-lg">{moment(date).format("DD/MM/YY")}</span>
-          <span className="text-sm"> - {trainer}</span>
+            <DeleteButton onClick={() => setOpenDeleteDialog(true)} tip="מחק פתק" />
+          </div>
         </div>
         <div className="flex gap-2 flex-wrap">
           {progressTrackers.map(({ label, value }, i) => (
@@ -68,7 +73,7 @@ const Note: React.FC<NoteProps> = ({
           ))}
         </div>
 
-        <div className="pt-2">{content}</div>
+        {!!content.length && <div className="pt-2">{content}</div>}
       </div>
 
       <DeleteModal
