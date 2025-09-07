@@ -16,7 +16,9 @@ const ProgressNoteContainer = () => {
   const notes = useMemo(() => {
     if (!progressNoteRes?.data.progressNotes.length) return [];
 
-    return progressNoteRes.data.progressNotes;
+    return progressNoteRes.data.progressNotes.map((note) => (
+      <Note key={note._id} progressNote={note} />
+    ));
   }, [progressNoteRes?.data]);
 
   if (isLoading) return <Loader size="medium" />;
@@ -25,9 +27,7 @@ const ProgressNoteContainer = () => {
   return (
     <>
       <div className="max-h-[55vh] overflow-y-auto space-y-5 p-2" dir="rtl">
-        {notes.map((note) => (
-          <Note key={note._id} progressNote={note} />
-        ))}
+        {notes}
 
         {notes.length == 0 && <h1 className="text-center">לא נמצאו פתקים למשתמש!</h1>}
       </div>
