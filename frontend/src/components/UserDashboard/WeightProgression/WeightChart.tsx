@@ -39,7 +39,7 @@ export const WeightChart: FC<WeighChartProps> = ({ weighIns }) => {
             data={weighIns}
             margin={{
               top: 20,
-              left: 0,
+              left: 15,
               bottom: 0,
               right: 10,
             }}
@@ -65,10 +65,29 @@ export const WeightChart: FC<WeighChartProps> = ({ weighIns }) => {
               cursor={true}
               content={
                 <ChartTooltipContent
+                  formatter={(weight) => {
+                    return (
+                      <div dir="rtl" className="w-full flex justify-end items-center gap-1 ">
+                        <div className="w-full flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div
+                              className={`shrink-0 rounded-[2px] border-[--color-border] bg-[var(--color-desktop)] h-2.5 w-2.5`}
+                            ></div>
+                            <span>משקל</span>
+                          </div>
+                          <span>{weight}</span>
+                        </div>
+                      </div>
+                    );
+                  }}
                   labelFormatter={(date: string) => {
                     const convertedDate = DateUtils.convertToDate(date);
 
-                    return DateUtils.formatDate(convertedDate, "DD/MM/YYYY");
+                    return (
+                      <div dir="rtl">
+                        <span>{DateUtils.formatDate(convertedDate, "DD/MM/YYYY")}</span>
+                      </div>
+                    );
                   }}
                 />
               }

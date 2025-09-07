@@ -1,7 +1,7 @@
 import AnalyticsCard from "@/components/AdminDashboard/AnalyticsCard";
 import Shortcut from "@/components/AdminDashboard/Shortcut";
 import UserCheckIn from "@/components/AdminDashboard/UserCheckIn";
-import GenericCarousel from "@/components/ui/GenericCarousel";
+import GenericCarousel from "@/components/ui/carousel/GenericCarousel";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { BiFoodMenu } from "react-icons/bi";
 import { FaDumbbell } from "react-icons/fa";
