@@ -26,9 +26,9 @@ const Note: React.FC<NoteProps> = ({
   const progressTrackers = useMemo(() => {
     const items = [];
 
-    if (cardio) items.push({ label: "אירובי", value: cardio });
-    if (workouts) items.push({ label: "אימונים", value: workouts });
     if (diet) items.push({ label: "תזונה", value: diet });
+    if (workouts) items.push({ label: "אימונים", value: workouts });
+    if (cardio) items.push({ label: "אירובי", value: cardio });
 
     return items;
   }, [cardio, workouts, diet]);
@@ -56,9 +56,10 @@ const Note: React.FC<NoteProps> = ({
 
           <DeleteButton onClick={() => setOpenDeleteDialog(true)} tip="מחק פתק" />
         </div>
-
-        <span className="text-sm block">{trainer}</span>
-        <span className="font-bold text-lg">{moment(date).format("DD/MM/YY")}</span>
+        <div className="flex items-center gap-1">
+          <span className="font-bold text-lg">{moment(date).format("DD/MM/YY")}</span>
+          <span className="text-sm"> - {trainer}</span>
+        </div>
         <div className="flex gap-2 flex-wrap">
           {progressTrackers.map(({ label, value }, i) => (
             <ProgressTracker key={i} label={label} value={value} />

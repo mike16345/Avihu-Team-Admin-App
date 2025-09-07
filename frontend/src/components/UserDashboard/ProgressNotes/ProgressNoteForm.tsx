@@ -13,7 +13,6 @@ import { useForm } from "react-hook-form";
 import { progressNoteSchema } from "@/schemas/progressNoteSchema";
 import { Input } from "@/components/ui/input";
 import CustomButton from "@/components/ui/CustomButton";
-import { convertStringsToOptions } from "@/lib/utils";
 import CustomSelect from "@/components/ui/CustomSelect";
 import { Textarea } from "@/components/ui/textarea";
 import DatePicker from "@/components/ui/DatePicker";
@@ -23,7 +22,12 @@ import useUpdateProgressNote from "@/hooks/mutations/progressNotes/useUpdateProg
 import { useParams } from "react-router-dom";
 import { useUsersStore } from "@/store/userStore";
 
-const progressOptions = convertStringsToOptions(["25", "50", "75", "100"]);
+const progressOptions = [
+  { name: "25%", value: "25" },
+  { name: "50%", value: "50" },
+  { name: "75%", value: "75" },
+  { name: "100%", value: "100" },
+];
 
 const ProgressNoteForm = () => {
   const { id } = useParams();
@@ -124,10 +128,10 @@ const ProgressNoteForm = () => {
           />
           <FormField
             control={progressNoteForm.control}
-            name="cardio"
+            name="workouts"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>אירובי</FormLabel>
+                <FormLabel>אימונים</FormLabel>
                 <FormControl>
                   <CustomSelect
                     items={progressOptions}
@@ -139,12 +143,13 @@ const ProgressNoteForm = () => {
               </FormItem>
             )}
           />
+
           <FormField
             control={progressNoteForm.control}
-            name="workouts"
+            name="cardio"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>אימונים</FormLabel>
+                <FormLabel>אירובי</FormLabel>
                 <FormControl>
                   <CustomSelect
                     items={progressOptions}
