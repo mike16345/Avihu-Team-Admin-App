@@ -15,22 +15,7 @@ import { QueryKeys } from "@/enums/QueryKeys";
 import CustomButton from "../ui/CustomButton";
 import Loader from "../ui/Loader";
 import { FULL_DAY_STALE_TIME } from "@/constants/constants";
-
-const formats = [
-  "font",
-  "size",
-  "color",
-  "bold",
-  "italic",
-  "underline",
-  "strike",
-  "blockquote",
-  "list",
-  "bullet",
-  "indent",
-  "link",
-  "align",
-];
+import TextEditor from "../ui/TextEditor";
 
 const BlogEditor = () => {
   const { handleUploadBlog, updateBlog, getBlogById } = useBlogsApi();
@@ -47,8 +32,6 @@ const BlogEditor = () => {
   const [isImageFromCloudFront, setIsImageFromCloudFront] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [imageToDelete, setImageToDelete] = useState<string | undefined>();
-
-  const quillRef = useRef<ReactQuill>(null);
 
   const { id } = useParams();
   const stateBlog = location.state?.blog as IBlog;
@@ -115,12 +98,6 @@ const BlogEditor = () => {
   const generatePhotoUrl = (url: string) => (isImageFromCloudFront ? buildPhotoUrl(url) : url);
 
   useEffect(() => {
-    if (!quillRef.current) return;
-    const editor = quillRef.current.getEditor();
-    editor.format("align", "right");
-  }, [quillRef]);
-
-  useEffect(() => {
     if (stateBlog) {
       setBlog(stateBlog);
       setIsImageFromCloudFront(true);
@@ -164,23 +141,8 @@ const BlogEditor = () => {
         </div>
       )}
       <Label className="font-semibold">תוכן</Label>
-      <ReactQuill
-        id="editor"
-        ref={quillRef}
-        value={blog.content}
-        modules={{
-          toolbar: [
-            ["bold", "italic", "underline", "strike", "blockquote"],
-            [{ list: "ordered" }, { list: "bullet" }, { indent: "-1" }, { indent: "+1" }],
-            ["link"],
-            ["clean"],
-            [{ align: "" }, { align: "center" }, { align: "right" }, { align: "justify" }],
-          ],
-        }}
-        formats={formats}
-        className="flex-1 "
-        onChange={(val) => handleFieldChange("content", val)}
-      />
+      <TextEditor value={blog.content} onChange={(val) => handleFieldChange("content", val)} />
+
       <div className="flex items-center justify-end gap-3">
         <Button variant={"secondary"} onClick={() => navigate("/blogs")}>
           בטל
