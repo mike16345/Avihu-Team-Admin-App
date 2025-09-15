@@ -21,6 +21,9 @@ import useAddProgressNote from "@/hooks/mutations/progressNotes/useAddProgressNo
 import useUpdateProgressNote from "@/hooks/mutations/progressNotes/useUpdateProgressNote";
 import { useParams } from "react-router-dom";
 import { useUsersStore } from "@/store/userStore";
+import BlogEditor from "@/components/Blog/BlogEditor";
+import ReactQuill from "react-quill-new";
+import TextEditor from "@/components/ui/TextEditor";
 
 const progressOptions = [
   { name: "25%", value: "25" },
@@ -174,7 +177,7 @@ const ProgressNoteForm = () => {
             <FormItem>
               <FormLabel>תוכן</FormLabel>
               <FormControl>
-                <Textarea {...field} />
+                <TextEditor value={field.value} onChange={(val) => field.onChange(val)} />
               </FormControl>
               <FormMessage />
             </FormItem>
