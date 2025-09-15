@@ -73,7 +73,7 @@ const Note: React.FC<NoteProps> = ({
           ))}
         </div>
 
-        {!!content.length && <div className="pt-2">{content}</div>}
+        {!!content.length && <p dangerouslySetInnerHTML={{ __html: content }}></p>}
       </div>
 
       <DeleteModal
