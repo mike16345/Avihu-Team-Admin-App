@@ -51,13 +51,14 @@ const Note: React.FC<NoteProps> = ({
     <>
       <div className={cn("border shadow rounded-lg p-2 ", className)}>
         <div className="flex items-center justify-between ">
-          <div className="flex gap-3 items-center ">
-            <div className="flex gap-2 items-center">
-              <span className="font-bold text-lg">{moment(date).format("DD/MM/YY")}</span>
-              <span className="text-xs block"> - {trainer}</span>
-            </div>
+          <span className="font-bold text-lg">{moment(date).format("DD/MM/YY")}</span>
 
-            <Separator orientation="vertical" className="h-3 w-0.5" />
+          <div className="flex gap-3 items-center ">
+            <span className="text-xs block"> {trainer}</span>
+
+            {!!progressTrackers.length && (
+              <Separator orientation="vertical" className="h-3 w-0.5" />
+            )}
 
             <div className="flex gap-2 items-start flex-wrap ">
               {progressTrackers.map(({ label, value }, i) => (
