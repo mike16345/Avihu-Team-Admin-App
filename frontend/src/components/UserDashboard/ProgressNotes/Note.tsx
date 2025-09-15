@@ -10,6 +10,7 @@ import DeleteModal from "@/components/Alerts/DeleteModal";
 import useDeleteProgressNote from "@/hooks/mutations/progressNotes/useDeleteProgressNote";
 import { useParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { Separator } from "@/components/ui/separator";
 
 interface NoteProps {
   progressNote: IProgressNote;
@@ -49,11 +50,23 @@ const Note: React.FC<NoteProps> = ({
   return (
     <>
       <div className={cn("border shadow rounded-lg p-2 ", className)}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1">
-            <span className="font-bold text-lg">{moment(date).format("DD/MM/YY")}</span>
-            <span className="text-sm"> - {trainer}</span>
+        <div className="flex items-center justify-between ">
+          <span className="font-bold text-lg">{moment(date).format("DD/MM/YY")}</span>
+
+          <div className="flex gap-3 items-center ">
+            <span className="text-xs block"> {trainer}</span>
+
+            {!!progressTrackers.length && (
+              <Separator orientation="vertical" className="h-3 w-0.5" />
+            )}
+
+            <div className="flex gap-2 items-start flex-wrap ">
+              {progressTrackers.map(({ label, value }, i) => (
+                <ProgressTracker key={i} label={label} value={value} />
+              ))}
+            </div>
           </div>
+
           <div className="flex items-center">
             <Button
               type="button"
@@ -67,13 +80,10 @@ const Note: React.FC<NoteProps> = ({
             <DeleteButton onClick={() => setOpenDeleteDialog(true)} tip="מחק פתק" />
           </div>
         </div>
-        <div className="flex gap-2 flex-wrap">
-          {progressTrackers.map(({ label, value }, i) => (
-            <ProgressTracker key={i} label={label} value={value} />
-          ))}
-        </div>
 
-        {!!content.length && <div className="pt-2">{content}</div>}
+        <Separator />
+
+        {!!content.length && <p className="p-3" dangerouslySetInnerHTML={{ __html: content }}></p>}
       </div>
 
       <DeleteModal

@@ -7,9 +7,9 @@ interface ProgressTrackerProps {
 
 const ProgressTracker: React.FC<ProgressTrackerProps> = ({ label, value }) => {
   return (
-    <div>
-      <span className="text-xs font-bold">{label}</span>
-      <div className="text-sm">{value}%</div>
+    <div className="flex gap-1 items-center">
+      <span className="text-xs block">{label} - </span>
+      <div className="text-sm font-bold">{value}%</div>
     </div>
   );
 };

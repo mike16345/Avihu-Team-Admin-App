@@ -14,13 +14,13 @@ import { progressNoteSchema } from "@/schemas/progressNoteSchema";
 import { Input } from "@/components/ui/input";
 import CustomButton from "@/components/ui/CustomButton";
 import CustomSelect from "@/components/ui/CustomSelect";
-import { Textarea } from "@/components/ui/textarea";
 import DatePicker from "@/components/ui/DatePicker";
 import { useProgressNoteContext } from "@/context/useProgressNoteContext";
 import useAddProgressNote from "@/hooks/mutations/progressNotes/useAddProgressNote";
 import useUpdateProgressNote from "@/hooks/mutations/progressNotes/useUpdateProgressNote";
 import { useParams } from "react-router-dom";
 import { useUsersStore } from "@/store/userStore";
+import TextEditor from "@/components/ui/TextEditor";
 
 const progressOptions = [
   { name: "25%", value: "25" },
@@ -174,7 +174,7 @@ const ProgressNoteForm = () => {
             <FormItem>
               <FormLabel>תוכן</FormLabel>
               <FormControl>
-                <Textarea {...field} />
+                <TextEditor value={field.value} onChange={(val) => field.onChange(val)} />
               </FormControl>
               <FormMessage />
             </FormItem>
