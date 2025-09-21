@@ -7,9 +7,11 @@ import { useLocation, useParams, useSearchParams } from "react-router-dom";
 import ErrorPage from "./ErrorPage";
 import { useState } from "react";
 import useUserQuery from "@/hooks/queries/user/useUserQuery";
+import MeasurementsProgression from "@/components/UserDashboard/MeasurementProgression/MeasurementsProgression";
 
 export const weightTab = "מעקב שקילה";
 export const workoutTab = "מעקב אימון";
+export const measurementTab = "מעקב היקפים";
 
 export const UserDashboard = () => {
   const user = useLocation().state;
@@ -43,12 +45,18 @@ export const UserDashboard = () => {
           <TabsTrigger onClick={() => handleSwitchTabs(workoutTab)} value={workoutTab}>
             {workoutTab}
           </TabsTrigger>
+          <TabsTrigger onClick={() => handleSwitchTabs(measurementTab)} value={measurementTab}>
+            {measurementTab}
+          </TabsTrigger>
         </TabsList>
         <TabsContent forceMount hidden={activeTab !== weightTab} value={weightTab}>
           <WeightProgression />
         </TabsContent>
         <TabsContent forceMount hidden={activeTab !== workoutTab} value={workoutTab}>
           <WorkoutProgression />
+        </TabsContent>
+        <TabsContent forceMount hidden={activeTab !== measurementTab} value={measurementTab}>
+          <MeasurementsProgression />
         </TabsContent>
       </Tabs>
     </div>
