@@ -69,7 +69,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
             !date && "text-muted-foreground"
           )}
         >
-          <CalendarIcon className="mr-2 h-4 w-4" />
+          <CalendarIcon className="ml-2 h-4 w-4" />
           {date ? format(date, "PPP", { locale: he }) : <span>בחר תאריך</span>}
         </Button>
       </PopoverTrigger>
@@ -96,7 +96,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
             </>
           )}
         </Select>
-        <div className="rounded-md border">
+        <div className={`rounded-md ${presets && "border"}`}>
           <Calendar mode="single" dir="ltr" selected={date} onSelect={handleSelect} />
         </div>
       </PopoverContent>
