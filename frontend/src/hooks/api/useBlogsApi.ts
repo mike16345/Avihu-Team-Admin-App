@@ -44,10 +44,10 @@ export const useBlogsApi = () => {
     }
   };
 
-  const deleteBlog = async (blog: IBlog & { _id: string }) => {
+  const deleteBlog = async (blog: IBlogResponse) => {
     await handleDeletePhoto(`images/` + blog.imageUrl);
 
-    return await deleteItem(`${BLOGS_API_URL}/one?id=${blog._id}`);
+    return await deleteItem<ApiResponse<IBlogResponse>>(`${BLOGS_API_URL}/one?id=${blog._id}`);
   };
 
   const handleUploadBlog = async (blog: IBlog, image?: string) => {
@@ -56,7 +56,7 @@ export const useBlogsApi = () => {
         blog.imageUrl = await handleUploadImageToS3(blog.title, image);
       }
 
-      await sendData<ApiResponse<{}>>(BLOGS_API_URL, blog);
+      return await sendData<ApiResponse<IBlogResponse>>(BLOGS_API_URL, blog);
     } catch (error) {
       throw error;
     }

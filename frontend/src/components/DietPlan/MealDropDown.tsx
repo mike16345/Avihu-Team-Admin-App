@@ -1,7 +1,7 @@
 import { FC, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FaChevronDown, FaTrash } from "react-icons/fa";
+import { FaChevronDown } from "react-icons/fa";
 import { Button } from "../ui/button";
 import { Collapsible, CollapsibleContent } from "../ui/collapsible";
 import {
@@ -13,12 +13,25 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "../ui/input";
-import { CustomItemSelectionRadio } from "./CustomItemSelectionRadio";
 import { CustomItems, IDietItem, IMeal } from "@/interfaces/IDietPlan";
 import { CustomItemSelection } from "./CustomItemSelection";
 import { mealSchema } from "./DietPlanSchema";
 import ExtraItems from "./ExtraItems";
 import DeleteButton from "../ui/buttons/DeleteButton";
+import CustomRadioGroup from "../ui/CustomRadioGroup";
+
+const dietRadioItems = [
+  {
+    id: "Custom",
+    label: "בחירה",
+    value: "Custom",
+  },
+  {
+    label: "קבוע",
+    id: "Fixed",
+    value: "Fixed",
+  },
+];
 
 type ShowCustomSelectionType = {
   totalProtein: boolean;
@@ -209,11 +222,13 @@ export const MealDropDown: FC<MealDropDownProps> = ({
                   )}
 
                   <div className="flex">
-                    <CustomItemSelectionRadio
+                    <CustomRadioGroup
+                      className="flex items-center"
                       defaultValue={showCustomSelection.totalProtein ? "Custom" : "Fixed"}
-                      onChangeSelection={(val: ItemSelection) =>
+                      onValueChange={(val: ItemSelection) =>
                         handleChangeItemSelectionType(val, "totalProtein")
                       }
+                      items={dietRadioItems}
                     />
                   </div>
                   {showCustomSelection.totalProtein && (
@@ -264,11 +279,13 @@ export const MealDropDown: FC<MealDropDownProps> = ({
                   )}
 
                   <div className="flex ">
-                    <CustomItemSelectionRadio
-                      defaultValue={showCustomSelection.totalCarbs ? "Custom" : "Fixed"}
-                      onChangeSelection={(val: ItemSelection) =>
+                    <CustomRadioGroup
+                      className="flex items-center"
+                      defaultValue={showCustomSelection.totalProtein ? "Custom" : "Fixed"}
+                      onValueChange={(val: ItemSelection) =>
                         handleChangeItemSelectionType(val, "totalCarbs")
                       }
+                      items={dietRadioItems}
                     />
                   </div>
 
