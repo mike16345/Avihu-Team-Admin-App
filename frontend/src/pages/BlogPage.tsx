@@ -45,7 +45,7 @@ const BlogPage = () => {
       <div className="flex items-center sm:justify-start justify-center p-4">
         <div className="w-full flex flex-col gap-3 sm:flex-row sm:items-center justify-between">
           <Button onClick={handleCreateNewBlog} className="w-full sm:w-32">
-            צור בלוג חדש
+            צור מאמר חדש
           </Button>
 
           <div className="flex items-center gap-3">

@@ -35,7 +35,7 @@ const items: LinkProps[] = [
   },
   {
     url: "/blogs",
-    title: "שיעורים",
+    title: "מאמרים",
     icon: Edit,
   },
   {

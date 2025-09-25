@@ -113,14 +113,14 @@ const BlogEditor = () => {
 
   const handleSave = async () => {
     if (isEdit && id) {
-      return await updateBlogMutation.mutate({
+      return await updateBlogMutation.mutateAsync({
         blogId: id,
         blog,
         imageToUpload: image,
         imageToDelete,
       });
     } else {
-      return await addBlogMutation.mutate({ blog, image });
+      return await addBlogMutation.mutateAsync({ blog, image });
     }
   };
 
@@ -148,6 +148,7 @@ const BlogEditor = () => {
 
     setBlog({ ...fetchedBlog });
     setIsImageFromCloudFront(!!fetchedBlog.imageUrl);
+    setMediaType(fetchedBlog.imageUrl ? "image" : "link");
     setIsEdit(true);
   }, [fetchedBlog]);
 
@@ -199,6 +200,7 @@ const BlogEditor = () => {
             <>
               <Label className="font-semibold">לינק</Label>
               <Input
+                value={blog.link}
                 type="text"
                 placeholder=".../https://youtube.com"
                 className="sm:w-2/3"

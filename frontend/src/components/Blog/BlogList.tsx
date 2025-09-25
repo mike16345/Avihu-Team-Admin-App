@@ -36,13 +36,13 @@ const BlogList: React.FC<BlogListProps> = ({ blogs }) => {
   };
 
   const onError = (e: any) => {
-    toast.error("לא הצלחנו למחוק את הבלוג", {
+    toast.error("לא הצלחנו למחוק את המאמר", {
       description: e?.message,
     });
   };
 
   const onSuccess = (blog: any) => {
-    toast.success("בלוג נמחק בהצלחה!");
+    toast.success("מאמר נמחק בהצלחה!");
     query.invalidateQueries({ queryKey: [QueryKeys.BLOGS] });
     query.invalidateQueries({ queryKey: [QueryKeys.BLOGS, blog._id] });
   };
@@ -68,7 +68,7 @@ const BlogList: React.FC<BlogListProps> = ({ blogs }) => {
         />
       ))}
       {blogs.length == 0 && (
-        <div className="col-span-full text-center text-xl">אין בלוגים כרגע</div>
+        <div className="col-span-full text-center text-xl">אין מאמרים כרגע</div>
       )}
       {hasNextPage && (
         <CustomButton
