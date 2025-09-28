@@ -20,15 +20,21 @@ const LessonGroupForm: FC<LessonGroupFormProps> = ({ objectId, closeSheet }) => 
   const queryClient = useQueryClient();
   const { data, isLoading } = useLessonGroupQuery(objectId);
 
-  const onSuccess = (blog: any) => {
+  const onUpdateSuccess = (lessonGroup: any) => {
+    queryClient.invalidateQueries({ queryKey: [QueryKeys.BLOGS] });
+    queryClient.invalidateQueries({ queryKey: [QueryKeys.BLOGS, objectId] });
+    onSuccess(lessonGroup);
+  };
+
+  const onSuccess = (lessonGroup: any) => {
     toast.success("פריט נשמר בהצלחה!");
     queryClient.invalidateQueries({ queryKey: [QueryKeys.LESSON_GROUPS] });
-    queryClient.invalidateQueries({ queryKey: [QueryKeys.LESSON_GROUPS, blog?._id] });
+    queryClient.invalidateQueries({ queryKey: [QueryKeys.LESSON_GROUPS, lessonGroup?._id] });
     closeSheet();
   };
 
   const addLessonGroup = useAddLessonGroup({ onSuccess });
-  const updateLessonGroup = useUpdateLessonGroup({ onSuccess });
+  const updateLessonGroup = useUpdateLessonGroup({ onSuccess: onUpdateSuccess });
 
   const form = useForm<LessonGroupSchemaType>({
     resolver: zodResolver(lessonGroupSchema),
