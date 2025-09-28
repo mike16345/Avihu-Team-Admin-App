@@ -35,7 +35,7 @@ const BlogPage = () => {
 
     const selectedGroupIds = new Set(selectedGroups.map((group) => group.name));
 
-    return allBlogs.filter((blog) => blog.group && selectedGroupIds.has(blog.group));
+    return allBlogs.filter((blog) => blog.group && selectedGroupIds.has(blog.group?.name));
   }, [selectedGroups, allBlogs]);
 
   if (isLoading) return <Loader />;

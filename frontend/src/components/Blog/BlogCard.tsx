@@ -20,7 +20,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onClick, onDelete }) =
       <CardHeader className="flex flex-row items-center justify-between ">
         <div className="space-y-2">
           <CardTitle className=" leading-snug">{blog.title}</CardTitle>
-          <span>קבוצה: {blog.group}</span>
+          <span>קבוצה: {blog.group?.name || blog.group}</span>
         </div>
         <DeleteButton
           tip="הסר"

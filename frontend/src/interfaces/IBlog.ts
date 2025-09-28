@@ -4,7 +4,7 @@ export interface IBlog {
   title: string;
   content: string;
   planType?: UserPlanTypes;
-  group?: string;
+  group?: ILessonGroup;
   imageUrl?: string;
   link?: string;
 }

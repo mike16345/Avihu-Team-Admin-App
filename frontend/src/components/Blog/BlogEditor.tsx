@@ -179,7 +179,7 @@ const BlogEditor = () => {
             isLoading={isBlogGroupsLoading}
             options={blogGroupItems}
             onSelect={(val) => handleFieldChange("group", val)}
-            value={blog.group}
+            value={blog.group?.name || blog.group}
             inputPlaceholder="בחר קבוצה..."
             listEmptyMessage="אין קבוצות כרגע"
           />
