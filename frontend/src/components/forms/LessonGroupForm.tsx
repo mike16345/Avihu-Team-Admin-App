@@ -13,6 +13,7 @@ import Loader from "../ui/Loader";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { Textarea } from "../ui/textarea";
 
 interface LessonGroupFormProps extends IPresetFormProps {}
 
@@ -40,12 +41,13 @@ const LessonGroupForm: FC<LessonGroupFormProps> = ({ objectId, closeSheet }) => 
     resolver: zodResolver(lessonGroupSchema),
     defaultValues: {
       name: "",
+      description: "",
     },
   });
 
   const onSubmit = (values: LessonGroupSchemaType) => {
     if (objectId) {
-      updateLessonGroup.mutate({ id: objectId, group: values.name });
+      updateLessonGroup.mutate({ id: objectId, group: values });
     } else {
       addLessonGroup.mutate(values);
     }
@@ -75,6 +77,21 @@ const LessonGroupForm: FC<LessonGroupFormProps> = ({ objectId, closeSheet }) => 
                 <FormLabel>שם</FormLabel>
                 <FormControl>
                   <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
+        />
+        <FormField
+          name="description"
+          control={control}
+          render={({ field }) => {
+            return (
+              <FormItem>
+                <FormLabel>תיאור</FormLabel>
+                <FormControl>
+                  <Textarea {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

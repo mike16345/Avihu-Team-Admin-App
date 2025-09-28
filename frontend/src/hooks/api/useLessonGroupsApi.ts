@@ -1,4 +1,5 @@
 import { deleteItem, fetchData, sendData, updateItem } from "@/API/api";
+import { description } from "@/components/forms/LoginForm";
 import { ILessonGroup } from "@/interfaces/IBlog";
 import { ApiResponse } from "@/types/types";
 
@@ -10,9 +11,10 @@ const useLessonGroupsApi = () => {
   };
 
   const updateLessonGroup = (id: string, group: ILessonGroup) => {
-    return updateItem<ApiResponse<ILessonGroup>>(`${LESSON_GROUP_API_ENDPOINT}/one?id=${id}`, {
-      name: group.name,
-    });
+    return updateItem<ApiResponse<ILessonGroup>>(
+      `${LESSON_GROUP_API_ENDPOINT}/one?id=${id}`,
+      group
+    );
   };
 
   const getLessonGroups = () => {

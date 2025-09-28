@@ -15,4 +15,5 @@ export interface IBlogResponse extends IBlog {
 
 export interface ILessonGroup {
   name: string;
+  description?: string;
 }
