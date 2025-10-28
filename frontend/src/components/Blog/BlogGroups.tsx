@@ -9,15 +9,20 @@ import { useQueryClient } from "@tanstack/react-query";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { toast } from "sonner";
 import BackButton from "../ui/BackButton";
+import { ApiResponse } from "@/types/types";
+import { ILessonGroup } from "@/interfaces/IBlog";
 
 const BlogGroups = () => {
   const queryClient = useQueryClient();
   const { data, isLoading } = useLessonGroupsQuery();
 
-  const onSuccess = (blog: any) => {
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [lessonGroupId, setLessonGroupId] = useState<string | undefined>(undefined);
+
+  const onSuccess = (lessonGroup: ApiResponse<ILessonGroup>) => {
     toast.success("פריט נמחק בהצלחה!");
     queryClient.invalidateQueries({ queryKey: [QueryKeys.LESSON_GROUPS] });
-    queryClient.invalidateQueries({ queryKey: [QueryKeys.LESSON_GROUPS, blog?._id] });
+    queryClient.invalidateQueries({ queryKey: [QueryKeys.LESSON_GROUPS, lessonGroup.data._id] });
   };
 
   const deleteLessonGroup = useDeleteLessonGroup({ onSuccess });
@@ -31,9 +36,6 @@ const BlogGroups = () => {
     setIsSheetOpen(false);
     setLessonGroupId(undefined);
   };
-
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [lessonGroupId, setLessonGroupId] = useState<string | undefined>(undefined);
 
   if (isLoading) return <TemplateTabsSkeleton />;
 

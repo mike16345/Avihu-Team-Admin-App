@@ -128,6 +128,9 @@ const BlogEditor = () => {
     setMediaType(type);
     if (type == "image") return;
 
+    setImage(undefined);
+    setIsImageFromCloudFront(false);
+
     if (blog.imageUrl && isEdit && isImageFromCloudFront) {
       setImageToDelete(blog.imageUrl);
     } else {

@@ -281,7 +281,7 @@ export const MealDropDown: FC<MealDropDownProps> = ({
                   <div className="flex ">
                     <CustomRadioGroup
                       className="flex items-center"
-                      defaultValue={showCustomSelection.totalProtein ? "Custom" : "Fixed"}
+                      defaultValue={showCustomSelection.totalCarbs ? "Custom" : "Fixed"}
                       onValueChange={(val: ItemSelection) =>
                         handleChangeItemSelectionType(val, "totalCarbs")
                       }

@@ -14,6 +14,7 @@ export interface IBlogResponse extends IBlog {
 }
 
 export interface ILessonGroup {
+  _id?: string;
   name: string;
   description?: string;
 }
