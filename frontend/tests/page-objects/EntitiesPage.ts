@@ -1,6 +1,6 @@
-import { expect, Page } from '@playwright/test';
-import { BasePage } from './BasePage';
-import { ids } from '../helpers/ids';
+import { expect, Page } from "@playwright/test";
+import { BasePage } from "./BasePage";
+import { ids } from "../helpers/ids";
 
 export class EntitiesPage extends BasePage {
   readonly createButton = this.page.getByTestId(ids.createButton);
@@ -38,13 +38,13 @@ export class EntitiesPage extends BasePage {
   }
 
   async gotoList() {
-    await this.page.goto('/users');
+    await this.page.goto("/users");
     await this.waitForReady();
   }
 
   async openCreateForm() {
     await this.createButton.click();
-    await this.page.waitForURL('**/users/add');
+    await this.page.waitForURL("**/users/add");
     await this.waitForReady();
   }
 
@@ -63,16 +63,16 @@ export class EntitiesPage extends BasePage {
     planType: string;
     remindIn: string;
   }) {
-    await this.formField('firstName').fill(data.firstName);
-    await this.formField('lastName').fill(data.lastName);
-    await this.formField('email').fill(data.email);
-    await this.formField('phone').fill(data.phone);
+    await this.formField("firstName").fill(data.firstName);
+    await this.formField("lastName").fill(data.lastName);
+    await this.formField("email").fill(data.email);
+    await this.formField("phone").fill(data.phone);
 
-    await this.formField('planType').click();
-    await this.page.getByRole('option', { name: data.planType }).click();
+    await this.formField("planType").click();
+    await this.page.getByRole("option", { name: data.planType }).click();
 
-    await this.formField('remindIn').click();
-    await this.page.getByRole('option', { name: data.remindIn }).click();
+    await this.formField("remindIn").click();
+    await this.page.getByRole("option", { name: data.remindIn }).click();
   }
 
   async submitFormExpectSuccess() {

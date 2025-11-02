@@ -211,7 +211,11 @@ export function DataTableHebrew<TData, TValue>({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center" data-testid="empty-state">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                  data-testid="empty-state"
+                >
                   אין תוצאות
                 </TableCell>
               </TableRow>

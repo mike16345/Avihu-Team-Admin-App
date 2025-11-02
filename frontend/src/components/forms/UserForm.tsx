@@ -94,11 +94,7 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
               <FormItem className="w-full">
                 <FormLabel>שם פרטי</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="שם פרטי..."
-                    data-testid="form-field-firstName"
-                    {...field}
-                  />
+                  <Input placeholder="שם פרטי..." data-testid="form-field-firstName" {...field} />
                 </FormControl>
                 <FormMessage data-testid="form-error-firstName" />
               </FormItem>
@@ -111,11 +107,7 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
               <FormItem className="w-full">
                 <FormLabel>שם משפחה</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="שם משפחה..."
-                    data-testid="form-field-lastName"
-                    {...field}
-                  />
+                  <Input placeholder="שם משפחה..." data-testid="form-field-lastName" {...field} />
                 </FormControl>
                 <FormMessage data-testid="form-error-lastName" />
               </FormItem>
