@@ -42,7 +42,11 @@ export const UsersTable = () => {
       <DataTableHebrew
         data={data || []}
         columns={userColumns}
-        actionButton={<Button onClick={() => navigate(`/users/add`)}>הוסף משתמש</Button>}
+        actionButton={
+          <Button data-testid="create-button" onClick={() => navigate(`/users/add`)}>
+            הוסף משתמש
+          </Button>
+        }
         handleSetData={() => {}}
         handleViewData={(user) => handleViewUser(user)}
         handleDeleteData={(user) => usersMutation.mutate(user._id || "")}

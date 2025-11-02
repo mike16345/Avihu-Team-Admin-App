@@ -187,12 +187,13 @@ export function DataTableHebrew<TData, TValue>({
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
+          <TableBody data-testid="table-rows">
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
                   className={getRowClassName(row.original)}
+                  data-testid={`row-${String((row.original as any)?._id ?? (row.original as any)?.id ?? row.id)}`}
                   onDoubleClick={(e) => {
                     const target = e.target as HTMLElement;
                     if (target.id == "row-checkbox" || target.id == "access-switch") return;
@@ -210,7 +211,7 @@ export function DataTableHebrew<TData, TValue>({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell colSpan={columns.length} className="h-24 text-center" data-testid="empty-state">
                   אין תוצאות
                 </TableCell>
               </TableRow>

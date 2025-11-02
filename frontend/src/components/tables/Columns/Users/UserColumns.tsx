@@ -163,10 +163,18 @@ export const columns: ColumnDef<IUser>[] = [
               <DropdownMenuLabel>פעולות</DropdownMenuLabel>
               <DropdownMenuSeparator />
 
-              <DropdownMenuItem onClick={() => handleViewUser && handleViewUser(user)}>
+              <DropdownMenuItem
+                onClick={() => handleViewUser && handleViewUser(user)}
+                data-testid={`row-${user._id ?? row.id}-edit`}
+              >
                 צפה
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setIsDeleteModalOpen(true)}>מחק</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => setIsDeleteModalOpen(true)}
+                data-testid={`row-${user._id ?? row.id}-delete`}
+              >
+                מחק
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           <DeleteModal

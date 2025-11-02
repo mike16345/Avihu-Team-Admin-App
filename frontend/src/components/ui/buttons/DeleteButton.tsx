@@ -9,9 +9,15 @@ interface DeleteButtonProps {
   tip: string;
   onClick: (e: any) => void;
   disabled?: boolean;
+  "data-testid"?: string;
 }
 
-const DeleteButton: React.FC<DeleteButtonProps> = ({ tip, onClick, disabled = false }) => {
+const DeleteButton: React.FC<DeleteButtonProps> = ({
+  tip,
+  onClick,
+  disabled = false,
+  "data-testid": dataTestId,
+}) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -31,6 +37,7 @@ const DeleteButton: React.FC<DeleteButtonProps> = ({ tip, onClick, disabled = fa
             className={`flex rounded items-center justify-center size-full p-3   hover:bg-accent ${
               disabled && "opacity-30"
             }`}
+            data-testid={dataTestId}
           >
             {isHovered ? <BsFillTrash3Fill /> : <BsTrash3 />}
           </Button>

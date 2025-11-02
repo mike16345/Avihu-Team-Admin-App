@@ -69,21 +69,33 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <Link
-                      className={`w-full rounded-full  ${
-                        location.pathname == item.url && " text-secondary bg-secondary-foreground"
-                      } `}
-                      to={item.url}
-                    >
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {items.map((item) => {
+                const normalizedRoute =
+                  item.url === "/"
+                    ? "home"
+                    : item.url
+                        .replace(/^\/+/u, "")
+                        .replace(/\/+/gu, "-")
+                        .replace(/[^a-zA-Z0-9-]/gu, "-")
+                        .toLowerCase();
+
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <Link
+                        className={`w-full rounded-full  ${
+                          location.pathname == item.url && " text-secondary bg-secondary-foreground"
+                        } `}
+                        to={item.url}
+                        data-testid={`nav-${normalizedRoute}-link`}
+                      >
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

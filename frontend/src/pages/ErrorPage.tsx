@@ -8,7 +8,7 @@ interface ErrorPageProps {
 
 const ErrorPage: React.FC<ErrorPageProps> = ({ message }) => {
   return (
-    <div className="w-full h-full flex items-center justify-center">
+    <div className="w-full h-full flex items-center justify-center" data-testid="alert-error">
       <div className="flex flex-col items-center gap-4">
         <FiAlertOctagon className="text-destructive animate-pulse" size={80} />
         <h1 className="text-3xl font-bold">{ERROR_MESSAGES.GENERIC_ERROR_MESSAGE}</h1>

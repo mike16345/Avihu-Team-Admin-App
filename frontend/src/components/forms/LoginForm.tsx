@@ -19,6 +19,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import queryClient from "@/QueryClient/queryClient";
 import { QueryKeys } from "@/enums/QueryKeys";
+import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 
 export const description =
   "A simple login form with email and password. The submit button says 'Sign in'.";
@@ -40,6 +41,7 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<LoginFormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const handleSubmit = async (e: any) => {
@@ -52,6 +54,7 @@ export default function LoginForm() {
       });
       return;
     }
+    setAuthError(null);
     setIsLoading(true);
 
     try {
@@ -63,9 +66,11 @@ export default function LoginForm() {
 
       setIsLoading(false);
       toast.success(`ברוך הבא ${res.data.data.user.firstName}`);
+      setAuthError(null);
     } catch (err: any) {
       setIsLoading(false);
       toast.error(err?.data?.message);
+      setAuthError(err?.data?.message || ERROR_MESSAGES.GENERIC_ERROR_MESSAGE);
     }
 
     setErrors({});
@@ -91,8 +96,13 @@ export default function LoginForm() {
               placeholder="m@example.com"
               autoComplete="email"
               required
+              data-testid="form-field-email"
             />
-            {errors.email && <p className="text-red-500">{errors.email}</p>}
+            {errors.email && (
+              <p className="text-red-500" data-testid="form-error-email">
+                {errors.email}
+              </p>
+            )}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="password">סיסמה</Label>
@@ -114,17 +124,30 @@ export default function LoginForm() {
                 autoComplete="current-password"
                 required
                 className="pl-10"
+                data-testid="form-field-password"
               />
             </div>
-            {errors.password && <p className="text-red-500">{errors.password}</p>}
+            {errors.password && (
+              <p className="text-red-500" data-testid="form-error-password">
+                {errors.password}
+              </p>
+            )}
           </div>
         </CardContent>
+        {authError && (
+          <div className="px-6 pb-2">
+            <p className="text-destructive" data-testid="alert-error">
+              {authError}
+            </p>
+          </div>
+        )}
         <CardFooter>
           <CustomButton
             title="כניסה"
             isLoading={isLoading}
             type="submit"
             className="w-full font-bold"
+            data-testid="form-submit"
           />
         </CardFooter>
       </form>

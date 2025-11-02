@@ -26,6 +26,7 @@ interface DatePickerProps {
   presetValues?: PresetValues[];
   selectedDate: Date;
   onChangeDate: (date: Date) => void;
+  triggerTestId?: string;
 }
 
 const DatePicker: React.FC<DatePickerProps> = ({
@@ -34,6 +35,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
   presetValues,
   selectedDate,
   onChangeDate,
+  triggerTestId,
 }) => {
   const [date, setDate] = useState<Date>();
   const [openPopover, setOpenPopover] = useState(false);
@@ -68,6 +70,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
             "sm:w-1/2 justify-start text-left font-normal",
             !date && "text-muted-foreground"
           )}
+          data-testid={triggerTestId}
         >
           <CalendarIcon className="ml-2 h-4 w-4" />
           {date ? format(date, "PPP", { locale: he }) : <span>בחר תאריך</span>}

@@ -58,7 +58,7 @@ function getRemindInDate(remindIn: number) {
 }
 
 const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) => {
-  const userFinishDate = existingUser ? new Date(existingUser.dateFinished) : undefined;
+  const userFinishDate = existingUser ? new Date(existingUser.dateFinished) : new Date();
   const userForm = useForm<z.infer<typeof userSchema>>({
     resolver: zodResolver(userSchema),
     defaultValues: {
@@ -94,9 +94,13 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
               <FormItem className="w-full">
                 <FormLabel>שם פרטי</FormLabel>
                 <FormControl>
-                  <Input placeholder="שם פרטי..." {...field} />
+                  <Input
+                    placeholder="שם פרטי..."
+                    data-testid="form-field-firstName"
+                    {...field}
+                  />
                 </FormControl>
-                <FormMessage />
+                <FormMessage data-testid="form-error-firstName" />
               </FormItem>
             )}
           />
@@ -107,9 +111,13 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
               <FormItem className="w-full">
                 <FormLabel>שם משפחה</FormLabel>
                 <FormControl>
-                  <Input placeholder="שם משפחה..." {...field} />
+                  <Input
+                    placeholder="שם משפחה..."
+                    data-testid="form-field-lastName"
+                    {...field}
+                  />
                 </FormControl>
-                <FormMessage />
+                <FormMessage data-testid="form-error-lastName" />
               </FormItem>
             )}
           />
@@ -122,9 +130,15 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
               <FormItem className="w-full">
                 <FormLabel>טלפון</FormLabel>
                 <FormControl>
-                  <Input dir="ltr" className="text-center" placeholder="טלפון" {...field} />
+                  <Input
+                    dir="ltr"
+                    className="text-center"
+                    placeholder="טלפון"
+                    data-testid="form-field-phone"
+                    {...field}
+                  />
                 </FormControl>
-                <FormMessage />
+                <FormMessage data-testid="form-error-phone" />
               </FormItem>
             )}
           />
@@ -135,9 +149,14 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
               <FormItem className="w-full">
                 <FormLabel>אימייל</FormLabel>
                 <FormControl>
-                  <Input className=" text-center" placeholder="israel@example.com" {...field} />
+                  <Input
+                    className=" text-center"
+                    placeholder="israel@example.com"
+                    data-testid="form-field-email"
+                    {...field}
+                  />
                 </FormControl>
-                <FormMessage />
+                <FormMessage data-testid="form-error-email" />
               </FormItem>
             )}
           />
@@ -150,7 +169,7 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
               <FormLabel>סוג תוכנית</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
-                  <SelectTrigger dir="rtl">
+                  <SelectTrigger dir="rtl" data-testid="form-field-planType">
                     <SelectValue placeholder={field.value || "בחר סוג תוכנית"} />
                   </SelectTrigger>
                 </FormControl>
@@ -159,7 +178,7 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
                   <SelectItem value="חיטוב">חיטוב</SelectItem>
                 </SelectContent>
               </Select>
-              <FormMessage />
+              <FormMessage data-testid="form-error-planType" />
             </FormItem>
           )}
         />
@@ -174,7 +193,7 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
                 <FormLabel>בדיקה תקופתית</FormLabel>
                 <Select key={remindIn} onValueChange={field.onChange}>
                   <FormControl>
-                    <SelectTrigger dir="rtl">
+                    <SelectTrigger dir="rtl" data-testid="form-field-remindIn">
                       <SelectValue placeholder={remindIn || "תבדוק אותי כל שבוע..."} />
                     </SelectTrigger>
                   </FormControl>
@@ -186,7 +205,7 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
                     ))}
                   </SelectContent>
                 </Select>
-                <FormMessage />
+                <FormMessage data-testid="form-error-remindIn" />
               </FormItem>
             );
           }}
@@ -204,9 +223,10 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
                   presetValues={datePresets}
                   selectedDate={field.value}
                   onChangeDate={(date: Date) => field.onChange(date)}
+                  triggerTestId="form-field-dateFinished"
                 />
               </FormControl>
-              <FormMessage />
+              <FormMessage data-testid="form-error-dateFinished" />
             </FormItem>
           )}
         />
@@ -222,7 +242,7 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
                   saveSelected={field.onChange}
                 />
               </FormControl>
-              <FormMessage />
+              <FormMessage data-testid="form-error-dietaryType" />
             </FormItem>
           )}
         />
@@ -232,6 +252,7 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
           className=" sm:w-32 w-full"
           variant={"success"}
           isLoading={pending}
+          data-testid="form-submit"
         />
       </form>
     </Form>
