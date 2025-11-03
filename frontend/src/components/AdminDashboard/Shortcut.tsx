@@ -10,10 +10,13 @@ interface ShortcutProps {
 const Shortcut: React.FC<ShortcutProps> = ({ icon, actionName, navLink }) => {
   const navigate = useNavigate();
 
+  const normalizedRoute = navLink.replace(/^\//, "").replace(/\//g, "-") || "home";
+
   return (
     <div
       className="flex p-2 justify-between items-center bg-accent h-12 sm:h-14 w-full rounded-full cursor-pointer hover:opacity-70"
       onClick={() => navigate(navLink)}
+      data-testid={`nav-${normalizedRoute}-link`}
     >
       <p className="font-bold px-4 text-lg">{actionName}</p>
       <div className="bg-background rounded-full h-full w-12 flex items-center justify-center">

@@ -53,7 +53,13 @@ const items: LinkProps[] = [
 const SidebarItems = () => {
   const location = useLocation();
 
-  return items.map((item) => (
+  return items.map((item) => {
+    const normalizedRoute =
+      item.url === "/"
+        ? "home"
+        : item.url.replace(/^\//, "").replace(/\//g, "-");
+
+    return (
     <SidebarMenuItem key={item.title}>
       <SidebarMenuButton asChild>
         <Link
@@ -61,13 +67,15 @@ const SidebarItems = () => {
             location.pathname == item.url && " text-secondary bg-secondary-foreground"
           } `}
           to={item.url}
+          data-testid={`nav-${normalizedRoute}-link`}
         >
           <item.icon />
           <span>{item.title}</span>
         </Link>
       </SidebarMenuButton>
     </SidebarMenuItem>
-  ));
+    );
+  });
 };
 
 const Header = () => {

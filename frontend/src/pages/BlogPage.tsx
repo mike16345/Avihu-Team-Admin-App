@@ -8,6 +8,7 @@ import useLessonGroupsQuery from "@/hooks/queries/lessonGroups/useLessonGroupsQu
 import { ILessonGroup } from "@/interfaces/IBlog";
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { FilterIcon } from "lucide-react";
 
 const BlogPage = () => {
   const navigate = useNavigate();
@@ -44,12 +45,21 @@ const BlogPage = () => {
     <>
       <div className="flex items-center sm:justify-start justify-center p-4">
         <div className="w-full flex flex-col gap-3 sm:flex-row sm:items-center justify-between">
-          <Button onClick={handleCreateNewBlog} className="w-full sm:w-32">
+          <Button
+            onClick={handleCreateNewBlog}
+            className="w-full sm:w-32"
+            data-testid="nav-blogs-create-link"
+          >
             צור מאמר חדש
           </Button>
 
           <div className="flex items-center gap-3">
-            <Button variant="outline" onClick={handleViewBlogGroups} className="w-full sm:w-32">
+            <Button
+              variant="outline"
+              onClick={handleViewBlogGroups}
+              className="w-full sm:w-32"
+              data-testid="nav-presets-blogs-groups-link"
+            >
               קבוצות
             </Button>
 
@@ -59,6 +69,12 @@ const BlogPage = () => {
               selectedItems={selectedGroups}
               onChange={setSelectedGroups}
               placeholder="סנן לפי קבוצות"
+              trigger={
+                <Button variant="outline" data-testid="filter-lesson-groups">
+                  סנן לפי קבוצות
+                  <FilterIcon size={16} className="mr-2" />
+                </Button>
+              }
             />
           </div>
         </div>
@@ -72,6 +88,7 @@ const BlogPage = () => {
             onClick={() => fetchNextPage()}
             isLoading={isFetchingNextPage}
             variant="default"
+            data-testid="pagination-next"
           />
         </div>
       )}

@@ -1,0 +1,21 @@
+export const TID = {
+  nav: (route: string) => `nav-${route}-link`,
+  loading: 'loading',
+  empty: 'empty-state',
+  rows: 'table-rows',
+  toastSuccess: 'toast-success',
+  alertError: 'alert-error',
+  form: {
+    submit: 'form-submit',
+    field: (name: string) => `form-field-${name}`,
+    error: (name: string) => `form-error-${name}`,
+  },
+  row: (id: string) => `row-${id}`,
+  rowEdit: (id: string) => `row-${id}-edit`,
+  rowDelete: (id: string) => `row-${id}-delete`,
+  search: 'search-input',
+  filter: (name: string) => `filter-${name}`,
+  sort: (name: string) => `sort-${name}`,
+  pagination: { next: 'pagination-next', prev: 'pagination-prev' },
+  dialog: { confirm: 'dialog-confirm', cancel: 'dialog-cancel' },
+} as const;

@@ -68,7 +68,9 @@ const BlogList: React.FC<BlogListProps> = ({ blogs }) => {
         />
       ))}
       {blogs.length == 0 && (
-        <div className="col-span-full text-center text-xl">אין מאמרים כרגע</div>
+        <div className="col-span-full text-center text-xl" data-testid="empty-state">
+          אין מאמרים כרגע
+        </div>
       )}
       {hasNextPage && (
         <CustomButton

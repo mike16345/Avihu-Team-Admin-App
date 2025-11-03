@@ -91,8 +91,13 @@ export default function LoginForm() {
               placeholder="m@example.com"
               autoComplete="email"
               required
+              data-testid="form-field-email"
             />
-            {errors.email && <p className="text-red-500">{errors.email}</p>}
+            {errors.email && (
+              <p className="text-red-500" data-testid="form-error-email">
+                {errors.email}
+              </p>
+            )}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="password">סיסמה</Label>
@@ -100,6 +105,7 @@ export default function LoginForm() {
               <span
                 onClick={() => setIsPasswordVisible((prev) => !prev)}
                 className="absolute cursor-pointer inset-y-0 left-0 pl-3 flex items-center"
+                data-testid="toggle-password-visibility"
               >
                 {isPasswordVisible ? <EyeOff /> : <Eye />}
               </span>
@@ -114,9 +120,14 @@ export default function LoginForm() {
                 autoComplete="current-password"
                 required
                 className="pl-10"
+                data-testid="form-field-password"
               />
             </div>
-            {errors.password && <p className="text-red-500">{errors.password}</p>}
+            {errors.password && (
+              <p className="text-red-500" data-testid="form-error-password">
+                {errors.password}
+              </p>
+            )}
           </div>
         </CardContent>
         <CardFooter>
@@ -125,6 +136,7 @@ export default function LoginForm() {
             isLoading={isLoading}
             type="submit"
             className="w-full font-bold"
+            data-testid="form-submit"
           />
         </CardFooter>
       </form>

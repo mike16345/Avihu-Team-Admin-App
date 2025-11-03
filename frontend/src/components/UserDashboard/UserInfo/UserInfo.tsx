@@ -43,11 +43,17 @@ const UserInfo: FC<UserInfoProps> = ({ user }) => {
       </div>
       <ul className="flex flex-col sm:text-sm sm:w-fit w-full">
         {links.map((link, i) => {
+          const normalized = link.path
+            .replace(/^\/+/g, "")
+            .replace(/\/+/g, "-")
+            .replace(/-$/, "");
+
           return (
             <Link
               key={link.path + `-${i}`}
               className="flex items-center justify-between sm:w-40 hover:bg-secondary font-bold px-2 py-0.5 rounded-md"
               to={link.path + user._id}
+              data-testid={`nav-${normalized || "home"}-link`}
             >
               <p>{link.label}</p>
               {link.icon}

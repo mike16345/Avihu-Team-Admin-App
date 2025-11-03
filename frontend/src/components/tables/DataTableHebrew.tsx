@@ -116,6 +116,7 @@ export function DataTableHebrew<TData, TValue>({
           value={(table.getColumn("שם")?.getFilterValue() as string) ?? ""}
           onChange={(event) => table.getColumn("שם")?.setFilterValue(event.target.value)}
           className="sm:w-72"
+          data-testid="search-input"
         />
 
         <div className=" shrink-0 block sm:hidden text-sm text-muted-foreground sm:text-right text-center">
@@ -187,7 +188,7 @@ export function DataTableHebrew<TData, TValue>({
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
+          <TableBody data-testid="table-rows">
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
@@ -200,6 +201,11 @@ export function DataTableHebrew<TData, TValue>({
                     handleViewData(row.original);
                   }}
                   data-state={row.getIsSelected() && "selected"}
+                  data-testid={`row-${
+                    ((row.original as { _id?: string; id?: string })?._id ||
+                      (row.original as { id?: string })?.id ||
+                      row.id)
+                  }`}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
@@ -210,7 +216,11 @@ export function DataTableHebrew<TData, TValue>({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                  data-testid="empty-state"
+                >
                   אין תוצאות
                 </TableCell>
               </TableRow>
@@ -226,6 +236,7 @@ export function DataTableHebrew<TData, TValue>({
             goToPage(pageNumber - 1);
           }}
           disabled={!table.getCanPreviousPage()}
+          data-testid="pagination-prev"
         >
           קודם
         </Button>
@@ -236,6 +247,7 @@ export function DataTableHebrew<TData, TValue>({
             goToPage(pageNumber + 1);
           }}
           disabled={!table.getCanNextPage()}
+          data-testid="pagination-next"
         >
           הבא
         </Button>

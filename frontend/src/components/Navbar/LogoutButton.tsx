@@ -7,7 +7,12 @@ const LogoutButton: FC = () => {
   const { logout } = useAuth();
 
   return (
-    <Button className="w-full flex items-center gap-2" onClick={logout} variant={"outline"}>
+    <Button
+      className="w-full flex items-center gap-2"
+      onClick={logout}
+      variant={"outline"}
+      data-testid="nav-logout-link"
+    >
       <span>יציאה</span>
       <BiExit />
     </Button>

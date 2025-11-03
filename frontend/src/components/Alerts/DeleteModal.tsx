@@ -34,6 +34,7 @@ const DeleteModal: React.FC<IDeleteModalProps> = ({
           setIsModalOpen(false);
         },
         children: "בטל",
+        "data-testid": "dialog-cancel",
       }}
       alertDialogActionProps={{
         onClick: () => {
@@ -41,6 +42,7 @@ const DeleteModal: React.FC<IDeleteModalProps> = ({
           setIsModalOpen(false);
         },
         children: "אשר",
+        "data-testid": "dialog-confirm",
       }}
     />
   );

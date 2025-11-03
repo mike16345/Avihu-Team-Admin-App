@@ -20,7 +20,12 @@ const CustomRadioGroup: FC<CustomRadioGroupProps> = ({ items, className, ...prop
       {items.map((item) => {
         return (
           <div className="flex items-center gap-2 ">
-            <RadioGroupItem type="button" value={item.value} id={item.id} />
+            <RadioGroupItem
+              type="button"
+              value={item.value}
+              id={item.id}
+              data-testid={`radio-${item.value}`}
+            />
             <Label htmlFor={item.id}>{item.label}</Label>
           </div>
         );

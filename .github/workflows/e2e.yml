@@ -1,0 +1,32 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  playwright:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Install Playwright
+        working-directory: frontend
+        run: npx playwright install --with-deps
+      - name: Run Playwright tests
+        working-directory: frontend
+        env:
+          VITE_BASE_URL: http://localhost:5173
+          VITE_API_BASE: https://api.mock.local
+          PLAYWRIGHT_API_MODE: mock
+          E2E_TEST_USER: ${{ secrets.E2E_TEST_USER != '' && secrets.E2E_TEST_USER || 'michaelgani815@gmail.com' }}
+          E2E_TEST_PASS: ${{ secrets.E2E_TEST_PASS != '' && secrets.E2E_TEST_PASS || 'Subs1234!' }}
+        run: npx playwright test --config=../playwright.config.ts

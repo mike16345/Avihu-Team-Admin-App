@@ -39,13 +39,25 @@ export const UserDashboard = () => {
       <UserInfo user={currentUser} />
       <Tabs dir="rtl" defaultValue={activeTab} className="w-full">
         <TabsList>
-          <TabsTrigger onClick={() => handleSwitchTabs(weightTab)} value={weightTab}>
+          <TabsTrigger
+            onClick={() => handleSwitchTabs(weightTab)}
+            value={weightTab}
+            data-testid="tab-weight"
+          >
             {weightTab}
           </TabsTrigger>
-          <TabsTrigger onClick={() => handleSwitchTabs(workoutTab)} value={workoutTab}>
+          <TabsTrigger
+            onClick={() => handleSwitchTabs(workoutTab)}
+            value={workoutTab}
+            data-testid="tab-workout"
+          >
             {workoutTab}
           </TabsTrigger>
-          <TabsTrigger onClick={() => handleSwitchTabs(measurementTab)} value={measurementTab}>
+          <TabsTrigger
+            onClick={() => handleSwitchTabs(measurementTab)}
+            value={measurementTab}
+            data-testid="tab-measurement"
+          >
             {measurementTab}
           </TabsTrigger>
         </TabsList>
