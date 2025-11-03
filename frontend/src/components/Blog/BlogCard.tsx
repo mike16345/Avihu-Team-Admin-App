@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { IBlogResponse } from "@/interfaces/IBlog";
-import { buildPhotoUrl } from "@/lib/utils";
+import { buildPhotoUrl, getYouTubeThumbnail } from "@/lib/utils";
 import DeleteButton from "../ui/buttons/DeleteButton";
 
 interface BlogCardProps {
@@ -11,10 +11,17 @@ interface BlogCardProps {
 }
 
 export const BlogCard: React.FC<BlogCardProps> = ({ blog, onClick, onDelete }) => {
+  const imageUrl = blog.imageUrl
+    ? buildPhotoUrl(blog.imageUrl)
+    : getYouTubeThumbnail(blog.link || "");
+
   return (
     <Card onClick={onClick} className=" cursor-pointer hover:shadow-lg transition-shadow">
       <CardHeader className="flex flex-row items-center justify-between ">
-        <CardTitle className=" leading-snug">{blog.title}</CardTitle>
+        <div className="space-y-2">
+          <CardTitle className=" leading-snug">{blog.title}</CardTitle>
+          <span>קבוצה: {blog.group?.name || blog.group}</span>
+        </div>
         <DeleteButton
           tip="הסר"
           onClick={(e) => {
@@ -24,12 +31,8 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onClick, onDelete }) =
         />
       </CardHeader>
       <CardContent>
-        {blog.imageUrl && (
-          <img
-            src={buildPhotoUrl(blog.imageUrl)}
-            alt={blog.title}
-            className="w-full h-40 object-cover rounded-md"
-          />
+        {imageUrl && (
+          <img src={imageUrl} alt={blog.title} className="w-full h-40 object-cover rounded-md" />
         )}
         <p className="line-clamp-3" dangerouslySetInnerHTML={{ __html: blog.content }}></p>
       </CardContent>

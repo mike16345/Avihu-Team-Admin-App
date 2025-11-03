@@ -3,6 +3,7 @@ import { ViewDietPlanPresetPage } from "@/pages/ViewDietPlanPresetPage";
 import DietPlanWrapper from "@/components/DietPlan/DietPlanWrapper";
 import WorkoutPlans from "@/components/workout plan/WorkoutPlans";
 import { CreateWorkoutPresetWrapper } from "@/components/templates/workoutTemplates/WorkoutPreset";
+import BlogGroups from "@/components/Blog/BlogGroups";
 
 const PresetRoutes = () => {
   return (
@@ -40,6 +41,8 @@ const PresetRoutes = () => {
             </DietPlanWrapper>
           }
         />
+
+        <Route path="/blogs/groups" element={<BlogGroups />} />
       </Routes>
     </>
   );

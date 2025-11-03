@@ -145,7 +145,7 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
                 <PresetTable
                   data={apiData.data?.data || []}
                   handleDelete={(id) => deleteItem(id, tab.deleteFunc)}
-                  retrieveObjectId={(id: string) => startEdit(id, tab.sheetForm)}
+                  handleViewData={(id: string) => startEdit(id, tab.sheetForm)}
                 />
               </TabsContent>
             ))}

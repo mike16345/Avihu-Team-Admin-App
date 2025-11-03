@@ -19,4 +19,5 @@ export enum QueryKeys {
   USER_LOGIN_SESSION = "user-login-session",
   USER_PROGRESS_NOTES = "user-progress-notes-",
   USER_MEASUREMENTS = "user-measurements-",
+  LESSON_GROUPS = "lesson-groups",
 }

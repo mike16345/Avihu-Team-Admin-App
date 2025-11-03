@@ -33,8 +33,6 @@ const UserFormPage = () => {
       url += `${addNewUser.data?._id || id || ""}?tab=${weightTab}`;
     }
 
-    console.log("url", url);
-
     navigate(url);
   };
 
