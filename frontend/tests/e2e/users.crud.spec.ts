@@ -1,7 +1,7 @@
 /**
  * CRUD workflows for users, ensuring create/update/delete flows behave under mock APIs.
  */
-import { expect, test } from '@playwright/test';
+import { expect, Page, test } from '@playwright/test';
 import { useAuthenticated } from '../helpers/auth';
 import { interceptJSON } from '../helpers/network';
 import {
@@ -19,7 +19,7 @@ let createdUserId: string | undefined;
 
 const emptyWeighIns = { data: [], message: 'ok' };
 
-async function mockUserDashboard(page, userId: string, detail = createUserResponse) {
+async function mockUserDashboard(page:Page, userId: string, detail = createUserResponse) {
   await interceptJSON(page, 'GET', `/users/one?id=${userId}`, {
     data: { ...detail.data, _id: userId },
     message: detail.message,
