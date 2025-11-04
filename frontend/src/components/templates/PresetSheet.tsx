@@ -26,7 +26,10 @@ const PresetSheet: React.FC<PresetSheetProps> = ({ form, id, isOpen, onCloseShee
 
   return (
     <Sheet open={isOpen} onOpenChange={() => onCloseSheet()}>
-      <SheetContent className="hide-scrollbar overflow-y-auto space-y-2" dir="rtl">
+      <SheetContent
+        className="hide-scrollbar overflow-y-auto space-y-4 rounded-xl bg-muted/40 p-6 shadow-lg"
+        dir="rtl"
+      >
         <SheetHeader>
           <SheetTitle className="text-right text-3xl">הוסף פריט</SheetTitle>
           <SheetDescription className="text-right">
