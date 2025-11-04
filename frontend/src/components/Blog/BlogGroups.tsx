@@ -43,7 +43,11 @@ const BlogGroups = () => {
     <div>
       <BackButton navLink="/blogs" />
 
-      <Button onClick={() => handleViewLessonGroup()} className="my-4">
+      <Button
+        onClick={() => handleViewLessonGroup()}
+        className="my-4"
+        data-testid="tab-lessonGroups-add"
+      >
         הוסף קבוצה
       </Button>
       <PresetTable

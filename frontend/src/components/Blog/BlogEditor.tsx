@@ -166,26 +166,30 @@ const BlogEditor = () => {
           className="sm:w-2/3 "
           value={blog.title}
           onChange={(e) => handleFieldChange("title", e.target.value)}
+          data-testid="form-field-title"
         />
 
         <div className="flex flex-col gap-3 sm:w-2/3">
           <Label className="font-semibold">תוכנית</Label>
-
-          <ComboBox
-            options={planTypes}
-            onSelect={(val) => handleFieldChange("planType", val)}
-            value={blog.planType}
-            inputPlaceholder="בחר תוכנית..."
-          />
+          <div data-testid="form-field-planType">
+            <ComboBox
+              options={planTypes}
+              onSelect={(val) => handleFieldChange("planType", val)}
+              value={blog.planType}
+              inputPlaceholder="בחר תוכנית..."
+            />
+          </div>
           <Label className="font-semibold">קבוצה</Label>
-          <ComboBox
-            isLoading={isBlogGroupsLoading}
-            options={blogGroupItems}
-            onSelect={(val) => handleFieldChange("group", val)}
-            value={blog.group?.name || blog.group}
-            inputPlaceholder="בחר קבוצה..."
-            listEmptyMessage="אין קבוצות כרגע"
-          />
+          <div data-testid="form-field-group">
+            <ComboBox
+              isLoading={isBlogGroupsLoading}
+              options={blogGroupItems}
+              onSelect={(val) => handleFieldChange("group", val)}
+              value={blog.group?.name || blog.group}
+              inputPlaceholder="בחר קבוצה..."
+              listEmptyMessage="אין קבוצות כרגע"
+            />
+          </div>
         </div>
         <div className="flex flex-col gap-2 sm:2/3">
           {mediaType == "image" && (
@@ -196,6 +200,7 @@ const BlogEditor = () => {
                 accept="image/*"
                 className="sm:2/3 cursor-pointer"
                 onChange={handleImageUpload}
+                data-testid="form-field-image"
               />
             </>
           )}
@@ -208,6 +213,7 @@ const BlogEditor = () => {
                 placeholder=".../https://youtube.com"
                 className="sm:w-2/3"
                 onChange={(e) => handleFieldChange("link", e.target.value)}
+                data-testid="form-field-link"
               />
             </>
           )}
@@ -231,7 +237,9 @@ const BlogEditor = () => {
           </div>
         )}
         <Label className="font-semibold">תוכן</Label>
-        <TextEditor content={blog.content} onChange={(val) => handleFieldChange("content", val)} />
+        <div data-testid="form-field-content">
+          <TextEditor content={blog.content} onChange={(val) => handleFieldChange("content", val)} />
+        </div>
       </div>
       <CustomButton
         className="w-32 h-fit"
@@ -239,6 +247,7 @@ const BlogEditor = () => {
         title="שמור"
         variant={"success"}
         onClick={handleSave}
+        data-testid="form-submit"
       />
     </div>
   );

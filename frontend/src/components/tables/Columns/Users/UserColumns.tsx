@@ -118,6 +118,7 @@ export const columns: ColumnDef<IUser>[] = [
           id="access-switch"
           checked={isChecked}
           onCheckedChange={(value: any) => handleChangeAccess(Boolean(value))}
+          data-testid={`toggle-access-${row.original._id}`}
         />
       );
     },
@@ -154,7 +155,7 @@ export const columns: ColumnDef<IUser>[] = [
         <>
           <DropdownMenu dir="rtl">
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
+              <Button variant="ghost" className="h-8 w-8 p-0" data-testid={`row-${user._id}-actions`}>
                 <span className="sr-only">Open menu</span>
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
@@ -163,10 +164,18 @@ export const columns: ColumnDef<IUser>[] = [
               <DropdownMenuLabel>פעולות</DropdownMenuLabel>
               <DropdownMenuSeparator />
 
-              <DropdownMenuItem onClick={() => handleViewUser && handleViewUser(user)}>
+              <DropdownMenuItem
+                onClick={() => handleViewUser && handleViewUser(user)}
+                data-testid={`row-${user._id}-view`}
+              >
                 צפה
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setIsDeleteModalOpen(true)}>מחק</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => setIsDeleteModalOpen(true)}
+                data-testid={`row-${user._id}-delete`}
+              >
+                מחק
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           <DeleteModal

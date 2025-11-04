@@ -25,6 +25,7 @@ const BackButton: React.FC<BackButtonProps> = ({
       } group hover:bg-primary transition-colors duration-500`}
       variant="secondary"
       onClick={variant === `navigation` ? () => navigate(navLink) : handleClick}
+      data-testid="nav-back-button"
     >
       <span className="group-hover:text-background transition-colors duration-500">
         {variant === `navigation` ? <IoArrowBackCircleOutline size={30} /> : `בטל`}

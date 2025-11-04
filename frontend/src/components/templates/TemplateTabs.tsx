@@ -128,6 +128,7 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
                 key={tab.value}
                 value={tab.value}
                 onClick={() => setQueryKey(tab.queryKey)}
+                data-testid={`tab-${tab.value}`}
               >
                 {tab.name}
               </TabsTrigger>
@@ -138,7 +139,11 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
           {!apiData.isLoading &&
             tabs.tabContent.map((tab) => (
               <TabsContent key={tab.value} value={tab.value}>
-                <Button onClick={() => handleAddNew(tab.sheetForm)} className="my-4">
+                <Button
+                  onClick={() => handleAddNew(tab.sheetForm)}
+                  className="my-4"
+                  data-testid={`tab-${tab.value}-add`}
+                >
                   {tab.btnPrompt}
                 </Button>
 

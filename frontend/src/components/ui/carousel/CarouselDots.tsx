@@ -17,6 +17,7 @@ const CarouselDots: React.FC<CarouselDotsProps> = ({ currentWindow, onDotClick, 
                w-3 h-3 rounded-full
                ${currentWindow === index ? "bg-blue-600" : "bg-gray-300"}
              `}
+          data-testid={`carousel-dot-${index}`}
         />
       ))}
     </div>

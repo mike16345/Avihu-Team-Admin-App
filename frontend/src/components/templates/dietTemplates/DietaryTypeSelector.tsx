@@ -45,6 +45,7 @@ const DietaryTypeSelector: React.FC<DietaryTypeSelectorProps> = ({
         <div
           className="cursor-pointer border-2 hover:border-black hover:bg-accent p-2 rounded"
           onClick={() => setIsOpen(!isOpen)}
+          data-testid="toggle-dietary-type"
         >
           <BiPencil />
         </div>
@@ -56,13 +57,17 @@ const DietaryTypeSelector: React.FC<DietaryTypeSelectorProps> = ({
       </div>
       <CollapsibleContent>
         <div className="w-full bg-accent py-3 px-2 rounded">
-          {dietaryTypeItems.map((item) => (
+          {dietaryTypeItems.map((item) => {
+            const normalized = item.replace(/\s+/g, "-");
+
+            return (
             <Badge
               key={item}
               className={`m-1 cursor-pointer ${
                 selectedItems.includes(item) ? `bg-green-500 text-white` : ``
               }`}
               onClick={() => handleSelect(item)}
+              data-testid={`toggle-dietary-${normalized}`}
             >
               {item}
               {selectedItems.includes(item) ? (
@@ -71,7 +76,8 @@ const DietaryTypeSelector: React.FC<DietaryTypeSelectorProps> = ({
                 <FaPlus size={12} className="inline mr-1" />
               )}
             </Badge>
-          ))}
+          );
+          })}
         </div>
       </CollapsibleContent>
     </Collapsible>

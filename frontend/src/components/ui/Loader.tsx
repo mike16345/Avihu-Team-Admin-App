@@ -10,7 +10,10 @@ const Loader: React.FC<LoaderProps> = ({ size = `medium`, variant = `standard`, 
   const pxSize = size === `small` ? 10 : size === `medium` ? 12 : size === `large` ? 20 : 24;
 
   return (
-    <div className={cn(`w-full h-full flex items-center justify-center `, className)}>
+    <div
+      className={cn(`w-full h-full flex items-center justify-center `, className)}
+      data-testid="loading"
+    >
       <div className="flex flex-col gap-5 items-center">
         <div
           className={

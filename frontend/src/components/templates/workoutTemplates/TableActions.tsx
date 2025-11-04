@@ -17,14 +17,21 @@ interface TableActionsProps {
 const TableActions: React.FC<TableActionsProps> = ({ handleDelete, handleEdit }) => {
   return (
     <DropdownMenu dir="rtl">
-      <DropdownMenuTrigger className="hover:bg-accent p-2 rounded-lg">
+      <DropdownMenuTrigger
+        className="hover:bg-accent p-2 rounded-lg"
+        data-testid="row-actions-trigger"
+      >
         <BsThreeDots />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuLabel className="font-bold">פעולות</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleEdit}>עריכה</DropdownMenuItem>
-        <DropdownMenuItem onClick={handleDelete}>מחיקה</DropdownMenuItem>
+        <DropdownMenuItem data-testid="row-action-edit" onClick={handleEdit}>
+          עריכה
+        </DropdownMenuItem>
+        <DropdownMenuItem data-testid="row-action-delete" onClick={handleDelete}>
+          מחיקה
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

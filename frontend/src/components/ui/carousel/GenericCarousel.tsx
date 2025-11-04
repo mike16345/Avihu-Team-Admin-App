@@ -56,8 +56,8 @@ const GenericCarousel: React.FC<GenericCarouselProps> = ({
 
         {!hideControls && (
           <>
-            <CarouselPrevious />
-            <CarouselNext />
+            <CarouselPrevious data-testid="carousel-prev" />
+            <CarouselNext data-testid="carousel-next" />
           </>
         )}
       </Carousel>

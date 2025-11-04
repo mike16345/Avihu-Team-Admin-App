@@ -95,7 +95,11 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
               <FormItem className="w-full">
                 <FormLabel>שם פרטי</FormLabel>
                 <FormControl>
-                  <Input placeholder="שם פרטי..." {...field} />
+                  <Input
+                    placeholder="שם פרטי..."
+                    {...field}
+                    data-testid="form-field-firstName"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -108,7 +112,11 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
               <FormItem className="w-full">
                 <FormLabel>שם משפחה</FormLabel>
                 <FormControl>
-                  <Input placeholder="שם משפחה..." {...field} />
+                  <Input
+                    placeholder="שם משפחה..."
+                    {...field}
+                    data-testid="form-field-lastName"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -123,7 +131,13 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
               <FormItem className="w-full">
                 <FormLabel>טלפון</FormLabel>
                 <FormControl>
-                  <Input dir="ltr" className="text-center" placeholder="טלפון" {...field} />
+                  <Input
+                    dir="ltr"
+                    className="text-center"
+                    placeholder="טלפון"
+                    {...field}
+                    data-testid="form-field-phone"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -136,7 +150,12 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
               <FormItem className="w-full">
                 <FormLabel>אימייל</FormLabel>
                 <FormControl>
-                  <Input className=" text-center" placeholder="israel@example.com" {...field} />
+                  <Input
+                    className=" text-center"
+                    placeholder="israel@example.com"
+                    {...field}
+                    data-testid="form-field-email"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -151,7 +170,7 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
               <FormLabel>סוג תוכנית</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
-                  <SelectTrigger dir="rtl">
+                  <SelectTrigger dir="rtl" data-testid="form-field-planType">
                     <SelectValue placeholder={field.value || "בחר סוג תוכנית"} />
                   </SelectTrigger>
                 </FormControl>
@@ -173,12 +192,12 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
             return (
               <FormItem className="sm:w-1/2">
                 <FormLabel>בדיקה תקופתית</FormLabel>
-                <Select key={remindIn} onValueChange={field.onChange}>
-                  <FormControl>
-                    <SelectTrigger dir="rtl">
-                      <SelectValue placeholder={remindIn || "תבדוק אותי כל שבוע..."} />
-                    </SelectTrigger>
-                  </FormControl>
+              <Select key={remindIn} onValueChange={field.onChange}>
+                <FormControl>
+                  <SelectTrigger dir="rtl" data-testid="form-field-remindIn">
+                    <SelectValue placeholder={remindIn || "תבדוק אותי כל שבוע..."} />
+                  </SelectTrigger>
+                </FormControl>
                   <SelectContent dir="rtl">
                     {remindInOptions.map((option) => (
                       <SelectItem key={option.name} value={option.value}>
@@ -199,13 +218,15 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
             <FormItem className="flex flex-col justify-between pt-2">
               <FormLabel>תאריך סיום הליווי</FormLabel>
               <FormControl>
-                <DatePicker
-                  presets
-                  noPrevDates
-                  presetValues={datePresets}
-                  selectedDate={field.value}
-                  onChangeDate={(date: Date) => field.onChange(date)}
-                />
+                <div data-testid="form-field-dateFinished">
+                  <DatePicker
+                    presets
+                    noPrevDates
+                    presetValues={datePresets}
+                    selectedDate={field.value}
+                    onChangeDate={(date: Date) => field.onChange(date)}
+                  />
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -217,11 +238,13 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
           render={({ field }) => (
             <FormItem className="sm:w-2/4">
               <FormControl>
-                <DietaryTypeSelector
-                  existingItems={field.value}
-                  error={errors.dietaryType ? true : false}
-                  saveSelected={field.onChange}
-                />
+                <div data-testid="form-field-dietaryType">
+                  <DietaryTypeSelector
+                    existingItems={field.value}
+                    error={errors.dietaryType ? true : false}
+                    saveSelected={field.onChange}
+                  />
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -233,6 +256,7 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
           className=" sm:w-32 w-full"
           variant={"success"}
           isLoading={pending}
+          data-testid="form-submit"
         />
       </form>
     </Form>

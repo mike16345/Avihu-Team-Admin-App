@@ -16,19 +16,25 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onClick, onDelete }) =
     : getYouTubeThumbnail(blog.link || "");
 
   return (
-    <Card onClick={onClick} className=" cursor-pointer hover:shadow-lg transition-shadow">
+    <Card
+      onClick={onClick}
+      className=" cursor-pointer hover:shadow-lg transition-shadow"
+      data-testid={`row-${blog._id}`}
+    >
       <CardHeader className="flex flex-row items-center justify-between ">
         <div className="space-y-2">
           <CardTitle className=" leading-snug">{blog.title}</CardTitle>
           <span>קבוצה: {blog.group?.name || blog.group}</span>
         </div>
-        <DeleteButton
-          tip="הסר"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete(blog._id);
-          }}
-        />
+        <div data-testid={`row-${blog._id}-delete`}>
+          <DeleteButton
+            tip="הסר"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(blog._id);
+            }}
+          />
+        </div>
       </CardHeader>
       <CardContent>
         {imageUrl && (

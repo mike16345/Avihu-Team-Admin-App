@@ -84,9 +84,9 @@ const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, handleVie
   return (
     <>
       <div className="my-2 sm:w-2/4">
-        <Input placeholder="חיפוש..." onChange={handleSearch} />
+        <Input placeholder="חיפוש..." onChange={handleSearch} data-testid="search-input" />
       </div>
-      <Table dir="rtl" className="sm:w-3/4">
+      <Table dir="rtl" className="sm:w-3/4" data-testid="table-rows">
         <TableHeader>
           <TableRow>
             <TableHead className="text-right">שם</TableHead>
@@ -95,7 +95,7 @@ const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, handleVie
         <TableBody>
           {paginatedData.length == 0 && (
             <TableRow className="font-bold text-center">
-              <TableCell>לא נמצאו תוצאות</TableCell>
+              <TableCell data-testid="empty-state">לא נמצאו תוצאות</TableCell>
             </TableRow>
           )}
           {paginatedData.map((data, i) => (
@@ -104,6 +104,7 @@ const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, handleVie
               onDoubleClick={() => {
                 handleViewData(data._id);
               }}
+              data-testid={`row-${data._id || i}`}
             >
               <TableCell className="flex justify-between items-center px-3">
                 <div className="pr-4">{data.title || data.name}</div>
@@ -119,7 +120,11 @@ const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, handleVie
         </TableBody>
         <TableFooter className="p-2 flex items-start">
           <Pagination>
-            <PaginationPrevious onClick={handlePrevPage} className="cursor-pointer" />
+            <PaginationPrevious
+              onClick={handlePrevPage}
+              className="cursor-pointer"
+              data-testid="pagination-prev"
+            />
             {Array.from({ length: Math.min(10, totalPages) }, (_, index) => {
               const startPage = Math.max(1, Math.min(currentPage - 4, totalPages - 9)); // Ensure it stays within range
               const pageNumber = startPage + index;
@@ -130,18 +135,23 @@ const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, handleVie
                   onClick={() => handlePageChange(pageNumber)}
                   isActive={pageNumber === currentPage}
                   className="cursor-pointer"
+                  data-testid={`pagination-page-${pageNumber}`}
                 >
                   {pageNumber}
                 </PaginationLink>
               );
             })}
-            <PaginationNext onClick={handleNextPage} className="cursor-pointer" />
+            <PaginationNext
+              onClick={handleNextPage}
+              className="cursor-pointer"
+              data-testid="pagination-next"
+            />
           </Pagination>
           <Select
             onValueChange={(e) => handleItemsPerPageChange(Number(e))}
             value={itemsPerPage.toString()}
           >
-            <SelectTrigger className="w-[80px]">
+            <SelectTrigger className="w-[80px]" data-testid="filter-items-per-page">
               <SelectValue placeholder="10" />
             </SelectTrigger>
             <SelectContent>
