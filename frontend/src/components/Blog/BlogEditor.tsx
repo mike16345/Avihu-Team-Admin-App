@@ -14,12 +14,12 @@ import Loader from "../ui/Loader";
 import useBlogQuery from "@/hooks/queries/blogs/useBlogQuery";
 import useAddBlog from "@/hooks/mutations/blogs/useAddBlog";
 import useUpdateBlog from "@/hooks/mutations/blogs/useUpdateBlog";
-import TextEditor from "./TextEditor";
 import CustomRadioGroup, { IRadioItem } from "../ui/CustomRadioGroup";
 import ComboBox from "../ui/combo-box";
 import useLessonGroupsQuery from "@/hooks/queries/lessonGroups/useLessonGroupsQuery";
 import UserPlanTypes from "@/enums/UserPlanTypes";
 import { Option } from "@/types/types";
+import TextEditor from "../ui/TextEditor";
 
 type MediaType = "link" | "image";
 
@@ -187,14 +187,14 @@ const BlogEditor = () => {
             listEmptyMessage="אין קבוצות כרגע"
           />
         </div>
-        <div className="flex flex-col gap-2 sm:2/3">
+        <div className="flex flex-col justify-center gap-2 sm:2/3">
           {mediaType == "image" && (
             <>
               <Label className="font-semibold">תמונה</Label>
               <Input
                 type="file"
                 accept="image/*"
-                className="sm:2/3 cursor-pointer"
+                className="sm:w-2/3 cursor-pointer"
                 onChange={handleImageUpload}
               />
             </>
@@ -231,7 +231,11 @@ const BlogEditor = () => {
           </div>
         )}
         <Label className="font-semibold">תוכן</Label>
-        <TextEditor content={blog.content} onChange={(val) => handleFieldChange("content", val)} />
+        <TextEditor
+          defaultValue={blog.content}
+          value={blog.content}
+          onChange={(val) => handleFieldChange("content", val)}
+        />
       </div>
       <CustomButton
         className="w-32 h-fit"
