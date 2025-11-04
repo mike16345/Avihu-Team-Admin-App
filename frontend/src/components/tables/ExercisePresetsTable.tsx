@@ -33,7 +33,7 @@ const columns: ColumnDef<IExercisePresetItem>[] = [
   {
     accessorKey: "linkToVideo",
     header: "לינק לסרטון",
-    cell: ({ row }) => (
+    cell: ({ row }) =>
       row.original.linkToVideo ? (
         <a
           href={row.original.linkToVideo}
@@ -45,8 +45,7 @@ const columns: ColumnDef<IExercisePresetItem>[] = [
         </a>
       ) : (
         "-"
-      )
-    ),
+      ),
   },
   {
     id: "actions",
@@ -99,8 +98,8 @@ const ExercisePresetsTable = ({
       const rowGroups = Array.isArray((item as any).muscleGroups)
         ? ((item as any).muscleGroups as string[])
         : item.muscleGroup
-        ? [item.muscleGroup]
-        : [];
+          ? [item.muscleGroup]
+          : [];
 
       rowGroups.filter(Boolean).forEach((group) => groups.add(group));
     });
@@ -117,8 +116,8 @@ const ExercisePresetsTable = ({
       const rowGroups = Array.isArray((item as any).muscleGroups)
         ? ((item as any).muscleGroups as string[])
         : item.muscleGroup
-        ? [item.muscleGroup]
-        : [];
+          ? [item.muscleGroup]
+          : [];
 
       return rowGroups.some((group) => selectedGroups.includes(group));
     });

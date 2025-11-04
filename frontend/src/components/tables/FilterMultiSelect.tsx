@@ -64,14 +64,9 @@ const FilterMultiSelect = ({
   return (
     <DropdownMenu dir="rtl">
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          className={cn("h-9 gap-2 whitespace-nowrap", className)}
-        >
+        <Button variant="outline" className={cn("h-9 gap-2 whitespace-nowrap", className)}>
           <span className="text-sm font-medium">{label}</span>
-          <span className="max-w-[12rem] truncate text-sm text-muted-foreground">
-            {summary}
-          </span>
+          <span className="max-w-[12rem] truncate text-sm text-muted-foreground">{summary}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="max-h-64 overflow-y-auto">

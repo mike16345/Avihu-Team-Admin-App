@@ -153,10 +153,7 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
                   />
                 ) : (
                   <>
-                    <Button
-                      onClick={() => handleAddNew(tab.sheetForm)}
-                      className="my-4 h-9 px-4"
-                    >
+                    <Button onClick={() => handleAddNew(tab.sheetForm)} className="my-4 h-9 px-4">
                       {tab.btnPrompt}
                     </Button>
 
