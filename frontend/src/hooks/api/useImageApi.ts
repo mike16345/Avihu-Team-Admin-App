@@ -42,13 +42,13 @@ export const useImageApi = () => {
         body: fileBlob,
       });
 
-      if (response.status === 200) {
-        console.log("uploaded image");
-      } else {
+      if (response.status !== 200) {
         console.error("Failed to upload image:", response.status, await response.text());
+        throw new Error(`Failed to upload image: ${response.status}`);
       }
     } catch (error) {
       console.error(error);
+      throw error;
     }
   };
 
