@@ -31,6 +31,7 @@ import { FilterIcon } from "lucide-react";
 import { RowData } from "@tanstack/react-table";
 import { usePagination } from "@/hooks/usePagination";
 import DeleteButton from "../ui/buttons/DeleteButton";
+import UserExpiredTooltip from "./UserExpiredTooltip";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -42,6 +43,7 @@ interface DataTableProps<TData, TValue> {
   handleDeleteData: (data: TData) => void;
   handleViewNestedData: (data: any | any[], id: string) => void;
   getRowClassName: (row: TData) => string;
+  handleHoverOnRow: (row: TData) => boolean;
 }
 
 declare module "@tanstack/table-core" {
@@ -51,6 +53,7 @@ declare module "@tanstack/table-core" {
     handleDeleteData: (data: TData) => void;
     handleViewNestedData: (data: any | any[], id: string) => void;
     getRowClassName: (row: TData) => string;
+    handleHoverOnRow: (row: TData) => boolean;
   }
 }
 
@@ -64,6 +67,7 @@ export function DataTableHebrew<TData, TValue>({
   handleViewNestedData,
   handleSetData,
   getRowClassName,
+  handleHoverOnRow,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -88,6 +92,7 @@ export function DataTableHebrew<TData, TValue>({
       handleViewNestedData: (data: TData, id: string) => handleViewNestedData(data, id),
       handleSetData: (data: TData) => handleSetData(data),
       getRowClassName: (data: TData) => getRowClassName(data),
+      handleHoverOnRow: (data: TData) => handleHoverOnRow(data),
     },
 
     state: {
@@ -111,8 +116,8 @@ export function DataTableHebrew<TData, TValue>({
   };
 
   return (
-    <div className="space-y-4 rounded-xl border bg-background/80 p-4 shadow-sm">
-      <div className="flex flex-col gap-4 border-b border-border/60 pb-4">
+    <div className="space-y-4 rounded-xl bg-background/80 p-4 shadow-sm">
+      <div className="flex flex-col gap-4  pb-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <Input
             placeholder="חיפוש..."
@@ -197,23 +202,26 @@ export function DataTableHebrew<TData, TValue>({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  className={getRowClassName(row.original)}
-                  onDoubleClick={(e) => {
-                    const target = e.target as HTMLElement;
-                    if (target.id == "row-checkbox" || target.id == "access-switch") return;
+                <UserExpiredTooltip isActive={handleHoverOnRow(row.original)}>
+                  <TableRow
+                    key={row.id}
+                    className={getRowClassName(row.original)}
+                    onMouseOver={() => handleHoverOnRow(row.original)}
+                    onDoubleClick={(e) => {
+                      const target = e.target as HTMLElement;
+                      if (target.id == "row-checkbox" || target.id == "access-switch") return;
 
-                    handleViewData(row.original);
-                  }}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
-                </TableRow>
+                      handleViewData(row.original);
+                    }}
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </UserExpiredTooltip>
               ))
             ) : (
               <TableRow>
