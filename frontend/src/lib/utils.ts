@@ -168,7 +168,7 @@ export const extractVideoId = (url: string): string => {
 
 export const getYouTubeThumbnail = (url: string) => {
   const id = extractVideoId(url);
-  
+
   return `https://img.youtube.com/vi/${id}/maxresdefault.jpg`;
 };
 
