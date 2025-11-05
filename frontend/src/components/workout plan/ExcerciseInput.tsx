@@ -170,7 +170,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                               src={
                                 imageUrl
                                   ? buildPhotoUrl(imageUrl)
-                                  : getYouTubeThumbnail(extractVideoId(linkToVideo))
+                                  : getYouTubeThumbnail(linkToVideo)
                               }
                             />
                           )}
