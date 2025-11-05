@@ -1,5 +1,4 @@
 import React, { useMemo, useRef, useState } from "react";
-import { Textarea } from "@/components/ui/textarea";
 import { IExercisePresetItem, IExercise } from "@/interfaces/IWorkoutPlan";
 import SetsContainer, { defaultSet } from "./SetsContainer";
 import { Input } from "../ui/input";
@@ -23,6 +22,7 @@ import { useFieldArray, useFormContext } from "react-hook-form";
 import useMuscleGroupExercisesQuery from "@/hooks/queries/exercises/useMuscleGroupExercisesQuery";
 import useExerciseMethodQuery from "@/hooks/queries/exercises/useExerciseMethodQuery";
 import { FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
+import TextEditor from "../ui/TextEditor";
 
 interface ExcerciseInputProps {
   muscleGroup?: string;
@@ -244,7 +244,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                               return (
                                 <FormItem>
                                   <FormLabel>דגשים</FormLabel>
-                                  <Textarea
+                                  <TextEditor
                                     {...field}
                                     value={item.tipFromTrainer}
                                     placeholder="דגשים למתאמן..."
