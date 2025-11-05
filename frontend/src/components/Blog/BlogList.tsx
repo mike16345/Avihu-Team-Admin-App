@@ -8,20 +8,30 @@ import { toast } from "sonner";
 import { QueryKeys } from "@/enums/QueryKeys";
 import Loader from "../ui/Loader";
 import ErrorPage from "@/pages/ErrorPage";
-import useBlogsQuery from "@/hooks/queries/blogs/useBlogsQuery";
 import useDeleteBlog from "@/hooks/mutations/blogs/useDeleteBlog";
 import CustomButton from "../ui/CustomButton";
 
 interface BlogListProps {
   blogs: IBlogResponse[];
+  isLoading?: boolean;
+  isError?: boolean;
+  error?: unknown;
+  hasNextPage?: boolean;
+  fetchNextPage?: () => void | Promise<unknown>;
+  isFetchingNextPage?: boolean;
 }
 
-const BlogList: React.FC<BlogListProps> = ({ blogs }) => {
+const BlogList: React.FC<BlogListProps> = ({
+  blogs,
+  isLoading,
+  isError,
+  error,
+  hasNextPage,
+  fetchNextPage,
+  isFetchingNextPage,
+}) => {
   const navigate = useNavigate();
   const query = useQueryClient();
-
-  const { isFetchingNextPage, isLoading, isError, error, hasNextPage, fetchNextPage } =
-    useBlogsQuery();
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [blogToDelete, setBlogToDelete] = useState<IBlogResponse | null>(null);
@@ -55,7 +65,10 @@ const BlogList: React.FC<BlogListProps> = ({ blogs }) => {
   };
 
   if (isLoading) return <Loader />;
-  if (isError) return <ErrorPage message={error?.message} />;
+  if (isError) {
+    const message = error instanceof Error ? error.message : undefined;
+    return <ErrorPage message={message} />;
+  }
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4">
@@ -70,7 +83,7 @@ const BlogList: React.FC<BlogListProps> = ({ blogs }) => {
       {blogs.length == 0 && (
         <div className="col-span-full text-center text-xl">אין מאמרים כרגע</div>
       )}
-      {hasNextPage && (
+      {hasNextPage && fetchNextPage && (
         <CustomButton
           title="הצג עוד"
           isLoading={isFetchingNextPage}

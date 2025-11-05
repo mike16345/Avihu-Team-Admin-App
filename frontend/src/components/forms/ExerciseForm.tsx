@@ -50,7 +50,7 @@ const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
   const { reset } = exerciseForm;
 
   const [image, setImage] = useState<string>();
-  const [imageToDelete, setImageToDelete] = useState<string>();
+  const [imageToDelete, setImageToDelete] = useState<string | null>(null);
 
   const successFunc = (message: string) => {
     invalidateQueryKeys([QueryKeys.EXERCISES, QueryKeys.EXERCISES + objectId]);
@@ -69,10 +69,12 @@ const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
 
     if (!file) return;
 
+    const existingImageKey = exerciseForm.getValues("imageUrl");
+    setImageToDelete(existingImageKey || null);
+
     const reader = new FileReader();
     reader.onload = () => {
       if (reader.result) {
-        setImageToDelete(image);
         setImage(reader.result.toString());
       }
     };
@@ -85,6 +87,8 @@ const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
     if (existingImage) {
       setImageToDelete(existingImage);
       exerciseForm.setValue("imageUrl", "");
+    } else {
+      setImageToDelete(null);
     }
 
     setImage(undefined);
@@ -102,7 +106,12 @@ const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
 
   const onSubmit = (values: z.infer<typeof exerciseSchema>) => {
     if (objectId) {
-      editExercise.mutate({ id: objectId, exercise: values, imageToUpload: image, imageToDelete });
+      editExercise.mutate({
+        id: objectId,
+        exercise: values,
+        imageToUpload: image,
+        imageToDelete: imageToDelete || undefined,
+      });
     } else {
       addNewExercise.mutate({ exercise: values, image });
     }

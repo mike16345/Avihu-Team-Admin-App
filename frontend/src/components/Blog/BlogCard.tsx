@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { IBlogResponse } from "@/interfaces/IBlog";
-import { buildPhotoUrl, getYouTubeThumbnail } from "@/lib/utils";
+import { buildPhotoUrl, extractVideoId, getYouTubeThumbnail } from "@/lib/utils";
 import DeleteButton from "../ui/buttons/DeleteButton";
 
 interface BlogCardProps {
@@ -11,9 +11,9 @@ interface BlogCardProps {
 }
 
 export const BlogCard: React.FC<BlogCardProps> = ({ blog, onClick, onDelete }) => {
-  const imageUrl = blog.imageUrl
-    ? buildPhotoUrl(blog.imageUrl)
-    : getYouTubeThumbnail(blog.link || "");
+  const hasYoutubeLink = Boolean(blog.link && extractVideoId(blog.link));
+  const fallbackImage = hasYoutubeLink && blog.link ? getYouTubeThumbnail(blog.link) : undefined;
+  const imageUrl = blog.imageUrl ? buildPhotoUrl(blog.imageUrl) : fallbackImage;
 
   return (
     <Card onClick={onClick} className=" cursor-pointer hover:shadow-lg transition-shadow">

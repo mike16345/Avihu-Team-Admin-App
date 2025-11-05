@@ -152,6 +152,7 @@ const ExercisePresetsTable = ({
       }}
       handleViewNestedData={() => {}}
       getRowClassName={() => ""}
+      handleHoverOnRow={() => false}
     />
   );
 };

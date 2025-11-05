@@ -1,6 +1,5 @@
 import BlogList from "@/components/Blog/BlogList";
 import { Button } from "@/components/ui/button";
-import CustomButton from "@/components/ui/CustomButton";
 import Loader from "@/components/ui/Loader";
 import FilterItems from "@/components/ui/FilterItems";
 import useBlogsQuery from "@/hooks/queries/blogs/useBlogsQuery";
@@ -18,6 +17,8 @@ const BlogPage = () => {
     isFetchingNextPage,
     hasNextPage,
     fetchNextPage,
+    isError,
+    error,
   } = useBlogsQuery();
   const { data: lessonGroups } = useLessonGroupsQuery();
 
@@ -63,18 +64,15 @@ const BlogPage = () => {
           </div>
         </div>
       </div>
-      <BlogList blogs={blogs} />
-
-      {hasNextPage && (
-        <div className="flex justify-center p-4">
-          <CustomButton
-            title={isFetchingNextPage ? "טוען..." : "טען עוד"}
-            onClick={() => fetchNextPage()}
-            isLoading={isFetchingNextPage}
-            variant="default"
-          />
-        </div>
-      )}
+      <BlogList
+        blogs={blogs}
+        hasNextPage={hasNextPage}
+        fetchNextPage={fetchNextPage}
+        isFetchingNextPage={isFetchingNextPage}
+        isLoading={isLoading}
+        isError={isError}
+        error={error}
+      />
     </>
   );
 };
