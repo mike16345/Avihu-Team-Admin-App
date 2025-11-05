@@ -8,4 +8,5 @@ export const exerciseSchema = z.object({
   muscleGroup: z.string().min(1, { message: `תרגיל חייב להיות משוייך לקבוצת שריר` }),
   linkToVideo: z.string().url({ message: `אנא הכנס לינק תקין!` }).regex(youtubeLinkRegex),
   imageUrl: z.string().optional(),
+  tipFromTrainer: z.string().optional(),
 });
