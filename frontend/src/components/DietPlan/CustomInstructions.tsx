@@ -6,6 +6,7 @@ import TipAdder from "../ui/TipAdder";
 
 interface CustomInstructionsProps {
   instructions?: string[];
+  supplements?: string[];
   freeCalories: number;
   fatsPerDay: number;
   veggiesPerDay: number;
@@ -14,6 +15,7 @@ interface CustomInstructionsProps {
 
 const CustomInstructions: FC<CustomInstructionsProps> = ({
   instructions,
+  supplements,
   freeCalories,
   fatsPerDay,
   veggiesPerDay,
@@ -26,21 +28,20 @@ const CustomInstructions: FC<CustomInstructionsProps> = ({
       </CardHeader>
       <CardContent className="flex flex-col gap-4 ">
         <Label>קלוריות חופשיות</Label>
-
         <Input
           type="number"
           value={freeCalories}
           onChange={(e) => onUpdate("freeCalories", Number(e.target.value))}
         />
-        <Label>כמות שומנים ליום (מנות)</Label>
 
+        <Label>כמות שומנים ליום (מנות)</Label>
         <Input
           type="number"
           value={fatsPerDay}
           onChange={(e) => onUpdate("fatsPerDay", Number(e.target.value))}
         />
-        <Label>כמות ירקות ליום </Label>
 
+        <Label>כמות ירקות ליום </Label>
         <Input
           type="number"
           value={veggiesPerDay}
@@ -50,6 +51,12 @@ const CustomInstructions: FC<CustomInstructionsProps> = ({
         <TipAdder
           tips={instructions || []}
           saveTips={(tips) => onUpdate("customInstructions", tips)}
+        />
+
+        <TipAdder
+          name="תוספים"
+          tips={supplements || []}
+          saveTips={(tips) => onUpdate("supplements", tips)}
         />
       </CardContent>
     </Card>

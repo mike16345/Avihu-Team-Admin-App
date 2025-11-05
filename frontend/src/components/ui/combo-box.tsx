@@ -4,14 +4,25 @@ import { ChevronsUpDown } from "lucide-react";
 import { FC, useEffect, useState } from "react";
 import { Button } from "./button";
 import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "./command";
+import Loader from "./Loader";
 
 interface ComboBoxProps {
   options: Option[];
   value: any;
   onSelect: (val: any) => void;
+  inputPlaceholder?: string;
+  listEmptyMessage?: string;
+  isLoading?: boolean;
 }
 
-const ComboBox: FC<ComboBoxProps> = ({ onSelect, options, value }) => {
+const ComboBox: FC<ComboBoxProps> = ({
+  onSelect,
+  options,
+  value,
+  isLoading,
+  listEmptyMessage = "אין פריטים",
+  inputPlaceholder = "חפש...",
+}) => {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -27,8 +38,13 @@ const ComboBox: FC<ComboBoxProps> = ({ onSelect, options, value }) => {
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0">
-        <Command>
-          <CommandInput dir="rtl" placeholder="בחר סוג תוכנית..." />
+        <Command shouldFilter={false}>
+          <CommandInput dir="rtl" placeholder={inputPlaceholder} />
+
+          {options.length == 0 && !isLoading && (
+            <div className="flex-1 flex place-content-center p-3 text-sm">{listEmptyMessage}</div>
+          )}
+          {isLoading && <Loader className="p-2" />}
           <CommandList>
             <CommandGroup dir="rtl">
               {options?.map((option, i) => (

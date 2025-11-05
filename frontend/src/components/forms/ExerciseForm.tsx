@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Form,
   FormControl,
@@ -29,6 +29,9 @@ import useExerciseQuery from "@/hooks/queries/exercises/useExerciseQuery";
 import { invalidateQueryKeys } from "@/QueryClient/queryClient";
 import { Input } from "../ui/input";
 import CustomButton from "../ui/CustomButton";
+import TextEditor from "../ui/TextEditor";
+import { buildPhotoUrl } from "@/lib/utils";
+import { Button } from "../ui/button";
 
 const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
   const exerciseForm = useForm<z.infer<typeof exerciseSchema>>({
@@ -37,6 +40,7 @@ const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
       name: "",
       muscleGroup: "",
       linkToVideo: "",
+      tipFromTrainer: "",
     },
   });
 
@@ -44,6 +48,9 @@ const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
   const { data: exercise } = useExerciseQuery(objectId || "undefined");
 
   const { reset } = exerciseForm;
+
+  const [image, setImage] = useState<string>();
+  const [imageToDelete, setImageToDelete] = useState<string | null>(null);
 
   const successFunc = (message: string) => {
     invalidateQueryKeys([QueryKeys.EXERCISES, QueryKeys.EXERCISES + objectId]);
@@ -57,6 +64,36 @@ const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
       description: err.message,
     });
 
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files ? event.target.files[0] : null;
+
+    if (!file) return;
+
+    const existingImageKey = exerciseForm.getValues("imageUrl");
+    setImageToDelete(existingImageKey || null);
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (reader.result) {
+        setImage(reader.result.toString());
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveImage = () => {
+    const existingImage = exerciseForm.getValues("imageUrl");
+
+    if (existingImage) {
+      setImageToDelete(existingImage);
+      exerciseForm.setValue("imageUrl", "");
+    } else {
+      setImageToDelete(null);
+    }
+
+    setImage(undefined);
+  };
+
   const addNewExercise = useAddExercise({
     onSuccess: () => successFunc(`פריט נשמר בהצלחה!`),
     onError: errorFunc,
@@ -69,16 +106,24 @@ const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
 
   const onSubmit = (values: z.infer<typeof exerciseSchema>) => {
     if (objectId) {
-      editExercise.mutate({ id: objectId, exercise: values });
+      editExercise.mutate({
+        id: objectId,
+        exercise: values,
+        imageToUpload: image,
+        imageToDelete: imageToDelete || undefined,
+      });
     } else {
-      addNewExercise.mutate(values);
+      addNewExercise.mutate({ exercise: values, image });
     }
   };
 
   useEffect(() => {
     if (!exercise) return;
 
-    reset(exercise.data);
+    reset({
+      ...exercise.data,
+      tipFromTrainer: exercise.data?.tipFromTrainer || "",
+    });
   }, [exercise]);
 
   return (
@@ -113,6 +158,20 @@ const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
 
         <FormField
           control={exerciseForm.control}
+          name="tipFromTrainer"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>טיפ מהמדריך</FormLabel>
+              <FormControl>
+                <TextEditor value={field.value || ""} onChange={(val) => field.onChange(val)} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={exerciseForm.control}
           name="muscleGroup"
           render={({ field }) => (
             <FormItem>
@@ -135,6 +194,32 @@ const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
             </FormItem>
           )}
         />
+
+        <FormItem>
+          <FormLabel>תמונה</FormLabel>
+          <FormControl>
+            <Input type="file" accept="image/*" onChange={handleImageUpload} />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+
+        {(image || exerciseForm.getValues().imageUrl) && (
+          <div className="flex flex-col gap-4 mt-2 relative">
+            <img
+              src={image || buildPhotoUrl(exerciseForm.getValues().imageUrl || "")}
+              alt="Selected"
+              className="w-full  rounded-md"
+            />
+            <Button
+              type="button"
+              className="bg-red-500 text-base text-white  rounded"
+              onClick={handleRemoveImage}
+            >
+              הסר תמונה
+            </Button>
+          </div>
+        )}
+
         <CustomButton
           className="w-full"
           type="submit"

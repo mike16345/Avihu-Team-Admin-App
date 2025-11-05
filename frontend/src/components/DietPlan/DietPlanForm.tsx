@@ -79,6 +79,7 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ dietPlan, updateDietPlan, c
           <CustomInstructions
             instructions={dietPlan.customInstructions}
             freeCalories={dietPlan.freeCalories || 0}
+            supplements={dietPlan.supplements || []}
             fatsPerDay={dietPlan.fatsPerDay || 0}
             veggiesPerDay={dietPlan.veggiesPerDay || 0}
             onUpdate={(key, val) => {

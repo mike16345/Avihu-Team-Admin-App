@@ -25,22 +25,25 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { FilterIcon } from "lucide-react";
 import { RowData } from "@tanstack/react-table";
 import { usePagination } from "@/hooks/usePagination";
 import DeleteButton from "../ui/buttons/DeleteButton";
+import UserExpiredTooltip from "./UserExpiredTooltip";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  actionButton?: React.JSX.Element;
+  actionButton?: ReactNode;
+  filters?: ReactNode;
   handleViewData: (data: TData) => void;
   handleSetData: (data: TData) => void;
   handleDeleteData: (data: TData) => void;
   handleViewNestedData: (data: any | any[], id: string) => void;
   getRowClassName: (row: TData) => string;
+  handleHoverOnRow: (row: TData) => boolean;
 }
 
 declare module "@tanstack/table-core" {
@@ -50,6 +53,7 @@ declare module "@tanstack/table-core" {
     handleDeleteData: (data: TData) => void;
     handleViewNestedData: (data: any | any[], id: string) => void;
     getRowClassName: (row: TData) => string;
+    handleHoverOnRow: (row: TData) => boolean;
   }
 }
 
@@ -57,11 +61,13 @@ export function DataTableHebrew<TData, TValue>({
   columns,
   data,
   actionButton,
+  filters,
   handleViewData,
   handleDeleteData,
   handleViewNestedData,
   handleSetData,
   getRowClassName,
+  handleHoverOnRow,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -86,6 +92,7 @@ export function DataTableHebrew<TData, TValue>({
       handleViewNestedData: (data: TData, id: string) => handleViewNestedData(data, id),
       handleSetData: (data: TData) => handleSetData(data),
       getRowClassName: (data: TData) => getRowClassName(data),
+      handleHoverOnRow: (data: TData) => handleHoverOnRow(data),
     },
 
     state: {
@@ -109,66 +116,71 @@ export function DataTableHebrew<TData, TValue>({
   };
 
   return (
-    <div className="space-y-1">
-      <div className="w-full flex flex-col gap-2 sm:gap-0 sm:flex-row sm:justify-between sm:items-center">
-        <Input
-          placeholder="חיפוש..."
-          value={(table.getColumn("שם")?.getFilterValue() as string) ?? ""}
-          onChange={(event) => table.getColumn("שם")?.setFilterValue(event.target.value)}
-          className="sm:w-72"
-        />
+    <div className="space-y-4 rounded-xl bg-background/80 p-4 shadow-sm">
+      <div className="flex flex-col gap-4  pb-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+          <Input
+            placeholder="חיפוש..."
+            value={(table.getColumn("שם")?.getFilterValue() as string) ?? ""}
+            onChange={(event) => table.getColumn("שם")?.setFilterValue(event.target.value)}
+            className="h-9 sm:w-72"
+          />
 
-        <div className=" shrink-0 block sm:hidden text-sm text-muted-foreground sm:text-right text-center">
-          {table.getFilteredSelectedRowModel().rows.length} {"תוך "}
-          {table.getFilteredRowModel().rows.length} שורות נבחרו.
-        </div>
-        <div className="text-sm  flex items-center gap-4 ">
-          <div className="text-muted-foreground">
-            דף {pageNumber} תוך {table.getPageCount()}
+          <div className="block text-center text-sm text-muted-foreground sm:hidden">
+            {table.getFilteredSelectedRowModel().rows.length} {"תוך "}
+            {table.getFilteredRowModel().rows.length} שורות נבחרו.
           </div>
-          {Object.keys(rowSelection).length > 0 && (
-            <div className=" shrink-0 hidden sm:block text-sm text-muted-foreground sm:text-right text-center">
-              {table.getFilteredSelectedRowModel().rows.length} {"תוך "}
-              {table.getFilteredRowModel().rows.length} שורות נבחרו.
+
+          <div className="flex items-center justify-between gap-3 text-sm text-muted-foreground sm:w-auto sm:justify-end sm:text-right">
+            <div>
+              דף {pageNumber} תוך {table.getPageCount()}
             </div>
-          )}
+            {Object.keys(rowSelection).length > 0 && (
+              <div className="hidden sm:block">
+                {table.getFilteredSelectedRowModel().rows.length} {"תוך "}
+                {table.getFilteredRowModel().rows.length} שורות נבחרו.
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            {Object.keys(rowSelection).length > 0 && (
+              <DeleteButton onClick={handleDeleteRows} tip="הסר משתמשים" />
+            )}
+            <DropdownMenu dir="rtl">
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="h-9 px-3">
+                  סינון עמודות
+                  <FilterIcon size={15} className="mr-2" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {table
+                  .getAllColumns()
+                  .filter((column) => column.getCanHide())
+                  .map((column) => {
+                    return (
+                      <DropdownMenuCheckboxItem
+                        onSelect={(e) => e.preventDefault()}
+                        key={column.id}
+                        className="capitalize"
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                      >
+                        {column.columnDef.header instanceof Function
+                          ? column.id
+                          : column.columnDef.header}
+                      </DropdownMenuCheckboxItem>
+                    );
+                  })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {actionButton}
+          </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          {Object.keys(rowSelection).length > 0 && (
-            <DeleteButton onClick={handleDeleteRows} tip="הסר משתמשים" />
-          )}
-          <DropdownMenu dir="rtl">
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">
-                סינון עמודות
-                <FilterIcon size={15} className="mr-2" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      onSelect={(e) => e.preventDefault()}
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                    >
-                      {column.columnDef.header instanceof Function
-                        ? column.id
-                        : column.columnDef.header}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {actionButton}
-        </div>
+        {filters ? <div className="flex flex-wrap items-center gap-2">{filters}</div> : null}
       </div>
       <div className="rounded-md border min-h-[60vh] max-h-[65vh] overflow-auto">
         <Table>
@@ -190,23 +202,25 @@ export function DataTableHebrew<TData, TValue>({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  className={getRowClassName(row.original)}
-                  onDoubleClick={(e) => {
-                    const target = e.target as HTMLElement;
-                    if (target.id == "row-checkbox" || target.id == "access-switch") return;
+                <UserExpiredTooltip isActive={handleHoverOnRow?.(row.original)}>
+                  <TableRow
+                    key={row.id}
+                    className={getRowClassName(row.original)}
+                    onDoubleClick={(e) => {
+                      const target = e.target as HTMLElement;
+                      if (target.id == "row-checkbox" || target.id == "access-switch") return;
 
-                    handleViewData(row.original);
-                  }}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
-                </TableRow>
+                      handleViewData(row.original);
+                    }}
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </UserExpiredTooltip>
               ))
             ) : (
               <TableRow>

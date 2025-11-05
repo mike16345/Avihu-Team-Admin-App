@@ -65,7 +65,15 @@ const WorkoutPlans: FC<IWorkoutPlanProps> = ({ displayTips = false }) => {
           <WorkoutTabs
             cardioPlan={<CardioWrapper />}
             workoutPlan={
-              <div className="flex flex-col sm:flex-row gap-6">
+              <div className="flex flex-col gap-6">
+                {displayTips && (
+                  <div className="sm:w-[50%] w-full">
+                    <TipAdder
+                      tips={watch("tips") || []}
+                      saveTips={(tips) => setValue("tips", tips)}
+                    />
+                  </div>
+                )}
                 <div className={`flex flex-col ${displayTips && "w-[80%]"} gap-4 w-full`}>
                   <DragDropWrapper
                     items={workoutPlans}
@@ -99,14 +107,6 @@ const WorkoutPlans: FC<IWorkoutPlanProps> = ({ displayTips = false }) => {
                     </Button>
                   </div>
                 </div>
-                {displayTips && (
-                  <div className="sm:w-[20%] w-full">
-                    <TipAdder
-                      tips={watch("tips") || []}
-                      saveTips={(tips) => setValue("tips", tips)}
-                    />
-                  </div>
-                )}
               </div>
             }
           />

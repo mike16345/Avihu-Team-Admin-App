@@ -28,10 +28,10 @@ import { Input } from "@/components/ui/input";
 interface PresetTableProps {
   data: any[];
   handleDelete: (id: string) => void;
-  retrieveObjectId: (id: string) => void;
+  handleViewData: (id: string) => void;
 }
 
-const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, retrieveObjectId }) => {
+const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, handleViewData }) => {
   const [displayData, setDisplayData] = useState<any[]>(data);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -76,6 +76,8 @@ const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, retrieveO
   };
 
   useEffect(() => {
+    if (!data) return;
+
     setDisplayData(data);
   }, [data]);
 
@@ -100,7 +102,7 @@ const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, retrieveO
             <TableRow
               key={i}
               onDoubleClick={() => {
-                retrieveObjectId(data._id);
+                handleViewData(data._id);
               }}
             >
               <TableCell className="flex justify-between items-center px-3">
@@ -108,7 +110,7 @@ const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, retrieveO
                 <div>
                   <TableActions
                     handleDelete={() => handleDelete(data._id)}
-                    handleEdit={() => retrieveObjectId(data._id)}
+                    handleEdit={() => handleViewData(data._id)}
                   />
                 </div>
               </TableCell>

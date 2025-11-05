@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from "react";
 import ReactQuill from "react-quill-new";
+import "react-quill-new/dist/quill.snow.css";
 
-const formats = [
+const formats: ReactQuill.ReactQuillProps["formats"] = [
   "font",
   "size",
   "color",
@@ -11,37 +12,41 @@ const formats = [
   "strike",
   "blockquote",
   "list",
-  "bullet",
   "indent",
   "link",
   "align",
+  "direction",
 ];
+
+const modules: ReactQuill.ReactQuillProps["modules"] = {
+  toolbar: [
+    ["bold", "italic", "underline", "strike", "blockquote"],
+    [{ list: "ordered" }, { list: "bullet" }],
+    [{ indent: "-1" }, { indent: "+1" }],
+    [{ direction: "rtl" }, { align: [] }],
+    ["link", "clean"],
+  ],
+};
 
 const TextEditor: React.FC<ReactQuill.ReactQuillProps> = (props) => {
   const quillRef = useRef<ReactQuill>(null);
 
   useEffect(() => {
-    if (!quillRef.current) return;
+    const editor = quillRef.current?.getEditor();
+    if (!editor) return;
 
-    const editor = quillRef.current.getEditor();
+    editor.format("direction", "rtl");
     editor.format("align", "right");
-  }, [quillRef]);
+  }, []);
 
   return (
     <ReactQuill
       id="editor"
       ref={quillRef}
-      modules={{
-        toolbar: [
-          ["bold", "italic", "underline", "strike", "blockquote"],
-          [{ list: "ordered" }, { list: "bullet" }, { indent: "-1" }, { indent: "+1" }],
-          ["link"],
-          ["clean"],
-          [{ align: "" }, { align: "center" }, { align: "right" }, { align: "justify" }],
-        ],
-      }}
+      theme="snow"
+      modules={modules}
       formats={formats}
-      className="flex-1 "
+      className="flex-1"
       {...props}
     />
   );

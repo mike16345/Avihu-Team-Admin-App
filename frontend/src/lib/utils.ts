@@ -166,7 +166,13 @@ export const extractVideoId = (url: string): string => {
   return videoId;
 };
 
-export const getYouTubeThumbnail = (id: string) => {
+export const getYouTubeThumbnail = (url: string) => {
+  const id = extractVideoId(url);
+
+  if (!id) {
+    return ""; // or return a placeholder image URL
+  }
+
   return `https://img.youtube.com/vi/${id}/maxresdefault.jpg`;
 };
 
@@ -291,4 +297,8 @@ export function removePointerEventsFromBody() {
   if (document.body.style.pointerEvents === "none") {
     document.body.style.pointerEvents = "";
   }
+}
+
+export function isUndefined(variable: any) {
+  return variable == undefined || variable == "undefined" || variable == null;
 }

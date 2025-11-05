@@ -11,6 +11,7 @@ import MuscleGroupForm from "@/components/forms/MuscleGroupForm";
 import MenuItemForm from "../forms/MenuItemForm";
 import ExerciseMethodsForm from "../forms/ExerciseMethodsForm";
 import CardioWorkoutForm from "../forms/cardioWorkoutForm";
+import LessonGroupForm from "../forms/LessonGroupForm";
 
 interface PresetSheetProps {
   form?: string;
@@ -25,7 +26,7 @@ const PresetSheet: React.FC<PresetSheetProps> = ({ form, id, isOpen, onCloseShee
 
   return (
     <Sheet open={isOpen} onOpenChange={() => onCloseSheet()}>
-      <SheetContent className="hide-scrollbar overflow-y-auto space-y-2" dir="rtl">
+      <SheetContent className="hide-scrollbar overflow-y-auto space-y-4  p-6 shadow-lg" dir="rtl">
         <SheetHeader>
           <SheetTitle className="text-right text-3xl">הוסף פריט</SheetTitle>
           <SheetDescription className="text-right">
@@ -45,6 +46,7 @@ const PresetSheet: React.FC<PresetSheetProps> = ({ form, id, isOpen, onCloseShee
         {isFoodGroup && (
           <MenuItemForm objectId={id} closeSheet={() => onCloseSheet()} foodGroup={form} />
         )}
+        {form == "lessonGroups" && <LessonGroupForm objectId={id} closeSheet={onCloseSheet} />}
       </SheetContent>
     </Sheet>
   );

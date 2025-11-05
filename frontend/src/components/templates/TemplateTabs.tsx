@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PresetTable from "@/components/tables/PresetTable";
+import ExercisePresetsTable from "@/components/tables/ExercisePresetsTable";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import PresetSheet from "./PresetSheet";
@@ -8,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { UseMutationResult, useQuery } from "@tanstack/react-query";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { ITabs } from "@/interfaces/interfaces";
+import { IExercisePresetItem } from "@/interfaces/IWorkoutPlan";
 import useMenuItemApi from "@/hooks/api/useMenuItemApi";
 import { useDietPlanPresetApi } from "@/hooks/api/useDietPlanPresetsApi";
 import { ApiResponse } from "@/types/types";
@@ -138,15 +140,30 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
           {!apiData.isLoading &&
             tabs.tabContent.map((tab) => (
               <TabsContent key={tab.value} value={tab.value}>
-                <Button onClick={() => handleAddNew(tab.sheetForm)} className="my-4">
-                  {tab.btnPrompt}
-                </Button>
+                {tab.value === `exercises` ? (
+                  <ExercisePresetsTable
+                    data={(apiData.data?.data as IExercisePresetItem[]) || []}
+                    onView={(id) => startEdit(id, tab.sheetForm)}
+                    onDelete={(id) => deleteItem(id, tab.deleteFunc)}
+                    actionButton={
+                      <Button onClick={() => handleAddNew(tab.sheetForm)} className="h-9 px-4">
+                        {tab.btnPrompt}
+                      </Button>
+                    }
+                  />
+                ) : (
+                  <>
+                    <Button onClick={() => handleAddNew(tab.sheetForm)} className="my-4 h-9 px-4">
+                      {tab.btnPrompt}
+                    </Button>
 
-                <PresetTable
-                  data={apiData.data?.data || []}
-                  handleDelete={(id) => deleteItem(id, tab.deleteFunc)}
-                  retrieveObjectId={(id: string) => startEdit(id, tab.sheetForm)}
-                />
+                    <PresetTable
+                      data={apiData.data?.data || []}
+                      handleDelete={(id) => deleteItem(id, tab.deleteFunc)}
+                      handleViewData={(id: string) => startEdit(id, tab.sheetForm)}
+                    />
+                  </>
+                )}
               </TabsContent>
             ))}
         </Tabs>
