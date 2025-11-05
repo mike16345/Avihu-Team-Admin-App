@@ -289,12 +289,23 @@ export const userFullName = (user: IUser) => {
   return user.firstName?.trim() + " " + user.lastName?.trim();
 };
 
+/**
+ * Restore pointer interactions on the document body when they have been disabled.
+ *
+ * If the body's `pointer-events` style is set to `"none"`, this clears that style so the body can receive pointer events again.
+ */
 export function removePointerEventsFromBody() {
   if (document.body.style.pointerEvents === "none") {
     document.body.style.pointerEvents = "";
   }
 }
 
+/**
+ * Determines whether a value is undefined, the string `"undefined"`, or null.
+ *
+ * @param variable - The value to test
+ * @returns `true` if `variable` is `undefined`, the string `"undefined"`, or `null`, `false` otherwise.
+ */
 export function isUndefined(variable: any) {
   return variable == undefined || variable == "undefined" || variable == null;
 }

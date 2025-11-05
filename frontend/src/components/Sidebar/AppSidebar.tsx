@@ -87,6 +87,11 @@ const Header = () => {
   );
 };
 
+/**
+ * Renders the application's right-aligned sidebar containing the user header, navigation menu, logout control, and theme toggle.
+ *
+ * @returns The sidebar element that composes header, navigation items, logout button, and mode toggle.
+ */
 export function AppSidebar() {
   return (
     <Sidebar side="right">

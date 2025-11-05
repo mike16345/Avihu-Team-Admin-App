@@ -57,6 +57,23 @@ declare module "@tanstack/table-core" {
   }
 }
 
+/**
+ * Renders a configurable data table with Hebrew UI, supporting sorting, filtering, pagination, column visibility, row selection, and row actions.
+ *
+ * The table integrates with TanStack React Table and exposes handlers for viewing, editing, deleting, and inspecting nested data. It accepts an optional action button and an optional additional filter control row, and it wraps each row with a tooltip controlled by `handleHoverOnRow`.
+ *
+ * @param columns - Column definitions for the table.
+ * @param data - Array of row data to display.
+ * @param actionButton - Optional React node rendered among the table actions (e.g., "create" or "export" buttons).
+ * @param filters - Optional React node rendered as an additional row of filter controls below the main toolbar.
+ * @param handleViewData - Called when a row is activated for viewing (e.g., double-click).
+ * @param handleDeleteData - Called to delete a single row; also used to delete all selected rows.
+ * @param handleViewNestedData - Called to view nested data for a row; receives the nested data and an identifier.
+ * @param handleSetData - Called to set or update a row's data from within table actions.
+ * @param getRowClassName - Returns a class name for a given row's data to control row styling.
+ * @param handleHoverOnRow - Returns `true` when the row should show the "expired user" tooltip; used to control per-row tooltip activation.
+ * @returns A React element containing the fully interactive Hebrew-language data table UI.
+ */
 export function DataTableHebrew<TData, TValue>({
   columns,
   data,
