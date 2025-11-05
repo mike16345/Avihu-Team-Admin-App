@@ -29,6 +29,7 @@ import useExerciseQuery from "@/hooks/queries/exercises/useExerciseQuery";
 import { invalidateQueryKeys } from "@/QueryClient/queryClient";
 import { Input } from "../ui/input";
 import CustomButton from "../ui/CustomButton";
+import TextEditor from "../ui/TextEditor";
 import { buildPhotoUrl } from "@/lib/utils";
 import { Button } from "../ui/button";
 
@@ -39,6 +40,7 @@ const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
       name: "",
       muscleGroup: "",
       linkToVideo: "",
+      tipFromTrainer: "",
     },
   });
 
@@ -109,7 +111,10 @@ const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
   useEffect(() => {
     if (!exercise) return;
 
-    reset(exercise.data);
+    reset({
+      ...exercise.data,
+      tipFromTrainer: exercise.data?.tipFromTrainer || "",
+    });
   }, [exercise]);
 
   return (
@@ -136,6 +141,20 @@ const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
               <FormLabel>לינק לסרטון</FormLabel>
               <FormControl>
                 <Input placeholder="https://youtube.com" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={exerciseForm.control}
+          name="tipFromTrainer"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>טיפ מהמדריך</FormLabel>
+              <FormControl>
+                <TextEditor value={field.value || ""} onChange={(val) => field.onChange(val)} />
               </FormControl>
               <FormMessage />
             </FormItem>
