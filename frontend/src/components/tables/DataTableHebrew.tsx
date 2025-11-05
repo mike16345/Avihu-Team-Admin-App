@@ -202,11 +202,10 @@ export function DataTableHebrew<TData, TValue>({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <UserExpiredTooltip isActive={handleHoverOnRow(row.original)}>
+                <UserExpiredTooltip isActive={handleHoverOnRow?.(row.original)}>
                   <TableRow
                     key={row.id}
                     className={getRowClassName(row.original)}
-                    onMouseOver={() => handleHoverOnRow(row.original)}
                     onDoubleClick={(e) => {
                       const target = e.target as HTMLElement;
                       if (target.id == "row-checkbox" || target.id == "access-switch") return;
