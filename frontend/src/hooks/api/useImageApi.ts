@@ -1,4 +1,5 @@
 import { deleteItem } from "@/API/api";
+import { determineServerUrl } from "@/config/apiConfig";
 import { v4 as uuidv4 } from "uuid";
 
 export const useImageApi = () => {
@@ -53,7 +54,7 @@ export const useImageApi = () => {
   };
 
   const handleUploadImageToS3 = async (name: string, image: string) => {
-    const api = import.meta.env.VITE_SERVER;
+    const api = determineServerUrl();
     const today = new Date().toISOString().split("T")[0];
     const imageName = name + "-image";
     const id = uuidv4();

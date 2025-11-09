@@ -1,6 +1,10 @@
 import axios, { AxiosInstance } from "axios";
 
-const SERVER = import.meta.env.VITE_SERVER_PREVIEW_URL || import.meta.env.VITE_SERVER;
+export const determineServerUrl = (): string => {
+  return import.meta.env.VITE_SERVER_PREVIEW_URL || import.meta.env.VITE_SERVER;
+};
+
+const SERVER = determineServerUrl();
 
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: SERVER,
