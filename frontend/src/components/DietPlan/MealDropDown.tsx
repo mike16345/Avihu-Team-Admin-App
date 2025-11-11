@@ -3,13 +3,7 @@ import { useFormContext, useWatch } from "react-hook-form";
 import { FaChevronDown } from "react-icons/fa";
 import { Button } from "../ui/button";
 import { Collapsible, CollapsibleContent } from "../ui/collapsible";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "../ui/input";
 import { CustomItems, DietItemQuantityBlock, IDietPlan } from "@/interfaces/IDietPlan";
 import { CustomItemSelection } from "./CustomItemSelection";
@@ -85,7 +79,12 @@ const extractShowCustomSelection = (meal: MealValue | undefined): ShowCustomSele
   }, createEmptyShowState());
 };
 
-export const MealDropDown: FC<MealDropDownProps> = ({ mealNumber, mealIndex, customItems, onDelete }) => {
+export const MealDropDown: FC<MealDropDownProps> = ({
+  mealNumber,
+  mealIndex,
+  customItems,
+  onDelete,
+}) => {
   const form = useFormContext<IDietPlan>();
   const { control, setValue, getValues } = form;
   const mealPath = `meals.${mealIndex}` as const;
@@ -197,8 +196,9 @@ export const MealDropDown: FC<MealDropDownProps> = ({ mealNumber, mealIndex, cus
                       <CustomItemSelection
                         items={getSectionItems(section.source)}
                         selectedItems={
-                          (getValues(`${mealPath}.${section.key}.customItems` as const) as string[]) ||
-                          []
+                          (getValues(
+                            `${mealPath}.${section.key}.customItems` as const
+                          ) as string[]) || []
                         }
                         onItemToggle={(selectedItems) =>
                           handleToggleCustomItem(selectedItems, section.key, "customItems")
@@ -206,7 +206,9 @@ export const MealDropDown: FC<MealDropDownProps> = ({ mealNumber, mealIndex, cus
                       />
                       <ExtraItems
                         existingItems={
-                          (getValues(`${mealPath}.${section.key}.extraItems` as const) as string[]) || []
+                          (getValues(
+                            `${mealPath}.${section.key}.extraItems` as const
+                          ) as string[]) || []
                         }
                         onAddItem={(items) =>
                           handleToggleCustomItem(items, section.key, "extraItems")

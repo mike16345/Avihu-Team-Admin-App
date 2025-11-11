@@ -58,11 +58,7 @@ export const ViewDietPlanPresetPage = () => {
     mode: "onBlur",
   });
 
-  const {
-    reset: resetPlanForm,
-    getValues: getPlanValues,
-    watch: watchPlan,
-  } = planForm;
+  const { reset: resetPlanForm, getValues: getPlanValues, watch: watchPlan } = planForm;
   const meals = watchPlan("meals");
 
   const onSuccess = () => {
