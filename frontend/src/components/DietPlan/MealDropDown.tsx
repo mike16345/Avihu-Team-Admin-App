@@ -1,11 +1,9 @@
 import { FC, useEffect, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useFormContext, useWatch } from "react-hook-form";
 import { FaChevronDown } from "react-icons/fa";
 import { Button } from "../ui/button";
 import { Collapsible, CollapsibleContent } from "../ui/collapsible";
 import {
-  Form,
   FormControl,
   FormField,
   FormItem,
@@ -13,9 +11,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "../ui/input";
-import { CustomItems, IDietItem, IMeal } from "@/interfaces/IDietPlan";
+import { CustomItems, DietItemQuantityBlock, IDietPlan } from "@/interfaces/IDietPlan";
 import { CustomItemSelection } from "./CustomItemSelection";
-import { mealSchema } from "./DietPlanSchema";
 import ExtraItems from "./ExtraItems";
 import DeleteButton from "../ui/buttons/DeleteButton";
 import CustomRadioGroup from "../ui/CustomRadioGroup";
@@ -33,151 +30,120 @@ const dietRadioItems = [
   },
 ];
 
-type ShowCustomSelectionType = {
-  totalProtein: boolean;
-  totalCarbs: boolean;
-};
+const mealSections = [
+  { key: "totalProtein", label: "כמות חלבון", source: "protein" },
+  { key: "totalCarbs", label: "כמות פחמימות", source: "carbs" },
+  { key: "totalFats", label: "כמות שומנים", source: "fats" },
+  { key: "totalVeggies", label: "כמות ירקות", source: "veggies" },
+] as const;
 
-type CustomValues = {
-  totalProtein: string[];
-  totalCarbs: string[];
-};
+type SectionKey = (typeof mealSections)[number]["key"];
+type SectionSource = (typeof mealSections)[number]["source"];
+type ItemSelection = "Custom" | "Fixed";
+
+type ShowCustomSelectionType = Record<SectionKey, boolean>;
+type CustomValues = Record<SectionKey, string[]>;
 
 type MealDropDownProps = {
   mealNumber: number;
-  meal: IMeal;
+  mealIndex: number;
   customItems: CustomItems;
   onDelete: () => void;
-  setDietPlan: (meal: IMeal) => void;
 };
-type ItemSelection = "Custom" | "Fixed";
-type OmittedIMeal = Omit<IMeal, "_id">;
 
-export const MealDropDown: FC<MealDropDownProps> = ({
-  mealNumber,
-  meal,
-  customItems,
-  onDelete,
-  setDietPlan,
-}) => {
-  const initialFormValues = useMemo(() => {
-    return meal;
-  }, [meal]);
+type MealValue = IDietPlan["meals"][number];
 
-  const [initialCustomItems, setInitialCustomItems] = useState<CustomValues>({
-    totalProtein: meal.totalProtein.customItems || [],
-    totalCarbs: meal.totalCarbs.customItems || [],
-  });
+const createEmptyCustomValues = (): CustomValues =>
+  mealSections.reduce((acc, section) => {
+    acc[section.key] = [];
+    return acc;
+  }, {} as CustomValues);
 
-  const [initialExtraItems, setInitialExtraItems] = useState<CustomValues>({
-    totalProtein: meal.totalProtein.extraItems || [],
-    totalCarbs: meal.totalCarbs.extraItems || [],
-  });
+const extractCustomValues = (
+  meal: MealValue | undefined,
+  key: keyof DietItemQuantityBlock
+): CustomValues => {
+  return mealSections.reduce((acc, section) => {
+    const block = meal?.[section.key] as DietItemQuantityBlock | undefined;
+    const value = block?.[key];
+    acc[section.key] = Array.isArray(value) ? value : [];
+    return acc;
+  }, createEmptyCustomValues());
+};
 
-  const form = useForm<OmittedIMeal>({
-    resolver: zodResolver(mealSchema),
-    values: initialFormValues,
-    mode: "onBlur",
-  });
+const createEmptyShowState = (): ShowCustomSelectionType =>
+  mealSections.reduce((acc, section) => {
+    acc[section.key] = false;
+    return acc;
+  }, {} as ShowCustomSelectionType);
 
-  const {
-    control,
-    setValue,
-    formState: { errors },
-  } = form;
+const extractShowCustomSelection = (meal: MealValue | undefined): ShowCustomSelectionType => {
+  return mealSections.reduce((acc, section) => {
+    const block = meal?.[section.key] as DietItemQuantityBlock | undefined;
+    acc[section.key] = Boolean(block?.customItems?.length || block?.extraItems?.length);
+    return acc;
+  }, createEmptyShowState());
+};
+
+export const MealDropDown: FC<MealDropDownProps> = ({ mealNumber, mealIndex, customItems, onDelete }) => {
+  const form = useFormContext<IDietPlan>();
+  const { control, setValue, getValues } = form;
+  const mealPath = `meals.${mealIndex}` as const;
+  const meal = useWatch({ control, name: mealPath });
 
   const [isOpen, setIsOpen] = useState(false);
 
-  const initialShowCustomSelection = useMemo(() => {
-    const showProtein =
-      !!meal.totalProtein.customItems?.length || !!meal.totalProtein.extraItems?.length;
-    const showCarbs = !!meal.totalCarbs.customItems?.length || !!meal.totalCarbs.extraItems?.length;
+  const initialCustomValues = useMemo(() => extractCustomValues(meal, "customItems"), [meal]);
+  const initialExtraValues = useMemo(() => extractCustomValues(meal, "extraItems"), [meal]);
+  const initialShowState = useMemo(() => extractShowCustomSelection(meal), [meal]);
 
-    return {
-      totalProtein: showProtein,
-      totalCarbs: showCarbs,
-    };
-  }, [meal]);
+  const [storedCustomItems, setStoredCustomItems] = useState<CustomValues>(initialCustomValues);
+  const [storedExtraItems, setStoredExtraItems] = useState<CustomValues>(initialExtraValues);
+  const [showCustomSelection, setShowCustomSelection] =
+    useState<ShowCustomSelectionType>(initialShowState);
 
-  const [showCustomSelection, setShowCustomSelection] = useState<ShowCustomSelectionType>(
-    initialShowCustomSelection
-  );
-
-  const handleInputChange = (field: keyof OmittedIMeal, value: any) => {
-    const updatedMeal = {
-      ...form.getValues(),
-      [field]: { ...form.getValues()[field], quantity: value },
-    };
-    setDietPlan(updatedMeal);
-  };
+  useEffect(() => {
+    setStoredCustomItems(initialCustomValues);
+    setStoredExtraItems(initialExtraValues);
+    setShowCustomSelection(initialShowState);
+  }, [initialCustomValues, initialExtraValues, initialShowState]);
 
   const handleToggleCustomItem = (
     selectedItems: string[],
-    type: keyof OmittedIMeal,
-    key: keyof IDietItem
+    sectionKey: SectionKey,
+    key: keyof Pick<DietItemQuantityBlock, "customItems" | "extraItems">
   ) => {
-    const item = form.getValues()[type];
-    if (!item) return;
-
-    if (key == "customItems") {
-      setInitialCustomItems((prev) => {
-        return {
-          ...prev,
-          [type]: selectedItems,
-        };
-      });
-    } else if (key == "extraItems") {
-      setInitialExtraItems((prev) => {
-        return {
-          ...prev,
-          [type]: selectedItems,
-        };
-      });
-    }
-
-    setValue(type, { ...item, [key]: selectedItems });
-    handleInputChange(type, item.quantity);
-  };
-
-  const handleChangeItemSelectionType = (
-    type: ItemSelection,
-    field: keyof ShowCustomSelectionType
-  ) => {
-    const item = form.getValues()[field];
-    let meal: OmittedIMeal = {
-      ...form.getValues(),
-    };
-
-    setShowCustomSelection((prev) => ({ ...prev, [field]: type == "Custom" }));
-
-    if (type == "Custom") {
-      const val = {
-        ...item,
-        customItems: initialCustomItems[field],
-        extraItems: initialExtraItems[field],
-      };
-
-      setValue(field, {
-        ...item,
-        ...val,
-      });
-      meal = { ...meal, [field]: val };
+    if (key === "customItems") {
+      setStoredCustomItems((prev) => ({ ...prev, [sectionKey]: selectedItems }));
     } else {
-      const val = {
-        ...item,
-        customItems: [],
-        extraItems: [],
-      };
-
-      setValue(field, { ...item, ...val });
-      meal = { ...meal, [field]: val };
+      setStoredExtraItems((prev) => ({ ...prev, [sectionKey]: selectedItems }));
     }
-    setDietPlan(meal);
+
+    setValue(`${mealPath}.${sectionKey}.${key}` as const, selectedItems, {
+      shouldDirty: true,
+      shouldTouch: true,
+    });
   };
 
-  useEffect(() => {
-    form.trigger();
-  }, []);
+  const handleChangeItemSelectionType = (type: ItemSelection, field: SectionKey) => {
+    const isCustom = type === "Custom";
+
+    setShowCustomSelection((prev) => ({ ...prev, [field]: isCustom }));
+
+    const customItemsValue = isCustom ? storedCustomItems[field] : [];
+    const extraItemsValue = isCustom ? storedExtraItems[field] : [];
+
+    setValue(`${mealPath}.${field}.customItems` as const, customItemsValue, {
+      shouldDirty: true,
+      shouldTouch: true,
+    });
+    setValue(`${mealPath}.${field}.extraItems` as const, extraItemsValue, {
+      shouldDirty: true,
+      shouldTouch: true,
+    });
+  };
+
+  const getSectionItems = (source: SectionSource) => customItems?.[source] || [];
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen} className="gap-2">
@@ -197,53 +163,53 @@ export const MealDropDown: FC<MealDropDownProps> = ({
           </Button>
         </div>
       </div>
-      <Form {...form}>
-        <form>
-          <CollapsibleContent className={`flex flex-col gap-4 ${isOpen && "px-2 py-4"}`}>
+
+      <CollapsibleContent className={`flex flex-col gap-4 ${isOpen && "px-2 py-4"}`}>
+        {mealSections.map((section) => {
+          const quantityName = `meals.${mealIndex}.${section.key}.quantity` as const;
+          const isCustom = showCustomSelection[section.key];
+
+          return (
             <FormField
+              key={section.key}
               control={control}
-              name="totalProtein.quantity"
+              name={quantityName}
               render={({ field }) => (
                 <FormItem className="text-right font-bold">
-                  <FormLabel className="text-right font-bold">כמות חלבון</FormLabel>
+                  <FormLabel className="text-right font-bold">{section.label}</FormLabel>
                   <FormControl>
-                    <Input
-                      dir="rtl"
-                      type="number"
-                      {...field}
-                      onChange={(e) => {
-                        field.onChange(e);
-                        handleInputChange("totalProtein", e.target.value);
-                      }}
-                    />
+                    <Input dir="rtl" type="number" {...field} />
                   </FormControl>
-                  {errors.totalProtein?.quantity && (
-                    <FormMessage>{errors.totalProtein.quantity.message}</FormMessage>
-                  )}
+                  <FormMessage />
 
                   <div className="flex">
                     <CustomRadioGroup
                       className="flex items-center"
-                      defaultValue={showCustomSelection.totalProtein ? "Custom" : "Fixed"}
+                      value={isCustom ? "Custom" : "Fixed"}
                       onValueChange={(val: ItemSelection) =>
-                        handleChangeItemSelectionType(val, "totalProtein")
+                        handleChangeItemSelectionType(val, section.key)
                       }
                       items={dietRadioItems}
                     />
                   </div>
-                  {showCustomSelection.totalProtein && (
+                  {isCustom && (
                     <div className="space-y-2">
                       <CustomItemSelection
-                        items={customItems.protein}
-                        selectedItems={form?.getValues("totalProtein.customItems")}
+                        items={getSectionItems(section.source)}
+                        selectedItems={
+                          (getValues(`${mealPath}.${section.key}.customItems` as const) as string[]) ||
+                          []
+                        }
                         onItemToggle={(selectedItems) =>
-                          handleToggleCustomItem(selectedItems, "totalProtein", "customItems")
+                          handleToggleCustomItem(selectedItems, section.key, "customItems")
                         }
                       />
                       <ExtraItems
-                        existingItems={form?.getValues("totalProtein.extraItems")}
+                        existingItems={
+                          (getValues(`${mealPath}.${section.key}.extraItems` as const) as string[]) || []
+                        }
                         onAddItem={(items) =>
-                          handleToggleCustomItem(items, "totalProtein", "extraItems")
+                          handleToggleCustomItem(items, section.key, "extraItems")
                         }
                         trigger={
                           <Button variant={"secondary"} type="button">
@@ -256,63 +222,9 @@ export const MealDropDown: FC<MealDropDownProps> = ({
                 </FormItem>
               )}
             />
-
-            <FormField
-              control={control}
-              name="totalCarbs.quantity"
-              render={({ field }) => (
-                <FormItem className="text-right font-bold">
-                  <FormLabel className="text-right font-bold">כמות פחמימות</FormLabel>
-                  <FormControl>
-                    <Input
-                      dir="rtl"
-                      type="number"
-                      {...field}
-                      onChange={(e) => {
-                        field.onChange(e);
-                        handleInputChange("totalCarbs", e.target.value);
-                      }}
-                    />
-                  </FormControl>
-                  {errors.totalCarbs?.quantity && (
-                    <FormMessage>{errors.totalCarbs.quantity.message}</FormMessage>
-                  )}
-
-                  <div className="flex ">
-                    <CustomRadioGroup
-                      className="flex items-center"
-                      defaultValue={showCustomSelection.totalCarbs ? "Custom" : "Fixed"}
-                      onValueChange={(val: ItemSelection) =>
-                        handleChangeItemSelectionType(val, "totalCarbs")
-                      }
-                      items={dietRadioItems}
-                    />
-                  </div>
-
-                  {showCustomSelection.totalCarbs && (
-                    <div className="space-y-2">
-                      <CustomItemSelection
-                        items={customItems.carbs}
-                        selectedItems={form?.getValues("totalCarbs.customItems")}
-                        onItemToggle={(selectedItems) =>
-                          handleToggleCustomItem(selectedItems, "totalCarbs", "customItems")
-                        }
-                      />
-                      <ExtraItems
-                        existingItems={form.getValues("totalCarbs.extraItems")}
-                        onAddItem={(items) =>
-                          handleToggleCustomItem(items, "totalCarbs", "extraItems")
-                        }
-                        trigger={<Button type="button">פריטים נוספים</Button>}
-                      />
-                    </div>
-                  )}
-                </FormItem>
-              )}
-            />
-          </CollapsibleContent>
-        </form>
-      </Form>
+          );
+        })}
+      </CollapsibleContent>
     </Collapsible>
   );
 };

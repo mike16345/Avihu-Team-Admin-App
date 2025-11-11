@@ -215,8 +215,14 @@ const hebrewPathTranslations: Record<string, string> = {
   timesPerWeek: "פעמים בשבוע",
   warmUpAmount: "זמן חימום",
   freeCalories: "קלוריות חופשיות",
-  fatsPerDay: "שומנים ליום",
-  veggiesPerDay: "ירקות ליום",
+  totalProtein: "כמות חלבון",
+  totalCarbs: "כמות פחמימות",
+  totalFats: "כמות שומנים",
+  totalVeggies: "כמות ירקות",
+  quantity: "כמות",
+  customItems: "בחירה מותאמת",
+  extraItems: "פריטים נוספים",
+  supplements: "תוספים",
 };
 
 export const getNestedError = (

@@ -7,7 +7,7 @@ import DietPlanForm from "@/components/DietPlan/DietPlanForm";
 import Loader from "@/components/ui/Loader";
 import ErrorPage from "./ErrorPage";
 import { Input } from "@/components/ui/input";
-import { removeIdsAndVersions } from "@/utils/dietPlanUtils";
+import { normalizeDietPlan, removeIdsAndVersions } from "@/utils/dietPlanUtils";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -26,21 +26,22 @@ import { useNavigate } from "react-router-dom";
 import { MainRoutes } from "@/enums/Routes";
 import BackButton from "@/components/ui/BackButton";
 import { useDirtyFormContext } from "@/context/useFormContext";
-import { validateDietPlan } from "@/components/DietPlan/DietPlanSchema";
+import { dietPlanSchema, validateDietPlan } from "@/components/DietPlan/DietPlanSchema";
 import useDietPlanPresetQuery from "@/hooks/queries/dietPlans/useDietPlanPresetQuery";
 import useAddDietPlanPreset from "@/hooks/mutations/DietPlans/useAddDietPlanPreset";
 import useUpdateDietPlanPreset from "@/hooks/mutations/DietPlans/useUpdateDietPlanPreset";
 import { presetNameSchema, PresetNameSchemaType } from "@/schemas/dietPlanPresetSchema";
+import { useForm } from "react-hook-form";
+import { Form } from "@/components/ui/form";
 
 export const ViewDietPlanPresetPage = () => {
-  const { setErrors } = useDirtyFormContext();
+  const { setErrors, setIsDirty } = useDirtyFormContext();
 
   const navigation = useNavigate();
   const { id } = useParams();
   const queryClient = useQueryClient();
 
   const [isNewPlan, setIsNewPlan] = useState(true);
-  const [dietPlan, setDietPlan] = useState<IDietPlan>(defaultDietPlan);
 
   const presetNameForm = useForm<PresetNameSchemaType>({
     resolver: zodResolver(presetNameSchema),
@@ -50,6 +51,19 @@ export const ViewDietPlanPresetPage = () => {
   });
 
   const { reset } = presetNameForm;
+
+  const planForm = useForm<IDietPlan>({
+    resolver: zodResolver(dietPlanSchema),
+    defaultValues: defaultDietPlan,
+    mode: "onBlur",
+  });
+
+  const {
+    reset: resetPlanForm,
+    getValues: getPlanValues,
+    watch: watchPlan,
+  } = planForm;
+  const meals = watchPlan("meals");
 
   const onSuccess = () => {
     navigation(MainRoutes.DIET_PLANS);
@@ -70,6 +84,7 @@ export const ViewDietPlanPresetPage = () => {
   const updatePreset = useUpdateDietPlanPreset({ onSuccess, onError });
 
   const handleSubmit = (values: PresetNameSchemaType) => {
+    const dietPlan = getPlanValues();
     const dietPlanToAdd = {
       ...dietPlan,
       name: values.name,
@@ -91,15 +106,15 @@ export const ViewDietPlanPresetPage = () => {
     }
   };
 
-  const updateDietPlan = (dietPlan: IDietPlan) => setDietPlan(dietPlan);
-
   useEffect(() => {
     if (!data) return;
 
-    setDietPlan(data.data);
-    reset(data.data);
+    const normalized = normalizeDietPlan(data.data);
+    reset(normalized);
+    resetPlanForm(normalized);
     setIsNewPlan(false);
-  }, [data]);
+    setIsDirty(false);
+  }, [data, reset, resetPlanForm, setIsDirty]);
 
   if (isLoading) return <Loader size="large" />;
   if (error) return <ErrorPage message={error.message} />;
@@ -128,17 +143,19 @@ export const ViewDietPlanPresetPage = () => {
           </form>
         </Form>
       </div>
-      <DietPlanForm dietPlan={dietPlan} updateDietPlan={updateDietPlan}>
-        {dietPlan.meals.length > 0 && (
-          <CustomButton
-            className="font-bold sm:w-32 w-full"
-            variant="success"
-            title="שמור תפריט"
-            isLoading={createPreset.isPending || updatePreset.isPending}
-            onClick={presetNameForm.handleSubmit(handleSubmit)}
-          />
-        )}
-      </DietPlanForm>
+      <Form {...planForm}>
+        <DietPlanForm>
+          {(meals?.length || 0) > 0 && (
+            <CustomButton
+              className="font-bold sm:w-32 w-full"
+              variant="success"
+              title="שמור תפריט"
+              isLoading={createPreset.isPending || updatePreset.isPending}
+              onClick={presetNameForm.handleSubmit(handleSubmit)}
+            />
+          )}
+        </DietPlanForm>
+      </Form>
     </div>
   );
 };

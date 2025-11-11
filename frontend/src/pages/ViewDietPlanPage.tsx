@@ -1,4 +1,3 @@
-import { useDietPlanApi } from "@/hooks/api/useDietPlanApi";
 import { IDietPlan } from "@/interfaces/IDietPlan";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -15,9 +14,8 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { dietPlanSchema } from "@/components/DietPlan/DietPlanSchema";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import CustomButton from "@/components/ui/CustomButton";
-import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 import { useNavigate } from "react-router-dom";
 import { MainRoutes } from "@/enums/Routes";
 import { QueryKeys } from "@/enums/QueryKeys";
@@ -32,9 +30,15 @@ import useUpdateDietPlan from "@/hooks/mutations/DietPlans/useUpdateDietPlan";
 import useAddDietPlan from "@/hooks/mutations/DietPlans/useAddDietPlan";
 import useUserQuery from "@/hooks/queries/user/useUserQuery";
 import { presetNameSchema } from "@/schemas/dietPlanPresetSchema";
-import { createRetryFunction, getNestedZodError } from "@/lib/utils";
+import { getNestedZodError } from "@/lib/utils";
 import useDietPlanPresetsQuery from "@/hooks/queries/dietPlans/useDietPlanPresetsQuery";
 import { cleanWorkoutObject } from "@/utils/workoutPlanUtils";
+import { normalizeDietPlan } from "@/utils/dietPlanUtils";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Form } from "@/components/ui/form";
+import { useDirtyFormContext } from "@/context/useFormContext";
+import useGetDietPlan from "@/hooks/queries/dietPlans/useGetDietPlan";
 
 export const ViewDietPlanPage = () => {
   const navigation = useNavigate();
@@ -43,42 +47,25 @@ export const ViewDietPlanPage = () => {
   const { data: fetchedUser } = useUserQuery(id);
   const user = users.find((user) => user._id === id) || fetchedUser;
 
-  const { getDietPlanByUserId } = useDietPlanApi();
   const queryClient = useQueryClient();
 
   const [isNewPlan, setIsNewPlan] = useState(false);
   const [openPresetModal, setOpenPresetModal] = useState(false);
 
-  const handleGetDietPlan = async () => {
-    if (!id) return;
+  const { setIsDirty } = useDirtyFormContext();
 
-    try {
-      const plan = await getDietPlanByUserId(id);
-
-      setIsNewPlan(false);
-      setDietPlan(plan);
-
-      return plan;
-    } catch (err) {
-      setDietPlan(defaultDietPlan);
-      setIsNewPlan(true);
-      throw err;
-    }
-  };
-
-  const { isLoading, data } = useQuery({
-    queryKey: [`${QueryKeys.USER_DIET_PLAN}${id}`],
-    enabled: !!id,
-    staleTime: FULL_DAY_STALE_TIME,
-    queryFn: handleGetDietPlan,
-    retry: createRetryFunction(404, 2),
+  const form = useForm<IDietPlan>({
+    resolver: zodResolver(dietPlanSchema),
+    defaultValues: defaultDietPlan,
+    mode: "onBlur",
   });
 
+  const { reset, getValues, watch } = form;
+  const meals = watch("meals");
+
+  const { isLoading, data, error } = useGetDietPlan(id || "");
+
   const dietPlanPresets = useDietPlanPresetsQuery();
-
-  const [dietPlan, setDietPlan] = useState<IDietPlan | undefined>(data);
-
-  const updateDietPlan = (dietPlan: IDietPlan) => setDietPlan(dietPlan);
 
   const onSuccess = () => {
     toast.success("תפריט נשמר בהצלחה!");
@@ -101,20 +88,20 @@ export const ViewDietPlanPage = () => {
   const editDietPlan = useUpdateDietPlan({ onSuccess, onError });
   const addDietPlanPreset = useAddDietPlanPreset({ onSuccess: presetSuccess, onError });
 
-  const handleSubmit = () => {
-    if (!dietPlan) return;
+  const handleValidSubmit = (values: IDietPlan) => {
     const dietPlanToAdd = {
-      ...dietPlan,
+      ...values,
       userId: id,
     };
 
-    const { error } = dietPlanSchema.safeParse(dietPlanToAdd);
+    const result = dietPlanSchema.safeParse(dietPlanToAdd);
 
-    if (error) {
-      const { title, description } = getNestedZodError(error);
+    if (!result.success) {
+      const { title, description } = getNestedZodError(result.error);
 
       return toast.error(title, { description });
     }
+
     const cleanedDietPlan = cleanWorkoutObject(dietPlanToAdd);
 
     if (isNewPlan) {
@@ -127,19 +114,31 @@ export const ViewDietPlanPage = () => {
     }
   };
 
+  const handleInvalidSubmit = () => {
+    const result = dietPlanSchema.safeParse({
+      ...getValues(),
+      userId: id,
+    });
+
+    if (!result.success) {
+      const { title, description } = getNestedZodError(result.error);
+
+      toast.error(title, { description });
+    }
+  };
+
   const handleSelect = (presetName: string) => {
     const selectedPreset = dietPlanPresets.data?.data.find((preset) => preset.name === presetName);
 
     if (!selectedPreset) return;
-    const { name: _, ...rest } = selectedPreset;
+    const { name: _presetName, ...presetData } = selectedPreset;
+    void _presetName;
 
-    setDietPlan({
-      ...rest,
-    });
+    reset(normalizeDietPlan(presetData as IDietPlan));
   };
 
   const handleAddPreset = (name: string) => {
-    if (!dietPlan) return;
+    const dietPlan = getValues();
     const { error } = presetNameSchema.safeParse({ name: name });
 
     if (error) {
@@ -157,14 +156,24 @@ export const ViewDietPlanPage = () => {
   };
 
   useEffect(() => {
+    if (!id) return;
+
     if (data) {
-      setDietPlan(data);
+      reset(normalizeDietPlan(data));
       setIsNewPlan(false);
-    } else {
-      setIsNewPlan(true);
-      setDietPlan(defaultDietPlan);
+      setIsDirty(false);
     }
-  }, []);
+  }, [data, id, reset, setIsDirty]);
+
+  useEffect(() => {
+    if (!error) return;
+
+    if ((error as any)?.status === 404) {
+      reset(normalizeDietPlan(defaultDietPlan));
+      setIsNewPlan(true);
+      setIsDirty(false);
+    }
+  }, [error, reset, setIsDirty]);
 
   if (isLoading || dietPlanPresets.isLoading) return <Loader size="large" />;
 
@@ -187,32 +196,30 @@ export const ViewDietPlanPage = () => {
         </SelectContent>
       </Select>
 
-      {dietPlan && (
-        <>
-          <DietPlanForm dietPlan={dietPlan} updateDietPlan={updateDietPlan}>
-            {dietPlan && dietPlan.meals.length > 0 && (
-              <div className="flex gap-3 flex-col md:flex-row">
-                <CustomButton
-                  className="font-bold  sm:w-fit "
-                  variant="default"
-                  onClick={() => setOpenPresetModal(true)}
-                  title="שמור תפריט כתבנית"
-                  disabled={createDietPlan.isPending || editDietPlan.isPending}
-                  isLoading={addDietPlanPreset.isPending}
-                />
-                <CustomButton
-                  className="font-bold w-full sm:w-32"
-                  variant="success"
-                  onClick={handleSubmit}
-                  title="שמור תפריט"
-                  disabled={addDietPlanPreset.isPending}
-                  isLoading={createDietPlan.isPending || editDietPlan.isPending}
-                />
-              </div>
-            )}
-          </DietPlanForm>
-        </>
-      )}
+      <Form {...form}>
+        <DietPlanForm>
+          {(meals?.length || 0) > 0 && (
+            <div className="flex gap-3 flex-col md:flex-row">
+              <CustomButton
+                className="font-bold  sm:w-fit "
+                variant="default"
+                onClick={() => setOpenPresetModal(true)}
+                title="שמור תפריט כתבנית"
+                disabled={createDietPlan.isPending || editDietPlan.isPending}
+                isLoading={addDietPlanPreset.isPending}
+              />
+              <CustomButton
+                className="font-bold w-full sm:w-32"
+                variant="success"
+                onClick={form.handleSubmit(handleValidSubmit, handleInvalidSubmit)}
+                title="שמור תפריט"
+                disabled={addDietPlanPreset.isPending}
+                isLoading={createDietPlan.isPending || editDietPlan.isPending}
+              />
+            </div>
+          )}
+        </DietPlanForm>
+      </Form>
       <InputModal
         onClose={() => setOpenPresetModal(false)}
         open={openPresetModal}
