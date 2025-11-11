@@ -1,4 +1,4 @@
-import React, { PropsWithChildren, useEffect, useMemo, useState } from "react";
+import React, { PropsWithChildren, useMemo, useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { MealDropDown } from "./MealDropDown";
 import DeleteModal from "../Alerts/DeleteModal";
@@ -6,7 +6,6 @@ import { CustomItems, IDietPlan } from "@/interfaces/IDietPlan";
 import { defaultMeal } from "@/constants/DietPlanConsts";
 import CustomInstructions from "./CustomInstructions";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
-import { useDirtyFormContext } from "@/context/useFormContext";
 import useMenuItemsQuery from "@/hooks/queries/menuItems/useMenuItemsQuery";
 import AddButton from "../ui/buttons/AddButton";
 
@@ -16,7 +15,7 @@ const EMPTY_CUSTOM_ITEMS: CustomItems = {
   protein: [],
   carbs: [],
   fats: [],
-  veggies: [],
+  vegetables: [],
 };
 
 const cloneDietItem = (item: typeof defaultMeal.totalProtein) => ({
@@ -40,7 +39,6 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ children }) => {
     setValue,
     formState: { isDirty: formIsDirty },
   } = form;
-  const { isDirty, setIsDirty } = useDirtyFormContext();
 
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [mealToDelete, setMealToDelete] = useState<number | null>(null);
@@ -56,7 +54,6 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ children }) => {
 
   const handleAddMeal = () => {
     append(cloneDefaultMeal());
-    setIsDirty(true);
   };
 
   const handleDeleteMeal = () => {
@@ -64,7 +61,6 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ children }) => {
 
     remove(mealToDelete);
     setMealToDelete(null);
-    setIsDirty(true);
   };
 
   const handleUpdateInstructions = (
@@ -74,11 +70,7 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ children }) => {
     setValue(key, val, { shouldDirty: true, shouldTouch: true });
   };
 
-  useEffect(() => {
-    setIsDirty(formIsDirty);
-  }, [formIsDirty, setIsDirty]);
-
-  useUnsavedChangesWarning(isDirty);
+  useUnsavedChangesWarning(formIsDirty);
 
   return (
     <div className=" flex flex-col gap-4 w-full h-auto">

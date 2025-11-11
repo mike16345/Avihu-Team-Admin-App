@@ -28,7 +28,7 @@ const mealSections = [
   { key: "totalProtein", label: "כמות חלבון", source: "protein" },
   { key: "totalCarbs", label: "כמות פחמימות", source: "carbs" },
   { key: "totalFats", label: "כמות שומנים", source: "fats" },
-  { key: "totalVeggies", label: "כמות ירקות", source: "veggies" },
+  { key: "totalVeggies", label: "כמות ירקות", source: "vegetables" },
 ] as const;
 
 type SectionKey = (typeof mealSections)[number]["key"];
@@ -101,12 +101,6 @@ export const MealDropDown: FC<MealDropDownProps> = ({
   const [showCustomSelection, setShowCustomSelection] =
     useState<ShowCustomSelectionType>(initialShowState);
 
-  useEffect(() => {
-    setStoredCustomItems(initialCustomValues);
-    setStoredExtraItems(initialExtraValues);
-    setShowCustomSelection(initialShowState);
-  }, [initialCustomValues, initialExtraValues, initialShowState]);
-
   const handleToggleCustomItem = (
     selectedItems: string[],
     sectionKey: SectionKey,
@@ -143,6 +137,14 @@ export const MealDropDown: FC<MealDropDownProps> = ({
   };
 
   const getSectionItems = (source: SectionSource) => customItems?.[source] || [];
+
+  useEffect(() => {
+    if (!meal) return;
+
+    setStoredCustomItems(initialCustomValues);
+    setStoredExtraItems(initialExtraValues);
+    setShowCustomSelection(initialShowState);
+  }, [mealIndex]);
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen} className="gap-2">

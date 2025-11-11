@@ -64,5 +64,5 @@ export type CustomItems = {
   carbs: string[];
   protein: string[];
   fats: string[];
-  veggies: string[];
+  vegetables: string[];
 };
