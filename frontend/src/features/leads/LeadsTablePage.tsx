@@ -85,7 +85,10 @@ const LeadsTablePage = () => {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>בטל</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => deleteLead.mutate(id)} disabled={deleteLead.isPending}>
+                  <AlertDialogAction
+                    onClick={() => deleteLead.mutate(id)}
+                    disabled={deleteLead.isPending}
+                  >
                     מחק
                   </AlertDialogAction>
                 </AlertDialogFooter>
