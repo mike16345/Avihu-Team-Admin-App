@@ -1,13 +1,4 @@
-import {
-  Home,
-  BicepsFlexed,
-  LucideIcon,
-  User,
-  Edit,
-  SquareMenu,
-  User2,
-  Inbox,
-} from "lucide-react";
+import { Home, BicepsFlexed, LucideIcon, User, Edit, SquareMenu, User2, Inbox } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
