@@ -1,4 +1,4 @@
-import { Home, BicepsFlexed, LucideIcon, User, Edit, SquareMenu, User2 } from "lucide-react";
+import { Home, BicepsFlexed, LucideIcon, User, Edit, SquareMenu, User2, Inbox } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -30,8 +30,13 @@ const items: LinkProps[] = [
   },
   {
     url: "/users",
-    title: "משתמשים",
+    title: "לקוחות",
     icon: User,
+  },
+  {
+    url: "/leads",
+    title: "לידים",
+    icon: Inbox,
   },
   {
     url: "/blogs",
