@@ -1,4 +1,13 @@
-import { Home, BicepsFlexed, LucideIcon, User, Edit, SquareMenu, User2 } from "lucide-react";
+import {
+  Home,
+  BicepsFlexed,
+  LucideIcon,
+  User,
+  Edit,
+  SquareMenu,
+  User2,
+  Inbox,
+} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -9,6 +18,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import { Link, useLocation } from "react-router-dom";
 import LogoutButton from "../Navbar/LogoutButton";
@@ -22,16 +34,34 @@ type LinkProps = {
   icon: LucideIcon;
 };
 
-const items: LinkProps[] = [
+type SidebarItem = {
+  title: string;
+  icon: LucideIcon;
+  url?: string;
+  children?: LinkProps[];
+};
+
+const items: SidebarItem[] = [
   {
     url: "/",
     title: "בית",
     icon: Home,
   },
   {
-    url: "/users",
-    title: "משתמשים",
+    title: "לקוחות",
     icon: User,
+    children: [
+      {
+        url: "/users",
+        title: "לקוחות",
+        icon: User,
+      },
+      {
+        url: "/leads",
+        title: "לידים",
+        icon: Inbox,
+      },
+    ],
   },
   {
     url: "/blogs",
@@ -53,21 +83,61 @@ const items: LinkProps[] = [
 const SidebarItems = () => {
   const location = useLocation();
 
-  return items.map((item) => (
-    <SidebarMenuItem key={item.title}>
-      <SidebarMenuButton asChild>
-        <Link
-          className={`w-full rounded-full  ${
-            location.pathname == item.url && " text-secondary bg-secondary-foreground"
-          } `}
-          to={item.url}
-        >
-          <item.icon />
-          <span>{item.title}</span>
-        </Link>
-      </SidebarMenuButton>
-    </SidebarMenuItem>
-  ));
+  return items.map((item) => {
+    const hasChildren = Boolean(item.children?.length);
+    const isActive = hasChildren
+      ? item.children?.some((child) => child.url === location.pathname)
+      : location.pathname === item.url;
+
+    if (!hasChildren && item.url) {
+      return (
+        <SidebarMenuItem key={item.title}>
+          <SidebarMenuButton asChild isActive={isActive}>
+            <Link
+              className={`w-full rounded-full  ${
+                isActive && " text-secondary bg-secondary-foreground"
+              } `}
+              to={item.url}
+            >
+              <item.icon />
+              <span>{item.title}</span>
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      );
+    }
+
+    return (
+      <SidebarMenuItem key={item.title}>
+        <SidebarMenuButton isActive={Boolean(isActive)}>
+          <div className="flex items-center gap-2">
+            <item.icon />
+            <span>{item.title}</span>
+          </div>
+        </SidebarMenuButton>
+        <SidebarMenuSub>
+          {item.children?.map((child) => {
+            const childActive = location.pathname === child.url;
+            return (
+              <SidebarMenuSubItem key={child.title}>
+                <SidebarMenuSubButton asChild isActive={childActive}>
+                  <Link
+                    className={`flex items-center gap-2 ${
+                      childActive && " text-secondary bg-secondary-foreground"
+                    }`}
+                    to={child.url}
+                  >
+                    {child.icon ? <child.icon /> : null}
+                    <span>{child.title}</span>
+                  </Link>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+            );
+          })}
+        </SidebarMenuSub>
+      </SidebarMenuItem>
+    );
+  });
 };
 
 const Header = () => {
