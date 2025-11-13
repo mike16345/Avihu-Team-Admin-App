@@ -1,11 +1,8 @@
 import { useMemo } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
-import { format } from "date-fns";
-
 import DeleteLeadAlert from "@/components/leads/DeleteLeadAlert";
 import type { Lead } from "@/interfaces/leads";
-
-const DATE_FORMAT = "dd/MM/yyyy HH:mm";
+import DateUtils from "@/lib/dateUtils";
 
 type LeadsColumnsOptions = {
   onDelete: (lead: Lead) => void;
@@ -36,19 +33,10 @@ export const useLeadsColumns = ({ onDelete, isDeleting = false }: LeadsColumnsOp
         cell: ({ row }) => {
           const iso = row.original.registeredAt ?? row.original.createdAt;
           if (!iso) return "-";
-          return format(new Date(iso), DATE_FORMAT);
+          return DateUtils.formatDate(new Date(iso), "DD/MM/YYYY");
         },
       },
-      {
-        accessorKey: "deviceId",
-        header: "Device",
-        cell: ({ row }) => row.original.deviceId ?? "-",
-      },
-      {
-        accessorKey: "ip",
-        header: "IP",
-        cell: ({ row }) => (row.original.ip ? <span dir="ltr">{row.original.ip}</span> : "-"),
-      },
+
       {
         id: "actions",
         header: "פעולות",
