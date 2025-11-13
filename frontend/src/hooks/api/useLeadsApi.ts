@@ -18,7 +18,7 @@ export function useLeadsApi() {
   };
 
   const getById = async (id: LeadId): Promise<Lead> => {
-    const response = await fetchData<LeadResponse>(`${base}/${id}`);
+    const response = await fetchData<LeadResponse>(`${base}/one`, { id });
     return response.data;
   };
 
@@ -28,12 +28,12 @@ export function useLeadsApi() {
   };
 
   const update = async (id: LeadId, body: UpdateLeadBody): Promise<Lead> => {
-    const response = (await updateItem(`${base}/${id}`, body)) as LeadResponse;
+    const response = (await updateItem(`${base}/one`, body, undefined, { id })) as LeadResponse;
     return response.data;
   };
 
   const remove = async (id: LeadId): Promise<void> => {
-    await deleteItem(`${base}/${id}`);
+    await deleteItem(`${base}/one`, { id });
   };
 
   return { list, getById, create, update, remove };
