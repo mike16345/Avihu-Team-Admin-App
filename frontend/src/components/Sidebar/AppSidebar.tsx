@@ -1,4 +1,14 @@
-import { Home, BicepsFlexed, LucideIcon, User, Edit, SquareMenu, User2, Inbox } from "lucide-react";
+import {
+  Home,
+  BicepsFlexed,
+  LucideIcon,
+  User,
+  Edit,
+  SquareMenu,
+  User2,
+  Inbox,
+  ChevronDown,
+} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -13,6 +23,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Link, useLocation } from "react-router-dom";
 import LogoutButton from "../Navbar/LogoutButton";
 import { ModeToggle } from "../theme/mode-toggle";
@@ -44,7 +55,7 @@ const items: SidebarItem[] = [
     children: [
       {
         url: "/users",
-        title: "לקוחות",
+        title: "משתמשים",
         icon: User,
       },
       {
@@ -74,61 +85,74 @@ const items: SidebarItem[] = [
 const SidebarItems = () => {
   const location = useLocation();
 
-  return items.map((item) => {
-    const hasChildren = Boolean(item.children?.length);
-    const isActive = hasChildren
-      ? item.children?.some((child) => child.url === location.pathname)
-      : location.pathname === item.url;
+  return (
+    <>
+      {items.map((item) => {
+        const hasChildren = Boolean(item.children?.length);
+        const isActive = hasChildren
+          ? item.children?.some((child) => child.url === location.pathname)
+          : location.pathname === item.url;
 
-    if (!hasChildren && item.url) {
-      return (
-        <SidebarMenuItem key={item.title}>
-          <SidebarMenuButton asChild isActive={isActive}>
-            <Link
-              className={`w-full rounded-full  ${
-                isActive && " text-secondary bg-secondary-foreground"
-              } `}
-              to={item.url}
-            >
-              <item.icon />
-              <span>{item.title}</span>
-            </Link>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      );
-    }
+        if (!hasChildren && item.url) {
+          return (
+            <SidebarMenuItem key={item.title}>
+              <SidebarMenuButton asChild isActive={isActive}>
+                <Link
+                  className={`w-full rounded-full ${
+                    isActive && "text-secondary bg-secondary-foreground"
+                  }`}
+                  to={item.url}
+                >
+                  <item.icon />
+                  <span>{item.title}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          );
+        }
 
-    return (
-      <SidebarMenuItem key={item.title}>
-        <SidebarMenuButton isActive={Boolean(isActive)}>
-          <div className="flex items-center gap-2">
-            <item.icon />
-            <span>{item.title}</span>
-          </div>
-        </SidebarMenuButton>
-        <SidebarMenuSub>
-          {item.children?.map((child) => {
-            const childActive = location.pathname === child.url;
-            return (
-              <SidebarMenuSubItem key={child.title}>
-                <SidebarMenuSubButton asChild isActive={childActive}>
-                  <Link
-                    className={`flex items-center gap-2 ${
-                      childActive && " text-secondary bg-secondary-foreground"
-                    }`}
-                    to={child.url}
-                  >
-                    {child.icon ? <child.icon /> : null}
-                    <span>{child.title}</span>
-                  </Link>
-                </SidebarMenuSubButton>
-              </SidebarMenuSubItem>
-            );
-          })}
-        </SidebarMenuSub>
-      </SidebarMenuItem>
-    );
-  });
+        return (
+          <SidebarMenuItem key={item.title}>
+            <Collapsible defaultOpen={Boolean(isActive)} className="group/collapsible">
+              <CollapsibleTrigger className="flex items-center w-full justify-between" asChild>
+                <SidebarMenuButton isActive={Boolean(isActive)}>
+                  <div className="flex items-center gap-2">
+                    <item.icon />
+                    <span>{item.title}</span>
+                  </div>
+                  <ChevronDown className="mr-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                </SidebarMenuButton>
+              </CollapsibleTrigger>
+
+              <CollapsibleContent>
+                <SidebarMenuSub>
+                  {item.children?.map((child) => {
+                    const childActive = location.pathname === child.url;
+
+                    return (
+                      <SidebarMenuSubItem key={child.title}>
+                        <SidebarMenuSubButton asChild isActive={childActive}> 
+                          <Link
+                            className={`flex items-center gap-2 ${
+                              childActive && "text-secondary bg-secondary"
+                            }`}
+                            to={child.url}
+                          >
+                            {child.icon ? <child.icon /> : null}
+                            <span>{child.title}</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    );
+                  })}
+                </SidebarMenuSub>
+              </CollapsibleContent>
+            </Collapsible>
+          </SidebarMenuItem>
+        );
+      })}
+    </>
+  );
 };
 
 const Header = () => {
