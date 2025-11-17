@@ -131,7 +131,7 @@ const SidebarItems = () => {
 
                     return (
                       <SidebarMenuSubItem key={child.title}>
-                        <SidebarMenuSubButton asChild isActive={childActive}> 
+                        <SidebarMenuSubButton asChild isActive={childActive}>
                           <Link
                             className={`flex items-center gap-2 ${
                               childActive && "text-secondary bg-secondary"
