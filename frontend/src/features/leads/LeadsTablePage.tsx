@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { DataTableHebrew } from "@/components/tables/DataTableHebrew";
 import Loader from "@/components/ui/Loader";
@@ -9,13 +9,22 @@ import { useLeadsColumns } from "@/components/columns/leads";
 import type { Lead } from "@/interfaces/leads";
 
 const LeadsTablePage = () => {
-  const [page] = useState(1);
+  const [page, setPage] = useState(1);
   const limit = 25;
 
   const { data, isLoading, isError, error } = useLeadsList(page, limit);
   const { mutate: deleteLead, isPending: isDeleting } = useDeleteLead();
 
   const leads = data?.items ?? [];
+  const totalPages = data ? Math.max(1, Math.ceil(data.total / limit)) : 1;
+
+  useEffect(() => {
+    if (!data) return;
+    const maxPage = Math.max(1, Math.ceil(data.total / limit));
+    if (page > maxPage) {
+      setPage(maxPage);
+    }
+  }, [data, limit, page]);
 
   const columns = useLeadsColumns({
     onDelete: (lead: Lead) => deleteLead(lead._id),
@@ -42,6 +51,12 @@ const LeadsTablePage = () => {
         handleViewNestedData={() => {}}
         getRowClassName={() => ""}
         handleHoverOnRow={() => false}
+        pageNumber={page}
+        pageCount={totalPages}
+        onPageChange={(nextPage) => {
+          const safePage = Math.min(Math.max(nextPage, 1), totalPages);
+          setPage(safePage);
+        }}
       />
     </div>
   );

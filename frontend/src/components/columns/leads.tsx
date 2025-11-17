@@ -33,7 +33,11 @@ export const useLeadsColumns = ({ onDelete, isDeleting = false }: LeadsColumnsOp
         cell: ({ row }) => {
           const iso = row.original.registeredAt ?? row.original.createdAt;
           if (!iso) return "-";
-          return DateUtils.formatDate(new Date(iso), "DD/MM/YYYY");
+          const parsedDate = new Date(iso);
+          if (Number.isNaN(parsedDate.getTime())) {
+            return "-";
+          }
+          return DateUtils.formatDate(parsedDate, "DD/MM/YYYY");
         },
       },
 
@@ -43,7 +47,7 @@ export const useLeadsColumns = ({ onDelete, isDeleting = false }: LeadsColumnsOp
         cell: ({ row }) => (
           <DeleteLeadAlert
             lead={row.original}
-            disabled={isDeleting}
+            isLoading={isDeleting}
             onConfirm={() => onDelete(row.original)}
           />
         ),
