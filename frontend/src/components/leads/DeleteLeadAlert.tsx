@@ -22,14 +22,14 @@ const DeleteLeadAlert = ({ lead, onConfirm, isLoading }: DeleteLeadAlertProps) =
 
         onCancel={() => setIsDeleteModalOpen(false)}
       />
-        <CustomButton
-          onClick={() => setIsDeleteModalOpen(true)}
-          title="מחק"
-          isLoading={isLoading}
-          size={"lg"}
-          variant="destructive"
-          data-testid={`lead-delete-${lead._id}`}
-        />
+      <CustomButton
+        onClick={() => setIsDeleteModalOpen(true)}
+        title="מחק"
+        isLoading={isLoading}
+        size={"lg"}
+        variant="destructive"
+        data-testid={`lead-delete-${lead._id}`}
+      />
     </>
   );
 };

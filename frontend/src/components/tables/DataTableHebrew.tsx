@@ -87,7 +87,8 @@ export function DataTableHebrew<TData, TValue>({
     pageIndex: currentPageNumber - 1,
     pageSize: 10,
   }));
-  const isServerPaginated = typeof controlledPageNumber === "number" && typeof onPageChange === "function";
+  const isServerPaginated =
+    typeof controlledPageNumber === "number" && typeof onPageChange === "function";
 
   useEffect(() => {
     if (!isServerPaginated) return;
