@@ -221,27 +221,28 @@ export function DataTableHebrew<TData, TValue>({
         {filters ? <div className="flex flex-wrap items-center gap-2">{filters}</div> : null}
       </div>
       <div className="rounded-md border min-h-[60vh] max-h-[65vh] overflow-auto">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead className="text-right" key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          {isLoadingNextPage ? (
-            <div className="size-full flex items-center justify-center">
-              <Loader size="large" />
-            </div>
-          ) : (
+        {isLoadingNextPage ? (
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <Loader size="xl" />
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead className="text-right" key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(header.column.columnDef.header, header.getContext())}
+                      </TableHead>
+                    );
+                  })}
+                </TableRow>
+              ))}
+            </TableHeader>
+
             <TableBody>
               {table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
@@ -273,8 +274,8 @@ export function DataTableHebrew<TData, TValue>({
                 </TableRow>
               )}
             </TableBody>
-          )}
-        </Table>
+          </Table>
+        )}
       </div>
       <div className="flex items-center justify-between sm:justify-end gap-3 py-4">
         <Button

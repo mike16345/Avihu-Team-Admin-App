@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 
 import { DataTableHebrew } from "@/components/tables/DataTableHebrew";
-import Loader from "@/components/ui/Loader";
 import ErrorPage from "@/pages/ErrorPage";
 import { useLeadsList } from "@/hooks/queries/leads";
 import { useDeleteLead } from "@/hooks/mutations/leads";
@@ -10,14 +9,13 @@ import type { Lead } from "@/interfaces/leads";
 
 const LeadsTablePage = () => {
   const [page, setPage] = useState(1);
-  const limit = 15;
+  const limit = 10;
 
   const { data, isLoading, isError, error } = useLeadsList(page, limit);
   const { mutate: deleteLead, isPending: isDeleting } = useDeleteLead();
 
   const leads = data?.items ?? [];
-  console.log("data", data);
-  const totalPages = data ? Math.max(1, Math.ceil(data.total / limit)) : 1;
+  const [total, setTotal] = useState(1);
 
   useEffect(() => {
     if (!data) return;
@@ -27,6 +25,9 @@ const LeadsTablePage = () => {
     setPage((prev) => {
       return prev > maxPage ? maxPage : prev;
     });
+
+    const total = data.total ? Math.max(1, Math.ceil(data.total / limit)) : 1;
+    setTotal(total);
   }, [data, limit]);
 
   const columns = useLeadsColumns({
@@ -52,9 +53,9 @@ const LeadsTablePage = () => {
         getRowClassName={() => ""}
         handleHoverOnRow={() => false}
         pageNumber={page}
-        pageCount={totalPages}
+        pageCount={total}
         onPageChange={(nextPage) => {
-          const safePage = Math.min(Math.max(nextPage, 1), totalPages);
+          const safePage = Math.min(Math.max(nextPage, 1), total);
           setPage(safePage);
         }}
       />
