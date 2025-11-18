@@ -44,6 +44,7 @@ const LeadsTablePage = () => {
       <h1 className="text-2xl font-semibold">לידים</h1>
       <DataTableHebrew
         data={leads}
+        getRowId={(row) => row._id || ""}
         columns={columns}
         isLoadingNextPage={isLoading}
         handleSetData={() => {}}

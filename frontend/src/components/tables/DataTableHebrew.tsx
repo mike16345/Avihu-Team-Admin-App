@@ -46,6 +46,7 @@ interface DataTableProps<TData, TValue> {
   handleViewNestedData: (data: any | any[], id: string) => void;
   getRowClassName: (row: TData) => string;
   handleHoverOnRow: (row: TData) => boolean;
+  getRowId: (row: TData) => string;
   pageNumber?: number;
   pageCount?: number;
   onPageChange?: (page: number) => void;
@@ -78,6 +79,7 @@ export function DataTableHebrew<TData, TValue>({
   pageNumber: controlledPageNumber,
   pageCount,
   onPageChange,
+  getRowId,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -245,27 +247,31 @@ export function DataTableHebrew<TData, TValue>({
 
             <TableBody>
               {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <UserExpiredTooltip isActive={handleHoverOnRow?.(row.original)}>
-                    <TableRow
-                      key={row.id}
-                      className={getRowClassName(row.original)}
-                      onDoubleClick={(e) => {
-                        const target = e.target as HTMLElement;
-                        if (target.id == "row-checkbox" || target.id == "access-switch") return;
-
-                        handleViewData(row.original);
-                      }}
-                      data-state={row.getIsSelected() && "selected"}
+                table.getRowModel().rows.map((row) => {
+                  return (
+                    <UserExpiredTooltip
+                      key={getRowId(row.original) ?? row.id}
+                      isActive={handleHoverOnRow?.(row.original)}
                     >
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  </UserExpiredTooltip>
-                ))
+                      <TableRow
+                        className={getRowClassName(row.original)}
+                        onDoubleClick={(e) => {
+                          const target = e.target as HTMLElement;
+                          if (target.id == "row-checkbox" || target.id == "access-switch") return;
+
+                          handleViewData(row.original);
+                        }}
+                        data-state={row.getIsSelected() && "selected"}
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell key={cell.id}>
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    </UserExpiredTooltip>
+                  );
+                })
               ) : (
                 <TableRow>
                   <TableCell colSpan={columns.length} className="h-24 text-center">

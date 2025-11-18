@@ -65,6 +65,7 @@ export const UsersTable = () => {
         actionButton={<Button onClick={() => navigate(`/users/add`)}>הוסף משתמש</Button>}
         handleSetData={() => {}}
         handleViewData={(user) => handleViewUser(user)}
+        getRowId={(row) => row._id || ""}
         handleDeleteData={(user) => usersMutation.mutate(user._id || "")}
         handleViewNestedData={(_, userId) => navigate(`/users/${userId}?tab=${weightTab}`)}
         getRowClassName={(user) => handleGetRowClassName(user)}
