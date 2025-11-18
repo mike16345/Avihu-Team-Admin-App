@@ -33,6 +33,7 @@ import { RowData } from "@tanstack/react-table";
 import { usePagination } from "@/hooks/usePagination";
 import DeleteButton from "../ui/buttons/DeleteButton";
 import UserExpiredTooltip from "./UserExpiredTooltip";
+import Loader from "../ui/Loader";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -48,6 +49,7 @@ interface DataTableProps<TData, TValue> {
   pageNumber?: number;
   pageCount?: number;
   onPageChange?: (page: number) => void;
+  isLoadingNextPage?: boolean;
 }
 
 declare module "@tanstack/table-core" {
@@ -72,6 +74,7 @@ export function DataTableHebrew<TData, TValue>({
   handleSetData,
   getRowClassName,
   handleHoverOnRow,
+  isLoadingNextPage,
   pageNumber: controlledPageNumber,
   pageCount,
   onPageChange,
@@ -234,37 +237,43 @@ export function DataTableHebrew<TData, TValue>({
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <UserExpiredTooltip isActive={handleHoverOnRow?.(row.original)}>
-                  <TableRow
-                    key={row.id}
-                    className={getRowClassName(row.original)}
-                    onDoubleClick={(e) => {
-                      const target = e.target as HTMLElement;
-                      if (target.id == "row-checkbox" || target.id == "access-switch") return;
+          {isLoadingNextPage ? (
+           <div className="size-full flex items-center justify-center">
+             <Loader size="large" />
+           </div>
+          ) : (
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <UserExpiredTooltip isActive={handleHoverOnRow?.(row.original)}>
+                    <TableRow
+                      key={row.id}
+                      className={getRowClassName(row.original)}
+                      onDoubleClick={(e) => {
+                        const target = e.target as HTMLElement;
+                        if (target.id == "row-checkbox" || target.id == "access-switch") return;
 
-                      handleViewData(row.original);
-                    }}
-                    data-state={row.getIsSelected() && "selected"}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </UserExpiredTooltip>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  אין תוצאות
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
+                        handleViewData(row.original);
+                      }}
+                      data-state={row.getIsSelected() && "selected"}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  </UserExpiredTooltip>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="h-24 text-center">
+                    אין תוצאות
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          )}
         </Table>
       </div>
       <div className="flex items-center justify-between sm:justify-end gap-3 py-4">

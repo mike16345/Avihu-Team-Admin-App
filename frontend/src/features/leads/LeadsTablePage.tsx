@@ -10,30 +10,29 @@ import type { Lead } from "@/interfaces/leads";
 
 const LeadsTablePage = () => {
   const [page, setPage] = useState(1);
-  const limit = 25;
+  const limit = 15;
 
   const { data, isLoading, isError, error } = useLeadsList(page, limit);
   const { mutate: deleteLead, isPending: isDeleting } = useDeleteLead();
 
   const leads = data?.items ?? [];
+  console.log("data", data);
   const totalPages = data ? Math.max(1, Math.ceil(data.total / limit)) : 1;
 
   useEffect(() => {
     if (!data) return;
+
     const maxPage = Math.max(1, Math.ceil(data.total / limit));
-    if (page > maxPage) {
-      setPage(maxPage);
-    }
-  }, [data, limit, page]);
+
+    setPage((prev) => {
+      return prev > maxPage ? maxPage : prev;
+    });
+  }, [data, limit]);
 
   const columns = useLeadsColumns({
     onDelete: (lead: Lead) => deleteLead(lead._id),
     isDeleting,
   });
-
-  if (isLoading) {
-    return <Loader size="large" />;
-  }
 
   if (isError) {
     return <ErrorPage message={error?.message ?? "שגיאה בטעינת הלידים"} />;
@@ -45,6 +44,7 @@ const LeadsTablePage = () => {
       <DataTableHebrew
         data={leads}
         columns={columns}
+        isLoadingNextPage={isLoading}
         handleSetData={() => {}}
         handleViewData={() => {}}
         handleDeleteData={(lead: Lead) => deleteLead(lead._id)}
