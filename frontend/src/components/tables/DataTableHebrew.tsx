@@ -238,9 +238,9 @@ export function DataTableHebrew<TData, TValue>({
             ))}
           </TableHeader>
           {isLoadingNextPage ? (
-           <div className="size-full flex items-center justify-center">
-             <Loader size="large" />
-           </div>
+            <div className="size-full flex items-center justify-center">
+              <Loader size="large" />
+            </div>
           ) : (
             <TableBody>
               {table.getRowModel().rows?.length ? (
