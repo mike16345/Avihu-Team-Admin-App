@@ -116,7 +116,8 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
     setIsSheetOpen(true);
   }, [selectedObjectId]);
 
-  if (apiData.isError) return <ErrorPage message={apiData.error.message} />;
+  if (apiData.isError && apiData.error !== 404)
+    return <ErrorPage message={apiData.error.message} />;
 
   return (
     <>
