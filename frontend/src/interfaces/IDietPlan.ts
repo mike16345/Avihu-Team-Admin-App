@@ -8,16 +8,20 @@ export interface ICustomItem {
   };
 }
 
-export interface IDietItem {
+export type DietItemQuantityBlock = {
   quantity: number;
   customItems?: string[];
   extraItems?: string[];
-}
+};
+
+export type IDietItem = DietItemQuantityBlock;
 
 export interface IMeal {
   _id?: string;
-  totalProtein: IDietItem;
-  totalCarbs: IDietItem;
+  totalProtein: DietItemQuantityBlock;
+  totalCarbs: DietItemQuantityBlock;
+  totalFats: DietItemQuantityBlock;
+  totalVeggies: DietItemQuantityBlock;
 }
 
 export interface IDietPlan {
@@ -59,4 +63,6 @@ export interface IMenue {
 export type CustomItems = {
   carbs: string[];
   protein: string[];
+  fats: string[];
+  vegetables: string[];
 };

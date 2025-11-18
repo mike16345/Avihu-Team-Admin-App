@@ -6,10 +6,10 @@ import { useState } from "react";
 interface DeleteLeadAlertProps {
   lead: Lead;
   onConfirm: () => Promise<void> | void;
-  disabled?: boolean;
+  isLoading?: boolean;
 }
 
-const DeleteLeadAlert = ({ lead, onConfirm, disabled }: DeleteLeadAlertProps) => {
+const DeleteLeadAlert = ({ lead, onConfirm, isLoading }: DeleteLeadAlertProps) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   return (
@@ -25,7 +25,7 @@ const DeleteLeadAlert = ({ lead, onConfirm, disabled }: DeleteLeadAlertProps) =>
       <CustomButton
         onClick={() => setIsDeleteModalOpen(true)}
         title="מחק"
-        isLoading={disabled}
+        isLoading={isLoading}
         size={"lg"}
         variant="destructive"
         data-testid={`lead-delete-${lead._id}`}
