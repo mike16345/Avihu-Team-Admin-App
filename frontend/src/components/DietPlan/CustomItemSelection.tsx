@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { Badge } from "../ui/badge";
 import { FaCheck, FaPlus } from "react-icons/fa";
 
@@ -14,6 +14,10 @@ export const CustomItemSelection: FC<CustomItemSelectionProps> = ({
   items,
 }) => {
   const [selected, setSelectedItems] = useState<string[]>(selectedItems || []);
+
+  useEffect(() => {
+    setSelectedItems(selectedItems || []);
+  }, [selectedItems]);
 
   const toggleSelect = (item: string) => {
     setSelectedItems((prevSelectedItems) => {

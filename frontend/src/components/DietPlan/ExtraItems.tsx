@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { Badge } from "../ui/badge";
 import {
   Sheet,
@@ -40,6 +40,10 @@ const ExtraItems: FC<ExtraItemsProps> = ({ trigger, existingItems = [], onAddIte
   const [extraItems, setExtraItems] = useState<string[]>(existingItems);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [editItem, setEditItem] = useState<string | null>(null);
+
+  useEffect(() => {
+    setExtraItems(existingItems);
+  }, [existingItems]);
 
   const formControl = useForm<NameFormData>({
     resolver: zodResolver(nameSchema),

@@ -8,17 +8,13 @@ interface CustomInstructionsProps {
   instructions?: string[];
   supplements?: string[];
   freeCalories: number;
-  fatsPerDay: number;
-  veggiesPerDay: number;
-  onUpdate: (key: string, val: any) => void;
+  onUpdate: (key: "freeCalories" | "customInstructions" | "supplements", val: any) => void;
 }
 
 const CustomInstructions: FC<CustomInstructionsProps> = ({
   instructions,
   supplements,
   freeCalories,
-  fatsPerDay,
-  veggiesPerDay,
   onUpdate,
 }) => {
   return (
@@ -32,20 +28,6 @@ const CustomInstructions: FC<CustomInstructionsProps> = ({
           type="number"
           value={freeCalories}
           onChange={(e) => onUpdate("freeCalories", Number(e.target.value))}
-        />
-
-        <Label>כמות שומנים ליום (מנות)</Label>
-        <Input
-          type="number"
-          value={fatsPerDay}
-          onChange={(e) => onUpdate("fatsPerDay", Number(e.target.value))}
-        />
-
-        <Label>כמות ירקות ליום </Label>
-        <Input
-          type="number"
-          value={veggiesPerDay}
-          onChange={(e) => onUpdate("veggiesPerDay", Number(e.target.value))}
         />
 
         <TipAdder

@@ -8,24 +8,23 @@ const dietItemSchema = z.object({
   quantity: z.coerce
     .number()
     .min(MIN_QUANTITY, { message: `חובה לשים כמות גדול מ-${MIN_QUANTITY}` }),
-  customItems: z.array(z.string()).optional(),
-  extraItems: z.array(z.string()).optional(),
+  customItems: z.array(z.string()).optional().default([]),
+  extraItems: z.array(z.string()).optional().default([]),
 });
 
 const mealSchema = z.object({
   totalProtein: dietItemSchema,
   totalCarbs: dietItemSchema,
+  totalFats: dietItemSchema,
+  totalVeggies: dietItemSchema,
 });
 
 const dietPlanSchema = z.object({
   meals: z.array(mealSchema),
   totalCalories: z.coerce.number().min(0).optional(),
   freeCalories: z.coerce.number().min(0, { message: ERROR_MESSAGES.minNumber(0) }),
-  fatsPerDay: z.coerce
-    .number()
-    .min(0, { message: ERROR_MESSAGES.minNumber(0) })
-    .optional(),
   customInstructions: z.array(z.string()).optional(),
+  supplements: z.array(z.string()).optional(),
 });
 
 function validateDietPlan(dietPlan: IDietPlan) {
