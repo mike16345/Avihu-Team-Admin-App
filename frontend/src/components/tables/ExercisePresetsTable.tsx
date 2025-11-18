@@ -139,6 +139,7 @@ const ExercisePresetsTable = ({
           />
         ) : null
       }
+      getRowId={(row) => row._id || ""}
       handleViewData={(exercise) => {
         if (exercise._id) {
           onView(exercise._id);

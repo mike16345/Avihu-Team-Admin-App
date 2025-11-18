@@ -9,6 +9,7 @@ import {
   getFilteredRowModel,
   getSortedRowModel,
   useReactTable,
+  PaginationState,
 } from "@tanstack/react-table";
 import {
   DropdownMenu,
@@ -25,13 +26,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { FilterIcon } from "lucide-react";
 import { RowData } from "@tanstack/react-table";
 import { usePagination } from "@/hooks/usePagination";
 import DeleteButton from "../ui/buttons/DeleteButton";
 import UserExpiredTooltip from "./UserExpiredTooltip";
+import Loader from "../ui/Loader";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -44,6 +46,11 @@ interface DataTableProps<TData, TValue> {
   handleViewNestedData: (data: any | any[], id: string) => void;
   getRowClassName: (row: TData) => string;
   handleHoverOnRow: (row: TData) => boolean;
+  getRowId: (row: TData) => string;
+  pageNumber?: number;
+  pageCount?: number;
+  onPageChange?: (page: number) => void;
+  isLoadingNextPage?: boolean;
 }
 
 declare module "@tanstack/table-core" {
@@ -68,12 +75,34 @@ export function DataTableHebrew<TData, TValue>({
   handleSetData,
   getRowClassName,
   handleHoverOnRow,
+  isLoadingNextPage,
+  pageNumber: controlledPageNumber,
+  pageCount,
+  onPageChange,
+  getRowId,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
-  const { pageNumber, goToPage } = usePagination();
+  const initialPage = controlledPageNumber ?? 1;
+  const { pageNumber, goToPage } = usePagination(initialPage);
+  const currentPageNumber = controlledPageNumber ?? pageNumber;
+  const [tablePagination, setTablePagination] = useState<PaginationState>(() => ({
+    pageIndex: currentPageNumber - 1,
+    pageSize: 10,
+  }));
+  const isServerPaginated =
+    typeof controlledPageNumber === "number" && typeof onPageChange === "function";
+
+  useEffect(() => {
+    if (!isServerPaginated) return;
+    setTablePagination((prev) => ({
+      ...prev,
+      pageIndex: 0,
+      pageSize: data.length || prev.pageSize,
+    }));
+  }, [data.length, isServerPaginated]);
 
   const table = useReactTable({
     data,
@@ -100,14 +129,25 @@ export function DataTableHebrew<TData, TValue>({
       columnFilters,
       columnVisibility,
       rowSelection,
+      pagination: tablePagination,
     },
+    onPaginationChange: setTablePagination,
     getPaginationRowModel: getPaginationRowModel(),
-    initialState: {
-      pagination: {
-        pageIndex: pageNumber - 1,
-      },
-    },
   });
+
+  const fallbackPageCount = table.getPageCount() || 1;
+  const pageCountToDisplay = pageCount ?? fallbackPageCount;
+  const canGoPrevious = isServerPaginated ? currentPageNumber > 1 : table.getCanPreviousPage();
+  const canGoNext = isServerPaginated
+    ? currentPageNumber < pageCountToDisplay
+    : table.getCanNextPage();
+
+  const handleControlledPageChange = (nextPage: number) => {
+    if (!onPageChange) return;
+    const safePage = Math.max(1, nextPage);
+    onPageChange(safePage);
+    goToPage(safePage);
+  };
 
   const handleDeleteRows = async () => {
     const selectedRows = table.getFilteredSelectedRowModel().rows;
@@ -133,7 +173,7 @@ export function DataTableHebrew<TData, TValue>({
 
           <div className="flex items-center justify-between gap-3 text-sm text-muted-foreground sm:w-auto sm:justify-end sm:text-right">
             <div>
-              דף {pageNumber} תוך {table.getPageCount()}
+              דף {currentPageNumber} תוך {pageCountToDisplay}
             </div>
             {Object.keys(rowSelection).length > 0 && (
               <div className="hidden sm:block">
@@ -183,73 +223,92 @@ export function DataTableHebrew<TData, TValue>({
         {filters ? <div className="flex flex-wrap items-center gap-2">{filters}</div> : null}
       </div>
       <div className="rounded-md border min-h-[60vh] max-h-[65vh] overflow-auto">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead className="text-right" key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <UserExpiredTooltip isActive={handleHoverOnRow?.(row.original)}>
-                  <TableRow
-                    key={row.id}
-                    className={getRowClassName(row.original)}
-                    onDoubleClick={(e) => {
-                      const target = e.target as HTMLElement;
-                      if (target.id == "row-checkbox" || target.id == "access-switch") return;
+        {isLoadingNextPage ? (
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <Loader size="xl" />
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead className="text-right" key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(header.column.columnDef.header, header.getContext())}
+                      </TableHead>
+                    );
+                  })}
+                </TableRow>
+              ))}
+            </TableHeader>
 
-                      handleViewData(row.original);
-                    }}
-                    data-state={row.getIsSelected() && "selected"}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </UserExpiredTooltip>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  אין תוצאות
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => {
+                  return (
+                    <UserExpiredTooltip
+                      key={getRowId(row.original) ?? row.id}
+                      isActive={handleHoverOnRow?.(row.original)}
+                    >
+                      <TableRow
+                        className={getRowClassName(row.original)}
+                        onDoubleClick={(e) => {
+                          const target = e.target as HTMLElement;
+                          if (target.id == "row-checkbox" || target.id == "access-switch") return;
+
+                          handleViewData(row.original);
+                        }}
+                        data-state={row.getIsSelected() && "selected"}
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell key={cell.id}>
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    </UserExpiredTooltip>
+                  );
+                })
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="h-24 text-center">
+                    אין תוצאות
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        )}
       </div>
       <div className="flex items-center justify-between sm:justify-end gap-3 py-4">
         <Button
           variant="outline"
           onClick={() => {
+            if (isServerPaginated) {
+              handleControlledPageChange(currentPageNumber - 1);
+              return;
+            }
             table.previousPage();
-            goToPage(pageNumber - 1);
+            goToPage(currentPageNumber - 1);
           }}
-          disabled={!table.getCanPreviousPage()}
+          disabled={!canGoPrevious}
         >
           קודם
         </Button>
         <Button
           variant="outline"
           onClick={() => {
+            if (isServerPaginated) {
+              handleControlledPageChange(currentPageNumber + 1);
+              return;
+            }
             table.nextPage();
-            goToPage(pageNumber + 1);
+            goToPage(currentPageNumber + 1);
           }}
-          disabled={!table.getCanNextPage()}
+          disabled={!canGoNext}
         >
           הבא
         </Button>
