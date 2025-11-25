@@ -6,13 +6,6 @@ import { defaultDietPlan } from "@/constants/DietPlanConsts";
 import DietPlanForm from "@/components/DietPlan/DietPlanForm";
 import Loader from "@/components/ui/Loader";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectValue,
-  SelectTrigger,
-} from "@/components/ui/select";
 import { dietPlanSchema } from "@/components/DietPlan/DietPlanSchema";
 import { useQueryClient } from "@tanstack/react-query";
 import CustomButton from "@/components/ui/CustomButton";
@@ -198,7 +191,7 @@ export const ViewDietPlanPage = () => {
       <Form {...form}>
         <DietPlanForm>
           {(meals?.length || 0) > 0 && (
-            <div className="flex gap-3 flex-col md:flex-row">
+            <div className="flex gap-3 flex-row  fixed bottom-10 end-16">
               <CustomButton
                 className="font-bold  sm:w-fit "
                 variant="default"
