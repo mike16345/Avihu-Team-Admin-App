@@ -108,11 +108,13 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ children }) => {
                 ))}
               </div>
               <AddButton tip="הוסף ארוחה" onClick={handleAddMeal} />
-              {children}
             </div>
           </div>
         }
       />
+
+      {children}
+
       <DeleteModal
         onConfirm={() => handleDeleteMeal()}
         onCancel={() => setMealToDelete(null)}
