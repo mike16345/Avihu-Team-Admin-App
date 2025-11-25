@@ -76,7 +76,7 @@ export const WorkoutProgression = () => {
   }, [searchParams]);
 
   if (isLoading) return <Loader />;
-  if (error && error?.data?.message !== "No records found for user!")
+  if (error && error?.data?.message !== "Data could not be retrieved!")
     return <ErrorPage message={error.data.message} />;
 
   return (
