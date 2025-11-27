@@ -7,10 +7,8 @@ const formats: ReactQuill.ReactQuillProps["formats"] = [
   "size",
   "color",
   "bold",
-  "italic",
   "underline",
   "strike",
-  "blockquote",
   "list",
   "indent",
   "link",
@@ -20,7 +18,7 @@ const formats: ReactQuill.ReactQuillProps["formats"] = [
 
 const modules: ReactQuill.ReactQuillProps["modules"] = {
   toolbar: [
-    ["bold", "italic", "underline", "strike", "blockquote"],
+    ["bold", "underline", "strike"],
     [{ list: "ordered" }, { list: "bullet" }],
     [{ indent: "-1" }, { indent: "+1" }],
     [{ direction: "rtl" }, { align: [] }],
