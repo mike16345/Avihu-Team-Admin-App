@@ -13,7 +13,7 @@ const useGetDietPlan = (userId: string) => {
     try {
       return await getDietPlanByUserId(userId);
     } catch (error: any) {
-      if (error.status == 404) {
+      if (error.status === 404) {
         return defaultDietPlan;
       }
     }

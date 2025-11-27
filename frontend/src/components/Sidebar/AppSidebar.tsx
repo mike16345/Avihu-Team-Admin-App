@@ -30,6 +30,7 @@ import { ModeToggle } from "../theme/mode-toggle";
 import { useUsersStore } from "@/store/userStore";
 import { userFullName } from "@/lib/utils";
 import { Separator } from "../ui/separator";
+import React from "react";
 
 type LinkProps = {
   title: string;
@@ -87,7 +88,7 @@ const SidebarItems = () => {
   return (
     <>
       {sidebarGroups.map((group, index) => (
-        <>
+        <React.Fragment key={index}>
           {!!index && <Separator className="my-4" />}
           {group.map((item) => {
             const hasChildren = Boolean(item.children?.length);
@@ -153,7 +154,7 @@ const SidebarItems = () => {
               </SidebarMenuItem>
             );
           })}
-        </>
+        </React.Fragment>
       ))}
     </>
   );
