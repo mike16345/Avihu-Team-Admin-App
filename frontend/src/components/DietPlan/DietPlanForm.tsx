@@ -4,10 +4,13 @@ import { MealDropDown } from "./MealDropDown";
 import DeleteModal from "../Alerts/DeleteModal";
 import { CustomItems, IDietPlan } from "@/interfaces/IDietPlan";
 import { defaultMeal } from "@/constants/DietPlanConsts";
-import CustomInstructions from "./CustomInstructions";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 import useMenuItemsQuery from "@/hooks/queries/menuItems/useMenuItemsQuery";
 import AddButton from "../ui/buttons/AddButton";
+import DietplanTabs from "./DietPlanTabs";
+import TextEditor from "../ui/TextEditor";
+import { Label } from "../ui/label";
+import { Input } from "../ui/input";
 
 interface DietPlanFormProps extends PropsWithChildren {}
 
@@ -49,8 +52,8 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ children }) => {
   const { fields, append, remove } = useFieldArray({ control, name: "meals" });
 
   const freeCalories = watch("freeCalories") || 0;
-  const instructions = watch("customInstructions") || [];
-  const supplements = watch("supplements") || [];
+  const instructions = watch("customInstructions")?.join(" ") || "";
+  const supplements = watch("supplements")?.join(" ") || "";
 
   const handleAddMeal = () => {
     append(cloneDefaultMeal());
@@ -63,46 +66,55 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ children }) => {
     setMealToDelete(null);
   };
 
-  const handleUpdateInstructions = (
-    key: "freeCalories" | "customInstructions" | "supplements",
-    val: any
-  ) => {
-    setValue(key, val, { shouldDirty: true, shouldTouch: true });
-  };
-
   useUnsavedChangesWarning(formIsDirty);
 
   return (
     <div className=" flex flex-col gap-4 w-full h-auto">
-      <div className="w-full flex flex-col sm:flex-row gap-4">
-        <div className="sm:w-3/4 w-full flex flex-col gap-2 ">
-          <div className="space-y-4">
-            {fields.map((field, index) => (
-              <div key={field.id} className={`border-b`}>
-                <MealDropDown
-                  customItems={customItems}
-                  mealNumber={index + 1}
-                  mealIndex={index}
-                  onDelete={() => {
-                    setMealToDelete(index);
-                    setOpenDeleteModal(true);
-                  }}
-                />
-              </div>
-            ))}
-          </div>
-          <AddButton tip="הוסף ארוחה" onClick={handleAddMeal} />
-          {children}
-        </div>
-        <div className="sm:w-1/4">
-          <CustomInstructions
-            instructions={instructions}
-            freeCalories={freeCalories}
-            supplements={supplements}
-            onUpdate={handleUpdateInstructions}
+      <DietplanTabs
+        tips={
+          <TextEditor
+            value={instructions}
+            onChange={(val) => setValue("customInstructions", [val])}
           />
-        </div>
-      </div>
+        }
+        supplements={
+          <TextEditor value={supplements} onChange={(val) => setValue("supplements", [val])} />
+        }
+        dietplan={
+          <div className="w-full flex flex-col  gap-5">
+            <div>
+              <Label className="font-bold">קלוריות חופשיות</Label>
+              <Input
+                className="md:w-1/3"
+                type="number"
+                value={freeCalories}
+                onChange={(e) => setValue("freeCalories", Number(e.target.value))}
+              />
+            </div>
+            <div className=" w-full flex flex-col gap-2 ">
+              <div className="space-y-4">
+                {fields.map((field, index) => (
+                  <div key={field.id} className={`border-b`}>
+                    <MealDropDown
+                      customItems={customItems}
+                      mealNumber={index + 1}
+                      mealIndex={index}
+                      onDelete={() => {
+                        setMealToDelete(index);
+                        setOpenDeleteModal(true);
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+              <AddButton tip="הוסף ארוחה" onClick={handleAddMeal} />
+            </div>
+          </div>
+        }
+      />
+
+      {children}
+
       <DeleteModal
         onConfirm={() => handleDeleteMeal()}
         onCancel={() => setMealToDelete(null)}

@@ -3,8 +3,8 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import TextEditor from "@/components/ui/TextEditor";
 import useCardioWorkoutQuery from "@/hooks/queries/cardioWorkout/useCardioWorkoutQuery";
-import { ICardioWorkout } from "@/interfaces/IWorkoutPlan";
 import { convertItemsToOptions } from "@/lib/utils";
 import { WorkoutSchemaType } from "@/schemas/workoutPlanSchema";
 import React, { useMemo } from "react";
@@ -29,8 +29,8 @@ const CardioExercise: React.FC<CardioExerciseProps> = ({ parentPath }) => {
   }, [cardioWorkoutResponse?.data]);
 
   return (
-    <>
-      <div className="flex flex-wrap gap-5 w-5/6 justify-start p-5 items-end">
+    <div className="px-5 py-2 space-y-3">
+      <div className="flex flex-wrap gap-5 w-5/6 justify-start  items-end">
         <FormField
           control={control}
           name={`${parentPath}.warmUpAmount`}
@@ -55,51 +55,45 @@ const CardioExercise: React.FC<CardioExerciseProps> = ({ parentPath }) => {
           />
         </div>
       </div>
-      <div className="flex items-center gap-6 px-5 flex-wrap">
-        <div>
-          <FormField
-            control={control}
-            name={`${parentPath}.distance`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel htmlFor="distance" className="font-bold underline">
-                  מרחק:
-                </FormLabel>
-                <FormControl>
-                  <Textarea
-                    {...field}
-                    onChange={(e) => field.onChange(e.target.value)}
-                    placeholder="הכנס מרחק.."
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <div className="sm:w-1/5">
-          <FormField
-            control={control}
-            name={`${parentPath}.tips`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel htmlFor="tips" className="font-bold underline">
-                  דגשים:
-                </FormLabel>
-                <FormControl>
-                  <Textarea
-                    {...field}
-                    onChange={(e) => field.onChange(e.target.value)}
-                    placeholder="דגשים..."
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+      <div className=" md:w-1/2">
+        <FormField
+          control={control}
+          name={`${parentPath}.distance`}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel htmlFor="distance" className="font-bold underline">
+                מרחק:
+              </FormLabel>
+              <FormControl>
+                <Textarea
+                  {...field}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  placeholder="הכנס מרחק.."
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
-    </>
+      <div>
+        <FormField
+          control={control}
+          name={`${parentPath}.tips`}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel htmlFor="tips" className="font-bold underline">
+                דגשים:
+              </FormLabel>
+              <FormControl>
+                <TextEditor value={field.value || ""} onChange={field.onChange} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+    </div>
   );
 };
 

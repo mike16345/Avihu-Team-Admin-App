@@ -141,7 +141,7 @@ export const ViewDietPlanPresetPage = () => {
         <DietPlanForm>
           {(meals?.length || 0) > 0 && (
             <CustomButton
-              className="font-bold sm:w-32 w-full"
+              className="font-bold sm:w-32 w-full md:fixed md:bottom-10 md:end-10"
               variant="success"
               title="שמור תפריט"
               isLoading={createPreset.isPending || updatePreset.isPending}

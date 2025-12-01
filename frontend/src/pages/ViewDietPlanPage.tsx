@@ -6,13 +6,6 @@ import { defaultDietPlan } from "@/constants/DietPlanConsts";
 import DietPlanForm from "@/components/DietPlan/DietPlanForm";
 import Loader from "@/components/ui/Loader";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectValue,
-  SelectTrigger,
-} from "@/components/ui/select";
 import { dietPlanSchema } from "@/components/DietPlan/DietPlanSchema";
 import { useQueryClient } from "@tanstack/react-query";
 import CustomButton from "@/components/ui/CustomButton";
@@ -30,7 +23,7 @@ import useUpdateDietPlan from "@/hooks/mutations/DietPlans/useUpdateDietPlan";
 import useAddDietPlan from "@/hooks/mutations/DietPlans/useAddDietPlan";
 import useUserQuery from "@/hooks/queries/user/useUserQuery";
 import { presetNameSchema } from "@/schemas/dietPlanPresetSchema";
-import { getNestedZodError } from "@/lib/utils";
+import { convertItemsToOptions, getNestedZodError } from "@/lib/utils";
 import useDietPlanPresetsQuery from "@/hooks/queries/dietPlans/useDietPlanPresetsQuery";
 import { cleanWorkoutObject } from "@/utils/workoutPlanUtils";
 import { normalizeDietPlan } from "@/utils/dietPlanUtils";
@@ -39,6 +32,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@/components/ui/form";
 import { useDirtyFormContext } from "@/context/useFormContext";
 import useGetDietPlan from "@/hooks/queries/dietPlans/useGetDietPlan";
+import CustomSelect from "@/components/ui/CustomSelect";
 
 export const ViewDietPlanPage = () => {
   const navigation = useNavigate();
@@ -176,31 +170,28 @@ export const ViewDietPlanPage = () => {
     }
   }, [error, reset, setIsDirty]);
 
-  if (isLoading || dietPlanPresets.isLoading) return <Loader size="large" />;
+  if (isLoading) return <Loader size="large" />;
 
   return (
     <div className=" flex flex-col gap-4 size-full">
       {user && <BasicUserDetails user={user} />}
 
       <BackButton navLink={MainRoutes.USERS + `/${id}?tab=${weightTab}`} />
-      <Select onValueChange={(val) => handleSelect(val)}>
-        <SelectTrigger dir="rtl" className="sm:w-[350px] mr-1">
-          <SelectValue placeholder="בחר תפריט" />
-        </SelectTrigger>
-        <SelectContent dir="rtl">
-          {dietPlanPresets &&
-            dietPlanPresets.data?.data.map((preset) => (
-              <SelectItem key={preset.name} value={preset.name}>
-                {preset.name}
-              </SelectItem>
-            ))}
-        </SelectContent>
-      </Select>
+      <CustomSelect
+        className="sm:w-[350px] mr-1"
+        placeholder="בחר תפריט"
+        onValueChange={handleSelect}
+        items={
+          dietPlanPresets.data?.data
+            ? convertItemsToOptions(dietPlanPresets.data?.data, "name", "name")
+            : []
+        }
+      />
 
       <Form {...form}>
         <DietPlanForm>
           {(meals?.length || 0) > 0 && (
-            <div className="flex gap-3 flex-col md:flex-row">
+            <div className="flex gap-3 flex-row  fixed bottom-10 end-16">
               <CustomButton
                 className="font-bold  sm:w-fit "
                 variant="default"

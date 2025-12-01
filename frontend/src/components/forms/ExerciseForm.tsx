@@ -163,7 +163,11 @@ const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
             <FormItem>
               <FormLabel>טיפ מהמדריך</FormLabel>
               <FormControl>
-                <TextEditor value={field.value || ""} onChange={(val) => field.onChange(val)} />
+                <TextEditor
+                  defaultValue={field.value || ""}
+                  value={field.value || ""}
+                  onChange={field.onChange}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
