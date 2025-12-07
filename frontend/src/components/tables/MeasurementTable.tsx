@@ -35,7 +35,7 @@ const MeasurementTable = () => {
         Object.keys(starterObj).map((key) => [key, measurements[key] ?? starterObj[key]])
       );
 
-      return { date: moment(date).format("MM/DD/YYYY"), ...updatedObj };
+      return { date: moment(date).format("DD/MM/YYYY"), ...updatedObj };
     });
   }, [data]);
 
