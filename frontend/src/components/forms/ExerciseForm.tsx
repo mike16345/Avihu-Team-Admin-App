@@ -32,6 +32,7 @@ import CustomButton from "../ui/CustomButton";
 import TextEditor from "../ui/TextEditor";
 import { buildPhotoUrl } from "@/lib/utils";
 import { Button } from "../ui/button";
+import Loader from "../ui/Loader";
 
 const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
   const exerciseForm = useForm<z.infer<typeof exerciseSchema>>({
@@ -45,7 +46,7 @@ const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
   });
 
   const { data: muscleGroups } = useMuscleGroupsQuery();
-  const { data: exercise } = useExerciseQuery(objectId || "undefined");
+  const { data: exercise, isLoading } = useExerciseQuery(objectId || "undefined");
 
   const { reset } = exerciseForm;
 
@@ -126,6 +127,8 @@ const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
     });
   }, [exercise]);
 
+  if (isLoading) return <Loader size="large" />;
+
   return (
     <Form {...exerciseForm}>
       <form onSubmit={exerciseForm.handleSubmit(onSubmit)} className="space-y-4 text-right">
@@ -161,7 +164,7 @@ const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
           name="tipFromTrainer"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>טיפ מהמדריך</FormLabel>
+              <FormLabel>טיפ מהמדריך </FormLabel>
               <FormControl>
                 <TextEditor
                   defaultValue={field.value || ""}
