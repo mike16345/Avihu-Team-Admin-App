@@ -10,7 +10,6 @@ import { Button } from "../ui/button";
 import {
   buildPhotoUrl,
   convertItemsToOptions,
-  extractVideoId,
   generateUUID,
   getYouTubeThumbnail,
 } from "@/lib/utils";
@@ -22,7 +21,6 @@ import { useFieldArray, useFormContext } from "react-hook-form";
 import useMuscleGroupExercisesQuery from "@/hooks/queries/exercises/useMuscleGroupExercisesQuery";
 import useExerciseMethodQuery from "@/hooks/queries/exercises/useExerciseMethodQuery";
 import { FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
-import TextEditor from "../ui/TextEditor";
 
 interface ExcerciseInputProps {
   muscleGroup?: string;
@@ -231,23 +229,6 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                                     {...field}
                                     value={linkToVideo}
                                     placeholder="הכנס לינק כאן..."
-                                  />
-                                  <FormMessage />
-                                </FormItem>
-                              );
-                            }}
-                          />
-                          <FormField
-                            control={control}
-                            name={`${parentPath}.exercises.${index}.tipFromTrainer`}
-                            render={({ field }) => {
-                              return (
-                                <FormItem>
-                                  <FormLabel>דגשים</FormLabel>
-                                  <TextEditor
-                                    {...field}
-                                    value={item.tipFromTrainer}
-                                    placeholder="דגשים למתאמן..."
                                   />
                                   <FormMessage />
                                 </FormItem>
