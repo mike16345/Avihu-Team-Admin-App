@@ -11,15 +11,17 @@ const useGetDietPlan = (userId: string) => {
 
   const getDietPlan = async () => {
     try {
-      return await getDietPlanByUserId(userId);
+      const dietplan = await getDietPlanByUserId(userId);
+
+      return { dietplan, failed: false };
     } catch (error: any) {
       if (error.status === 404) {
-        return defaultDietPlan;
+        return { dietplan: defaultDietPlan, failed: true };
       }
     }
   };
 
-  return useQuery<IDietPlan>({
+  return useQuery<{ dietplan: IDietPlan; failed: boolean }>({
     queryKey: [`${QueryKeys.USER_DIET_PLAN}${userId}`],
     enabled: Boolean(userId),
     staleTime: FULL_DAY_STALE_TIME,

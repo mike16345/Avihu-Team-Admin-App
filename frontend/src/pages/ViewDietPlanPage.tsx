@@ -151,12 +151,14 @@ export const ViewDietPlanPage = () => {
   };
 
   useEffect(() => {
-    if (!id) return;
+    if (!id || !data) return;
 
-    if (data) {
-      reset(normalizeDietPlan(data));
-      setIsNewPlan(false);
-      setIsDirty(false);
+    const { dietplan, failed } = data;
+
+    reset(normalizeDietPlan(dietplan));
+    if (failed) {
+      setIsNewPlan(true);
+      setIsDirty(true);
     }
   }, [data, id, reset, setIsDirty]);
 
