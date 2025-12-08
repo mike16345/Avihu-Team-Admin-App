@@ -1,6 +1,6 @@
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import TextEditor from "@/components/ui/TextEditor";
 import { WorkoutSchemaType } from "@/schemas/workoutPlanSchema";
 import React from "react";
 import { useFormContext } from "react-hook-form";
@@ -57,10 +57,10 @@ const FixedCardioContainer: React.FC<FixedCardioContainerProps> = () => {
                 דגשים:
               </FormLabel>
               <FormControl>
-                <Textarea
-                  {...field}
-                  onChange={(e) => field.onChange(e.target.value)}
-                  placeholder="כמה אימונים בשבוע.."
+                <TextEditor
+                  className="bg-background"
+                  value={field.value || ""}
+                  onChange={field.onChange}
                 />
               </FormControl>
               <FormMessage />

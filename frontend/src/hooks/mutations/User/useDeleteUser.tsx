@@ -1,6 +1,6 @@
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { QueryKeys } from "@/enums/QueryKeys";
-import { handleDeleteManyPhotos } from "@/hooks/api/useBlogsApi";
+import { useImageApi } from "@/hooks/api/useImageApi";
 import { useUsersApi } from "@/hooks/api/useUsersApi";
 import { useWeighInPhotosApi } from "@/hooks/api/useWeighInPhotosApi";
 import queryClient from "@/QueryClient/queryClient";
@@ -12,6 +12,7 @@ const useDeleteUser = () => {
   const { setUsers } = useUsersStore();
   const { deleteUser } = useUsersApi();
   const { getUserImageUrls } = useWeighInPhotosApi();
+  const { handleDeleteManyPhotos } = useImageApi();
 
   const handleDeleteUser = async (userId: string) => {
     try {

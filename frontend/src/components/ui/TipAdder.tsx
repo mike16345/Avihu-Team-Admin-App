@@ -4,11 +4,12 @@ import DeleteButton from "./buttons/DeleteButton";
 import { Textarea } from "./textarea";
 
 interface TipAdderProps {
+  name?: string;
   saveTips: (tips: string[]) => void;
   tips: string[];
 }
 
-const TipAdder: React.FC<TipAdderProps> = ({ tips = [], saveTips }) => {
+const TipAdder: React.FC<TipAdderProps> = ({ name = "דגשים", tips = [], saveTips }) => {
   const [newTip, setNewTip] = useState<string>("");
 
   const addTip = () => {
@@ -42,10 +43,10 @@ const TipAdder: React.FC<TipAdderProps> = ({ tips = [], saveTips }) => {
 
   return (
     <div className="border-2 rounded  p-4 flex flex-col gap-4 ">
-      <h2 className="font-bold">דגשים</h2>
-      <ul className="w-full overflow-y-auto">
+      <h2 className="font-bold">{name}</h2>
+      <ul className="w-full custom-scrollbar max-h-[250px] overflow-y-auto">
         {tips.length === 0 ? (
-          <h2 className="text-center">לא הוספו טיפים!</h2>
+          <h2 className="text-center">לא הוספו {name}!</h2>
         ) : (
           tips.map((tip, i) => (
             <li key={i} className="list-disc py-1 border-b-2 flex items-center gap-2">

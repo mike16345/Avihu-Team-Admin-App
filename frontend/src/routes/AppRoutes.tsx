@@ -12,6 +12,7 @@ import BlogPage from "@/pages/BlogPage";
 import BlogEditor from "@/components/Blog/BlogEditor";
 import DietPlanWrapper from "@/components/DietPlan/DietPlanWrapper";
 import WorkoutPlans from "@/components/workout plan/WorkoutPlans";
+import LeadsTablePage from "@/features/leads/LeadsTablePage";
 
 export const AppRoutes = () => {
   return (
@@ -19,6 +20,7 @@ export const AppRoutes = () => {
       <Routes>
         <Route path="/" element={<AdminDashboard />} />
         <Route path="/users/*" element={<UsersTable />} />
+        <Route path="/leads" element={<LeadsTablePage />} />
         <Route path="/blogs/" element={<BlogPage />} />
         <Route path="/blogs/create/" element={<BlogEditor />} />
         <Route path="/blogs/create/:id" element={<BlogEditor />} />
@@ -37,7 +39,7 @@ export const AppRoutes = () => {
           path="/workout-plans/:id"
           element={
             <CreateWorkoutPlanWrapper>
-              <WorkoutPlans displayTips />
+              <WorkoutPlans />
             </CreateWorkoutPlanWrapper>
           }
         />

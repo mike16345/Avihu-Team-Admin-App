@@ -1,5 +1,4 @@
 import React, { useMemo, useRef, useState } from "react";
-import { Textarea } from "@/components/ui/textarea";
 import { IExercisePresetItem, IExercise } from "@/interfaces/IWorkoutPlan";
 import SetsContainer, { defaultSet } from "./SetsContainer";
 import { Input } from "../ui/input";
@@ -9,8 +8,8 @@ import { AddWorkoutPlanCard } from "./AddWorkoutPlanCard";
 import DeleteModal from "../Alerts/DeleteModal";
 import { Button } from "../ui/button";
 import {
+  buildPhotoUrl,
   convertItemsToOptions,
-  extractVideoId,
   generateUUID,
   getYouTubeThumbnail,
 } from "@/lib/utils";
@@ -47,7 +46,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
   const exercises = watch(`${parentPath}.exercises`) as IExercise[];
 
   const handleSelectExercise = (index: number, updatedExercise: IExercisePresetItem) => {
-    const { name, linkToVideo, exerciseMethod, _id } = updatedExercise;
+    const { name, linkToVideo, tipFromTrainer, exerciseMethod, _id } = updatedExercise;
     const exercise = getValues(`${parentPath}.exercises`)[index];
     const newExercise = {
       ...exercise,
@@ -56,6 +55,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
       name,
       linkToVideo,
       exerciseMethod,
+      tipFromTrainer: tipFromTrainer ? tipFromTrainer : exercise.tipFromTrainer || undefined,
     };
 
     resetField(`${parentPath}.exercises.${index}`, { defaultValue: newExercise });
@@ -122,7 +122,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
             {({ item, index }) => (
               <SortableItem item={item} idKey="_id">
                 {() => {
-                  const { name, linkToVideo } =
+                  const { name, linkToVideo, imageUrl } =
                     typeof item.exerciseId == "object" ? item.exerciseId : item;
 
                   return (
@@ -165,7 +165,11 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                           {linkToVideo && (
                             <img
                               className="rounded mt-2"
-                              src={getYouTubeThumbnail(extractVideoId(linkToVideo))}
+                              src={
+                                imageUrl
+                                  ? buildPhotoUrl(imageUrl)
+                                  : getYouTubeThumbnail(linkToVideo)
+                              }
                             />
                           )}
                           <label className="font-bold underline pt-5">שיטת אימון:</label>
@@ -225,23 +229,6 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                                     {...field}
                                     value={linkToVideo}
                                     placeholder="הכנס לינק כאן..."
-                                  />
-                                  <FormMessage />
-                                </FormItem>
-                              );
-                            }}
-                          />
-                          <FormField
-                            control={control}
-                            name={`${parentPath}.exercises.${index}.tipFromTrainer`}
-                            render={({ field }) => {
-                              return (
-                                <FormItem>
-                                  <FormLabel>דגשים</FormLabel>
-                                  <Textarea
-                                    {...field}
-                                    value={item.tipFromTrainer}
-                                    placeholder="דגשים למתאמן..."
                                   />
                                   <FormMessage />
                                 </FormItem>

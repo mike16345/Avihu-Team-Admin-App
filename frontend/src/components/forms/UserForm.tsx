@@ -23,6 +23,7 @@ import DietaryTypeSelector from "../templates/dietTemplates/DietaryTypeSelector"
 import { IUser, IUserPost } from "@/interfaces/IUser";
 import CustomButton from "../ui/CustomButton";
 import userSchema from "@/schemas/userSchema";
+import UserPlanTypes from "@/enums/UserPlanTypes";
 
 const remindInOptions = [
   { value: `604800`, name: `שבוע` },
@@ -155,8 +156,8 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent dir="rtl">
-                  <SelectItem value="מסה">מסה</SelectItem>
-                  <SelectItem value="חיטוב">חיטוב</SelectItem>
+                  <SelectItem value={UserPlanTypes.BULK}>{UserPlanTypes.BULK}</SelectItem>
+                  <SelectItem value={UserPlanTypes.CUT}>{UserPlanTypes.CUT}</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />

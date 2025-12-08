@@ -6,19 +6,15 @@ import WorkoutTabs from "./WorkoutTabs";
 import CardioWrapper from "./cardio/CardioWrapper";
 import WorkoutPlanContainer from "./WorkoutPlanContainer";
 import DeleteModal from "../Alerts/DeleteModal";
-import { FC, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
-import TipAdder from "../ui/TipAdder";
 import { DragDropWrapper } from "../Wrappers/DragDropWrapper";
 import { SortableItem } from "../DragAndDrop/SortableItem";
 import { generateUUID } from "@/lib/utils";
 import { IWorkoutPlan } from "@/interfaces/IWorkoutPlan";
+import TextEditor from "../ui/TextEditor";
 
-interface IWorkoutPlanProps {
-  displayTips?: boolean;
-}
-
-const WorkoutPlans: FC<IWorkoutPlanProps> = ({ displayTips = false }) => {
+const WorkoutPlans = () => {
   const form = useFormContext<WorkoutSchemaType>();
   const { control, setValue, watch } = form;
   const {
@@ -63,50 +59,46 @@ const WorkoutPlans: FC<IWorkoutPlanProps> = ({ displayTips = false }) => {
       <div className="size-full flex flex-col p-1.5">
         <div className="size-full">
           <WorkoutTabs
+            tips={
+              <TextEditor
+                value={watch("tips")?.join(" ") || ""}
+                onChange={(val) => setValue("tips", [val])}
+              />
+            }
             cardioPlan={<CardioWrapper />}
             workoutPlan={
-              <div className="flex flex-col sm:flex-row gap-6">
-                <div className={`flex flex-col ${displayTips && "w-[80%]"} gap-4 w-full`}>
-                  <DragDropWrapper
-                    items={workoutPlans}
-                    strategy="vertical"
-                    idKey="_id"
-                    setItems={replace}
-                  >
-                    {({ item, index }) => (
-                      <SortableItem
-                        className="relative w-full border-b-2 last:border-b-0 rounded"
-                        idKey={"_id"}
-                        item={item}
-                      >
-                        {() => {
-                          return (
-                            <WorkoutPlanContainer
-                              onDeleteWorkout={(index) => onClickDeleteWorkout(index)}
-                              parentPath={`workoutPlans.${index}`}
-                            />
-                          );
-                        }}
-                      </SortableItem>
-                    )}
-                  </DragDropWrapper>
-                  <div className="w-full flex items-center justify-center mb-2">
-                    <Button type="button" className="w-full sm:w-32" onClick={onAddWorkout}>
-                      <div className="flex flex-col items-center font-bold">
-                        הוסף אימון
-                        <BsPlusCircleFill />
-                      </div>
-                    </Button>
-                  </div>
+              <div className={`flex flex-col  gap-4 w-full`}>
+                <DragDropWrapper
+                  items={workoutPlans}
+                  strategy="vertical"
+                  idKey="_id"
+                  setItems={replace}
+                >
+                  {({ item, index }) => (
+                    <SortableItem
+                      className="relative w-full border-b-2 last:border-b-0 rounded"
+                      idKey={"_id"}
+                      item={item}
+                    >
+                      {() => {
+                        return (
+                          <WorkoutPlanContainer
+                            onDeleteWorkout={(index) => onClickDeleteWorkout(index)}
+                            parentPath={`workoutPlans.${index}`}
+                          />
+                        );
+                      }}
+                    </SortableItem>
+                  )}
+                </DragDropWrapper>
+                <div className="w-full flex items-center justify-center mb-2">
+                  <Button type="button" className="w-full sm:w-32" onClick={onAddWorkout}>
+                    <div className="flex flex-col items-center font-bold">
+                      הוסף אימון
+                      <BsPlusCircleFill />
+                    </div>
+                  </Button>
                 </div>
-                {displayTips && (
-                  <div className="sm:w-[20%] w-full">
-                    <TipAdder
-                      tips={watch("tips") || []}
-                      saveTips={(tips) => setValue("tips", tips)}
-                    />
-                  </div>
-                )}
               </div>
             }
           />

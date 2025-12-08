@@ -15,6 +15,7 @@ interface CustomSelectProps {
   selectedValue?: any;
   items: Option[];
   onValueChange: (value: string) => void;
+  className?: string;
 }
 
 const CustomSelect: React.FC<CustomSelectProps> = ({
@@ -22,22 +23,25 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   placeholder,
   selectedValue,
   onValueChange,
+  className,
 }) => {
   return (
-    <Select value={selectedValue} onValueChange={onValueChange} dir="rtl">
-      <SelectTrigger>
-        <SelectValue placeholder={selectedValue || placeholder || "בחר"} />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectGroup>
-          {items.map(({ name, value }, i) => (
-            <SelectItem className="hover:bg-muted cursor-pointer" key={i} value={value}>
-              {name}
-            </SelectItem>
-          ))}
-        </SelectGroup>
-      </SelectContent>
-    </Select>
+    <>
+      <Select value={selectedValue} onValueChange={onValueChange} dir="rtl">
+        <SelectTrigger className={className}>
+          <SelectValue placeholder={selectedValue || placeholder || "בחר"} />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            {items.map(({ name, value }, i) => (
+              <SelectItem className="hover:bg-muted cursor-pointer" key={i} value={value}>
+                {name}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+    </>
   );
 };
 

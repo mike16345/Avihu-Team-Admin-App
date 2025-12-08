@@ -10,12 +10,33 @@ import { useTheme } from "../theme/theme-provider";
 import { weightTab } from "@/pages/UserDashboard";
 import useUsersQuery from "@/hooks/queries/user/useUsersQuery";
 import useDeleteUser from "@/hooks/mutations/User/useDeleteUser";
+import { useMemo } from "react";
+
+const MINIMUM_WARNING_DAYS = 3;
 
 export const UsersTable = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
 
   const { data, isLoading, isError, error } = useUsersQuery();
+
+  const sortedUsers = useMemo(() => {
+    if (!data) return [];
+
+    return data.sort((a, b) => {
+      const aHasDate = !!a.dateFinished;
+      const bHasDate = !!b.dateFinished;
+
+      if (aHasDate && !bHasDate) return -1;
+      if (!aHasDate && bHasDate) return 1;
+
+      if (aHasDate && bHasDate) {
+        return new Date(b.dateFinished!).getTime() - new Date(a.dateFinished!).getTime();
+      }
+
+      return 0;
+    });
+  }, [data]);
 
   const usersMutation = useDeleteUser();
 
@@ -24,7 +45,6 @@ export const UsersTable = () => {
   };
 
   const handleGetRowClassName = (user: IUser) => {
-    const MINIMUM_WARNING_DAYS = 3;
     const daysUntilPlanIsFinished = DateUtils.getDaysDifference(new Date(), user.dateFinished);
 
     if (daysUntilPlanIsFinished <= MINIMUM_WARNING_DAYS) {
@@ -40,14 +60,23 @@ export const UsersTable = () => {
   return (
     <>
       <DataTableHebrew
-        data={data || []}
+        data={sortedUsers}
         columns={userColumns}
         actionButton={<Button onClick={() => navigate(`/users/add`)}>הוסף משתמש</Button>}
         handleSetData={() => {}}
         handleViewData={(user) => handleViewUser(user)}
+        getRowId={(row) => row._id || ""}
         handleDeleteData={(user) => usersMutation.mutate(user._id || "")}
         handleViewNestedData={(_, userId) => navigate(`/users/${userId}?tab=${weightTab}`)}
         getRowClassName={(user) => handleGetRowClassName(user)}
+        handleHoverOnRow={(user) => {
+          const daysUntilPlanIsFinished = DateUtils.getDaysDifference(
+            new Date(),
+            user.dateFinished
+          );
+
+          return daysUntilPlanIsFinished <= MINIMUM_WARNING_DAYS;
+        }}
       />
     </>
   );

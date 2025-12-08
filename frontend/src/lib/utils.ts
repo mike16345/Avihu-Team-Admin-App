@@ -166,7 +166,13 @@ export const extractVideoId = (url: string): string => {
   return videoId;
 };
 
-export const getYouTubeThumbnail = (id: string) => {
+export const getYouTubeThumbnail = (url: string) => {
+  const id = extractVideoId(url);
+
+  if (!id) {
+    return ""; // or return a placeholder image URL
+  }
+
   return `https://img.youtube.com/vi/${id}/maxresdefault.jpg`;
 };
 
@@ -209,8 +215,14 @@ const hebrewPathTranslations: Record<string, string> = {
   timesPerWeek: "פעמים בשבוע",
   warmUpAmount: "זמן חימום",
   freeCalories: "קלוריות חופשיות",
-  fatsPerDay: "שומנים ליום",
-  veggiesPerDay: "ירקות ליום",
+  totalProtein: "כמות חלבון",
+  totalCarbs: "כמות פחמימות",
+  totalFats: "כמות שומנים",
+  totalVeggies: "כמות ירקות",
+  quantity: "כמות",
+  customItems: "בחירה מותאמת",
+  extraItems: "פריטים נוספים",
+  supplements: "תוספים",
 };
 
 export const getNestedError = (
@@ -291,4 +303,8 @@ export function removePointerEventsFromBody() {
   if (document.body.style.pointerEvents === "none") {
     document.body.style.pointerEvents = "";
   }
+}
+
+export function isUndefined(variable: any) {
+  return variable == undefined || variable == "undefined" || variable == null;
 }

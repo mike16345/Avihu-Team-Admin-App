@@ -14,9 +14,9 @@ const ProgressNoteContainer = () => {
   const { data: progressNoteRes, isError, isLoading, error } = useProgressNoteQuery(id);
 
   const notes = useMemo(() => {
-    if (!progressNoteRes?.data.progressNotes.length) return [];
+    if (!progressNoteRes?.data?.progressNotes?.length) return [];
 
-    return progressNoteRes.data.progressNotes.map((note) => (
+    return progressNoteRes.data?.progressNotes?.map((note) => (
       <Note key={note._id} progressNote={note} />
     ));
   }, [progressNoteRes?.data]);

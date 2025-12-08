@@ -20,22 +20,24 @@ const UserFormPage = () => {
   const backButtonUrl = `${MainRoutes.USERS}/` + (id ? `${id}?tab=${weightTab}` : "");
 
   const handleSaveUser = async (user: IUser) => {
-    if (id) {
-      await editUser.mutateAsync({ id, user });
-    } else {
-      user.checkInAt = Date.now() + user.remindIn;
-      await addNewUser.mutateAsync(user);
+    let response: any;
+
+    try {
+      if (id) {
+        await editUser.mutateAsync({ id, user });
+      } else {
+        user.checkInAt = Date.now() + user.remindIn;
+        response = await addNewUser.mutateAsync(user);
+      }
+
+      let url = `${MainRoutes.USERS}/`;
+
+      url += `${response?.data?._id || id || ""}?tab=${weightTab}`;
+
+      navigate(url);
+    } catch (error) {
+      console.error(error);
     }
-
-    let url = `${MainRoutes.USERS}/`;
-
-    if (addNewUser.isSuccess || editUser.isSuccess) {
-      url += `${addNewUser.data?._id || id || ""}?tab=${weightTab}`;
-    }
-
-    console.log("url", url);
-
-    navigate(url);
   };
 
   if (isLoading) return <Loader size="large" />;
