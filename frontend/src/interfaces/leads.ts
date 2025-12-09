@@ -9,6 +9,7 @@ export type Lead = {
   phone?: string;
   deviceId?: string;
   ip?: string;
+  isContacted: boolean;
   registeredAt: string;
   createdAt: string;
   updatedAt: string;
@@ -28,6 +29,7 @@ export type UpdateLeadBody = {
   phone?: string;
   deviceId?: string;
   registeredAt?: string;
+  isContacted?: boolean;
 };
 
 export type LeadsListDTO = {
