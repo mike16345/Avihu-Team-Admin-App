@@ -9,7 +9,10 @@ type LeadsColumnsOptions = {
   pendingContactIds?: string[];
 };
 
-export const useLeadsColumns = ({ onToggleContacted, pendingContactIds = [] }: LeadsColumnsOptions) =>
+export const useLeadsColumns = ({
+  onToggleContacted,
+  pendingContactIds = [],
+}: LeadsColumnsOptions) =>
   useMemo<ColumnDef<Lead>[]>(
     () => [
       {
@@ -52,9 +55,7 @@ export const useLeadsColumns = ({ onToggleContacted, pendingContactIds = [] }: L
               checked={lead.isContacted}
               disabled={isPending}
               onClick={(event) => event.stopPropagation()}
-              onCheckedChange={(checked) =>
-                onToggleContacted(lead, Boolean(checked))
-              }
+              onCheckedChange={(checked) => onToggleContacted(lead, Boolean(checked))}
               aria-label={`Mark lead ${lead.fullName ?? lead.email ?? lead._id} as contacted`}
             />
           );

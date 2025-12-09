@@ -62,9 +62,7 @@ const LeadsTablePage = () => {
     async (lead: Lead, nextValue: boolean) => {
       const previousLeads = leads.map((item) => ({ ...item }));
 
-      setPendingContactIds((prev) =>
-        prev.includes(lead._id) ? prev : [...prev, lead._id]
-      );
+      setPendingContactIds((prev) => (prev.includes(lead._id) ? prev : [...prev, lead._id]));
 
       setLeads((current) =>
         sortLeads(
@@ -79,9 +77,7 @@ const LeadsTablePage = () => {
 
         setLeads((current) =>
           sortLeads(
-            current.map((item) =>
-              item._id === lead._id ? { ...item, ...updatedLead } : item
-            )
+            current.map((item) => (item._id === lead._id ? { ...item, ...updatedLead } : item))
           )
         );
       } catch (error) {
