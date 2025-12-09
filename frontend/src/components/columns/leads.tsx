@@ -1,15 +1,18 @@
 import { useMemo } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
-import DeleteLeadAlert from "@/components/leads/DeleteLeadAlert";
+import { Checkbox } from "@/components/ui/checkbox";
 import type { Lead } from "@/interfaces/leads";
 import DateUtils from "@/lib/dateUtils";
 
 type LeadsColumnsOptions = {
-  onDelete: (lead: Lead) => void;
-  isDeleting?: boolean;
+  onToggleContacted: (lead: Lead, nextValue: boolean) => void;
+  pendingContactIds?: string[];
 };
 
-export const useLeadsColumns = ({ onDelete, isDeleting = false }: LeadsColumnsOptions) =>
+export const useLeadsColumns = ({
+  onToggleContacted,
+  pendingContactIds = [],
+}: LeadsColumnsOptions) =>
   useMemo<ColumnDef<Lead>[]>(
     () => [
       {
@@ -40,20 +43,26 @@ export const useLeadsColumns = ({ onDelete, isDeleting = false }: LeadsColumnsOp
           return DateUtils.formatDate(parsedDate, "DD/MM/YYYY");
         },
       },
-
       {
-        id: "actions",
-        header: "פעולות",
-        cell: ({ row }) => (
-          <DeleteLeadAlert
-            lead={row.original}
-            isLoading={isDeleting}
-            onConfirm={() => onDelete(row.original)}
-          />
-        ),
+        accessorKey: "isContacted",
+        header: "נוצר קשר",
+        cell: ({ row }) => {
+          const lead = row.original;
+          const isPending = pendingContactIds.includes(lead._id);
+
+          return (
+            <Checkbox
+              checked={lead.isContacted}
+              disabled={isPending}
+              onClick={(event) => event.stopPropagation()}
+              onCheckedChange={(checked) => onToggleContacted(lead, Boolean(checked))}
+              aria-label={`Mark lead ${lead.fullName ?? lead.email ?? lead._id} as contacted`}
+            />
+          );
+        },
       },
     ],
-    [isDeleting, onDelete]
+    [onToggleContacted, pendingContactIds]
   );
 
 export type { LeadsColumnsOptions };

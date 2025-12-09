@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { DataTableHebrew } from "@/components/tables/DataTableHebrew";
 import ErrorPage from "@/pages/ErrorPage";
 import { useLeadsList } from "@/hooks/queries/leads";
-import { useDeleteLead } from "@/hooks/mutations/leads";
+import { useUpdateLead } from "@/hooks/mutations/leads";
 import { useLeadsColumns } from "@/components/columns/leads";
 import type { Lead } from "@/interfaces/leads";
 
@@ -12,10 +13,28 @@ const LeadsTablePage = () => {
   const limit = 10;
 
   const { data, isLoading, isError, error } = useLeadsList(page, limit);
-  const { mutate: deleteLead, isPending: isDeleting } = useDeleteLead();
+  const { mutateAsync: updateLead } = useUpdateLead();
 
-  const leads = data?.items ?? [];
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [pendingContactIds, setPendingContactIds] = useState<string[]>([]);
   const [total, setTotal] = useState(1);
+
+  const sortLeads = useCallback((list: Lead[]) => {
+    return [...list].sort((a, b) => {
+      if (a.isContacted === b.isContacted) {
+        const aDate = new Date(a.createdAt).getTime();
+        const bDate = new Date(b.createdAt).getTime();
+
+        if (Number.isNaN(aDate) || Number.isNaN(bDate)) {
+          return 0;
+        }
+
+        return bDate - aDate;
+      }
+
+      return a.isContacted ? 1 : -1;
+    });
+  }, []);
 
   useEffect(() => {
     if (!data) return;
@@ -26,13 +45,54 @@ const LeadsTablePage = () => {
       return prev > maxPage ? maxPage : prev;
     });
 
-    const total = data.total ? Math.max(1, Math.ceil(data.total / limit)) : 1;
-    setTotal(total);
-  }, [data, limit]);
+    const totalPages = data.total ? Math.max(1, Math.ceil(data.total / limit)) : 1;
+    setTotal(totalPages);
+
+    if (data.items) {
+      const normalizedLeads = data.items.map((lead) => ({
+        ...lead,
+        isContacted: Boolean(lead.isContacted),
+      }));
+
+      setLeads(sortLeads(normalizedLeads));
+    }
+  }, [data, limit, sortLeads]);
+
+  const handleToggleContacted = useCallback(
+    async (lead: Lead, nextValue: boolean) => {
+      const previousLeads = leads.map((item) => ({ ...item }));
+
+      setPendingContactIds((prev) => (prev.includes(lead._id) ? prev : [...prev, lead._id]));
+
+      setLeads((current) =>
+        sortLeads(
+          current.map((item) =>
+            item._id === lead._id ? { ...item, isContacted: nextValue } : item
+          )
+        )
+      );
+
+      try {
+        const updatedLead = await updateLead({ id: lead._id, body: { isContacted: nextValue } });
+
+        setLeads((current) =>
+          sortLeads(
+            current.map((item) => (item._id === lead._id ? { ...item, ...updatedLead } : item))
+          )
+        );
+      } catch (error) {
+        setLeads(previousLeads);
+        toast.error("Failed to update lead status. Please try again.");
+      } finally {
+        setPendingContactIds((prev) => prev.filter((id) => id !== lead._id));
+      }
+    },
+    [leads, sortLeads, updateLead]
+  );
 
   const columns = useLeadsColumns({
-    onDelete: (lead: Lead) => deleteLead(lead._id),
-    isDeleting,
+    onToggleContacted: handleToggleContacted,
+    pendingContactIds,
   });
 
   if (isError) {
@@ -49,7 +109,7 @@ const LeadsTablePage = () => {
         isLoadingNextPage={isLoading}
         handleSetData={() => {}}
         handleViewData={() => {}}
-        handleDeleteData={(lead: Lead) => deleteLead(lead._id)}
+        handleDeleteData={() => {}}
         handleViewNestedData={() => {}}
         getRowClassName={() => ""}
         handleHoverOnRow={() => false}
