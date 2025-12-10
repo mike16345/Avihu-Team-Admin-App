@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { DataTableHebrew } from "@/components/tables/DataTableHebrew";
 import ErrorPage from "@/pages/ErrorPage";
 import { useLeadsList } from "@/hooks/queries/leads";
-import { useUpdateLead } from "@/hooks/mutations/leads";
+import { useDeleteLead, useUpdateLead } from "@/hooks/mutations/leads";
 import { useLeadsColumns } from "@/components/columns/leads";
 import type { Lead } from "@/interfaces/leads";
 
@@ -14,10 +14,19 @@ const LeadsTablePage = () => {
 
   const { data, isLoading, isError, error } = useLeadsList(page, limit);
   const { mutateAsync: updateLead } = useUpdateLead();
+  const { mutateAsync: deleteLead } = useDeleteLead();
 
   const [leads, setLeads] = useState<Lead[]>([]);
   const [pendingContactIds, setPendingContactIds] = useState<string[]>([]);
   const [total, setTotal] = useState(1);
+
+  const handleDeleteLead = useCallback(
+    async (leadId: string) => {
+      await deleteLead(leadId);
+      toast.success("הלייד נמחק בהצלחה!");
+    },
+    [deleteLead]
+  );
 
   const sortLeads = useCallback((list: Lead[]) => {
     return [...list].sort((a, b) => {
@@ -109,7 +118,7 @@ const LeadsTablePage = () => {
         isLoadingNextPage={isLoading}
         handleSetData={() => {}}
         handleViewData={() => {}}
-        handleDeleteData={() => {}}
+        handleDeleteData={(lead) => handleDeleteLead(lead._id)}
         handleViewNestedData={() => {}}
         getRowClassName={() => ""}
         handleHoverOnRow={() => false}
