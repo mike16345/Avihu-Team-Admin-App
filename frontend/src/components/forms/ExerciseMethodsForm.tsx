@@ -117,7 +117,6 @@ const ExerciseMethodsForm: React.FC<IPresetFormProps> = ({ closeSheet, objectId 
               <FormControl>
                 <TextEditor
                   value={field.value}
-                  defaultValue={field.value}
                   onChange={field.onChange}
                 />
               </FormControl>
