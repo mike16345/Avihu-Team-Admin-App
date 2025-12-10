@@ -23,12 +23,14 @@ import { ExerciseMethodsSchema } from "@/schemas/exerciseMethodSchema";
 import { createRetryFunction } from "@/lib/utils";
 import { IPresetFormProps } from "@/interfaces/interfaces";
 import { FULL_DAY_STALE_TIME } from "@/constants/constants";
+import TextEditor from "../ui/TextEditor";
+import Loader from "../ui/Loader";
 
 const ExerciseMethodsForm: React.FC<IPresetFormProps> = ({ closeSheet, objectId }) => {
   const { addExerciseMethod, updateExerciseMethod, getExerciseMethodById } = useExerciseMethodApi();
   const queryClient = useQueryClient();
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: [QueryKeys.EXERCISE_METHODS + objectId],
     queryFn: () => getExerciseMethodById(objectId || ``),
     enabled: !!objectId,
@@ -88,6 +90,8 @@ const ExerciseMethodsForm: React.FC<IPresetFormProps> = ({ closeSheet, objectId 
     reset(data.data);
   }, [data]);
 
+  if (isLoading) return <Loader size="large" />;
+
   return (
     <Form {...exercisesMethodsForm}>
       <form onSubmit={exercisesMethodsForm.handleSubmit(onSubmit)} className="space-y-4 text-right">
@@ -111,7 +115,10 @@ const ExerciseMethodsForm: React.FC<IPresetFormProps> = ({ closeSheet, objectId 
             <FormItem>
               <FormLabel>תיאור</FormLabel>
               <FormControl>
-                <Textarea placeholder="הכנס תיאור כאן..." {...field} />
+                <TextEditor
+                  value={field.value}
+                  onChange={field.onChange}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
