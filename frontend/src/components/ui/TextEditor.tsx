@@ -33,11 +33,8 @@ const TextEditor: React.FC<ReactQuill.ReactQuillProps> = (props) => {
     const editor = quillRef.current?.getEditor();
     if (!editor) return;
 
-    const text = editor.getText().trim();
-    if (!text || text.length === 0) {
-      editor.format("direction", "rtl");
-      editor.format("align", "right");
-    }
+    editor.format("direction", "rtl");
+    editor.format("align", "right");
   }, [props.value]);
 
   return (

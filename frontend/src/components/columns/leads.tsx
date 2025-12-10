@@ -1,8 +1,10 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { Lead } from "@/interfaces/leads";
 import DateUtils from "@/lib/dateUtils";
+import DeleteButton from "../ui/buttons/DeleteButton";
+import DeleteModal from "../Alerts/DeleteModal";
 
 type LeadsColumnsOptions = {
   onToggleContacted: (lead: Lead, nextValue: boolean) => void;
@@ -58,6 +60,27 @@ export const useLeadsColumns = ({
               onCheckedChange={(checked) => onToggleContacted(lead, Boolean(checked))}
               aria-label={`Mark lead ${lead.fullName ?? lead.email ?? lead._id} as contacted`}
             />
+          );
+        },
+      },
+      {
+        header: "פעולות",
+        cell: ({ table, row }) => {
+          const lead = row.original;
+          const handleDeleteLead = table.options.meta?.handleDeleteData;
+
+          const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+          return (
+            <>
+              <DeleteButton tip="מחק לייד" onClick={() => setIsDeleteModalOpen(true)} />
+              <DeleteModal
+                isModalOpen={isDeleteModalOpen}
+                setIsModalOpen={setIsDeleteModalOpen}
+                onConfirm={() => handleDeleteLead && handleDeleteLead(lead)}
+                onCancel={() => setIsDeleteModalOpen(false)}
+              />
+            </>
           );
         },
       },

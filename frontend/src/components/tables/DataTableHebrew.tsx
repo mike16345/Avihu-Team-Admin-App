@@ -34,6 +34,7 @@ import { usePagination } from "@/hooks/usePagination";
 import DeleteButton from "../ui/buttons/DeleteButton";
 import UserExpiredTooltip from "./UserExpiredTooltip";
 import Loader from "../ui/Loader";
+import { cn } from "@/lib/utils";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -254,7 +255,7 @@ export function DataTableHebrew<TData, TValue>({
                       isActive={handleHoverOnRow?.(row.original)}
                     >
                       <TableRow
-                        className={getRowClassName(row.original)}
+                        className={cn(getRowClassName(row.original))}
                         onDoubleClick={(e) => {
                           const target = e.target as HTMLElement;
                           if (target.id == "row-checkbox" || target.id == "access-switch") return;
@@ -264,7 +265,7 @@ export function DataTableHebrew<TData, TValue>({
                         data-state={row.getIsSelected() && "selected"}
                       >
                         {row.getVisibleCells().map((cell) => (
-                          <TableCell key={cell.id}>
+                          <TableCell key={cell.id} className=" select-text">
                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                           </TableCell>
                         ))}
