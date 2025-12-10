@@ -38,7 +38,7 @@ const ComboBox: FC<ComboBoxProps> = ({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0">
-        <Command shouldFilter={false}>
+        <Command>
           <CommandInput dir="rtl" placeholder={inputPlaceholder} />
 
           {options.length == 0 && !isLoading && (
