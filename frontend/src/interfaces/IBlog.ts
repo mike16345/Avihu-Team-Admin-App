@@ -2,6 +2,7 @@ import UserPlanTypes from "@/enums/UserPlanTypes";
 
 export interface IBlog {
   title: string;
+  subtitle: string;
   content: string;
   planType?: UserPlanTypes;
   group?: ILessonGroup;
