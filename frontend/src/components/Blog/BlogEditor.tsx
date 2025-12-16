@@ -166,6 +166,14 @@ const BlogEditor = () => {
           className="sm:w-2/3 "
           value={blog.title}
           onChange={(e) => handleFieldChange("title", e.target.value)}
+          placeholder="כותרת.."
+        />
+        <Label className="font-semibold">כותרת משנה</Label>
+        <Input
+          className="sm:w-2/3 "
+          value={blog.subtitle}
+          onChange={(e) => handleFieldChange("subtitle", e.target.value)}
+          placeholder="כותרת משנה..."
         />
 
         <div className="flex flex-col gap-3 sm:w-2/3">
