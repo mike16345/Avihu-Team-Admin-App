@@ -123,7 +123,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
               <SortableItem item={item} idKey="_id">
                 {() => {
                   const { name, linkToVideo, imageUrl } =
-                    typeof item.exerciseId == "object" ? item.exerciseId : item;
+                    typeof item.exerciseId == "object" ? item.exerciseId || {} : item;
 
                   return (
                     <Card className={` sm:p-4 max-h-[575px] overflow-y-auto custom-scrollbar`}>
