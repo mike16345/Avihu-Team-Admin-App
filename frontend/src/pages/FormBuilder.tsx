@@ -5,7 +5,7 @@ import React from "react";
 
 const FormBuilder = () => {
   return (
-    <div className="p-5">
+    <div className="p-5 space-y-5">
       <FormBuilderHeader />
 
       <SectionContainer />

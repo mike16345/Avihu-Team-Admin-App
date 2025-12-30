@@ -9,3 +9,9 @@ export const QuestionTypeOptions: Option[] = [
   { name: "טווח / סרגל", value: "range" },
   { name: "העלאת קובץ", value: "file-upload" },
 ];
+
+export const FormTypeOptions: Option[] = [
+  { name: "התחלה", value: "onboarding" },
+  { name: "חודשי", value: "monthly" },
+  { name: "כללי", value: "general" },
+];
