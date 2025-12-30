@@ -19,7 +19,7 @@ const Question /* : React.FC<QuestionProps> */ = () => {
   const [question, setQuestion] = useState(tempQuestion);
 
   return (
-    <div className="border rounded-lg hover:shadow hover:border-primary transition-all p-5 group flex justify-between gap-5">
+    <div className="border rounded-xl hover:shadow hover:border-primary transition-all p-5 group flex justify-between gap-5">
       <QuestionForm />
 
       <div className="opacity-0 group-hover:opacity-100 transition-all">

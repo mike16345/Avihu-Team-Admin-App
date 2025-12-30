@@ -1,10 +1,16 @@
-import Question from "@/components/dynamicForms/question/Question";
+import FormBuilderHeader from "@/components/dynamicForms/FormBuilderHeader";
+import SectionContainer from "@/components/dynamicForms/section/SectionContainer";
+import AddButton from "@/components/ui/buttons/AddButton";
 import React from "react";
 
 const FormBuilder = () => {
   return (
-    <div>
-      <Question />
+    <div className="p-5">
+      <FormBuilderHeader />
+
+      <SectionContainer />
+
+      <AddButton onClick={() => {}} label="הוספת קטגוריה" />
     </div>
   );
 };
