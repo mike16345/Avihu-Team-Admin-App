@@ -5,30 +5,29 @@ import { Plus } from "lucide-react";
 
 interface AddButtonProps {
   onClick: any;
-  tip: string;
+  tip?: string;
+  label?: string;
 }
 
-const AddButton: React.FC<AddButtonProps> = ({ onClick, tip }) => {
+const AddButton: React.FC<AddButtonProps> = ({ onClick, tip, label }) => {
   return (
     <TooltipProvider delayDuration={100}>
       <Tooltip>
         <TooltipTrigger type="button" className="w-full">
           <div
-            className=" bg-accent rounded border-t-2  flex justify-center px-1 py-1.5  my-2 cursor-pointer"
+            className="border-2 bg-background rounded-xl border-dashed  border-primary opacity-80 hover:opacity-100 transition-all flex justify-center px-1 py-1.5  my-2 cursor-pointer"
             onClick={(e) => {
               e.preventDefault();
               onClick();
             }}
           >
-            <Button
-              type="button"
-              className="rounded-full h-5 bg-success hover:bg-success hover:font-bold  text-secondary-foreground"
-            >
-              <Plus size={14} />
-            </Button>
+            <div className="flex items-center gap-5">
+              <Plus className="text-primary " size={20} />
+              {!!label && <p className="text-primary font-bold">{label}</p>}
+            </div>
           </div>
         </TooltipTrigger>
-        <TooltipContent>
+        <TooltipContent hidden={!tip}>
           <span>{tip}</span>
         </TooltipContent>
       </Tooltip>
