@@ -3,32 +3,20 @@ import { ExerciseProgressChart } from "./ExerciseProgressChart";
 import { useParams } from "react-router";
 import { RecordedSetsList } from "./RecordedSetsList";
 import { MuscleExerciseSelector } from "./MuscleExerciseSelector";
-import { useRecordedSetsApi } from "@/hooks/api/useRecordedSetsApi";
 import { extractExercises } from "@/lib/workoutUtils";
-import { useSearchParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { QueryKeys } from "@/enums/QueryKeys";
-import { FULL_DAY_STALE_TIME } from "@/constants/constants";
-import { createRetryFunction } from "@/lib/utils";
+import { useLocation, useSearchParams } from "react-router-dom";
+import useUserRecordedSets from "@/hooks/queries/recordedSets/useUserRecordedSets";
 import Loader from "@/components/ui/Loader";
 import ErrorPage from "@/pages/ErrorPage";
 import { workoutTab } from "@/pages/UserDashboard";
+import ExerciseProgressNotePanel from "./ExerciseProgressNotePanel";
 
 export const WorkoutProgression = () => {
   const { id } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { getRecordedSetsByUserId } = useRecordedSetsApi();
-
-  const handleGetRecordedSets = async () => {
-    try {
-      const data = await getRecordedSetsByUserId(id!);
-
-      return data;
-    } catch (error) {
-      console.error("Error fetching recorded sets:", error);
-      throw error;
-    }
-  };
+  const location = useLocation();
+  const locationState = location.state as { firstName?: string; name?: string } | null;
+  const userName = locationState?.firstName || locationState?.name;
 
   const handleSetSearchParams = () => {
     if (!recordedWorkouts || (searchParams.get("muscleGroup") && searchParams.get("exercise")))
@@ -48,17 +36,7 @@ export const WorkoutProgression = () => {
     setSelectedExercise(initialExercise);
   };
 
-  const {
-    data: recordedWorkouts,
-    isLoading,
-    error,
-  } = useQuery({
-    queryFn: handleGetRecordedSets,
-    queryKey: [`${QueryKeys.RECORDED_WORKOUTS}${id}`],
-    staleTime: FULL_DAY_STALE_TIME / 2,
-    retry: createRetryFunction(404),
-    enabled: !!id,
-  });
+  const { data: recordedWorkouts, isLoading, error } = useUserRecordedSets(id);
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState(
     searchParams.get("muscleGroup") || ""
   );
@@ -81,6 +59,7 @@ export const WorkoutProgression = () => {
 
   return (
     <div className="size-full flex flex-col gap-4 p-3">
+      <ExerciseProgressNotePanel recordedWorkouts={recordedWorkouts} userName={userName} />
       {!!recordedWorkouts?.length && (
         <>
           <MuscleExerciseSelector
