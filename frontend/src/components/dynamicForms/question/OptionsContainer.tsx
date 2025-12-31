@@ -5,25 +5,28 @@ import React, { useState } from "react";
 
 interface OptionsContainerProps {
   options: [];
+  onChange: (arr: string[]) => void;
 }
 
-const OptionsContainer: React.FC<OptionsContainerProps> = () => {
-  const [options, setOptions] = useState(["אופציה 1"]);
-
+const OptionsContainer: React.FC<OptionsContainerProps> = ({ onChange, options }) => {
   const addOption = () => {
-    setOptions((prev) => [...prev, `אופציה ${prev.length + 1}`]);
+    onChange([...options, `אופציה ${options.length + 1}`]);
+  };
+
+  const removeOption = (index: number) => {
+    onChange(options.filter((_, i) => i !== index));
   };
 
   return (
     <div>
       <div className="space-y-3">
         {options.map((option, i) => (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2" key={i + option}>
             <div className="flex gap-2 w-full">
               <span>{i + 1}.</span>
               <DynamicInput defaultValue={option} />
             </div>
-            <DeleteButton onClick={() => {}} tip="הסרה" />
+            <DeleteButton onClick={() => removeOption(i)} tip="הסרה" />
           </div>
         ))}
       </div>

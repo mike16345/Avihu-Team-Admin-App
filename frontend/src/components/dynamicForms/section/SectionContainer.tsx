@@ -2,11 +2,25 @@ import React from "react";
 import SectionHeader from "./SectionHeader";
 import SectionContent from "./SectionContent";
 
-const SectionContainer = () => {
+interface SectionContainerProps {
+  parentPath: `sections.${number}`;
+  onDeleteSection: () => void;
+  onDuplicateSection: () => void;
+}
+
+const SectionContainer: React.FC<SectionContainerProps> = ({
+  onDuplicateSection,
+  onDeleteSection,
+  parentPath,
+}) => {
   return (
     <div className="rounded-xl shadow-lg border group overflow-hidden space-y-5 ">
-      <SectionHeader />
-      <SectionContent />
+      <SectionHeader
+        parentPath={parentPath}
+        handleDelete={onDeleteSection}
+        handleDuplicate={onDuplicateSection}
+      />
+      <SectionContent parentPath={parentPath} />
     </div>
   );
 };

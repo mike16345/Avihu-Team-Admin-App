@@ -13,7 +13,8 @@ import BlogEditor from "@/components/Blog/BlogEditor";
 import DietPlanWrapper from "@/components/DietPlan/DietPlanWrapper";
 import WorkoutPlans from "@/components/workout plan/WorkoutPlans";
 import LeadsTablePage from "@/features/leads/LeadsTablePage";
-import FormBuilder from "@/pages/FormBuilder";
+import FormBuilder from "@/components/dynamicForms/FormBuilder";
+import FormBuilderPage from "@/pages/FormBuilderPage";
 
 export const AppRoutes = () => {
   return (
@@ -47,7 +48,7 @@ export const AppRoutes = () => {
         <Route path="/workoutPlans" element={<WorkoutsTemplatePage />} />
         <Route path="/dietPlans/" element={<DietPlanTemplatePage />} />
         <Route path="/presets/*" element={<PresetRoutes />} />
-        <Route path="/form-builder" element={<FormBuilder />} />
+        <Route path="/form-builder" element={<FormBuilderPage />} />
       </Routes>
     </>
   );

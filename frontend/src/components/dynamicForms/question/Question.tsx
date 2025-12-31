@@ -1,29 +1,27 @@
-import { IFormQuestion } from "@/interfaces/IForm";
-import React, { useState } from "react";
-import DynamicInput from "../../ui/DynamicInput";
+import React from "react";
 import QuestionActions from "./QuestionActions";
-import CustomSelect from "@/components/ui/CustomSelect";
-import { QuestionTypeOptions } from "@/constants/form";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import CustomSwitch from "@/components/ui/CustomSwitch";
 import QuestionForm from "./QuestionForm";
 
-const tempQuestion: IFormQuestion = { question: "", type: "text", required: false };
+interface QuestionProps {
+  parentPath: `sections.${number}.questions.${number}`;
+  onDeleteQuestion: () => void;
+  onDuplicateQuestion: () => void;
+}
 
-/* interface QuestionProps {
-  question?: IFormQuestion;
-} */
-
-const Question /* : React.FC<QuestionProps> */ = () => {
-  const [question, setQuestion] = useState(tempQuestion);
-
+const Question: React.FC<QuestionProps> = ({
+  parentPath,
+  onDeleteQuestion,
+  onDuplicateQuestion,
+}) => {
   return (
     <div className="border rounded-xl hover:shadow hover:border-primary transition-all p-5 group flex justify-between gap-5">
-      <QuestionForm />
+      <QuestionForm parentPath={parentPath} />
 
       <div className="opacity-0 group-hover:opacity-100 transition-all">
-        <QuestionActions />
+        <QuestionActions
+          onDeleteQuestion={onDeleteQuestion}
+          onDuplicateQuestion={onDuplicateQuestion}
+        />
       </div>
     </div>
   );
