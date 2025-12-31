@@ -17,7 +17,10 @@ interface ExerciseProgressNotePanelProps {
   userName?: string;
 }
 
-const ExerciseProgressNotePanel = ({ recordedWorkouts, userName }: ExerciseProgressNotePanelProps) => {
+const ExerciseProgressNotePanel = ({
+  recordedWorkouts,
+  userName,
+}: ExerciseProgressNotePanelProps) => {
   const [selectedExercises, setSelectedExercises] = useState<string[]>([]);
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: addDays(new Date(), -30),

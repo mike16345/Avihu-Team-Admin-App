@@ -117,10 +117,13 @@ export const generateExerciseProgressNote = ({
     const allInstances = groupByInstance(setsForExercise);
     const firstInstance = allInstances[0];
 
-    const rangeInstances = allInstances.filter((instance) => isWithinRange(instance.date, dateRange));
+    const rangeInstances = allInstances.filter((instance) =>
+      isWithinRange(instance.date, dateRange)
+    );
     const firstRangeInstance = rangeInstances[0];
     const lastRangeInstance = rangeInstances[rangeInstances.length - 1];
-    const sameRangeInstance = firstRangeInstance?.key && firstRangeInstance.key === lastRangeInstance?.key;
+    const sameRangeInstance =
+      firstRangeInstance?.key && firstRangeInstance.key === lastRangeInstance?.key;
 
     noteLines.push(`${exercise}:`);
     noteLines.push("מאז שהצטרפת:");

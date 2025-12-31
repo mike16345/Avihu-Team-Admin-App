@@ -30,9 +30,13 @@ const DateRangePicker = ({
       return format(selectedRange.from, "PPP", { locale: he });
     }
 
-    return `${format(selectedRange.from, "PPP", { locale: he })} - ${format(selectedRange.to, "PPP", {
-      locale: he,
-    })}`;
+    return `${format(selectedRange.from, "PPP", { locale: he })} - ${format(
+      selectedRange.to,
+      "PPP",
+      {
+        locale: he,
+      }
+    )}`;
   };
 
   return (
@@ -43,7 +47,9 @@ const DateRangePicker = ({
           className={cn("h-9 justify-start gap-2 text-right font-normal", className)}
         >
           <CalendarIcon className="h-4 w-4" />
-          <span className={cn(!selectedRange?.from && "text-muted-foreground")}>{formatRange()}</span>
+          <span className={cn(!selectedRange?.from && "text-muted-foreground")}>
+            {formatRange()}
+          </span>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="center">
