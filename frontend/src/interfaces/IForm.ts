@@ -18,6 +18,9 @@ export interface IFormQuestion {
   description?: string;
   options?: string[];
   required: boolean;
+}
+
+export interface IFormQuestionWithAnswer extends IFormQuestion {
   answer?: any;
 }
 

@@ -15,6 +15,10 @@ const FormBuilderHeader = () => {
       <div className="flex justify-between gap-5 items-center">
         <DynamicInput defaultValue="טופס ללא שם" />
 
+        {formType == "general" && (
+          <DatePicker onChangeDate={() => {}} selectedDate={"2025-12-29"} />
+        )}
+
         <CustomSelect
           className="max-w-[200px] bg-muted"
           items={FormTypeOptions}
