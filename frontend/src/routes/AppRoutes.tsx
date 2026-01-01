@@ -47,7 +47,7 @@ export const AppRoutes = () => {
         <Route path="/workoutPlans" element={<WorkoutsTemplatePage />} />
         <Route path="/dietPlans/" element={<DietPlanTemplatePage />} />
         <Route path="/presets/*" element={<PresetRoutes />} />
-        <Route path="/form-builder" element={<FormBuilderPage />} />
+        <Route path="/form-builder/:id" element={<FormBuilderPage />} />
       </Routes>
     </>
   );

@@ -29,8 +29,6 @@ const FormBuilder = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const sectionIndex = useRef<number | null>(null);
 
-  /* ---------- Actions ---------- */
-
   const handleAddSection = () => {
     const newSection: IFormSection & { _id: string } = {
       _id: generateUUID(),
@@ -62,8 +60,6 @@ const FormBuilder = () => {
     sectionIndex.current = null;
     toast.success("קטגוריה נמחקה בהצלחה!");
   };
-
-  /* ---------- Render ---------- */
 
   return (
     <>

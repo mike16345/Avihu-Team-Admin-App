@@ -25,7 +25,7 @@ const FormBuilderHeader = () => {
           render={({ field }) => {
             return (
               <FormItem className="w-full">
-                <DynamicInput {...field} defaultValue="טופס ללא שם" />
+                <DynamicInput {...field} defaultValue="שאלון ללא שם" />
 
                 <FormMessage />
               </FormItem>

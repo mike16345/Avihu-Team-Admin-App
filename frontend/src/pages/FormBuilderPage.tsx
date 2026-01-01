@@ -2,13 +2,26 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form as RHFForm } from "@/components/ui/form";
 import { toast } from "sonner";
-
 import { FormSchema, FormType } from "@/schemas/formBuilderSchema";
 import CustomButton from "@/components/ui/CustomButton";
 import FormBuilder from "@/components/dynamicForms/FormBuilder";
 import { getNestedError } from "@/lib/utils";
+import useFormPresetQuery from "@/hooks/queries/formPresets/useFormPresetQuery";
+import { useParams } from "react-router-dom";
+import Loader from "@/components/ui/Loader";
+import ErrorPage from "./ErrorPage";
+import { useEffect, useMemo } from "react";
+import useAddFormPreset from "@/hooks/mutations/formPresets/useAddFormPreset";
+import useUpdateFormPreset from "@/hooks/mutations/formPresets/useUpdateFormPreset";
+import { IForm } from "@/interfaces/IForm";
 
 const FormBuilderPage = () => {
+  const { id } = useParams();
+  const isEdit = id !== "add";
+  const { data: formRes, isLoading, error } = useFormPresetQuery(isEdit ? id : undefined);
+  const { mutate: addForm, isPending: isAddFormPending } = useAddFormPreset();
+  const { mutate: updateForm, isPending: isUpdateFormPending } = useUpdateFormPreset(id);
+
   const form = useForm<FormType>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -22,15 +35,28 @@ const FormBuilderPage = () => {
   const {
     handleSubmit,
     formState: { isDirty, isSubmitting },
+    watch,
+    reset,
   } = form;
 
-  /* ---------- Submit ---------- */
+  const sections = watch("sections");
+  const disableButton = useMemo(
+    () => !isDirty || isSubmitting || !sections.length,
+    [isDirty, isSubmitting, sections]
+  );
+  const buttonLoadingState = useMemo(
+    () => isSubmitting || isAddFormPending || isUpdateFormPending,
+    [isSubmitting, isAddFormPending, isUpdateFormPending]
+  );
 
   const onSubmit = (values: FormType) => {
-    console.log("FORM PAYLOAD:", values);
+    const formPreset = values as IForm;
 
-    toast.success("הטופס נשמר בהצלחה!");
-    // mutation goes here
+    if (isEdit) {
+      updateForm({ id: id!, formPreset });
+    } else {
+      addForm(formPreset);
+    }
   };
 
   const onInvalidSubmit = (errors: any) => {
@@ -40,6 +66,15 @@ const FormBuilderPage = () => {
       description: errorMessage?.description,
     });
   };
+
+  useEffect(() => {
+    if (!formRes) return;
+
+    reset(formRes.data);
+  }, [formRes]);
+
+  if (isLoading) return <Loader size="xl" />;
+  if (error && error.status !== 404) return <ErrorPage />;
 
   return (
     <RHFForm {...form}>
@@ -54,8 +89,8 @@ const FormBuilderPage = () => {
             type="submit"
             title="שמור טופס"
             variant="default"
-            disabled={!isDirty || isSubmitting}
-            isLoading={isSubmitting}
+            disabled={disableButton}
+            isLoading={buttonLoadingState}
           />
         </div>
       </form>

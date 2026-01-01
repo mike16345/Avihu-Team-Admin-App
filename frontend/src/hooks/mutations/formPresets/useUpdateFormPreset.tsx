@@ -5,7 +5,7 @@ import { IForm } from "@/interfaces/IForm";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-const useUpdateFormPreset = (id: string) => {
+const useUpdateFormPreset = (id?: string) => {
   const { updateFormPreset } = useFormPresetApi();
   const queryClient = useQueryClient();
 

@@ -48,15 +48,28 @@ export const FormSectionSchema = z.object({
 
 // -----------------------------------------
 // Full Form Schema
-export const FormSchema = z.object({
-  name: z.string().min(1, { message: ERROR_MESSAGES.required }),
-  type: z.enum(
-    FormTypeOptions.map((f) => f.value) as [(typeof FormTypeOptions)[number]["value"], ...string[]]
-  ),
-  showOn: z.date().optional(),
-  repeatMonthly: z.boolean(),
-  sections: z.array(FormSectionSchema).min(1, { message: ERROR_MESSAGES.arrayMin(1, "קטגוריה") }),
-});
+export const FormSchema = z
+  .object({
+    name: z.string().min(1, { message: ERROR_MESSAGES.required }),
+    type: z.enum(
+      FormTypeOptions.map((f) => f.value) as [
+        (typeof FormTypeOptions)[number]["value"],
+        ...string[]
+      ]
+    ),
+    showOn: z.date().optional(),
+    repeatMonthly: z.boolean(),
+    sections: z.array(FormSectionSchema).min(1, { message: ERROR_MESSAGES.arrayMin(1, "קטגוריה") }),
+  })
+  .superRefine((data, ctx) => {
+    if (data.type === "general" && !data.showOn) {
+      ctx.addIssue({
+        path: ["showOn"],
+        code: z.ZodIssueCode.custom,
+        message: ERROR_MESSAGES.required,
+      });
+    }
+  });
 
 // -----------------------------------------
 // TypeScript types
