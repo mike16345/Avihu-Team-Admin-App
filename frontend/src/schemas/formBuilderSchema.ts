@@ -7,7 +7,7 @@ import ERROR_MESSAGES from "@/utils/errorMessages";
 export const QuestionTypesSchema = z.enum(
   QuestionTypeOptions.map((q) => q.value) as [
     (typeof QuestionTypeOptions)[number]["value"],
-    ...string[]
+    ...string[],
   ]
 );
 
@@ -54,7 +54,7 @@ export const FormSchema = z
     type: z.enum(
       FormTypeOptions.map((f) => f.value) as [
         (typeof FormTypeOptions)[number]["value"],
-        ...string[]
+        ...string[],
       ]
     ),
     showOn: z.coerce.date().optional(),
