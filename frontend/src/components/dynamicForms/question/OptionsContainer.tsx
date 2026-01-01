@@ -22,7 +22,7 @@ const OptionsContainer: React.FC<OptionsContainerProps> = ({ onChange, options }
       <div className="space-y-3">
         {options.map((option, i) => (
           <div className="flex items-center gap-2" key={i + option}>
-            <div className="flex gap-2 w-full">
+            <div className="flex gap-2 w-full items-center">
               <span>{i + 1}.</span>
               <DynamicInput defaultValue={option} />
             </div>
