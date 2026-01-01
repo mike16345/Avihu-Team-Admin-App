@@ -19,7 +19,7 @@ const useUpdateFormPreset = (id?: string) => {
   };
 
   const onError = (e: any) => {
-    toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, { description: e.data.message });
+    toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, { description: e?.data?.message });
   };
 
   return useMutation({

@@ -83,11 +83,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({ parentPath }) => {
           render={({ field }) => {
             return (
               <FormItem className="w-full">
-                <OptionsContainer
-                  type="checkboxes"
-                  options={field.value || ["אופציה 1"]}
-                  onChange={field.onChange}
-                />
+                <OptionsContainer options={field.value || ["אופציה 1"]} onChange={field.onChange} />
 
                 <FormMessage />
               </FormItem>

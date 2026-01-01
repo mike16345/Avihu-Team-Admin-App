@@ -63,7 +63,7 @@ const SectionContent: React.FC<SectionContentProps> = ({ parentPath }) => {
 
     remove(questionIndex.current);
     questionIndex.current = null;
-    toast.success("קטגוריה נמחקה בהצלחה!");
+    toast.success("שאלה נמחקה בהצלחה!");
   };
   return (
     <>

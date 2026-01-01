@@ -1,7 +1,7 @@
 import AddButton from "@/components/ui/buttons/AddButton";
 import DeleteButton from "@/components/ui/buttons/DeleteButton";
 import DynamicInput from "@/components/ui/DynamicInput";
-import React, { useState } from "react";
+import React from "react";
 
 interface OptionsContainerProps {
   options: [];

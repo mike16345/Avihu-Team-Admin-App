@@ -68,10 +68,7 @@ const FormBuilderHeader = () => {
           render={({ field }) => {
             return (
               <FormItem className="w-full">
-                <DatePicker
-                  onChangeDate={field.onChange}
-                  selectedDate={field.value ? new Date(field.value) : new Date()}
-                />
+                <DatePicker onChangeDate={field.onChange} selectedDate={field.value} />
 
                 <FormMessage />
               </FormItem>
