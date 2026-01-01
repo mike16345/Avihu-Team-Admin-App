@@ -60,8 +60,8 @@ export const FormSchema = z
     showOn: z.date().optional(),
     repeatMonthly: z.boolean(),
     sections: z.array(FormSectionSchema).min(1, { message: ERROR_MESSAGES.arrayMin(1, "קטגוריה") }),
-    createdAt: z.date().optional(),
-    updatedAt: z.date().optional(),
+    createdAt: z.any().optional(),
+    updatedAt: z.any().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.type === "general" && !data.showOn) {
