@@ -38,4 +38,6 @@ export interface IForm {
   showOn?: Date;
   repeatMonthly: boolean;
   sections: IFormSection[];
+  createdAt?: Date;
+  updatedAt?: Date;
 }

@@ -5,16 +5,24 @@ import DatePicker from "../ui/DatePicker";
 import { useFormContext } from "react-hook-form";
 import { FormType } from "@/schemas/formBuilderSchema";
 import { FormField, FormItem, FormMessage } from "../ui/form";
+import { useEffect } from "react";
 
 const FormBuilderHeader = () => {
   const {
     control,
     watch,
     formState: { errors },
+    setValue,
   } = useFormContext<FormType>();
   const formType = watch("type");
 
   const headerError = Boolean(errors.name || errors.type || errors.showOn);
+
+  useEffect(() => {
+    if (!formType) return;
+
+    setValue("repeatMonthly", formType == "monthly");
+  }, [formType]);
 
   return (
     <div className={`rounded-xl shadow-lg p-5 border space-y-3 ${borderColor[headerError as any]}`}>
