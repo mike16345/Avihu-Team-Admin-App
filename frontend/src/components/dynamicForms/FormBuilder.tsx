@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
-import { Form } from "@/schemas/formBuilderSchema";
+import { FormType } from "@/schemas/formBuilderSchema";
 import { IFormSection } from "@/interfaces/IForm";
 import FormBuilderHeader from "@/components/dynamicForms/FormBuilderHeader";
 import SectionContainer from "@/components/dynamicForms/section/SectionContainer";
@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { generateUUID } from "@/lib/utils";
 
 const FormBuilder = () => {
-  const form = useFormContext<Form>();
+  const form = useFormContext<FormType>();
   const { control, watch } = form;
 
   const {

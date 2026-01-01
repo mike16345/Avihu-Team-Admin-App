@@ -1,15 +1,13 @@
-import React, { useState } from "react";
 import DynamicInput from "../ui/DynamicInput";
 import CustomSelect from "../ui/CustomSelect";
 import { FormTypeOptions } from "@/constants/form";
-import { FormTypes } from "@/interfaces/IForm";
 import DatePicker from "../ui/DatePicker";
 import { useFormContext } from "react-hook-form";
-import { Form } from "@/schemas/formBuilderSchema";
+import { FormType } from "@/schemas/formBuilderSchema";
 import { FormField, FormItem, FormMessage } from "../ui/form";
 
 const FormBuilderHeader = () => {
-  const { control, watch } = useFormContext<Form>();
+  const { control, watch } = useFormContext<FormType>();
 
   const formType = watch("type");
 

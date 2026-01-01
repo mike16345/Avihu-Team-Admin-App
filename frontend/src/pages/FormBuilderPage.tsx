@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form as RHFForm } from "@/components/ui/form";
 import { toast } from "sonner";
 
-import { FormSchema, Form as FormType } from "@/schemas/formBuilderSchema";
+import { FormSchema, FormType } from "@/schemas/formBuilderSchema";
 import CustomButton from "@/components/ui/CustomButton";
 import FormBuilder from "@/components/dynamicForms/FormBuilder";
 import { getNestedError } from "@/lib/utils";
@@ -20,6 +20,7 @@ const FormBuilderPage = () => {
   });
 
   const {
+    trigger,
     handleSubmit,
     formState: { isDirty, isSubmitting },
   } = form;
@@ -44,23 +45,21 @@ const FormBuilderPage = () => {
   return (
     <RHFForm {...form}>
       <form
-        className="flex flex-col gap-4 w-full"
+        className="flex flex-col gap-4 max-w-[800px] mx-auto"
         onSubmit={handleSubmit(onSubmit, onInvalidSubmit)}
       >
-        {/* ---------- Builder ---------- */}
         <FormBuilder />
-
-        {/* ---------- Actions ---------- */}
-        <div className="flex justify-end gap-2 sticky bottom-0 w-fit mr-auto py-2">
-          <CustomButton
-            type="submit"
-            title="שמור טופס"
-            variant="success"
-            disabled={!isDirty || isSubmitting}
-            isLoading={isSubmitting}
-          />
-        </div>
       </form>
+      <div className="flex justify-end gap-2 sticky bottom-0 w-fit mr-auto py-2">
+        <CustomButton
+          type="submit"
+          title="שמור טופס"
+          variant="success"
+          disabled={!isDirty || isSubmitting}
+          isLoading={isSubmitting}
+          onClick={() => trigger()}
+        />
+      </div>
     </RHFForm>
   );
 };

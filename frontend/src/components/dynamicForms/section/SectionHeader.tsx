@@ -2,7 +2,7 @@ import DynamicInput from "@/components/ui/DynamicInput";
 import React from "react";
 import SectionActions from "./SectionActions";
 import { useFormContext } from "react-hook-form";
-import { Form } from "@/schemas/formBuilderSchema";
+import { FormType } from "@/schemas/formBuilderSchema";
 import { FormField, FormItem, FormMessage } from "@/components/ui/form";
 
 interface SectionHeaderProps {
@@ -16,7 +16,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
   handleDelete,
   handleDuplicate,
 }) => {
-  const { control } = useFormContext<Form>();
+  const { control } = useFormContext<FormType>();
 
   return (
     <div className="bg-muted p-5 flex justify-between items-start gap-5 ">
@@ -27,7 +27,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
           render={({ field }) => {
             return (
               <FormItem>
-                <DynamicInput {...field} defaultValue="שם" />
+                <DynamicInput {...field} defaultValue="קטגוריה ללא שם" />
                 <FormMessage />
               </FormItem>
             );

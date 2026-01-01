@@ -3,18 +3,18 @@ import CustomSwitch from "@/components/ui/CustomSwitch";
 import DynamicInput from "@/components/ui/DynamicInput";
 import { Input } from "@/components/ui/input";
 import { QuestionTypeOptions, typesRequiringOptions } from "@/constants/form";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import OptionsContainer from "./OptionsContainer";
 import { useFormContext } from "react-hook-form";
 import { FormField, FormItem, FormMessage } from "@/components/ui/form";
-import { Form } from "@/schemas/formBuilderSchema";
+import { FormType } from "@/schemas/formBuilderSchema";
 
 interface QuestionFormProps {
   parentPath: `sections.${number}.questions.${number}`;
 }
 
 const QuestionForm: React.FC<QuestionFormProps> = ({ parentPath }) => {
-  const { control, watch } = useFormContext<Form>();
+  const { control, watch, setValue } = useFormContext<FormType>();
 
   const type = watch(`${parentPath}.type`);
 
@@ -23,6 +23,12 @@ const QuestionForm: React.FC<QuestionFormProps> = ({ parentPath }) => {
 
     return typesRequiringOptions.includes(type);
   }, [type]);
+
+  useEffect(() => {
+    if (!showOptions) {
+      setValue(`${parentPath}.options`, []);
+    }
+  }, [showOptions]);
 
   return (
     <div className="w-full space-y-5">
@@ -33,7 +39,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({ parentPath }) => {
           render={({ field }) => {
             return (
               <FormItem className="w-full">
-                <DynamicInput {...field} />
+                <DynamicInput {...field} defaultValue="שאלה ללא שם" />
                 <FormMessage />
               </FormItem>
             );
