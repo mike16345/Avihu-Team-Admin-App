@@ -13,7 +13,6 @@ import BlogEditor from "@/components/Blog/BlogEditor";
 import DietPlanWrapper from "@/components/DietPlan/DietPlanWrapper";
 import WorkoutPlans from "@/components/workout plan/WorkoutPlans";
 import LeadsTablePage from "@/features/leads/LeadsTablePage";
-import FormBuilder from "@/components/dynamicForms/FormBuilder";
 import FormBuilderPage from "@/pages/FormBuilderPage";
 
 export const AppRoutes = () => {
