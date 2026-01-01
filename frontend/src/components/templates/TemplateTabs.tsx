@@ -23,6 +23,7 @@ import useExerciseMethodApi from "@/hooks/api/useExerciseMethodsApi";
 import { createRetryFunction } from "@/lib/utils";
 import useCardioWorkoutApi from "@/hooks/api/useCardioWorkoutPreset";
 import { FULL_DAY_STALE_TIME } from "@/constants/constants";
+import useFormPresetApi from "@/hooks/api/useFormPresetApi";
 
 interface TemplateTabsProps {
   tabs: ITabs;
@@ -37,6 +38,7 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
   const { getExercisePresets } = useExercisePresetApi();
   const { getAllExerciseMethods } = useExerciseMethodApi();
   const { getAllCardioWrkouts } = useCardioWorkoutApi();
+  const { getAllFormPresets } = useFormPresetApi();
 
   const [selectedForm, setSelectedForm] = useState<string | undefined>();
   const [selectedObjectId, setSelectedObjectId] = useState<string>();
@@ -58,6 +60,7 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
     [QueryKeys.MUSCLE_GROUP]: getAllMuscleGroups,
     [QueryKeys.EXERCISE_METHODS]: getAllExerciseMethods,
     [QueryKeys.CARDIO_WORKOUT_PRESET]: getAllCardioWrkouts,
+    [QueryKeys.FORM_PRESETS]: getAllFormPresets,
   };
 
   const apiFunc = apiHooks[queryKey];
@@ -89,6 +92,8 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
       navigate(`/presets/dietPlans/${id}`);
     } else if (formToUse === `workoutPlan`) {
       navigate(`/presets/workoutPlans/${id}`);
+    } else if (formToUse === `formPresets`) {
+      navigate(`/form-builder/${id}`);
     } else {
       setSelectedForm(formToUse);
       setSelectedObjectId(id);
@@ -100,6 +105,8 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
       navigate(`/presets/dietPlans`);
     } else if (formToUse === `workoutPlan`) {
       navigate(`/presets/workoutPlans/`);
+    } else if (formToUse === `formPresets`) {
+      navigate(`/form-builder/add`);
     } else {
       setSelectedForm(formToUse);
       setIsSheetOpen(true);

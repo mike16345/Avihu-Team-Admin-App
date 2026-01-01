@@ -3,7 +3,7 @@ import { QueryKeys } from "@/enums/QueryKeys";
 import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 import useFormPresetApi from "@/hooks/api/useFormPresetApi";
 
-const useFormPresetQuery = () => {
+const useFormPresetsQuery = () => {
   const { getAllFormPresets } = useFormPresetApi();
 
   return useQuery({
@@ -13,4 +13,4 @@ const useFormPresetQuery = () => {
   });
 };
 
-export default useFormPresetQuery;
+export default useFormPresetsQuery;

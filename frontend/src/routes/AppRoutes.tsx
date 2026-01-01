@@ -14,6 +14,7 @@ import DietPlanWrapper from "@/components/DietPlan/DietPlanWrapper";
 import WorkoutPlans from "@/components/workout plan/WorkoutPlans";
 import LeadsTablePage from "@/features/leads/LeadsTablePage";
 import FormBuilderPage from "@/pages/FormBuilderPage";
+import FormPresetsPage from "@/pages/FormPresetsPage";
 
 export const AppRoutes = () => {
   return (
@@ -48,6 +49,7 @@ export const AppRoutes = () => {
         <Route path="/dietPlans/" element={<DietPlanTemplatePage />} />
         <Route path="/presets/*" element={<PresetRoutes />} />
         <Route path="/form-builder/:id" element={<FormBuilderPage />} />
+        <Route path="/form-builder" element={<FormPresetsPage />} />
       </Routes>
     </>
   );

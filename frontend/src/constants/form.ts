@@ -17,6 +17,12 @@ export const FormTypeOptions: Option[] = [
   { name: "כללי", value: "general" },
 ];
 
+export const FormTypesInHebrew: Record<string, string> = {
+  onboarding: "התחלה",
+  monthly: "חודשי",
+  general: "כללי",
+};
+
 export const typesRequiringOptions = ["radio", "checkboxes", "range", "drop-down"] as const;
 
 export const borderColor: Record<any, string> = {

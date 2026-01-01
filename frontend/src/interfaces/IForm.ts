@@ -33,6 +33,7 @@ export interface IFormSection {
 }
 
 export interface IForm {
+  _id?: string;
   name: string;
   type: FormTypes;
   showOn?: Date;
