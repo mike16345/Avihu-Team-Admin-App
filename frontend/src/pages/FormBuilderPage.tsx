@@ -20,7 +20,6 @@ const FormBuilderPage = () => {
   });
 
   const {
-    trigger,
     handleSubmit,
     formState: { isDirty, isSubmitting },
   } = form;
@@ -37,7 +36,7 @@ const FormBuilderPage = () => {
   const onInvalidSubmit = (errors: any) => {
     const errorMessage = getNestedError(errors);
 
-    toast.error(errorMessage?.title, {
+    toast.error("שגיאה בטופס, אנא בדוק את השדות המסומנים", {
       description: errorMessage?.description,
     });
   };
@@ -49,17 +48,17 @@ const FormBuilderPage = () => {
         onSubmit={handleSubmit(onSubmit, onInvalidSubmit)}
       >
         <FormBuilder />
+
+        <div className="flex justify-end gap-2 sticky bottom-0 w-fit mr-auto py-2">
+          <CustomButton
+            type="submit"
+            title="שמור טופס"
+            variant="default"
+            disabled={!isDirty || isSubmitting}
+            isLoading={isSubmitting}
+          />
+        </div>
       </form>
-      <div className="flex justify-end gap-2 sticky bottom-0 w-fit mr-auto py-2">
-        <CustomButton
-          type="submit"
-          title="שמור טופס"
-          variant="success"
-          disabled={!isDirty || isSubmitting}
-          isLoading={isSubmitting}
-          onClick={() => trigger()}
-        />
-      </div>
     </RHFForm>
   );
 };

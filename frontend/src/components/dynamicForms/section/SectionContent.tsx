@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import Question from "../question/Question";
 import { DragDropWrapper } from "@/components/Wrappers/DragDropWrapper";
-import { Form } from "@/schemas/formBuilderSchema";
+import { FormType } from "@/schemas/formBuilderSchema";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { IFormQuestion } from "@/interfaces/IForm";
 import { generateUUID } from "@/lib/utils";
@@ -15,7 +15,13 @@ interface SectionContentProps {
 }
 
 const SectionContent: React.FC<SectionContentProps> = ({ parentPath }) => {
-  const { control, watch } = useFormContext<Form>();
+  const {
+    control,
+    watch,
+    formState: { errors },
+  } = useFormContext<FormType>();
+  const sectionIndex = Number(parentPath.split(".")[1]);
+  const questionsError = errors.sections?.[sectionIndex]?.questions?.root?.message;
 
   const { replace, append, remove } = useFieldArray({
     control,
@@ -78,6 +84,8 @@ const SectionContent: React.FC<SectionContentProps> = ({ parentPath }) => {
             );
           }}
         </DragDropWrapper>
+
+        {questionsError && <p className="text-sm text-destructive font-medium">{questionsError}</p>}
 
         <AddButton onClick={handleAddQuestion} label="הוסף שאלה" />
       </div>

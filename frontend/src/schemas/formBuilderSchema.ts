@@ -41,7 +41,9 @@ export const FormQuestionSchema = z
 export const FormSectionSchema = z.object({
   title: z.string().min(1, { message: ERROR_MESSAGES.required }),
   description: z.string().optional(),
-  questions: z.array(FormQuestionSchema).min(1, { message: ERROR_MESSAGES.arrayMin(1, "שאלה") }),
+  questions: z
+    .array(FormQuestionSchema)
+    .min(1, { message: ERROR_MESSAGES.arrayMinDetailed(1, "קטגוריה", "שאלה") }),
 });
 
 // -----------------------------------------

@@ -1,18 +1,23 @@
 import DynamicInput from "../ui/DynamicInput";
 import CustomSelect from "../ui/CustomSelect";
-import { FormTypeOptions } from "@/constants/form";
+import { borderColor, FormTypeOptions } from "@/constants/form";
 import DatePicker from "../ui/DatePicker";
 import { useFormContext } from "react-hook-form";
 import { FormType } from "@/schemas/formBuilderSchema";
 import { FormField, FormItem, FormMessage } from "../ui/form";
 
 const FormBuilderHeader = () => {
-  const { control, watch } = useFormContext<FormType>();
-
+  const {
+    control,
+    watch,
+    formState: { errors },
+  } = useFormContext<FormType>();
   const formType = watch("type");
 
+  const headerError = Boolean(errors.name || errors.type || errors.showOn);
+
   return (
-    <div className=" rounded-xl shadow p-5 border space-y-3 overflow-hidden">
+    <div className={`rounded-xl shadow-lg p-5 border space-y-3 ${borderColor[headerError as any]}`}>
       <div className="flex justify-between gap-5 items-center">
         <FormField
           name={`name`}

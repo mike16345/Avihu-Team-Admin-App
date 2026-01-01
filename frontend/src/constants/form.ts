@@ -18,3 +18,8 @@ export const FormTypeOptions: Option[] = [
 ];
 
 export const typesRequiringOptions = ["radio", "checkboxes", "range", "drop-down"] as const;
+
+export const borderColor: Record<any, string> = {
+  true: "border-destructive",
+  false: "",
+};
