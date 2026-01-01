@@ -21,6 +21,8 @@ const FormBuilderHeader = () => {
   useEffect(() => {
     if (!formType) return;
 
+    if (formType !== "general") setValue("showOn", undefined);
+
     setValue("repeatMonthly", formType == "monthly");
   }, [formType]);
 
@@ -66,7 +68,10 @@ const FormBuilderHeader = () => {
           render={({ field }) => {
             return (
               <FormItem className="w-full">
-                <DatePicker onChangeDate={field.onChange} selectedDate={field.value} />
+                <DatePicker
+                  onChangeDate={field.onChange}
+                  selectedDate={field.value ? new Date(field.value) : new Date()}
+                />
 
                 <FormMessage />
               </FormItem>

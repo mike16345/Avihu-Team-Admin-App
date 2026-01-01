@@ -14,6 +14,7 @@ import { useEffect, useMemo } from "react";
 import useAddFormPreset from "@/hooks/mutations/formPresets/useAddFormPreset";
 import useUpdateFormPreset from "@/hooks/mutations/formPresets/useUpdateFormPreset";
 import { IForm } from "@/interfaces/IForm";
+import BackButton from "@/components/ui/BackButton";
 
 const FormBuilderPage = () => {
   const { id } = useParams();
@@ -77,24 +78,27 @@ const FormBuilderPage = () => {
   if (error && error.status !== 404) return <ErrorPage />;
 
   return (
-    <RHFForm {...form}>
-      <form
-        className="flex flex-col gap-4 max-w-[800px] mx-auto"
-        onSubmit={handleSubmit(onSubmit, onInvalidSubmit)}
-      >
-        <FormBuilder />
+    <>
+      <BackButton fixedPosition navLink="/form-builder" />
+      <RHFForm {...form}>
+        <form
+          className="flex flex-col gap-4 max-w-[800px] mx-auto"
+          onSubmit={handleSubmit(onSubmit, onInvalidSubmit)}
+        >
+          <FormBuilder />
 
-        <div className="flex justify-end gap-2 sticky bottom-0 w-fit mr-auto py-2">
-          <CustomButton
-            type="submit"
-            title="שמור טופס"
-            variant="default"
-            disabled={disableButton}
-            isLoading={buttonLoadingState}
-          />
-        </div>
-      </form>
-    </RHFForm>
+          <div className="flex justify-end gap-2 sticky bottom-0 w-fit mr-auto py-2">
+            <CustomButton
+              type="submit"
+              title="שמור טופס"
+              variant="default"
+              disabled={disableButton}
+              isLoading={buttonLoadingState}
+            />
+          </div>
+        </form>
+      </RHFForm>
+    </>
   );
 };
 

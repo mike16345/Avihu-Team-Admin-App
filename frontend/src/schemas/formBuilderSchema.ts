@@ -57,7 +57,7 @@ export const FormSchema = z
         ...string[]
       ]
     ),
-    showOn: z.date().optional(),
+    showOn: z.coerce.date().optional(),
     repeatMonthly: z.boolean(),
     sections: z.array(FormSectionSchema).min(1, { message: ERROR_MESSAGES.arrayMin(1, "קטגוריה") }),
     createdAt: z.any().optional(),
