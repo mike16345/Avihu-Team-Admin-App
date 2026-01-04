@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { CustomTooltip } from "@/components/ui/custom-tooltip";
 import { cn } from "@/lib/utils";
-import { Clipboard } from "lucide-react";
+import { ClipboardList } from "lucide-react";
 
 interface ClipboardIconButtonProps {
   onClick: () => void;
@@ -21,14 +21,14 @@ const ClipboardIconButton = ({
       tooltipTrigger={
         <Button
           type="button"
-          variant="ghost"
+          variant="outline"
           size="icon"
           onClick={onClick}
           disabled={disabled}
           className={cn("h-9 w-9", className)}
           aria-label={tooltip}
         >
-          <Clipboard className="h-4 w-4" />
+          <ClipboardList className="h-4 w-4" />
         </Button>
       }
       tooltipContent={tooltip}

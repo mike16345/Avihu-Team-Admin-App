@@ -3,6 +3,7 @@ import { QueryKeys } from "@/enums/QueryKeys";
 import { useRecordedSetsApi } from "@/hooks/api/useRecordedSetsApi";
 import { ONE_HOUR } from "@/constants/constants";
 import { createRetryFunction } from "@/lib/utils";
+import { IRecordedSet } from "@/interfaces/IWorkout";
 
 const useUserRecordedSets = (userId?: string) => {
   const { getRecordedSetsByUserId } = useRecordedSetsApi();

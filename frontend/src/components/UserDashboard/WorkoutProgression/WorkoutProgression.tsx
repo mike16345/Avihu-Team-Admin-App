@@ -1,22 +1,29 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ExerciseProgressChart } from "./ExerciseProgressChart";
 import { useParams } from "react-router";
 import { RecordedSetsList } from "./RecordedSetsList";
 import { MuscleExerciseSelector } from "./MuscleExerciseSelector";
 import { extractExercises } from "@/lib/workoutUtils";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import useUserRecordedSets from "@/hooks/queries/recordedSets/useUserRecordedSets";
 import Loader from "@/components/ui/Loader";
 import ErrorPage from "@/pages/ErrorPage";
 import { workoutTab } from "@/pages/UserDashboard";
 import ExerciseProgressNotePanel from "./ExerciseProgressNotePanel";
+import useUserQuery from "@/hooks/queries/user/useUserQuery";
 
 export const WorkoutProgression = () => {
   const { id } = useParams();
+
+  const userFirstName = useUserQuery(id).data?.firstName;
+
+  const { data: recordedWorkouts, isLoading, error } = useUserRecordedSets(id);
+
   const [searchParams, setSearchParams] = useSearchParams();
-  const location = useLocation();
-  const locationState = location.state as { firstName?: string; name?: string } | null;
-  const userName = locationState?.firstName || locationState?.name;
+  const [selectedMuscleGroup, setSelectedMuscleGroup] = useState(
+    searchParams.get("muscleGroup") || ""
+  );
+  const [selectedExercise, setSelectedExercise] = useState(searchParams.get("exercise") || "");
 
   const handleSetSearchParams = () => {
     if (!recordedWorkouts || (searchParams.get("muscleGroup") && searchParams.get("exercise")))
@@ -36,20 +43,19 @@ export const WorkoutProgression = () => {
     setSelectedExercise(initialExercise);
   };
 
-  const { data: recordedWorkouts, isLoading, error } = useUserRecordedSets(id);
-  const [selectedMuscleGroup, setSelectedMuscleGroup] = useState(
-    searchParams.get("muscleGroup") || ""
-  );
-  const [selectedExercise, setSelectedExercise] = useState(searchParams.get("exercise") || "");
+  const recordedMuscleGroup = useMemo(() => {
+    if (!recordedWorkouts) return undefined;
 
-  const recordedMuscleGroup = recordedWorkouts?.find(
-    (recordedMuscleGroup) => recordedMuscleGroup.muscleGroup == selectedMuscleGroup
-  );
+    return recordedWorkouts?.find(
+      (recordedMuscleGroup) => recordedMuscleGroup.muscleGroup == selectedMuscleGroup
+    );
+  }, [selectedMuscleGroup, recordedWorkouts]);
 
   const recordedSets = recordedMuscleGroup?.recordedSets[selectedExercise] || [];
 
   useEffect(() => {
     if (searchParams.get("tab") !== workoutTab || !recordedWorkouts) return;
+    
     handleSetSearchParams();
   }, [searchParams]);
 
@@ -59,7 +65,11 @@ export const WorkoutProgression = () => {
 
   return (
     <div className="size-full flex flex-col gap-4 p-3">
-      <ExerciseProgressNotePanel recordedWorkouts={recordedWorkouts} userName={userName} />
+      <ExerciseProgressNotePanel
+        recordedWorkouts={recordedWorkouts}
+        userName={userFirstName}
+        userId={id}
+      />
       {!!recordedWorkouts?.length && (
         <>
           <MuscleExerciseSelector

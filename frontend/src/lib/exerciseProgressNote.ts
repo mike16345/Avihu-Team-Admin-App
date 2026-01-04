@@ -1,9 +1,11 @@
 import { DateRange } from "react-day-picker";
 import { IMuscleGroupRecordedSets, IRecordedSet } from "@/interfaces/IWorkout";
+import DateUtils from "./dateUtils";
 
 interface ExerciseProgressNoteInput {
   userName?: string;
-  selectedExercises: string[];
+  selectedByMuscleGroup: Record<string, string[]>;
+  muscleGroupOrder?: string[];
   dateRange?: DateRange;
   recordedWorkouts?: IMuscleGroupRecordedSets[];
 }
@@ -16,15 +18,15 @@ interface ExerciseInstance {
 
 const formatDate = (date?: Date) => {
   if (!date) {
-    return "לא זמין";
+    return "לא צוין תאריך";
   }
 
-  return date.toLocaleDateString("he-IL");
+  return DateUtils.formatDate(date, "DD/MM/YYYY");
 };
 
 const formatValue = (value?: number) => {
   if (typeof value !== "number" || Number.isNaN(value)) {
-    return "לא זמין";
+    return "לא קיים";
   }
 
   return value.toString();
@@ -75,75 +77,87 @@ const isWithinRange = (date: Date, range?: DateRange) => {
   return date >= start && date <= end;
 };
 
-const buildInstanceLines = (instance?: ExerciseInstance) => {
-  if (!instance) {
-    return ["אין נתונים זמינים."];
-  }
+const getInstanceSummary = (instance?: ExerciseInstance) => {
+  const maxSet = instance ? getMaxWeightSet(instance.sets) : null;
 
-  const maxSet = getMaxWeightSet(instance.sets);
-  const date = maxSet?.date ? new Date(maxSet.date) : instance.date;
-
-  return [
-    `- תאריך: ${formatDate(date)}`,
-    `- משקל: ${formatValue(maxSet?.weight)}`,
-    `- חזרות: ${formatValue(maxSet?.repsDone)}`,
-  ];
+  return {
+    weight: formatValue(maxSet?.weight),
+    reps: formatValue(maxSet?.repsDone),
+    dateLabel: instance ? formatDate(instance.date) : formatDate(undefined),
+  };
 };
 
 export const generateExerciseProgressNote = ({
   userName,
-  selectedExercises,
+  selectedByMuscleGroup,
+  muscleGroupOrder,
   dateRange,
   recordedWorkouts,
 }: ExerciseProgressNoteInput) => {
-  if (!selectedExercises.length) {
+  const totalSelected = Object.values(selectedByMuscleGroup || {}).reduce(
+    (count, exercises) => count + exercises.length,
+    0
+  );
+
+  if (!totalSelected) {
     return "";
   }
 
-  const greeting = userName?.trim() ? `היי ${userName.trim()},` : "היי,";
-  const rangeLabel =
-    dateRange?.from && dateRange?.to
-      ? `${formatDate(dateRange.from)} - ${formatDate(dateRange.to)}`
-      : "טווח לא נבחר";
+  const greeting = userName?.trim() ? `מה איתך ${userName.trim()}` : "מה איתך";
+  const introLine = "עברתי על ההתקדמות שלך";
+  const noteLines: string[] = [greeting, introLine, ""];
 
-  const noteLines: string[] = [greeting, "", "להלן ההתקדמות שלך:", ""];
+  const orderedMuscleGroups = (
+    muscleGroupOrder?.length ? muscleGroupOrder : Object.keys(selectedByMuscleGroup)
+  ).filter((muscleGroup) => selectedByMuscleGroup[muscleGroup]?.length);
 
-  selectedExercises.forEach((exercise, index) => {
-    const setsForExercise =
-      recordedWorkouts
-        ?.flatMap((group) => group.recordedSets?.[exercise] ?? [])
-        .filter((set) => set?.date) ?? [];
-
-    const allInstances = groupByInstance(setsForExercise);
-    const firstInstance = allInstances[0];
-
-    const rangeInstances = allInstances.filter((instance) =>
-      isWithinRange(instance.date, dateRange)
+  orderedMuscleGroups.forEach((muscleGroup, muscleGroupIndex) => {
+    const groupSelections = selectedByMuscleGroup[muscleGroup] || [];
+    const recordedGroup = recordedWorkouts?.find(
+      (recorded) => recorded.muscleGroup === muscleGroup
     );
-    const firstRangeInstance = rangeInstances[0];
-    const lastRangeInstance = rangeInstances[rangeInstances.length - 1];
-    const sameRangeInstance =
-      firstRangeInstance?.key && firstRangeInstance.key === lastRangeInstance?.key;
 
-    noteLines.push(`${exercise}:`);
-    noteLines.push("מאז שהצטרפת:");
-    noteLines.push(...buildInstanceLines(firstInstance));
-    noteLines.push("");
-    noteLines.push(`בטווח שנבחר (${rangeLabel}):`);
+    noteLines.push(`*${muscleGroup}*:`);
 
-    if (!rangeInstances.length) {
-      noteLines.push("אין נתונים בטווח שנבחר.");
-    } else {
-      noteLines.push(sameRangeInstance ? "התחלה (אותו אימון):" : "התחלה:");
-      noteLines.push(...buildInstanceLines(firstRangeInstance));
-      noteLines.push(sameRangeInstance ? "עדכני (אותו אימון):" : "עדכני:");
-      noteLines.push(...buildInstanceLines(lastRangeInstance));
-    }
+    groupSelections.forEach((exercise, exerciseIndex) => {
+      const setsForExercise =
+        recordedGroup?.recordedSets?.[exercise]?.filter((set) => set?.date) ?? [];
 
-    if (index < selectedExercises.length - 1) {
+      const allInstances = groupByInstance(setsForExercise);
+      const firstInstance = allInstances[0];
+
+      const rangeInstances = allInstances.filter((instance) =>
+        isWithinRange(instance.date, dateRange)
+      );
+      const firstRangeInstance = rangeInstances[0];
+      const lastRangeInstance = rangeInstances[rangeInstances.length - 1];
+
+      const overallSummary = getInstanceSummary(firstInstance);
+      const rangeStartSummary = getInstanceSummary(firstRangeInstance);
+      const rangeEndSummary = getInstanceSummary(lastRangeInstance);
+
+      noteLines.push(`*${exercise.trim()}*`);
+      noteLines.push(`התחלה בתוכנית: משקל${overallSummary.weight} (חזרות: ${overallSummary.reps})`);
+      noteLines.push(
+        `מ-${rangeStartSummary.dateLabel}: משקל ${rangeStartSummary.weight} (חזרות: ${rangeStartSummary.reps})`
+      );
+      noteLines.push(
+        `עד-${rangeEndSummary.dateLabel}: משקל ${rangeEndSummary.weight} (חזרות: ${rangeEndSummary.reps})`
+      );
+
+      if (exerciseIndex < groupSelections.length - 1) {
+        noteLines.push("");
+      }
+    });
+
+    if (muscleGroupIndex < orderedMuscleGroups.length - 1) {
       noteLines.push("");
     }
   });
+
+  noteLines.push("");
+  noteLines.push("מטרה:");
+  noteLines.push("");
 
   return noteLines.join("\n");
 };
