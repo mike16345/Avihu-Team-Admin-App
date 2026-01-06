@@ -69,7 +69,7 @@ const FilterMultiSelect = ({
           <span className="max-w-[12rem] truncate text-sm text-muted-foreground">{summary}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="center" className="max-h-64 overflow-y-auto w-40">
+      <DropdownMenuContent align="center" className="max-h-64 overflow-y-auto w-72">
         {options.map((option) => (
           <DropdownMenuCheckboxItem
             key={option.value}

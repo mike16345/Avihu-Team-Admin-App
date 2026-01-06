@@ -57,7 +57,6 @@ export const ViewDietPlanPage = () => {
   const { reset, getValues, watch } = form;
   const meals = watch("meals");
 
-  console.log("formState", getValues());
   const { isLoading, data, error } = useGetDietPlan(id || "");
 
   const dietPlanPresets = useDietPlanPresetsQuery();
