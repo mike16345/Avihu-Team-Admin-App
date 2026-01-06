@@ -98,8 +98,8 @@ const ExercisePresetsTable = ({
       const rowGroups = Array.isArray((item as any).muscleGroups)
         ? ((item as any).muscleGroups as string[])
         : item.muscleGroup
-          ? [item.muscleGroup]
-          : [];
+        ? [item.muscleGroup]
+        : [];
 
       rowGroups.filter(Boolean).forEach((group) => groups.add(group));
     });
@@ -116,8 +116,8 @@ const ExercisePresetsTable = ({
       const rowGroups = Array.isArray((item as any).muscleGroups)
         ? ((item as any).muscleGroups as string[])
         : item.muscleGroup
-          ? [item.muscleGroup]
-          : [];
+        ? [item.muscleGroup]
+        : [];
 
       return rowGroups.some((group) => selectedGroups.includes(group));
     });
@@ -131,6 +131,7 @@ const ExercisePresetsTable = ({
       filters={
         filterOptions.length ? (
           <FilterMultiSelect
+            className="w-72"
             label="קבוצות שריר"
             options={filterOptions}
             selected={selectedGroups}

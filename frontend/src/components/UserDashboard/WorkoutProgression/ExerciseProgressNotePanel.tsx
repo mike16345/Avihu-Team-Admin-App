@@ -12,7 +12,6 @@ import { IMuscleGroupRecordedSets } from "@/interfaces/IWorkout";
 import { generateExerciseProgressNote } from "@/lib/exerciseProgressNote";
 import useWorkoutPlanQuery from "@/hooks/queries/workoutPlans/useWorkoutPlanQuery";
 import { MuscleGroupCombobox } from "./MuscleGroupCombobox";
-import { IExercise } from "@/interfaces/IWorkoutPlan";
 
 interface ExerciseProgressNotePanelProps {
   recordedWorkouts?: IMuscleGroupRecordedSets[];
@@ -113,17 +112,20 @@ const ExerciseProgressNotePanel = ({
   const selectedGroupsOrder =
     muscleGroupOrder.length > 0 ? muscleGroupOrder : Object.keys(selectedByMuscleGroup);
 
-  const generatedNote = useMemo(
-    () =>
-      generateExerciseProgressNote({
-        userName,
-        selectedByMuscleGroup,
-        muscleGroupOrder,
-        dateRange,
-        recordedWorkouts,
-      }),
-    [userName, selectedByMuscleGroup, muscleGroupOrder, dateRange, recordedWorkouts]
-  );
+  const generatedNote = useMemo(() => {
+    console.log("Generated with new date", dateRange);
+    const newNote = generateExerciseProgressNote({
+      userName,
+      selectedByMuscleGroup,
+      muscleGroupOrder,
+      dateRange,
+      recordedWorkouts,
+    });
+
+    console.log("Generated Note:", newNote);
+
+    return newNote;
+  }, [userName, selectedByMuscleGroup, muscleGroupOrder, dateRange, recordedWorkouts]);
 
   const totalSelectedExercises = useMemo(
     () => Object.values(selectedByMuscleGroup).reduce((count, items) => count + items.length, 0),
@@ -172,7 +174,7 @@ const ExerciseProgressNotePanel = ({
   return (
     <section className="w-full rounded-xl border bg-card p-4">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-stretch">
-        <div className="lg:w-2/5 flex flex-col gap-4 border-b pb-4 lg:border-b-0 lg:border-l lg:pl-4 lg:pb-0">
+        <div className="lg:w-2/5 flex flex-col gap-4 border-b lg:border-b-0 lg:border-l lg:pl-4 lg:pb-0">
           <div className="flex items-center justify-between gap-2">
             <div className="text-right">
               <h2 className="text-lg font-semibold">פתק התקדמות בתרגילים</h2>
@@ -260,13 +262,14 @@ const ExerciseProgressNotePanel = ({
               <ClipboardIconButton onClick={handleCopy} disabled={!noteText.trim()} />
             </div>
           </div>
+
           {isEdited && hasSelection && (
             <p className="text-xs text-muted-foreground text-right">
               שינויים ידניים ימחקו בעת רענון.
             </p>
           )}
           {!hasSelection && (
-            <div className="flex min-h-[220px] items-center justify-center rounded-lg border border-dashed bg-muted/30 text-sm text-muted-foreground">
+            <div className="flex min-h-[350px] items-center justify-center rounded-lg border border-dashed bg-muted/30 text-sm text-muted-foreground">
               בחר תרגילים כדי ליצור פתק התקדמות.
             </div>
           )}
@@ -276,7 +279,7 @@ const ExerciseProgressNotePanel = ({
               value={noteText}
               onChange={(event) => setNoteText(event.target.value)}
               placeholder="הטקסט שנוצר יופיע כאן"
-              className="min-h-[300px] max-h-full resize-none text-right leading-6"
+              className="min-h-[350px] max-h-full resize-none text-right leading-6"
             />
           )}
         </div>

@@ -103,9 +103,10 @@ export const generateExerciseProgressNote = ({
     return "";
   }
 
-  const greeting = userName?.trim() ? `מה איתך ${userName.trim()}` : "מה איתך";
-  const introLine = "עברתי על ההתקדמות שלך";
-  const noteLines: string[] = [greeting, introLine, ""];
+  const greeting = userName?.trim() ? `מה איתך ${userName.trim()},` : ",מה איתך";
+  const introLine = "עברתי על ההתקדמות שלך באימונים.";
+  const dateInfo = `מ-*${formatDate(dateRange?.from)} עד ${formatDate(dateRange?.to)}*:`;
+  const noteLines: string[] = [greeting, introLine, "", dateInfo, ""];
 
   const orderedMuscleGroups = (
     muscleGroupOrder?.length ? muscleGroupOrder : Object.keys(selectedByMuscleGroup)
@@ -118,6 +119,7 @@ export const generateExerciseProgressNote = ({
     );
 
     noteLines.push(`*${muscleGroup}*:`);
+    noteLines.push("");
 
     groupSelections.forEach((exercise, exerciseIndex) => {
       const setsForExercise =
@@ -137,12 +139,14 @@ export const generateExerciseProgressNote = ({
       const rangeEndSummary = getInstanceSummary(lastRangeInstance);
 
       noteLines.push(`*${exercise.trim()}*`);
-      noteLines.push(`התחלה בתוכנית: משקל${overallSummary.weight} (חזרות: ${overallSummary.reps})`);
       noteLines.push(
-        `מ-${rangeStartSummary.dateLabel}: משקל ${rangeStartSummary.weight} (חזרות: ${rangeStartSummary.reps})`
+        `התחלה בתוכנית: משקל ${overallSummary.weight} (חזרות: ${overallSummary.reps})`
       );
       noteLines.push(
-        `עד-${rangeEndSummary.dateLabel}: משקל ${rangeEndSummary.weight} (חזרות: ${rangeEndSummary.reps})`
+        `${rangeStartSummary.dateLabel}: משקל ${rangeStartSummary.weight} (חזרות: ${rangeStartSummary.reps})`
+      );
+      noteLines.push(
+        `${rangeEndSummary.dateLabel}: משקל ${rangeEndSummary.weight} (חזרות: ${rangeEndSummary.reps})`
       );
 
       if (exerciseIndex < groupSelections.length - 1) {
