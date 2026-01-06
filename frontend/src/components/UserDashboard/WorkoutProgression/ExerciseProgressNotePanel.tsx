@@ -72,7 +72,7 @@ const ExerciseProgressNotePanel = ({
   }, [selectedMuscleGroup, workoutPlan]);
 
   const selectedExercisesForGroup = selectedMuscleGroup
-    ? (selectedByMuscleGroup[selectedMuscleGroup] ?? [])
+    ? selectedByMuscleGroup[selectedMuscleGroup] ?? []
     : [];
 
   const orderSelectionsByPlan = (values: string[]) => {
@@ -113,7 +113,6 @@ const ExerciseProgressNotePanel = ({
     muscleGroupOrder.length > 0 ? muscleGroupOrder : Object.keys(selectedByMuscleGroup);
 
   const generatedNote = useMemo(() => {
-    console.log("Generated with new date", dateRange);
     const newNote = generateExerciseProgressNote({
       userName,
       selectedByMuscleGroup,
@@ -121,8 +120,6 @@ const ExerciseProgressNotePanel = ({
       dateRange,
       recordedWorkouts,
     });
-
-    console.log("Generated Note:", newNote);
 
     return newNote;
   }, [userName, selectedByMuscleGroup, muscleGroupOrder, dateRange, recordedWorkouts]);
