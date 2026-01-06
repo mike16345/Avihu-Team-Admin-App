@@ -12,19 +12,22 @@ export const RecordedSetsList: FC<RecordedSetsListProps> = ({ recordedSets }) =>
   const [isOpen, setIsOpen] = useState<{ [key: string]: boolean }>({});
 
   const recordedSetsByDate = useMemo(() => {
-    const grouped = recordedSets.reduce((acc, set) => {
-      const date = new Date(set.date).toISOString().split("T")[0];
-      if (!acc[date]) acc[date] = [];
-      acc[date].push(set);
+    const grouped = recordedSets.reduce(
+      (acc, set) => {
+        const date = new Date(set.date).toISOString().split("T")[0];
+        if (!acc[date]) acc[date] = [];
+        acc[date].push(set);
 
-      return acc;
-    }, {} as { [date: string]: IRecordedSet[] });
+        return acc;
+      },
+      {} as { [date: string]: IRecordedSet[] }
+    );
 
     return grouped;
   }, [recordedSets]);
 
   const recordedSetsByDatesKeys = Object.keys(recordedSetsByDate).sort(
-    (a, b) => new Date(b).getTime() - new Date(a).getTime(),
+    (a, b) => new Date(b).getTime() - new Date(a).getTime()
   );
 
   const toggleOpen = (date: string) => {
