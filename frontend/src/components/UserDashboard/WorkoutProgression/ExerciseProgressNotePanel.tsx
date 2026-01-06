@@ -72,7 +72,7 @@ const ExerciseProgressNotePanel = ({
   }, [selectedMuscleGroup, workoutPlan]);
 
   const selectedExercisesForGroup = selectedMuscleGroup
-    ? selectedByMuscleGroup[selectedMuscleGroup] ?? []
+    ? (selectedByMuscleGroup[selectedMuscleGroup] ?? [])
     : [];
 
   const orderSelectionsByPlan = (values: string[]) => {

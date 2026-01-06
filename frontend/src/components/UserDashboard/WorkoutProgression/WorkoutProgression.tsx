@@ -55,7 +55,7 @@ export const WorkoutProgression = () => {
 
   useEffect(() => {
     if (searchParams.get("tab") !== workoutTab || !recordedWorkouts) return;
-    
+
     handleSetSearchParams();
   }, [searchParams]);
 
