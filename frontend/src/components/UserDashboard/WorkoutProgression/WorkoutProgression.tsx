@@ -80,7 +80,7 @@ export const WorkoutProgression = () => {
             onSelectMuscleGroup={(muscleGroup) => setSelectedMuscleGroup(muscleGroup)}
           />
           <div className="w-full flex flex-col sm:flex-row gap-4">
-            <div className="sm:w-2/6 border rounded-lg ">
+            <div className="sm:w-2/6 border rounded-lg max-h-[495px] overflow-y-auto custom-scrollbar ">
               <RecordedSetsList recordedSets={recordedSets} />
             </div>
             <div className="sm:w-4/6">

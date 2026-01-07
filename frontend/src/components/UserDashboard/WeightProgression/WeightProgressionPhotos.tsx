@@ -1,4 +1,4 @@
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+﻿import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { FC, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { FullscreenImage } from "./FullscreenImage";
@@ -74,26 +74,34 @@ export const WeightProgressionPhotos: FC<WeightProgressionPhotosProps> = ({ onCl
   return (
     <>
       {photos.length > 0 && (
-        <Card className="flex flex-col gap-2">
+        <Card className="flex flex-col gap-4">
           <CardHeader className="text-lg font-semibold">
             <CardTitle>תמונות</CardTitle>
           </CardHeader>
-          <CardContent className="flex flex-wrap items-center gap-2 rounded">
+          <CardContent className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {photos.map((photo, i) => (
-              <Card
-                onClick={() => handleClickPhoto(photo, i)}
-                className="w-[200px]  cursor-pointer"
+              <button
                 key={i}
+                type="button"
+                onClick={() => handleClickPhoto(photo, i)}
+                className="group relative w-full overflow-hidden rounded-lg border border-border/60 bg-muted/20 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
               >
-                <img className="rounded" src={photo} alt={`Photo ${i + 1}`} />
-              </Card>
+                <div className="aspect-[3/4] w-full">
+                  <img
+                    className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
+                    src={photo}
+                    alt={`Photo ${i + 1}`}
+                    loading="lazy"
+                  />
+                </div>
+              </button>
             ))}
           </CardContent>
         </Card>
       )}
       {photos.length == 0 && (
-        <div className="size-full items-center justify-center">
-          <h1 className="text-center">אין תמונות</h1>
+        <div className="flex size-full items-center justify-center rounded-lg border border-dashed border-border/60 bg-muted/20 py-10">
+          <h1 className="text-center text-sm text-muted-foreground">××™×Ÿ ×ª×ž×•× ×•×ª</h1>
         </div>
       )}
       {fullScreenImage && (
