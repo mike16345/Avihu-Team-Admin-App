@@ -1,26 +1,50 @@
-import React, { useState } from "react";
-import { Input } from "./input";
+import React, { useEffect, useState } from "react";
+import { Input, InputProps } from "./input";
 
-interface DynamicInput {
+interface DynamicInput extends InputProps {
   defaultValue?: string;
 }
 
-const DynamicInput: React.FC<DynamicInput> = ({ defaultValue = "שאלה ללא שם" }) => {
+const DynamicInput: React.FC<DynamicInput> = ({
+  defaultValue = "שאלה",
+  value,
+  onChange,
+  ...props
+}) => {
   const [isFocused, setIsFocused] = useState(false);
-  const [value, setValue] = useState<string>();
+  const [inputValue, setInputValue] = useState<string | undefined>(value as string);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setInputValue(newValue);
+    onChange?.(e);
+  };
+
+  useEffect(() => {
+    setInputValue(value as string);
+  }, [value]);
+
+  const displayValue = inputValue || defaultValue;
+  const isDefault = displayValue == defaultValue;
 
   return (
-    <div className="w-full" onClick={() => setIsFocused(true)} onBlur={() => setIsFocused(false)}>
+    <div className="w-full" onClick={() => setIsFocused(true)}>
       {!isFocused && (
-        <p className="font-bold cursor-pointer hover:text-primary transition-all">
-          {value ?? defaultValue}
+        <p
+          className={`${
+            isDefault ? "font-normal" : "font-bold text-primary"
+          }  cursor-pointer hover:text-primary border border-transparent hover:border-accent rounded-md p-1 py-2 transition-all`}
+        >
+          {displayValue}
         </p>
       )}
       {isFocused && (
         <Input
+          {...props}
           className="bg-muted"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
+          value={inputValue || ""}
+          onChange={handleChange}
+          onBlur={() => setIsFocused(false)}
           autoFocus
         />
       )}

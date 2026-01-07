@@ -1,5 +1,6 @@
 import { Option } from "@/types/types";
 
+// Existing options
 export const QuestionTypeOptions: Option[] = [
   { name: "טקסט קצר", value: "text" },
   { name: "טקסט ארוך", value: "textarea" },
@@ -15,3 +16,16 @@ export const FormTypeOptions: Option[] = [
   { name: "חודשי", value: "monthly" },
   { name: "כללי", value: "general" },
 ];
+
+export const FormTypesInHebrew: Record<string, string> = {
+  onboarding: "התחלה",
+  monthly: "חודשי",
+  general: "כללי",
+};
+
+export const typesRequiringOptions = ["radio", "checkboxes", "range", "drop-down"] as const;
+
+export const borderColor: Record<any, string> = {
+  true: "border-destructive",
+  false: "",
+};

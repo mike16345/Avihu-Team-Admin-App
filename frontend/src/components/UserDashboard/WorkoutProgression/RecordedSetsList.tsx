@@ -38,7 +38,7 @@ export const RecordedSetsList: FC<RecordedSetsListProps> = ({ recordedSets }) =>
   };
 
   return (
-    <div className=" max-h-[475px] overflow-y-scroll custom-scrollbar">
+    <>
       {recordedSetsByDatesKeys.map((date) => {
         const setsForDate = recordedSetsByDate[date];
         const dateAsLocaleString = new Date(date).toLocaleDateString();
@@ -68,6 +68,6 @@ export const RecordedSetsList: FC<RecordedSetsListProps> = ({ recordedSets }) =>
           </Collapsible>
         );
       })}
-    </div>
+    </>
   );
 };

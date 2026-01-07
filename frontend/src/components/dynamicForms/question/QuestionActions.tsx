@@ -3,14 +3,22 @@ import DeleteButton from "@/components/ui/buttons/DeleteButton";
 import { RxDragHandleDots2 } from "react-icons/rx";
 import React from "react";
 
-const QuestionActions = () => {
+interface QuestionActionsProps {
+  onDeleteQuestion: () => void;
+  onDuplicateQuestion: () => void;
+}
+
+const QuestionActions: React.FC<QuestionActionsProps> = ({
+  onDeleteQuestion,
+  onDuplicateQuestion,
+}) => {
   return (
     <div className="flex flex-col gap-1">
       <div className="flex justify-center">
         <RxDragHandleDots2 />
       </div>
-      <CopyButton onClick={() => {}} tip="שכפל שאלה" />
-      <DeleteButton onClick={() => {}} tip="מחק שאלה" />
+      <CopyButton onClick={onDuplicateQuestion} tip="שכפל שאלה" />
+      <DeleteButton onClick={onDeleteQuestion} tip="מחק שאלה" />
     </div>
   );
 };

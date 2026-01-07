@@ -1,6 +1,6 @@
 "use client";
 
-import { Line, LineChart, XAxis, YAxis } from "recharts";
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
 import {
   ChartConfig,
@@ -16,11 +16,11 @@ import { CardContent } from "@/components/ui/card";
 const chartConfig = {
   desktop: {
     label: "Desktop",
-    color: "hsl(var(--chart-1))",
+    color: "hsl(200 70% 45%)",
   },
   mobile: {
     label: "Mobile",
-    color: "hsl(var(--chart-2))",
+    color: "hsl(168 65% 42%)",
   },
 } satisfies ChartConfig;
 
@@ -44,9 +44,18 @@ export const WeightChart: FC<WeighChartProps> = ({ weighIns }) => {
               right: 10,
             }}
           >
+            <defs>
+              <linearGradient id="weightStroke" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="var(--color-desktop)" stopOpacity={0.9} />
+                <stop offset="100%" stopColor="var(--color-mobile)" stopOpacity={0.9} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid vertical={false} stroke="var(--color-border)" strokeOpacity={0.35} />
             <XAxis
               dataKey="date"
               axisLine={false}
+              tickLine={false}
+              tickMargin={8}
               tickFormatter={(value: string) => {
                 const date = DateUtils.convertToDate(value);
                 const month = DateUtils.formatDate(date, "DD/MM");
@@ -95,11 +104,11 @@ export const WeightChart: FC<WeighChartProps> = ({ weighIns }) => {
             <Line
               dataKey="weight"
               type="natural"
-              stroke="var(--color-desktop)"
-              strokeWidth={1}
-              dot={false}
+              stroke="url(#weightStroke)"
+              strokeWidth={2}
+              dot={{ r: 2 }}
               activeDot={{
-                r: 6,
+                r: 5,
               }}
             />
           </LineChart>

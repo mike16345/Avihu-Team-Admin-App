@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 
@@ -17,11 +17,11 @@ import { SetProgressTooltip } from "./SetProgressTooltip";
 const chartConfig = {
   desktop: {
     label: "Desktop",
-    color: "hsl(var(--chart-1))",
+    color: "hsl(325 86% 58%)",
   },
   mobile: {
     label: "Mobile",
-    color: "hsl(var(--chart-2))",
+    color: "hsl(195 92% 52%)",
   },
 } satisfies ChartConfig;
 
@@ -50,8 +50,20 @@ export const ExerciseProgressChart: FC<ExerciseProgressChartProps> = ({
             margin={{
               left: 12,
               right: 12,
+              top: 12,
+              bottom: 12,
             }}
           >
+            <defs>
+              <linearGradient id="weightGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="var(--color-mobile)" stopOpacity={0.55} />
+                <stop offset="95%" stopColor="var(--color-mobile)" stopOpacity={0.05} />
+              </linearGradient>
+              <linearGradient id="repsGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="var(--color-desktop)" stopOpacity={0.5} />
+                <stop offset="95%" stopColor="var(--color-desktop)" stopOpacity={0.05} />
+              </linearGradient>
+            </defs>
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="date"
@@ -79,20 +91,24 @@ export const ExerciseProgressChart: FC<ExerciseProgressChartProps> = ({
               dataKey="weight"
               type="natural"
               name="משקל"
-              fill="var(--color-mobile)"
-              dot
-              fillOpacity={0.4}
+              fill="url(#weightGradient)"
+              dot={{ r: 2 }}
+              activeDot={{ r: 5 }}
+              fillOpacity={0.35}
               stroke="var(--color-mobile)"
+              strokeWidth={2}
               stackId="a"
             />
             <Area
               dataKey="repsDone"
               type="natural"
-              dot
+              dot={{ r: 2 }}
+              activeDot={{ r: 5 }}
               name="חזרות"
-              fill="var(--color-desktop)"
-              fillOpacity={0.4}
+              fill="url(#repsGradient)"
+              fillOpacity={0.32}
               stroke="var(--color-desktop)"
+              strokeWidth={2}
               stackId="a"
             />
           </AreaChart>
