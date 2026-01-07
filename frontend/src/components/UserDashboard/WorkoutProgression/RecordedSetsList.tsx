@@ -1,6 +1,6 @@
 import { IRecordedSet } from "@/interfaces/IWorkout";
 import { Collapsible, CollapsibleContent } from "@radix-ui/react-collapsible";
-import { FC, useState } from "react";
+import { FC, useMemo, useState } from "react";
 import { SetDetails } from "./SetDetails";
 import SetDropDownHeader from "./SetDropDownHeader";
 
@@ -11,14 +11,24 @@ interface RecordedSetsListProps {
 export const RecordedSetsList: FC<RecordedSetsListProps> = ({ recordedSets }) => {
   const [isOpen, setIsOpen] = useState<{ [key: string]: boolean }>({});
 
-  const recordedSetsByDate = recordedSets.reduce((acc, set) => {
-    const date = new Date(set.date).toISOString().split("T")[0];
-    if (!acc[date]) acc[date] = [];
-    acc[date].push(set);
-    return acc;
-  }, {} as { [date: string]: IRecordedSet[] });
+  const recordedSetsByDate = useMemo(() => {
+    const grouped = recordedSets.reduce(
+      (acc, set) => {
+        const date = new Date(set.date).toISOString().split("T")[0];
+        if (!acc[date]) acc[date] = [];
+        acc[date].push(set);
 
-  const recordedSetsByDatesKeys = Object.keys(recordedSetsByDate);
+        return acc;
+      },
+      {} as { [date: string]: IRecordedSet[] }
+    );
+
+    return grouped;
+  }, [recordedSets]);
+
+  const recordedSetsByDatesKeys = Object.keys(recordedSetsByDate).sort(
+    (a, b) => new Date(b).getTime() - new Date(a).getTime()
+  );
 
   const toggleOpen = (date: string) => {
     setIsOpen((prevState) => ({
@@ -28,7 +38,7 @@ export const RecordedSetsList: FC<RecordedSetsListProps> = ({ recordedSets }) =>
   };
 
   return (
-    <>
+    <div className=" max-h-[475px] overflow-y-scroll custom-scrollbar">
       {recordedSetsByDatesKeys.map((date) => {
         const setsForDate = recordedSetsByDate[date];
         const dateAsLocaleString = new Date(date).toLocaleDateString();
@@ -49,7 +59,7 @@ export const RecordedSetsList: FC<RecordedSetsListProps> = ({ recordedSets }) =>
               onToggleDropDown={() => toggleOpen(dateAsLocaleString)}
             />
             {setsForDate.length && (
-              <CollapsibleContent className="flex flex-col overflow-y-scroll hide-scrollbar max-h-[600px] gap-3 mt-2">
+              <CollapsibleContent className="flex flex-col gap-3 mt-2">
                 {setsForDate.map((set, index) => (
                   <SetDetails set={set} index={index} key={index} />
                 ))}
@@ -58,6 +68,6 @@ export const RecordedSetsList: FC<RecordedSetsListProps> = ({ recordedSets }) =>
           </Collapsible>
         );
       })}
-    </>
+    </div>
   );
 };

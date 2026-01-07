@@ -131,6 +131,7 @@ const ExercisePresetsTable = ({
       filters={
         filterOptions.length ? (
           <FilterMultiSelect
+            className="w-72"
             label="קבוצות שריר"
             options={filterOptions}
             selected={selectedGroups}

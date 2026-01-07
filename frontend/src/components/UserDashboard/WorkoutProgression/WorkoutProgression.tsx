@@ -1,34 +1,29 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ExerciseProgressChart } from "./ExerciseProgressChart";
 import { useParams } from "react-router";
 import { RecordedSetsList } from "./RecordedSetsList";
 import { MuscleExerciseSelector } from "./MuscleExerciseSelector";
-import { useRecordedSetsApi } from "@/hooks/api/useRecordedSetsApi";
 import { extractExercises } from "@/lib/workoutUtils";
 import { useSearchParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { QueryKeys } from "@/enums/QueryKeys";
-import { FULL_DAY_STALE_TIME } from "@/constants/constants";
-import { createRetryFunction } from "@/lib/utils";
+import useUserRecordedSets from "@/hooks/queries/recordedSets/useUserRecordedSets";
 import Loader from "@/components/ui/Loader";
 import ErrorPage from "@/pages/ErrorPage";
 import { workoutTab } from "@/pages/UserDashboard";
+import ExerciseProgressNotePanel from "./ExerciseProgressNotePanel";
+import useUserQuery from "@/hooks/queries/user/useUserQuery";
 
 export const WorkoutProgression = () => {
   const { id } = useParams();
+
+  const userFirstName = useUserQuery(id).data?.firstName;
+
+  const { data: recordedWorkouts, isLoading, error } = useUserRecordedSets(id);
+
   const [searchParams, setSearchParams] = useSearchParams();
-  const { getRecordedSetsByUserId } = useRecordedSetsApi();
-
-  const handleGetRecordedSets = async () => {
-    try {
-      const data = await getRecordedSetsByUserId(id!);
-
-      return data;
-    } catch (error) {
-      console.error("Error fetching recorded sets:", error);
-      throw error;
-    }
-  };
+  const [selectedMuscleGroup, setSelectedMuscleGroup] = useState(
+    searchParams.get("muscleGroup") || ""
+  );
+  const [selectedExercise, setSelectedExercise] = useState(searchParams.get("exercise") || "");
 
   const handleSetSearchParams = () => {
     if (!recordedWorkouts || (searchParams.get("muscleGroup") && searchParams.get("exercise")))
@@ -48,30 +43,19 @@ export const WorkoutProgression = () => {
     setSelectedExercise(initialExercise);
   };
 
-  const {
-    data: recordedWorkouts,
-    isLoading,
-    error,
-  } = useQuery({
-    queryFn: handleGetRecordedSets,
-    queryKey: [`${QueryKeys.RECORDED_WORKOUTS}${id}`],
-    staleTime: FULL_DAY_STALE_TIME / 2,
-    retry: createRetryFunction(404),
-    enabled: !!id,
-  });
-  const [selectedMuscleGroup, setSelectedMuscleGroup] = useState(
-    searchParams.get("muscleGroup") || ""
-  );
-  const [selectedExercise, setSelectedExercise] = useState(searchParams.get("exercise") || "");
+  const recordedMuscleGroup = useMemo(() => {
+    if (!recordedWorkouts) return undefined;
 
-  const recordedMuscleGroup = recordedWorkouts?.find(
-    (recordedMuscleGroup) => recordedMuscleGroup.muscleGroup == selectedMuscleGroup
-  );
+    return recordedWorkouts?.find(
+      (recordedMuscleGroup) => recordedMuscleGroup.muscleGroup == selectedMuscleGroup
+    );
+  }, [selectedMuscleGroup, recordedWorkouts]);
 
   const recordedSets = recordedMuscleGroup?.recordedSets[selectedExercise] || [];
 
   useEffect(() => {
     if (searchParams.get("tab") !== workoutTab || !recordedWorkouts) return;
+
     handleSetSearchParams();
   }, [searchParams]);
 
@@ -81,6 +65,11 @@ export const WorkoutProgression = () => {
 
   return (
     <div className="size-full flex flex-col gap-4 p-3">
+      <ExerciseProgressNotePanel
+        recordedWorkouts={recordedWorkouts}
+        userName={userFirstName}
+        userId={id}
+      />
       {!!recordedWorkouts?.length && (
         <>
           <MuscleExerciseSelector
@@ -90,11 +79,11 @@ export const WorkoutProgression = () => {
             onSelectExercise={(exercise) => setSelectedExercise(exercise)}
             onSelectMuscleGroup={(muscleGroup) => setSelectedMuscleGroup(muscleGroup)}
           />
-          <div className="w-full flex flex-col md:flex-row gap-4">
-            <div className="md:w-2/6 border rounded-lg ">
+          <div className="w-full flex flex-col sm:flex-row gap-4">
+            <div className="sm:w-2/6 border rounded-lg ">
               <RecordedSetsList recordedSets={recordedSets} />
             </div>
-            <div className="md:w-4/6">
+            <div className="sm:w-4/6">
               <ExerciseProgressChart
                 selectedMuscleGroup={selectedMuscleGroup}
                 selectedExercise={selectedExercise}
