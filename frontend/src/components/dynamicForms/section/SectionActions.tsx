@@ -13,7 +13,7 @@ interface SectionActionsProps {
 
 const SectionActions: React.FC<SectionActionsProps> = ({ handleDelete, handleDuplicate }) => {
   return (
-    <div className="flex gap-2 items-center opacity-0 group-hover:opacity-100 transition-all">
+    <div className="flex gap-2 items-center">
       <CopyButton onClick={handleDuplicate} tip="שכפול" />
       <DeleteButton onClick={handleDelete} tip="הסרה" />
       <CollapsibleTrigger asChild>
