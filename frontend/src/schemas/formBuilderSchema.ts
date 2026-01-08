@@ -7,7 +7,7 @@ import ERROR_MESSAGES from "@/utils/errorMessages";
 export const QuestionTypesSchema = z.enum(
   QuestionTypeOptions.map((q) => q.value) as [
     (typeof QuestionTypeOptions)[number]["value"],
-    ...string[],
+    ...string[]
   ]
 );
 
@@ -20,12 +20,12 @@ export const FormQuestionSchema = z
       .string({ message: ERROR_MESSAGES.required })
       .min(1, { message: ERROR_MESSAGES.required }),
     description: z.string().optional(),
-    options: z.array(z.string()).optional(),
+    options: z.array(z.union([z.string(), z.number()])).optional(),
     required: z.boolean(),
   })
   .refine(
     (data) => {
-      if (typesRequiringOptions.includes(data.type)) {
+      if (typesRequiringOptions.includes(data.type as any)) {
         return Array.isArray(data.options) && data.options.length > 0;
       }
       return true;
@@ -54,7 +54,7 @@ export const FormSchema = z
     type: z.enum(
       FormTypeOptions.map((f) => f.value) as [
         (typeof FormTypeOptions)[number]["value"],
-        ...string[],
+        ...string[]
       ]
     ),
     showOn: z.coerce.date().optional(),
