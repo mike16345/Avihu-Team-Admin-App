@@ -28,7 +28,7 @@ const FormBuilderHeader = () => {
 
   return (
     <div className={`rounded-xl shadow-lg p-5 border space-y-3 ${borderColor[headerError as any]}`}>
-      <div className="flex justify-between gap-5 items-start">
+      <div className="flex flex-col md:flex-row justify-between gap-5 items-start">
         <FormField
           name={`name`}
           control={control}
@@ -48,7 +48,7 @@ const FormBuilderHeader = () => {
           control={control}
           render={({ field }) => {
             return (
-              <FormItem className="w-[200px]">
+              <FormItem className="w-full md:w-[200px]">
                 <CustomSelect
                   className="w-full bg-muted"
                   items={FormTypeOptions}

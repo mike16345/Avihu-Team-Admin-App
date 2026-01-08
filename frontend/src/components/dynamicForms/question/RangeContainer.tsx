@@ -41,25 +41,29 @@ const RangeContainer: React.FC<RangeContainerProps> = ({ onChange, options }) =>
   }, []);
 
   return (
-    <div className="flex items-center gap-2">
-      <span>מ -</span>
-      <Input
-        className="w-[80px] bg-muted"
-        type="number"
-        min={1}
-        value={range.start}
-        onChange={(e) => handleInputChange(e.target.value, "start")}
-        onBlur={generateOptions}
-      />
-      <span>עד -</span>
-      <Input
-        className="w-[80px] bg-muted"
-        type="number"
-        min={range.start}
-        value={range.end}
-        onChange={(e) => handleInputChange(e.target.value, "end")}
-        onBlur={generateOptions}
-      />
+    <div className="flex items-center gap-2 flex-wrap jus">
+      <div className="flex items-center gap-2">
+        <span>מ -</span>
+        <Input
+          className="w-[80px] bg-muted"
+          type="number"
+          min={1}
+          value={range.start}
+          onChange={(e) => handleInputChange(e.target.value, "start")}
+          onBlur={generateOptions}
+        />
+      </div>
+      <div className="flex items-center gap-2">
+        <span>עד -</span>
+        <Input
+          className="w-[80px] bg-muted"
+          type="number"
+          min={range.start}
+          value={range.end}
+          onChange={(e) => handleInputChange(e.target.value, "end")}
+          onBlur={generateOptions}
+        />
+      </div>
     </div>
   );
 };

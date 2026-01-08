@@ -38,7 +38,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({ parentPath }) => {
 
   return (
     <div className="w-full space-y-5">
-      <div className="flex w-full gap-5 items-start">
+      <div className="flex flex-col md:flex-row w-full gap-5 items-start">
         <FormField
           name={`${parentPath}.question`}
           control={control}
@@ -56,7 +56,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({ parentPath }) => {
           control={control}
           render={({ field }) => {
             return (
-              <FormItem className=" w-[250px]">
+              <FormItem className="w-full md:w-[250px]">
                 <CustomSelect
                   className="w-full bg-muted"
                   items={QuestionTypeOptions}
