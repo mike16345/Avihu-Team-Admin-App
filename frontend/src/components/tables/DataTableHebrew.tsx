@@ -26,7 +26,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useState, type MouseEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { FilterIcon } from "lucide-react";
 import { RowData } from "@tanstack/react-table";
@@ -52,6 +52,7 @@ interface DataTableProps<TData, TValue> {
   pageCount?: number;
   onPageChange?: (page: number) => void;
   isLoadingNextPage?: boolean;
+  rowClickMode?: "single" | "double";
 }
 
 declare module "@tanstack/table-core" {
@@ -81,6 +82,7 @@ export function DataTableHebrew<TData, TValue>({
   pageCount,
   onPageChange,
   getRowId,
+  rowClickMode = "double",
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -154,6 +156,13 @@ export function DataTableHebrew<TData, TValue>({
     const selectedRows = table.getFilteredSelectedRowModel().rows;
     selectedRows.forEach(async (row) => await handleDeleteData(row.original));
     setRowSelection({});
+  };
+
+  const handleRowActivate = (event: MouseEvent<HTMLElement>, rowData: TData) => {
+    const target = event.target as HTMLElement;
+    if (target.id == "row-checkbox" || target.id == "access-switch") return;
+
+    handleViewData(rowData);
   };
 
   return (
@@ -256,12 +265,16 @@ export function DataTableHebrew<TData, TValue>({
                     >
                       <TableRow
                         className={cn(getRowClassName(row.original))}
-                        onDoubleClick={(e) => {
-                          const target = e.target as HTMLElement;
-                          if (target.id == "row-checkbox" || target.id == "access-switch") return;
-
-                          handleViewData(row.original);
-                        }}
+                        onClick={
+                          rowClickMode === "single"
+                            ? (event) => handleRowActivate(event, row.original)
+                            : undefined
+                        }
+                        onDoubleClick={
+                          rowClickMode === "double"
+                            ? (event) => handleRowActivate(event, row.original)
+                            : undefined
+                        }
                         data-state={row.getIsSelected() && "selected"}
                       >
                         {row.getVisibleCells().map((cell) => (
