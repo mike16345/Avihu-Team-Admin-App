@@ -1,3 +1,4 @@
+import { FormTypes } from "@/interfaces/IForm";
 import { Option } from "@/types/types";
 
 // Existing options
@@ -17,10 +18,11 @@ export const FormTypeOptions: Option[] = [
   { name: "כללי", value: "general" },
 ];
 
-export const FormTypesInHebrew: Record<string, string> = {
+export const FormTypesInHebrew: Record<FormTypes, string> = {
   onboarding: "התחלה",
   monthly: "חודשי",
   general: "כללי",
+  
 };
 
 export const typesRequiringOptions = ["radio", "checkboxes", "range", "drop-down"] as const;
