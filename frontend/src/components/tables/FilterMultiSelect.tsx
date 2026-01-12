@@ -7,15 +7,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-
-interface FilterOption {
-  label: string;
-  value: string;
-}
+import { Option } from "@/types/types";
 
 interface FilterMultiSelectProps {
   label: string;
-  options: FilterOption[];
+  options: Option[];
   selected: string[];
   onChange: (values: string[]) => void;
   placeholder?: string;
@@ -32,7 +28,7 @@ const FilterMultiSelect = ({
 }: FilterMultiSelectProps) => {
   const optionMap = useMemo(() => {
     return options.reduce<Record<string, string>>((acc, option) => {
-      acc[option.value] = option.label;
+      acc[option.value] = option.name;
       return acc;
     }, {});
   }, [options]);
@@ -78,7 +74,7 @@ const FilterMultiSelect = ({
             onCheckedChange={() => handleToggle(option.value)}
             onSelect={(event) => event.preventDefault()}
           >
-            {option.label}
+            {option.name}
           </DropdownMenuCheckboxItem>
         ))}
       </DropdownMenuContent>

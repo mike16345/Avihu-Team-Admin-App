@@ -104,7 +104,7 @@ const ExercisePresetsTable = ({
       rowGroups.filter(Boolean).forEach((group) => groups.add(group));
     });
 
-    return Array.from(groups).map((group) => ({ label: group, value: group }));
+    return Array.from(groups).map((group) => ({ name: group, value: group }));
   }, [data]);
 
   const filteredData = useMemo(() => {

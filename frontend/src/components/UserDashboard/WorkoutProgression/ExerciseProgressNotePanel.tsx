@@ -52,7 +52,7 @@ const ExerciseProgressNotePanel = ({
     if (!selectedMuscleGroup || !workoutPlan?.workoutPlans) return [];
 
     const seen = new Set<string>();
-    const ordered: { value: string; label: string }[] = [];
+    const ordered: { value: string; name: string }[] = [];
 
     workoutPlan.workoutPlans.forEach((plan) => {
       plan.muscleGroups
@@ -63,7 +63,7 @@ const ExerciseProgressNotePanel = ({
             if (!details || seen.has(details.name)) return;
 
             seen.add(details.name);
-            ordered.push({ value: details.name, label: details.name });
+            ordered.push({ name: details.name, value: details.name });
           });
         });
     });
