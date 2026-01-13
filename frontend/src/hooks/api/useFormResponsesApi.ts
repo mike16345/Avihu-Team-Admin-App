@@ -11,9 +11,14 @@ const useFormResponsesApi = () => {
   const getFormResponseById = (id: string) =>
     fetchData<ApiResponse<FormResponse>>(FORM_RESPONSES_API + "/one", { id });
 
+  const getFormResponseByQuery = (query: Partial<FormResponse> = {}) => {
+    return fetchData<ApiResponse<FormResponse>>(FORM_RESPONSES_API + "/response/one", query);
+  };
+
   return {
     getFormResponses,
     getFormResponseById,
+    getFormResponseByQuery,
   };
 };
 

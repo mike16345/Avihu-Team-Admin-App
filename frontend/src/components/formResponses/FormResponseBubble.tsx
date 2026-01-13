@@ -8,12 +8,14 @@ import Loader from "@/components/ui/Loader";
 import ErrorPage from "@/pages/ErrorPage";
 import { useUsersStore } from "@/store/userStore";
 import useUserQuery from "@/hooks/queries/user/useUserQuery";
+import { FormResponse } from "@/interfaces/IFormResponse";
 
 type FormResponseBubbleProps = {
   responseId?: string;
   initialTop?: number;
   rightOffset?: number;
   className?: string;
+  formResponse: FormResponse | undefined;
 };
 
 const BUBBLE_SIZE = 56;
@@ -24,6 +26,7 @@ const clamp = (value: number, min: number, max: number) => Math.min(Math.max(val
 
 const FormResponseBubble = ({
   responseId,
+  formResponse,
   initialTop = 180,
   rightOffset = EDGE_PADDING,
   className,
@@ -40,6 +43,23 @@ const FormResponseBubble = ({
     moved: false,
     justDragged: false,
   });
+
+  const { data, isLoading, isError, error } = useFormResponseQuery(
+    responseId,
+    open && !formResponse
+  );
+  const response = formResponse ?? data?.data;
+
+  const { users } = useUsersStore();
+  const cachedUser = useMemo(
+    () => users.find((entry) => entry._id === response?.userId),
+    [users, response?.userId]
+  );
+
+  const { data: fetchedUser } = useUserQuery(
+    response?.userId,
+    Boolean(response?.userId) && !cachedUser && open
+  );
 
   const handlePointerDown = (event: PointerEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -87,15 +107,6 @@ const FormResponseBubble = ({
     setOpen(true);
   };
 
-  const { data, isLoading, isError, error } = useFormResponseQuery(responseId, open);
-  const response = data?.data;
-  const { users } = useUsersStore();
-  const cachedUser = users.find((entry) => entry._id === response?.userId);
-  const { data: fetchedUser } = useUserQuery(
-    response?.userId,
-    Boolean(response?.userId) && !cachedUser && open
-  );
-
   const respondentName = useMemo(() => {
     const user = cachedUser || fetchedUser;
     const firstName = user?.firstName?.trim() ?? "";
@@ -140,16 +151,13 @@ const FormResponseBubble = ({
       >
         שאלון
       </Button>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" dir="rtl">
-        <DialogHeader>
-          <DialogTitle className="text-right">Response details</DialogTitle>
-        </DialogHeader>
+      <DialogContent className="max-w-4xl min-h-[90vh] max-h-[90vh] overflow-y-auto" dir="rtl">
         {!responseId ? (
-          <div className="py-10 text-center text-sm text-muted-foreground">
+          <div className="py-10 flex items-center justify-center size-full text-center text-sm text-muted-foreground">
             אין תגובה זמינה להצגה.
           </div>
         ) : isLoading ? (
-          <div className="py-10 flex justify-center">
+          <div className="py-10 flex items-center justify-center">
             <Loader size="large" />
           </div>
         ) : isError ? (
@@ -161,7 +169,7 @@ const FormResponseBubble = ({
             navigationMode="select"
           />
         ) : (
-          <div className="py-10 text-center text-sm text-muted-foreground">
+          <div className="py-10 flex items-center justify-center size-full text-center text-sm text-muted-foreground">
             אין תגובה זמינה להצגה.
           </div>
         )}

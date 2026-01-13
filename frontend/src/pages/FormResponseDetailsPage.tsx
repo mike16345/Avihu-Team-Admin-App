@@ -7,7 +7,6 @@ import FormResponseViewer from "@/components/formResponses/FormResponseViewer";
 import { useUsersStore } from "@/store/userStore";
 import useUserQuery from "@/hooks/queries/user/useUserQuery";
 import BackButton from "@/components/ui/BackButton";
-import FormResponseBubble from "@/components/formResponses/FormResponseBubble";
 
 const FormResponseDetailsPage = () => {
   const { id } = useParams();
