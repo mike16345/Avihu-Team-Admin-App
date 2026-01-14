@@ -9,9 +9,7 @@ import Loader from "@/components/ui/Loader";
 import ErrorPage from "@/pages/ErrorPage";
 import { useUsersStore } from "@/store/userStore";
 import { QueryKeys } from "@/enums/QueryKeys";
-import useAgreementsAdminApi, {
-  SignedAgreementsParams,
-} from "@/hooks/api/useAgreementsAdminApi";
+import useAgreementsAdminApi, { SignedAgreementsParams } from "@/hooks/api/useAgreementsAdminApi";
 import { SignedAgreement } from "@/interfaces/IAgreement";
 import DateUtils from "@/lib/dateUtils";
 import CustomSelect from "@/components/ui/CustomSelect";

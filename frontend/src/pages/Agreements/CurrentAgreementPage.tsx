@@ -180,11 +180,7 @@ const CurrentAgreementPage = () => {
           <AgreementQuestionsEditor questions={questions} onChange={setQuestions} />
           <div className="flex justify-end">
             <Button onClick={handleActivate} disabled={isSaving}>
-              {isSaving
-                ? "שומר..."
-                : pendingVersion
-                ? "הפעל גרסה חדשה"
-                : "שמור שאלות"}
+              {isSaving ? "שומר..." : pendingVersion ? "הפעל גרסה חדשה" : "שמור שאלות"}
             </Button>
           </div>
         </CardContent>

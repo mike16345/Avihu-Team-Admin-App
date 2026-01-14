@@ -1,5 +1,9 @@
 import { fetchData, sendData } from "@/API/api";
-import { AgreementQuestionDefinition, AgreementTemplateUploadResponse, SignedAgreement } from "@/interfaces/IAgreement";
+import {
+  AgreementQuestionDefinition,
+  AgreementTemplateUploadResponse,
+  SignedAgreement,
+} from "@/interfaces/IAgreement";
 import { PaginationParams, PaginationResult } from "@/interfaces/interfaces";
 import { ApiResponse } from "@/types/types";
 
