@@ -52,8 +52,8 @@ export function getElapsedSeconds(timestamp: number) {
   return `${days}d ${hours % 24}h ${remainingMinutes}m ${remainingSeconds.toFixed(0)}s`;
 }
 
-export const convertStringsToOptions = (
-  data: string[],
+export const convertStringsToOptions = <T extends string>(
+  data: T[],
   convertNameToLabel?: Function
 ): Option[] => {
   return data.map((item) => {

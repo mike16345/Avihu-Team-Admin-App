@@ -15,6 +15,7 @@ export interface IUser extends IBaseUser {
   isChecked: boolean;
   checkInAt: number;
   hasAccess: boolean;
+  onboardingCompleted: boolean;
 }
 
 export interface IUserPost extends IBaseUser {}
