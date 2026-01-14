@@ -26,7 +26,7 @@ const FormPresetsPage = () => {
       <TabsList>
         <TabsTrigger value="forms">שאלונים</TabsTrigger>
         <TabsTrigger value="responses">תשובות</TabsTrigger>
-        <TabsTrigger value="agreements">Agreement</TabsTrigger>
+        <TabsTrigger value="agreements">הסכמים</TabsTrigger>
       </TabsList>
       <TabsContent value="forms">
         {isLoading ? (

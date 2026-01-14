@@ -7,7 +7,7 @@ import {
 import { PaginationParams, PaginationResult } from "@/interfaces/interfaces";
 import { ApiResponse } from "@/types/types";
 
-const AGREEMENTS_ADMIN_ENDPOINT = "admin/agreements";
+const AGREEMENTS_ADMIN_ENDPOINT = "agreements/admin";
 
 export interface SignedAgreementsParams extends Partial<PaginationParams> {
   adminId?: string;
@@ -23,7 +23,7 @@ export interface SignedAgreementDownloadParams {
 }
 
 export interface AgreementTemplateUploadBody {
-  agreementId: string;
+  agreementId?: string;
   groupId?: string;
   contentType: "application/pdf";
   adminId?: string;

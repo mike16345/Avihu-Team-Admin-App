@@ -4,17 +4,22 @@ import QuestionForm from "./QuestionForm";
 import { useFormContext } from "react-hook-form";
 import { FormType } from "@/schemas/formBuilderSchema";
 import { borderColor } from "@/constants/form";
+import { Option } from "@/types/types";
 
 interface QuestionProps {
   parentPath: `sections.${number}.questions.${number}`;
   onDeleteQuestion: () => void;
   onDuplicateQuestion: () => void;
+  typeOptions?: Option[];
+  typesRequiringOptions?: string[];
 }
 
 const Question: React.FC<QuestionProps> = ({
   parentPath,
   onDeleteQuestion,
   onDuplicateQuestion,
+  typeOptions,
+  typesRequiringOptions,
 }) => {
   const {
     formState: { errors },
@@ -29,7 +34,11 @@ const Question: React.FC<QuestionProps> = ({
         borderColor[!!questionError as any]
       }`}
     >
-      <QuestionForm parentPath={parentPath} />
+      <QuestionForm
+        parentPath={parentPath}
+        typeOptions={typeOptions}
+        typesRequiringOptions={typesRequiringOptions}
+      />
 
       <div className="opacity-0 group-hover:opacity-100 transition-all">
         <QuestionActions

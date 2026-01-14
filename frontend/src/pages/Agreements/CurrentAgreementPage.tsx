@@ -13,10 +13,11 @@ import ErrorPage from "@/pages/ErrorPage";
 import { useUsersStore } from "@/store/userStore";
 import BackButton from "@/components/ui/BackButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { createRetryFunction } from "@/lib/utils";
 
 const CurrentAgreementPage = () => {
   const currentUser = useUsersStore((state) => state.currentUser);
-  const adminId = currentUser?._id;
+  const adminId = import.meta.env.VITE_DEFAULT_TRAINER_ID ?? currentUser?._id;
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { getCurrentAgreement } = useAgreementsApi();
   const { createTemplateUploadUrl, activateTemplate } = useAgreementsAdminApi();
@@ -29,6 +30,7 @@ const CurrentAgreementPage = () => {
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: [QueryKeys.AGREEMENT_CURRENT],
     queryFn: () => getCurrentAgreement(),
+    retry: createRetryFunction(404, 2),
   });
 
   const currentAgreement = data?.data;
@@ -62,15 +64,10 @@ const CurrentAgreementPage = () => {
       return;
     }
 
-    if (!currentAgreement) {
-      toast.error("לא נמצאה גרסה פעילה להסכם.");
-      return;
-    }
-
     try {
       setIsUploading(true);
       const uploadResponse = await createTemplateUploadUrl({
-        agreementId: currentAgreement.agreementId,
+        agreementId: currentAgreement?.agreementId,
         contentType: "application/pdf",
         adminId,
       });
@@ -89,7 +86,7 @@ const CurrentAgreementPage = () => {
       }
 
       setPendingVersion(version);
-      setQuestions(currentAgreement.questions ?? []);
+      setQuestions(currentAgreement?.questions ?? []);
       toast.success(`הקובץ הועלה בהצלחה (גרסה ${version}).`);
     } catch (uploadError: any) {
       toast.error("העלאת ההסכם נכשלה", {
@@ -125,10 +122,44 @@ const CurrentAgreementPage = () => {
     }
   };
 
+  console.log("Error", error);
   if (isLoading) return <Loader size="xl" />;
-  if (isError) return <ErrorPage message={error.message} />;
-  if (!currentAgreement) return <ErrorPage message="לא נמצאה גרסה פעילה להסכם." />;
+  if (isError && error.status !== 404) return <ErrorPage message={error.message} />;
+  if (!currentAgreement) {
+    return (
+      <div className="space-y-6" dir="rtl">
+        <BackButton fixedPosition navLink="/form-builder" />
 
+        <Card>
+          <CardHeader>
+            <CardTitle>לא קיים הסכם פעיל</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Alert>
+              <AlertTitle>אין הסכם במערכת</AlertTitle>
+              <AlertDescription>
+                טרם הועלה הסכם. יש להעלות קובץ PDF כדי ליצור גרסה ראשונה.
+              </AlertDescription>
+            </Alert>
+
+            <div className="flex justify-end">
+              <Button onClick={handleUploadClick} disabled={isUploading}>
+                {isUploading ? "מעלה..." : "העלאת הסכם חדש"}
+              </Button>
+            </div>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="application/pdf"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
   return (
     <div className="space-y-6" dir="rtl">
       <BackButton fixedPosition navLink="/form-builder" />
@@ -139,11 +170,7 @@ const CurrentAgreementPage = () => {
         <CardContent className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="space-y-1">
-              <div className="text-sm text-muted-foreground">Agreement ID</div>
-              <div className="font-medium">{currentAgreement.agreementId}</div>
-            </div>
-            <div className="space-y-1">
-              <div className="text-sm text-muted-foreground">גרסה פעילה</div>
+              <div className="text-muted-foreground">גרסה פעילה</div>
               <div className="font-medium">v{currentAgreement.version}</div>
             </div>
             <Button onClick={handleUploadClick} disabled={isUploading}>
