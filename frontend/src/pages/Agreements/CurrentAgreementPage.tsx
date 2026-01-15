@@ -1,52 +1,37 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import AgreementQuestionsEditor from "@/components/agreements/AgreementQuestionsEditor";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import Loader from "@/components/ui/Loader";
-import { QueryKeys } from "@/enums/QueryKeys";
-import useAgreementsAdminApi from "@/hooks/api/useAgreementsAdminApi";
-import useAgreementsApi from "@/hooks/api/useAgreementsApi";
+import { pdfjs, Document, Page } from "react-pdf";
+import { AgreementTemplateActivateBody } from "@/hooks/api/useAgreementsAdminApi";
 import { AgreementQuestionDefinition } from "@/interfaces/IAgreement";
 import ErrorPage from "@/pages/ErrorPage";
 import { useUsersStore } from "@/store/userStore";
 import BackButton from "@/components/ui/BackButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { createRetryFunction } from "@/lib/utils";
+import useCurrentAgreementQuery from "@/hooks/queries/agreements/useCurrentAgreementQuery";
+import useUploadAgreement from "@/hooks/mutations/agreements/useUploadAgreement";
+import { Download } from "lucide-react";
+import { CustomTooltip } from "@/components/ui/custom-tooltip";
+import useActivateAgreement from "@/hooks/mutations/agreements/useActivateAgreement";
+
+pdfjs.GlobalWorkerOptions.workerSrc = "/workers/pdf.worker.mjs";
 
 const CurrentAgreementPage = () => {
-  const currentUser = useUsersStore((state) => state.currentUser);
-  const adminId = import.meta.env.VITE_DEFAULT_TRAINER_ID ?? currentUser?._id;
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const { getCurrentAgreement } = useAgreementsApi();
-  const { createTemplateUploadUrl, activateTemplate } = useAgreementsAdminApi();
+  const adminId =
+    import.meta.env.VITE_DEFAULT_TRAINER_ID ?? useUsersStore((state) => state.currentUser)?._id;
+
+  const { data: currentAgreement, isLoading, isError, error, refetch } = useCurrentAgreementQuery();
+  const { isPending, mutateAsync: uploadAgreement } = useUploadAgreement();
+  const { isPending: isSaving, mutateAsync: activateTemplate } = useActivateAgreement();
 
   const [pendingVersion, setPendingVersion] = useState<number | null>(null);
   const [questions, setQuestions] = useState<AgreementQuestionDefinition[]>([]);
-  const [isUploading, setIsUploading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  const [numPages, setNumPages] = useState(0);
 
-  const { data, isLoading, isError, error, refetch } = useQuery({
-    queryKey: [QueryKeys.AGREEMENT_CURRENT],
-    queryFn: () => getCurrentAgreement(),
-    retry: createRetryFunction(404, 2),
-  });
-
-  const currentAgreement = data?.data;
-
-  useEffect(() => {
-    if (!currentAgreement) return;
-    if (pendingVersion) return;
-
-    setQuestions(currentAgreement.questions ?? []);
-  }, [currentAgreement, pendingVersion]);
-
-  const uploadNotice = useMemo(() => {
-    if (!pendingVersion) return null;
-
-    return `גרסה חדשה (v${pendingVersion}) הועלתה. ערוך את השאלות והפעל את הגרסה.`;
-  }, [pendingVersion]);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleUploadClick = () => {
     fileInputRef.current?.click();
@@ -58,58 +43,38 @@ const CurrentAgreementPage = () => {
 
     if (!file) return;
 
-    const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
-    if (!isPdf) {
-      toast.error("ניתן להעלות קובץ PDF בלבד.");
-      return;
-    }
-
     try {
-      setIsUploading(true);
-      const uploadResponse = await createTemplateUploadUrl({
-        agreementId: currentAgreement?.agreementId,
-        contentType: "application/pdf",
-        adminId,
+      const result = await uploadAgreement({
+        file,
+        agreementId: currentAgreement?.data.agreementId ?? "",
+        adminId: adminId,
       });
 
-      const { uploadUrl, version } = uploadResponse.data;
-      const uploadResult = await fetch(uploadUrl, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/pdf",
-        },
-        body: file,
-      });
-
-      if (!uploadResult.ok) {
-        throw new Error("העלאת הקובץ נכשלה.");
+      setQuestions(currentAgreement?.data.questions ?? []);
+      if (result?.version) {
+        setPendingVersion(result.version);
       }
-
-      setPendingVersion(version);
-      setQuestions(currentAgreement?.questions ?? []);
-      toast.success(`הקובץ הועלה בהצלחה (גרסה ${version}).`);
     } catch (uploadError: any) {
       toast.error("העלאת ההסכם נכשלה", {
         description: uploadError?.message || uploadError?.data?.message,
       });
-    } finally {
-      setIsUploading(false);
     }
   };
 
   const handleActivate = async () => {
     if (!currentAgreement) return;
 
-    const version = pendingVersion ?? currentAgreement.version;
+    const version = pendingVersion ?? currentAgreement.data.version;
 
     try {
-      setIsSaving(true);
-      await activateTemplate({
-        agreementId: currentAgreement.agreementId,
+      const params: AgreementTemplateActivateBody = {
+        agreementId: currentAgreement.data.agreementId,
         version,
         questions,
         adminId,
-      });
+      };
+
+      await activateTemplate(params);
       toast.success("הגרסה הופעלה בהצלחה.");
       setPendingVersion(null);
       await refetch();
@@ -117,19 +82,29 @@ const CurrentAgreementPage = () => {
       toast.error("שמירת ההסכם נכשלה", {
         description: saveError?.data?.message,
       });
-    } finally {
-      setIsSaving(false);
     }
   };
 
-  console.log("Error", error);
+  const uploadNotice = useMemo(() => {
+    if (!pendingVersion) return null;
+
+    return `גרסה חדשה (v${pendingVersion}) הועלתה. ערוך את השאלות והפעל את הגרסה.`;
+  }, [pendingVersion]);
+
+  useEffect(() => {
+    if (!currentAgreement) return;
+    if (pendingVersion) return;
+
+    setQuestions(currentAgreement.data.questions ?? []);
+  }, [currentAgreement, pendingVersion]);
+
   if (isLoading) return <Loader size="xl" />;
   if (isError && error.status !== 404) return <ErrorPage message={error.message} />;
-  if (!currentAgreement) {
-    return (
-      <div className="space-y-6" dir="rtl">
-        <BackButton fixedPosition navLink="/form-builder" />
 
+  return (
+    <div className="space-y-6" dir="rtl">
+      <BackButton fixedPosition navLink="/form-builder" />
+      {!currentAgreement && (
         <Card>
           <CardHeader>
             <CardTitle>לא קיים הסכם פעיל</CardTitle>
@@ -143,8 +118,8 @@ const CurrentAgreementPage = () => {
             </Alert>
 
             <div className="flex justify-end">
-              <Button onClick={handleUploadClick} disabled={isUploading}>
-                {isUploading ? "מעלה..." : "העלאת הסכם חדש"}
+              <Button onClick={handleUploadClick} disabled={isPending}>
+                {isPending ? "מעלה..." : "העלאת הסכם חדש"}
               </Button>
             </div>
 
@@ -157,48 +132,74 @@ const CurrentAgreementPage = () => {
             />
           </CardContent>
         </Card>
-      </div>
-    );
-  }
-  return (
-    <div className="space-y-6" dir="rtl">
-      <BackButton fixedPosition navLink="/form-builder" />
-      <Card>
-        <CardHeader>
-          <CardTitle>הסכם נוכחי</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="space-y-1">
-              <div className="text-muted-foreground">גרסה פעילה</div>
-              <div className="font-medium">v{currentAgreement.version}</div>
+      )}
+
+      {!!currentAgreement && (
+        <Card>
+          <CardHeader>
+            <CardTitle>הסכם נוכחי</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="space-y-1">
+                <div className="text-muted-foreground">גרסה פעילה</div>
+                <div className="font-medium">v{currentAgreement.data.version}</div>
+              </div>
+              <Button onClick={handleUploadClick} disabled={isPending}>
+                {isPending ? "מעלה..." : "העלאת PDF חדש"}
+              </Button>
+              <CustomTooltip
+                tooltipContent="הורד"
+                tooltipTrigger={
+                  <Button variant={"outline"} asChild>
+                    <a href={currentAgreement.data.pdfUrl} target="_blank" rel="noreferrer">
+                      <Download />
+                    </a>
+                  </Button>
+                }
+              />
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="application/pdf"
+                className="hidden"
+                onChange={handleFileChange}
+              />
             </div>
-            <Button onClick={handleUploadClick} disabled={isUploading}>
-              {isUploading ? "מעלה..." : "העלאת PDF חדש"}
-            </Button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="application/pdf"
-              className="hidden"
-              onChange={handleFileChange}
-            />
-          </div>
-          {uploadNotice && (
-            <Alert>
-              <AlertTitle>גרסה חדשה מוכנה להפעלה</AlertTitle>
-              <AlertDescription>{uploadNotice}</AlertDescription>
-            </Alert>
-          )}
-          <div className="rounded-lg border overflow-hidden min-h-[600px]">
-            <iframe
-              title="Agreement PDF"
-              src={currentAgreement.pdfUrl}
-              className="w-full h-[600px]"
-            />
-          </div>
-        </CardContent>
-      </Card>
+            {uploadNotice && (
+              <Alert>
+                <AlertTitle>גרסה חדשה מוכנה להפעלה</AlertTitle>
+                <AlertDescription>{uploadNotice}</AlertDescription>
+              </Alert>
+            )}
+            <div className="rounded-lg border overflow-hidden h-[600px] bg-muted/20">
+              <div className="h-full overflow-auto flex justify-center p-4">
+                <Document
+                  file={currentAgreement.data.pdfUrl}
+                  onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+                  loading={
+                    <div className="w-full flex justify-center py-10">
+                      <Loader />
+                    </div>
+                  }
+                  error={<div className="text-sm text-destructive">שגיאה בטעינת ה-PDF</div>}
+                >
+                  {Array.from({ length: numPages }, (_, i) => (
+                    <Page
+                      key={`page_${i + 1}`}
+                      pageNumber={i + 1}
+                      renderTextLayer={false}
+                      renderAnnotationLayer={false}
+                      className="shadow-sm"
+                    />
+                  ))}
+                </Document>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle>שאלות בריאות</CardTitle>
