@@ -4,6 +4,7 @@ import { useFormContext } from "react-hook-form";
 import { FormType } from "@/schemas/formBuilderSchema";
 import { FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 interface SectionHeaderProps {
   parentPath: `sections.${number}`;
@@ -39,7 +40,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
           render={({ field }) => {
             return (
               <FormItem>
-                <Input {...field} placeholder="תיאור" />
+                <Textarea {...field} placeholder="תיאור" />
                 <FormMessage />
               </FormItem>
             );

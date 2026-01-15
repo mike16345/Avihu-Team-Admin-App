@@ -9,6 +9,7 @@ import { FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { FormType } from "@/schemas/formBuilderSchema";
 import { QuestionTypes } from "@/interfaces/IForm";
 import RangeContainer from "./RangeContainer";
+import { Textarea } from "@/components/ui/textarea";
 
 interface QuestionFormProps {
   parentPath: `sections.${number}.questions.${number}`;
@@ -75,7 +76,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({ parentPath }) => {
         render={({ field }) => {
           return (
             <FormItem className="w-full">
-              <Input className="bg-muted" placeholder="תיאור (אופציונלי)" {...field} />
+              <Textarea className="bg-muted" placeholder="תיאור (אופציונלי)" {...field} />
               <FormMessage />
             </FormItem>
           );
