@@ -2,7 +2,10 @@ import CustomSelect from "@/components/ui/CustomSelect";
 import CustomSwitch from "@/components/ui/CustomSwitch";
 import DynamicInput from "@/components/ui/DynamicInput";
 import { Input } from "@/components/ui/input";
-import { QuestionTypeOptions, typesRequiringOptions as defaultTypesRequiringOptions } from "@/constants/form";
+import {
+  QuestionTypeOptions,
+  typesRequiringOptions as defaultTypesRequiringOptions,
+} from "@/constants/form";
 import React, { useEffect, useMemo } from "react";
 import OptionsContainer from "./OptionsContainer";
 import { useFormContext } from "react-hook-form";
