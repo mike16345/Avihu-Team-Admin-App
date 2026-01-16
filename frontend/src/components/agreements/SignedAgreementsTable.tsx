@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import type { DateRange } from "react-day-picker";
 import { ColumnDef } from "@tanstack/react-table";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -13,6 +14,7 @@ import useAgreementsAdminApi, { SignedAgreementsParams } from "@/hooks/api/useAg
 import { SignedAgreement } from "@/interfaces/IAgreement";
 import DateUtils from "@/lib/dateUtils";
 import CustomSelect from "@/components/ui/CustomSelect";
+import DateRangePicker from "@/components/ui/DateRangePicker";
 
 const PAGE_SIZE_OPTIONS = [
   { name: "10", value: "10" },
@@ -27,8 +29,14 @@ const SignedAgreementsTable = () => {
 
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
-  const [filters, setFilters] = useState({ userId: "", from: "", to: "" });
-  const [appliedFilters, setAppliedFilters] = useState({ userId: "", from: "", to: "" });
+  const [filters, setFilters] = useState<{ userId: string; range?: DateRange }>({
+    userId: "",
+    range: undefined,
+  });
+  const [appliedFilters, setAppliedFilters] = useState<{ userId: string; range?: DateRange }>({
+    userId: "",
+    range: undefined,
+  });
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   const queryParams: SignedAgreementsParams = {
@@ -36,8 +44,12 @@ const SignedAgreementsTable = () => {
     page,
     limit,
     userId: appliedFilters.userId || undefined,
-    from: appliedFilters.from || undefined,
-    to: appliedFilters.to || undefined,
+    from: appliedFilters.range?.from
+      ? DateUtils.formatDate(appliedFilters.range.from, "YYYY-MM-DD")
+      : undefined,
+    to: appliedFilters.range?.to
+      ? DateUtils.formatDate(appliedFilters.range.to, "YYYY-MM-DD")
+      : undefined,
   };
 
   const { data, isLoading, isError, error } = useQuery({
@@ -127,7 +139,7 @@ const SignedAgreementsTable = () => {
   };
 
   const handleResetFilters = () => {
-    const empty = { userId: "", from: "", to: "" };
+    const empty = { userId: "", range: undefined };
     setFilters(empty);
     setAppliedFilters(empty);
     setPage(1);
@@ -153,17 +165,10 @@ const SignedAgreementsTable = () => {
             onChange={(event) => setFilters((prev) => ({ ...prev, userId: event.target.value }))}
             className="h-9 w-56"
           />
-          <Input
-            type="date"
-            value={filters.from}
-            onChange={(event) => setFilters((prev) => ({ ...prev, from: event.target.value }))}
-            className="h-9 w-44"
-          />
-          <Input
-            type="date"
-            value={filters.to}
-            onChange={(event) => setFilters((prev) => ({ ...prev, to: event.target.value }))}
-            className="h-9 w-44"
+          <DateRangePicker
+            selectedRange={filters.range}
+            onChangeRange={(range) => setFilters((prev) => ({ ...prev, range }))}
+            className="w-64"
           />
           <CustomSelect
             className="h-9 w-28"

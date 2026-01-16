@@ -10,6 +10,7 @@ export type Timezone =
 
 export type DateAndValue = { date: Date; value: any };
 export type DateFormatType =
+  | "DD/MM/YYYY HH:mm"
   | "YYYY-MM-DD"
   | "DD/MM/YYYY"
   | "MM/DD/YYYY"

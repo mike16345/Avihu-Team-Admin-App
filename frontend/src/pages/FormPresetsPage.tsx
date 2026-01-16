@@ -64,7 +64,7 @@ const FormPresetsPage = () => {
         <FormResponsesTable />
       </TabsContent>
       <TabsContent value="agreements">
-        <div className="flex justify-end mb-4">
+        <div className="flex justify-end ml-4">
           <Button variant="outline" onClick={() => navigate(`/agreements/current`)}>
             להסכם נוכחי
           </Button>
