@@ -41,8 +41,9 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
   const showOptions = useMemo(() => {
     if (!type) return false;
 
-    return effectiveTypesRequiringOptions.includes(type);
+    return effectiveTypesRequiringOptions.includes(type as any);
   }, [type]);
+
   const showRange = useMemo(() => {
     if (!type) return false;
 

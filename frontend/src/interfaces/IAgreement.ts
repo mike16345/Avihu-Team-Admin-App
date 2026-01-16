@@ -1,12 +1,6 @@
-export type AgreementQuestionType = "text" | "textarea" | "single-select" | "multi-select";
+import { FormQuestionType } from "@/schemas/formBuilderSchema";
 
-export interface AgreementQuestionDefinition {
-  questionId: string;
-  label: string;
-  type: AgreementQuestionType;
-  required: boolean;
-  options?: string[];
-}
+export type AgreementQuestionType = "text" | "textarea" | "single-select" | "multi-select";
 
 export interface SignedAgreementUser {
   _id?: string;
@@ -29,7 +23,7 @@ export interface CurrentAgreement {
   agreementId: string;
   version: number;
   pdfUrl: string;
-  questions: AgreementQuestionDefinition[];
+  questions: FormQuestionType[];
 }
 
 export interface AgreementTemplateUploadResponse {

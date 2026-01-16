@@ -1,32 +1,13 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { AgreementQuestionDefinition, AgreementQuestionType } from "@/interfaces/IAgreement";
+import { useEffect, useRef, useState } from "react";
 import { generateUUID } from "@/lib/utils";
-import { FormProvider, useFieldArray, useForm, useWatch } from "react-hook-form";
+import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import Question from "@/components/dynamicForms/question/Question";
 import { DragDropWrapper } from "@/components/Wrappers/DragDropWrapper";
 import { SortableItem } from "@/components/DragAndDrop/SortableItem";
 import AddButton from "@/components/ui/buttons/AddButton";
 import DeleteModal from "@/components/Alerts/DeleteModal";
 import { toast } from "sonner";
-import { Option } from "@/types/types";
-
-const QUESTION_TYPE_OPTIONS: Option[] = [
-  { name: "טקסט קצר", value: "text" },
-  { name: "טקסט ארוך", value: "textarea" },
-  { name: "בחירה יחידה", value: "single-select" },
-  { name: "בחירה מרובה", value: "multi-select" },
-];
-
-const QUESTION_TYPES_WITH_OPTIONS: AgreementQuestionType[] = ["single-select", "multi-select"];
-
-type AgreementFormQuestion = {
-  _id: string;
-  type: AgreementQuestionType;
-  question: string;
-  description?: string;
-  options?: string[];
-  required: boolean;
-};
+import { FormQuestionType } from "@/schemas/formBuilderSchema";
 
 type AgreementFormValues = {
   name: string;
@@ -36,16 +17,47 @@ type AgreementFormValues = {
   sections: Array<{
     title: string;
     description?: string;
-    questions: AgreementFormQuestion[];
+    questions: FormQuestionType[];
   }>;
 };
 
+type QuestionWithId = FormQuestionType & { _id: string };
+
 interface AgreementQuestionsEditorProps {
-  questions: AgreementQuestionDefinition[];
-  onChange: (questions: AgreementQuestionDefinition[]) => void;
+  questions: FormQuestionType[];
+  onChange: (questions: FormQuestionType[]) => void;
 }
 
-const buildDefaultValues = (questions: AgreementQuestionDefinition[]): AgreementFormValues => {
+const ensureQuestionIds = (
+  questions: Array<FormQuestionType | QuestionWithId>
+): QuestionWithId[] => {
+  return questions.map((question) => {
+    if ("_id" in question && typeof question._id === "string") {
+      return question as QuestionWithId;
+    }
+
+    return { _id: generateUUID(), ...question };
+  });
+};
+
+const stripQuestionIds = (questions: QuestionWithId[]): FormQuestionType[] => {
+  return questions.map(({ _id, ...question }) => question);
+};
+
+const serializeQuestions = (questions: Array<FormQuestionType | QuestionWithId>) => {
+  return JSON.stringify(
+    questions.map((question) => {
+      if ("_id" in question) {
+        const { _id, ...rest } = question;
+        return rest;
+      }
+      return question;
+    })
+  );
+};
+
+const buildDefaultValues = (questions: FormQuestionType[]): AgreementFormValues => {
+  const baseQuestions = questions;
   return {
     name: "",
     type: "general",
@@ -54,28 +66,9 @@ const buildDefaultValues = (questions: AgreementQuestionDefinition[]): Agreement
       {
         title: "",
         description: "",
-        questions: questions.map((question) => ({
-          _id: question.questionId,
-          question: question.label,
-          type: question.type,
-          required: question.required,
-          options: question.options ?? [],
-          description: "",
-        })),
+        questions: ensureQuestionIds(baseQuestions),
       },
     ],
-  };
-};
-
-const mapFormQuestionToAgreement = (
-  question: AgreementFormQuestion
-): AgreementQuestionDefinition => {
-  return {
-    questionId: question._id,
-    label: question.question,
-    type: question.type,
-    required: question.required,
-    options: question.options ?? [],
   };
 };
 
@@ -86,7 +79,13 @@ const AgreementQuestionsEditor = ({ questions, onChange }: AgreementQuestionsEdi
   });
   const { control, reset } = form;
 
-  const { append, remove, replace } = useFieldArray({
+  const {
+    fields: formQuestions,
+    append,
+    insert,
+    remove,
+    replace,
+  } = useFieldArray({
     control,
     name: "sections.0.questions",
   });
@@ -94,18 +93,10 @@ const AgreementQuestionsEditor = ({ questions, onChange }: AgreementQuestionsEdi
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const questionIndex = useRef<number | null>(null);
 
-  const formQuestions = useWatch({
-    control,
-    name: "sections.0.questions",
-  }) as AgreementFormQuestion[] | undefined;
-
-  const lastEmittedQuestions = useRef<string>("");
-
-  const questionsList = useMemo(() => formQuestions ?? [], [formQuestions]);
+  const lastEmittedQuestions = useRef<string>(serializeQuestions(questions));
 
   const handleAddQuestion = () => {
     append({
-      _id: generateUUID(),
       question: "",
       type: "text",
       required: false,
@@ -119,55 +110,64 @@ const AgreementQuestionsEditor = ({ questions, onChange }: AgreementQuestionsEdi
   };
 
   const onDuplicateQuestion = (index: number) => {
-    const questionToCopy = questionsList[index];
+    if (!formQuestions) return;
+    const questionToCopy = formQuestions[index];
+
     if (!questionToCopy) return;
-    const { _id, ...newQuestion } = questionToCopy;
-    append({ _id: generateUUID(), ...newQuestion });
+
+    const { options, ...newQuestion } = questionToCopy;
+    insert(index + 1, {
+      ...newQuestion,
+      options: Array.isArray(options) ? [...options] : options,
+    });
   };
 
   const onConfirmDeleteQuestion = () => {
     if (questionIndex.current == null) return;
     remove(questionIndex.current);
     questionIndex.current = null;
-    toast.success("");
+    toast.success("שאלה נמחק בהצלחה");
   };
 
   useEffect(() => {
-    const mappedQuestions = (formQuestions ?? []).map(mapFormQuestionToAgreement);
-    const serialized = JSON.stringify(mappedQuestions);
+    const subscription = form.watch((values) => {
+      const updatedQuestions = (values.sections?.[0]?.questions ?? []) as QuestionWithId[];
+      const serialized = JSON.stringify(stripQuestionIds(updatedQuestions));
+
+      if (serialized === lastEmittedQuestions.current) return;
+
+      lastEmittedQuestions.current = serialized;
+      onChange(stripQuestionIds(updatedQuestions));
+    });
+
+    return () => subscription.unsubscribe();
+  }, [form, onChange]);
+
+  useEffect(() => {
+    const serialized = serializeQuestions(questions);
 
     if (serialized === lastEmittedQuestions.current) return;
 
     lastEmittedQuestions.current = serialized;
-    onChange(mappedQuestions);
-  }, [formQuestions, onChange]);
-
-  useEffect(() => {
-    const serialized = JSON.stringify(questions);
-
-    if (serialized === lastEmittedQuestions.current) return;
-
     reset(buildDefaultValues(questions));
   }, [questions, reset]);
 
   return (
     <FormProvider {...form}>
       <div className="space-y-4">
-        {questionsList.length === 0 && (
+        {formQuestions.length === 0 && (
           <p className="text-lg text-muted-foreground text-center ">אין שאלות</p>
         )}
-        <DragDropWrapper items={questionsList} strategy="vertical" idKey="_id" setItems={replace}>
+        <DragDropWrapper items={formQuestions} strategy="vertical" idKey="id" setItems={replace}>
           {({ item, index }) => {
             return (
-              <SortableItem className="relative w-full bg-background" idKey="_id" item={item}>
+              <SortableItem className="relative w-full bg-background" idKey="id" item={item}>
                 {() => (
                   <Question
-                    key={item._id}
+                    key={item.id}
                     parentPath={`sections.0.questions.${index}`}
                     onDeleteQuestion={() => onClickDeleteQuestion(index)}
                     onDuplicateQuestion={() => onDuplicateQuestion(index)}
-                    typeOptions={QUESTION_TYPE_OPTIONS}
-                    typesRequiringOptions={QUESTION_TYPES_WITH_OPTIONS}
                   />
                 )}
               </SortableItem>

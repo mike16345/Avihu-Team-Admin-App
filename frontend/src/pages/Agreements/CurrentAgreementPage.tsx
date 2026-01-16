@@ -74,7 +74,15 @@ const CurrentAgreementPage = () => {
       const params: AgreementTemplateActivateBody = {
         agreementId: currentAgreement.data.agreementId,
         version,
-        questions,
+        questions: questions.map((question) => {
+          const q = {
+            _id: question.id,
+            ...question,
+          };
+
+          delete q.id;
+          return q;
+        }),
         adminId,
       };
 

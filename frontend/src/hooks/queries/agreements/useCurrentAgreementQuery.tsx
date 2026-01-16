@@ -11,7 +11,7 @@ const useCurrentAgreementQuery = () => {
     queryKey: [QueryKeys.AGREEMENT_CURRENT],
     queryFn: () => getCurrentAgreement(),
     retry: createRetryFunction(404, 2),
-    staleTime: ONE_MIN_IN_MILLISECONDS * 5,
+    staleTime: ONE_MIN_IN_MILLISECONDS * 30,
   });
 };
 
