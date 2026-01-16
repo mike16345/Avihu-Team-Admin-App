@@ -11,7 +11,11 @@ import { SortableItem } from "@/components/DragAndDrop/SortableItem";
 import { toast } from "sonner";
 import { generateUUID } from "@/lib/utils";
 
-const FormBuilder = () => {
+interface FormBuilderProps {
+  disableOnboarding?: boolean;
+}
+
+const FormBuilder = ({ disableOnboarding = false }: FormBuilderProps) => {
   const form = useFormContext<FormType>();
   const { control, watch } = form;
 
@@ -64,7 +68,7 @@ const FormBuilder = () => {
   return (
     <>
       <div className="p-5 space-y-5">
-        <FormBuilderHeader />
+        <FormBuilderHeader disableOnboarding={disableOnboarding} />
 
         <DragDropWrapper items={sections} strategy="vertical" idKey="_id" setItems={replace}>
           {({ item, index }) => {

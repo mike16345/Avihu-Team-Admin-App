@@ -101,7 +101,7 @@ export const WeightProgressionPhotos: FC<WeightProgressionPhotosProps> = ({ onCl
       )}
       {photos.length == 0 && (
         <div className="flex size-full items-center justify-center rounded-lg border border-dashed border-border/60 bg-muted/20 py-10">
-          <h1 className="text-center text-sm text-muted-foreground">××™×Ÿ ×ª×ž×•× ×•×ª</h1>
+          <h1 className="text-center text-sm text-muted-foreground">אין תמונות מעקב</h1>
         </div>
       )}
       {fullScreenImage && (

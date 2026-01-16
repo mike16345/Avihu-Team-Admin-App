@@ -20,12 +20,12 @@ export const FormQuestionSchema = z
       .string({ message: ERROR_MESSAGES.required })
       .min(1, { message: ERROR_MESSAGES.required }),
     description: z.string().optional(),
-    options: z.array(z.string()).optional(),
+    options: z.array(z.union([z.string(), z.number()])).optional(),
     required: z.boolean(),
   })
   .refine(
     (data) => {
-      if (typesRequiringOptions.includes(data.type)) {
+      if (typesRequiringOptions.includes(data.type as any)) {
         return Array.isArray(data.options) && data.options.length > 0;
       }
       return true;

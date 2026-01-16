@@ -22,4 +22,6 @@ export enum QueryKeys {
   LESSON_GROUPS = "lesson-groups",
   FORM_PRESETS = "form-presets",
   FORM_PRESET = "form-preset-",
+  AGREEMENTS_SIGNED = "agreements-signed",
+  AGREEMENT_CURRENT = "agreement-current",
 }

@@ -65,6 +65,7 @@ const SectionContent: React.FC<SectionContentProps> = ({ parentPath }) => {
     questionIndex.current = null;
     toast.success("שאלה נמחקה בהצלחה!");
   };
+
   return (
     <>
       <div className="p-5 space-y-5">
