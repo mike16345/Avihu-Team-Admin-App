@@ -13,7 +13,7 @@ const QuestionActions: React.FC<QuestionActionsProps> = ({
   onDuplicateQuestion,
 }) => {
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex md:flex-col gap-1 items-center">
       <div className="flex justify-center">
         <RxDragHandleDots2 />
       </div>

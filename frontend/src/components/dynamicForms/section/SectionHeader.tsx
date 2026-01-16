@@ -1,9 +1,10 @@
-import DynamicInput from "@/components/ui/DynamicInput";
 import React from "react";
 import SectionActions from "./SectionActions";
 import { useFormContext } from "react-hook-form";
 import { FormType } from "@/schemas/formBuilderSchema";
 import { FormField, FormItem, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 interface SectionHeaderProps {
   parentPath: `sections.${number}`;
@@ -27,7 +28,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
           render={({ field }) => {
             return (
               <FormItem>
-                <DynamicInput {...field} defaultValue="קטגוריה ללא שם" />
+                <Input {...field} placeholder="קטגוריה ללא שם" />
                 <FormMessage />
               </FormItem>
             );
@@ -39,7 +40,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
           render={({ field }) => {
             return (
               <FormItem>
-                <DynamicInput {...field} defaultValue="תיאור" />
+                <Textarea {...field} placeholder="תיאור" />
                 <FormMessage />
               </FormItem>
             );

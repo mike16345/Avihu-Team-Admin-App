@@ -16,6 +16,7 @@ import useUpdateFormPreset from "@/hooks/mutations/formPresets/useUpdateFormPres
 import { IForm } from "@/interfaces/IForm";
 import BackButton from "@/components/ui/BackButton";
 import useFormPresetsQuery from "@/hooks/queries/formPresets/useFormPresetsQuery";
+import DateUtils from "@/lib/dateUtils";
 
 const FormBuilderPage = () => {
   const { id } = useParams();
@@ -64,6 +65,10 @@ const FormBuilderPage = () => {
 
   const onSubmit = (values: FormType) => {
     const formPreset = values as IForm;
+
+    if (formPreset.showOn) {
+      formPreset.showOn = DateUtils.formatDate(formPreset.showOn, "YYYY-MM-DD");
+    }
 
     if (isEdit) {
       updateForm({ id: id!, formPreset });

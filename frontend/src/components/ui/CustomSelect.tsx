@@ -34,7 +34,14 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
         <SelectContent>
           <SelectGroup>
             {items.map(({ name, value }, i) => (
-              <SelectItem className="hover:bg-muted cursor-pointer" key={i} value={value}>
+              <SelectItem
+                className="hover:bg-muted cursor-pointer"
+                key={i}
+                value={value}
+                onPointerDown={(e) => {
+                  e.stopPropagation();
+                }}
+              >
                 {name}
               </SelectItem>
             ))}
