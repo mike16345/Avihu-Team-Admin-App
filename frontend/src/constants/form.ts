@@ -22,7 +22,6 @@ export const FormTypesInHebrew: Record<FormTypes, string> = {
   onboarding: "התחלה",
   monthly: "חודשי",
   general: "כללי",
-  
 };
 
 export const typesRequiringOptions = ["radio", "checkboxes", "drop-down"] as const;
