@@ -10,8 +10,7 @@ export interface SignedAgreementUser {
 
 export interface SignedAgreement {
   _id?: string;
-  userId?: string;
-  user?: SignedAgreementUser;
+  userId?: SignedAgreementUser | string;
   signedAt?: string;
   createdAt?: string;
   version?: number;

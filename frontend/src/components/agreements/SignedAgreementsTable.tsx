@@ -11,10 +11,17 @@ import ErrorPage from "@/pages/ErrorPage";
 import { useUsersStore } from "@/store/userStore";
 import { QueryKeys } from "@/enums/QueryKeys";
 import useAgreementsAdminApi, { SignedAgreementsParams } from "@/hooks/api/useAgreementsAdminApi";
-import { SignedAgreement } from "@/interfaces/IAgreement";
+import { SignedAgreement, SignedAgreementUser } from "@/interfaces/IAgreement";
 import DateUtils from "@/lib/dateUtils";
 import CustomSelect from "@/components/ui/CustomSelect";
 import DateRangePicker from "@/components/ui/DateRangePicker";
+
+export const resolveUserName = (user: string | SignedAgreementUser) => {
+  console.log("user", user);
+  return typeof user == "object" && typeof user !== "string"
+    ? `${user?.firstName || ""} ${user.lastName || ""}`.trim()
+    : "";
+};
 
 const PAGE_SIZE_OPTIONS = [
   { name: "10", value: "10" },
@@ -87,16 +94,14 @@ const SignedAgreementsTable = () => {
         id: "שם",
         header: "משתמש",
         accessorFn: (row) => {
-          const fullName = row.user
-            ? `${row.user.firstName || ""} ${row.user.lastName || ""}`.trim()
-            : "";
+          const fullName = resolveUserName(row);
+
           return fullName || row.userId || "לא ידוע";
         },
         cell: ({ row }) => {
-          const fullName = row.original.user
-            ? `${row.original.user.firstName || ""} ${row.original.user.lastName || ""}`.trim()
-            : "";
-          return <span>{fullName || row.original.userId || "-"}</span>;
+          const fullName = resolveUserName(row.original.userId || "");
+
+          return <span>{fullName || "-"}</span>;
         },
       },
       {

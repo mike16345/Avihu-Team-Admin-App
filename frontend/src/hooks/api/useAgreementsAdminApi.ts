@@ -1,9 +1,6 @@
 import { fetchData, sendData } from "@/API/api";
-import {
-  AgreementQuestionDefinition,
-  AgreementTemplateUploadResponse,
-  SignedAgreement,
-} from "@/interfaces/IAgreement";
+import { AgreementTemplateUploadResponse, SignedAgreement } from "@/interfaces/IAgreement";
+import { IFormQuestion } from "@/interfaces/IForm";
 import { PaginationParams, PaginationResult } from "@/interfaces/interfaces";
 import { ApiResponse } from "@/types/types";
 
@@ -33,7 +30,7 @@ export interface AgreementTemplateActivateBody {
   agreementId: string;
   version: number;
   groupId?: string;
-  questions: AgreementQuestionDefinition[];
+  questions: IFormQuestion[];
   adminId?: string;
 }
 
