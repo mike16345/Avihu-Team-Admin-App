@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import useFormResponseQuery from "@/hooks/queries/formResponses/useFormResponseQuery";
@@ -132,13 +132,12 @@ const FormResponseBubble = ({
         type="button"
         variant="secondary"
         className={cn(
-          "fixed z-40 left-0 h-14 w-14 rounded-full shadow-lg cursor-grab",
+          "fixed z-40 left-4 h-14 w-14 rounded-full shadow-lg cursor-grab",
           isDragging && "cursor-grabbing",
           className
         )}
         style={{
           top,
-          right: rightOffset,
           transform: `translateX(${dragOffsetX}px)`,
           touchAction: "none",
         }}
