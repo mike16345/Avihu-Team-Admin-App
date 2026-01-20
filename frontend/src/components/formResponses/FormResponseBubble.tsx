@@ -151,7 +151,7 @@ const FormResponseBubble = ({
         שאלון
       </Button>
       <DialogContent className="max-w-4xl min-h-[90vh] max-h-[90vh] overflow-y-auto" dir="rtl">
-        {!responseId ? (
+        {!responseId && !formResponse ? (
           <div className="py-10 flex items-center justify-center size-full text-center text-sm text-muted-foreground">
             אין תגובה זמינה להצגה.
           </div>
