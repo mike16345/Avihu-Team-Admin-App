@@ -179,7 +179,7 @@ export const ViewDietPlanPage = () => {
       {user && <BasicUserDetails user={user} />}
       <FormResponseBubbleWrapper
         userId={id}
-        query={{ formType: user && user?.isOnboarded ? "monthly" : "onboarding", userId: id }} // TODO: Check if user is onboarded
+        query={{ formType: user?.onboardingCompleted ? "monthly" : "onboarding", userId: id }}
       />
 
       <BackButton navLink={MainRoutes.USERS + `/${id}?tab=${weightTab}`} />
