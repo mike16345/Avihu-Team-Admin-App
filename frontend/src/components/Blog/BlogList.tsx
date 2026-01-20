@@ -1,14 +1,9 @@
-import React, { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import React from "react";
 import { BlogCard } from "./BlogCard";
 import { IBlogResponse } from "@/interfaces/IBlog";
 import { useNavigate } from "react-router-dom";
-import DeleteModal from "../Alerts/DeleteModal";
-import { toast } from "sonner";
-import { QueryKeys } from "@/enums/QueryKeys";
 import Loader from "../ui/Loader";
 import ErrorPage from "@/pages/ErrorPage";
-import useDeleteBlog from "@/hooks/mutations/blogs/useDeleteBlog";
 import CustomButton from "../ui/CustomButton";
 
 interface BlogListProps {
@@ -31,37 +26,9 @@ const BlogList: React.FC<BlogListProps> = ({
   isFetchingNextPage,
 }) => {
   const navigate = useNavigate();
-  const query = useQueryClient();
-
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [blogToDelete, setBlogToDelete] = useState<IBlogResponse | null>(null);
 
   const handleBlogClick = (blog: IBlogResponse) => {
-    navigate(`/blogs/create/${blog._id}`, { state: { blog } });
-  };
-
-  const handleOpenDeleteModal = (blog: IBlogResponse) => {
-    setBlogToDelete(blog);
-    setIsDeleteModalOpen(true);
-  };
-
-  const onError = (e: any) => {
-    toast.error("לא הצלחנו למחוק את המאמר", {
-      description: e?.message,
-    });
-  };
-
-  const onSuccess = (blog: any) => {
-    toast.success("מאמר נמחק בהצלחה!");
-    query.invalidateQueries({ queryKey: [QueryKeys.BLOGS] });
-    query.invalidateQueries({ queryKey: [QueryKeys.BLOGS, blog._id] });
-  };
-
-  const deleteBlogMutation = useDeleteBlog({ onSuccess, onError });
-
-  const handleDeleteBlog = () => {
-    if (!blogToDelete) return;
-    deleteBlogMutation.mutate(blogToDelete);
+    navigate(`/blogs/${blog._id}`, { state: { blog } });
   };
 
   if (isLoading) return <Loader />;
@@ -76,7 +43,6 @@ const BlogList: React.FC<BlogListProps> = ({
         <BlogCard
           key={blog._id}
           blog={blog}
-          onDelete={() => handleOpenDeleteModal(blog)}
           onClick={() => handleBlogClick(blog)}
         />
       ))}
@@ -91,15 +57,6 @@ const BlogList: React.FC<BlogListProps> = ({
           className="col-span-full mt-4 py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600"
         />
       )}
-      <DeleteModal
-        isModalOpen={isDeleteModalOpen}
-        setIsModalOpen={setIsDeleteModalOpen}
-        onConfirm={() => handleDeleteBlog()}
-        onCancel={() => {
-          setBlogToDelete(null);
-          setIsDeleteModalOpen(false);
-        }}
-      />
     </div>
   );
 };
