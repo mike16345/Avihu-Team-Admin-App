@@ -25,7 +25,7 @@ const BlogPreviewPage = () => {
     const message = error instanceof Error ? error.message : undefined;
     return <ErrorPage message={message} />;
   }
-  if (!blog) return <ErrorPage message="Blog not found." />;
+  if (!blog) return <ErrorPage message="המאמר לא נמצא." />;
 
   return (
     <div className="p-4 pb-10">
@@ -38,7 +38,7 @@ const BlogPreviewPage = () => {
             onClick={() => navigate(`/blogs/create/${blog._id}`)}
           >
             <BiPencil className="h-4 w-4" />
-            Edit
+            עריכה
           </Button>
         </div>
 
