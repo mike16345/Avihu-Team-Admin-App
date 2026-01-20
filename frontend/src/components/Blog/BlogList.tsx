@@ -40,11 +40,7 @@ const BlogList: React.FC<BlogListProps> = ({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4">
       {blogs.map((blog) => (
-        <BlogCard
-          key={blog._id}
-          blog={blog}
-          onClick={() => handleBlogClick(blog)}
-        />
+        <BlogCard key={blog._id} blog={blog} onClick={() => handleBlogClick(blog)} />
       ))}
       {blogs.length == 0 && (
         <div className="col-span-full text-center text-xl">אין מאמרים כרגע</div>
