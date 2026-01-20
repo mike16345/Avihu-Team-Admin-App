@@ -16,6 +16,14 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onClick }) => {
   return (
     <Card
       onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick();
+        }
+      }}
       className="cursor-pointer hover:shadow-lg transition-shadow h-full flex flex-col"
     >
       <CardHeader className="flex flex-col gap-2 min-h-[5rem]">
