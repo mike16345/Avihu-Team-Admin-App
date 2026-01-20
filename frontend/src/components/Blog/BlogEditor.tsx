@@ -239,9 +239,9 @@ const BlogEditor = () => {
                 </AlertDialogTrigger>
                 <AlertDialogContent className="text-right" dir="rtl">
                   <AlertDialogHeader>
-                    <AlertDialogTitle>מחיקת קורס</AlertDialogTitle>
+                    <AlertDialogTitle>מחיקת מאמר</AlertDialogTitle>
                     <AlertDialogDescription>
-                      המחיקה היא פעולה בלתי הפיכה. האם למחוק את הקורס?
+                      המחיקה היא פעולה בלתי הפיכה. האם למחוק את המאמר?
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter className="sm:justify-start">
