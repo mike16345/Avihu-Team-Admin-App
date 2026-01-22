@@ -47,7 +47,9 @@ const QuestionnairesTable = () => {
           handleViewData={(user) => handleViewForm(user)}
           getRowClassName={() => ""}
           getRowId={(row) => row._id || ""}
-          handleDeleteData={(form) => formMutation.mutate(form._id || "")}
+          handleDeleteData={(form) => {
+            if (form._id) formMutation.mutate(form._id);
+          }}
           handleViewNestedData={(_, formId) => navigate(`/form-builder/${formId}`)}
           handleHoverOnRow={() => false}
         />
