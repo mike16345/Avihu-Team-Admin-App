@@ -101,9 +101,7 @@ export function DataTableHebrew<TData, TValue>({
     totalPages: isServerPaginated ? undefined : pageCount,
   });
 
-  console.log({ page });
   const currentPageNumber = controlledPageNumber ?? page;
-  console.log({ currentPageNumber });
   const [tablePagination, setTablePagination] = useState<PaginationState>(() => ({
     pageIndex: currentPageNumber - 1,
     pageSize: 10,
