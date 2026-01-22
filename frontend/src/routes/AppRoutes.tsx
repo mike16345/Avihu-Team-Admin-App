@@ -9,6 +9,7 @@ import PresetRoutes from "./PresetRoutes";
 import UserFormPage from "@/pages/UserFormPage";
 import AdminDashboard from "@/pages/AdminDashboard";
 import BlogPage from "@/pages/BlogPage";
+import BlogPreviewPage from "@/pages/BlogPreviewPage";
 import BlogEditor from "@/components/Blog/BlogEditor";
 import DietPlanWrapper from "@/components/DietPlan/DietPlanWrapper";
 import WorkoutPlans from "@/components/workout plan/WorkoutPlans";
@@ -26,6 +27,7 @@ export const AppRoutes = () => {
         <Route path="/users/*" element={<UsersTable />} />
         <Route path="/leads" element={<LeadsTablePage />} />
         <Route path="/blogs/" element={<BlogPage />} />
+        <Route path="/blogs/:id" element={<BlogPreviewPage />} />
         <Route path="/blogs/create/" element={<BlogEditor />} />
         <Route path="/blogs/create/:id" element={<BlogEditor />} />
         <Route path="/users/add" element={<UserFormPage />} />

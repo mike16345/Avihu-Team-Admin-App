@@ -4,44 +4,45 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { IBlog } from "@/interfaces/IBlog";
+import { IBlog, IBlogResponse } from "@/interfaces/IBlog";
 import { buildPhotoUrl, convertItemsToOptions } from "@/lib/utils";
-import BackButton from "../ui/BackButton";
 import { QueryKeys } from "@/enums/QueryKeys";
 import CustomButton from "../ui/CustomButton";
 import Loader from "../ui/Loader";
 import useBlogQuery from "@/hooks/queries/blogs/useBlogQuery";
 import useAddBlog from "@/hooks/mutations/blogs/useAddBlog";
 import useUpdateBlog from "@/hooks/mutations/blogs/useUpdateBlog";
-import CustomRadioGroup, { IRadioItem } from "../ui/CustomRadioGroup";
+import useDeleteBlog from "@/hooks/mutations/blogs/useDeleteBlog";
 import ComboBox from "../ui/combo-box";
 import useLessonGroupsQuery from "@/hooks/queries/lessonGroups/useLessonGroupsQuery";
 import UserPlanTypes from "@/enums/UserPlanTypes";
 import { Option } from "@/types/types";
 import TextEditor from "../ui/TextEditor";
+import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 
 type MediaType = "link" | "image";
 
 const defaultBlog: IBlog = {
   title: "",
   content: "",
+  subtitle: "",
   planType: UserPlanTypes.GENERAL,
   imageUrl: undefined,
 };
-
-const radioItems: IRadioItem<string>[] = [
-  {
-    id: "link",
-    label: "לינק",
-    value: "link",
-  },
-  {
-    id: "image",
-    label: "תמונה",
-    value: "image",
-  },
-];
 
 const planTypes: Option[] = Object.values(UserPlanTypes).map((type) => {
   return {
@@ -49,6 +50,28 @@ const planTypes: Option[] = Object.values(UserPlanTypes).map((type) => {
     value: type,
   };
 });
+
+const isValidUrl = (value: string) => {
+  try {
+    new URL(value);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const normalizeUrl = (value: string) => {
+  const trimmed = value.trim();
+  if (!trimmed) return trimmed;
+
+  const hasScheme = /^[a-zA-Z][a-zA-Z\d+.-]*:/.test(trimmed);
+  if (hasScheme) return trimmed;
+
+  const looksLikeUrl = /^([\w-]+\.)+[\w-]{2,}(\/.*)?$/.test(trimmed);
+  if (!looksLikeUrl) return trimmed;
+
+  return `https://${trimmed}`;
+};
 
 const BlogEditor = () => {
   const navigate = useNavigate();
@@ -62,11 +85,13 @@ const BlogEditor = () => {
   const [image, setImage] = useState<string | undefined>();
   const [isImageFromCloudFront, setIsImageFromCloudFront] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
+  const [blogToDelete, setBlogToDelete] = useState<IBlogResponse | null>(null);
   const [mediaType, setMediaType] = useState<MediaType>("link");
   const [imageToDelete, setImageToDelete] = useState<string | undefined>();
+  const [linkTouched, setLinkTouched] = useState(false);
 
   const onSuccess = async () => {
-    toast.success(`פוסט נשמר בהצלחה!`);
+    toast.success("מאמר נשמר בהצלחה!");
     navigate("/blogs");
     await Promise.all([
       query.invalidateQueries({ queryKey: [QueryKeys.BLOGS] }),
@@ -75,11 +100,28 @@ const BlogEditor = () => {
   };
 
   const onError = () => {
-    toast.error("אירעה שגיאה בהעלאת הפוסט!");
+    toast.error("אירעה שגיאה בשמירת המאמר!");
   };
 
   const addBlogMutation = useAddBlog({ onSuccess, onError });
   const updateBlogMutation = useUpdateBlog({ onSuccess, onError });
+
+  const onDeleteSuccess = async () => {
+    toast.success("המאמר נמחק בהצלחה");
+    navigate("/blogs");
+    await Promise.all([
+      query.invalidateQueries({ queryKey: [QueryKeys.BLOGS] }),
+      query.invalidateQueries({ queryKey: [QueryKeys.BLOGS, id] }),
+    ]);
+  };
+
+  const onDeleteError = (e: any) => {
+    toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
+      description: e?.message,
+    });
+  };
+
+  const deleteBlogMutation = useDeleteBlog({ onSuccess: onDeleteSuccess, onError: onDeleteError });
 
   const handleFieldChange = <K extends keyof IBlog>(field: K, value: IBlog[K]) => {
     setBlog((prev) => ({
@@ -111,6 +153,11 @@ const BlogEditor = () => {
     setBlog((prev) => ({ ...prev, imageUrl: undefined }));
   };
 
+  const handleDeleteBlog = () => {
+    if (!blogToDelete) return;
+    deleteBlogMutation.mutate(blogToDelete);
+  };
+
   const handleSave = async () => {
     if (isEdit && id) {
       return await updateBlogMutation.mutateAsync({
@@ -126,6 +173,7 @@ const BlogEditor = () => {
 
   const handleChangeMediaType = (type: MediaType) => {
     setMediaType(type);
+    setLinkTouched(false);
     if (type == "image") return;
 
     setImage(undefined);
@@ -135,6 +183,15 @@ const BlogEditor = () => {
       setImageToDelete(blog.imageUrl);
     } else {
       handleFieldChange("imageUrl", undefined);
+    }
+  };
+
+  const handleLinkBlur = () => {
+    setLinkTouched(true);
+    if (!blog.link) return;
+    const normalized = normalizeUrl(blog.link);
+    if (normalized !== blog.link) {
+      handleFieldChange("link", normalized);
     }
   };
 
@@ -150,108 +207,210 @@ const BlogEditor = () => {
     if (!fetchedBlog) return;
 
     setBlog({ ...fetchedBlog });
+    setBlogToDelete(fetchedBlog as IBlogResponse);
     setIsImageFromCloudFront(!!fetchedBlog.imageUrl);
     setMediaType(fetchedBlog.imageUrl ? "image" : "link");
     setIsEdit(true);
+    setLinkTouched(false);
   }, [fetchedBlog]);
 
   if (isLoading) return <Loader variant="standard" />;
 
+  const pageTitle = isEdit ? "עריכת מאמר" : "יצירת מאמר";
+  const isTitleInvalid = !blog.title.trim();
+  const isLinkInvalid = mediaType === "link" && (!blog.link || !isValidUrl(blog.link));
+  const showLinkError = mediaType === "link" && (linkTouched || !!blog.link) && isLinkInvalid;
+  const linkErrorMessage = !blog.link?.trim() ? "שדה חובה" : "הלינק אינו תקין";
+  const isSaveDisabled = isTitleInvalid || isLinkInvalid;
+
   return (
-    <div className="flex justify-between p-4 pb-8">
-      <div className="flex-1 flex flex-col gap-2 ">
-        <BackButton navLink="/blogs" />
-        <Label className="font-semibold">כותרת</Label>
-        <Input
-          className="sm:w-2/3 "
-          value={blog.title}
-          onChange={(e) => handleFieldChange("title", e.target.value)}
-          placeholder="כותרת.."
-        />
-        <Label className="font-semibold">כותרת משנה</Label>
-        <Input
-          className="sm:w-2/3 "
-          value={blog.subtitle}
-          onChange={(e) => handleFieldChange("subtitle", e.target.value)}
-          placeholder="כותרת משנה..."
-        />
-
-        <div className="flex flex-col gap-3 sm:w-2/3">
-          <Label className="font-semibold">תוכנית</Label>
-
-          <ComboBox
-            options={planTypes}
-            onSelect={(val) => handleFieldChange("planType", val)}
-            value={blog.planType}
-            inputPlaceholder="בחר תוכנית..."
-          />
-          <Label className="font-semibold">קבוצה</Label>
-          <ComboBox
-            isLoading={isBlogGroupsLoading}
-            options={blogGroupItems}
-            onSelect={(val) => handleFieldChange("group", val)}
-            value={blog.group?.name || blog.group}
-            inputPlaceholder="בחר קבוצה..."
-            listEmptyMessage="אין קבוצות כרגע"
-          />
-        </div>
-        <div className="flex flex-col justify-center gap-2 sm:2/3">
-          {mediaType == "image" && (
-            <>
-              <Label className="font-semibold">תמונה</Label>
-              <Input
-                type="file"
-                accept="image/*"
-                className="sm:w-2/3 cursor-pointer"
-                onChange={handleImageUpload}
-              />
-            </>
-          )}
-          {mediaType == "link" && (
-            <>
-              <Label className="font-semibold">לינק</Label>
-              <Input
-                value={blog.link}
-                type="text"
-                placeholder=".../https://youtube.com"
-                className="sm:w-2/3"
-                onChange={(e) => handleFieldChange("link", e.target.value)}
-              />
-            </>
-          )}
-          <CustomRadioGroup
-            className="flex w-fit items-center"
-            defaultValue="link"
-            items={radioItems}
-            onValueChange={handleChangeMediaType}
-          />
-        </div>
-        {(image || blog.imageUrl) && (
-          <div className="flex flex-col gap-4 mt-2 relative sm:w-1/4">
-            <img
-              src={generatePhotoUrl(image || blog.imageUrl || "")}
-              alt="Selected"
-              className="w-full rounded-md"
-            />
-            <Button className="bg-destructive text-base rounded" onClick={handleRemoveImage}>
-              הסר
+    <div className="pb-10">
+      <div className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur">
+        <div className="mx-auto grid max-w-3xl grid-cols-1 gap-3 px-4 py-3 sm:grid-cols-[1fr_auto_1fr] sm:items-center">
+          <h1 className="order-1 text-xl font-semibold text-right sm:order-2">{pageTitle}</h1>
+          <div className="order-3 flex items-center gap-2 sm:order-1 sm:justify-self-end">
+            <Button variant="outline" onClick={() => navigate("/blogs")}>
+              ביטול
             </Button>
+            {isEdit && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive">מחק</Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="text-right" dir="rtl">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>מחיקת מאמר</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      המחיקה היא פעולה בלתי הפיכה. האם למחוק את המאמר?
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter className="sm:justify-start">
+                    <AlertDialogCancel>ביטול</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDeleteBlog}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      מחק
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
           </div>
-        )}
-        <Label className="font-semibold">תוכן</Label>
-        <TextEditor
-          defaultValue={blog.content}
-          value={blog.content}
-          onChange={(val) => handleFieldChange("content", val)}
-        />
+          <div className="order-2 flex items-center gap-2 sm:order-3 sm:justify-self-start">
+            <CustomButton
+              className="w-32"
+              isLoading={addBlogMutation.isPending || updateBlogMutation.isPending}
+              title="שמור"
+              variant={"success"}
+              onClick={handleSave}
+              disabled={isSaveDisabled}
+            />
+          </div>
+        </div>
       </div>
-      <CustomButton
-        className="w-32 h-fit"
-        isLoading={addBlogMutation.isPending || updateBlogMutation.isPending}
-        title="שמור"
-        variant={"success"}
-        onClick={handleSave}
-      />
+
+      <div className="mx-auto flex max-w-3xl flex-col gap-8 px-4 pt-6 text-right">
+        <Card>
+          <CardHeader>
+            <CardTitle>פרטי המאמר</CardTitle>
+            <CardDescription>מידע בסיסי שמופיע בראש העמוד.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label className="font-semibold">
+                כותרת <span className="text-destructive">*</span>
+              </Label>
+              <p className="text-xs text-muted-foreground">שם קצר וברור למאמר.</p>
+              <Input
+                className="w-full"
+                value={blog.title}
+                onChange={(e) => handleFieldChange("title", e.target.value)}
+                placeholder="לדוגמה: אימון חיזוק שבועי"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="font-semibold">כותרת משנה</Label>
+              <p className="text-xs text-muted-foreground">שורת הסבר קצרה (לא חובה).</p>
+              <Input
+                className="w-full"
+                value={blog.subtitle || ""}
+                onChange={(e) => handleFieldChange("subtitle", e.target.value)}
+                placeholder="לדוגמה: תוכנית בת 12 שבועות"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="font-semibold">תוכנית</Label>
+              <p className="text-xs text-muted-foreground">בחר את סוג התוכנית.</p>
+              <ComboBox
+                options={planTypes}
+                onSelect={(val) => handleFieldChange("planType", val)}
+                value={blog.planType}
+                inputPlaceholder="בחר תוכנית..."
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>סיווג</CardTitle>
+            <CardDescription>ארגון המאמר לפי קבוצות.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label className="font-semibold">קבוצה</Label>
+              <p className="text-xs text-muted-foreground">משמש לסינון וחיפוש.</p>
+              <ComboBox
+                isLoading={isBlogGroupsLoading}
+                options={blogGroupItems}
+                onSelect={(val) => handleFieldChange("group", val)}
+                value={blog.group?.name || blog.group}
+                inputPlaceholder="בחר קבוצה..."
+                listEmptyMessage="אין קבוצות כרגע"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>מדיה</CardTitle>
+            <CardDescription>בחרו לינק או העלאת תמונה.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Tabs
+              value={mediaType}
+              onValueChange={(val) => handleChangeMediaType(val as MediaType)}
+            >
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="link">לינק</TabsTrigger>
+                <TabsTrigger value="image">תמונה</TabsTrigger>
+              </TabsList>
+              <TabsContent value="link" className="mt-4 space-y-2">
+                <Label className="font-semibold">לינק</Label>
+                <p className="text-xs text-muted-foreground">
+                  ניתן להדביק לינק ל־YouTube או עמוד חיצוני.
+                </p>
+                <Input
+                  dir="ltr"
+                  className="w-full text-left"
+                  value={blog.link || ""}
+                  type="text"
+                  placeholder="לדוגמה: https://www.youtube.com/..."
+                  onChange={(e) => {
+                    if (!linkTouched) setLinkTouched(true);
+                    handleFieldChange("link", e.target.value);
+                  }}
+                  onBlur={handleLinkBlur}
+                />
+                {showLinkError && <p className="text-xs text-destructive">{linkErrorMessage}</p>}
+              </TabsContent>
+              <TabsContent value="image" className="mt-4 space-y-2">
+                <Label className="font-semibold">תמונה</Label>
+                <p className="text-xs text-muted-foreground">בחרו תמונת כיסוי שתוצג בראש הדף.</p>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  className="w-full cursor-pointer"
+                  onChange={handleImageUpload}
+                />
+                {(image || blog.imageUrl) && (
+                  <div className="flex flex-col gap-3 pt-3 sm:w-1/2">
+                    <img
+                      src={generatePhotoUrl(image || blog.imageUrl || "")}
+                      alt="Selected"
+                      className="w-full rounded-md"
+                    />
+                    <Button
+                      className="bg-destructive text-base rounded"
+                      onClick={handleRemoveImage}
+                    >
+                      הסר
+                    </Button>
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>תוכן</CardTitle>
+            <CardDescription>הטקסט שיופיע בתחתית העמוד.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <TextEditor
+              defaultValue={blog.content}
+              value={blog.content}
+              onChange={(val) => handleFieldChange("content", val)}
+            />
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
