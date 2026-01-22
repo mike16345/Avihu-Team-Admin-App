@@ -39,7 +39,7 @@ const useUploadAgreement = () => {
     }
 
     toast.success(`הקובץ הועלה בהצלחה (גרסה ${version}).`);
-    return {version,}
+    return { version };
   };
 
   return useMutation({
