@@ -33,6 +33,7 @@ import { Form } from "@/components/ui/form";
 import { useDirtyFormContext } from "@/context/useFormContext";
 import useGetDietPlan from "@/hooks/queries/dietPlans/useGetDietPlan";
 import CustomSelect from "@/components/ui/CustomSelect";
+import FormResponseBubbleWrapper from "@/components/formResponses/FormResponseBubbleWrapper";
 
 export const ViewDietPlanPage = () => {
   const navigation = useNavigate();
@@ -176,6 +177,10 @@ export const ViewDietPlanPage = () => {
   return (
     <div className=" flex flex-col gap-4 size-full">
       {user && <BasicUserDetails user={user} />}
+      <FormResponseBubbleWrapper
+        userId={id}
+        query={{ formType: user?.onboardingCompleted ? "monthly" : "onboarding", userId: id }}
+      />
 
       <BackButton navLink={MainRoutes.USERS + `/${id}?tab=${weightTab}`} />
       <CustomSelect

@@ -21,7 +21,7 @@ import useWorkoutPlanPresetsQuery from "@/hooks/queries/workoutPlans/useWorkoutP
 import { convertItemsToOptions, getNestedError, getZodErrorIssues } from "@/lib/utils";
 import useAddWorkoutPlan from "@/hooks/mutations/workouts/useAddWorkoutPlan";
 import useUpdateWorkoutPlan from "@/hooks/mutations/workouts/useUpdateWorkoutPlan";
-import { cleanWorkoutObject, parseErrorFromObject } from "@/utils/workoutPlanUtils";
+import { parseErrorFromObject } from "@/utils/workoutPlanUtils";
 import { toast } from "sonner";
 import { invalidateQueryKeys } from "@/QueryClient/queryClient";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
@@ -31,6 +31,7 @@ import InputModal from "../ui/InputModal";
 import { defaultSimpleCardioOption } from "@/constants/cardioOptions";
 import { ICompleteWorkoutPlan, ISimpleCardioType } from "@/interfaces/IWorkoutPlan";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
+import FormResponseBubbleWrapper from "../formResponses/FormResponseBubbleWrapper";
 
 const calculateMinPerWorkout = (workout: WorkoutSchemaType) => {
   let workoutPlan = workout;
@@ -165,6 +166,13 @@ const CreateWorkoutPlanWrapper = ({ children }: { children: React.ReactNode }) =
           <BackButton navLink={MainRoutes.USERS + `/${id}?tab=${weightTab}`} />
 
           {user && <BasicUserDetails user={user} />}
+          <FormResponseBubbleWrapper
+            userId={id}
+            query={{
+              formType: user && user?.onboardingCompleted ? "monthly" : "onboarding",
+              userId: id,
+            }} // TODO: Check if user is onboarded
+          />
           <div className="sm:w-fit sm:min-w-40">
             <ComboBox
               value={selectedPreset}

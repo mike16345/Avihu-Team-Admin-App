@@ -8,10 +8,12 @@ import ErrorPage from "./ErrorPage";
 import { useState } from "react";
 import useUserQuery from "@/hooks/queries/user/useUserQuery";
 import MeasurementsProgression from "@/components/UserDashboard/MeasurementProgression/MeasurementsProgression";
+import UserFormResponses from "@/components/UserDashboard/FormResponses/UserFormResponses";
 
 export const weightTab = "מעקב שקילה";
 export const workoutTab = "מעקב אימון";
 export const measurementTab = "מעקב היקפים";
+export const formsTab = "שאלונים";
 
 export const UserDashboard = () => {
   const user = useLocation().state;
@@ -48,6 +50,9 @@ export const UserDashboard = () => {
           <TabsTrigger onClick={() => handleSwitchTabs(measurementTab)} value={measurementTab}>
             {measurementTab}
           </TabsTrigger>
+          <TabsTrigger onClick={() => handleSwitchTabs(formsTab)} value={formsTab}>
+            {formsTab}
+          </TabsTrigger>
         </TabsList>
         <TabsContent forceMount hidden={activeTab !== weightTab} value={weightTab}>
           <WeightProgression />
@@ -57,6 +62,9 @@ export const UserDashboard = () => {
         </TabsContent>
         <TabsContent forceMount hidden={activeTab !== measurementTab} value={measurementTab}>
           <MeasurementsProgression />
+        </TabsContent>
+        <TabsContent forceMount hidden={activeTab !== formsTab} value={formsTab}>
+          <UserFormResponses />
         </TabsContent>
       </Tabs>
     </div>
