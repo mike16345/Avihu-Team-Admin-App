@@ -11,9 +11,10 @@ import { FormTypeOptions } from "@/constants/form";
 
 type FormResponsesTableProps = {
   userId?: string;
+  paginationKey?: string;
 };
 
-const FormResponsesTable = ({ userId }: FormResponsesTableProps) => {
+const FormResponsesTable = ({ userId, paginationKey }: FormResponsesTableProps) => {
   const navigate = useNavigate();
   const { data, isLoading, isError, error } = useFormResponsesQuery(
     userId ? { userId } : undefined
@@ -41,6 +42,7 @@ const FormResponsesTable = ({ userId }: FormResponsesTableProps) => {
     <DataTableHebrew
       data={filteredData}
       columns={columns}
+      paginationKey={paginationKey}
       isLoadingNextPage={isLoading}
       handleSetData={() => {}}
       handleViewData={handleViewResponse}

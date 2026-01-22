@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useUrlPagination } from "@/hooks/useUrlPagination";
 import type { DateRange } from "react-day-picker";
 import { ColumnDef } from "@tanstack/react-table";
 import { useQuery } from "@tanstack/react-query";
@@ -15,12 +16,18 @@ import { SignedAgreement, SignedAgreementUser } from "@/interfaces/IAgreement";
 import DateUtils from "@/lib/dateUtils";
 import CustomSelect from "@/components/ui/CustomSelect";
 import DateRangePicker from "@/components/ui/DateRangePicker";
+import { IUser } from "@/interfaces/IUser";
 
-export const resolveUserName = (user: string | SignedAgreementUser) => {
-  console.log("user", user);
-  return typeof user == "object" && typeof user !== "string"
-    ? `${user?.firstName || ""} ${user.lastName || ""}`.trim()
-    : "";
+export const getFullUserName = (user: Partial<IUser> | undefined) => {
+  return `${user?.firstName || ""} ${user?.lastName || ""}`.trim();
+};
+
+export const resolveUserName = (user: string | SignedAgreementUser | undefined) => {
+  return user && isUserIdObject(user) ? getFullUserName(user) : "";
+};
+
+export const isUserIdObject = (user: string | SignedAgreementUser | undefined) => {
+  return typeof user == "object" && typeof user !== "string";
 };
 
 const PAGE_SIZE_OPTIONS = [
@@ -29,13 +36,24 @@ const PAGE_SIZE_OPTIONS = [
   { name: "50", value: "50" },
 ];
 
-const SignedAgreementsTable = () => {
+type SignedAgreementsTableProps = {
+  paginationKey?: string;
+};
+
+const SignedAgreementsTable = ({ paginationKey }: SignedAgreementsTableProps) => {
   const currentUser = useUsersStore((state) => state.currentUser);
   const adminId = currentUser?._id;
   const { getSignedAgreements, getSignedAgreementDownloadUrl } = useAgreementsAdminApi();
 
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [pageCountState, setPageCountState] = useState<number | undefined>(undefined);
+
+  const { page, pageSize, setPage, setPageSize } = useUrlPagination({
+    namespace: paginationKey ?? "agreements",
+    defaultPage: 1,
+    defaultPageSize: 10,
+    totalPages: pageCountState,
+  });
+
   const [filters, setFilters] = useState<{ userId: string; range?: DateRange }>({
     userId: "",
     range: undefined,
@@ -49,7 +67,7 @@ const SignedAgreementsTable = () => {
   const queryParams: SignedAgreementsParams = {
     adminId,
     page,
-    limit,
+    limit: pageSize,
     userId: appliedFilters.userId || undefined,
     from: appliedFilters.range?.from
       ? DateUtils.formatDate(appliedFilters.range.from, "YYYY-MM-DD")
@@ -67,6 +85,10 @@ const SignedAgreementsTable = () => {
 
   const signedAgreements = data?.data?.results ?? [];
   const pageCount = data?.data?.totalPages ?? 1;
+
+  useEffect(() => {
+    setPageCountState(data?.data?.totalPages);
+  }, [data?.data?.totalPages]);
 
   const handleDownload = async (agreement: SignedAgreement) => {
     if (!agreement._id) {
@@ -178,10 +200,9 @@ const SignedAgreementsTable = () => {
           <CustomSelect
             className="h-9 w-28"
             items={PAGE_SIZE_OPTIONS}
-            selectedValue={String(limit)}
+            selectedValue={String(pageSize)}
             onValueChange={(value) => {
-              setLimit(Number(value));
-              setPage(1);
+              setPageSize(Number(value));
             }}
           />
           <Button variant="outline" onClick={handleApplyFilters}>
@@ -202,6 +223,7 @@ const SignedAgreementsTable = () => {
       pageNumber={page}
       pageCount={pageCount}
       onPageChange={setPage}
+      paginationKey={paginationKey ?? "agreements"}
       rowClickMode="single"
     />
   );

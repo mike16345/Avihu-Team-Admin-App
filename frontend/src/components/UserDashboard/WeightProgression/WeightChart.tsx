@@ -39,7 +39,7 @@ export const WeightChart: FC<WeighChartProps> = ({ weighIns }) => {
             data={weighIns}
             margin={{
               top: 20,
-              left: 15,
+              left: 25,
               bottom: 0,
               right: 10,
             }}

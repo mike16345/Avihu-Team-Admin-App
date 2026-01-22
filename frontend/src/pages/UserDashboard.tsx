@@ -3,9 +3,9 @@ import { WeightProgression } from "@/components/UserDashboard/WeightProgression/
 import { WorkoutProgression } from "@/components/UserDashboard/WorkoutProgression/WorkoutProgression";
 import Loader from "@/components/ui/Loader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useLocation, useParams, useSearchParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import ErrorPage from "./ErrorPage";
-import { useState } from "react";
+import { useUrlTab } from "@/hooks/useUrlTab";
 import useUserQuery from "@/hooks/queries/user/useUserQuery";
 import MeasurementsProgression from "@/components/UserDashboard/MeasurementProgression/MeasurementsProgression";
 import UserFormResponses from "@/components/UserDashboard/FormResponses/UserFormResponses";
@@ -18,17 +18,11 @@ export const formsTab = "שאלונים";
 export const UserDashboard = () => {
   const user = useLocation().state;
   const { id } = useParams();
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  const tabName = searchParams.get("tab")?.trim();
-  const [activeTab, setActiveTab] = useState(tabName);
+  const tabs = [weightTab, workoutTab, measurementTab, formsTab];
+  const { tab, setTab } = useUrlTab({ param: "tab", defaultTab: weightTab, tabs });
 
   const { data, isLoading, isError, error } = useUserQuery(id || "oneUser", !user);
 
-  const handleSwitchTabs = (tab: string) => {
-    setActiveTab(tab);
-    setSearchParams({ tab });
-  };
 
   if (isLoading) return <Loader size="large" />;
   if (isError && !data) return <ErrorPage message={error.message} />;
@@ -39,31 +33,31 @@ export const UserDashboard = () => {
     <div className="size-full flex flex-col gap-4  ">
       <h1 className="text-3xl text-center sm:hidden ">עמוד משתמש</h1>
       <UserInfo user={currentUser} />
-      <Tabs dir="rtl" defaultValue={activeTab} className="w-full">
+      <Tabs dir="rtl" value={tab} onValueChange={setTab} className="w-full">
         <TabsList>
-          <TabsTrigger onClick={() => handleSwitchTabs(weightTab)} value={weightTab}>
+          <TabsTrigger value={weightTab}>
             {weightTab}
           </TabsTrigger>
-          <TabsTrigger onClick={() => handleSwitchTabs(workoutTab)} value={workoutTab}>
+          <TabsTrigger value={workoutTab}>
             {workoutTab}
           </TabsTrigger>
-          <TabsTrigger onClick={() => handleSwitchTabs(measurementTab)} value={measurementTab}>
+          <TabsTrigger value={measurementTab}>
             {measurementTab}
           </TabsTrigger>
-          <TabsTrigger onClick={() => handleSwitchTabs(formsTab)} value={formsTab}>
+          <TabsTrigger value={formsTab}>
             {formsTab}
           </TabsTrigger>
         </TabsList>
-        <TabsContent forceMount hidden={activeTab !== weightTab} value={weightTab}>
+        <TabsContent forceMount hidden={tab !== weightTab} value={weightTab}>
           <WeightProgression />
         </TabsContent>
-        <TabsContent forceMount hidden={activeTab !== workoutTab} value={workoutTab}>
+        <TabsContent forceMount hidden={tab !== workoutTab} value={workoutTab}>
           <WorkoutProgression />
         </TabsContent>
-        <TabsContent forceMount hidden={activeTab !== measurementTab} value={measurementTab}>
+        <TabsContent forceMount hidden={tab !== measurementTab} value={measurementTab}>
           <MeasurementsProgression />
         </TabsContent>
-        <TabsContent forceMount hidden={activeTab !== formsTab} value={formsTab}>
+        <TabsContent forceMount hidden={tab !== formsTab} value={formsTab}>
           <UserFormResponses />
         </TabsContent>
       </Tabs>

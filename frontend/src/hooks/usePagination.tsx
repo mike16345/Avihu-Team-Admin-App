@@ -1,21 +1,10 @@
-import { useSearchParams } from "react-router-dom";
-import { useState } from "react";
+import { useUrlPagination } from "./useUrlPagination";
 
 export function usePagination(initialPage = 1) {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [pageNumber, setPageNumber] = useState<number>(() => {
-    const pageNumber = searchParams.get("page");
-    
-    return pageNumber ? parseInt(pageNumber, 10) : initialPage;
-  });
-
-  const goToPage = (page: number) => {
-    setPageNumber(page);
-    setSearchParams({ page: page.toString() });
-  };
+  const { page, setPage } = useUrlPagination({ defaultPage: initialPage });
 
   return {
-    pageNumber,
-    goToPage,
+    pageNumber: page,
+    goToPage: setPage,
   };
 }
