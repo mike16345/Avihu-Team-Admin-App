@@ -17,7 +17,7 @@ const useUploadAgreement = () => {
     const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
     if (!isPdf) {
       toast.error("ניתן להעלות קובץ PDF בלבד.");
-      return;
+      throw new Error("ניתן להעלות קובץ PDF בלבד.");
     }
     const uploadResponse = await createTemplateUploadUrl({
       agreementId: agreementId,
