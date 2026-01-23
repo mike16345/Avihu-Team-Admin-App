@@ -25,6 +25,9 @@ const useUploadAgreement = () => {
       adminId,
     });
 
+    if (!uploadResponse.data?.uploadUrl) {
+      throw new Error("Failed to obtain upload URL");
+    }
     const { uploadUrl, version } = uploadResponse.data;
     const uploadResult = await fetch(uploadUrl, {
       method: "PUT",
