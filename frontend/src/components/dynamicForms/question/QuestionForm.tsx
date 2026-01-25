@@ -1,7 +1,10 @@
 import CustomSelect from "@/components/ui/CustomSelect";
 import CustomSwitch from "@/components/ui/CustomSwitch";
 import { Input } from "@/components/ui/input";
-import { QuestionTypeOptions, typesRequiringOptions } from "@/constants/form";
+import {
+  QuestionTypeOptions,
+  typesRequiringOptions as defaultTypesRequiringOptions,
+} from "@/constants/form";
 import React, { useEffect, useMemo } from "react";
 import OptionsContainer from "./OptionsContainer";
 import { useFormContext } from "react-hook-form";
@@ -10,26 +13,42 @@ import { FormType } from "@/schemas/formBuilderSchema";
 import { QuestionTypes } from "@/interfaces/IForm";
 import RangeContainer from "./RangeContainer";
 import { Textarea } from "@/components/ui/textarea";
+import { Option } from "@/types/types";
 
 interface QuestionFormProps {
   parentPath: `sections.${number}.questions.${number}`;
+  typeOptions?: Option[];
+  typesRequiringOptions?: string[];
 }
 
-const QuestionForm: React.FC<QuestionFormProps> = ({ parentPath }) => {
+const QuestionForm: React.FC<QuestionFormProps> = ({
+  parentPath,
+  typeOptions,
+  typesRequiringOptions,
+}) => {
   const { control, watch, setValue } = useFormContext<FormType>();
 
   const type = watch(`${parentPath}.type`);
 
+  const effectiveTypeOptions = useMemo(() => {
+    return typeOptions ?? QuestionTypeOptions;
+  }, [typeOptions]);
+
+  const effectiveTypesRequiringOptions = useMemo(() => {
+    return typesRequiringOptions ?? defaultTypesRequiringOptions;
+  }, [typesRequiringOptions]);
+
   const showOptions = useMemo(() => {
     if (!type) return false;
 
-    return typesRequiringOptions.includes(type as any);
+    return effectiveTypesRequiringOptions.includes(type as any);
   }, [type]);
+
   const showRange = useMemo(() => {
     if (!type) return false;
 
     return type == "range";
-  }, [type]);
+  }, [type, effectiveTypesRequiringOptions]);
 
   useEffect(() => {
     if (!showOptions && !showRange) {
@@ -60,7 +79,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({ parentPath }) => {
               <FormItem className="w-full md:w-[250px]">
                 <CustomSelect
                   className="w-full bg-muted"
-                  items={QuestionTypeOptions}
+                  items={effectiveTypeOptions}
                   onValueChange={field.onChange}
                   selectedValue={field.value}
                 />

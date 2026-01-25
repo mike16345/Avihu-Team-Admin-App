@@ -1,3 +1,5 @@
+import { SignedAgreementUser } from "./IAgreement";
+
 export type FormResponse = {
   _id: string;
   formId: {
@@ -5,7 +7,7 @@ export type FormResponse = {
     name: string;
     type: string;
   };
-  userId: string;
+  userId: SignedAgreementUser | string;
   submittedAt: string;
   formTitle?: string;
   formType?: string;

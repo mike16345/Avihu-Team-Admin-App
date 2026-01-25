@@ -6,8 +6,17 @@ import { FormType } from "@/schemas/formBuilderSchema";
 import { FormField, FormItem, FormMessage } from "../ui/form";
 import { useEffect } from "react";
 import { Input } from "../ui/input";
+import { Option } from "@/types/types";
 
-const FormBuilderHeader = () => {
+interface FormBuilderHeaderProps {
+  formTypeOptions?: Option[];
+  disableOnboarding?: boolean;
+}
+
+const FormBuilderHeader = ({
+  formTypeOptions = FormTypeOptions,
+  disableOnboarding = false,
+}: FormBuilderHeaderProps) => {
   const {
     control,
     watch,
@@ -16,15 +25,22 @@ const FormBuilderHeader = () => {
   } = useFormContext<FormType>();
   const formType = watch("type");
 
+  const availableTypeOptions = disableOnboarding
+    ? formTypeOptions.filter((option) => option.value !== "onboarding")
+    : formTypeOptions;
   const headerError = Boolean(errors.name || errors.type || errors.showOn);
 
   useEffect(() => {
     if (!formType) return;
 
+    if (disableOnboarding && formType === "onboarding") {
+      setValue("type", "general");
+    }
+
     if (formType !== "general") setValue("showOn", undefined);
 
     setValue("repeatMonthly", formType == "monthly");
-  }, [formType]);
+  }, [formType, disableOnboarding, setValue]);
 
   return (
     <div className={`rounded-xl shadow-lg p-5 border space-y-3 ${borderColor[headerError as any]}`}>
@@ -51,7 +67,7 @@ const FormBuilderHeader = () => {
               <FormItem className="w-full md:w-[200px]">
                 <CustomSelect
                   className="w-full bg-muted"
-                  items={FormTypeOptions}
+                  items={availableTypeOptions}
                   onValueChange={field.onChange}
                   selectedValue={field.value}
                 />
@@ -61,6 +77,11 @@ const FormBuilderHeader = () => {
           }}
         />
       </div>
+      {disableOnboarding && (
+        <p className="text-sm text-muted-foreground">
+          שאלון התחלה כבר קיים. ניתן לערוך אותו מרשימת השאלונים.
+        </p>
+      )}
       {formType == "general" && (
         <FormField
           name={`showOn`}

@@ -15,12 +15,14 @@ import useAddFormPreset from "@/hooks/mutations/formPresets/useAddFormPreset";
 import useUpdateFormPreset from "@/hooks/mutations/formPresets/useUpdateFormPreset";
 import { IForm } from "@/interfaces/IForm";
 import BackButton from "@/components/ui/BackButton";
+import useFormPresetsQuery from "@/hooks/queries/formPresets/useFormPresetsQuery";
 import DateUtils from "@/lib/dateUtils";
 
 const FormBuilderPage = () => {
   const { id } = useParams();
   const isEdit = id !== "add";
   const { data: formRes, isLoading, error } = useFormPresetQuery(isEdit ? id : undefined);
+  const { data: formPresetsRes } = useFormPresetsQuery();
   const { mutate: addForm, isPending: isAddFormPending } = useAddFormPreset();
   const { mutate: updateForm, isPending: isUpdateFormPending } = useUpdateFormPreset(id);
 
@@ -50,6 +52,16 @@ const FormBuilderPage = () => {
     () => isSubmitting || isAddFormPending || isUpdateFormPending,
     [isSubmitting, isAddFormPending, isUpdateFormPending]
   );
+  const existingOnboardingForm = useMemo(
+    () => formPresetsRes?.data?.find((form) => form.type === "onboarding"),
+    [formPresetsRes]
+  );
+  const disableOnboardingType = useMemo(() => {
+    if (!existingOnboardingForm) return false;
+    if (isEdit && existingOnboardingForm._id === id) return false;
+
+    return true;
+  }, [existingOnboardingForm, isEdit, id]);
 
   const onSubmit = (values: FormType) => {
     const formPreset = values as IForm;
@@ -90,7 +102,7 @@ const FormBuilderPage = () => {
           className="flex flex-col gap-4 max-w-[800px] mx-auto"
           onSubmit={handleSubmit(onSubmit, onInvalidSubmit)}
         >
-          <FormBuilder />
+          <FormBuilder disableOnboarding={disableOnboardingType} />
 
           <div className="flex justify-end gap-2 sticky bottom-0 w-fit mr-auto py-2">
             <CustomButton

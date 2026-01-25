@@ -202,8 +202,21 @@ const FormResponseViewer = ({
 }: FormResponseViewerProps) => {
   const sections = response.sections ?? [];
   const isMobile = useIsMobile();
+
   const [activeSectionId, setActiveSectionId] = useState(sections[0]?._id ?? "");
   const [fullscreenState, setFullscreenState] = useState<FullscreenState | null>(null);
+
+  const formName = response.formTitle ?? response.formId?.name ?? "-";
+  const rawFormType = response.formType ?? response.formId?.type;
+  const formType = rawFormType ? (FormTypesInHebrew[rawFormType as FormTypes] ?? rawFormType) : "-";
+  const submittedAt = formatSubmittedAt(response.submittedAt);
+  const displayRespondent = respondentName?.trim() || response.userId || "משתמש לא ידוע";
+  const showSelect = navigationMode === "select" || (navigationMode === "auto" && isMobile);
+  const showTabs = navigationMode === "tabs" || (navigationMode === "auto" && !isMobile);
+
+  const sectionOptions = useMemo(() => {
+    return convertItemsToOptions(sections, "title", "_id");
+  }, [sections]);
 
   const activeSection = useMemo(() => {
     if (!sections.length) return undefined;
@@ -214,18 +227,6 @@ const FormResponseViewer = ({
     if (!activeSection) return -1;
     return sections.findIndex((section) => section._id === activeSection._id);
   }, [activeSection, sections]);
-
-  const formName = response.formTitle ?? response.formId?.name ?? "-";
-  const rawFormType = response.formType ?? response.formId?.type;
-  const formType = rawFormType ? FormTypesInHebrew[rawFormType as FormTypes] ?? rawFormType : "-";
-  const submittedAt = formatSubmittedAt(response.submittedAt);
-  const displayRespondent = respondentName?.trim() || response.userId || "משתמש לא ידוע";
-  const showSelect = navigationMode === "select" || (navigationMode === "auto" && isMobile);
-  const showTabs = navigationMode === "tabs" || (navigationMode === "auto" && !isMobile);
-
-  const sectionOptions = useMemo(() => {
-    return convertItemsToOptions(sections, "title", "_id");
-  }, [sections]);
 
   useEffect(() => {
     setActiveSectionId(sections[0]?._id ?? "");

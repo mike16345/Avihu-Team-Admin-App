@@ -167,8 +167,6 @@ export const extractVideoId = (url: string): string => {
     videoId = url.split("shorts/")[1]?.split("?")[0];
   }
 
-  console.log("extracted videoId:", videoId);
-
   return videoId;
 };
 
@@ -314,3 +312,20 @@ export function removePointerEventsFromBody() {
 export function isUndefined(variable: any) {
   return variable == undefined || variable == "undefined" || variable == null;
 }
+
+export const parseNumber = (value: string | null) => {
+  if (!value) return undefined;
+  const parsed = Number(value);
+  if (Number.isNaN(parsed) || !Number.isFinite(parsed)) return undefined;
+  return Math.trunc(parsed);
+};
+
+export const normalizeValue = (value: ParamValue) => {
+  if (value === null || value === undefined) return null;
+
+  if (typeof value === "boolean") return value ? "true" : "false";
+
+  return String(value);
+};
+
+export type ParamValue = string | number | boolean | null | undefined;

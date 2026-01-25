@@ -17,6 +17,7 @@ import LeadsTablePage from "@/features/leads/LeadsTablePage";
 import FormBuilderPage from "@/pages/FormBuilderPage";
 import FormPresetsPage from "@/pages/FormPresetsPage";
 import FormResponseDetailsPage from "@/pages/FormResponseDetailsPage";
+import CurrentAgreementPage from "@/pages/Agreements/CurrentAgreementPage";
 
 export const AppRoutes = () => {
   return (
@@ -54,6 +55,7 @@ export const AppRoutes = () => {
         <Route path="/form-builder/:id" element={<FormBuilderPage />} />
         <Route path="/form-builder" element={<FormPresetsPage />} />
         <Route path="/form-responses/:id" element={<FormResponseDetailsPage />} />
+        <Route path="/agreements/current" element={<CurrentAgreementPage />} />
       </Routes>
     </>
   );

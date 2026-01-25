@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useUrlPagination } from "@/hooks/useUrlPagination";
 import { toast } from "sonner";
 
 import { DataTableHebrew } from "@/components/tables/DataTableHebrew";
@@ -9,16 +10,22 @@ import { useLeadsColumns } from "@/components/columns/leads";
 import type { Lead } from "@/interfaces/leads";
 
 const LeadsTablePage = () => {
-  const [page, setPage] = useState(1);
-  const limit = 10;
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [pendingContactIds, setPendingContactIds] = useState<string[]>([]);
+  const [total, setTotal] = useState(1);
+
+  const { page, pageSize, setPage } = useUrlPagination({
+    namespace: "leads",
+    defaultPage: 1,
+    defaultPageSize: 10,
+    totalPages: total,
+  });
+
+  const limit = pageSize;
 
   const { data, isLoading, isError, error } = useLeadsList(page, limit);
   const { mutateAsync: updateLead } = useUpdateLead();
   const { mutateAsync: deleteLead } = useDeleteLead();
-
-  const [leads, setLeads] = useState<Lead[]>([]);
-  const [pendingContactIds, setPendingContactIds] = useState<string[]>([]);
-  const [total, setTotal] = useState(1);
 
   const handleDeleteLead = useCallback(
     async (leadId: string) => {
@@ -47,12 +54,6 @@ const LeadsTablePage = () => {
 
   useEffect(() => {
     if (!data) return;
-
-    const maxPage = Math.max(1, Math.ceil(data.total / limit));
-
-    setPage((prev) => {
-      return prev > maxPage ? maxPage : prev;
-    });
 
     const totalPages = data.total ? Math.max(1, Math.ceil(data.total / limit)) : 1;
     setTotal(totalPages);
@@ -128,6 +129,7 @@ const LeadsTablePage = () => {
           const safePage = Math.min(Math.max(nextPage, 1), total);
           setPage(safePage);
         }}
+        paginationKey="leads"
       />
     </div>
   );

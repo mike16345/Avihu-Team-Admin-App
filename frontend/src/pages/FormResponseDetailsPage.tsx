@@ -7,25 +7,29 @@ import FormResponseViewer from "@/components/formResponses/FormResponseViewer";
 import { useUsersStore } from "@/store/userStore";
 import useUserQuery from "@/hooks/queries/user/useUserQuery";
 import BackButton from "@/components/ui/BackButton";
+import { getFullUserName, isUserIdObject } from "@/components/agreements/SignedAgreementsTable";
 
 const FormResponseDetailsPage = () => {
   const { id } = useParams();
+  const { users } = useUsersStore();
+
   const { data, isLoading, isError, error } = useFormResponseQuery(id);
   const response = data?.data;
-  const { users } = useUsersStore();
-  const cachedUser = users.find((entry) => entry._id === response?.userId);
-  const { data: fetchedUser } = useUserQuery(
-    response?.userId,
-    Boolean(response?.userId) && !cachedUser
-  );
+
+  const userId = useMemo(() => {
+    return isUserIdObject(response?.userId) ? response?.userId._id : response?.userId;
+  }, [response?.userId]);
+
+  const cachedUser = users.find((entry) => entry._id === userId);
+
+  const { data: fetchedUser } = useUserQuery(userId, Boolean(response?.userId) && !cachedUser);
 
   const respondentName = useMemo(() => {
     const user = cachedUser || fetchedUser;
-    const firstName = user?.firstName?.trim() ?? "";
-    const lastName = user?.lastName?.trim() ?? "";
-    const name = `${firstName} ${lastName}`.trim();
-    return name || response?.userId || "Unknown user";
-  }, [cachedUser, fetchedUser, response?.userId]);
+    const name = getFullUserName(user);
+
+    return name || userId || "לא ידוע";
+  }, [cachedUser, fetchedUser, userId]);
 
   if (isLoading) return <Loader size="large" />;
   if (isError && !response) return <ErrorPage message={error?.message} />;
@@ -36,7 +40,7 @@ const FormResponseDetailsPage = () => {
       {response ? (
         <FormResponseViewer response={response} respondentName={respondentName} />
       ) : (
-        <div className="py-10 text-center text-sm text-muted-foreground">No response found.</div>
+        <div className="py-10 text-center text-sm text-muted-foreground">לא מצאנו תשובה</div>
       )}
     </div>
   );

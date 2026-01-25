@@ -6,10 +6,7 @@ import { FormTypesInHebrew } from "@/constants/form";
 import DateUtils from "@/lib/dateUtils";
 import { FormResponse } from "@/interfaces/IFormResponse";
 import { FormTypes } from "@/interfaces/IForm";
-
-type FormResponseColumnsOptions = {
-  resolveUserName: (userId: string) => string;
-};
+import { resolveUserName } from "@/components/agreements/SignedAgreementsTable";
 
 const formatSubmittedAt = (submittedAt?: string) => {
   if (!submittedAt) return "-";
@@ -20,7 +17,7 @@ const formatSubmittedAt = (submittedAt?: string) => {
   return DateUtils.formatDate(parsedDate, "DD/MM/YYYY");
 };
 
-export const useFormResponseColumns = ({ resolveUserName }: FormResponseColumnsOptions) =>
+export const useFormResponseColumns = () =>
   useMemo<ColumnDef<FormResponse>[]>(
     () => [
       {
@@ -53,7 +50,9 @@ export const useFormResponseColumns = ({ resolveUserName }: FormResponseColumnsO
       {
         accessorKey: "userId",
         header: "משתמש",
-        cell: ({ row }) => resolveUserName(row.original.userId) || row.original.userId || "-",
+        cell: ({ row }) => {
+          return resolveUserName(row.original.userId) || "-";
+        },
       },
       {
         accessorKey: "submittedAt",
@@ -61,5 +60,5 @@ export const useFormResponseColumns = ({ resolveUserName }: FormResponseColumnsO
         cell: ({ row }) => formatSubmittedAt(row.original.submittedAt),
       },
     ],
-    [resolveUserName]
+    []
   );
