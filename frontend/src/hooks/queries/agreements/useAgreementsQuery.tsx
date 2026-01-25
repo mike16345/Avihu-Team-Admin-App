@@ -4,10 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 
 const useAgreementsQuery = (adminId: string | undefined, queryParams: SignedAgreementsParams) => {
   const { getSignedAgreements } = useAgreementsAdminApi();
-  const stringified = JSON.stringify(queryParams);
 
   return useQuery({
-    queryKey: [QueryKeys.AGREEMENTS_SIGNED, stringified],
+    queryKey: [QueryKeys.AGREEMENTS_SIGNED, queryParams],
     queryFn: () => getSignedAgreements(queryParams),
     enabled: Boolean(adminId),
   });
