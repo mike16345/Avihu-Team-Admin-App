@@ -17,7 +17,7 @@ const useUploadAgreement = () => {
     const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
     if (!isPdf) {
       toast.error("ניתן להעלות קובץ PDF בלבד.");
-      return;
+      throw new Error("ניתן להעלות קובץ PDF בלבד.");
     }
     const uploadResponse = await createTemplateUploadUrl({
       agreementId: agreementId,
@@ -25,6 +25,9 @@ const useUploadAgreement = () => {
       adminId,
     });
 
+    if (!uploadResponse.data?.uploadUrl) {
+      throw new Error("Failed to obtain upload URL");
+    }
     const { uploadUrl, version } = uploadResponse.data;
     const uploadResult = await fetch(uploadUrl, {
       method: "PUT",
@@ -39,7 +42,7 @@ const useUploadAgreement = () => {
     }
 
     toast.success(`הקובץ הועלה בהצלחה (גרסה ${version}).`);
-    return {version,}
+    return { version };
   };
 
   return useMutation({
