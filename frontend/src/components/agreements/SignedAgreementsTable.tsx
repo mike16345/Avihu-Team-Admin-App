@@ -4,7 +4,6 @@ import { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 import { DataTableHebrew } from "@/components/tables/DataTableHebrew";
 import { Button } from "@/components/ui/button";
-import Loader from "@/components/ui/Loader";
 import ErrorPage from "@/pages/ErrorPage";
 import { useUsersStore } from "@/store/userStore";
 import useAgreementsAdminApi, { SignedAgreementsParams } from "@/hooks/api/useAgreementsAdminApi";
