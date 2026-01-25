@@ -14,14 +14,13 @@ const FormResponseDetailsPage = () => {
   const { users } = useUsersStore();
 
   const { data, isLoading, isError, error } = useFormResponseQuery(id);
-  console.log({ data });
   const response = data?.data;
-
-  const cachedUser = users.find((entry) => entry._id === response?.userId);
 
   const userId = useMemo(() => {
     return isUserIdObject(response?.userId) ? response?.userId._id : response?.userId;
   }, [response?.userId]);
+
+  const cachedUser = users.find((entry) => entry._id === userId);
 
   const { data: fetchedUser } = useUserQuery(userId, Boolean(response?.userId) && !cachedUser);
 
@@ -34,8 +33,6 @@ const FormResponseDetailsPage = () => {
 
   if (isLoading) return <Loader size="large" />;
   if (isError && !response) return <ErrorPage message={error?.message} />;
-
-  console.log("response", response);
 
   return (
     <div className="size-full flex flex-col gap-4">

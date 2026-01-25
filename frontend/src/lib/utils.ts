@@ -167,8 +167,6 @@ export const extractVideoId = (url: string): string => {
     videoId = url.split("shorts/")[1]?.split("?")[0];
   }
 
-  console.log("extracted videoId:", videoId);
-
   return videoId;
 };
 
