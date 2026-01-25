@@ -22,8 +22,8 @@ import { useDisclosure } from "@/hooks/useDisclosure";
 pdfjs.GlobalWorkerOptions.workerSrc = "/workers/pdf.worker.mjs";
 
 const CurrentAgreementPage = () => {
-  const adminId =
-    import.meta.env.VITE_DEFAULT_TRAINER_ID ?? useUsersStore((state) => state.currentUser)?._id;
+  const userId = useUsersStore((state) => state.currentUser)?._id;
+  const adminId = import.meta.env.VITE_DEFAULT_TRAINER_ID ?? userId;
 
   const { data: currentAgreement, isLoading, isError, error, refetch } = useCurrentAgreementQuery();
   const { isPending, mutateAsync: uploadAgreement } = useUploadAgreement();
