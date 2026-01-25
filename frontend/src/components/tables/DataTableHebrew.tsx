@@ -102,8 +102,9 @@ export function DataTableHebrew<TData, TValue>({
   });
 
   const currentPageNumber = controlledPageNumber ?? page;
+  const resolvedPageCount = pageCount ?? 1;
   const [tablePagination, setTablePagination] = useState<PaginationState>(() => ({
-    pageIndex: currentPageNumber - 1,
+    pageIndex: isServerPaginated ? 0 : currentPageNumber - 1,
     pageSize: 10,
   }));
 
@@ -134,12 +135,14 @@ export function DataTableHebrew<TData, TValue>({
       rowSelection,
       pagination: tablePagination,
     },
+    manualPagination: isServerPaginated,
+    pageCount: isServerPaginated ? resolvedPageCount : undefined,
     onPaginationChange: setTablePagination,
-    getPaginationRowModel: getPaginationRowModel(),
+    getPaginationRowModel: isServerPaginated ? undefined : getPaginationRowModel(),
   });
 
-  const fallbackPageCount = table.getPageCount() || 1;
-  const pageCountToDisplay = pageCount ?? fallbackPageCount;
+  const fallbackPageCount = isServerPaginated ? resolvedPageCount : table.getPageCount() || 1;
+  const pageCountToDisplay = isServerPaginated ? resolvedPageCount : pageCount ?? fallbackPageCount;
   const canGoPrevious = isServerPaginated ? currentPageNumber > 1 : table.getCanPreviousPage();
   const canGoNext = isServerPaginated
     ? currentPageNumber < pageCountToDisplay
@@ -168,9 +171,9 @@ export function DataTableHebrew<TData, TValue>({
   useEffect(() => {
     setTablePagination((prev) => ({
       ...prev,
-      pageIndex: Math.max(0, currentPageNumber - 1),
+      pageIndex: isServerPaginated ? 0 : Math.max(0, currentPageNumber - 1),
     }));
-  }, [currentPageNumber]);
+  }, [currentPageNumber, isServerPaginated]);
 
   useEffect(() => {
     if (isServerPaginated) return;
@@ -278,7 +281,7 @@ export function DataTableHebrew<TData, TValue>({
               table.getRowModel().rows.map((row) => {
                 return (
                   <UserExpiredTooltip
-                    key={getRowId(row.original) ?? row.id}
+                    key={getRowId(row.original) || row.id}
                     isActive={handleHoverOnRow?.(row.original)}
                   >
                     <TableRow
