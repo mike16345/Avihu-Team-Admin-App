@@ -8,6 +8,7 @@ import AddButton from "@/components/ui/buttons/AddButton";
 import DeleteModal from "@/components/Alerts/DeleteModal";
 import { toast } from "sonner";
 import { FormQuestionType } from "@/schemas/formBuilderSchema";
+import { IFormQuestion } from "@/interfaces/IForm";
 
 type AgreementFormValues = {
   name: string;
@@ -17,19 +18,19 @@ type AgreementFormValues = {
   sections: Array<{
     title: string;
     description?: string;
-    questions: FormQuestionType[];
+    questions: IFormQuestion[];
   }>;
 };
 
-type QuestionWithId = FormQuestionType & { _id: string };
+type QuestionWithId = IFormQuestion & { _id: string };
 
 interface AgreementQuestionsEditorProps {
-  questions: FormQuestionType[];
-  onChange: (questions: FormQuestionType[]) => void;
+  questions: IFormQuestion[];
+  onChange: (questions: IFormQuestion[]) => void;
 }
 
 const ensureQuestionIds = (
-  questions: Array<FormQuestionType | QuestionWithId>
+  questions: Array<IFormQuestion | QuestionWithId>
 ): QuestionWithId[] => {
   return questions.map((question) => {
     if ("_id" in question && typeof question._id === "string") {

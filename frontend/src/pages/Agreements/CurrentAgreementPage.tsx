@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import Loader from "@/components/ui/Loader";
 import { pdfjs, Document, Page } from "react-pdf";
 import { AgreementTemplateActivateBody } from "@/hooks/api/useAgreementsAdminApi";
-import { AgreementQuestionDefinition } from "@/interfaces/IAgreement";
 import ErrorPage from "@/pages/ErrorPage";
 import { useUsersStore } from "@/store/userStore";
 import BackButton from "@/components/ui/BackButton";
@@ -18,6 +17,7 @@ import { CustomTooltip } from "@/components/ui/custom-tooltip";
 import useActivateAgreement from "@/hooks/mutations/agreements/useActivateAgreement";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useDisclosure } from "@/hooks/useDisclosure";
+import { IFormQuestion } from "@/interfaces/IForm";
 
 pdfjs.GlobalWorkerOptions.workerSrc = "/workers/pdf.worker.mjs";
 
@@ -30,7 +30,7 @@ const CurrentAgreementPage = () => {
   const { isPending: isSaving, mutateAsync: activateTemplate } = useActivateAgreement();
 
   const [pendingVersion, setPendingVersion] = useState<number | null>(null);
-  const [questions, setQuestions] = useState<AgreementQuestionDefinition[]>([]);
+  const [questions, setQuestions] = useState<IFormQuestion[]>([]);
   const [numPages, setNumPages] = useState(0);
   const { isOpen, toggle, bind } = useDisclosure();
   const { isOpen: isQuestionsOpen, toggle: toggleQuestions, bind: questionsBind } = useDisclosure();

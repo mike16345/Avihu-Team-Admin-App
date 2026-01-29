@@ -6,17 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { IBlog, IBlogResponse } from "@/interfaces/IBlog";
 import { buildPhotoUrl, convertItemsToOptions } from "@/lib/utils";
@@ -33,6 +22,8 @@ import UserPlanTypes from "@/enums/UserPlanTypes";
 import { Option } from "@/types/types";
 import TextEditor from "../ui/TextEditor";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
+import DeleteModal from "../Alerts/DeleteModal";
+import { useDisclosure } from "@/hooks/useDisclosure";
 
 type MediaType = "link" | "image";
 
@@ -89,6 +80,8 @@ const BlogEditor = () => {
   const [mediaType, setMediaType] = useState<MediaType>("link");
   const [imageToDelete, setImageToDelete] = useState<string | undefined>();
   const [linkTouched, setLinkTouched] = useState(false);
+
+  const { isOpen, setOpen } = useDisclosure();
 
   const onSuccess = async () => {
     toast.success("מאמר נשמר בהצלחה!");
@@ -225,36 +218,25 @@ const BlogEditor = () => {
 
   return (
     <div className="pb-10">
-      <div className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur">
-        <div className="mx-auto grid max-w-3xl grid-cols-1 gap-3 px-4 py-3 sm:grid-cols-[1fr_auto_1fr] sm:items-center">
+      <div className="w-full fixed top-0 z-10 border-b bg-background/95 backdrop-blur">
+        <div className="flex gap-3 px-4 py-3 sm:items-center justify-center">
           <h1 className="order-1 text-xl font-semibold text-right sm:order-2">{pageTitle}</h1>
           <div className="order-3 flex items-center gap-2 sm:order-1 sm:justify-self-end">
-            <Button variant="outline" onClick={() => navigate("/blogs")}>
+            <Button variant="outline" onClick={() => navigate(`/blogs/`)}>
               ביטול
             </Button>
             {isEdit && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="destructive">מחק</Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent className="text-right" dir="rtl">
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>מחיקת מאמר</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      המחיקה היא פעולה בלתי הפיכה. האם למחוק את המאמר?
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter className="sm:justify-start">
-                    <AlertDialogCancel>ביטול</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={handleDeleteBlog}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                    >
-                      מחק
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              <>
+                <Button onClick={() => setOpen(true)} variant="destructive">
+                  מחק
+                </Button>
+                <DeleteModal
+                  isModalOpen={isOpen}
+                  setIsModalOpen={setOpen}
+                  onConfirm={handleDeleteBlog}
+                  onCancel={() => setOpen(false)}
+                />
+              </>
             )}
           </div>
           <div className="order-2 flex items-center gap-2 sm:order-3 sm:justify-self-start">
@@ -355,8 +337,7 @@ const BlogEditor = () => {
                   ניתן להדביק לינק ל־YouTube או עמוד חיצוני.
                 </p>
                 <Input
-                  dir="ltr"
-                  className="w-full text-left"
+                  className="w-full"
                   value={blog.link || ""}
                   type="text"
                   placeholder="לדוגמה: https://www.youtube.com/..."

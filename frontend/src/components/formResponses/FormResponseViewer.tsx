@@ -210,6 +210,7 @@ const FormResponseViewer = ({
   const rawFormType = response.formType ?? response.formId?.type;
   const formType = rawFormType ? (FormTypesInHebrew[rawFormType as FormTypes] ?? rawFormType) : "-";
   const submittedAt = formatSubmittedAt(response.submittedAt);
+  console.log("Response:", respondentName);
   const displayRespondent = respondentName?.trim() || response.userId || "משתמש לא ידוע";
   const showSelect = navigationMode === "select" || (navigationMode === "auto" && isMobile);
   const showTabs = navigationMode === "tabs" || (navigationMode === "auto" && !isMobile);

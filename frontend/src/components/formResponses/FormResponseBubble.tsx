@@ -9,6 +9,7 @@ import ErrorPage from "@/pages/ErrorPage";
 import { useUsersStore } from "@/store/userStore";
 import useUserQuery from "@/hooks/queries/user/useUserQuery";
 import { FormResponse } from "@/interfaces/IFormResponse";
+import { getFullUserName, isUserIdObject } from "../agreements/SignedAgreementsTable";
 
 type FormResponseBubbleProps = {
   responseId?: string;
@@ -164,7 +165,9 @@ const FormResponseBubble = ({
         ) : response ? (
           <FormResponseViewer
             response={response}
-            respondentName={respondentName}
+            respondentName={
+              isUserIdObject(respondentName) ? getFullUserName(respondentName) : respondentName
+            }
             navigationMode="select"
           />
         ) : (

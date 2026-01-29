@@ -6,6 +6,7 @@ export type QuestionTypes =
   | "range"
   | "file-upload"
   | "checkboxes"
+  | "yes-no"
   | "drop-down";
 
 export type OptionTypes = "radio" | "drop-down" | "checkboxes" | "range";

@@ -10,6 +10,7 @@ export const QuestionTypeOptions: Option[] = [
   { name: "בחירה מרשימה", value: "drop-down" },
   { name: "טווח / סרגל", value: "range" },
   { name: "העלאת קובץ", value: "file-upload" },
+  { name: "כן/לא עם פירוט", value: "yes-no" },
 ];
 
 export const FormTypeOptions: Option[] = [
