@@ -104,10 +104,11 @@ const FormBuilderPage = () => {
         >
           <FormBuilder disableOnboarding={disableOnboardingType} />
 
-          <div className="flex justify-end gap-2 sticky bottom-0 w-fit mr-auto py-2">
+          <div className="md:fixed md:bottom-4 md:left-24 flex items-center justify-center w-full md:w-fit">
             <CustomButton
               type="submit"
               title="שמור טופס"
+              className="w-full md:w-fit"
               variant="default"
               disabled={disableButton}
               isLoading={buttonLoadingState}
