@@ -38,7 +38,7 @@ const SignedAgreementsTable = ({ paginationKey }: SignedAgreementsTableProps) =>
   const { page, pageSize, setPage } = useUrlPagination({
     namespace: paginationKey ?? "agreements",
     defaultPage: 1,
-    defaultPageSize: 10,
+    defaultPageSize: 20,
     totalPages: pageCountState,
   });
 
