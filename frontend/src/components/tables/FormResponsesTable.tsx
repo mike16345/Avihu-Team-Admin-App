@@ -62,9 +62,7 @@ const FormResponsesTable = ({ userId, paginationKey }: FormResponsesTableProps) 
     const userName = resolveUserName(response.userId) ?? "";
     const formName = response.formTitle ?? response.formId?.name ?? "";
 
-    return [userName, formName].some((value) =>
-      value.toLowerCase().includes(normalizedQuery)
-    );
+    return [userName, formName].some((value) => value.toLowerCase().includes(normalizedQuery));
   };
 
   if (isError) return <ErrorPage message={error?.message} />;
@@ -86,7 +84,6 @@ const FormResponsesTable = ({ userId, paginationKey }: FormResponsesTableProps) 
       getRowClassName={() => "cursor-pointer"}
       handleHoverOnRow={() => false}
       getRowId={(row) => row._id || ""}
-      rowClickMode="single"
       filters={
         FormTypeOptions.length ? (
           <FilterMultiSelect
