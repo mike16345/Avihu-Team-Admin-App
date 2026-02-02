@@ -41,6 +41,8 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   actionButton?: ReactNode;
   filters?: ReactNode;
+  searchFn?: (row: TData, query: string) => boolean;
+  searchPlaceholder?: string;
   handleViewData: (data: TData) => void;
   handleSetData: (data: TData) => void;
   handleDeleteData: (data: TData) => void;
@@ -72,6 +74,8 @@ export function DataTableHebrew<TData, TValue>({
   data,
   actionButton,
   filters,
+  searchFn,
+  searchPlaceholder,
   handleViewData,
   handleDeleteData,
   handleViewNestedData,
@@ -90,6 +94,7 @@ export function DataTableHebrew<TData, TValue>({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
+  const [globalFilter, setGlobalFilter] = useState("");
 
   const initialPage = controlledPageNumber;
   const isServerPaginated =
@@ -98,6 +103,7 @@ export function DataTableHebrew<TData, TValue>({
   const { page, setPage } = useUrlPagination({
     namespace: paginationKey,
     defaultPage: initialPage ?? 1,
+    defaultPageSize: 20,
     totalPages: isServerPaginated ? undefined : pageCount,
   });
 
@@ -105,7 +111,7 @@ export function DataTableHebrew<TData, TValue>({
   const resolvedPageCount = pageCount ?? 1;
   const [tablePagination, setTablePagination] = useState<PaginationState>(() => ({
     pageIndex: isServerPaginated ? 0 : currentPageNumber - 1,
-    pageSize: 10,
+    pageSize: 20,
   }));
 
   const table = useReactTable({
@@ -118,6 +124,11 @@ export function DataTableHebrew<TData, TValue>({
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    globalFilterFn: searchFn
+      ? (row, _columnId, filterValue) =>
+          searchFn(row.original, String(filterValue ?? "").trim())
+      : undefined,
+    onGlobalFilterChange: searchFn ? setGlobalFilter : undefined,
 
     meta: {
       handleViewData: (data: TData) => handleViewData(data),
@@ -133,6 +144,7 @@ export function DataTableHebrew<TData, TValue>({
       columnFilters,
       columnVisibility,
       rowSelection,
+      globalFilter: searchFn ? globalFilter : undefined,
       pagination: tablePagination,
     },
     manualPagination: isServerPaginated,
@@ -142,7 +154,9 @@ export function DataTableHebrew<TData, TValue>({
   });
 
   const fallbackPageCount = isServerPaginated ? resolvedPageCount : table.getPageCount() || 1;
-  const pageCountToDisplay = isServerPaginated ? resolvedPageCount : pageCount ?? fallbackPageCount;
+  const pageCountToDisplay = isServerPaginated
+    ? resolvedPageCount
+    : (pageCount ?? fallbackPageCount);
   const canGoPrevious = isServerPaginated ? currentPageNumber > 1 : table.getCanPreviousPage();
   const canGoNext = isServerPaginated
     ? currentPageNumber < pageCountToDisplay
@@ -164,6 +178,7 @@ export function DataTableHebrew<TData, TValue>({
   const handleRowActivate = (event: MouseEvent<HTMLElement>, rowData: TData) => {
     const target = event.target as HTMLElement;
     if (target.id == "row-checkbox" || target.id == "access-switch") return;
+    console.log("Handling row activate for:", rowData);
 
     handleViewData(rowData);
   };
@@ -183,14 +198,27 @@ export function DataTableHebrew<TData, TValue>({
     }
   }, [currentPageNumber, fallbackPageCount, isServerPaginated]);
 
+  const searchValue = searchFn
+    ? globalFilter
+    : ((table.getColumn("שם")?.getFilterValue() as string) ?? "");
+    
+  const handleSearchChange = (value: string) => {
+    if (searchFn) {
+      setGlobalFilter(value);
+      return;
+    }
+
+    table.getColumn("שם")?.setFilterValue(value);
+  };
+
   return (
     <div className="space-y-4 rounded-xl bg-background/80 p-4 shadow-sm">
       <div className="flex flex-col gap-4  pb-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <Input
-            placeholder="חיפוש..."
-            value={(table.getColumn("שם")?.getFilterValue() as string) ?? ""}
-            onChange={(event) => table.getColumn("שם")?.setFilterValue(event.target.value)}
+            placeholder={searchPlaceholder ?? "חיפוש..."}
+            value={searchValue}
+            onChange={(event) => handleSearchChange(event.target.value)}
             className="h-9 sm:w-72"
           />
 

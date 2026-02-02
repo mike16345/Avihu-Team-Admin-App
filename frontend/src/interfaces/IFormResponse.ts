@@ -11,6 +11,7 @@ export type FormResponse = {
   submittedAt: string;
   formTitle?: string;
   formType?: string;
+  isChecked?: boolean;
   sections: Array<{
     _id: string;
     title: string;

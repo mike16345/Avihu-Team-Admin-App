@@ -8,6 +8,13 @@ import ErrorPage from "@/pages/ErrorPage";
 import FilterMultiSelect from "./FilterMultiSelect";
 import { FormTypes } from "@/interfaces/IForm";
 import { FormTypeOptions } from "@/constants/form";
+import { useMutation } from "@tanstack/react-query";
+import useFormResponsesApi from "@/hooks/api/useFormResponsesApi";
+import { toast } from "sonner";
+import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
+import queryClient from "@/QueryClient/queryClient";
+import { formResponsesKeys } from "@/hooks/queries/formResponses/formResponsesKeys";
+import { resolveUserName } from "@/components/agreements/SignedAgreementsTable";
 
 type FormResponsesTableProps = {
   userId?: string;
@@ -21,6 +28,18 @@ const FormResponsesTable = ({ userId, paginationKey }: FormResponsesTableProps) 
   );
 
   const columns = useFormResponseColumns();
+  const { deleteFormById } = useFormResponsesApi();
+
+  const deleteResponseMutation = useMutation({
+    mutationFn: (id: string) => deleteFormById(id),
+    onSuccess: () => {
+      toast.success("התגובה נמחקה בהצלחה!");
+      queryClient.invalidateQueries({ queryKey: formResponsesKeys.all });
+    },
+    onError: () => {
+      toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE);
+    },
+  });
 
   const handleViewResponse = (response: FormResponse) => {
     if (!response?._id) return;
@@ -36,6 +55,18 @@ const FormResponsesTable = ({ userId, paginationKey }: FormResponsesTableProps) 
     );
   }, [data, selectedGroups]);
 
+  const searchFn = (response: FormResponse, query: string) => {
+    const normalizedQuery = query.trim().toLowerCase();
+    if (!normalizedQuery) return true;
+
+    const userName = resolveUserName(response.userId) ?? "";
+    const formName = response.formTitle ?? response.formId?.name ?? "";
+
+    return [userName, formName].some((value) =>
+      value.toLowerCase().includes(normalizedQuery)
+    );
+  };
+
   if (isError) return <ErrorPage message={error?.message} />;
 
   return (
@@ -46,7 +77,11 @@ const FormResponsesTable = ({ userId, paginationKey }: FormResponsesTableProps) 
       isLoadingNextPage={isLoading}
       handleSetData={() => {}}
       handleViewData={handleViewResponse}
-      handleDeleteData={() => {}}
+      searchFn={searchFn}
+      searchPlaceholder="חיפוש לפי משתמש או שאלון"
+      handleDeleteData={(response) => {
+        if (response._id) deleteResponseMutation.mutate(response._id);
+      }}
       handleViewNestedData={() => {}}
       getRowClassName={() => "cursor-pointer"}
       handleHoverOnRow={() => false}
