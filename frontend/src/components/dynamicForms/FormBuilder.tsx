@@ -13,9 +13,10 @@ import { generateUUID } from "@/lib/utils";
 
 interface FormBuilderProps {
   disableOnboarding?: boolean;
+  onboardingFormId?: string;
 }
 
-const FormBuilder = ({ disableOnboarding = false }: FormBuilderProps) => {
+const FormBuilder = ({ disableOnboarding = false, onboardingFormId }: FormBuilderProps) => {
   const form = useFormContext<FormType>();
   const { control, watch } = form;
 
@@ -68,7 +69,10 @@ const FormBuilder = ({ disableOnboarding = false }: FormBuilderProps) => {
   return (
     <>
       <div className="p-5 space-y-5">
-        <FormBuilderHeader disableOnboarding={disableOnboarding} />
+        <FormBuilderHeader
+          disableOnboarding={disableOnboarding}
+          onboardingFormId={onboardingFormId}
+        />
 
         <DragDropWrapper items={sections} strategy="vertical" idKey="_id" setItems={replace}>
           {({ item, index }) => {

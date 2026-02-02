@@ -4,18 +4,22 @@ import DatePicker from "../ui/DatePicker";
 import { useFormContext } from "react-hook-form";
 import { FormType } from "@/schemas/formBuilderSchema";
 import { FormField, FormItem, FormMessage } from "../ui/form";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Input } from "../ui/input";
 import { Option } from "@/types/types";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface FormBuilderHeaderProps {
   formTypeOptions?: Option[];
   disableOnboarding?: boolean;
+  onboardingFormId?: string;
 }
 
 const FormBuilderHeader = ({
   formTypeOptions = FormTypeOptions,
   disableOnboarding = false,
+  onboardingFormId,
 }: FormBuilderHeaderProps) => {
   const {
     control,
@@ -24,10 +28,16 @@ const FormBuilderHeader = ({
     setValue,
   } = useFormContext<FormType>();
   const formType = watch("type");
+  const navigate = useNavigate();
 
-  const availableTypeOptions = disableOnboarding
-    ? formTypeOptions.filter((option) => option.value !== "onboarding")
-    : formTypeOptions;
+  const availableTypeOptions = useMemo(() => {
+    if (!disableOnboarding) return formTypeOptions;
+    return formTypeOptions.map((option) =>
+      option.value === "onboarding"
+        ? { ...option, name: `${option.name} (כבר קיים)` }
+        : option
+    );
+  }, [disableOnboarding, formTypeOptions]);
   const headerError = Boolean(errors.name || errors.type || errors.showOn);
 
   useEffect(() => {
@@ -68,7 +78,22 @@ const FormBuilderHeader = ({
                 <CustomSelect
                   className="w-full bg-muted"
                   items={availableTypeOptions}
-                  onValueChange={field.onChange}
+                  onValueChange={(value) => {
+                    if (disableOnboarding && value === "onboarding") {
+                      toast.info("כבר קיים שאלון התחלה.", {
+                        description: "רוצה לצפות בו?",
+                        action: onboardingFormId
+                          ? {
+                              label: "צפייה",
+                              onClick: () => navigate(`/form-builder/${onboardingFormId}`),
+                            }
+                          : undefined,
+                      });
+                      return;
+                    }
+
+                    field.onChange(value);
+                  }}
                   selectedValue={field.value}
                 />
                 <FormMessage />
@@ -77,11 +102,14 @@ const FormBuilderHeader = ({
           }}
         />
       </div>
-      {disableOnboarding && (
-        <p className="text-sm text-muted-foreground">
-          שאלון התחלה כבר קיים. ניתן לערוך אותו מרשימת השאלונים.
-        </p>
-      )}
+      <div className="text-sm text-muted-foreground space-y-1">
+        <p>הסבר על סוג השאלון:</p>
+        <ul className="list-disc pr-5 space-y-1">
+          <li>כללי - השאלון יוצג בתאריך שנבחר.</li>
+          <li>חודשי - השאלון יוצג בכל הראשון של החודש.</li>
+          <li>התחלה - השאלון יוצג רק בכניסה הראשונה של המשתמש.</li>
+        </ul>
+      </div>
       {formType == "general" && (
         <FormField
           name={`showOn`}
