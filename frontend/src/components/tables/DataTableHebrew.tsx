@@ -178,7 +178,6 @@ export function DataTableHebrew<TData, TValue>({
   const handleRowActivate = (event: MouseEvent<HTMLElement>, rowData: TData) => {
     const target = event.target as HTMLElement;
     if (target.id == "row-checkbox" || target.id == "access-switch") return;
-    console.log("Handling row activate for:", rowData);
 
     handleViewData(rowData);
   };
