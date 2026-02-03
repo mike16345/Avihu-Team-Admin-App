@@ -108,10 +108,7 @@ const FormBuilderPage = () => {
           className="flex flex-col gap-4 max-w-[800px] mx-auto"
           onSubmit={handleSubmit(onSubmit, onInvalidSubmit)}
         >
-          <FormBuilder
-            disableOnboarding={disableOnboardingType}
-            onboardingFormId={existingOnboardingForm?._id}
-          />
+          <FormBuilder disableOnboarding={disableOnboardingType} />
 
           <div className="md:fixed md:bottom-4 md:left-24 flex items-center justify-center w-full md:w-fit">
             <CustomButton
