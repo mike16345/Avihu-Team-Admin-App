@@ -77,11 +77,7 @@ const FormBuilderHeader = ({
           }}
         />
       </div>
-      {disableOnboarding && (
-        <p className="text-sm text-muted-foreground">
-          שאלון התחלה כבר קיים. ניתן לערוך אותו מרשימת השאלונים.
-        </p>
-      )}
+
       {formType == "general" && (
         <FormField
           name={`showOn`}
@@ -96,6 +92,17 @@ const FormBuilderHeader = ({
             );
           }}
         />
+      )}
+      {formType === "general" && (
+        <p className="text-sm text-muted-foreground">כללי - השאלון יוצג בתאריך שנבחר.</p>
+      )}
+      {formType === "monthly" && (
+        <p className="text-sm text-muted-foreground">חודשי - השאלון יוצג בכל הראשון של החודש.</p>
+      )}
+      {formType === "onboarding" && (
+        <p className="text-sm text-muted-foreground">
+          התחלה - השאלון יוצג רק בכניסה הראשונה של המשתמש.
+        </p>
       )}
     </div>
   );

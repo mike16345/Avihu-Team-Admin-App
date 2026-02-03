@@ -26,14 +26,15 @@ const FormBuilderPage = () => {
   const { mutate: addForm, isPending: isAddFormPending } = useAddFormPreset();
   const { mutate: updateForm, isPending: isUpdateFormPending } = useUpdateFormPreset(id);
 
+  const emptyDefaults: FormType = {
+    name: "",
+    type: "general",
+    repeatMonthly: false,
+    sections: [],
+  };
   const form = useForm<FormType>({
     resolver: zodResolver(FormSchema),
-    defaultValues: {
-      name: "",
-      type: "general",
-      repeatMonthly: false,
-      sections: [],
-    },
+    defaultValues: emptyDefaults,
   });
 
   const {
@@ -86,10 +87,15 @@ const FormBuilderPage = () => {
   };
 
   useEffect(() => {
+    if (!isEdit) {
+      reset(emptyDefaults);
+      return;
+    }
+
     if (!formRes) return;
 
     reset(formRes.data);
-  }, [formRes]);
+  }, [formRes, isEdit, reset]);
 
   if (isLoading) return <Loader size="xl" />;
   if (error && error.status !== 404) return <ErrorPage />;
