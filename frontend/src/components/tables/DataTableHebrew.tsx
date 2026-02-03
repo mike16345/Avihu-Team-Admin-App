@@ -125,8 +125,7 @@ export function DataTableHebrew<TData, TValue>({
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
     globalFilterFn: searchFn
-      ? (row, _columnId, filterValue) =>
-          searchFn(row.original, String(filterValue ?? "").trim())
+      ? (row, _columnId, filterValue) => searchFn(row.original, String(filterValue ?? "").trim())
       : undefined,
     onGlobalFilterChange: searchFn ? setGlobalFilter : undefined,
 
@@ -200,7 +199,7 @@ export function DataTableHebrew<TData, TValue>({
   const searchValue = searchFn
     ? globalFilter
     : ((table.getColumn("שם")?.getFilterValue() as string) ?? "");
-    
+
   const handleSearchChange = (value: string) => {
     if (searchFn) {
       setGlobalFilter(value);
