@@ -106,7 +106,7 @@ export const useFormResponseColumns = () =>
 
           return (
             <Checkbox
-              id="viewed-checkbox"
+              id={`viewed-checkbox-${row.original._id}`}
               checked={isViewed}
               disabled={isUpdating}
               onClick={(event) => event.stopPropagation()}
