@@ -1,13 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { generateUUID } from "@/lib/utils";
-import { FormProvider, useFieldArray, useForm } from "react-hook-form";
+import { FormProvider, useFieldArray, useForm, useWatch } from "react-hook-form";
 import Question from "@/components/dynamicForms/question/Question";
 import { DragDropWrapper } from "@/components/Wrappers/DragDropWrapper";
 import { SortableItem } from "@/components/DragAndDrop/SortableItem";
 import AddButton from "@/components/ui/buttons/AddButton";
 import DeleteModal from "@/components/Alerts/DeleteModal";
 import { toast } from "sonner";
-import { FormQuestionType } from "@/schemas/formBuilderSchema";
 import { IFormQuestion } from "@/interfaces/IForm";
 
 type AgreementFormValues = {
@@ -22,34 +20,31 @@ type AgreementFormValues = {
   }>;
 };
 
-type QuestionWithId = IFormQuestion & { _id: string };
+type QuestionWithUiId = IFormQuestion & { rhfId?: string };
 
 interface AgreementQuestionsEditorProps {
   questions: IFormQuestion[];
   onChange: (questions: IFormQuestion[]) => void;
 }
 
-const ensureQuestionIds = (
-  questions: Array<IFormQuestion | QuestionWithId>
-): QuestionWithId[] => {
-  return questions.map((question) => {
-    if ("_id" in question && typeof question._id === "string") {
-      return question as QuestionWithId;
+const isValidObjectId = (value?: string) =>
+  typeof value === "string" && /^[a-fA-F0-9]{24}$/.test(value);
+
+const stripUiFields = (questions: QuestionWithUiId[]): IFormQuestion[] => {
+  return questions.map(({ rhfId, _id, ...question }) => {
+    if (_id && !isValidObjectId(_id)) {
+      return question;
     }
 
-    return { _id: generateUUID(), ...question };
+    return _id ? { ...question, _id } : question;
   });
 };
 
-const stripQuestionIds = (questions: QuestionWithId[]): FormQuestionType[] => {
-  return questions.map(({ _id, ...question }) => question);
-};
-
-const serializeQuestions = (questions: Array<FormQuestionType | QuestionWithId>) => {
+const serializeQuestions = (questions: Array<IFormQuestion | QuestionWithUiId>) => {
   return JSON.stringify(
     questions.map((question) => {
-      if ("_id" in question) {
-        const { _id, ...rest } = question;
+      if ("rhfId" in question) {
+        const { rhfId, ...rest } = question;
         return rest;
       }
       return question;
@@ -57,8 +52,7 @@ const serializeQuestions = (questions: Array<FormQuestionType | QuestionWithId>)
   );
 };
 
-const buildDefaultValues = (questions: FormQuestionType[]): AgreementFormValues => {
-  const baseQuestions = questions;
+const buildDefaultValues = (questions: IFormQuestion[]): AgreementFormValues => {
   return {
     name: "",
     type: "general",
@@ -67,7 +61,7 @@ const buildDefaultValues = (questions: FormQuestionType[]): AgreementFormValues 
       {
         title: "",
         description: "",
-        questions: ensureQuestionIds(baseQuestions),
+        questions,
       },
     ],
   };
@@ -89,7 +83,19 @@ const AgreementQuestionsEditor = ({ questions, onChange }: AgreementQuestionsEdi
   } = useFieldArray({
     control,
     name: "sections.0.questions",
+    keyName: "rhfId",
   });
+
+  const watchedQuestions =
+    (useWatch({
+      control,
+      name: "sections.0.questions",
+    }) as IFormQuestion[]) ?? [];
+
+  const questionsForDnd = formQuestions.map((field, index) => ({
+    ...(watchedQuestions[index] ?? field),
+    rhfId: field.rhfId,
+  }));
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const questionIndex = useRef<number | null>(null);
@@ -111,12 +117,11 @@ const AgreementQuestionsEditor = ({ questions, onChange }: AgreementQuestionsEdi
   };
 
   const onDuplicateQuestion = (index: number) => {
-    if (!formQuestions) return;
-    const questionToCopy = formQuestions[index];
+    const questionToCopy = watchedQuestions[index];
 
     if (!questionToCopy) return;
 
-    const { options, ...newQuestion } = questionToCopy;
+    const { options, _id, ...newQuestion } = questionToCopy;
     insert(index + 1, {
       ...newQuestion,
       options: Array.isArray(options) ? [...options] : options,
@@ -132,13 +137,14 @@ const AgreementQuestionsEditor = ({ questions, onChange }: AgreementQuestionsEdi
 
   useEffect(() => {
     const subscription = form.watch((values) => {
-      const updatedQuestions = (values.sections?.[0]?.questions ?? []) as QuestionWithId[];
-      const serialized = JSON.stringify(stripQuestionIds(updatedQuestions));
+      const updatedQuestions = (values.sections?.[0]?.questions ?? []) as QuestionWithUiId[];
+      const sanitized = stripUiFields(updatedQuestions);
+      const serialized = JSON.stringify(sanitized);
 
       if (serialized === lastEmittedQuestions.current) return;
 
       lastEmittedQuestions.current = serialized;
-      onChange(stripQuestionIds(updatedQuestions));
+      onChange(sanitized);
     });
 
     return () => subscription.unsubscribe();
@@ -156,16 +162,21 @@ const AgreementQuestionsEditor = ({ questions, onChange }: AgreementQuestionsEdi
   return (
     <FormProvider {...form}>
       <div className="space-y-4">
-        {formQuestions.length === 0 && (
+        {questionsForDnd.length === 0 && (
           <p className="text-lg text-muted-foreground text-center ">אין שאלות</p>
         )}
-        <DragDropWrapper items={formQuestions} strategy="vertical" idKey="id" setItems={replace}>
+        <DragDropWrapper
+          items={questionsForDnd}
+          strategy="vertical"
+          idKey="rhfId"
+          setItems={(items) => replace(items.map(({ rhfId, ...rest }) => rest))}
+        >
           {({ item, index }) => {
             return (
-              <SortableItem className="relative w-full bg-background" idKey="id" item={item}>
+              <SortableItem className="relative w-full bg-background" idKey="rhfId" item={item}>
                 {() => (
                   <Question
-                    key={item.id}
+                    key={item.rhfId}
                     parentPath={`sections.0.questions.${index}`}
                     onDeleteQuestion={() => onClickDeleteQuestion(index)}
                     onDuplicateQuestion={() => onDuplicateQuestion(index)}
