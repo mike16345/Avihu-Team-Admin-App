@@ -1,13 +1,12 @@
 import CustomSelect from "@/components/ui/CustomSelect";
 import CustomSwitch from "@/components/ui/CustomSwitch";
-import { Input } from "@/components/ui/input";
 import {
   QuestionTypeOptions,
   typesRequiringOptions as defaultTypesRequiringOptions,
 } from "@/constants/form";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import OptionsContainer from "./OptionsContainer";
-import { useFormContext } from "react-hook-form";
+import { ControllerRenderProps, useFormContext } from "react-hook-form";
 import { FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { FormType } from "@/schemas/formBuilderSchema";
 import { QuestionTypes } from "@/interfaces/IForm";
@@ -20,6 +19,47 @@ interface QuestionFormProps {
   typeOptions?: Option[];
   typesRequiringOptions?: string[];
 }
+
+const MAX_QUESTION_HEIGHT = 160;
+
+const resizeTextarea = (element: HTMLTextAreaElement | null) => {
+  if (!element) return;
+
+  element.style.height = "auto";
+  element.style.height = `${Math.min(element.scrollHeight, MAX_QUESTION_HEIGHT)}px`;
+  element.style.overflowY = element.scrollHeight > MAX_QUESTION_HEIGHT ? "auto" : "hidden";
+};
+
+const AutoResizeQuestionField = ({
+  field,
+}: {
+  field: ControllerRenderProps<FormType, `sections.${number}.questions.${number}.question`>;
+}) => {
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  useLayoutEffect(() => {
+    resizeTextarea(textareaRef.current);
+  }, [field.value]);
+
+  return (
+    <Textarea
+      {...field}
+      placeholder="הזן שאלה"
+      rows={1}
+      className="min-h-[42px] max-h-40 resize-none overflow-y-hidden"
+      ref={(element) => {
+        textareaRef.current = element;
+        field.ref(element);
+        resizeTextarea(element);
+      }}
+      onChange={(event) => {
+        field.onChange(event);
+        resizeTextarea(event.currentTarget);
+      }}
+      onInput={(event) => resizeTextarea(event.currentTarget)}
+    />
+  );
+};
 
 const QuestionForm: React.FC<QuestionFormProps> = ({
   parentPath,
@@ -65,7 +105,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
           render={({ field }) => {
             return (
               <FormItem className="w-full">
-                <Input {...field} placeholder="שאלה:" />
+                <AutoResizeQuestionField field={field} />
                 <FormMessage />
               </FormItem>
             );

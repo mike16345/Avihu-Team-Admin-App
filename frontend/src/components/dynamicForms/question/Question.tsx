@@ -10,6 +10,7 @@ interface QuestionProps {
   parentPath: `sections.${number}.questions.${number}`;
   onDeleteQuestion: () => void;
   onDuplicateQuestion: () => void;
+  dragHandleProps?: any;
   typeOptions?: Option[];
   typesRequiringOptions?: string[];
 }
@@ -18,6 +19,7 @@ const Question: React.FC<QuestionProps> = ({
   parentPath,
   onDeleteQuestion,
   onDuplicateQuestion,
+  dragHandleProps,
   typeOptions,
   typesRequiringOptions,
 }) => {
@@ -44,6 +46,7 @@ const Question: React.FC<QuestionProps> = ({
         <QuestionActions
           onDeleteQuestion={onDeleteQuestion}
           onDuplicateQuestion={onDuplicateQuestion}
+          dragHandleProps={dragHandleProps}
         />
       </div>
     </div>

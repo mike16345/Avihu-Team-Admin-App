@@ -53,7 +53,8 @@ const SectionContent: React.FC<SectionContentProps> = ({ parentPath }) => {
   const onDuplicateQuestion = (index: number) => {
     questionIndex.current = index;
     const questionToCopy = questions[index];
-    const { _id, ...newSection } = questionToCopy;
+    const newSection = { ...questionToCopy };
+    delete (newSection as Partial<IFormQuestion>)._id;
 
     append({ _id: generateUUID(), ...newSection });
   };
@@ -72,13 +73,19 @@ const SectionContent: React.FC<SectionContentProps> = ({ parentPath }) => {
         <DragDropWrapper items={questions} strategy="vertical" idKey="_id" setItems={replace}>
           {({ item, index }) => {
             return (
-              <SortableItem className="relative w-full bg-background" idKey="_id" item={item}>
-                {() => (
+              <SortableItem
+                key={item._id}
+                className="relative w-full bg-background"
+                idKey="_id"
+                item={item}
+                dragHandleOnly
+              >
+                {({ dragHandleProps }) => (
                   <Question
-                    key={item._id}
                     parentPath={`${parentPath}.questions.${index}`}
                     onDeleteQuestion={() => onClickDeleteQuestion(index)}
                     onDuplicateQuestion={() => onDuplicateQuestion(index)}
+                    dragHandleProps={dragHandleProps}
                   />
                 )}
               </SortableItem>

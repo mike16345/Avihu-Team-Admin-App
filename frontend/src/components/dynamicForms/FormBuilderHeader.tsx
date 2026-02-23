@@ -5,7 +5,7 @@ import { useFormContext } from "react-hook-form";
 import { FormType } from "@/schemas/formBuilderSchema";
 import { FormField, FormItem, FormMessage } from "../ui/form";
 import { useEffect } from "react";
-import { Input } from "../ui/input";
+import AutoResizer from "../ui/AutoResizer";
 import { Option } from "@/types/types";
 
 interface FormBuilderHeaderProps {
@@ -51,7 +51,7 @@ const FormBuilderHeader = ({
           render={({ field }) => {
             return (
               <FormItem className="w-full">
-                <Input {...field} placeholder="שאלון ללא שם" />
+                <AutoResizer {...field} placeholder="שם השאלון" />
 
                 <FormMessage />
               </FormItem>
@@ -94,8 +94,8 @@ const FormBuilderHeader = ({
         />
       )}
       {formType === "general" && (
-        <p className="text-sm text-muted-foreground">כללי - השאלון יוצג בתאריך שנבחר.</p>
-      )}
+        <p className="text-sm text-muted-foreground">מתוזמן - השאלון יוצג בתאריך שנבחר.</p>
+      )}    
       {formType === "monthly" && (
         <p className="text-sm text-muted-foreground">חודשי - השאלון יוצג בכל הראשון של החודש.</p>
       )}

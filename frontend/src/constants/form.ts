@@ -16,13 +16,13 @@ export const QuestionTypeOptions: Option[] = [
 export const FormTypeOptions: Option[] = [
   { name: "התחלה", value: "onboarding" },
   { name: "חודשי", value: "monthly" },
-  { name: "כללי", value: "general" },
+  { name: "מתוזמן", value: "general" },
 ];
 
 export const FormTypesInHebrew: Record<FormTypes, string> = {
   onboarding: "התחלה",
   monthly: "חודשי",
-  general: "כללי",
+  general: "מתוזמן",
 };
 
 export const typesRequiringOptions = ["radio", "checkboxes", "drop-down"] as const;

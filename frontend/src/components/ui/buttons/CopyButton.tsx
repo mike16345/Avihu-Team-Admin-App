@@ -1,4 +1,4 @@
-import React, { MouseEventHandler, useState } from "react";
+import React, { useState } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 import { Button } from "@/components/ui/button";
@@ -23,8 +23,11 @@ const CopyButton: React.FC<CopyButtonProps> = ({ tip, onClick, disabled = false 
             disabled={disabled}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
+            onPointerDown={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => {
               e.preventDefault();
+              e.stopPropagation();
               onClick(e);
             }}
             className={`flex rounded items-center justify-center size-full p-3   hover:bg-accent ${

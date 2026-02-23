@@ -9,6 +9,7 @@ import DateRangePicker from "@/components/ui/DateRangePicker";
 import ClipboardIconButton from "@/components/ui/buttons/ClipboardIconButton";
 import { Textarea } from "@/components/ui/textarea";
 import { IMuscleGroupRecordedSets } from "@/interfaces/IWorkout";
+import { copyToClipboard } from "@/lib/copyToClipboard";
 import { generateExerciseProgressNote } from "@/lib/exerciseProgressNote";
 import useWorkoutPlanQuery from "@/hooks/queries/workoutPlans/useWorkoutPlanQuery";
 import { MuscleGroupCombobox } from "./MuscleGroupCombobox";
@@ -143,7 +144,10 @@ const ExerciseProgressNotePanel = ({
     }
 
     try {
-      await navigator.clipboard.writeText(noteText);
+      const copied = await copyToClipboard(noteText);
+      if (!copied) {
+        throw new Error("Clipboard copy failed");
+      }
       toast.success("הטקסט הועתק ללוח");
     } catch (error) {
       console.error("Failed to copy note:", error);

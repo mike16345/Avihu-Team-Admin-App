@@ -31,12 +31,16 @@ const isValidObjectId = (value?: string) =>
   typeof value === "string" && /^[a-fA-F0-9]{24}$/.test(value);
 
 const stripUiFields = (questions: QuestionWithUiId[]): IFormQuestion[] => {
-  return questions.map(({ rhfId, _id, ...question }) => {
+  return questions.map((question) => {
+    const normalizedQuestion = { ...question };
+    delete normalizedQuestion.rhfId;
+
+    const { _id, ...questionWithoutId } = normalizedQuestion;
     if (_id && !isValidObjectId(_id)) {
-      return question;
+      return questionWithoutId;
     }
 
-    return _id ? { ...question, _id } : question;
+    return _id ? { ...questionWithoutId, _id } : questionWithoutId;
   });
 };
 
@@ -44,8 +48,9 @@ const serializeQuestions = (questions: Array<IFormQuestion | QuestionWithUiId>) 
   return JSON.stringify(
     questions.map((question) => {
       if ("rhfId" in question) {
-        const { rhfId, ...rest } = question;
-        return rest;
+        const normalizedQuestion = { ...question };
+        delete normalizedQuestion.rhfId;
+        return normalizedQuestion;
       }
       return question;
     })
@@ -121,7 +126,8 @@ const AgreementQuestionsEditor = ({ questions, onChange }: AgreementQuestionsEdi
 
     if (!questionToCopy) return;
 
-    const { options, _id, ...newQuestion } = questionToCopy;
+    const { options, ...newQuestion } = questionToCopy;
+    delete (newQuestion as Partial<IFormQuestion>)._id;
     insert(index + 1, {
       ...newQuestion,
       options: Array.isArray(options) ? [...options] : options,
@@ -169,17 +175,31 @@ const AgreementQuestionsEditor = ({ questions, onChange }: AgreementQuestionsEdi
           items={questionsForDnd}
           strategy="vertical"
           idKey="rhfId"
-          setItems={(items) => replace(items.map(({ rhfId, ...rest }) => rest))}
+          setItems={(items) =>
+            replace(
+              items.map((item) => {
+                const itemWithoutRhfId = { ...item };
+                delete itemWithoutRhfId.rhfId;
+                return itemWithoutRhfId;
+              })
+            )
+          }
         >
           {({ item, index }) => {
             return (
-              <SortableItem className="relative w-full bg-background" idKey="rhfId" item={item}>
-                {() => (
+              <SortableItem
+                key={item.rhfId}
+                className="relative w-full bg-background"
+                idKey="rhfId"
+                item={item}
+                dragHandleOnly
+              >
+                {({ dragHandleProps }) => (
                   <Question
-                    key={item.rhfId}
                     parentPath={`sections.0.questions.${index}`}
                     onDeleteQuestion={() => onClickDeleteQuestion(index)}
                     onDuplicateQuestion={() => onDuplicateQuestion(index)}
+                    dragHandleProps={dragHandleProps}
                   />
                 )}
               </SortableItem>

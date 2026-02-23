@@ -149,9 +149,9 @@ export const generateExerciseProgressNote = ({
         `${rangeEndSummary.dateLabel}: משקל ${rangeEndSummary.weight} (חזרות: ${rangeEndSummary.reps})`
       );
 
-      if (exerciseIndex < groupSelections.length - 1) {
-        noteLines.push("");
-      }
+      noteLines.push("");
+      noteLines.push("מטרה:");
+      noteLines.push("");
     });
 
     if (muscleGroupIndex < orderedMuscleGroups.length - 1) {
@@ -160,7 +160,7 @@ export const generateExerciseProgressNote = ({
   });
 
   noteLines.push("");
-  noteLines.push("מטרה:");
+  noteLines.push("מטרה כללית:");
   noteLines.push("");
 
   return noteLines.join("\n");

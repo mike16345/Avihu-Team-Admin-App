@@ -1,4 +1,4 @@
-import React, { MouseEventHandler, useState } from "react";
+import React, { useState } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 import { BsFillTrash3Fill } from "react-icons/bs";
@@ -24,8 +24,11 @@ const DeleteButton: React.FC<DeleteButtonProps> = ({ tip, onClick, disabled = fa
             disabled={disabled}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
+            onPointerDown={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => {
               e.preventDefault();
+              e.stopPropagation();
               onClick(e);
             }}
             className={`flex rounded items-center justify-center size-full p-3   hover:bg-accent ${

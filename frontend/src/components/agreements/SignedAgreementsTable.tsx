@@ -54,11 +54,18 @@ const SignedAgreementsTable = ({ paginationKey }: SignedAgreementsTableProps) =>
   const pageCount = data?.data?.totalPages ?? 1;
 
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
-
   const handleDownload = async (agreement: SignedAgreement) => {
     if (!agreement._id) {
       toast.error("לא ניתן להוריד את ההסכם.");
       return;
+    }
+
+    // Must be called synchronously in the click handler context (before any await)
+    const popup = window.open("", "_blank", "noopener,noreferrer");
+
+    // If Safari blocks even the blank popup, we’ll fallback later
+    if (popup) {
+      popup.document.title = "Downloading…";
     }
 
     try {
@@ -67,8 +74,15 @@ const SignedAgreementsTable = ({ paginationKey }: SignedAgreementsTableProps) =>
       const response = await getSignedAgreementDownloadUrl({ id: agreement._id, adminId });
       const downloadUrl = response.data.downloadUrl;
 
-      window.open(downloadUrl, "_blank", "noopener,noreferrer");
+      if (popup) {
+        popup.location.href = downloadUrl;
+      } else {
+        // Fallback: same-tab navigation (always works)
+        window.location.href = downloadUrl;
+      }
     } catch (downloadError: any) {
+      popup?.close();
+
       toast.error("הורדת ההסכם נכשלה", {
         description: downloadError?.data?.message,
       });

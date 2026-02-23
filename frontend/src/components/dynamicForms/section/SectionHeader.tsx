@@ -3,7 +3,7 @@ import SectionActions from "./SectionActions";
 import { useFormContext } from "react-hook-form";
 import { FormType } from "@/schemas/formBuilderSchema";
 import { FormField, FormItem, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import AutoResizer from "@/components/ui/AutoResizer";
 import { Textarea } from "@/components/ui/textarea";
 
 interface SectionHeaderProps {
@@ -28,7 +28,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
           render={({ field }) => {
             return (
               <FormItem>
-                <Input {...field} placeholder="קטגוריה ללא שם" />
+                <AutoResizer {...field} placeholder="שם הקטגוריה" />
                 <FormMessage />
               </FormItem>
             );

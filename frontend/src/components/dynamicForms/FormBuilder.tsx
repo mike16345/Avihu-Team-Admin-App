@@ -52,7 +52,8 @@ const FormBuilder = ({ disableOnboarding = false }: FormBuilderProps) => {
   const onDuplicateSection = (index: number) => {
     sectionIndex.current = index;
     const sectionToCopy = sections[index];
-    const { _id, ...newSection } = sectionToCopy;
+    const newSection = { ...sectionToCopy };
+    delete (newSection as Partial<IFormSection>)._id;
 
     addSection({ _id: generateUUID(), ...newSection });
   };
@@ -73,10 +74,14 @@ const FormBuilder = ({ disableOnboarding = false }: FormBuilderProps) => {
         <DragDropWrapper items={sections} strategy="vertical" idKey="_id" setItems={replace}>
           {({ item, index }) => {
             return (
-              <SortableItem className="relative w-full bg-background" idKey="_id" item={item}>
+              <SortableItem
+                key={item._id}
+                className="relative w-full bg-background"
+                idKey="_id"
+                item={item}
+              >
                 {() => (
                   <SectionContainer
-                    key={item._id}
                     parentPath={`sections.${index}`}
                     onDeleteSection={() => onClickDeleteSection(index)}
                     onDuplicateSection={() => onDuplicateSection(index)}
