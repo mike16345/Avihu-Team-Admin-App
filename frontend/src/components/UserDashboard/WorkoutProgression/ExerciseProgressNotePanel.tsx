@@ -102,8 +102,9 @@ const ExerciseProgressNotePanel = ({
       const updated = (prev[muscleGroup] || []).filter((item) => item !== exercise);
 
       if (!updated.length) {
-        const { [muscleGroup]: _, ...rest } = prev;
-        return rest;
+        const next = { ...prev };
+        delete next[muscleGroup];
+        return next;
       }
 
       return { ...prev, [muscleGroup]: updated };
@@ -280,7 +281,7 @@ const ExerciseProgressNotePanel = ({
               value={noteText}
               onChange={(event) => setNoteText(event.target.value)}
               placeholder="הטקסט שנוצר יופיע כאן"
-              className="min-h-[350px] max-h-full resize-none text-right leading-6"
+              className="min-h-[350px] max-h-full resize-none leading-6 text-right [unicode-bidi:normal]"
             />
           )}
         </div>
@@ -290,3 +291,4 @@ const ExerciseProgressNotePanel = ({
 };
 
 export default ExerciseProgressNotePanel;
+
