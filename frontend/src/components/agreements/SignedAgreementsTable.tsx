@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useUrlPagination } from "@/hooks/useUrlPagination";
 import { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
@@ -53,43 +53,43 @@ const SignedAgreementsTable = ({ paginationKey }: SignedAgreementsTableProps) =>
   const signedAgreements = data?.data?.results ?? [];
   const pageCount = data?.data?.totalPages ?? 1;
 
-  const [downloadingId, setDownloadingId] = useState<string | null>(null);
-  const handleDownload = async (agreement: SignedAgreement) => {
-    if (!agreement._id) {
-      toast.error("לא ניתן להוריד את ההסכם.");
-      return;
-    }
-
-    // Must be called synchronously in the click handler context (before any await)
-    const popup = window.open("", "_blank", "noopener,noreferrer");
-
-    // If Safari blocks even the blank popup, we’ll fallback later
-    if (popup) {
-      popup.document.title = "Downloading…";
-    }
-
-    try {
-      setDownloadingId(agreement._id);
-
-      const response = await getSignedAgreementDownloadUrl({ id: agreement._id, adminId });
-      const downloadUrl = response.data.downloadUrl;
-
-      if (popup) {
-        popup.location.href = downloadUrl;
-      } else {
-        // Fallback: same-tab navigation (always works)
-        window.location.href = downloadUrl;
+  const [openingId, setOpeningId] = useState<string | null>(null);
+  const handleViewPdf = useCallback(
+    async (agreement: SignedAgreement) => {
+      if (!agreement._id) {
+        toast.error("לא ניתן להוריד את ההסכם.");
+        return;
       }
-    } catch (downloadError: any) {
-      popup?.close();
 
-      toast.error("הורדת ההסכם נכשלה", {
-        description: downloadError?.data?.message,
-      });
-    } finally {
-      setDownloadingId(null);
-    }
-  };
+      // Must be called synchronously in the click handler context (before any await)
+      const popup = window.open("", "_blank");
+
+      if (popup) popup.opener = null;
+
+      try {
+        setOpeningId(agreement._id);
+
+        const response = await getSignedAgreementDownloadUrl({ id: agreement._id, adminId });
+        const downloadUrl = response.data.downloadUrl;
+
+        if (popup) {
+          popup.location.href = downloadUrl;
+        } else {
+          // If popup is blocked, fallback to same-tab navigation.
+          window.location.href = downloadUrl;
+        }
+      } catch (downloadError: any) {
+        popup?.close();
+
+        toast.error("הורדת ההסכם נכשלה", {
+          description: downloadError?.data?.message,
+        });
+      } finally {
+        setOpeningId(null);
+      }
+    },
+    [adminId, getSignedAgreementDownloadUrl]
+  );
 
   const columns = useMemo<ColumnDef<SignedAgreement>[]>(
     () => [
@@ -130,15 +130,15 @@ const SignedAgreementsTable = ({ paginationKey }: SignedAgreementsTableProps) =>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => handleDownload(row.original)}
-            disabled={downloadingId === row.original._id}
+            onClick={() => handleViewPdf(row.original)}
+            disabled={openingId === row.original._id}
           >
-            {downloadingId === row.original._id ? "מוריד..." : "הורדת PDF"}
+            {openingId === row.original._id ? "פותח..." : "הצג PDF"}
           </Button>
         ),
       },
     ],
-    [downloadingId]
+    [handleViewPdf, openingId]
   );
 
   useEffect(() => {
