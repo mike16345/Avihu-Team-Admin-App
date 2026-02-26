@@ -9,9 +9,14 @@ import { RxDragHandleDots2 } from "react-icons/rx";
 interface SectionActionsProps {
   handleDelete: () => void;
   handleDuplicate: () => void;
+  dragHandleProps?: any;
 }
 
-const SectionActions: React.FC<SectionActionsProps> = ({ handleDelete, handleDuplicate }) => {
+const SectionActions: React.FC<SectionActionsProps> = ({
+  handleDelete,
+  handleDuplicate,
+  dragHandleProps,
+}) => {
   return (
     <div className="flex flex-col md:flex-row gap-2 items-center">
       <CopyButton onClick={handleDuplicate} tip="שכפול" />
@@ -22,7 +27,14 @@ const SectionActions: React.FC<SectionActionsProps> = ({ handleDelete, handleDup
           <span className="sr-only">Toggle</span>
         </Button>
       </CollapsibleTrigger>
-      <RxDragHandleDots2 />
+      <button
+        type="button"
+        className="flex justify-center cursor-grab active:cursor-grabbing touch-none text-muted-foreground hover:text-foreground transition-colors"
+        aria-label="Drag section"
+        {...dragHandleProps}
+      >
+        <RxDragHandleDots2 />
+      </button>
     </div>
   );
 };

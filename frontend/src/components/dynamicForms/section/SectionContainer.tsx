@@ -10,12 +10,14 @@ interface SectionContainerProps {
   parentPath: `sections.${number}`;
   onDeleteSection: () => void;
   onDuplicateSection: () => void;
+  dragHandleProps?: any;
 }
 
 const SectionContainer: React.FC<SectionContainerProps> = ({
   onDuplicateSection,
   onDeleteSection,
   parentPath,
+  dragHandleProps,
 }) => {
   const {
     formState: { errors },
@@ -41,6 +43,7 @@ const SectionContainer: React.FC<SectionContainerProps> = ({
           parentPath={parentPath}
           handleDelete={onDeleteSection}
           handleDuplicate={onDuplicateSection}
+          dragHandleProps={dragHandleProps}
         />
         <CollapsibleContent className="flex flex-col gap-2">
           <SectionContent parentPath={parentPath} />

@@ -10,12 +10,14 @@ interface SectionHeaderProps {
   parentPath: `sections.${number}`;
   handleDelete: () => void;
   handleDuplicate: () => void;
+  dragHandleProps?: any;
 }
 
 const SectionHeader: React.FC<SectionHeaderProps> = ({
   parentPath,
   handleDelete,
   handleDuplicate,
+  dragHandleProps,
 }) => {
   const { control } = useFormContext<FormType>();
 
@@ -47,7 +49,11 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
           }}
         />
       </div>
-      <SectionActions handleDelete={handleDelete} handleDuplicate={handleDuplicate} />
+      <SectionActions
+        handleDelete={handleDelete}
+        handleDuplicate={handleDuplicate}
+        dragHandleProps={dragHandleProps}
+      />
     </div>
   );
 };

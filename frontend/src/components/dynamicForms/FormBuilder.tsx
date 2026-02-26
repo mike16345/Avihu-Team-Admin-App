@@ -79,12 +79,14 @@ const FormBuilder = ({ disableOnboarding = false }: FormBuilderProps) => {
                 className="relative w-full bg-background"
                 idKey="_id"
                 item={item}
+                dragHandleOnly
               >
-                {() => (
+                {({ dragHandleProps }) => (
                   <SectionContainer
                     parentPath={`sections.${index}`}
                     onDeleteSection={() => onClickDeleteSection(index)}
                     onDuplicateSection={() => onDuplicateSection(index)}
+                    dragHandleProps={dragHandleProps}
                   />
                 )}
               </SortableItem>
