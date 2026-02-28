@@ -9,10 +9,15 @@ import PresetRoutes from "./PresetRoutes";
 import UserFormPage from "@/pages/UserFormPage";
 import AdminDashboard from "@/pages/AdminDashboard";
 import BlogPage from "@/pages/BlogPage";
+import BlogPreviewPage from "@/pages/BlogPreviewPage";
 import BlogEditor from "@/components/Blog/BlogEditor";
 import DietPlanWrapper from "@/components/DietPlan/DietPlanWrapper";
 import WorkoutPlans from "@/components/workout plan/WorkoutPlans";
 import LeadsTablePage from "@/features/leads/LeadsTablePage";
+import FormBuilderPage from "@/pages/FormBuilderPage";
+import FormPresetsPage from "@/pages/FormPresetsPage";
+import FormResponseDetailsPage from "@/pages/FormResponseDetailsPage";
+import CurrentAgreementPage from "@/pages/Agreements/CurrentAgreementPage";
 
 export const AppRoutes = () => {
   return (
@@ -22,6 +27,7 @@ export const AppRoutes = () => {
         <Route path="/users/*" element={<UsersTable />} />
         <Route path="/leads" element={<LeadsTablePage />} />
         <Route path="/blogs/" element={<BlogPage />} />
+        <Route path="/blogs/:id" element={<BlogPreviewPage />} />
         <Route path="/blogs/create/" element={<BlogEditor />} />
         <Route path="/blogs/create/:id" element={<BlogEditor />} />
         <Route path="/users/add" element={<UserFormPage />} />
@@ -46,6 +52,10 @@ export const AppRoutes = () => {
         <Route path="/workoutPlans" element={<WorkoutsTemplatePage />} />
         <Route path="/dietPlans/" element={<DietPlanTemplatePage />} />
         <Route path="/presets/*" element={<PresetRoutes />} />
+        <Route path="/form-builder/:id" element={<FormBuilderPage />} />
+        <Route path="/form-builder" element={<FormPresetsPage />} />
+        <Route path="/form-responses/:id" element={<FormResponseDetailsPage />} />
+        <Route path="/agreements/current" element={<CurrentAgreementPage />} />
       </Routes>
     </>
   );

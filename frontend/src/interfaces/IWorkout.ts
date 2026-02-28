@@ -1,7 +1,7 @@
 import { WorkoutPlan } from "@/enums/WorkoutPlans";
 
 export interface IRecordedSet {
-  plan: WorkoutPlan;
+  plan: string;
   weight: number;
   repsDone: number;
   setNumber: number;

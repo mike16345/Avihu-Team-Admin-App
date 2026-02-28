@@ -1,0 +1,56 @@
+import React from "react";
+import QuestionActions from "./QuestionActions";
+import QuestionForm from "./QuestionForm";
+import { useFormContext } from "react-hook-form";
+import { FormType } from "@/schemas/formBuilderSchema";
+import { borderColor } from "@/constants/form";
+import { Option } from "@/types/types";
+
+interface QuestionProps {
+  parentPath: `sections.${number}.questions.${number}`;
+  onDeleteQuestion: () => void;
+  onDuplicateQuestion: () => void;
+  dragHandleProps?: any;
+  typeOptions?: Option[];
+  typesRequiringOptions?: string[];
+}
+
+const Question: React.FC<QuestionProps> = ({
+  parentPath,
+  onDeleteQuestion,
+  onDuplicateQuestion,
+  dragHandleProps,
+  typeOptions,
+  typesRequiringOptions,
+}) => {
+  const {
+    formState: { errors },
+  } = useFormContext<FormType>();
+  const sectionIndex = Number(parentPath.split(".")[1]);
+  const questionIndex = Number(parentPath.split(".")[3]);
+  const questionError = errors.sections?.[sectionIndex]?.questions?.[questionIndex];
+
+  return (
+    <div
+      className={`border rounded-xl hover:shadow hover:border-primary transition-all p-5 group flex flex-col-reverse md:flex-row justify-between gap-5 ${
+        borderColor[!!questionError as any]
+      }`}
+    >
+      <QuestionForm
+        parentPath={parentPath}
+        typeOptions={typeOptions}
+        typesRequiringOptions={typesRequiringOptions}
+      />
+
+      <div>
+        <QuestionActions
+          onDeleteQuestion={onDeleteQuestion}
+          onDuplicateQuestion={onDuplicateQuestion}
+          dragHandleProps={dragHandleProps}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default Question;

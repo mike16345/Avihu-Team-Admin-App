@@ -8,6 +8,7 @@ import {
   User2,
   Inbox,
   ChevronDown,
+  Clipboard,
 } from "lucide-react";
 import {
   Sidebar,
@@ -78,6 +79,11 @@ const sidebarGroups: SidebarItem[][] = [
       url: "/leads",
       title: "לידים",
       icon: Inbox,
+    },
+    {
+      url: "/form-builder",
+      title: "שאלונים",
+      icon: Clipboard,
     },
   ],
 ];

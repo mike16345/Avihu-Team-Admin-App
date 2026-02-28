@@ -52,8 +52,8 @@ export function getElapsedSeconds(timestamp: number) {
   return `${days}d ${hours % 24}h ${remainingMinutes}m ${remainingSeconds.toFixed(0)}s`;
 }
 
-export const convertStringsToOptions = (
-  data: string[],
+export const convertStringsToOptions = <T extends string>(
+  data: T[],
   convertNameToLabel?: Function
 ): Option[] => {
   return data.map((item) => {
@@ -161,6 +161,10 @@ export const extractVideoId = (url: string): string => {
   // Check if it's a short YouTube URL
   else if (url.startsWith("https://youtu.be/")) {
     videoId = url.split("https://youtu.be/")[1]?.split("?")[0];
+  } else if (url.includes("/embed/")) {
+    videoId = url.split("/embed/")[1]?.split("?")[0];
+  } else if (url.includes("shorts/")) {
+    videoId = url.split("shorts/")[1]?.split("?")[0];
   }
 
   return videoId;
@@ -308,3 +312,20 @@ export function removePointerEventsFromBody() {
 export function isUndefined(variable: any) {
   return variable == undefined || variable == "undefined" || variable == null;
 }
+
+export const parseNumber = (value: string | null) => {
+  if (!value) return undefined;
+  const parsed = Number(value);
+  if (Number.isNaN(parsed) || !Number.isFinite(parsed)) return undefined;
+  return Math.trunc(parsed);
+};
+
+export const normalizeValue = (value: ParamValue) => {
+  if (value === null || value === undefined) return null;
+
+  if (typeof value === "boolean") return value ? "true" : "false";
+
+  return String(value);
+};
+
+export type ParamValue = string | number | boolean | null | undefined;

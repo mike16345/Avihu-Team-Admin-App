@@ -5,6 +5,8 @@ const ERROR_MESSAGES = {
   stringMin: (min: number) => `הטקסט חייב להיות באורך של לפחות ${min} תווים`,
   stringMax: (max: number) => `הטקסט יכול להיות עד ${max} תווים בלבד`,
   arrayMin: (min: number, fieldName = "רשימה") => `${fieldName} צריכה להכיל לפחות ${min} פריטים`,
+  arrayMinDetailed: (min: number, fieldName = "רשימה", requiredField = "") =>
+    `${fieldName} צריכה להכיל לפחות ${requiredField} ${min}`,
   enumError: (validValues: string[]) =>
     `ערך לא  חוקי. נא לבחור אחד מהבאים: ${validValues.join(", ")}`,
   youtubeLink:
