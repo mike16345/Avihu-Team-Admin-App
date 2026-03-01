@@ -1,0 +1,39 @@
+{
+  "data": [
+    {
+      "_id": "user-admin-001",
+      "firstName": "מיכל",
+      "lastName": "כהן",
+      "email": "admin@example.com",
+      "phone": "0501234567",
+      "dietaryType": [],
+      "dateFinished": "2026-12-31T00:00:00.000Z",
+      "planType": "premium",
+      "remindIn": 3,
+      "dateJoined": "2025-01-15T00:00:00.000Z",
+      "isChecked": true,
+      "checkInAt": 1735689600,
+      "hasAccess": true,
+      "onboardingCompleted": true
+    },
+    {
+      "_id": "user-admin-002",
+      "firstName": "דניאל",
+      "lastName": "לוי",
+      "email": "daniel@example.com",
+      "phone": "0507654321",
+      "dietaryType": [
+        "vegetarian"
+      ],
+      "dateFinished": "2026-10-01T00:00:00.000Z",
+      "planType": "standard",
+      "remindIn": 7,
+      "dateJoined": "2025-02-01T00:00:00.000Z",
+      "isChecked": false,
+      "checkInAt": 1735603200,
+      "hasAccess": true,
+      "onboardingCompleted": false
+    }
+  ],
+  "message": "רשימת המשתמשים נטענה"
+}

@@ -84,6 +84,7 @@ export default function LoginForm() {
             <Input
               name="email"
               id="email"
+              data-testid="login-email"
               type="email"
               onChange={(e) => {
                 setEmail(e.target.value);
@@ -107,6 +108,7 @@ export default function LoginForm() {
                 placeholder="סיסמה"
                 name="password"
                 id="password"
+                data-testid="login-password"
                 type={isPasswordVisible ? "text" : "password"}
                 onChange={(e) => {
                   setPassword(e.target.value);
@@ -124,6 +126,7 @@ export default function LoginForm() {
             title="כניסה"
             isLoading={isLoading}
             type="submit"
+            data-testid="login-submit"
             className="w-full font-bold"
           />
         </CardFooter>

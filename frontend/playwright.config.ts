@@ -15,7 +15,7 @@ export default defineConfig({
   reporter: isCI ? [["html", { open: "never" }], ["list"]] : [["html", { open: "on-failure" }], ["list"]],
 
   use: {
-    baseURL: process.env.E2E_BASE_URL || "http://127.0.0.1:4173",
+    baseURL: process.env.E2E_BASE_URL || "http://127.0.0.1:3000",
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
@@ -26,9 +26,9 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: "npm run preview",
-    url: "http://127.0.0.1:4173",
+    command: "npm run start",
+    url: "http://127.0.0.1:3000",
     reuseExistingServer: !isCI,
-    timeout: 120_000,
+    timeout: 30_000,
   },
 });
