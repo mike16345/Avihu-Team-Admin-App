@@ -1,0 +1,15 @@
+{
+  "data": [
+    {
+      "_id": "analytics-user-001",
+      "firstName": "נועה",
+      "lastName": "אברהם"
+    },
+    {
+      "_id": "analytics-user-002",
+      "firstName": "יואב",
+      "lastName": "פרץ"
+    }
+  ],
+  "message": "רשימת משתמשים נטענה"
+}
