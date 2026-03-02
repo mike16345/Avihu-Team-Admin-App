@@ -1,6 +1,7 @@
-import { HOUR_STALE_TIME, MIN_STALE_TIME } from "@/constants/constants";
+import { HOUR_STALE_TIME } from "@/constants/constants";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { useUsersApi } from "@/hooks/api/useUsersApi";
+import { createRetryFunction } from "@/lib/utils";
 import { useUsersStore } from "@/store/userStore";
 import { useQuery } from "@tanstack/react-query";
 
@@ -11,6 +12,7 @@ const useUsersQuery = () => {
   return useQuery({
     queryKey: [QueryKeys.USERS],
     staleTime: HOUR_STALE_TIME,
+    retry: createRetryFunction(404, 2),
     queryFn: () =>
       getAllUsers()
         .then((users) => {

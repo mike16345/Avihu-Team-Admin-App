@@ -45,7 +45,12 @@ const Loader: React.FC<LoaderProps> = ({
       : "bg-primary-foreground";
 
   return (
-    <div className={cn(`w-full h-full flex items-center justify-center `, className)}>
+    <div
+      data-testid="loader"
+      role="status"
+      aria-label="Loading"
+      className={cn(`w-full h-full flex items-center justify-center `, className)}
+    >
       {style === `spinner` ? (
         <div
           className={cn(

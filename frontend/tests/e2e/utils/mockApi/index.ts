@@ -1,9 +1,17 @@
 import type { Page, Request } from "@playwright/test";
-import { mockScenarioRegistry, resolveMockRoutes, type MockScenarioKey } from "./registry";
+import {
+  getScenarioKey,
+  mockScenarioRegistry,
+  resolveMockRoutes,
+  type MockScenarioKey,
+  type MockScenarioSelection,
+} from "./registry";
 import { API_RESOURCE_TYPES, normalizePathname, type MockRouteDefinition } from "./routes";
 
 export interface MockApiController {
   enabledScenarios: readonly MockScenarioKey[];
+  useScenario: (...scenarioSelections: MockScenarioSelection[]) => void;
+  addScenario: (...scenarioSelections: MockScenarioSelection[]) => void;
   assertNoUnhandledRequests: () => void;
   getUnhandledRequestErrors: () => readonly Error[];
 }
@@ -64,10 +72,12 @@ const formatUnhandledRequestError = ({
 
 export const installMockApi = async (
   page: Page,
-  routes: readonly MockRouteDefinition[],
+  routes: readonly MockRouteDefinition[] = [],
   enabledScenarios: readonly MockScenarioKey[] = []
 ): Promise<MockApiController> => {
   const unhandledRequestErrors: Error[] = [];
+  let activeRoutes = routes.map((route) => ({ ...route }));
+  let activeScenarioKeys = [...enabledScenarios];
 
   await page.route("**/*", async (route) => {
     const request = route.request();
@@ -89,12 +99,12 @@ export const installMockApi = async (
       return;
     }
 
-    const matchingRoute = findMatchingRoute(routes, method, pathname);
+    const matchingRoute = findMatchingRoute(activeRoutes, method, pathname);
 
     if (!matchingRoute) {
       const error = new Error(
         formatUnhandledRequestError({
-          enabledScenarios,
+          enabledScenarios: activeScenarioKeys,
           method,
           pathname,
         })
@@ -103,6 +113,15 @@ export const installMockApi = async (
       unhandledRequestErrors.push(error);
       await route.abort("failed");
       throw error;
+    }
+
+    if (matchingRoute.delayMs && matchingRoute.delayMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, matchingRoute.delayMs));
+    }
+
+    if (matchingRoute.abortErrorCode) {
+      await route.abort(matchingRoute.abortErrorCode);
+      return;
     }
 
     await route.fulfill({
@@ -117,7 +136,22 @@ export const installMockApi = async (
   });
 
   return {
-    enabledScenarios: [...enabledScenarios],
+    get enabledScenarios() {
+      return [...activeScenarioKeys];
+    },
+    useScenario(...scenarioSelections) {
+      activeRoutes = resolveMockRoutes(scenarioSelections);
+      activeScenarioKeys = scenarioSelections.map((scenarioSelection) =>
+        getScenarioKey(scenarioSelection)
+      );
+    },
+    addScenario(...scenarioSelections) {
+      activeRoutes = [...activeRoutes, ...resolveMockRoutes(scenarioSelections)];
+      activeScenarioKeys = [
+        ...activeScenarioKeys,
+        ...scenarioSelections.map((scenarioSelection) => getScenarioKey(scenarioSelection)),
+      ];
+    },
     assertNoUnhandledRequests() {
       if (unhandledRequestErrors.length > 0) {
         throw unhandledRequestErrors[0];
@@ -129,10 +163,16 @@ export const installMockApi = async (
   };
 };
 
-export const useMockApi = async (page: Page, scenarioKeys: readonly MockScenarioKey[]) => {
-  const routes = resolveMockRoutes(scenarioKeys);
+export const useMockApi = async (
+  page: Page,
+  scenarioSelections: readonly MockScenarioSelection[]
+) => {
+  const routes = resolveMockRoutes(scenarioSelections);
+  const scenarioKeys = scenarioSelections.map((scenarioSelection) =>
+    getScenarioKey(scenarioSelection)
+  );
 
   return installMockApi(page, routes, scenarioKeys);
 };
 
-export type { MockScenarioKey } from "./registry";
+export type { MockScenarioKey, MockScenarioSelection } from "./registry";

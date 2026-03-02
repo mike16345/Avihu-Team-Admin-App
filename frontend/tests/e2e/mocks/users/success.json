@@ -1,0 +1,39 @@
+{
+  "data": [
+    {
+      "_id": "user-001",
+      "firstName": "Alice",
+      "lastName": "Cohen",
+      "email": "alice@example.com",
+      "phone": "0501234567",
+      "dietaryType": [],
+      "dateFinished": "2027-12-31T00:00:00.000Z",
+      "planType": "premium",
+      "remindIn": 604800,
+      "dateJoined": "2025-01-15T00:00:00.000Z",
+      "isChecked": true,
+      "checkInAt": 1735689600,
+      "hasAccess": true,
+      "onboardingCompleted": true
+    },
+    {
+      "_id": "user-002",
+      "firstName": "Bob",
+      "lastName": "Levi",
+      "email": "bob@example.com",
+      "phone": "0507654321",
+      "dietaryType": [
+        "vegetarian"
+      ],
+      "dateFinished": "2026-06-01T00:00:00.000Z",
+      "planType": "standard",
+      "remindIn": 1209600,
+      "dateJoined": "2025-02-01T00:00:00.000Z",
+      "isChecked": false,
+      "checkInAt": 1735603200,
+      "hasAccess": false,
+      "onboardingCompleted": false
+    }
+  ],
+  "message": "Users loaded"
+}

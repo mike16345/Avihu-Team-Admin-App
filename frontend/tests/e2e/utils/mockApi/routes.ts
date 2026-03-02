@@ -5,13 +5,7 @@ export const API_RESOURCE_TYPES = new Set(["fetch", "xhr"]);
 
 export type MockApiMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
-type JsonValue =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: JsonValue }
-  | JsonValue[];
+type JsonValue = string | number | boolean | null | { [key: string]: JsonValue } | JsonValue[];
 
 export interface MockRouteDefinition {
   method: MockApiMethod;
@@ -20,6 +14,19 @@ export interface MockRouteDefinition {
   status: number;
   fixture: JsonValue;
   headers?: Record<string, string>;
+  delayMs?: number;
+  abortErrorCode?:
+    | "aborted"
+    | "accessdenied"
+    | "connectionaborted"
+    | "connectionclosed"
+    | "connectionfailed"
+    | "connectionrefused"
+    | "connectionreset"
+    | "internetdisconnected"
+    | "namenotresolved"
+    | "timedout"
+    | "failed";
 }
 
 export type MockScenarioMap = Record<string, readonly MockRouteDefinition[]>;
@@ -52,12 +59,14 @@ export const jsonRoute = ({
   fixture,
   status = 200,
   headers,
+  delayMs,
 }: {
   method: MockApiMethod;
   pathname: string;
   fixture: JsonValue;
   status?: number;
   headers?: Record<string, string>;
+  delayMs?: number;
 }): MockRouteDefinition => {
   const normalizedPathname = normalizePathname(pathname);
 
@@ -68,6 +77,31 @@ export const jsonRoute = ({
     status,
     fixture,
     headers,
+    delayMs,
+  };
+};
+
+export const abortRoute = ({
+  method,
+  pathname,
+  abortErrorCode = "failed",
+  delayMs,
+}: {
+  method: MockApiMethod;
+  pathname: string;
+  abortErrorCode?: MockRouteDefinition["abortErrorCode"];
+  delayMs?: number;
+}): MockRouteDefinition => {
+  const normalizedPathname = normalizePathname(pathname);
+
+  return {
+    method,
+    pathRegex: createPathRegex(normalizedPathname),
+    pathname: normalizedPathname,
+    status: 0,
+    fixture: null,
+    delayMs,
+    abortErrorCode,
   };
 };
 

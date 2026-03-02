@@ -12,7 +12,9 @@ export default defineConfig({
   retries: isCI ? 2 : 0,
   workers: isCI ? 2 : undefined,
 
-  reporter: isCI ? [["html", { open: "never" }], ["list"]] : [["html", { open: "on-failure" }], ["list"]],
+  reporter: isCI
+    ? [["html", { open: "never" }], ["list"]]
+    : [["html", { open: "on-failure" }], ["list"]],
 
   use: {
     baseURL: process.env.E2E_BASE_URL || "http://127.0.0.1:3000",
@@ -23,6 +25,8 @@ export default defineConfig({
 
   projects: [
     { name: "chromium", use: { ...devices["Desktop Chrome"] } },
+    { name: "firefox", use: { ...devices["Desktop Firefox"] } },
+    { name: "webkit", use: { ...devices["Desktop Safari"] } },
   ],
 
   webServer: {

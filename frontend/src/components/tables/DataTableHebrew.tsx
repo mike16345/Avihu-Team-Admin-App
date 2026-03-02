@@ -56,6 +56,7 @@ interface DataTableProps<TData, TValue> {
   paginationKey?: string;
   isLoadingNextPage?: boolean;
   rowClickMode?: "single" | "double";
+  testIdPrefix?: string;
 }
 
 declare module "@tanstack/table-core" {
@@ -89,6 +90,7 @@ export function DataTableHebrew<TData, TValue>({
   paginationKey,
   getRowId,
   rowClickMode = "double",
+  testIdPrefix,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -210,11 +212,15 @@ export function DataTableHebrew<TData, TValue>({
   };
 
   return (
-    <div className="space-y-4 rounded-xl bg-background/80 p-4 shadow-sm">
+    <div
+      data-testid={testIdPrefix ? `${testIdPrefix}-table` : undefined}
+      className="space-y-4 rounded-xl bg-background/80 p-4 shadow-sm"
+    >
       <div className="flex flex-col gap-4  pb-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <Input
             placeholder={searchPlaceholder ?? "חיפוש..."}
+            data-testid={testIdPrefix ? `${testIdPrefix}-search` : undefined}
             value={searchValue}
             onChange={(event) => handleSearchChange(event.target.value)}
             className="h-9 sm:w-72"
@@ -243,7 +249,11 @@ export function DataTableHebrew<TData, TValue>({
             )}
             <DropdownMenu dir="rtl">
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="h-9 px-3">
+                <Button
+                  data-testid={testIdPrefix ? `${testIdPrefix}-column-toggle` : undefined}
+                  variant="outline"
+                  className="h-9 px-3"
+                >
                   סינון עמודות
                   <FilterIcon size={15} className="mr-2" />
                 </Button>
@@ -311,6 +321,9 @@ export function DataTableHebrew<TData, TValue>({
                     isActive={handleHoverOnRow?.(row.original)}
                   >
                     <TableRow
+                      data-testid={
+                        testIdPrefix ? `${testIdPrefix}-row-${getRowId(row.original)}` : undefined
+                      }
                       className={cn(getRowClassName(row.original))}
                       onClick={
                         rowClickMode === "single"
@@ -345,6 +358,7 @@ export function DataTableHebrew<TData, TValue>({
       </div>
       <div className="flex items-center justify-between sm:justify-end gap-3 py-4">
         <Button
+          data-testid={testIdPrefix ? `${testIdPrefix}-previous-page` : undefined}
           variant="outline"
           onClick={() => {
             if (isServerPaginated) {
@@ -359,6 +373,7 @@ export function DataTableHebrew<TData, TValue>({
           קודם
         </Button>
         <Button
+          data-testid={testIdPrefix ? `${testIdPrefix}-next-page` : undefined}
           variant="outline"
           onClick={() => {
             if (isServerPaginated) {

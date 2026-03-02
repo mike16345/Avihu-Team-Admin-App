@@ -90,6 +90,8 @@ const sidebarGroups: SidebarItem[][] = [
 
 const SidebarItems = () => {
   const location = useLocation();
+  const createSidebarTestId = (url?: string) =>
+    url ? `sidebar-link-${url.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "")}` : undefined;
 
   return (
     <>
@@ -107,6 +109,7 @@ const SidebarItems = () => {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={isActive}>
                     <Link
+                      data-testid={createSidebarTestId(item.url)}
                       className={`w-full rounded-full ${
                         isActive && "text-secondary bg-secondary-foreground"
                       }`}
@@ -142,6 +145,7 @@ const SidebarItems = () => {
                           <SidebarMenuSubItem key={child.title}>
                             <SidebarMenuSubButton asChild isActive={childActive}>
                               <Link
+                                data-testid={createSidebarTestId(child.url)}
                                 className={`flex items-center gap-2 ${
                                   childActive && "text-secondary bg-secondary"
                                 }`}

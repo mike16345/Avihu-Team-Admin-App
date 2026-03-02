@@ -77,6 +77,7 @@ export const UsersTable = () => {
 
           return daysUntilPlanIsFinished <= MINIMUM_WARNING_DAYS;
         }}
+        testIdPrefix="users"
       />
     </>
   );
