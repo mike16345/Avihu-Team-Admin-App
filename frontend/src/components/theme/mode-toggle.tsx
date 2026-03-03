@@ -7,6 +7,7 @@ export function ModeToggle() {
 
   return (
     <Button
+      data-testid="sidebar-theme-toggle"
       onClick={() => setTheme(theme == "dark" ? "light" : "dark")}
       variant={"outline"}
       size="icon"

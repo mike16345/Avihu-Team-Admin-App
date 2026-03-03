@@ -14,7 +14,7 @@ const FormPresetsPage = () => {
   const { tab, setTab } = useUrlTab({ defaultTab: "forms", tabs });
 
   return (
-    <Tabs dir="rtl" value={tab} onValueChange={setTab} className="w-full">
+    <Tabs data-testid="form-presets-page" dir="rtl" value={tab} onValueChange={setTab} className="w-full">
       <TabsList>
         <TabsTrigger value="forms">שאלונים</TabsTrigger>
         <TabsTrigger value="responses">תשובות</TabsTrigger>

@@ -30,6 +30,7 @@ const QuestionnairesTable = () => {
           data={formPresetsRes?.data || []}
           columns={formColumns}
           paginationKey="forms"
+          testIdPrefix="questionnaires"
           actionButton={
             <div className="flex flex-wrap gap-2">
               {onboardingForm && (

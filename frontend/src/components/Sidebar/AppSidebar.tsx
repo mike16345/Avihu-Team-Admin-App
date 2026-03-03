@@ -91,7 +91,11 @@ const sidebarGroups: SidebarItem[][] = [
 const SidebarItems = () => {
   const location = useLocation();
   const createSidebarTestId = (url?: string) =>
-    url ? `sidebar-link-${url.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "")}` : undefined;
+    url
+      ? `sidebar-link-${
+          url === "/" ? "home" : url.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "")
+        }`
+      : undefined;
 
   return (
     <>
@@ -189,7 +193,7 @@ const Header = () => {
 
 export function AppSidebar() {
   return (
-    <Sidebar side="right">
+    <Sidebar side="right" data-testid="app-sidebar">
       <Header />
       <SidebarContent>
         <SidebarGroup>

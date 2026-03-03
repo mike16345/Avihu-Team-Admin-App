@@ -1,5 +1,8 @@
 import { analyticsScenarios } from "./scenarios/analytics";
 import { authScenarios } from "./scenarios/auth";
+import { blogsScenarios } from "./scenarios/blogs";
+import { leadsScenarios } from "./scenarios/leads";
+import { presetsScenarios } from "./scenarios/presets";
 import { usersScenarios } from "./scenarios/users";
 import { weighInsScenarios } from "./scenarios/weighIns";
 import type { MockRouteDefinition } from "./routes";
@@ -7,6 +10,9 @@ import type { MockRouteDefinition } from "./routes";
 export const mockScenarioRegistry = {
   ...analyticsScenarios,
   ...authScenarios,
+  ...blogsScenarios,
+  ...leadsScenarios,
+  ...presetsScenarios,
   ...usersScenarios,
   ...weighInsScenarios,
 };
