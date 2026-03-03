@@ -1,12 +1,14 @@
 import { analyticsScenarios } from "./scenarios/analytics";
 import { authScenarios } from "./scenarios/auth";
 import { usersScenarios } from "./scenarios/users";
+import { weighInsScenarios } from "./scenarios/weighIns";
 import type { MockRouteDefinition } from "./routes";
 
 export const mockScenarioRegistry = {
   ...analyticsScenarios,
   ...authScenarios,
   ...usersScenarios,
+  ...weighInsScenarios,
 };
 
 export type MockScenarioKey = keyof typeof mockScenarioRegistry;

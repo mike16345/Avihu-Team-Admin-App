@@ -5,7 +5,18 @@ export const API_RESOURCE_TYPES = new Set(["fetch", "xhr"]);
 
 export type MockApiMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
-type JsonValue = string | number | boolean | null | { [key: string]: JsonValue } | JsonValue[];
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: JsonValue }
+  | JsonValue[];
+
+export interface ApiResponseFixture<TData extends JsonValue = JsonValue> {
+  data: TData;
+  message: string;
+}
 
 export interface MockRouteDefinition {
   method: MockApiMethod;
@@ -30,6 +41,8 @@ export interface MockRouteDefinition {
 }
 
 export type MockScenarioMap = Record<string, readonly MockRouteDefinition[]>;
+type MockRouteOptions = Pick<MockRouteDefinition, "status" | "headers" | "delayMs">;
+type FixturePath = readonly [string, ...string[]];
 
 const escapeForRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -81,6 +94,30 @@ export const jsonRoute = ({
   };
 };
 
+export const jsonFixtureRoute = ({
+  method,
+  pathname,
+  fixturePath,
+  status = 200,
+  headers,
+  delayMs,
+}: {
+  method: MockApiMethod;
+  pathname: string;
+  fixturePath: FixturePath;
+  status?: number;
+  headers?: Record<string, string>;
+  delayMs?: number;
+}): MockRouteDefinition =>
+  jsonRoute({
+    method,
+    pathname,
+    fixture: loadJsonFixture(...fixturePath),
+    status,
+    headers,
+    delayMs,
+  });
+
 export const abortRoute = ({
   method,
   pathname,
@@ -104,6 +141,61 @@ export const abortRoute = ({
     abortErrorCode,
   };
 };
+
+export const apiResponseFixture = <TData extends JsonValue>(
+  data: TData,
+  message: string
+): ApiResponseFixture<TData> => ({
+  data,
+  message,
+});
+
+export const errorResponseFixture = (message: string) => apiResponseFixture(null, message);
+
+export const apiRoute = <TData extends JsonValue>({
+  method,
+  pathname,
+  data,
+  message,
+  status = 200,
+  headers,
+  delayMs,
+}: {
+  method: MockApiMethod;
+  pathname: string;
+  data: TData;
+  message: string;
+} & MockRouteOptions): MockRouteDefinition =>
+  jsonRoute({
+    method,
+    pathname,
+    fixture: apiResponseFixture(data, message),
+    status,
+    headers,
+    delayMs,
+  });
+
+export const apiErrorRoute = ({
+  method,
+  pathname,
+  message,
+  status,
+  headers,
+  delayMs,
+}: {
+  method: MockApiMethod;
+  pathname: string;
+  message: string;
+  status: number;
+} & Omit<MockRouteOptions, "status">): MockRouteDefinition =>
+  jsonRoute({
+    method,
+    pathname,
+    fixture: errorResponseFixture(message),
+    status,
+    headers,
+    delayMs,
+  });
 
 export const loadJsonFixture = <T extends JsonValue>(...pathSegments: string[]) => {
   const fixturePath = path.resolve(__dirname, "..", "..", "mocks", ...pathSegments);

@@ -26,25 +26,25 @@ import userSchema from "@/schemas/userSchema";
 import UserPlanTypes from "@/enums/UserPlanTypes";
 
 const remindInOptions = [
-  { value: `604800`, name: `שבוע` },
-  { value: `1209600`, name: `שבועיים` },
-  { value: `1814400`, name: `שלושה שבועות` },
-  { value: `2592000`, name: `חודש` },
+  { value: "604800", name: "שבוע" },
+  { value: "1209600", name: "שבועיים" },
+  { value: "1814400", name: "שלושה שבועות" },
+  { value: "2592000", name: "חודש" },
 ];
 
 const datePresets = [
-  { name: `חודש`, timeInDays: `30` },
-  { name: `חודשיים`, timeInDays: `60` },
-  { name: `שלושה חודשים`, timeInDays: `90` },
-  { name: `ארבעה חודשים`, timeInDays: `120` },
-  { name: `חמישה חודשים`, timeInDays: `150` },
-  { name: `שישה חודשים`, timeInDays: `180` },
-  { name: `שבעה חודשים`, timeInDays: `210` },
-  { name: `שמונה חודשים`, timeInDays: `240` },
-  { name: `תשעה חודשים`, timeInDays: `270` },
-  { name: `עשרה חודשים`, timeInDays: `300` },
-  { name: `אחד עשר חודשים`, timeInDays: `330` },
-  { name: `שנה`, timeInDays: `360` },
+  { name: "חודש", timeInDays: "30" },
+  { name: "חודשיים", timeInDays: "60" },
+  { name: "שלושה חודשים", timeInDays: "90" },
+  { name: "ארבעה חודשים", timeInDays: "120" },
+  { name: "חמישה חודשים", timeInDays: "150" },
+  { name: "שישה חודשים", timeInDays: "180" },
+  { name: "שבעה חודשים", timeInDays: "210" },
+  { name: "שמונה חודשים", timeInDays: "240" },
+  { name: "תשעה חודשים", timeInDays: "270" },
+  { name: "עשרה חודשים", timeInDays: "300" },
+  { name: "אחד עשר חודשים", timeInDays: "330" },
+  { name: "שנה", timeInDays: "360" },
 ];
 
 interface UserFormProps {
@@ -63,11 +63,11 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
   const userForm = useForm<z.infer<typeof userSchema>>({
     resolver: zodResolver(userSchema),
     defaultValues: {
-      firstName: existingUser?.firstName || ``,
-      lastName: existingUser?.lastName || ``,
-      phone: existingUser?.phone || ``,
-      email: existingUser?.email || ``,
-      planType: existingUser?.planType || ``,
+      firstName: existingUser?.firstName || "",
+      lastName: existingUser?.lastName || "",
+      phone: existingUser?.phone || "",
+      email: existingUser?.email || "",
+      planType: existingUser?.planType || "",
       dietaryType: existingUser?.dietaryType || [],
       remindIn: existingUser?.remindIn,
       dateFinished: userFinishDate,
@@ -86,7 +86,11 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
 
   return (
     <Form {...userForm}>
-      <form onSubmit={userForm.handleSubmit(onSubmit)} className="space-y-5">
+      <form
+        data-testid="user-form"
+        onSubmit={userForm.handleSubmit(onSubmit)}
+        className="space-y-5"
+      >
         <div className="flex items-center gap-4 sm:w-1/2">
           <FormField
             control={userForm.control}
@@ -95,9 +99,9 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
               <FormItem className="w-full">
                 <FormLabel>שם פרטי</FormLabel>
                 <FormControl>
-                  <Input placeholder="שם פרטי..." {...field} />
+                  <Input data-testid="user-form-first-name" placeholder="שם פרטי..." {...field} />
                 </FormControl>
-                <FormMessage />
+                <FormMessage data-testid="user-form-first-name-error" />
               </FormItem>
             )}
           />
@@ -108,9 +112,9 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
               <FormItem className="w-full">
                 <FormLabel>שם משפחה</FormLabel>
                 <FormControl>
-                  <Input placeholder="שם משפחה..." {...field} />
+                  <Input data-testid="user-form-last-name" placeholder="שם משפחה..." {...field} />
                 </FormControl>
-                <FormMessage />
+                <FormMessage data-testid="user-form-last-name-error" />
               </FormItem>
             )}
           />
@@ -123,9 +127,15 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
               <FormItem className="w-full">
                 <FormLabel>טלפון</FormLabel>
                 <FormControl>
-                  <Input dir="ltr" className="text-center" placeholder="טלפון" {...field} />
+                  <Input
+                    data-testid="user-form-phone"
+                    dir="ltr"
+                    className="text-center"
+                    placeholder="טלפון"
+                    {...field}
+                  />
                 </FormControl>
-                <FormMessage />
+                <FormMessage data-testid="user-form-phone-error" />
               </FormItem>
             )}
           />
@@ -136,9 +146,14 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
               <FormItem className="w-full">
                 <FormLabel>אימייל</FormLabel>
                 <FormControl>
-                  <Input className=" text-center" placeholder="israel@example.com" {...field} />
+                  <Input
+                    data-testid="user-form-email"
+                    className="text-center"
+                    placeholder="israel@example.com"
+                    {...field}
+                  />
                 </FormControl>
-                <FormMessage />
+                <FormMessage data-testid="user-form-email-error" />
               </FormItem>
             )}
           />
@@ -151,7 +166,7 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
               <FormLabel>סוג תוכנית</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
-                  <SelectTrigger dir="rtl">
+                  <SelectTrigger data-testid="user-form-plan-type" dir="rtl">
                     <SelectValue placeholder={field.value || "בחר סוג תוכנית"} />
                   </SelectTrigger>
                 </FormControl>
@@ -160,7 +175,7 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
                   <SelectItem value={UserPlanTypes.CUT}>{UserPlanTypes.CUT}</SelectItem>
                 </SelectContent>
               </Select>
-              <FormMessage />
+              <FormMessage data-testid="user-form-plan-type-error" />
             </FormItem>
           )}
         />
@@ -175,7 +190,7 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
                 <FormLabel>בדיקה תקופתית</FormLabel>
                 <Select key={remindIn} onValueChange={field.onChange}>
                   <FormControl>
-                    <SelectTrigger dir="rtl">
+                    <SelectTrigger data-testid="user-form-remind-in" dir="rtl">
                       <SelectValue placeholder={remindIn || "תבדוק אותי כל שבוע..."} />
                     </SelectTrigger>
                   </FormControl>
@@ -187,7 +202,7 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
                     ))}
                   </SelectContent>
                 </Select>
-                <FormMessage />
+                <FormMessage data-testid="user-form-remind-in-error" />
               </FormItem>
             );
           }}
@@ -205,9 +220,11 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
                   presetValues={datePresets}
                   selectedDate={field.value}
                   onChangeDate={(date: Date) => field.onChange(date)}
+                  triggerTestId="user-form-date-finished"
+                  presetTriggerTestId="user-form-date-preset"
                 />
               </FormControl>
-              <FormMessage />
+              <FormMessage data-testid="user-form-date-finished-error" />
             </FormItem>
           )}
         />
@@ -223,14 +240,15 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
                   saveSelected={field.onChange}
                 />
               </FormControl>
-              <FormMessage />
+              <FormMessage data-testid="user-form-dietary-type-error" />
             </FormItem>
           )}
         />
         <CustomButton
+          data-testid="user-form-submit"
           title="שמור משתמש"
           type="submit"
-          className=" sm:w-32 w-full"
+          className="sm:w-32 w-full"
           variant={"success"}
           isLoading={pending}
         />

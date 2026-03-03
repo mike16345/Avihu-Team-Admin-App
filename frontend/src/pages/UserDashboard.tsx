@@ -30,7 +30,7 @@ export const UserDashboard = () => {
   const currentUser = data || user;
 
   return (
-    <div className="size-full flex flex-col gap-4  ">
+    <div data-testid="user-dashboard" className="size-full flex flex-col gap-4  ">
       <h1 className="text-3xl text-center sm:hidden ">עמוד משתמש</h1>
       <UserInfo user={currentUser} />
       <Tabs dir="rtl" value={tab} onValueChange={setTab} className="w-full">

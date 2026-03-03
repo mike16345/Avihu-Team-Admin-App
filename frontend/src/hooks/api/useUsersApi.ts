@@ -5,7 +5,7 @@ import { ApiResponse } from "@/types/types";
 const USERS_ENDPOINT = "users";
 
 export const useUsersApi = () => {
-  const addUser = (user: IUserPost) => sendData<IUser>(USERS_ENDPOINT, user);
+  const addUser = (user: IUserPost) => sendData<ApiResponse<IUser>>(USERS_ENDPOINT, user);
 
   const updateUser = (userID: string, user: IUser) =>
     updateItem(`${USERS_ENDPOINT}/one`, user, null, { id: userID });

@@ -26,6 +26,8 @@ interface DatePickerProps {
   presetValues?: PresetValues[];
   selectedDate: Date;
   onChangeDate: (date: Date) => void;
+  triggerTestId?: string;
+  presetTriggerTestId?: string;
 }
 
 const DatePicker: React.FC<DatePickerProps> = ({
@@ -34,6 +36,8 @@ const DatePicker: React.FC<DatePickerProps> = ({
   presetValues,
   selectedDate,
   onChangeDate,
+  triggerTestId,
+  presetTriggerTestId,
 }) => {
   const [date, setDate] = useState<Date>();
   const [openPopover, setOpenPopover] = useState(false);
@@ -62,6 +66,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
     <Popover open={openPopover} onOpenChange={closePopover}>
       <PopoverTrigger onClick={() => setOpenPopover(true)} asChild>
         <Button
+          data-testid={triggerTestId}
           onClick={() => setOpenPopover(true)}
           variant={"outline"}
           className={cn(
@@ -83,7 +88,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
         >
           {presets && (
             <>
-              <SelectTrigger dir="rtl">
+              <SelectTrigger data-testid={presetTriggerTestId} dir="rtl">
                 <SelectValue placeholder="בחר" />
               </SelectTrigger>
               <SelectContent position="popper" dir="rtl">
