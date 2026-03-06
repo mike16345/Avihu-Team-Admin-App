@@ -15,11 +15,7 @@ interface TableActionsProps {
   testIdPrefix?: string;
 }
 
-const TableActions: React.FC<TableActionsProps> = ({
-  handleDelete,
-  handleEdit,
-  testIdPrefix,
-}) => {
+const TableActions: React.FC<TableActionsProps> = ({ handleDelete, handleEdit, testIdPrefix }) => {
   return (
     <DropdownMenu dir="rtl">
       <DropdownMenuTrigger

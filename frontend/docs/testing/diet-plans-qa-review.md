@@ -99,80 +99,80 @@ Related entry/auth endpoints:
 
 ### A) Routing & Entry
 
-| Case | Setup | Mock Scenario | User Action | Expected Assertions |
-| --- | --- | --- | --- | --- |
-| Direct navigation | Logged-in admin | `diet-plans.success`, `diet-plans.food-groups.success` | `goto("/dietPlans")` | Path is `/dietPlans`, page shell visible, presets table visible |
-| Sidebar entry | Logged-in admin on dashboard | Same | Click sidebar diet-plans link | Path is `/dietPlans`, page shell visible |
-| Guarded route | No auth state | None | `goto("/dietPlans")` | Redirect to `/login` |
-| Back/forward | Logged-in admin | Same | Open via sidebar, then browser back/forward | Dashboard then diet-plans restore correctly |
-| Invalid params | N/A | N/A | N/A | No route params exist on this page |
-| Missing params | N/A | N/A | N/A | No required route params exist on this page |
+| Case              | Setup                        | Mock Scenario                                          | User Action                                 | Expected Assertions                                             |
+| ----------------- | ---------------------------- | ------------------------------------------------------ | ------------------------------------------- | --------------------------------------------------------------- |
+| Direct navigation | Logged-in admin              | `diet-plans.success`, `diet-plans.food-groups.success` | `goto("/dietPlans")`                        | Path is `/dietPlans`, page shell visible, presets table visible |
+| Sidebar entry     | Logged-in admin on dashboard | Same                                                   | Click sidebar diet-plans link               | Path is `/dietPlans`, page shell visible                        |
+| Guarded route     | No auth state                | None                                                   | `goto("/dietPlans")`                        | Redirect to `/login`                                            |
+| Back/forward      | Logged-in admin              | Same                                                   | Open via sidebar, then browser back/forward | Dashboard then diet-plans restore correctly                     |
+| Invalid params    | N/A                          | N/A                                                    | N/A                                         | No route params exist on this page                              |
+| Missing params    | N/A                          | N/A                                                    | N/A                                         | No required route params exist on this page                     |
 
 ### B) Data States (Per Endpoint)
 
 Primary endpoint `GET /presets/dietPlans`
 
-| Case | Setup | Mock Scenario | User Action | Expected Assertions |
-| --- | --- | --- | --- | --- |
-| Success | Logged-in admin | `diet-plans.success` | Open page | 2 preset rows visible |
-| Success (large) | Logged-in admin | `diet-plans.large` | Open page | Pagination controls work across multiple pages |
-| Empty | Logged-in admin | `diet-plans.empty` | Open page | Table visible, 0 data rows |
-| Partial / null | Logged-in admin | `diet-plans.null-data` | Open page | Table visible, 0 data rows |
-| 400 | Logged-in admin | `diet-plans.error-400` | Open page | `ErrorPage` visible |
-| 401 | Logged-in admin | `diet-plans.error-401` | Open page | `ErrorPage` visible |
-| 403 | Logged-in admin | `diet-plans.error-403` | Open page | `ErrorPage` visible |
-| 404 | Logged-in admin | `diet-plans.error-404` | Open page | Empty table state, not `ErrorPage` |
-| 500 | Logged-in admin | `diet-plans.error-500` | Open page | `ErrorPage` visible |
-| Network failure | Logged-in admin | `diet-plans.network-failure` | Open page | `ErrorPage` visible |
-| Slow response | Logged-in admin | delayed `diet-plans.success` | Open page | `TemplateTabsSkeleton` visible before table |
+| Case            | Setup           | Mock Scenario                | User Action | Expected Assertions                            |
+| --------------- | --------------- | ---------------------------- | ----------- | ---------------------------------------------- |
+| Success         | Logged-in admin | `diet-plans.success`         | Open page   | 2 preset rows visible                          |
+| Success (large) | Logged-in admin | `diet-plans.large`           | Open page   | Pagination controls work across multiple pages |
+| Empty           | Logged-in admin | `diet-plans.empty`           | Open page   | Table visible, 0 data rows                     |
+| Partial / null  | Logged-in admin | `diet-plans.null-data`       | Open page   | Table visible, 0 data rows                     |
+| 400             | Logged-in admin | `diet-plans.error-400`       | Open page   | `ErrorPage` visible                            |
+| 401             | Logged-in admin | `diet-plans.error-401`       | Open page   | `ErrorPage` visible                            |
+| 403             | Logged-in admin | `diet-plans.error-403`       | Open page   | `ErrorPage` visible                            |
+| 404             | Logged-in admin | `diet-plans.error-404`       | Open page   | Empty table state, not `ErrorPage`             |
+| 500             | Logged-in admin | `diet-plans.error-500`       | Open page   | `ErrorPage` visible                            |
+| Network failure | Logged-in admin | `diet-plans.network-failure` | Open page   | `ErrorPage` visible                            |
+| Slow response   | Logged-in admin | delayed `diet-plans.success` | Open page   | `TemplateTabsSkeleton` visible before table    |
 
 Tab endpoint `GET /menuItems/foodGroup`
 
-| Case | Setup | Mock Scenario | User Action | Expected Assertions |
-| --- | --- | --- | --- | --- |
-| Success | Logged-in admin | `diet-plans.food-groups.success` | Switch to protein tab | Food-group table visible with rows |
-| Success (large) | Logged-in admin | `diet-plans.food-groups.large` | Switch to protein tab | Pagination can span multiple pages |
-| Empty | Logged-in admin | `diet-plans.food-groups.empty` | Switch to protein tab | Table visible, 0 data rows |
-| Partial / null | Logged-in admin | `diet-plans.food-groups.null-data` | Switch to protein tab | Table visible, 0 data rows |
-| 400 | Logged-in admin | `diet-plans.food-groups.error-400` | Switch to protein tab | `ErrorPage` visible |
-| 401 | Logged-in admin | `diet-plans.food-groups.error-401` | Switch to protein tab | `ErrorPage` visible |
-| 403 | Logged-in admin | `diet-plans.food-groups.error-403` | Switch to protein tab | `ErrorPage` visible |
-| 404 | Logged-in admin | `diet-plans.food-groups.error-404` | Switch to protein tab | Empty table state, not `ErrorPage` |
-| 500 | Logged-in admin | `diet-plans.food-groups.error-500` | Switch to protein tab | `ErrorPage` visible |
-| Network failure | Logged-in admin | `diet-plans.food-groups.network-failure` | Switch to protein tab | `ErrorPage` visible |
-| Slow response | Logged-in admin | delayed `diet-plans.food-groups.success` | Switch to protein tab | Skeleton visible before table |
+| Case            | Setup           | Mock Scenario                            | User Action           | Expected Assertions                |
+| --------------- | --------------- | ---------------------------------------- | --------------------- | ---------------------------------- |
+| Success         | Logged-in admin | `diet-plans.food-groups.success`         | Switch to protein tab | Food-group table visible with rows |
+| Success (large) | Logged-in admin | `diet-plans.food-groups.large`           | Switch to protein tab | Pagination can span multiple pages |
+| Empty           | Logged-in admin | `diet-plans.food-groups.empty`           | Switch to protein tab | Table visible, 0 data rows         |
+| Partial / null  | Logged-in admin | `diet-plans.food-groups.null-data`       | Switch to protein tab | Table visible, 0 data rows         |
+| 400             | Logged-in admin | `diet-plans.food-groups.error-400`       | Switch to protein tab | `ErrorPage` visible                |
+| 401             | Logged-in admin | `diet-plans.food-groups.error-401`       | Switch to protein tab | `ErrorPage` visible                |
+| 403             | Logged-in admin | `diet-plans.food-groups.error-403`       | Switch to protein tab | `ErrorPage` visible                |
+| 404             | Logged-in admin | `diet-plans.food-groups.error-404`       | Switch to protein tab | Empty table state, not `ErrorPage` |
+| 500             | Logged-in admin | `diet-plans.food-groups.error-500`       | Switch to protein tab | `ErrorPage` visible                |
+| Network failure | Logged-in admin | `diet-plans.food-groups.network-failure` | Switch to protein tab | `ErrorPage` visible                |
+| Slow response   | Logged-in admin | delayed `diet-plans.food-groups.success` | Switch to protein tab | Skeleton visible before table      |
 
 ### C) User Interactions
 
-| Case | Setup | Mock Scenario | User Action | Expected Assertions |
-| --- | --- | --- | --- | --- |
-| Search | Logged-in admin | `diet-plans.large` | Type in search | Matching rows remain; non-matching rows disappear |
-| Pagination | Logged-in admin | `diet-plans.large` | Click next page | Page 2 rows appear; page 1 rows disappear |
-| Main add | Logged-in admin | `diet-plans.success` | Click main add button | Navigate to `/presets/dietPlans` and editor page shell loads |
-| Food-group add | Logged-in admin | `diet-plans.food-groups.success` | Switch tab, click add | Sheet dialog opens |
-| Sheet close | Logged-in admin | `diet-plans.food-groups.success` | Press `Escape` | Sheet dialog closes |
-| Delete preset | Logged-in admin | `diet-plans.delete.success` | Open actions, click delete | `DELETE /presets/dietPlans/one` request sent |
-| Delete food-group item | Logged-in admin | `diet-plans.food-groups.delete.success` | Open actions, click delete | `DELETE /menuItems/one` request sent |
-| Disabled state | N/A | N/A | N/A | No explicit disabled/pending state is exposed by `PresetTable` actions today |
-| Double-click prevention | N/A | N/A | N/A | No prevention exists; repeated clicks would issue repeated actions |
-| UI rollback | N/A | N/A | N/A | No optimistic row removal is implemented in this table |
+| Case                    | Setup           | Mock Scenario                           | User Action                | Expected Assertions                                                          |
+| ----------------------- | --------------- | --------------------------------------- | -------------------------- | ---------------------------------------------------------------------------- |
+| Search                  | Logged-in admin | `diet-plans.large`                      | Type in search             | Matching rows remain; non-matching rows disappear                            |
+| Pagination              | Logged-in admin | `diet-plans.large`                      | Click next page            | Page 2 rows appear; page 1 rows disappear                                    |
+| Main add                | Logged-in admin | `diet-plans.success`                    | Click main add button      | Navigate to `/presets/dietPlans` and editor page shell loads                 |
+| Food-group add          | Logged-in admin | `diet-plans.food-groups.success`        | Switch tab, click add      | Sheet dialog opens                                                           |
+| Sheet close             | Logged-in admin | `diet-plans.food-groups.success`        | Press `Escape`             | Sheet dialog closes                                                          |
+| Delete preset           | Logged-in admin | `diet-plans.delete.success`             | Open actions, click delete | `DELETE /presets/dietPlans/one` request sent                                 |
+| Delete food-group item  | Logged-in admin | `diet-plans.food-groups.delete.success` | Open actions, click delete | `DELETE /menuItems/one` request sent                                         |
+| Disabled state          | N/A             | N/A                                     | N/A                        | No explicit disabled/pending state is exposed by `PresetTable` actions today |
+| Double-click prevention | N/A             | N/A                                     | N/A                        | No prevention exists; repeated clicks would issue repeated actions           |
+| UI rollback             | N/A             | N/A                                     | N/A                        | No optimistic row removal is implemented in this table                       |
 
 ### D) Edge Cases
 
-| Case | Setup | Mock Scenario | User Action | Expected Assertions |
-| --- | --- | --- | --- | --- |
-| Very long names | Logged-in admin | Large-name fixture (not yet automated) | Open page | Rows should stay usable without breaking action access |
-| Special characters | Logged-in admin | Special-name fixture (not yet automated) | Search / open actions | Matching and row actions should still work |
-| RTL layout | Logged-in admin | Standard success fixtures | Open page | Tabs, table, and sheet remain usable in RTL |
-| Zero / null fields | Logged-in admin | `null-data` fixtures | Open page / switch tab | Page degrades to empty state instead of crashing |
-| Keyboard modal handling | Logged-in admin | Food-group success | Open sheet, press `Escape` | Dialog closes |
+| Case                    | Setup           | Mock Scenario                            | User Action                | Expected Assertions                                    |
+| ----------------------- | --------------- | ---------------------------------------- | -------------------------- | ------------------------------------------------------ |
+| Very long names         | Logged-in admin | Large-name fixture (not yet automated)   | Open page                  | Rows should stay usable without breaking action access |
+| Special characters      | Logged-in admin | Special-name fixture (not yet automated) | Search / open actions      | Matching and row actions should still work             |
+| RTL layout              | Logged-in admin | Standard success fixtures                | Open page                  | Tabs, table, and sheet remain usable in RTL            |
+| Zero / null fields      | Logged-in admin | `null-data` fixtures                     | Open page / switch tab     | Page degrades to empty state instead of crashing       |
+| Keyboard modal handling | Logged-in admin | Food-group success                       | Open sheet, press `Escape` | Dialog closes                                          |
 
 ### E) Permissions / Roles
 
-| Case | Setup | Mock Scenario | User Action | Expected Assertions |
-| --- | --- | --- | --- | --- |
-| Unauthenticated | No auth state | None | Visit `/dietPlans` | Redirect to `/login` |
-| Partial / full permission | N/A | N/A | N/A | No page-level role gating is implemented beyond auth in the inspected code |
+| Case                      | Setup         | Mock Scenario | User Action        | Expected Assertions                                                        |
+| ------------------------- | ------------- | ------------- | ------------------ | -------------------------------------------------------------------------- |
+| Unauthenticated           | No auth state | None          | Visit `/dietPlans` | Redirect to `/login`                                                       |
+| Partial / full permission | N/A           | N/A           | N/A                | No page-level role gating is implemented beyond auth in the inspected code |
 
 ## Implemented Coverage
 
