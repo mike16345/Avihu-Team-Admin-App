@@ -43,7 +43,10 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [queryKey, setQueryKey] = useState<string>(tabs.tabHeaders[0].queryKey);
   const createTemplateTabsTestId = (value?: string) =>
-    (value ?? "tab").replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "").toLowerCase();
+    (value ?? "tab")
+      .replace(/[^a-z0-9]+/gi, "-")
+      .replace(/^-|-$/g, "")
+      .toLowerCase();
   const getTabQueryKey = (tabValue: string) =>
     tabs.tabHeaders.find((tabHeader) => tabHeader.value === tabValue)?.queryKey ?? tabValue;
 
