@@ -42,6 +42,10 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
   const [selectedObjectId, setSelectedObjectId] = useState<string>();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [queryKey, setQueryKey] = useState<string>(tabs.tabHeaders[0].queryKey);
+  const createTemplateTabsTestId = (value?: string) =>
+    (value ?? "tab").replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "").toLowerCase();
+  const getTabQueryKey = (tabValue: string) =>
+    tabs.tabHeaders.find((tabHeader) => tabHeader.value === tabValue)?.queryKey ?? tabValue;
 
   type ApiHooks = {
     [key: string]: (params: any) => Promise<ApiResponse<any[]>>;
@@ -123,13 +127,14 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
 
   return (
     <>
-      <div>
+      <div data-testid="template-tabs">
         <Tabs defaultValue={tabs.tabHeaders[0].value} dir="rtl">
           <TabsList>
             {tabs.tabHeaders.map((tab) => (
               <TabsTrigger
                 key={tab.value}
                 value={tab.value}
+                data-testid={`template-tab-${createTemplateTabsTestId(tab.queryKey)}`}
                 onClick={() => setQueryKey(tab.queryKey)}
               >
                 {tab.name}
@@ -139,34 +144,47 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
           {apiData.isLoading && <TemplateTabsSkeleton />}
 
           {!apiData.isLoading &&
-            tabs.tabContent.map((tab) => (
-              <TabsContent key={tab.value} value={tab.value}>
-                {tab.value === `exercises` ? (
-                  <ExercisePresetsTable
-                    data={(apiData.data?.data as IExercisePresetItem[]) || []}
-                    onView={(id) => startEdit(id, tab.sheetForm)}
-                    onDelete={(id) => deleteItem(id, tab.deleteFunc)}
-                    actionButton={
-                      <Button onClick={() => handleAddNew(tab.sheetForm)} className="h-9 px-4">
+            tabs.tabContent.map((tab) => {
+              const tableTestIdPrefix = createTemplateTabsTestId(getTabQueryKey(tab.value));
+
+              return (
+                <TabsContent key={tab.value} value={tab.value}>
+                  {tab.value === `exercises` ? (
+                    <ExercisePresetsTable
+                      data={(apiData.data?.data as IExercisePresetItem[]) || []}
+                      onView={(id) => startEdit(id, tab.sheetForm)}
+                      onDelete={(id) => deleteItem(id, tab.deleteFunc)}
+                      actionButton={
+                        <Button
+                          data-testid={`template-add-${createTemplateTabsTestId(tab.value)}`}
+                          onClick={() => handleAddNew(tab.sheetForm)}
+                          className="h-9 px-4"
+                        >
+                          {tab.btnPrompt}
+                        </Button>
+                      }
+                    />
+                  ) : (
+                    <>
+                      <Button
+                        data-testid={`template-add-${createTemplateTabsTestId(tab.value)}`}
+                        onClick={() => handleAddNew(tab.sheetForm)}
+                        className="my-4 h-9 px-4"
+                      >
                         {tab.btnPrompt}
                       </Button>
-                    }
-                  />
-                ) : (
-                  <>
-                    <Button onClick={() => handleAddNew(tab.sheetForm)} className="my-4 h-9 px-4">
-                      {tab.btnPrompt}
-                    </Button>
 
-                    <PresetTable
-                      data={apiData.data?.data || []}
-                      handleDelete={(id) => deleteItem(id, tab.deleteFunc)}
-                      handleViewData={(id: string) => startEdit(id, tab.sheetForm)}
-                    />
-                  </>
-                )}
-              </TabsContent>
-            ))}
+                      <PresetTable
+                        data={apiData.data?.data || []}
+                        testIdPrefix={tableTestIdPrefix}
+                        handleDelete={(id) => deleteItem(id, tab.deleteFunc)}
+                        handleViewData={(id: string) => startEdit(id, tab.sheetForm)}
+                      />
+                    </>
+                  )}
+                </TabsContent>
+              );
+            })}
         </Tabs>
       </div>
       <PresetSheet

@@ -4,8 +4,8 @@ import {
   type MockApiController,
   type MockScenarioSelection,
 } from "../utils/mockApi";
+import { loginAsAdmin as performAdminLogin } from "../utils/adminSession";
 
-const LOGIN_PATH = "/login";
 const GOTO_OPTIONS = { waitUntil: "domcontentloaded" } as const;
 
 test.setTimeout(60_000);
@@ -96,12 +96,7 @@ const loginAsAdmin = async (
   scenarioSelections: readonly MockScenarioSelection[] = baseSidebarScenarios()
 ) => {
   mockApi.useScenario("auth.login.success", "analytics.dashboard.success");
-
-  await page.goto(LOGIN_PATH, GOTO_OPTIONS);
-  await expect(page.getByTestId("login-page")).toBeVisible();
-  await page.getByTestId("login-email").fill("admin@example.com");
-  await page.getByTestId("login-password").fill("Secret123!");
-  await page.getByTestId("login-submit").click();
+  await performAdminLogin(page);
 
   await expectPathname(page, "/");
   await expect(page.getByTestId("admin-dashboard")).toBeVisible();
@@ -232,7 +227,9 @@ test.describe("sidebar controls", () => {
 
     await page.getByTestId("sidebar-theme-toggle").click();
 
-    await expect.poll(() => page.evaluate(() => localStorage.getItem("vite-ui-theme"))).toBe("dark");
+    await expect
+      .poll(() => page.evaluate(() => localStorage.getItem("vite-ui-theme")))
+      .toBe("dark");
     await expect(page.locator("html")).toHaveClass(/dark/);
 
     await page.getByTestId("sidebar-theme-toggle").click();

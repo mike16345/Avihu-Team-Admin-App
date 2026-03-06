@@ -1,7 +1,7 @@
 import { expect, type Page, type Request, test } from "@playwright/test";
 import { installMockApi, type MockApiController } from "../utils/mockApi";
+import { loginAsAdmin } from "../utils/adminSession";
 
-const LOGIN_PATH = "/login";
 const USERS_PATH = "/users";
 const ADD_USER_PATH = "/users/add";
 const GOTO_OPTIONS = { waitUntil: "domcontentloaded" } as const;
@@ -31,20 +31,12 @@ const expectAddUserPage = async (page: Page) => {
   await expect(page.getByTestId("user-form-submit")).toBeVisible();
 };
 
-const loginAsAdmin = async (page: Page, mockApi: MockApiController) => {
+const openAddUserDirectly = async (page: Page, mockApi: MockApiController) => {
   mockApi.useScenario("auth.login.success", "auth.session.valid", "analytics.dashboard.success");
-
-  await page.goto(LOGIN_PATH, GOTO_OPTIONS);
-  await page.getByTestId("login-email").fill("admin@example.com");
-  await page.getByTestId("login-password").fill("Secret123!");
-  await page.getByTestId("login-submit").click();
+  await loginAsAdmin(page);
 
   await expect(page).not.toHaveURL(/\/login$/);
   await expect(page.getByTestId("sidebar-link-users")).toBeVisible();
-};
-
-const openAddUserDirectly = async (page: Page, mockApi: MockApiController) => {
-  await loginAsAdmin(page, mockApi);
   mockApi.useScenario("auth.session.valid", "analytics.dashboard.success");
 
   await page.goto(ADD_USER_PATH, GOTO_OPTIONS);
@@ -52,7 +44,11 @@ const openAddUserDirectly = async (page: Page, mockApi: MockApiController) => {
 };
 
 const openAddUserFromUsersList = async (page: Page, mockApi: MockApiController) => {
-  await loginAsAdmin(page, mockApi);
+  mockApi.useScenario("auth.login.success", "auth.session.valid", "analytics.dashboard.success");
+  await loginAsAdmin(page);
+
+  await expect(page).not.toHaveURL(/\/login$/);
+  await expect(page.getByTestId("sidebar-link-users")).toBeVisible();
   mockApi.useScenario("auth.session.valid", "analytics.dashboard.success", "users.success");
 
   await page.goto(USERS_PATH, GOTO_OPTIONS);
@@ -165,7 +161,11 @@ test.describe("add user page data states", () => {
       "auth.session.valid",
       "users.create.success",
       "users.one.success",
+      "forms.responses.success",
+      "measurements.user.empty",
+      "recorded-sets.user.empty",
       "weigh-ins.user.empty",
+      "workout-plans.user.empty",
       "users.delete.precheck.empty"
     );
 
@@ -241,7 +241,11 @@ test.describe("add user page data states", () => {
       "auth.session.valid",
       { key: "users.create.success", overrides: { delayMs: 800 } },
       "users.one.success",
+      "forms.responses.success",
+      "measurements.user.empty",
+      "recorded-sets.user.empty",
       "weigh-ins.user.empty",
+      "workout-plans.user.empty",
       "users.delete.precheck.empty"
     );
 
@@ -303,7 +307,11 @@ test.describe("add user page interactions", () => {
       "auth.session.valid",
       { key: "users.create.success", overrides: { delayMs: 900 } },
       "users.one.success",
+      "forms.responses.success",
+      "measurements.user.empty",
+      "recorded-sets.user.empty",
       "weigh-ins.user.empty",
+      "workout-plans.user.empty",
       "users.delete.precheck.empty"
     );
 

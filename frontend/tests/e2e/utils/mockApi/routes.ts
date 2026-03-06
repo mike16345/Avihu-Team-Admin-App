@@ -13,6 +13,8 @@ export type JsonValue =
   | { [key: string]: JsonValue }
   | JsonValue[];
 
+type NamedJsonFixtures = Record<string, JsonValue>;
+
 export interface ApiResponseFixture<TData extends JsonValue = JsonValue> {
   data: TData;
   message: string;
@@ -42,9 +44,59 @@ export interface MockRouteDefinition {
 
 export type MockScenarioMap = Record<string, readonly MockRouteDefinition[]>;
 type MockRouteOptions = Pick<MockRouteDefinition, "status" | "headers" | "delayMs">;
-type FixturePath = readonly [string, ...string[]];
+const fixtureCache = new Map<string, NamedJsonFixtures>();
+const FIXTURE_STATUS_BY_VARIANT = {
+  bad_request: 400,
+  validation: 400,
+  unauthorized: 401,
+  forbidden: 403,
+  not_found: 404,
+  conflict: 409,
+  unprocessable_entity: 422,
+  rate_limited: 429,
+  server: 500,
+  internal: 500,
+} as const;
 
 const escapeForRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const isJsonObject = (value: JsonValue): value is { [key: string]: JsonValue } =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const cloneJsonValue = <T extends JsonValue>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
+
+const mergeJsonValue = (fixture: JsonValue, patch?: JsonValue): JsonValue => {
+  if (patch === undefined) {
+    return cloneJsonValue(fixture);
+  }
+
+  if (isJsonObject(fixture) && isJsonObject(patch)) {
+    const mergedFixture: { [key: string]: JsonValue } = { ...fixture };
+
+    for (const [key, patchValue] of Object.entries(patch)) {
+      const currentValue = mergedFixture[key];
+
+      mergedFixture[key] =
+        currentValue === undefined
+          ? cloneJsonValue(patchValue)
+          : mergeJsonValue(currentValue, patchValue);
+    }
+
+    return mergedFixture;
+  }
+
+  return cloneJsonValue(patch);
+};
+
+const getDefaultStatusForVariant = (variant: string) => {
+  if (!variant.startsWith("error_")) {
+    return 200;
+  }
+
+  const statusKey = variant.slice("error_".length) as keyof typeof FIXTURE_STATUS_BY_VARIANT;
+
+  return FIXTURE_STATUS_BY_VARIANT[statusKey] ?? 400;
+};
 
 export const normalizePathname = (pathname: string) => {
   if (!pathname || pathname === "/") {
@@ -97,14 +149,18 @@ export const jsonRoute = ({
 export const jsonFixtureRoute = ({
   method,
   pathname,
-  fixturePath,
-  status = 200,
+  fixture,
+  variant,
+  patch,
+  status = getDefaultStatusForVariant(variant),
   headers,
   delayMs,
 }: {
   method: MockApiMethod;
   pathname: string;
-  fixturePath: FixturePath;
+  fixture: string;
+  variant: string;
+  patch?: JsonValue;
   status?: number;
   headers?: Record<string, string>;
   delayMs?: number;
@@ -112,7 +168,7 @@ export const jsonFixtureRoute = ({
   jsonRoute({
     method,
     pathname,
-    fixture: loadJsonFixture(...fixturePath),
+    fixture: loadJsonFixture(fixture, variant, patch),
     status,
     headers,
     delayMs,
@@ -197,9 +253,40 @@ export const apiErrorRoute = ({
     delayMs,
   });
 
-export const loadJsonFixture = <T extends JsonValue>(...pathSegments: string[]) => {
-  const fixturePath = path.resolve(__dirname, "..", "..", "mocks", ...pathSegments);
-  const fixtureContents = readFileSync(fixturePath, "utf8");
+const loadFixtureFile = (fixtureName: string) => {
+  const cachedFixture = fixtureCache.get(fixtureName);
 
-  return JSON.parse(fixtureContents) as T;
+  if (cachedFixture) {
+    return cachedFixture;
+  }
+
+  const fixturePath = path.resolve(
+    __dirname,
+    "..",
+    "..",
+    "mocks",
+    "fixtures",
+    `${fixtureName}.json`
+  );
+  const fixtureContents = readFileSync(fixturePath, "utf8");
+  const parsedFixture = JSON.parse(fixtureContents) as NamedJsonFixtures;
+
+  fixtureCache.set(fixtureName, parsedFixture);
+
+  return parsedFixture;
+};
+
+export const loadJsonFixture = <T extends JsonValue>(
+  fixtureName: string,
+  variant: string,
+  patch?: JsonValue
+) => {
+  const fixtureCollection = loadFixtureFile(fixtureName);
+  const fixture = fixtureCollection[variant];
+
+  if (fixture === undefined) {
+    throw new Error(`Unknown mock fixture variant "${variant}" in "${fixtureName}"`);
+  }
+
+  return mergeJsonValue(fixture, patch) as T;
 };

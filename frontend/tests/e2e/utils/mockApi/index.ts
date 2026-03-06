@@ -66,7 +66,7 @@ const formatUnhandledRequestError = ({
     `Unmocked API request intercepted: ${method} ${pathname}`,
     `Enabled mock scenarios: ${scenarioList}`,
     `Available mock scenarios: ${availableScenarios}`,
-    "Add a matching scenario under tests/e2e/utils/mockApi/scenarios, using inline response helpers or a JSON fixture when needed.",
+    "Add a matching scenario under tests/e2e/utils/mockApi/scenarios, using inline response helpers or a fixture variant when needed.",
   ].join("\n");
 };
 

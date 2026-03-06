@@ -1,0 +1,76 @@
+{
+  "success": {
+    "data": [
+      {
+        "_id": "diet-plan-001",
+        "name": "Balanced Cut"
+      },
+      {
+        "_id": "diet-plan-002",
+        "name": "Lean Bulk"
+      }
+    ],
+    "message": "Diet plan presets loaded"
+  },
+  "large": {
+    "data": [
+      {
+        "_id": "diet-plan-001",
+        "name": "Diet Plan 01"
+      },
+      {
+        "_id": "diet-plan-002",
+        "name": "Diet Plan 02"
+      },
+      {
+        "_id": "diet-plan-003",
+        "name": "Diet Plan 03"
+      },
+      {
+        "_id": "diet-plan-004",
+        "name": "Diet Plan 04"
+      },
+      {
+        "_id": "diet-plan-005",
+        "name": "Diet Plan 05"
+      },
+      {
+        "_id": "diet-plan-006",
+        "name": "Diet Plan 06"
+      },
+      {
+        "_id": "diet-plan-007",
+        "name": "Diet Plan 07"
+      },
+      {
+        "_id": "diet-plan-008",
+        "name": "Diet Plan 08"
+      },
+      {
+        "_id": "diet-plan-009",
+        "name": "Diet Plan 09"
+      },
+      {
+        "_id": "diet-plan-010",
+        "name": "Diet Plan 10"
+      },
+      {
+        "_id": "diet-plan-011",
+        "name": "Diet Plan 11"
+      },
+      {
+        "_id": "diet-plan-012",
+        "name": "Diet Plan 12"
+      }
+    ],
+    "message": "Large diet plan preset list loaded"
+  },
+  "empty": {
+    "data": [],
+    "message": "No diet plan presets"
+  },
+  "null_data": {
+    "data": null,
+    "message": "Diet plan presets payload missing"
+  }
+}

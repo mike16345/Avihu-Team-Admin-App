@@ -27,12 +27,12 @@ const CREATE_USER_ERROR_MESSAGES = {
   500: "Create user failed",
 } as const;
 
-const usersListRoute = (fixtureName: string, status = 200) =>
+const usersListRoute = (variant: string) =>
   jsonFixtureRoute({
     method: "GET",
     pathname: USERS_ENDPOINT,
-    fixturePath: ["users", fixtureName],
-    status,
+    fixture: "users.collection",
+    variant,
   });
 
 const usersErrorRoute = (
@@ -58,10 +58,10 @@ const createUserErrorRoute = (
   });
 
 export const usersScenarios = {
-  "users.success": [usersListRoute("success.json")],
-  "users.large": [usersListRoute("large.json")],
-  "users.empty": [usersListRoute("empty.json")],
-  "users.malformed": [usersListRoute("malformed.json")],
+  "users.success": [usersListRoute("success")],
+  "users.large": [usersListRoute("large")],
+  "users.empty": [usersListRoute("empty")],
+  "users.malformed": [usersListRoute("malformed")],
   "users.error-400": [usersErrorRoute(400)],
   "users.error-401": [usersErrorRoute(401)],
   "users.error-403": [usersErrorRoute(403)],
@@ -74,33 +74,43 @@ export const usersScenarios = {
       abortErrorCode: "failed",
     }),
   ],
-  "users.after-delete": [usersListRoute("after-delete.json")],
+  "users.after-delete": [usersListRoute("after_delete")],
   "users.one.success": [
     jsonFixtureRoute({
       method: "GET",
       pathname: USERS_ONE_PATH,
-      fixturePath: ["users", "one-success.json"],
+      fixture: "users.one",
+      variant: "success",
     }),
   ],
   "users.access.success": [
     jsonFixtureRoute({
       method: "PUT",
       pathname: USERS_ONE_FIELD_PATH,
-      fixturePath: ["users", "access-success.json"],
+      fixture: "users.one",
+      variant: "success",
+      patch: {
+        data: {
+          hasAccess: false,
+        },
+        message: "User access updated",
+      },
     }),
   ],
   "users.delete.precheck.empty": [
-    jsonFixtureRoute({
+    apiRoute({
       method: "GET",
       pathname: USER_IMAGE_URLS_PATH,
-      fixturePath: ["users", "user-image-urls-empty.json"],
+      data: [],
+      message: "No user images",
     }),
   ],
   "users.delete.success": [
-    jsonFixtureRoute({
+    apiRoute({
       method: "DELETE",
       pathname: USERS_ONE_PATH,
-      fixturePath: ["users", "delete-success.json"],
+      data: null,
+      message: "\u05d4\u05de\u05e9\u05ea\u05de\u05e9 \u05e0\u05de\u05d7\u05e7",
     }),
   ],
   "users.create.success": [
@@ -133,5 +143,5 @@ export const usersScenarios = {
   ],
 
   // Backward-compatible aliases for the existing scenario keys.
-  "users.many.success": [usersListRoute("success.json")],
+  "users.many.success": [usersListRoute("success")],
 } satisfies MockScenarioMap;

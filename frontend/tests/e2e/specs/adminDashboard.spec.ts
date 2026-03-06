@@ -1,15 +1,11 @@
 import { expect, type Page, test } from "@playwright/test";
 import { type MockScenarioKey, useMockApi as installPageMockApi } from "../utils/mockApi";
-
-const LOGIN_PATH = "/login";
+import { loginAsAdmin } from "../utils/adminSession";
 
 const loginToDashboard = async (page: Page, scenarioKeys: MockScenarioKey[]) => {
   const mockApi = await installPageMockApi(page, ["auth.login.success", ...scenarioKeys]);
 
-  await page.goto(LOGIN_PATH);
-  await page.getByTestId("login-email").fill("admin@example.com");
-  await page.getByTestId("login-password").fill("Secret123!");
-  await page.getByTestId("login-submit").click();
+  await loginAsAdmin(page);
   await expect(page.getByTestId("admin-dashboard")).toBeVisible();
 
   return mockApi;

@@ -1,7 +1,7 @@
 import { expect, type Page, type Request, test } from "@playwright/test";
 import { installMockApi, type MockScenarioSelection } from "../utils/mockApi";
+import { loginAsAdmin } from "../utils/adminSession";
 
-const LOGIN_PATH = "/login";
 const USERS_PATH = "/users";
 const GOTO_OPTIONS = { waitUntil: "domcontentloaded" } as const;
 
@@ -24,15 +24,6 @@ const trackRequests = (page: Page, method: string, pathnameSuffix: string) => {
   return requests;
 };
 
-const login = async (page: Page) => {
-  await page.goto(LOGIN_PATH, GOTO_OPTIONS);
-  await page.getByTestId("login-email").fill("admin@example.com");
-  await page.getByTestId("login-password").fill("Secret123!");
-  await page.getByTestId("login-submit").click();
-  await expect(page).not.toHaveURL(/\/login$/);
-  await expect(page.getByTestId("sidebar-link-users")).toBeVisible();
-};
-
 const expectUsersUrl = async (page: Page, pageNumber = 1) => {
   await expect.poll(() => new URL(page.url()).pathname).toBe(USERS_PATH);
   await expect.poll(() => new URL(page.url()).searchParams.get("page")).toBe(String(pageNumber));
@@ -47,7 +38,10 @@ const openUsersDirectly = async (
   const mockApi = await installMockApi(page);
 
   mockApi.useScenario("auth.login.success", "analytics.dashboard.success");
-  await login(page);
+  await loginAsAdmin(page);
+
+  await expect(page).not.toHaveURL(/\/login$/);
+  await expect(page.getByTestId("sidebar-link-users")).toBeVisible();
 
   mockApi.useScenario("auth.session.valid", "analytics.dashboard.success", ...scenarioSelections);
   await page.goto(USERS_PATH, GOTO_OPTIONS);
@@ -64,7 +58,10 @@ const openUsersFromSidebar = async (page: Page, scenarioSelections: MockScenario
   const mockApi = await installMockApi(page);
 
   mockApi.useScenario("auth.login.success", "analytics.dashboard.success");
-  await login(page);
+  await loginAsAdmin(page);
+
+  await expect(page).not.toHaveURL(/\/login$/);
+  await expect(page.getByTestId("sidebar-link-users")).toBeVisible();
 
   mockApi.useScenario("analytics.dashboard.success", ...scenarioSelections);
   await page.getByTestId("sidebar-link-users").click();
@@ -106,7 +103,10 @@ test.describe("users page routing and entry", () => {
     const mockApi = await installMockApi(page);
 
     mockApi.useScenario("auth.login.success", "analytics.dashboard.success");
-    await login(page);
+    await loginAsAdmin(page);
+
+    await expect(page).not.toHaveURL(/\/login$/);
+    await expect(page.getByTestId("sidebar-link-users")).toBeVisible();
 
     mockApi.useScenario("auth.session.valid", "analytics.dashboard.success", "users.large");
     await page.goto(`${USERS_PATH}?page=-3&limit=20`, GOTO_OPTIONS);

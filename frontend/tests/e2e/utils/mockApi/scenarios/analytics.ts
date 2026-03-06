@@ -1,58 +1,67 @@
-import { jsonRoute, loadJsonFixture, type MockScenarioMap } from "../routes";
+import { apiErrorRoute, jsonFixtureRoute, type MockScenarioMap } from "../routes";
 
 const ANALYTICS_ENDPOINT = "/analytics";
 
 export const analyticsScenarios = {
   "analytics.dashboard.success": [
-    jsonRoute({
+    jsonFixtureRoute({
       method: "GET",
       pathname: `${ANALYTICS_ENDPOINT}/checkIns`,
-      fixture: loadJsonFixture("analytics", "check-ins-success.json"),
+      fixture: "analytics.checkIns",
+      variant: "success",
     }),
-    jsonRoute({
+    jsonFixtureRoute({
       method: "GET",
       pathname: `${ANALYTICS_ENDPOINT}/users`,
-      fixture: loadJsonFixture("analytics", "users-without-plans-success.json"),
+      fixture: "analytics.users",
+      variant: "success",
     }),
-    jsonRoute({
+    jsonFixtureRoute({
       method: "GET",
       pathname: `${ANALYTICS_ENDPOINT}/users/expiring`,
-      fixture: loadJsonFixture("analytics", "expiring-users-success.json"),
+      fixture: "analytics.users-expiring",
+      variant: "success",
     }),
   ],
   "analytics.dashboard.populated": [
-    jsonRoute({
+    jsonFixtureRoute({
       method: "GET",
       pathname: `${ANALYTICS_ENDPOINT}/checkIns`,
-      fixture: loadJsonFixture("analytics", "check-ins-populated.json"),
+      fixture: "analytics.checkIns",
+      variant: "populated",
     }),
-    jsonRoute({
+    jsonFixtureRoute({
       method: "GET",
       pathname: `${ANALYTICS_ENDPOINT}/users`,
-      fixture: loadJsonFixture("analytics", "users-without-plans-populated.json"),
+      fixture: "analytics.users",
+      variant: "populated",
     }),
-    jsonRoute({
+    jsonFixtureRoute({
       method: "GET",
       pathname: `${ANALYTICS_ENDPOINT}/users/expiring`,
-      fixture: loadJsonFixture("analytics", "expiring-users-populated.json"),
+      fixture: "analytics.users-expiring",
+      variant: "populated",
     }),
   ],
   "analytics.dashboard.checkins.error": [
-    jsonRoute({
+    apiErrorRoute({
       method: "GET",
       pathname: `${ANALYTICS_ENDPOINT}/checkIns`,
-      fixture: loadJsonFixture("analytics", "error.json"),
+      message:
+        "\u05d8\u05e2\u05d9\u05e0\u05ea \u05d4\u05e0\u05ea\u05d5\u05e0\u05d9\u05dd \u05e0\u05db\u05e9\u05dc\u05d4",
       status: 500,
     }),
-    jsonRoute({
+    jsonFixtureRoute({
       method: "GET",
       pathname: `${ANALYTICS_ENDPOINT}/users`,
-      fixture: loadJsonFixture("analytics", "users-without-plans-success.json"),
+      fixture: "analytics.users",
+      variant: "success",
     }),
-    jsonRoute({
+    jsonFixtureRoute({
       method: "GET",
       pathname: `${ANALYTICS_ENDPOINT}/users/expiring`,
-      fixture: loadJsonFixture("analytics", "expiring-users-success.json"),
+      fixture: "analytics.users-expiring",
+      variant: "success",
     }),
   ],
 } satisfies MockScenarioMap;

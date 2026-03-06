@@ -5,6 +5,7 @@
 This repository is a Vite + React + TypeScript admin frontend. The codebase is organized around route-level pages, domain-specific components, and a dedicated HTTP access layer rather than embedding request logic directly in UI code.
 
 The dominant design pattern is thin composition at the page layer:
+
 - `src/pages` owns route entry points and composes hooks plus domain components.
 - `src/components` holds reusable UI and domain widgets.
 - `src/hooks/api`, `src/hooks/queries`, and `src/hooks/mutations` separate transport, read caching, and write side effects.
@@ -62,6 +63,8 @@ Data-heavy UI favors cached server state through TanStack Query, with only small
 - `npm run build`
 - When adding a new test framework or test type, follow the existing folder boundaries and update this document once a repeatable convention exists across multiple files.
 - For Playwright mock API scenarios under `tests/e2e/utils/mockApi`, prefer code-defined `ApiResponse` fixtures via shared helpers (`apiRoute`, `apiErrorRoute`) for simple success/error payloads. Use `jsonFixtureRoute` + JSON files only when the payload is large or deeply nested enough that inline TypeScript would hurt readability.
+- For Playwright JSON fixtures, keep endpoint variants together in `tests/e2e/mocks/fixtures/<name>.json` and select them with `jsonFixtureRoute({ fixture, variant })` instead of creating one JSON file per test case.
+- For repeated Playwright setup actions such as admin login, extract a shared helper under `tests/e2e/utils` and reuse it across specs instead of redefining the same flow in each file.
 
 ## 6. API & Backend Conventions
 

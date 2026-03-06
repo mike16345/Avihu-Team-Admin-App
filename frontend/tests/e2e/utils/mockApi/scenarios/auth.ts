@@ -9,15 +9,16 @@ export const authScenarios = {
     jsonFixtureRoute({
       method: "POST",
       pathname: USERS_LOGIN_PATH,
-      fixturePath: ["auth", "login-success.json"],
+      fixture: "auth.login",
+      variant: "success",
     }),
   ],
   "auth.login.unauthorized": [
     jsonFixtureRoute({
       method: "POST",
       pathname: USERS_LOGIN_PATH,
-      fixturePath: ["auth", "login-unauthorized.json"],
-      status: 401,
+      fixture: "auth.login",
+      variant: "error_unauthorized",
     }),
   ],
   "auth.session.valid": [
