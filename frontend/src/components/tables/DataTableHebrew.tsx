@@ -318,15 +318,10 @@ export function DataTableHebrew<TData, TValue>({
                 const resolvedId = getRowId(row.original) || row.id;
 
                 return (
-                  <UserExpiredTooltip
-                    key={resolvedId}
-                    isActive={handleHoverOnRow?.(row.original)}
-                  >
+                  <UserExpiredTooltip key={resolvedId} isActive={handleHoverOnRow?.(row.original)}>
                     <TableRow
                       data-testid={
-                        testIdPrefix && resolvedId
-                          ? `${testIdPrefix}-row-${resolvedId}`
-                          : undefined
+                        testIdPrefix && resolvedId ? `${testIdPrefix}-row-${resolvedId}` : undefined
                       }
                       className={cn(getRowClassName(row.original))}
                       onClick={

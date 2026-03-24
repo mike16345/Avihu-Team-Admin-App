@@ -98,7 +98,9 @@ const getDefaultStatusForVariant = (variant: string) => {
 
   if (status === undefined) {
     throw new Error(
-      `Unknown error fixture variant "${variant}". Expected one of: ${Object.keys(FIXTURE_STATUS_BY_VARIANT)
+      `Unknown error fixture variant "${variant}". Expected one of: ${Object.keys(
+        FIXTURE_STATUS_BY_VARIANT
+      )
         .map((key) => `error_${key}`)
         .join(", ")}`
     );

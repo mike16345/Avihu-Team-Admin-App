@@ -6,10 +6,10 @@ This document defines the UI automation standards for this Vite + React + TypeSc
 
 The goals of automation are:
 
-* Deterministic, low-flake PR validation
-* Fast feedback for route-level screens
-* Clear separation between UI behavior validation and backend logic validation
-* Debuggable failures via traces, screenshots, and videos
+- Deterministic, low-flake PR validation
+- Fast feedback for route-level screens
+- Clear separation between UI behavior validation and backend logic validation
+- Debuggable failures via traces, screenshots, and videos
 
 UI automation must respect the existing layered architecture:
 
@@ -27,17 +27,17 @@ Runs on every pull request.
 
 Purpose:
 
-* Validate UI rendering
-* Validate form behavior
-* Validate navigation flows
-* Validate loading, success, and error states
-* Validate user-visible feedback (toasts, banners, modals)
+- Validate UI rendering
+- Validate form behavior
+- Validate navigation flows
+- Validate loading, success, and error states
+- Validate user-visible feedback (toasts, banners, modals)
 
 Constraints:
 
-* Must not depend on real backend
-* Must not allow real network calls
-* Must fail fast on unexpected/unmocked API requests
+- Must not depend on real backend
+- Must not allow real network calls
+- Must fail fast on unexpected/unmocked API requests
 
 This suite validates UI behavior only, not backend business logic.
 
@@ -49,10 +49,10 @@ Backend validation does not belong in this frontend repository.
 
 Backend tests are responsible for:
 
-* Validation rules
-* Auth rules
-* DB behavior
-* Business logic correctness
+- Validation rules
+- Auth rules
+- DB behavior
+- Business logic correctness
 
 UI tests are not responsible for server correctness.
 
@@ -64,16 +64,16 @@ Runs on `main` branch or nightly only.
 
 Purpose:
 
-* Validate frontend/backend contract compatibility
-* Validate authentication/session integration
-* Detect breaking API shape changes
+- Validate frontend/backend contract compatibility
+- Validate authentication/session integration
+- Detect breaking API shape changes
 
 Constraints:
 
-* Maximum 3–5 critical flows
-* Must use seeded or isolated test account
-* Must not depend on production data
-* Must not expand into full regression coverage
+- Maximum 3–5 critical flows
+- Must use seeded or isolated test account
+- Must not depend on production data
+- Must not expand into full regression coverage
 
 ---
 
@@ -89,16 +89,16 @@ tests/
     utils/
 ```
 
-* `specs/` → Test files
-* `mocks/` → Static JSON fixtures
-* `utils/` → Shared mocking helpers
+- `specs/` → Test files
+- `mocks/` → Static JSON fixtures
+- `utils/` → Shared mocking helpers
 
 Playwright configuration must:
 
-* Use `npm run start`
-* Target `http://127.0.0.1:3000`
-* Enable trace on first retry
-* Capture screenshot + video on failure
+- Use `npm run start`
+- Target `http://127.0.0.1:3000`
+- Enable trace on first retry
+- Capture screenshot + video on failure
 
 ---
 
@@ -112,10 +112,10 @@ Locator priority:
 
 Never use:
 
-* nth-child selectors
-* brittle CSS structural selectors
-* XPath
-* `waitForTimeout()` unless absolutely unavoidable and documented
+- nth-child selectors
+- brittle CSS structural selectors
+- XPath
+- `waitForTimeout()` unless absolutely unavoidable and documented
 
 Rely on Playwright auto-waiting behavior.
 
@@ -127,29 +127,29 @@ UI automation relies primarily on `data-testid`.
 
 ## 5.1 Naming Rules
 
-* kebab-case
-* prefix by domain:
+- kebab-case
+- prefix by domain:
 
 Examples:
 
-* `auth-*`
-* `users-*`
-* `leads-*`
-* `settings-*`
-* `nav-*`
-* `table-*`
-* `toast-*`
+- `auth-*`
+- `users-*`
+- `leads-*`
+- `settings-*`
+- `nav-*`
+- `table-*`
+- `toast-*`
 
 Examples:
 
-* `auth-login-root`
-* `auth-login-email`
-* `auth-login-submit`
-* `users-table-root`
-* `users-table-row-<id>`
-* `users-table-row-open-<id>`
-* `toast-success`
-* `toast-error`
+- `auth-login-root`
+- `auth-login-email`
+- `auth-login-submit`
+- `users-table-root`
+- `users-table-row-<id>`
+- `users-table-row-open-<id>`
+- `toast-success`
+- `toast-error`
 
 ---
 
@@ -157,23 +157,23 @@ Examples:
 
 Add testids to:
 
-* Screen root container
-* Primary action buttons
-* Form inputs
-* Modal root containers
-* Table/list root containers
-* Table rows (if stable ID exists)
-* Loading states
-* Empty states
-* Error banners
-* Toast containers
+- Screen root container
+- Primary action buttons
+- Form inputs
+- Modal root containers
+- Table/list root containers
+- Table rows (if stable ID exists)
+- Loading states
+- Empty states
+- Error banners
+- Toast containers
 
 Do not add testids to:
 
-* Decorative wrappers
-* Icons
-* Styling-only divs
-* Pure layout containers
+- Decorative wrappers
+- Icons
+- Styling-only divs
+- Pure layout containers
 
 Test IDs must not replace semantic HTML or accessibility attributes.
 
@@ -185,24 +185,24 @@ All HTTP transport flows through `src/API/api.ts`.
 
 UI Smoke tests must:
 
-* Intercept requests at the browser level using Playwright
-* Match endpoints by path, not by hardcoded host
-* Store JSON fixtures under `tests/e2e/mocks/`
-* Abort unexpected or unmocked API requests
+- Intercept requests at the browser level using Playwright
+- Match endpoints by path, not by hardcoded host
+- Store JSON fixtures under `tests/e2e/mocks/`
+- Abort unexpected or unmocked API requests
 
 ## 6.1 Fail-Fast Rule
 
-* Any unmocked API request must cause the test to fail.
-* Real backend calls are not allowed in UI Smoke suite.
-* Silent network fallthrough is prohibited.
+- Any unmocked API request must cause the test to fail.
+- Real backend calls are not allowed in UI Smoke suite.
+- Silent network fallthrough is prohibited.
 
 ---
 
 ## 6.2 Axios Endpoint Matching
 
-* Mock routes must match endpoint paths (e.g., `/users/many`)
-* Do not couple mocks to specific API domain or environment
-* Prefer regex path matching over full URL matching
+- Mock routes must match endpoint paths (e.g., `/users/many`)
+- Do not couple mocks to specific API domain or environment
+- Prefer regex path matching over full URL matching
 
 ---
 
@@ -210,16 +210,16 @@ UI Smoke tests must:
 
 The application uses:
 
-* Persisted query client
-* `gcTime = Infinity`
-* Long-lived cache
+- Persisted query client
+- `gcTime = Infinity`
+- Long-lived cache
 
 Testing rules:
 
-* Each Playwright test runs in an isolated browser context
-* Tests must not rely on persisted query cache
-* Tests must explicitly assert loading → success transitions
-* Tests must not depend on warmed cache state
+- Each Playwright test runs in an isolated browser context
+- Tests must not rely on persisted query cache
+- Tests must explicitly assert loading → success transitions
+- Tests must not depend on warmed cache state
 
 Do not share storage state in UI Smoke suite.
 
@@ -241,8 +241,8 @@ Test title format:
 
 Examples:
 
-* `"login - submit valid credentials - redirects to dashboard"`
-* `"users table - server 500 - shows error banner"`
+- `"login - submit valid credentials - redirects to dashboard"`
+- `"users table - server 500 - shows error banner"`
 
 ---
 
@@ -250,20 +250,19 @@ Examples:
 
 For any server-backed feature:
 
-* At least one happy-path test
-* At least one failure-state test:
-
-  * 401
-  * 403
-  * 500
-  * or relevant domain error
+- At least one happy-path test
+- At least one failure-state test:
+  - 401
+  - 403
+  - 500
+  - or relevant domain error
 
 Error state must assert:
 
-* Toast message
-* Error banner
-* Disabled state
-* Or redirect behavior
+- Toast message
+- Error banner
+- Disabled state
+- Or redirect behavior
 
 Silent failure is not acceptable.
 
@@ -273,21 +272,21 @@ Silent failure is not acceptable.
 
 A new route-level screen is considered automation-complete when:
 
-* Screen root renders under mocked API
-* Loading state is asserted
-* Success state is asserted
-* Error state is asserted (if server-backed)
-* No unmocked network calls occur
+- Screen root renders under mocked API
+- Loading state is asserted
+- Success state is asserted
+- Error state is asserted (if server-backed)
+- No unmocked network calls occur
 
 ---
 
 # 11. Reliability Requirements
 
-* Each spec must run independently
-* No cross-test state dependencies
-* No reliance on execution order
-* Avoid duplicated mocking logic; prefer shared scenario helpers
-* Smoke suite target runtime: under 3 minutes
+- Each spec must run independently
+- No cross-test state dependencies
+- No reliance on execution order
+- Avoid duplicated mocking logic; prefer shared scenario helpers
+- Smoke suite target runtime: under 3 minutes
 
 ---
 
@@ -295,9 +294,9 @@ A new route-level screen is considered automation-complete when:
 
 Repository must expose:
 
-* `npm run test:e2e`
-* CI must fail if UI Smoke suite fails
-* Failure artifacts must be uploaded (trace, screenshots, video)
+- `npm run test:e2e`
+- CI must fail if UI Smoke suite fails
+- Failure artifacts must be uploaded (trace, screenshots, video)
 
 Lint and build checks remain mandatory.
 
@@ -307,14 +306,14 @@ Lint and build checks remain mandatory.
 
 UI tests validate:
 
-* User-visible behavior
-* State transitions
-* Contract integration boundaries
+- User-visible behavior
+- State transitions
+- Contract integration boundaries
 
 UI tests do not validate:
 
-* Database logic
-* Business rule correctness
-* Internal implementation details
+- Database logic
+- Business rule correctness
+- Internal implementation details
 
 Keep automation aligned with architectural layering and existing domain boundaries.

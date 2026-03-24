@@ -428,8 +428,7 @@ Typical helpers:
 Example:
 
 ```ts
-const getUserRow = (page: Page, userId: string) =>
-  page.getByTestId(`users-row-${userId}`);
+const getUserRow = (page: Page, userId: string) => page.getByTestId(`users-row-${userId}`);
 ```
 
 ### 7.3 Install the mock API first
