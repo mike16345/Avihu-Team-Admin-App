@@ -66,7 +66,7 @@ const formatUnhandledRequestError = ({
     `Unmocked API request intercepted: ${method} ${pathname}`,
     `Enabled mock scenarios: ${scenarioList}`,
     `Available mock scenarios: ${availableScenarios}`,
-    "Add a matching scenario under tests/e2e/utils/mockApi/scenarios, using inline response helpers or a fixture variant when needed.",
+    "Add a matching scenario under frontend/tests/e2e/utils/mockApi/scenarios, using inline response helpers or a fixture variant when needed.",
   ].join("\n");
 };
 
@@ -76,14 +76,16 @@ export const installMockApi = async (
   enabledScenarios: readonly MockScenarioKey[] = []
 ): Promise<MockApiController> => {
   const unhandledRequestErrors: Error[] = [];
-  let activeRoutes = routes.map((route) => ({ ...route }));
+  const baseRoutes = routes.map((route) => ({ ...route }));
+  let scenarioRoutes = resolveMockRoutes(enabledScenarios);
+  let activeRoutes = [...baseRoutes, ...scenarioRoutes];
   let activeScenarioKeys = [...enabledScenarios];
 
   await page.route("**/*", async (route) => {
     const request = route.request();
 
     if (!isApiRequest(request)) {
-      await route.continue();
+      await route.fallback();
       return;
     }
 
@@ -140,13 +142,15 @@ export const installMockApi = async (
       return [...activeScenarioKeys];
     },
     useScenario(...scenarioSelections) {
-      activeRoutes = resolveMockRoutes(scenarioSelections);
+      scenarioRoutes = resolveMockRoutes(scenarioSelections);
+      activeRoutes = [...baseRoutes, ...scenarioRoutes];
       activeScenarioKeys = scenarioSelections.map((scenarioSelection) =>
         getScenarioKey(scenarioSelection)
       );
     },
     addScenario(...scenarioSelections) {
-      activeRoutes = [...activeRoutes, ...resolveMockRoutes(scenarioSelections)];
+      scenarioRoutes = [...scenarioRoutes, ...resolveMockRoutes(scenarioSelections)];
+      activeRoutes = [...baseRoutes, ...scenarioRoutes];
       activeScenarioKeys = [
         ...activeScenarioKeys,
         ...scenarioSelections.map((scenarioSelection) => getScenarioKey(scenarioSelection)),
@@ -167,12 +171,11 @@ export const useMockApi = async (
   page: Page,
   scenarioSelections: readonly MockScenarioSelection[]
 ) => {
-  const routes = resolveMockRoutes(scenarioSelections);
   const scenarioKeys = scenarioSelections.map((scenarioSelection) =>
     getScenarioKey(scenarioSelection)
   );
 
-  return installMockApi(page, routes, scenarioKeys);
+  return installMockApi(page, [], scenarioKeys);
 };
 
 export type { MockScenarioKey, MockScenarioSelection } from "./registry";

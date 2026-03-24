@@ -234,7 +234,6 @@ test.describe("users page interactions", () => {
   });
 
   test("deletes a user and refreshes the list", async ({ page }) => {
-    const imageLookupRequests = trackRequests(page, "GET", "/userImageUrls/user");
     const deleteRequests = trackRequests(page, "DELETE", "/users/one");
     const mockApi = await openUsersDirectly(page, ["users.success"]);
 
@@ -246,6 +245,7 @@ test.describe("users page interactions", () => {
 
     await page.getByTestId("users-row-menu-user-001").click();
     await page.getByTestId("users-row-menu-content-user-001").getByRole("menuitem").last().click();
+    const imageLookupRequests = trackRequests(page, "GET", "/userImageUrls/user");
     await page.getByTestId("delete-modal-confirm").click();
 
     await expect.poll(() => imageLookupRequests.length).toBe(1);

@@ -21,8 +21,8 @@ The relevant folders are:
   - Playwright spec files live here.
   - Each file usually maps to a page or a major flow.
 - `tests/e2e/mocks`
-  - JSON fixtures live here.
-  - Fixtures are grouped by domain, for example `users`, `auth`, `analytics`.
+  - JSON fixtures live in `tests/e2e/mocks/fixtures/<name>.json`.
+  - Each fixture file contains named variants such as `success`, `empty`, or `error_server`.
 - `tests/e2e/utils/mockApi`
   - The mock API engine lives here.
   - This is where route matching, scenario registration, and per-test scenario switching happen.
@@ -36,7 +36,7 @@ Examples already in the repo:
 - `tests/e2e/specs/adminDashboard.spec.ts`
 - `tests/e2e/specs/users.spec.ts`
 - `tests/e2e/utils/mockApi/scenarios/users.ts`
-- `tests/e2e/mocks/users`
+- `tests/e2e/mocks/fixtures/users.collection.json`
 
 ## 2. High-Level Testing Flow
 
@@ -81,17 +81,34 @@ Avoid:
 
 ### 3.2 JSON fixtures
 
-Put JSON fixtures in a domain folder under:
+Put JSON fixtures under:
 
-- `tests/e2e/mocks/<domain>/`
+- `tests/e2e/mocks/fixtures/<name>.json`
 
 Examples:
 
-- `tests/e2e/mocks/users/success.json`
-- `tests/e2e/mocks/users/error-500.json`
-- `tests/e2e/mocks/auth/login-success.json`
+- `tests/e2e/mocks/fixtures/users.collection.json`
+- `tests/e2e/mocks/fixtures/users.one.json`
+- `tests/e2e/mocks/fixtures/auth.login.json`
 
-Each fixture should represent one API response body.
+Each fixture file should group variants for the same endpoint or response family.
+
+Example:
+
+```json
+{
+  "success": {
+    "data": [],
+    "message": "Users loaded"
+  },
+  "error_server": {
+    "data": null,
+    "message": "Server error"
+  }
+}
+```
+
+The mock loader resolves these with `jsonFixtureRoute({ fixture: "users.collection", variant: "success" })`.
 
 ### 3.3 Mock scenario registration
 
@@ -220,40 +237,66 @@ Every page test in this repo should use mocked backend responses.
 
 Do not call the real backend.
 
-### 5.1 Pick the domain folder
+### 5.1 Pick the fixture file name
 
-If you are testing the users page:
+If you are testing the users list page:
 
-- use `tests/e2e/mocks/users`
+- use a file like `tests/e2e/mocks/fixtures/users.collection.json`
 
 If you are testing login:
 
-- use `tests/e2e/mocks/auth`
+- use a file like `tests/e2e/mocks/fixtures/auth.login.json`
 
 If you are testing a new domain:
 
-1. Create a new folder under `tests/e2e/mocks/<domain>`.
-2. Put all response bodies there.
+1. Create a new file under `tests/e2e/mocks/fixtures/<name>.json`.
+2. Group related response variants for that endpoint in the same file.
 
-### 5.2 Create one file per response case
+### 5.2 Create named variants inside that file
 
-Use clear names:
+Use clear variant names:
 
-- `success.json`
-- `empty.json`
-- `large.json`
-- `error-400.json`
-- `error-401.json`
-- `error-403.json`
-- `error-404.json`
-- `error-500.json`
-- `malformed.json`
+- `success`
+- `empty`
+- `large`
+- `error_bad_request`
+- `error_unauthorized`
+- `error_forbidden`
+- `error_not_found`
+- `error_server`
+- `malformed`
 
-For mutations, create dedicated files when helpful:
+For mutations, create dedicated variants when helpful:
 
-- `create-success.json`
-- `update-success.json`
-- `delete-success.json`
+- `create_success`
+- `update_success`
+- `delete_success`
+
+Example path and structure:
+
+- `tests/e2e/mocks/fixtures/users.collection.json`
+
+```json
+{
+  "success": {
+    "data": [
+      {
+        "_id": "user-001",
+        "firstName": "Alice"
+      }
+    ],
+    "message": "Users loaded"
+  },
+  "empty": {
+    "data": [],
+    "message": "No users found"
+  },
+  "error_server": {
+    "data": null,
+    "message": "Server error"
+  }
+}
+```
 
 ### 5.3 Match the real backend shape
 
@@ -297,14 +340,15 @@ You load the fixture and bind it to:
 Typical pattern:
 
 ```ts
-import { jsonRoute, loadJsonFixture, type MockScenarioMap } from "../routes";
+import { jsonFixtureRoute, type MockScenarioMap } from "../routes";
 
 export const sampleScenarios = {
   "sample.success": [
-    jsonRoute({
+    jsonFixtureRoute({
       method: "GET",
       pathname: "/sample",
-      fixture: loadJsonFixture("sample", "success.json"),
+      fixture: "sample.collection",
+      variant: "success",
     }),
   ],
 } satisfies MockScenarioMap;
@@ -716,12 +760,12 @@ Examples:
 
 ### Step 3: Create mock fixtures
 
-Under `tests/e2e/mocks/<domain>`:
+Under `tests/e2e/mocks/fixtures/<name>.json`:
 
-1. add `success.json`
-2. add `empty.json`
-3. add error fixtures
-4. add mutation fixtures if needed
+1. add a `success` variant
+2. add an `empty` variant if needed
+3. add `error_*` variants for expected failures
+4. add mutation variants if needed
 
 ### Step 4: Register mock scenarios
 
@@ -804,7 +848,7 @@ Do not patch instability with `waitForTimeout(...)`.
 Before you consider a test ready, confirm:
 
 - the spec file is in `tests/e2e/specs`
-- the fixtures are in `tests/e2e/mocks/<domain>`
+- the fixtures are in `tests/e2e/mocks/fixtures/<name>.json`
 - the scenario keys are registered
 - all backend calls are mocked
 - selectors are stable

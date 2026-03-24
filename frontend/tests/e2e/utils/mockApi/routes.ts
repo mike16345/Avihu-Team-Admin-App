@@ -94,8 +94,17 @@ const getDefaultStatusForVariant = (variant: string) => {
   }
 
   const statusKey = variant.slice("error_".length) as keyof typeof FIXTURE_STATUS_BY_VARIANT;
+  const status = FIXTURE_STATUS_BY_VARIANT[statusKey];
 
-  return FIXTURE_STATUS_BY_VARIANT[statusKey] ?? 400;
+  if (status === undefined) {
+    throw new Error(
+      `Unknown error fixture variant "${variant}". Expected one of: ${Object.keys(FIXTURE_STATUS_BY_VARIANT)
+        .map((key) => `error_${key}`)
+        .join(", ")}`
+    );
+  }
+
+  return status;
 };
 
 export const normalizePathname = (pathname: string) => {

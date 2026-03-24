@@ -56,11 +56,13 @@ Data-heavy UI favors cached server state through TanStack Query, with only small
 
 ## 5. Testing Standards
 
-- There is currently no automated test command in `package.json`.
 - There is no established unit/integration test suite pattern in this repository yet.
-- Until a test harness is introduced, validate changes with the available project checks.
+- Validate frontend changes with the available local project checks before opening or updating a PR.
 - `npm run lint`
 - `npm run build`
+- `npm run test:e2e`
+- The Playwright e2e suite is the current automated UI regression flow for this repository. Run it locally alongside lint and build when your change can affect user-facing behavior.
+- CI runs the Playwright command through the e2e job in `.github/workflows/pr-tests.yml`, so proofs of change should include a passing Playwright e2e check in addition to any local screenshots or notes.
 - When adding a new test framework or test type, follow the existing folder boundaries and update this document once a repeatable convention exists across multiple files.
 - For Playwright mock API scenarios under `tests/e2e/utils/mockApi`, prefer code-defined `ApiResponse` fixtures via shared helpers (`apiRoute`, `apiErrorRoute`) for simple success/error payloads. Use `jsonFixtureRoute` + JSON files only when the payload is large or deeply nested enough that inline TypeScript would hurt readability.
 - For Playwright JSON fixtures, keep endpoint variants together in `tests/e2e/mocks/fixtures/<name>.json` and select them with `jsonFixtureRoute({ fixture, variant })` instead of creating one JSON file per test case.

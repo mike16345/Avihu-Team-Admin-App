@@ -95,8 +95,8 @@ tests/
 
 Playwright configuration must:
 
-* Use `vite preview`
-* Target `http://127.0.0.1:4173`
+* Use `npm run start`
+* Target `http://127.0.0.1:3000`
 * Enable trace on first retry
 * Capture screenshot + video on failure
 
