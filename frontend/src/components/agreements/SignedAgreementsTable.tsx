@@ -168,6 +168,7 @@ const SignedAgreementsTable = ({ paginationKey }: SignedAgreementsTableProps) =>
       pageCount={pageCount}
       onPageChange={setPage}
       paginationKey={paginationKey ?? "agreements"}
+      testIdPrefix={paginationKey ?? "agreements"}
       rowClickMode="single"
     />
   );

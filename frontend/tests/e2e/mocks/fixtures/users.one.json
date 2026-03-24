@@ -1,0 +1,21 @@
+{
+  "success": {
+    "data": {
+      "_id": "user-admin-001",
+      "firstName": "\u05de\u05d9\u05db\u05dc",
+      "lastName": "\u05db\u05d4\u05df",
+      "email": "admin@example.com",
+      "phone": "0501234567",
+      "dietaryType": [],
+      "dateFinished": "2026-12-31T00:00:00.000Z",
+      "planType": "premium",
+      "remindIn": 3,
+      "dateJoined": "2025-01-15T00:00:00.000Z",
+      "isChecked": true,
+      "checkInAt": 1735689600,
+      "hasAccess": true,
+      "onboardingCompleted": true
+    },
+    "message": "\u05d4\u05de\u05e9\u05ea\u05de\u05e9 \u05e0\u05d8\u05e2\u05df"
+  }
+}

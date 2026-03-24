@@ -29,9 +29,15 @@ interface PresetTableProps {
   data: any[];
   handleDelete: (id: string) => void;
   handleViewData: (id: string) => void;
+  testIdPrefix?: string;
 }
 
-const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, handleViewData }) => {
+const PresetTable: React.FC<PresetTableProps> = ({
+  data,
+  handleDelete,
+  handleViewData,
+  testIdPrefix,
+}) => {
   const [displayData, setDisplayData] = useState<any[]>(data);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -83,10 +89,17 @@ const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, handleVie
 
   return (
     <>
-      <div className="my-2 sm:w-2/4">
+      <div
+        data-testid={testIdPrefix ? `${testIdPrefix}-search-container` : undefined}
+        className="my-2 sm:w-2/4"
+      >
         <Input placeholder="חיפוש..." onChange={handleSearch} />
       </div>
-      <Table dir="rtl" className="sm:w-3/4">
+      <Table
+        data-testid={testIdPrefix ? `${testIdPrefix}-table` : undefined}
+        dir="rtl"
+        className="sm:w-3/4"
+      >
         <TableHeader>
           <TableRow>
             <TableHead className="text-right">שם</TableHead>
@@ -100,6 +113,7 @@ const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, handleVie
           )}
           {paginatedData.map((data, i) => (
             <TableRow
+              data-testid={testIdPrefix ? `${testIdPrefix}-row-${data._id}` : undefined}
               key={i}
               onDoubleClick={() => {
                 handleViewData(data._id);
@@ -109,6 +123,9 @@ const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, handleVie
                 <div className="pr-4">{data.title || data.name}</div>
                 <div>
                   <TableActions
+                    testIdPrefix={
+                      testIdPrefix && data._id ? `${testIdPrefix}-row-${data._id}` : undefined
+                    }
                     handleDelete={() => handleDelete(data._id)}
                     handleEdit={() => handleViewData(data._id)}
                   />
@@ -119,7 +136,11 @@ const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, handleVie
         </TableBody>
         <TableFooter className="p-2 flex items-start">
           <Pagination>
-            <PaginationPrevious onClick={handlePrevPage} className="cursor-pointer" />
+            <PaginationPrevious
+              data-testid={testIdPrefix ? `${testIdPrefix}-previous-page` : undefined}
+              onClick={handlePrevPage}
+              className="cursor-pointer"
+            />
             {Array.from({ length: Math.min(10, totalPages) }, (_, index) => {
               const startPage = Math.max(1, Math.min(currentPage - 4, totalPages - 9)); // Ensure it stays within range
               const pageNumber = startPage + index;
@@ -135,13 +156,20 @@ const PresetTable: React.FC<PresetTableProps> = ({ data, handleDelete, handleVie
                 </PaginationLink>
               );
             })}
-            <PaginationNext onClick={handleNextPage} className="cursor-pointer" />
+            <PaginationNext
+              data-testid={testIdPrefix ? `${testIdPrefix}-next-page` : undefined}
+              onClick={handleNextPage}
+              className="cursor-pointer"
+            />
           </Pagination>
           <Select
             onValueChange={(e) => handleItemsPerPageChange(Number(e))}
             value={itemsPerPage.toString()}
           >
-            <SelectTrigger className="w-[80px]">
+            <SelectTrigger
+              data-testid={testIdPrefix ? `${testIdPrefix}-page-size` : undefined}
+              className="w-[80px]"
+            >
               <SelectValue placeholder="10" />
             </SelectTrigger>
             <SelectContent>

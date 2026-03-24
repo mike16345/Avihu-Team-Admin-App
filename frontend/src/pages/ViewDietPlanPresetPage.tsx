@@ -114,7 +114,7 @@ export const ViewDietPlanPresetPage = () => {
   if (error) return <ErrorPage message={error.message} />;
 
   return (
-    <div className=" flex flex-col gap-4 size-full ">
+    <div data-testid="diet-plan-preset-page" className=" flex flex-col gap-4 size-full ">
       <BackButton navLink={MainRoutes.DIET_PLANS} />
       <div className="w-1/3 ">
         <Form {...presetNameForm}>

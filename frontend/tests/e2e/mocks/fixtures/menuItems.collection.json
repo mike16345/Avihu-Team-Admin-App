@@ -1,0 +1,11 @@
+{
+  "success": {
+    "data": {
+      "protein": ["Chicken Breast", "Greek Yogurt"],
+      "carbs": ["Rice", "Potatoes"],
+      "fats": ["Avocado", "Tahini"],
+      "vegetables": ["Cucumber", "Tomato"]
+    },
+    "message": "Menu items loaded"
+  }
+}

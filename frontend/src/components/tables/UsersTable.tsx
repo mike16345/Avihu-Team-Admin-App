@@ -1,16 +1,16 @@
-import { IUser } from "@/interfaces/IUser";
-import { columns as userColumns } from "./Columns/Users/UserColumns";
-import { DataTableHebrew } from "./DataTableHebrew";
+import { useMemo } from "react";
 import { useNavigate } from "react-router";
-import { Button } from "../ui/button";
-import Loader from "../ui/Loader";
-import ErrorPage from "@/pages/ErrorPage";
-import DateUtils from "@/lib/dateUtils";
-import { useTheme } from "../theme/theme-provider";
 import { weightTab } from "@/pages/UserDashboard";
+import { IUser } from "@/interfaces/IUser";
 import useUsersQuery from "@/hooks/queries/user/useUsersQuery";
 import useDeleteUser from "@/hooks/mutations/User/useDeleteUser";
-import { useMemo } from "react";
+import DateUtils from "@/lib/dateUtils";
+import ErrorPage from "@/pages/ErrorPage";
+import { columns as userColumns } from "./Columns/Users/UserColumns";
+import { DataTableHebrew } from "./DataTableHebrew";
+import { Button } from "../ui/button";
+import Loader from "../ui/Loader";
+import { useTheme } from "../theme/theme-provider";
 
 const MINIMUM_WARNING_DAYS = 3;
 
@@ -62,7 +62,11 @@ export const UsersTable = () => {
       <DataTableHebrew
         data={sortedUsers}
         columns={userColumns}
-        actionButton={<Button onClick={() => navigate(`/users/add`)}>הוסף משתמש</Button>}
+        actionButton={
+          <Button data-testid="users-add-button" onClick={() => navigate(`/users/add`)}>
+            הוסף משתמש
+          </Button>
+        }
         handleSetData={() => {}}
         handleViewData={(user) => handleViewUser(user)}
         getRowId={(row) => row._id || ""}
@@ -77,6 +81,7 @@ export const UsersTable = () => {
 
           return daysUntilPlanIsFinished <= MINIMUM_WARNING_DAYS;
         }}
+        testIdPrefix="users"
       />
     </>
   );

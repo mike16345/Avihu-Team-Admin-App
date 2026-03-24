@@ -33,7 +33,7 @@ const shortcuts = [
 
 const AdminDashboard = () => {
   return (
-    <div className="flex flex-col gap-3">
+    <div data-testid="admin-dashboard" className="flex flex-col gap-3">
       <div className="flex flex-col  gap-2">
         <div className="flex flex-col  sm:flex-row  sm:flex-wrap sm:items-center gap-5">
           {shortcuts.map((item) => (

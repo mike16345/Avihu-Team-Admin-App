@@ -33,6 +33,7 @@ const BackButton: React.FC<BackButtonProps> = ({
 
   return (
     <Button
+      data-testid="back-button"
       className={`${
         fixedPosition && `absolute top-5 left-12`
       } group hover:bg-primary transition-colors duration-500`}

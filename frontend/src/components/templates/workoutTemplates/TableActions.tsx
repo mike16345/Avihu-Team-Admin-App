@@ -12,19 +12,33 @@ import { BsThreeDots } from "react-icons/bs";
 interface TableActionsProps {
   handleDelete: () => void;
   handleEdit: () => void;
+  testIdPrefix?: string;
 }
 
-const TableActions: React.FC<TableActionsProps> = ({ handleDelete, handleEdit }) => {
+const TableActions: React.FC<TableActionsProps> = ({ handleDelete, handleEdit, testIdPrefix }) => {
   return (
     <DropdownMenu dir="rtl">
-      <DropdownMenuTrigger className="hover:bg-accent p-2 rounded-lg">
+      <DropdownMenuTrigger
+        data-testid={testIdPrefix ? `${testIdPrefix}-actions-trigger` : undefined}
+        className="hover:bg-accent p-2 rounded-lg"
+      >
         <BsThreeDots />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuLabel className="font-bold">פעולות</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleEdit}>עריכה</DropdownMenuItem>
-        <DropdownMenuItem onClick={handleDelete}>מחיקה</DropdownMenuItem>
+        <DropdownMenuItem
+          data-testid={testIdPrefix ? `${testIdPrefix}-edit` : undefined}
+          onClick={handleEdit}
+        >
+          עריכה
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          data-testid={testIdPrefix ? `${testIdPrefix}-delete` : undefined}
+          onClick={handleDelete}
+        >
+          מחיקה
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
