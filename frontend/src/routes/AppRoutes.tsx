@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/react";
 import { UsersTable } from "@/components/tables/UsersTable";
 import { UserDashboard } from "@/pages/UserDashboard";
 import { ViewDietPlanPage } from "@/pages/ViewDietPlanPage";
@@ -19,10 +20,12 @@ import FormPresetsPage from "@/pages/FormPresetsPage";
 import FormResponseDetailsPage from "@/pages/FormResponseDetailsPage";
 import CurrentAgreementPage from "@/pages/Agreements/CurrentAgreementPage";
 
+const SentryRoutes = Sentry.withSentryReactRouterV6Routing(Routes);
+
 export const AppRoutes = () => {
   return (
     <>
-      <Routes>
+      <SentryRoutes>
         <Route path="/" element={<AdminDashboard />} />
         <Route path="/users/*" element={<UsersTable />} />
         <Route path="/leads" element={<LeadsTablePage />} />
@@ -56,7 +59,7 @@ export const AppRoutes = () => {
         <Route path="/form-builder" element={<FormPresetsPage />} />
         <Route path="/form-responses/:id" element={<FormResponseDetailsPage />} />
         <Route path="/agreements/current" element={<CurrentAgreementPage />} />
-      </Routes>
+      </SentryRoutes>
     </>
   );
 };

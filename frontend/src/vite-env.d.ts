@@ -12,10 +12,21 @@ declare module "*.svg" {
 
 interface ImportMetaEnv {
   readonly VITE_SERVER: string;
+  readonly VITE_SERVER_PREVIEW_URL?: string;
   readonly VITE_API_AUTH_TOKEN: string;
   readonly VITE_CLOUDFRONT_URL: string;
+  readonly VITE_SENTRY_DSN?: string;
 }
 
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+
+interface Window {
+  __sentryTest?: {
+    captureError: () => string;
+    captureMessage: () => string;
+  };
+}
+
+declare const __APP_VERSION__: string;

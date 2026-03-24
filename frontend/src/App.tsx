@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/react";
 import { Route, Routes } from "react-router-dom";
 import RequireAuth from "./hooks/Authentication/RequireAuthentication";
 import useAuth from "./hooks/Authentication/useAuth";
@@ -6,6 +7,8 @@ import { AppRoutes } from "./routes/AppRoutes";
 import "./App.css";
 import { AppSidebar } from "./components/Sidebar/AppSidebar";
 import { SidebarProvider, SidebarTrigger } from "./components/ui/sidebar";
+
+const SentryRoutes = Sentry.withSentryReactRouterV6Routing(Routes);
 
 function App() {
   const { authed } = useAuth();
@@ -18,9 +21,9 @@ function App() {
         <RequireAuth>
           <AppRoutes />
         </RequireAuth>
-        <Routes>
+        <SentryRoutes>
           <Route path="/login" element={<LoginPage />} />
-        </Routes>
+        </SentryRoutes>
       </div>
     </SidebarProvider>
   );
