@@ -8,31 +8,9 @@ import {
 } from "react-router-dom";
 
 const dsn = import.meta.env.VITE_SENTRY_DSN;
-const apiUrls = [
-  import.meta.env.VITE_SERVER_PREVIEW_URL,
-  import.meta.env.VITE_SERVER,
-].filter((value): value is string => Boolean(value));
+const tracePropagationTargets = ["localhost", /^\//];
 
-const createTracePropagationTargets = (): Array<string | RegExp> => {
-  const targets = new Set<string>(["localhost"]);
 
-  for (const apiUrl of apiUrls) {
-    try {
-      const url = new URL(apiUrl);
-      const normalizedPathname = url.pathname.replace(/\/$/, "");
-
-      targets.add(url.origin);
-
-      if (normalizedPathname) {
-        targets.add(`${url.origin}${normalizedPathname}`);
-      }
-    } catch {
-      targets.add(apiUrl);
-    }
-  }
-
-  return [/^\//, ...targets];
-};
 
 if (dsn) {
   Sentry.init({
@@ -53,7 +31,7 @@ if (dsn) {
       }),
     ],
     tracesSampleRate: import.meta.env.DEV ? 1.0 : 0.1,
-    tracePropagationTargets: createTracePropagationTargets(),
+    tracePropagationTargets: tracePropagationTargets,
     replaysSessionSampleRate: import.meta.env.DEV ? 1.0 : 0.1,
     replaysOnErrorSampleRate: 1.0,
   });
