@@ -8,17 +8,13 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { USER_TOKEN_STORAGE_KEY } from "@/constants/constants";
-import { useUsersApi } from "@/hooks/api/useUsersApi";
 import useAuth from "@/hooks/Authentication/useAuth";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import secureLocalStorage from "react-secure-storage";
 import CustomButton from "../ui/CustomButton";
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
-import queryClient from "@/QueryClient/queryClient";
-import { QueryKeys } from "@/enums/QueryKeys";
+import { loginWithPassword } from "@/services/authApi";
 
 export const description =
   "A simple login form with email and password. The submit button says 'Sign in'.";
@@ -33,7 +29,6 @@ type LoginFormErrors = {
 
 export default function LoginForm() {
   const { login } = useAuth();
-  const { loginUser } = useUsersApi();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -55,17 +50,15 @@ export default function LoginForm() {
     setIsLoading(true);
 
     try {
-      const res = await loginUser(email, password);
-      secureLocalStorage.setItem(USER_TOKEN_STORAGE_KEY, res.data);
-      await login();
+      const session = await loginWithPassword(email, password);
+      await login(session);
       navigate("/");
-      queryClient.invalidateQueries({ queryKey: [QueryKeys.USER_LOGIN_SESSION] });
 
       setIsLoading(false);
-      toast.success(`ברוך הבא ${res.data.data.user.firstName}`);
+      toast.success(`ברוך הבא ${session.user.firstName ?? session.user.email}`);
     } catch (err: any) {
       setIsLoading(false);
-      toast.error(err?.data?.message);
+      toast.error(err?.response?.data?.message ?? err?.data?.message);
     }
 
     setErrors({});

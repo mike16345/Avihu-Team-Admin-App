@@ -19,6 +19,7 @@ type SidebarDestination = {
 const normalizePathname = (pathname: string) => pathname.replace(/\/+$/, "") || "/";
 
 const baseSidebarScenarios = (): MockScenarioSelection[] => [
+  "auth.logout.success",
   "analytics.dashboard.success",
   "users.success",
   "blogs.success",

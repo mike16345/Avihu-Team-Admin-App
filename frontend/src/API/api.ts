@@ -2,8 +2,6 @@ import axiosInstance from "@/config/apiConfig";
 import { handleAxiosError } from "@/lib/utils";
 import { AxiosRequestConfig, Method } from "axios";
 
-const API_AUTH_TOKEN = import.meta.env.VITE_API_AUTH_TOKEN;
-
 async function request<T>(
   method: Method,
   endpoint: string,
@@ -16,7 +14,7 @@ async function request<T>(
     url: endpoint,
     data,
     params,
-    headers: { ["X-Api-Key"]: API_AUTH_TOKEN, ...headers },
+    headers,
   };
 
   try {

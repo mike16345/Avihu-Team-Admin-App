@@ -1,9 +1,10 @@
+import { SafeAuthUser } from "@/interfaces/IAuth";
 import { IUser } from "@/interfaces/IUser";
 import { create } from "zustand";
 
 interface IUserStore {
-  currentUser: IUser | null;
-  setCurrentUser: (user: IUser | null) => void;
+  currentUser: SafeAuthUser | null;
+  setCurrentUser: (user: SafeAuthUser | null) => void;
   users: IUser[];
   setUsers: (users: IUser[]) => void;
 }

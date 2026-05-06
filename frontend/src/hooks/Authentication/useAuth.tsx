@@ -1,16 +1,22 @@
-import { USER_TOKEN_STORAGE_KEY } from "@/constants/constants";
-import { useEffect, useState, useContext, createContext } from "react";
-import secureLocalStorage from "react-secure-storage";
-import useCheckUserSessionQuery from "../queries/auth/useCheckUserSessionQuery";
-import { ISession } from "@/interfaces/IUser";
+import { useCallback, useEffect, useState, useContext, createContext } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { QueryKeys } from "@/enums/QueryKeys";
 import { useUsersStore } from "@/store/userStore";
+import { LoginResponse } from "@/interfaces/IAuth";
+import {
+  clearAuthSession,
+  getRefreshToken,
+  loadPersistedAuthSession,
+  setAuthSession,
+  subscribeAuthSession,
+} from "@/services/authSession";
+import { refreshAuthSession } from "@/services/authRefresh";
+import { logoutRefreshSession } from "@/services/authApi";
+import { shouldClearPersistedAuth } from "@/services/authErrors";
 
 interface AuthContext {
   authed: boolean;
   loading: boolean;
-  login: () => Promise<void>;
+  login: (session: LoginResponse) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -22,53 +28,83 @@ function useAuth(): AuthContext {
 
   const [authed, setAuthed] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState<ISession | null>(null);
 
-  const { data } = useCheckUserSessionQuery(token);
+  const resetAuthState = useCallback(() => {
+    queryClient.clear();
+    setCurrentUser(null);
+    setAuthed(false);
+  }, [queryClient, setCurrentUser]);
 
-  const checkUserToken = () => {
-    const userToken = secureLocalStorage.getItem(USER_TOKEN_STORAGE_KEY);
+  const hydrateAuthSession = useCallback(async () => {
+    const persistedSession = loadPersistedAuthSession();
 
-    if (!userToken || userToken === "undefined") {
-      setAuthed(false);
+    console.log("Hydrating auth session:", persistedSession);
+    if (!persistedSession) {
+      resetAuthState();
       setLoading(false);
-    } else {
-      const token = userToken as ISession;
-
-      setToken(token);
-      setCurrentUser(token?.data?.user || null);
+      return;
     }
-  };
+
+    setCurrentUser(persistedSession.user ?? null);
+
+    try {
+      await refreshAuthSession();
+      setAuthed(true);
+    } catch (error) {
+      if (shouldClearPersistedAuth(error)) {
+        clearAuthSession(false);
+      }
+
+      resetAuthState();
+    } finally {
+      setLoading(false);
+    }
+  }, [resetAuthState, setCurrentUser]);
 
   useEffect(() => {
-    checkUserToken();
-  }, []);
+    hydrateAuthSession();
+  }, [hydrateAuthSession]);
 
   useEffect(() => {
-    if (!data) return;
+    return subscribeAuthSession((snapshot) => {
+      if (!snapshot) {
+        resetAuthState();
+        return;
+      }
 
-    setAuthed(data.isValid);
-    if (!data.isValid) setCurrentUser(null);
-    setLoading(false);
-  }, [data]);
+      setCurrentUser(snapshot.user ?? null);
+      setAuthed(Boolean(snapshot.accessToken));
+    });
+  }, [resetAuthState, setCurrentUser]);
 
   return {
     authed,
     loading,
-    login() {
+    login(session: LoginResponse) {
       return new Promise<void>((resolve) => {
+        setAuthSession({
+          nextAccessToken: session.accessToken,
+          nextRefreshToken: session.refreshToken,
+          nextSessionId: session.sessionId,
+          nextUser: session.user,
+        });
+        setCurrentUser(session.user);
         setAuthed(true);
         resolve();
       });
     },
-    logout() {
-      return new Promise<void>((resolve) => {
-        secureLocalStorage.clear();
+    async logout() {
+      const refreshToken = getRefreshToken();
+
+      try {
+        if (refreshToken) {
+          await logoutRefreshSession(refreshToken);
+        }
+      } finally {
+        clearAuthSession(false);
         sessionStorage.clear();
-        queryClient.invalidateQueries({ queryKey: [QueryKeys.USER_LOGIN_SESSION] });
-        setAuthed(false);
-        resolve();
-      });
+        resetAuthState();
+      }
     },
   };
 }
