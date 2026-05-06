@@ -1,4 +1,5 @@
 import { useDeferredValue, useMemo, useState } from "react";
+import { CreateTrainerDialog } from "@/components/trainers/CreateTrainerDialog";
 import { TrainersTable } from "@/components/trainers/TrainersTable";
 import { TrainersToolbar } from "@/components/trainers/TrainersToolbar";
 import { usePaginatedTrainersQuery } from "@/hooks/queries/trainers/usePaginatedTrainersQuery";
@@ -48,6 +49,7 @@ const TrainersPage = () => {
   const [searchValue, setSearchValue] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [planFilter, setPlanFilter] = useState("all");
+  const [isCreateTrainerOpen, setIsCreateTrainerOpen] = useState(false);
 
   const deferredSearchValue = useDeferredValue(searchValue);
   const hasActiveFilters =
@@ -100,7 +102,7 @@ const TrainersPage = () => {
           setStatusFilter("all");
           setPlanFilter("all");
         }}
-        onAddTrainer={() => {}}
+        onAddTrainer={() => setIsCreateTrainerOpen(true)}
       />
 
       <TrainersTable
@@ -109,6 +111,11 @@ const TrainersPage = () => {
         page={page}
         pageCount={pageCount}
         onPageChange={(nextPage) => setPage(Math.min(Math.max(nextPage, 1), pageCount))}
+      />
+
+      <CreateTrainerDialog
+        open={isCreateTrainerOpen}
+        onOpenChange={setIsCreateTrainerOpen}
       />
     </div>
   );

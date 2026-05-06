@@ -4,9 +4,20 @@ import { ApiResponse } from "@/types/types";
 export type TrainerId = string;
 export type SubTrainerId = string;
 
-export type TrainerSubscriptionPlan = "Pro" | "בסיסי";
-export type TrainerStatus = "active" | "inactive" | "blocked";
-export type TrainerSource = "פנייה קרה" | "יוטיוב" | "גוגל" | "פייסבוק" | "אינסטגרם" | "פה לאוזן";
+export const TRAINER_SUBSCRIPTION_PLANS = ["Pro", "בסיסי"] as const;
+export const TRAINER_STATUSES = ["active", "inactive", "blocked"] as const;
+export const TRAINER_SOURCES = [
+  "פנייה קרה",
+  "יוטיוב",
+  "גוגל",
+  "פייסבוק",
+  "אינסטגרם",
+  "פה לאוזן",
+] as const;
+
+export type TrainerSubscriptionPlan = (typeof TRAINER_SUBSCRIPTION_PLANS)[number];
+export type TrainerStatus = (typeof TRAINER_STATUSES)[number];
+export type TrainerSource = (typeof TRAINER_SOURCES)[number];
 export type SubTrainerPosition = "מאמן" | "תזונאי" | "יועץ תזונה" | "אחר";
 export type SubTrainerStatus = "active" | "inactive";
 
