@@ -4,11 +4,11 @@ import { ApiResponse } from "@/types/types";
 export type TrainerId = string;
 export type SubTrainerId = string;
 
-export type TrainerSubscriptionPlan = string;
-export type TrainerStatus = string;
-export type TrainerSource = string;
-export type SubTrainerPosition = string;
-export type SubTrainerStatus = string;
+export type TrainerSubscriptionPlan = "Pro" | "בסיסי";
+export type TrainerStatus = "active" | "inactive" | "blocked";
+export type TrainerSource = "פנייה קרה" | "יוטיוב" | "גוגל" | "פייסבוק" | "אינסטגרם" | "פה לאוזן";
+export type SubTrainerPosition = "מאמן" | "תזונאי" | "יועץ תזונה" | "אחר";
+export type SubTrainerStatus = "active" | "inactive";
 
 export type TrainerFilter = Record<string, unknown>;
 export type TrainerSort = Record<string, unknown>;

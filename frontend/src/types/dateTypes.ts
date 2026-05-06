@@ -20,7 +20,8 @@ export type DateFormatType =
   | "MMMM"
   | "MM"
   | "YY"
-  | "DD";
+  | "DD"
+  | "D MMM YYYY";
 
 export type DateRanges = "hours" | "days" | "weeks" | "months" | "years";
 export type ItemsInDateRangeParams<T> = {

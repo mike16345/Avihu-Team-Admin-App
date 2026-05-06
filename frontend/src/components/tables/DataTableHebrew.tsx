@@ -41,8 +41,13 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   actionButton?: ReactNode;
   filters?: ReactNode;
+  className?: string;
+  tableWrapperClassName?: string;
+  paginationClassName?: string;
   searchFn?: (row: TData, query: string) => boolean;
   searchPlaceholder?: string;
+  emptyStateText?: string;
+  hideToolbar?: boolean;
   handleViewData: (data: TData) => void;
   handleSetData: (data: TData) => void;
   handleDeleteData: (data: TData) => void;
@@ -75,8 +80,13 @@ export function DataTableHebrew<TData, TValue>({
   data,
   actionButton,
   filters,
+  className,
+  tableWrapperClassName,
+  paginationClassName,
   searchFn,
   searchPlaceholder,
+  emptyStateText,
+  hideToolbar = false,
   handleViewData,
   handleDeleteData,
   handleViewNestedData,
@@ -214,9 +224,9 @@ export function DataTableHebrew<TData, TValue>({
   return (
     <div
       data-testid={testIdPrefix ? `${testIdPrefix}-table` : undefined}
-      className="space-y-4 rounded-xl bg-background/80 p-4 shadow-sm"
+      className={cn("space-y-4 rounded-xl bg-background/80 p-4 shadow-sm", className)}
     >
-      <div className="flex flex-col gap-4  pb-4">
+      {!hideToolbar ? <div className="flex flex-col gap-4  pb-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <Input
             placeholder={searchPlaceholder ?? "חיפוש..."}
@@ -285,8 +295,13 @@ export function DataTableHebrew<TData, TValue>({
         </div>
 
         {filters ? <div className="flex flex-wrap items-center gap-2">{filters}</div> : null}
-      </div>
-      <div className="size-full rounded-md border min-h-[60vh] max-h-[65vh] overflow-auto">
+      </div> : null}
+      <div
+        className={cn(
+          "size-full rounded-md border min-h-[60vh] max-h-[65vh] overflow-auto",
+          tableWrapperClassName
+        )}
+      >
         <Table className="size-full">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -348,14 +363,19 @@ export function DataTableHebrew<TData, TValue>({
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  אין תוצאות
+                  {emptyStateText ?? "אין תוצאות"}
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-between sm:justify-end gap-3 py-4">
+      <div
+        className={cn(
+          "flex items-center justify-between sm:justify-end gap-3 py-4",
+          paginationClassName
+        )}
+      >
         <Button
           data-testid={testIdPrefix ? `${testIdPrefix}-previous-page` : undefined}
           variant="outline"

@@ -36,10 +36,13 @@ const unwrapAuthResponse = <T>(responseBody: T | ApiResponse<T>) => {
 };
 
 export const loginWithPassword = async (email: string, password: string) => {
-  const response = await authClient.post<ApiResponse<LoginResponse> | LoginResponse>(`${AUTH_ENDPOINT}/login`, {
-    email,
-    password,
-  });
+  const response = await authClient.post<ApiResponse<LoginResponse> | LoginResponse>(
+    `${AUTH_ENDPOINT}/login`,
+    {
+      email,
+      password,
+    }
+  );
 
   return unwrapAuthResponse<LoginResponse>(response.data);
 };
@@ -73,13 +76,16 @@ export const logoutRefreshSession = async (refreshToken: string) => {
 
 export const getCurrentAuthUser = async () => {
   const accessToken = getAccessToken();
-  const response = await authClient.get<ApiResponse<MeResponse> | MeResponse>(`${AUTH_ENDPOINT}/me`, {
-    headers: accessToken
-      ? {
-          Authorization: `Bearer ${accessToken}`,
-        }
-      : undefined,
-  });
+  const response = await authClient.get<ApiResponse<MeResponse> | MeResponse>(
+    `${AUTH_ENDPOINT}/me`,
+    {
+      headers: accessToken
+        ? {
+            Authorization: `Bearer ${accessToken}`,
+          }
+        : undefined,
+    }
+  );
 
   return unwrapAuthResponse<MeResponse>(response.data);
 };

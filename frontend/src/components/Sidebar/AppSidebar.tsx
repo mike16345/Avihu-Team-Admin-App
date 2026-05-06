@@ -3,6 +3,7 @@ import {
   BicepsFlexed,
   LucideIcon,
   User,
+  Users,
   Edit,
   SquareMenu,
   User2,
@@ -52,6 +53,11 @@ const sidebarGroups: SidebarItem[][] = [
       url: "/",
       title: "בית",
       icon: Home,
+    },
+    {
+      url: "/trainers",
+      title: "מאמנים",
+      icon: Users,
     },
     {
       url: "/users",
