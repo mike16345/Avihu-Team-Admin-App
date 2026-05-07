@@ -20,7 +20,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
 import {
   Select,
   SelectContent,
@@ -41,6 +40,7 @@ import {
   type UpdateTrainerSchemaType,
   updateTrainerSchema,
 } from "@/schemas/trainerSchema";
+import { TrainerEditSummaryCard } from "./TrainerEditSummaryCard";
 
 type EditTrainerDialogProps = {
   open: boolean;
@@ -53,9 +53,6 @@ const statusLabels: Record<TrainerStatus, string> = {
   inactive: "לא פעיל",
   blocked: "חסום",
 };
-
-const summaryCellClassName =
-  "flex min-h-[58px] flex-col items-center justify-center px-3 py-2 text-center";
 
 const clampPercent = (value: number) => Math.max(0, Math.min(100, value));
 
@@ -160,42 +157,17 @@ export const EditTrainerDialog = ({ open, onOpenChange, data }: EditTrainerDialo
             <div className="min-h-0 space-y-3 overflow-y-auto px-5 py-4">
               <input type="hidden" {...form.register("source")} />
 
-              <div className="overflow-hidden rounded-2xl border border-primary/25 bg-background">
-                <div className="grid grid-cols-3 divide-x divide-x-reverse divide-primary/15">
-                  <div className={summaryCellClassName}>
-                    <div className="text-[11px] leading-none text-muted-foreground">תת-מאמנים</div>
-                    <div className="mt-1 flex items-baseline gap-1 text-sm font-semibold text-foreground">
-                      <span>{currentSubTrainers}/{trainer.subTrainerLimit}</span>
-                      <span className={subTrainerTone.text}>{subTrainerPercent}%</span>
-                    </div>
-                    <Progress
-                      value={subTrainerPercent}
-                      className="mt-2 h-1.5 w-full bg-muted"
-                      indicatorClassName={subTrainerTone.bar}
-                    />
-                  </div>
-
-                  <div className={summaryCellClassName}>
-                    <div className="text-[11px] leading-none text-muted-foreground">לקוחות</div>
-                    <div className="mt-1 flex items-baseline gap-1 text-sm font-semibold text-foreground">
-                      <span>{currentClients}/{trainer.clientLimit}</span>
-                      <span className={clientTone.text}>{clientPercent}%</span>
-                    </div>
-                    <Progress
-                      value={clientPercent}
-                      className="mt-2 h-1.5 w-full bg-muted"
-                      indicatorClassName={clientTone.bar}
-                    />
-                  </div>
-
-                  <div className={summaryCellClassName}>
-                    <div className="text-[11px] leading-none text-muted-foreground">תוכנית</div>
-                    <div className="mt-2 text-2xl font-semibold leading-none text-primary">
-                      {trainer.subscriptionPlan}
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <TrainerEditSummaryCard
+                currentClients={currentClients}
+                clientLimit={trainer.clientLimit}
+                clientPercent={clientPercent}
+                clientTone={clientTone}
+                currentSubTrainers={currentSubTrainers}
+                subTrainerLimit={trainer.subTrainerLimit}
+                subTrainerPercent={subTrainerPercent}
+                subTrainerTone={subTrainerTone}
+                subscriptionPlan={trainer.subscriptionPlan}
+              />
 
               <FormField
                 control={form.control}
