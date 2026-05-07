@@ -30,7 +30,9 @@
   font-family: "Arial MT Bold";
   font-style: normal;
   font-weight: normal;
-  src: local("Arial MT Bold"), url("/public/Fonts/ARIALBOLDMT/ARIALBOLDMT.woff") format("woff");
+  src:
+    local("Arial MT Bold"),
+    url("/public/Fonts/ARIALBOLDMT/ARIALBOLDMT.woff") format("woff");
 }
 
 /* vietnamese */
@@ -40,8 +42,9 @@
   font-weight: 400;
   font-display: swap;
   src: url("/assets/Fonts/Varela-Round/w8gdH283Tvk__Lua32TysjIfqMuPP9g.woff2") format("woff2");
-  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0,
-    U+1EA0-1EF9, U+20AB;
+  unicode-range:
+    U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+1EA0-1EF9,
+    U+20AB;
 }
 
 /* latin-ext */
@@ -51,8 +54,9 @@
   font-weight: 400;
   font-display: swap;
   src: url("/public/Fonts/Varela-Round/w8gdH283Tvk__Lua32TysjIfqcuPP9g.woff2") format("woff2");
-  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113,
-    U+2C60-2C7F, U+A720-A7FF;
+  unicode-range:
+    U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F,
+    U+A720-A7FF;
 }
 
 /* latin */
@@ -62,8 +66,18 @@
   font-weight: 400;
   font-display: swap;
   src: url("/public/Fonts/Varela-Round/w8gdH283Tvk__Lua32TysjIfp8uP.woff2") format("woff2");
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F,
-    U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074,
+    U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Google Sans";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+
+  src: url("/Fonts/Google-Sans/GoogleSans-VariableFont_GRAD,opsz,wght.ttf") format("truetype");
 }
 
 /* ------------------------------ */
@@ -82,11 +96,15 @@ body {
 
 .i.icon {
   font-family: "Arial" !important;
-  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000 !important;
+  text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000 !important;
 }
 
 * :not(.icon) {
-  font-family: "Varela Round" !important;
+  font-family: "Google Sans" !important;
 }
 
 * {
@@ -94,15 +112,27 @@ body {
 }
 
 .text-shadow {
-  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000 !important;
+  text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000 !important;
 }
 
 .text-shadow {
-  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000 !important;
+  text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000 !important;
 }
 
 .text-shadow-md {
-  text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000 !important;
+  text-shadow:
+    -2px -2px 0 #000,
+    2px -2px 0 #000,
+    -2px 2px 0 #000,
+    2px 2px 0 #000 !important;
 }
 
 .filter-shadow {

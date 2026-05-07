@@ -2,6 +2,7 @@ export enum MainRoutes {
   HOME = "/",
   TRAINERS = "/trainers",
   TRAINER = "/trainers/:id",
+  SUB_TRAINERS = "/sub-trainers",
   DIET_PLANS = "/dietPlans",
   DIET_PLAN = "/diet-plans/:id",
   USERS = "/users",
