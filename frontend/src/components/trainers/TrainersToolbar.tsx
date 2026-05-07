@@ -34,16 +34,16 @@ export const TrainersToolbar = ({
   onAddTrainer,
 }: TrainersToolbarProps) => {
   return (
-    <div className="rounded-[28px] border border-default bg-background p-4 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
+    <div className="rounded-[28px] border border-border bg-background p-4 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:justify-start md:flex-none   w-full md:max-w-[450px] lg:max-w-[600px]">
           <div className="relative w-full  ">
-            <Search className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-accented" />
+            <Search className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={searchValue}
               onChange={(event) => onSearchChange(event.target.value)}
               placeholder="חפש מאמן לפי שם, אימייל או מספר..."
-              className="h-11 rounded-xl border-none  bg-muted pr-10 text-right placeholder:text-accented w-full "
+              className="h-11 w-full rounded-xl border-none bg-muted pr-10 text-right placeholder:text-muted-foreground"
             />
           </div>
 
@@ -52,7 +52,7 @@ export const TrainersToolbar = ({
               <Button
                 type="button"
                 variant="outline"
-                className="h-11 shrink-0 rounded-xl border-default px-4 text-accented"
+                className="h-11 shrink-0 rounded-xl border-border px-4 text-muted-foreground"
               >
                 <Filter className="ml-2 h-4 w-4" />
                 סינון
@@ -93,7 +93,7 @@ export const TrainersToolbar = ({
                 variant="ghost"
                 onClick={onResetFilters}
                 disabled={!hasActiveFilters}
-                className="w-full justify-center text-[#3467EB]"
+                className="w-full justify-center text-primary"
               >
                 <RotateCcw className="ml-2 h-4 w-4" />
                 איפוס מסננים

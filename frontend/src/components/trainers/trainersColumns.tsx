@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import DateUtils from "@/lib/dateUtils";
 import { PaginatedTrainerRow } from "@/interfaces/trainers";
+import { Link } from "react-router-dom";
 import { TrainerAvatar } from "./TrainerAvatar";
 import { TrainerPlanBadge } from "./TrainerPlanBadge";
 import { TrainerStatusBadge } from "./TrainerStatusBadge";
@@ -17,11 +18,11 @@ export const trainersColumns: ColumnDef<PaginatedTrainerRow>[] = [
     accessorKey: "fullName",
     header: "שם",
     cell: ({ row }) => (
-      <div dir="rtl" className="flex w-full items-center  gap-3 text-right ">
+      <div dir="rtl" className="flex w-full items-center gap-3 text-right">
         <TrainerAvatar fullName={row.original.fullName} />
 
         <div className="text-right">
-          <div className="font-medium ">{row.original.fullName}</div>
+          <div className="font-medium">{row.original.fullName}</div>
           <div className="text-xs text-muted-foreground">{row.original.email}</div>
         </div>
       </div>
@@ -63,14 +64,14 @@ export const trainersColumns: ColumnDef<PaginatedTrainerRow>[] = [
   {
     id: "actions",
     header: "פעולות",
-    cell: () => (
+    cell: ({ row }) => (
       <Button
-        type="button"
+        asChild
         variant="outline"
         size="sm"
-        className="rounded-lg border-primary bg-primary/10 h-8  px-4 text-primary hover:bg-primary/20 hover:text-primary font-bold"
+        className="h-8 rounded-lg border-primary bg-primary/10 px-4 font-bold text-primary hover:bg-primary/20 hover:text-primary"
       >
-        פרטים
+        <Link to={`/trainers/${row.original._id}`}>פרטים</Link>
       </Button>
     ),
   },

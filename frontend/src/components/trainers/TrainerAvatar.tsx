@@ -19,7 +19,7 @@ export const TrainerAvatar = ({ fullName, className }: TrainerAvatarProps) => {
   return (
     <div
       className={cn(
-        "flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#C7D2FE] text-xs font-semibold text-[#3751A3]",
+        "flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/15 text-sm font-bold leading-none text-primary",
         className
       )}
     >

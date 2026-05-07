@@ -18,6 +18,7 @@ import FormBuilderPage from "@/pages/FormBuilderPage";
 import FormPresetsPage from "@/pages/FormPresetsPage";
 import FormResponseDetailsPage from "@/pages/FormResponseDetailsPage";
 import CurrentAgreementPage from "@/pages/Agreements/CurrentAgreementPage";
+import TrainerDetailsPage from "@/pages/TrainerDetailsPage";
 import TrainersPage from "@/pages/TrainersPage";
 
 export const AppRoutes = () => {
@@ -25,6 +26,7 @@ export const AppRoutes = () => {
     <>
       <Routes>
         <Route path="/" element={<AdminDashboard />} />
+        <Route path="/trainers/:id" element={<TrainerDetailsPage />} />
         <Route path="/trainers" element={<TrainersPage />} />
         <Route path="/users/*" element={<UsersTable />} />
         <Route path="/leads" element={<LeadsTablePage />} />

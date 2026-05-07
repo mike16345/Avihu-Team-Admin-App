@@ -15,9 +15,9 @@ export const TrainerUtilization = ({ current, limit }: TrainerUtilizationProps) 
   const percent = safeLimit ? clampPercent(Math.round((current / safeLimit) * 100)) : 0;
 
   const colorClassName =
-    percent >= 90 ? "bg-destructive" : percent >= 75 ? "bg-[#F4C430]" : "bg-success";
+    percent >= 90 ? "bg-destructive" : percent >= 75 ? "bg-chart-4" : "bg-success";
   const textColorClassName =
-    percent >= 90 ? "text-destructive" : percent >= 75 ? "text-[#D97706]" : "text-success";
+    percent >= 90 ? "text-destructive" : percent >= 75 ? "text-chart-4" : "text-success";
 
   return (
     <div className="min-w-[112px] space-y-1  flex items-center gap-2">

@@ -47,7 +47,7 @@ const sourceButtonClassName = (selected: boolean) =>
     "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
     selected
       ? "border-primary bg-primary/10 text-primary"
-      : "border-default text-muted-foreground hover:bg-muted"
+      : "border-border text-muted-foreground hover:bg-muted"
   );
 
 export const CreateTrainerDialog = ({ open, onOpenChange }: CreateTrainerDialogProps) => {
@@ -285,7 +285,7 @@ export const CreateTrainerDialog = ({ open, onOpenChange }: CreateTrainerDialogP
               control={form.control}
               name="videoLibraryAccess"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-xl border border-default bg-muted px-4 py-3">
+                <FormItem className="flex flex-row items-center justify-between rounded-xl border border-border bg-muted px-4 py-3">
                   <div className="space-y-1 text-right">
                     <FormLabel className="block">גישה לספריית תרגילים</FormLabel>
                     <p className="text-sm text-muted-foreground">
