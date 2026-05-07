@@ -7,24 +7,30 @@ type ActionButtonProps = {
   icon: ReactNode;
   title: string;
   className: string;
+  onClick?: () => void;
 };
 
-const ActionButton = ({ icon, title, className }: ActionButtonProps) => {
+const ActionButton = ({ icon, title, className, onClick }: ActionButtonProps) => {
   return (
     <Button
       type="button"
       variant="outline"
+      onClick={onClick}
       className={`h-11 w-full justify-between rounded-xl border text-sm font-semibold ${className}`}
     >
       <div className="flex h-7 w-7 items-center justify-center rounded-full border border-current">
         {icon}
       </div>
-      <div className=" w-full">{title}</div>
+      <div className="w-full">{title}</div>
     </Button>
   );
 };
 
-export const TrainerQuickActionsCard = () => {
+type TrainerQuickActionsCardProps = {
+  onEdit?: () => void;
+};
+
+export const TrainerQuickActionsCard = ({ onEdit }: TrainerQuickActionsCardProps) => {
   return (
     <Card
       dir="rtl"
@@ -39,6 +45,7 @@ export const TrainerQuickActionsCard = () => {
         <ActionButton
           title="ערוך מאמן"
           icon={<Pencil className="h-4 w-4" />}
+          onClick={onEdit}
           className="border-primary/40 bg-primary/5 text-primary hover:bg-primary/10 hover:text-primary"
         />
         <ActionButton

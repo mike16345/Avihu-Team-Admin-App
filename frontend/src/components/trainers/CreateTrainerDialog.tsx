@@ -2,14 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { useCreateTrainer } from "@/hooks/mutations/trainers/useCreateTrainer";
-import { TRAINER_SOURCES, TRAINER_SUBSCRIPTION_PLANS } from "@/interfaces/trainers";
-import {
-  buildCreateTrainerPayload,
-  trainerSchema,
-  TrainerSchemaType,
-} from "@/schemas/trainerSchema";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -36,6 +28,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { useCreateTrainer } from "@/hooks/mutations/trainers/useCreateTrainer";
+import { TRAINER_SOURCES, TRAINER_SUBSCRIPTION_PLANS } from "@/interfaces/trainers";
+import { cn } from "@/lib/utils";
+import {
+  buildCreateTrainerPayload,
+  trainerSchema,
+  type TrainerSchemaType,
+} from "@/schemas/trainerSchema";
 
 type CreateTrainerDialogProps = {
   open: boolean;
@@ -61,6 +61,7 @@ export const CreateTrainerDialog = ({ open, onOpenChange }: CreateTrainerDialogP
       subscriptionPlan: "Pro",
       clientLimit: 1,
       subTrainerLimit: 1,
+      status: "active",
       source: "פנייה קרה",
       videoLibraryAccess: true,
     },
@@ -93,10 +94,10 @@ export const CreateTrainerDialog = ({ open, onOpenChange }: CreateTrainerDialogP
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         dir="rtl"
-        className="max-w-[430px] gap-0 overflow-hidden rounded-[18px]  p-0 shadow-[0_30px_80px_rgba(15,23,42,0.28)] [&>button]:left-4 [&>button]:right-auto"
+        className="max-w-[430px] gap-0 overflow-hidden rounded-[18px] p-0 shadow-[0_30px_80px_rgba(15,23,42,0.28)] [&>button]:left-4 [&>button]:right-auto"
       >
         <DialogHeader className="border-b border-primary/40 bg-primary/10 px-6 py-4 text-right">
-          <DialogTitle className="text-right text-lg font-semibold border-r-4 border-primary ps-4 ">
+          <DialogTitle className="border-r-4 border-primary ps-4 text-right text-lg font-semibold">
             הוספת מאמן חדש
           </DialogTitle>
           <DialogDescription className="hidden">טופס יצירת מאמן חדש</DialogDescription>
@@ -104,6 +105,8 @@ export const CreateTrainerDialog = ({ open, onOpenChange }: CreateTrainerDialogP
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-6 py-5">
+            <input type="hidden" {...form.register("status")} />
+
             <FormField
               control={form.control}
               name="fullName"
@@ -111,11 +114,7 @@ export const CreateTrainerDialog = ({ open, onOpenChange }: CreateTrainerDialogP
                 <FormItem>
                   <FormLabel>שם מלא</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="יש למלא שם מלא"
-                      className="bg-muted border-none"
-                      {...field}
-                    />
+                    <Input placeholder="יש למלא שם מלא" className="border-none bg-muted" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -131,7 +130,7 @@ export const CreateTrainerDialog = ({ open, onOpenChange }: CreateTrainerDialogP
                   <FormControl>
                     <Input
                       placeholder="יש למלא כתובת אימייל"
-                      className="bg-muted border-none"
+                      className="border-none bg-muted"
                       {...field}
                     />
                   </FormControl>
@@ -149,7 +148,7 @@ export const CreateTrainerDialog = ({ open, onOpenChange }: CreateTrainerDialogP
                   <FormControl>
                     <Input
                       dir="ltr"
-                      className="text-right bg-muted border-none"
+                      className="border-none bg-muted text-right"
                       placeholder="הכנס מספר טלפון"
                       {...field}
                     />
@@ -169,7 +168,7 @@ export const CreateTrainerDialog = ({ open, onOpenChange }: CreateTrainerDialogP
                     <Input
                       type="password"
                       placeholder="יש למלא סיסמה"
-                      className="bg-muted border-none"
+                      className="border-none bg-muted"
                       {...field}
                     />
                   </FormControl>
@@ -184,14 +183,14 @@ export const CreateTrainerDialog = ({ open, onOpenChange }: CreateTrainerDialogP
                 name="subscriptionPlan"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>מנוי</FormLabel>
+                    <FormLabel>תוכנית</FormLabel>
                     <Select dir="rtl" onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger className="bg-muted border-none">
-                          <SelectValue placeholder="בחר מנוי" />
+                        <SelectTrigger className="border-none bg-muted">
+                          <SelectValue placeholder="בחר תוכנית" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent dir="rtl" className="bg-muted border-none">
+                      <SelectContent dir="rtl" className="border-none bg-muted">
                         {TRAINER_SUBSCRIPTION_PLANS.map((plan) => (
                           <SelectItem key={plan} value={plan}>
                             {plan}
@@ -206,11 +205,7 @@ export const CreateTrainerDialog = ({ open, onOpenChange }: CreateTrainerDialogP
 
               <FormItem>
                 <FormLabel>סטטוס</FormLabel>
-                <Input
-                  value="פעיל"
-                  disabled
-                  className="bg-muted text-muted-foreground border-none"
-                />
+                <Input value="פעיל" disabled className="border-none bg-muted text-muted-foreground" />
               </FormItem>
             </div>
 
@@ -225,7 +220,7 @@ export const CreateTrainerDialog = ({ open, onOpenChange }: CreateTrainerDialogP
                       <Input
                         type="number"
                         min={1}
-                        className="bg-muted border-none"
+                        className="border-none bg-muted"
                         placeholder="הזן מגבלת לקוחות"
                         {...field}
                       />
@@ -239,13 +234,13 @@ export const CreateTrainerDialog = ({ open, onOpenChange }: CreateTrainerDialogP
                 control={form.control}
                 name="subTrainerLimit"
                 render={({ field }) => (
-                  <FormItem>
+                    <FormItem>
                     <FormLabel>מגבלת תתי מאמנים</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
                         min={1}
-                        className="bg-muted border-none"
+                        className="border-none bg-muted"
                         placeholder="הזן מגבלת תתי מאמנים"
                         {...field}
                       />
@@ -289,7 +284,7 @@ export const CreateTrainerDialog = ({ open, onOpenChange }: CreateTrainerDialogP
                   <div className="space-y-1 text-right">
                     <FormLabel className="block">גישה לספריית תרגילים</FormLabel>
                     <p className="text-sm text-muted-foreground">
-                      האם לאפשר למאמן גישה לספריית הווידאו
+                      האם לאפשר למאמן גישה לספריית התרגילים והסרטונים
                     </p>
                   </div>
                   <FormControl>
@@ -311,7 +306,7 @@ export const CreateTrainerDialog = ({ open, onOpenChange }: CreateTrainerDialogP
               </Button>
               <Button
                 type="submit"
-                className="w-full rounded-xl "
+                className="w-full rounded-xl"
                 disabled={createTrainerMutation.isPending}
               >
                 {createTrainerMutation.isPending ? "יוצר..." : "הוסף מאמן"}

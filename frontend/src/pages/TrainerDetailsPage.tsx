@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { EditTrainerDialog } from "@/components/trainers/EditTrainerDialog";
 import { TrainerInformationCard } from "@/components/trainers/TrainerInformationCard";
 import { TrainerOverviewCard } from "@/components/trainers/TrainerOverviewCard";
 import { TrainerQuickActionsCard } from "@/components/trainers/TrainerQuickActionsCard";
@@ -9,6 +11,7 @@ import { Link, useParams } from "react-router-dom";
 import { MdOutlineChevronLeft } from "react-icons/md";
 
 const TrainerDetailsPage = () => {
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const { id } = useParams();
   const { data, isLoading, isError, error } = useTrainerQuery(id);
 
@@ -39,8 +42,14 @@ const TrainerDetailsPage = () => {
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-start">
         <TrainerInformationCard data={data} />
-        <TrainerQuickActionsCard />
+        <TrainerQuickActionsCard onEdit={() => setIsEditDialogOpen(true)} />
       </div>
+
+      <EditTrainerDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        data={data}
+      />
     </div>
   );
 };
