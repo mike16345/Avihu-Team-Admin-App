@@ -1,11 +1,17 @@
+import { useState } from "react";
 import { toast } from "sonner";
+import { SubTrainerDialog } from "@/components/subTrainers/SubTrainerDialog";
 import { SubTrainersTableCard } from "@/components/subTrainers/SubTrainersTableCard";
 import { useDeleteSubTrainer } from "@/hooks/mutations/subTrainers/useDeleteSubTrainer";
 import { usePaginatedSubTrainersQuery } from "@/hooks/queries/subTrainers/usePaginatedSubTrainersQuery";
 import { useUrlPagination } from "@/hooks/useUrlPagination";
+import { PaginatedSubTrainerRow } from "@/interfaces/trainers";
 import ErrorPage from "@/pages/ErrorPage";
 
 const SubTrainersPage = () => {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedSubTrainer, setSelectedSubTrainer] = useState<PaginatedSubTrainerRow | null>(null);
+
   const { page, pageSize, setPage } = useUrlPagination({
     namespace: "sub-trainers",
     defaultPage: 1,
@@ -52,12 +58,24 @@ const SubTrainersPage = () => {
         pageCount={pageCount}
         totalCount={totalCount}
         onPageChange={(nextPage) => setPage(Math.min(Math.max(nextPage, 1), pageCount))}
-        onAddSubTrainer={() => {}}
-        onEditSubTrainer={() => {}}
+        onAddSubTrainer={() => {
+          setSelectedSubTrainer(null);
+          setIsDialogOpen(true);
+        }}
+        onEditSubTrainer={(subTrainer) => {
+          setSelectedSubTrainer(subTrainer);
+          setIsDialogOpen(true);
+        }}
         onDeleteSubTrainer={(subTrainer) => deleteSubTrainerMutation.mutate(subTrainer._id)}
         deletingId={
           deleteSubTrainerMutation.isPending ? deleteSubTrainerMutation.variables : undefined
         }
+      />
+
+      <SubTrainerDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        subTrainer={selectedSubTrainer}
       />
     </div>
   );

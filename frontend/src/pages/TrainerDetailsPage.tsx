@@ -6,6 +6,7 @@ import { EditTrainerDialog } from "@/components/trainers/EditTrainerDialog";
 import { TrainerInformationCard } from "@/components/trainers/TrainerInformationCard";
 import { TrainerOverviewCard } from "@/components/trainers/TrainerOverviewCard";
 import { TrainerQuickActionsCard } from "@/components/trainers/TrainerQuickActionsCard";
+import { TrainerSubTrainersDialog } from "@/components/trainers/TrainerSubTrainersDialog";
 import { MainRoutes } from "@/enums/Routes";
 import Loader from "@/components/ui/Loader";
 import { useUpdateTrainer } from "@/hooks/mutations/trainers/useUpdateTrainer";
@@ -14,6 +15,7 @@ import ErrorPage from "@/pages/ErrorPage";
 
 const TrainerDetailsPage = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isSubTrainersDialogOpen, setIsSubTrainersDialogOpen] = useState(false);
   const { id } = useParams();
   const { data, isLoading, isError, error } = useTrainerQuery(id);
   const updateTrainerMutation = useUpdateTrainer({
@@ -76,6 +78,7 @@ const TrainerDetailsPage = () => {
         <TrainerQuickActionsCard
           onEdit={() => setIsEditDialogOpen(true)}
           onBlock={handleBlockTrainer}
+          onViewSubTrainers={() => setIsSubTrainersDialogOpen(true)}
           isBlocking={updateTrainerMutation.isPending}
           isBlocked={data.trainer.status === "blocked"}
         />
@@ -85,6 +88,13 @@ const TrainerDetailsPage = () => {
         open={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
         data={data}
+      />
+
+      <TrainerSubTrainersDialog
+        open={isSubTrainersDialogOpen}
+        onOpenChange={setIsSubTrainersDialogOpen}
+        trainerId={data.trainer._id}
+        trainerName={data.trainer.fullName}
       />
     </div>
   );

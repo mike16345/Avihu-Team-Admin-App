@@ -1,11 +1,9 @@
 import { refreshAuthSession } from "@/services/authRefresh";
-import {
-  clearAuthSession,
-  getAccessToken,
-} from "@/services/authSession";
+import { clearAuthSession, getAccessToken } from "@/services/authSession";
 import { API_KEY_HEADER, getApiKey } from "@/services/apiKey";
 import { shouldClearPersistedAuth } from "@/services/authErrors";
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "axios";
+import { useUsersStore } from "@/store/userStore";
 
 export const determineServerUrl = (): string => {
   return import.meta.env.VITE_SERVER_PREVIEW_URL || import.meta.env.VITE_SERVER;

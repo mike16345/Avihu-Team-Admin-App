@@ -106,8 +106,6 @@ export const SubTrainersTableCard = ({
         </Button>
       </div>
 
-      <div className="h-1 w-full bg-primary" />
-
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>

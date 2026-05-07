@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Ban, Eye, Pencil } from "lucide-react";
 import { ReactNode } from "react";
+import { Ban, Eye, Pencil } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type ActionButtonProps = {
   icon: ReactNode;
@@ -11,7 +11,13 @@ type ActionButtonProps = {
   disabled?: boolean;
 };
 
-const ActionButton = ({ icon, title, className, onClick, disabled }: ActionButtonProps) => {
+const ActionButton = ({
+  icon,
+  title,
+  className,
+  onClick,
+  disabled,
+}: ActionButtonProps) => {
   return (
     <Button
       type="button"
@@ -31,6 +37,7 @@ const ActionButton = ({ icon, title, className, onClick, disabled }: ActionButto
 type TrainerQuickActionsCardProps = {
   onEdit?: () => void;
   onBlock?: () => void;
+  onViewSubTrainers?: () => void;
   isBlocking?: boolean;
   isBlocked?: boolean;
 };
@@ -38,11 +45,12 @@ type TrainerQuickActionsCardProps = {
 export const TrainerQuickActionsCard = ({
   onEdit,
   onBlock,
+  onViewSubTrainers,
   isBlocking = false,
   isBlocked = false,
 }: TrainerQuickActionsCardProps) => {
   return (
-    <div dir="rtl" className="rounded-2xl border-muted border bg-card shadow-lg ">
+    <div dir="rtl" className="rounded-2xl border border-muted bg-card shadow-lg">
       <CardHeader className="pb-4">
         <CardTitle className="border-r-4 border-primary pr-3 text-right text-xl">
           פעולות מהירות
@@ -65,6 +73,7 @@ export const TrainerQuickActionsCard = ({
         <ActionButton
           title="צפה בתת-מאמנים"
           icon={<Eye className="h-4 w-4" />}
+          onClick={onViewSubTrainers}
           className="border-chart-5/40 bg-chart-5/10 text-chart-5 hover:bg-chart-5/15 hover:text-chart-5"
         />
       </CardContent>
