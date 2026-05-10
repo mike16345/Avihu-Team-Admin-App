@@ -28,7 +28,7 @@ const adminAndTrainerRoles: AppRole[] = ["admin", "trainer"];
 
 export const ROUTE_ROLE_ACCESS: Record<AppRouteAccessKey, AppRole[]> = {
   home: ["admin"],
-  trainerAnalytics: nonUserRoles,
+  trainerAnalytics: ["admin"],
   trainers: ["admin"],
   trainerDetails: ["admin"],
   subTrainers: adminAndTrainerRoles,
