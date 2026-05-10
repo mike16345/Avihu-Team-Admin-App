@@ -34,11 +34,7 @@ import { userFullName } from "@/lib/utils";
 import LogoutButton from "../Navbar/LogoutButton";
 import { ModeToggle } from "../theme/mode-toggle";
 import { Separator } from "../ui/separator";
-import {
-  type AppRouteAccessKey,
-  canAccessRoute,
-  normalizeAppRole,
-} from "@/routes/routeAccess";
+import { type AppRouteAccessKey, canAccessRoute, normalizeAppRole } from "@/routes/routeAccess";
 
 type LinkProps = {
   accessKey: AppRouteAccessKey;
@@ -65,7 +61,7 @@ const sidebarGroups: SidebarItem[][] = [
     },
     {
       url: "/trainer-analytics",
-      title: "דאשבורד מאמנים",
+      title: "לוח בקרה",
       icon: BarChart3,
       accessKey: "trainerAnalytics",
     },
