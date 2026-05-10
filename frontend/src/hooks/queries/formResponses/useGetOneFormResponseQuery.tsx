@@ -21,9 +21,7 @@ const useGetOneFormResponseQuery = (query: Partial<FormResponse>) => {
 
         return result;
       } catch (error: any) {
-        console.log("Error", error.status);
         if (error?.status == 404 && hasMonthlyFallback) {
-          console.log("Trying here");
           return await getFormResponseByQuery({
             ...query,
             formType: "onboarding",

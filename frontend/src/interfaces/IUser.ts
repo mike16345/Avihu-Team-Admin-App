@@ -20,11 +20,3 @@ export interface IUser extends IBaseUser {
 
 export interface IUserPost extends IBaseUser {}
 
-export interface ISession extends Document {
-  _id: string;
-  userId: string;
-  type: "login";
-  data?: any; // Additional session-specific data
-  createdAt: Date;
-  updatedAt: Date;
-}

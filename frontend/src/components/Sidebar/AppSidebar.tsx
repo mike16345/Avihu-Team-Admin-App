@@ -1,15 +1,18 @@
+import React from "react";
 import {
-  Home,
   BicepsFlexed,
-  LucideIcon,
-  User,
-  Edit,
-  SquareMenu,
-  User2,
-  Inbox,
   ChevronDown,
   Clipboard,
+  Edit,
+  Home,
+  Inbox,
+  LucideIcon,
+  SquareMenu,
+  User,
+  User2,
+  Users,
 } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Sidebar,
   SidebarContent,
@@ -24,14 +27,12 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Link, useLocation } from "react-router-dom";
-import LogoutButton from "../Navbar/LogoutButton";
-import { ModeToggle } from "../theme/mode-toggle";
 import { useUsersStore } from "@/store/userStore";
 import { userFullName } from "@/lib/utils";
+import LogoutButton from "../Navbar/LogoutButton";
+import { ModeToggle } from "../theme/mode-toggle";
 import { Separator } from "../ui/separator";
-import React from "react";
 
 type LinkProps = {
   title: string;
@@ -52,6 +53,16 @@ const sidebarGroups: SidebarItem[][] = [
       url: "/",
       title: "בית",
       icon: Home,
+    },
+    {
+      url: "/trainers",
+      title: "מאמנים",
+      icon: Users,
+    },
+    {
+      url: "/sub-trainers",
+      title: "תת-מאמנים",
+      icon: User2,
     },
     {
       url: "/users",
@@ -115,7 +126,7 @@ const SidebarItems = () => {
                     <Link
                       data-testid={createSidebarTestId(item.url)}
                       className={`w-full rounded-full ${
-                        isActive && "text-secondary bg-secondary-foreground"
+                        isActive && "bg-secondary-foreground text-secondary"
                       }`}
                       to={item.url}
                     >
@@ -130,7 +141,7 @@ const SidebarItems = () => {
             return (
               <SidebarMenuItem key={item.title}>
                 <Collapsible defaultOpen={Boolean(isActive)} className="group/collapsible">
-                  <CollapsibleTrigger className="flex items-center w-full justify-between" asChild>
+                  <CollapsibleTrigger className="flex w-full items-center justify-between" asChild>
                     <SidebarMenuButton isActive={Boolean(isActive)}>
                       <div className="flex items-center gap-2">
                         <item.icon />
@@ -151,7 +162,7 @@ const SidebarItems = () => {
                               <Link
                                 data-testid={createSidebarTestId(child.url)}
                                 className={`flex items-center gap-2 ${
-                                  childActive && "text-secondary bg-secondary"
+                                  childActive && "bg-secondary text-secondary"
                                 }`}
                                 to={child.url}
                               >
@@ -181,7 +192,7 @@ const Header = () => {
     <>
       {currentUser && (
         <SidebarHeader>
-          <div className="flex items-center gap-2 text-lg font-semibold ">
+          <div className="flex items-center gap-2 text-lg font-semibold">
             <User2 size={20} />
             <span>{userFullName(currentUser)}</span>
           </div>

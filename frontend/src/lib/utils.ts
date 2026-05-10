@@ -79,16 +79,13 @@ export const convertItemsToOptions = (
 
 export const handleAxiosError = (error: AxiosError) => {
   if (error.response) {
-    // Server responded with a status code outside of the 2xx range
-    console.error(`Response Error \n Status code ${error.response.status}: `, error);
+    console.error(`Response Error \n Status code ${error.response.status}: ${error.message}`);
 
     return error.response;
   } else if (error.request) {
-    // Request was made but no response was received
-    console.error("No Response:", error.request);
+    console.error("No Response:", error.message);
     return error.request;
   } else {
-    // Something went wrong during setup of the request
     console.error("Request Setup Error:", error.message);
     return error.message;
   }
@@ -297,10 +294,12 @@ export const generateUUID = () => {
   });
 };
 
-export const userFullName = (user: IUser) => {
+export const userFullName = (
+  user: { firstName?: string; lastName?: string } | null | undefined
+) => {
   if (!user) return "";
 
-  return user.firstName?.trim() + " " + user.lastName?.trim();
+  return [user.firstName, user.lastName].filter(Boolean).join(" ").trim();
 };
 
 export function removePointerEventsFromBody() {

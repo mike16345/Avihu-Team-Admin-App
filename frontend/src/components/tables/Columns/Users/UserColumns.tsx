@@ -139,7 +139,7 @@ export const columns: ColumnDef<IUser>[] = [
     cell: ({ row }) => {
       const user = row.original;
 
-      return format(user.dateFinished, "PPP", { locale: he });
+      return user.dateFinished ? format(user.dateFinished, "PPP", { locale: he }) : null;
     },
   },
   {
