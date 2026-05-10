@@ -19,6 +19,7 @@ import FormPresetsPage from "@/pages/FormPresetsPage";
 import FormResponseDetailsPage from "@/pages/FormResponseDetailsPage";
 import CurrentAgreementPage from "@/pages/Agreements/CurrentAgreementPage";
 import SubTrainersPage from "@/pages/SubTrainersPage";
+import TrainerAnalyticsDashboardPage from "@/pages/TrainerAnalyticsDashboardPage";
 import TrainerDetailsPage from "@/pages/TrainerDetailsPage";
 import TrainersPage from "@/pages/TrainersPage";
 
@@ -27,6 +28,7 @@ export const AppRoutes = () => {
     <>
       <Routes>
         <Route path="/" element={<AdminDashboard />} />
+        <Route path="/trainer-analytics" element={<TrainerAnalyticsDashboardPage />} />
         <Route path="/trainers/:id" element={<TrainerDetailsPage />} />
         <Route path="/trainers" element={<TrainersPage />} />
         <Route path="/sub-trainers" element={<SubTrainersPage />} />

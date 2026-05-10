@@ -1,5 +1,6 @@
 import React from "react";
 import {
+  BarChart3,
   BicepsFlexed,
   ChevronDown,
   Clipboard,
@@ -12,6 +13,7 @@ import {
   User2,
   Users,
 } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Sidebar,
@@ -27,7 +29,6 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import { Link, useLocation } from "react-router-dom";
 import { useUsersStore } from "@/store/userStore";
 import { userFullName } from "@/lib/utils";
 import LogoutButton from "../Navbar/LogoutButton";
@@ -53,6 +54,11 @@ const sidebarGroups: SidebarItem[][] = [
       url: "/",
       title: "בית",
       icon: Home,
+    },
+    {
+      url: "/trainer-analytics",
+      title: "לוח בקרה",
+      icon: BarChart3,
     },
     {
       url: "/trainers",
