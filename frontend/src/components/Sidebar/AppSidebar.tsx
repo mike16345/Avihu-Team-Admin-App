@@ -34,8 +34,14 @@ import { userFullName } from "@/lib/utils";
 import LogoutButton from "../Navbar/LogoutButton";
 import { ModeToggle } from "../theme/mode-toggle";
 import { Separator } from "../ui/separator";
+import {
+  type AppRouteAccessKey,
+  canAccessRoute,
+  normalizeAppRole,
+} from "@/routes/routeAccess";
 
 type LinkProps = {
+  accessKey: AppRouteAccessKey;
   title: string;
   url: string;
   icon: LucideIcon;
@@ -45,6 +51,7 @@ type SidebarItem = {
   title: string;
   icon: LucideIcon;
   url?: string;
+  accessKey?: AppRouteAccessKey;
   children?: LinkProps[];
 };
 
@@ -54,41 +61,49 @@ const sidebarGroups: SidebarItem[][] = [
       url: "/",
       title: "בית",
       icon: Home,
+      accessKey: "home",
     },
     {
       url: "/trainer-analytics",
-      title: "לוח בקרה",
+      title: "דאשבורד מאמנים",
       icon: BarChart3,
+      accessKey: "trainerAnalytics",
     },
     {
       url: "/trainers",
       title: "מאמנים",
       icon: Users,
+      accessKey: "trainers",
     },
     {
       url: "/sub-trainers",
       title: "תת-מאמנים",
       icon: User2,
+      accessKey: "subTrainers",
     },
     {
       url: "/users",
       title: "משתמשים",
       icon: User,
+      accessKey: "users",
     },
     {
       url: "/blogs",
       title: "מאמרים",
       icon: Edit,
+      accessKey: "blogs",
     },
     {
       url: "/dietPlans",
       title: "תפריטים",
       icon: SquareMenu,
+      accessKey: "dietPlans",
     },
     {
       url: "/workoutPlans",
       title: "תוכנית אימון",
       icon: BicepsFlexed,
+      accessKey: "workoutPlans",
     },
   ],
   [
@@ -96,17 +111,22 @@ const sidebarGroups: SidebarItem[][] = [
       url: "/leads",
       title: "לידים",
       icon: Inbox,
+      accessKey: "leads",
     },
     {
       url: "/form-builder",
       title: "שאלונים",
       icon: Clipboard,
+      accessKey: "formBuilder",
     },
   ],
 ];
 
 const SidebarItems = () => {
   const location = useLocation();
+  const currentUser = useUsersStore((state) => state.currentUser);
+  const role = normalizeAppRole(currentUser?.role);
+
   const createSidebarTestId = (url?: string) =>
     url
       ? `sidebar-link-${
@@ -114,15 +134,29 @@ const SidebarItems = () => {
         }`
       : undefined;
 
+  const visibleGroups = sidebarGroups
+    .map((group) =>
+      group.filter((item) => {
+        if (item.children?.length) {
+          return item.children.some((child) => canAccessRoute(role, child.accessKey));
+        }
+
+        return item.accessKey ? canAccessRoute(role, item.accessKey) : true;
+      })
+    )
+    .filter((group) => group.length > 0);
+
   return (
     <>
-      {sidebarGroups.map((group, index) => (
+      {visibleGroups.map((group, index) => (
         <React.Fragment key={index}>
           {!!index && <Separator className="my-4" />}
           {group.map((item) => {
-            const hasChildren = Boolean(item.children?.length);
+            const visibleChildren =
+              item.children?.filter((child) => canAccessRoute(role, child.accessKey)) ?? [];
+            const hasChildren = visibleChildren.length > 0;
             const isActive = hasChildren
-              ? item.children?.some((child) => child.url === location.pathname)
+              ? visibleChildren.some((child) => child.url === location.pathname)
               : location.pathname === item.url;
 
             if (!hasChildren && item.url) {
@@ -159,7 +193,7 @@ const SidebarItems = () => {
 
                   <CollapsibleContent>
                     <SidebarMenuSub>
-                      {item.children?.map((child) => {
+                      {visibleChildren.map((child) => {
                         const childActive = location.pathname === child.url;
 
                         return (
@@ -172,7 +206,7 @@ const SidebarItems = () => {
                                 }`}
                                 to={child.url}
                               >
-                                {child.icon ? <child.icon /> : null}
+                                <child.icon />
                                 <span>{child.title}</span>
                               </Link>
                             </SidebarMenuSubButton>
