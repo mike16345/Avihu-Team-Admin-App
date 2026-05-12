@@ -43,6 +43,7 @@
     "date-fns": "^3.6.0",
     "electron-log": "^5.1.2",
     "embla-carousel-react": "^8.2.1",
+    "input-otp": "^1.4.2",
     "lucide-react": "^0.488.0",
     "moment-timezone": "^0.5.45",
     "next-themes": "^0.2.1",

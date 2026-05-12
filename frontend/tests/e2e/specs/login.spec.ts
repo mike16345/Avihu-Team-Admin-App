@@ -8,6 +8,7 @@ const REFRESH_PATH_SUFFIX = "/users/auth/refresh";
 const getEmailInput = (page: Page) => page.getByTestId("login-email");
 const getPasswordInput = (page: Page) => page.getByTestId("login-password");
 const getSubmitButton = (page: Page) => page.getByTestId("login-submit");
+const getForgotPasswordTrigger = (page: Page) => page.getByTestId("forgot-password-trigger");
 
 test.setTimeout(60_000);
 
@@ -51,6 +52,83 @@ test.describe("login page", () => {
     await expect(getEmailInput(page)).toBeVisible();
     await expect(getPasswordInput(page)).toBeVisible();
     await expect(getSubmitButton(page)).toBeVisible();
+    await expect(getForgotPasswordTrigger(page)).toBeVisible();
+    mockApi.assertNoUnhandledRequests();
+  });
+
+  test("completes the forgot password flow inline", async ({ page }) => {
+    const mockApi = await useMockApi(page, [
+      "auth.password-reset.request.success",
+      "auth.password-reset.validate.success",
+      "auth.password-reset.change.success",
+    ]);
+    const otpRequests = trackRequestsByPathSuffix(page, "/otp", "POST");
+    const otpValidationRequests = trackRequestsByPathSuffix(page, "/otp/validate", "POST");
+    const passwordChangeRequests = trackRequestsByPathSuffix(page, "/passwords", "PUT");
+
+    await page.goto(LOGIN_PATH);
+    await getForgotPasswordTrigger(page).click();
+
+    await page.getByTestId("forgot-password-email").fill(" Admin@Example.com ");
+    await page.getByTestId("forgot-password-send-otp").click();
+
+    await expect(page.getByTestId("forgot-password-otp")).toBeVisible();
+    await page.getByTestId("forgot-password-otp").fill("123456");
+    await page.getByTestId("forgot-password-verify-otp").click();
+
+    await expect(page.getByTestId("forgot-password-password")).toBeVisible();
+    await page.getByTestId("forgot-password-password").fill("NewSecret123!");
+    await page.getByTestId("forgot-password-confirm-password").fill("NewSecret123!");
+    await page.getByTestId("forgot-password-submit").click();
+
+    await expect(page.getByText("הסיסמה עודכנה בהצלחה.")).toBeVisible();
+    await expect(getSubmitButton(page)).toBeVisible();
+
+    expect(otpRequests).toHaveLength(1);
+    expect(otpValidationRequests).toHaveLength(1);
+    expect(passwordChangeRequests).toHaveLength(1);
+    expect(otpRequests[0].headers()["x-api-key"]).toBeTruthy();
+    expect(otpValidationRequests[0].headers()["x-api-key"]).toBeTruthy();
+    expect(passwordChangeRequests[0].headers()["x-api-key"]).toBeTruthy();
+    expect(otpRequests[0].postDataJSON()).toEqual({ email: "admin@example.com" });
+    expect(otpValidationRequests[0].postDataJSON()).toEqual({
+      email: "admin@example.com",
+      otp: "123456",
+    });
+    expect(passwordChangeRequests[0].postDataJSON()).toEqual({
+      email: "admin@example.com",
+      password: "NewSecret123!",
+      sessionId: "change-password-session-001",
+    });
+    mockApi.assertNoUnhandledRequests();
+  });
+
+  test("returns to the otp step when the reset code expires before password update", async ({
+    page,
+  }) => {
+    const mockApi = await useMockApi(page, [
+      "auth.password-reset.request.success",
+      "auth.password-reset.validate.success",
+      "auth.password-reset.change.expired",
+    ]);
+
+    await page.goto(LOGIN_PATH);
+    await getForgotPasswordTrigger(page).click();
+
+    await page.getByTestId("forgot-password-email").fill("admin@example.com");
+    await page.getByTestId("forgot-password-send-otp").click();
+    await page.getByTestId("forgot-password-otp").fill("123456");
+    await page.getByTestId("forgot-password-verify-otp").click();
+
+    await expect(page.getByTestId("forgot-password-password")).toBeVisible();
+    await page.getByTestId("forgot-password-password").fill("NewSecret123!");
+    await page.getByTestId("forgot-password-confirm-password").fill("NewSecret123!");
+    await page.getByTestId("forgot-password-submit").click();
+
+    await expect(page.getByTestId("forgot-password-otp")).toBeVisible();
+    await expect(page.getByTestId("forgot-password-password")).not.toBeVisible();
+    await expect(page.getByText("תוקף קוד האימות פג. שלחו קוד חדש כדי להמשיך.")).toBeVisible();
+    await expect(page.getByText("תוקף הקוד פג. שלחו קוד חדש והזינו אותו שוב.")).toBeVisible();
     mockApi.assertNoUnhandledRequests();
   });
 
