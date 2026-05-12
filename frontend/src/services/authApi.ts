@@ -41,10 +41,45 @@ export const loginWithPassword = async (email: string, password: string) => {
     {
       email,
       password,
+      isAdminApp: true,
     }
   );
 
   return unwrapAuthResponse<LoginResponse>(response.data);
+};
+
+export const requestPasswordResetOtp = async (email: string) => {
+  const response = await authClient.post<ApiResponse<undefined>>("otp", {
+    email,
+  });
+
+  return response.data;
+};
+
+export const validatePasswordResetOtp = async (email: string, otp: string) => {
+  const response = await authClient.post<ApiResponse<{ changePasswordSessionId: string }>>(
+    "otp/validate",
+    {
+      email,
+      otp,
+    }
+  );
+
+  return response.data;
+};
+
+export const changePasswordWithResetSession = async (
+  email: string,
+  password: string,
+  sessionId: string
+) => {
+  const response = await authClient.put<ApiResponse<undefined>>("passwords", {
+    email,
+    sessionId,
+    password,
+  });
+
+  return response.data;
 };
 
 export const refreshAccessToken = async (refreshToken: string) => {

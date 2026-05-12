@@ -38,7 +38,6 @@ function useAuth(): AuthContext {
   const hydrateAuthSession = useCallback(async () => {
     const persistedSession = loadPersistedAuthSession();
 
-    console.log("Hydrating auth session:", persistedSession);
     if (!persistedSession) {
       resetAuthState();
       setLoading(false);
