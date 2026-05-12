@@ -27,7 +27,7 @@ const nonUserRoles: AppRole[] = ["admin", "trainer", "subTrainer"];
 const adminAndTrainerRoles: AppRole[] = ["admin", "trainer"];
 
 export const ROUTE_ROLE_ACCESS: Record<AppRouteAccessKey, AppRole[]> = {
-  home: ["admin"],
+  home: nonUserRoles,
   trainerAnalytics: ["admin"],
   trainers: ["admin"],
   trainerDetails: ["admin"],
@@ -47,9 +47,9 @@ export const ROUTE_ROLE_ACCESS: Record<AppRouteAccessKey, AppRole[]> = {
 };
 
 export const DEFAULT_ROUTE_BY_ROLE: Record<AppRole, string | null> = {
-  admin: MainRoutes.HOME,
-  trainer: MainRoutes.TRAINER_ANALYTICS,
-  subTrainer: MainRoutes.TRAINER_ANALYTICS,
+  admin: MainRoutes.TRAINER_ANALYTICS,
+  trainer: MainRoutes.HOME,
+  subTrainer: MainRoutes.HOME,
   user: "login",
 };
 

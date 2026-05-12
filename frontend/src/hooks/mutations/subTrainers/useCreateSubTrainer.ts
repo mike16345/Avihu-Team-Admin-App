@@ -14,7 +14,7 @@ export const useCreateSubTrainer = (options?: CreateSubTrainerOptions) => {
 
   return useMutation({
     ...options,
-    mutationFn: createSubTrainer,
+    mutationFn: ({ body, trainerId }: any) => createSubTrainer({ ...body, trainerId }),
     onSuccess: (data, variables, context) => {
       queryClient.setQueryData<SubTrainer[]>(subTrainerKeys.list(), (current) => {
         if (!current) return current;

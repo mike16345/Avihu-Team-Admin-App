@@ -140,11 +140,13 @@ export const SubTrainerDialog = ({
   const form = isEditMode ? updateForm : createForm;
   const isPending = createSubTrainerMutation.isPending || updateSubTrainerMutation.isPending;
   const selectedTrainerId = subTrainer?.trainerId ?? trainerIdPreset;
-  const trainerName =
-    trainers.find((trainer) => trainer._id === selectedTrainerId)?.fullName ?? "";
+  const trainerName = trainers.find((trainer) => trainer._id === selectedTrainerId)?.fullName ?? "";
 
   const handleSubmitCreate = (values: CreateSubTrainerSchemaType) => {
-    createSubTrainerMutation.mutate(buildCreateSubTrainerPayload(values));
+    createSubTrainerMutation.mutate({
+      body: buildCreateSubTrainerPayload(values),
+      trainerId: trainerIdPreset,
+    });
   };
 
   const handleSubmitUpdate = (values: UpdateSubTrainerSchemaType) => {
@@ -153,6 +155,7 @@ export const SubTrainerDialog = ({
     updateSubTrainerMutation.mutate({
       id: subTrainer._id,
       body: buildUpdateSubTrainerPayload(values),
+      trainerId: selectedTrainerId,
     });
   };
 

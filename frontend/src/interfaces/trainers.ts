@@ -139,7 +139,7 @@ export type CreateSubTrainerBody = {
   password: string;
   position: SubTrainerPosition;
   status: SubTrainerStatus;
-  trainerId: TrainerId;
+  trainerId?: TrainerId;
 };
 
 export type UpdateSubTrainerBody = {
@@ -148,7 +148,7 @@ export type UpdateSubTrainerBody = {
   phone: string;
   position: SubTrainerPosition;
   status: SubTrainerStatus;
-  trainerId: TrainerId;
+  trainerId?: TrainerId;
   userId?: string;
   isDeleted?: boolean;
 };
