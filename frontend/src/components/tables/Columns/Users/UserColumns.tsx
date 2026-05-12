@@ -138,7 +138,7 @@ export const columns: ColumnDef<IUser>[] = [
     cell: ({ row }) => {
       const user = row.original;
 
-      return format(user.dateFinished, "PPP", { locale: he });
+      return format(user?.dateFinished, "PPP", { locale: he });
     },
   },
   {
