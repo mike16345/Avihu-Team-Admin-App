@@ -16,7 +16,10 @@ const trackLoginRequests = (page: Page) => {
   const requests: Request[] = [];
 
   page.on("request", (request) => {
-    if (request.method() === "POST" && new URL(request.url()).pathname.endsWith(LOGIN_PATH_SUFFIX)) {
+    if (
+      request.method() === "POST" &&
+      new URL(request.url()).pathname.endsWith(LOGIN_PATH_SUFFIX)
+    ) {
       requests.push(request);
     }
   });
@@ -141,8 +144,14 @@ test.describe("login page", () => {
 
     await expect(page).toHaveURL(/\/login$/);
     await expect(getEmailInput(page)).toBeFocused();
-    expect(await getEmailInput(page).evaluate((node) => (node as HTMLInputElement).validity.valueMissing)).toBe(true);
-    expect(await getPasswordInput(page).evaluate((node) => (node as HTMLInputElement).validity.valueMissing)).toBe(true);
+    expect(
+      await getEmailInput(page).evaluate((node) => (node as HTMLInputElement).validity.valueMissing)
+    ).toBe(true);
+    expect(
+      await getPasswordInput(page).evaluate(
+        (node) => (node as HTMLInputElement).validity.valueMissing
+      )
+    ).toBe(true);
     expect(loginRequests).toHaveLength(0);
     mockApi.assertNoUnhandledRequests();
   });
@@ -157,7 +166,11 @@ test.describe("login page", () => {
 
     await expect(page).toHaveURL(/\/login$/);
     await expect(getPasswordInput(page)).toBeFocused();
-    expect(await getPasswordInput(page).evaluate((node) => (node as HTMLInputElement).validity.valueMissing)).toBe(true);
+    expect(
+      await getPasswordInput(page).evaluate(
+        (node) => (node as HTMLInputElement).validity.valueMissing
+      )
+    ).toBe(true);
     expect(loginRequests).toHaveLength(0);
     mockApi.assertNoUnhandledRequests();
   });
@@ -172,7 +185,9 @@ test.describe("login page", () => {
 
     await expect(page).toHaveURL(/\/login$/);
     await expect(getEmailInput(page)).toBeFocused();
-    expect(await getEmailInput(page).evaluate((node) => (node as HTMLInputElement).validity.valueMissing)).toBe(true);
+    expect(
+      await getEmailInput(page).evaluate((node) => (node as HTMLInputElement).validity.valueMissing)
+    ).toBe(true);
     expect(loginRequests).toHaveLength(0);
     mockApi.assertNoUnhandledRequests();
   });
@@ -188,7 +203,9 @@ test.describe("login page", () => {
 
     await expect(page).toHaveURL(/\/login$/);
     await expect(getEmailInput(page)).toBeFocused();
-    expect(await getEmailInput(page).evaluate((node) => (node as HTMLInputElement).validity.typeMismatch)).toBe(true);
+    expect(
+      await getEmailInput(page).evaluate((node) => (node as HTMLInputElement).validity.typeMismatch)
+    ).toBe(true);
     expect(loginRequests).toHaveLength(0);
     mockApi.assertNoUnhandledRequests();
   });

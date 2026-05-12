@@ -265,7 +265,6 @@ export default function ForgotPasswordForm({ onBackToLogin }: ForgotPasswordForm
                   pattern={REGEXP_ONLY_DIGITS}
                   value={otp}
                   onChange={(value) => {
-                    
                     setOtp(value);
                     setErrors((current) => ({ ...current, otp: undefined }));
                   }}
