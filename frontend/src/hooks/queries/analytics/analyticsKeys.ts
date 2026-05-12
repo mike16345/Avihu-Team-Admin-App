@@ -1,7 +1,4 @@
-import {
-  DashboardJoinedByMonthParams,
-  DashboardSourcesParams,
-} from "@/interfaces/IAnalytics";
+import { DashboardJoinedByMonthParams, DashboardSourcesParams } from "@/interfaces/IAnalytics";
 
 export const analyticsKeys = {
   all: ["analytics"] as const,

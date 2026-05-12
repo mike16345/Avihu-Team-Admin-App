@@ -5,10 +5,7 @@ import { createRetryFunction } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { analyticsKeys } from "./analyticsKeys";
 
-export const useGetTrainerDashboardSources = (
-  params: DashboardSourcesParams,
-  enabled = true
-) => {
+export const useGetTrainerDashboardSources = (params: DashboardSourcesParams, enabled = true) => {
   const { getTrainerDashboardSources } = useAnalyticsApi();
 
   return useQuery({

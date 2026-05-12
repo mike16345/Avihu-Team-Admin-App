@@ -1,11 +1,4 @@
-import {
-  endOfDay,
-  format,
-  startOfDay,
-  subMonths,
-  subYears,
-  type Locale,
-} from "date-fns";
+import { endOfDay, format, startOfDay, subMonths, subYears, type Locale } from "date-fns";
 import { he } from "date-fns/locale";
 import { DateRange } from "react-day-picker";
 
@@ -28,20 +21,16 @@ export const HEBREW_SHORT_MONTHS = [
 
 export const TRAINER_SOURCE_COLOR_MAP: Record<string, string> = {
   "פנייה קרה": "hsl(var(--success))",
-  "יוטיוב": "hsl(var(--chart-5))",
-  "גוגל": "hsl(var(--primary))",
-  "פייסבוק": "hsl(var(--chart-2))",
-  "אינסטגרם": "hsl(var(--chart-4))",
+  יוטיוב: "hsl(var(--chart-5))",
+  גוגל: "hsl(var(--primary))",
+  פייסבוק: "hsl(var(--chart-2))",
+  אינסטגרם: "hsl(var(--chart-4))",
   "פה לאוזן": "hsl(var(--chart-3))",
 };
 
 export const formatApiDate = (date: Date) => format(date, "yyyy-MM-dd");
 
-export const formatHebrewRange = (
-  from?: Date,
-  to?: Date,
-  locale: Locale = he
-) => {
+export const formatHebrewRange = (from?: Date, to?: Date, locale: Locale = he) => {
   if (!from || !to) {
     return "בחר טווח תאריכים";
   }
