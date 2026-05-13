@@ -41,6 +41,8 @@ import {
   type UpdateSubTrainerSchemaType,
   updateSubTrainerSchema,
 } from "@/schemas/subTrainerSchema";
+import { useSubTrainerQuery } from "@/hooks/queries/subTrainers/useSubTrainerQuery";
+import { usePaginatedSubTrainersQuery } from "@/hooks/queries/subTrainers/usePaginatedSubTrainersQuery";
 
 type SubTrainerDialogProps = {
   open: boolean;
@@ -86,6 +88,7 @@ export const SubTrainerDialog = ({
 }: SubTrainerDialogProps) => {
   const isEditMode = Boolean(subTrainer);
   const { data: trainers = [], isLoading: isLoadingTrainers } = useTrainersQuery(open);
+  const { data: subTrainers = [] } = usePaginatedSubTrainersQuery();
 
   const createForm = useForm<CreateSubTrainerSchemaType>({
     resolver: zodResolver(createSubTrainerSchema),
@@ -104,8 +107,19 @@ export const SubTrainerDialog = ({
       onOpenChange(false);
     },
     onError: (error: any) => {
-      toast.error("יצירת תת-המאמן נכשלה", {
-        description: error?.data?.message ?? error?.message,
+      const limit = subTrainers.totalResults ?? 0;
+      const isLimitReached = error.data.message == "Trainer sub trainer limit reached.";
+
+      const title = isLimitReached
+        ? "הגעת למגבלת תת-המאמנים שניתן להוסיף"
+        : '"יצירת תת-המאמן נכשלה"';
+
+      const description = isLimitReached
+        ? `כרגע ישנם ${limit}/${limit} תת מתאנים פעילים. לשדרג את החבילה פנה לאדמין`
+        : (error?.data?.message ?? error?.message);
+
+      toast.error(title, {
+        description,
       });
     },
   });

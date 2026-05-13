@@ -231,10 +231,14 @@ const Header = () => {
   return (
     <>
       {currentUser && (
-        <SidebarHeader>
-          <div className="flex items-center gap-2 text-lg font-semibold">
-            <User2 size={20} />
-            <span>{userFullName(currentUser)}</span>
+        <SidebarHeader className=" border-b border-accented bg-background py-3">
+          <div className="flex items-center gap-5 text-lg font-semibold">
+            <img
+              className="h-10 w-10 rounded-lg shadow-lg border border-muted"
+              src="../public/images/app-logo.png"
+              alt=""
+            />
+            <span>מערכת ניהול</span>
           </div>
         </SidebarHeader>
       )}
@@ -266,20 +270,17 @@ export function AppSidebar() {
             />
 
             <div>
-              <div className="text-sm">
+              <div className="text-sm ">
                 {user?.firstName} {user?.lastName}
               </div>
-              <div className="text-xs text-muted-foreground">{user?.email}</div>
+              <div className="text-xs text-muted-foreground">
+                {user?.email.slice(0, 22).padStart(25, "...")}
+              </div>
             </div>
 
             <div className="w-full flex justify-end text-accented">
               <LuChevronsUpDown />
             </div>
-
-            {/*   <div className="flex-1">
-          <LogoutButton />
-        </div>
-        <ModeToggle /> */}
           </SidebarFooter>
         </PopoverTrigger>
         <PopoverContent>
