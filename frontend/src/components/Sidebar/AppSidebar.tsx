@@ -36,14 +36,7 @@ import { ModeToggle } from "../theme/mode-toggle";
 import { Separator } from "../ui/separator";
 import { type AppRouteAccessKey, canAccessRoute, normalizeAppRole } from "@/routes/routeAccess";
 import { LuChevronsUpDown } from "react-icons/lu";
-import {
-  Popover,
-  PopoverContent,
-  PopoverDescription,
-  PopoverHeader,
-  PopoverTitle,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 type LinkProps = {
   accessKey: AppRouteAccessKey;
@@ -92,6 +85,8 @@ const sidebarGroups: SidebarItem[][] = [
       icon: User,
       accessKey: "users",
     },
+  ],
+  [
     {
       url: "/blogs",
       title: "מאמרים",

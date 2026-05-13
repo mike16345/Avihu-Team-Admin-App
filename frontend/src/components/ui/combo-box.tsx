@@ -6,7 +6,7 @@ import { Button } from "./button";
 import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "./command";
 import Loader from "./Loader";
 
-interface ComboBoxProps {
+export interface ComboBoxProps {
   options: Option[];
   value: any;
   onSelect: (val: any) => void;
