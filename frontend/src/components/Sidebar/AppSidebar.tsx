@@ -35,6 +35,8 @@ import LogoutButton from "../Navbar/LogoutButton";
 import { ModeToggle } from "../theme/mode-toggle";
 import { Separator } from "../ui/separator";
 import { type AppRouteAccessKey, canAccessRoute, normalizeAppRole } from "@/routes/routeAccess";
+import { LuChevronsUpDown } from "react-icons/lu";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 type LinkProps = {
   accessKey: AppRouteAccessKey;
@@ -83,6 +85,8 @@ const sidebarGroups: SidebarItem[][] = [
       icon: User,
       accessKey: "users",
     },
+  ],
+  [
     {
       url: "/blogs",
       title: "מאמרים",
@@ -227,10 +231,14 @@ const Header = () => {
   return (
     <>
       {currentUser && (
-        <SidebarHeader>
-          <div className="flex items-center gap-2 text-lg font-semibold">
-            <User2 size={20} />
-            <span>{userFullName(currentUser)}</span>
+        <SidebarHeader className=" border-b border-accented bg-background py-3">
+          <div className="flex items-center gap-5 text-lg font-semibold">
+            <img
+              className="h-10 w-10 rounded-lg shadow-lg border border-muted"
+              src="../public/images/app-logo.png"
+              alt=""
+            />
+            <span>מערכת ניהול</span>
           </div>
         </SidebarHeader>
       )}
@@ -239,6 +247,8 @@ const Header = () => {
 };
 
 export function AppSidebar() {
+  const user = useUsersStore((state) => state.currentUser);
+
   return (
     <Sidebar side="right" data-testid="app-sidebar">
       <Header />
@@ -251,12 +261,37 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="flex flex-row items-center">
-        <div className="flex-1">
-          <LogoutButton />
-        </div>
-        <ModeToggle />
-      </SidebarFooter>
+      <Popover>
+        <PopoverTrigger asChild>
+          <SidebarFooter className="flex flex-row items-center border-t border-accented bg-background gap-3 py-4 cursor-pointer hover:bg-muted">
+            <img
+              src={`https://api.dicebear.com/9.x/initials/svg?seed=${user?.firstName}&radius=50&size=36`}
+              alt="avatar"
+            />
+
+            <div>
+              <div className="text-sm ">
+                {user?.firstName} {user?.lastName}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {user?.email.slice(0, 22).padStart(25, "...")}
+              </div>
+            </div>
+
+            <div className="w-full flex justify-end text-accented">
+              <LuChevronsUpDown />
+            </div>
+          </SidebarFooter>
+        </PopoverTrigger>
+        <PopoverContent>
+          <div className="flex items-center flex-row gap-2">
+            <div className="flex-1">
+              <LogoutButton />
+            </div>
+            <ModeToggle />
+          </div>
+        </PopoverContent>
+      </Popover>
     </Sidebar>
   );
 }

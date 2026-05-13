@@ -6,6 +6,7 @@ import { UseMutationOptions, useMutation, useQueryClient } from "@tanstack/react
 type UpdateSubTrainerVariables = {
   id: SubTrainerId;
   body: UpdateSubTrainerBody;
+  trainerId?: string;
 };
 
 type UpdateSubTrainerOptions = Omit<
@@ -19,7 +20,8 @@ export const useUpdateSubTrainer = (options?: UpdateSubTrainerOptions) => {
 
   return useMutation({
     ...options,
-    mutationFn: ({ id, body }: UpdateSubTrainerVariables) => updateSubTrainer(id, body),
+    mutationFn: ({ id, body, trainerId }: UpdateSubTrainerVariables) =>
+      updateSubTrainer(id, { ...body, trainerId }),
     onSuccess: (data, variables, context) => {
       queryClient.setQueryData<SubTrainer[]>(subTrainerKeys.list(), (current) => {
         if (!current) return current;

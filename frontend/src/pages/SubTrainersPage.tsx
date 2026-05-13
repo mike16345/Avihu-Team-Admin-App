@@ -46,9 +46,7 @@ const SubTrainersPage = () => {
     <div dir="rtl" className="space-y-6 px-1 pb-6">
       <div className="space-y-1 text-right">
         <h1 className="text-3xl font-bold tracking-tight">ניהול מאמנים</h1>
-        <p className="text-sm text-muted-foreground">
-          נהל את צוות המאמנים שלך והרשאות גישה
-        </p>
+        <p className="text-sm text-muted-foreground">נהל את צוות המאמנים שלך והרשאות גישה</p>
       </div>
 
       <SubTrainersTableCard

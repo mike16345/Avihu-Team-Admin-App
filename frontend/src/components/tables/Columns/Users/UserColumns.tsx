@@ -22,6 +22,13 @@ import DeleteModal from "@/components/Alerts/DeleteModal";
 import { invalidateQueryKeys } from "@/QueryClient/queryClient";
 import { QueryKeys } from "@/enums/QueryKeys";
 
+const hebrewRoleMap: Record<string, string> = {
+  admin: "מנהל",
+  user: "משתמש",
+  trainer: "מאמן",
+  subTrainer: "תת מאמן",
+};
+
 export const columns: ColumnDef<IUser>[] = [
   {
     id: "select",
@@ -77,6 +84,27 @@ export const columns: ColumnDef<IUser>[] = [
     header: "פלאפון",
     cell(row) {
       return <span dir="ltr">{String(row.renderValue())}</span>;
+    },
+  },
+
+  {
+    accessorKey: "role",
+    id: `תפקיד`,
+    header: ({ column }) => {
+      return (
+        <Button
+          className="m-0 px-1 py-1"
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          תפקיד
+          <ArrowUpDown className="h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => {
+      const role: string = row.original.role;
+      return hebrewRoleMap[role] || role;
     },
   },
   {
