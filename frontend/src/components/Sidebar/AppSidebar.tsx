@@ -35,6 +35,15 @@ import LogoutButton from "../Navbar/LogoutButton";
 import { ModeToggle } from "../theme/mode-toggle";
 import { Separator } from "../ui/separator";
 import { type AppRouteAccessKey, canAccessRoute, normalizeAppRole } from "@/routes/routeAccess";
+import { LuChevronsUpDown } from "react-icons/lu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 type LinkProps = {
   accessKey: AppRouteAccessKey;
@@ -239,6 +248,8 @@ const Header = () => {
 };
 
 export function AppSidebar() {
+  const user = useUsersStore((state) => state.currentUser);
+
   return (
     <Sidebar side="right" data-testid="app-sidebar">
       <Header />
@@ -251,12 +262,40 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="flex flex-row items-center">
-        <div className="flex-1">
+      <Popover>
+        <PopoverTrigger asChild>
+          <SidebarFooter className="flex flex-row items-center border-t border-accented bg-background gap-3 py-4 cursor-pointer hover:bg-muted">
+            <img
+              src={`https://api.dicebear.com/9.x/initials/svg?seed=${user?.firstName}&radius=50&size=36`}
+              alt="avatar"
+            />
+
+            <div>
+              <div className="text-sm">
+                {user?.firstName} {user?.lastName}
+              </div>
+              <div className="text-xs text-muted-foreground">{user?.email}</div>
+            </div>
+
+            <div className="w-full flex justify-end text-accented">
+              <LuChevronsUpDown />
+            </div>
+
+            {/*   <div className="flex-1">
           <LogoutButton />
         </div>
-        <ModeToggle />
-      </SidebarFooter>
+        <ModeToggle /> */}
+          </SidebarFooter>
+        </PopoverTrigger>
+        <PopoverContent>
+          <div className="flex items-center flex-row gap-2">
+            <div className="flex-1">
+              <LogoutButton />
+            </div>
+            <ModeToggle />
+          </div>
+        </PopoverContent>
+      </Popover>
     </Sidebar>
   );
 }
