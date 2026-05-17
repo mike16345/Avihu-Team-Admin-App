@@ -12,6 +12,7 @@ import {
   User,
   User2,
   Users,
+  UserCog,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -30,7 +31,6 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import { useUsersStore } from "@/store/userStore";
-import { userFullName } from "@/lib/utils";
 import LogoutButton from "../Navbar/LogoutButton";
 import { ModeToggle } from "../theme/mode-toggle";
 import { Separator } from "../ui/separator";
@@ -70,19 +70,19 @@ const sidebarGroups: SidebarItem[][] = [
     {
       url: "/trainers",
       title: "מאמנים",
-      icon: Users,
+      icon: User2,
       accessKey: "trainers",
     },
     {
       url: "/sub-trainers",
-      title: "תת-מאמנים",
-      icon: User2,
+      title: "הצוות שלי",
+      icon: UserCog,
       accessKey: "subTrainers",
     },
     {
       url: "/users",
-      title: "משתמשים",
-      icon: User,
+      title: "לקוחות",
+      icon: Users,
       accessKey: "users",
     },
   ],
@@ -252,7 +252,7 @@ export function AppSidebar() {
   return (
     <Sidebar side="right" data-testid="app-sidebar">
       <Header />
-      <SidebarContent>
+      <SidebarContent className="bg-background">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>

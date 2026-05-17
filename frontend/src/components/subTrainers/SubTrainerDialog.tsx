@@ -41,7 +41,6 @@ import {
   type UpdateSubTrainerSchemaType,
   updateSubTrainerSchema,
 } from "@/schemas/subTrainerSchema";
-import { useSubTrainerQuery } from "@/hooks/queries/subTrainers/useSubTrainerQuery";
 import { usePaginatedSubTrainersQuery } from "@/hooks/queries/subTrainers/usePaginatedSubTrainersQuery";
 
 type SubTrainerDialogProps = {
@@ -177,13 +176,13 @@ export const SubTrainerDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         dir="rtl"
-        className="max-w-[430px] gap-0 overflow-hidden rounded-[18px] p-0 shadow-[0_30px_80px_rgba(15,23,42,0.28)] [&>button]:left-4 [&>button]:right-auto"
+        className="grid max-h-[85vh]  grid-rows-[auto_minmax(0,1fr)]  max-w-[430px] gap-0 overflow-hidden rounded-[18px] p-0 shadow-[0_30px_80px_rgba(15,23,42,0.28)] [&>button]:left-4 [&>button]:right-auto"
       >
-        <DialogHeader className="px-6 py-4 text-right">
+        <DialogHeader className="px-6 py-4 text-right border-b border-primary/40 bg-primary/10">
           <DialogTitle className="text-right text-lg font-semibold">
             {isEditMode ? "עריכת מאמן" : "הוספת מאמן חדש"}
           </DialogTitle>
-          <DialogDescription className="text-xs">
+          <DialogDescription className="text-xs text-start">
             {isEditMode ? "עדכון פרטי תת-המאמן" : "צור איש צוות מאמן חדש"}
           </DialogDescription>
         </DialogHeader>
@@ -191,51 +190,32 @@ export const SubTrainerDialog = ({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(isEditMode ? handleSubmitUpdate : handleSubmitCreate)}
-            className="space-y-4 px-6 pb-5"
+            className=" flex min-h-0 flex-col "
           >
-            <FormField
-              control={form.control}
-              name="fullName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>שם מלא</FormLabel>
-                  <FormControl>
-                    <Input placeholder="ישי כהן" className="border-none bg-muted" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>שם אימייל</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="example@email.com"
-                      className="border-none bg-muted"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {!isEditMode ? (
+            <div className=" space-y-4 px-5 py-5 overflow-auto">
               <FormField
-                control={createForm.control}
-                name="password"
+                control={form.control}
+                name="fullName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>סיסמה</FormLabel>
+                    <FormLabel>שם מלא</FormLabel>
+                    <FormControl>
+                      <Input placeholder="ישי כהן" className="border-none bg-muted" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>שם אימייל</FormLabel>
                     <FormControl>
                       <Input
-                        type="password"
-                        placeholder="הכנס סיסמה חזקה"
+                        placeholder="example@email.com"
                         className="border-none bg-muted"
                         {...field}
                       />
@@ -244,106 +224,63 @@ export const SubTrainerDialog = ({
                   </FormItem>
                 )}
               />
-            ) : null}
 
-            <FormField
-              control={form.control}
-              name="phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>מספר טלפון</FormLabel>
-                  <FormControl>
-                    <Input
-                      dir="ltr"
-                      placeholder="050-123-4567"
-                      className="border-none bg-muted text-right"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="position"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>תפקיד</FormLabel>
-                  <Select dir="rtl" onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="border-none bg-muted">
-                        <SelectValue placeholder="בחר תפקיד" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent dir="rtl" className="border-none bg-muted">
-                      {SUB_TRAINER_POSITIONS.map((position) => (
-                        <SelectItem key={position} value={position}>
-                          {position}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>סטטוס</FormLabel>
-                  <Select dir="rtl" onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="border-none bg-muted">
-                        <SelectValue placeholder="בחר סטטוס" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent dir="rtl" className="border-none bg-muted">
-                      {SUB_TRAINER_STATUSES.map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {statusLabels[status]}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {lockTrainerId ? (
-              <div className="space-y-2">
-                <FormLabel>מאמן ראשי</FormLabel>
-                <Input
-                  value={trainerName || "מאמן נבחר"}
-                  disabled
-                  className="border-none bg-muted text-muted-foreground"
+              {!isEditMode ? (
+                <FormField
+                  control={createForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>סיסמה</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="password"
+                          placeholder="הכנס סיסמה חזקה"
+                          className="border-none bg-muted"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-                <input type="hidden" {...form.register("trainerId")} />
-              </div>
-            ) : (
+              ) : null}
+
               <FormField
                 control={form.control}
-                name="trainerId"
+                name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>מאמן ראשי</FormLabel>
+                    <FormLabel>מספר טלפון</FormLabel>
+                    <FormControl>
+                      <Input
+                        dir="ltr"
+                        placeholder="050-123-4567"
+                        className="border-none bg-muted text-right"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="position"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>תפקיד</FormLabel>
                     <Select dir="rtl" onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger className="border-none bg-muted">
-                          <SelectValue
-                            placeholder={isLoadingTrainers ? "טוען מאמנים..." : "בחר מאמן ראשי"}
-                          />
+                          <SelectValue placeholder="בחר תפקיד" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent dir="rtl" className="border-none bg-muted">
-                        {trainers.map((trainer) => (
-                          <SelectItem key={trainer._id} value={trainer._id}>
-                            {trainer.fullName}
+                        {SUB_TRAINER_POSITIONS.map((position) => (
+                          <SelectItem key={position} value={position}>
+                            {position}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -352,13 +289,77 @@ export const SubTrainerDialog = ({
                   </FormItem>
                 )}
               />
-            )}
 
-            <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-xs text-primary">
-              מאמן יוכל להעניק את כל כמות האימונים שתאפשר לו
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>סטטוס</FormLabel>
+                    <Select dir="rtl" onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="border-none bg-muted">
+                          <SelectValue placeholder="בחר סטטוס" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent dir="rtl" className="border-none bg-muted">
+                        {SUB_TRAINER_STATUSES.map((status) => (
+                          <SelectItem key={status} value={status}>
+                            {statusLabels[status]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {lockTrainerId ? (
+                <div className="space-y-2">
+                  <FormLabel>מאמן ראשי</FormLabel>
+                  <Input
+                    value={trainerName || "מאמן נבחר"}
+                    disabled
+                    className="border-none bg-muted text-muted-foreground"
+                  />
+                  <input type="hidden" {...form.register("trainerId")} />
+                </div>
+              ) : (
+                <FormField
+                  control={form.control}
+                  name="trainerId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>מאמן ראשי</FormLabel>
+                      <Select dir="rtl" onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="border-none bg-muted">
+                            <SelectValue
+                              placeholder={isLoadingTrainers ? "טוען מאמנים..." : "בחר מאמן ראשי"}
+                            />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent dir="rtl" className="border-none bg-muted">
+                          {trainers.map((trainer) => (
+                            <SelectItem key={trainer._id} value={trainer._id}>
+                              {trainer.fullName}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-xs text-primary">
+                מאמן יוכל להעניק את כל כמות האימונים שתאפשר לו
+              </div>
             </div>
 
-            <DialogFooter className="flex-row gap-3 pt-2 sm:justify-start sm:space-x-0">
+            <DialogFooter className="flex-row gap-3 px-2 py-4 sm:justify-start sm:space-x-0  border-t ">
               <Button
                 type="button"
                 variant="outline"

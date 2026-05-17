@@ -21,12 +21,19 @@ import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import DeleteModal from "@/components/Alerts/DeleteModal";
 import { invalidateQueryKeys } from "@/QueryClient/queryClient";
 import { QueryKeys } from "@/enums/QueryKeys";
+import { Badge } from "@/components/ui/badge";
 
 const hebrewRoleMap: Record<string, string> = {
   admin: "מנהל",
   user: "משתמש",
   trainer: "מאמן",
-  subTrainer: "תת מאמן",
+  subTrainer: "צוות",
+};
+const roleColorMap: Record<string, string> = {
+  admin: "bg-primary",
+  user: "bg-muted-foreground",
+  trainer: "bg-primary",
+  subTrainer: "bg-primary",
 };
 
 export const columns: ColumnDef<IUser>[] = [
@@ -104,7 +111,7 @@ export const columns: ColumnDef<IUser>[] = [
     },
     cell: ({ row }) => {
       const role: string = row.original.role;
-      return hebrewRoleMap[role] || role;
+      return <Badge className={roleColorMap[role]}>{hebrewRoleMap[role] || role}</Badge>;
     },
   },
   {
