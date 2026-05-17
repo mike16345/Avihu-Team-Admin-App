@@ -63,7 +63,7 @@ export const CreateTrainerDialog = ({ open, onOpenChange }: CreateTrainerDialogP
       subTrainerLimit: 1,
       status: "active",
       source: "פנייה קרה",
-      videoLibraryAccess: true,
+      videoLibraryAccess: false,
     },
   });
 

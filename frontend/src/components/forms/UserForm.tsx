@@ -25,7 +25,6 @@ import CustomButton from "../ui/CustomButton";
 import userSchema from "@/schemas/userSchema";
 import UserPlanTypes from "@/enums/UserPlanTypes";
 import SubTrainerDropdown from "../ui/SubTrainerDropdown";
-import { useUsersStore } from "@/store/userStore";
 
 const remindInOptions = [
   { value: "604800", name: "שבוע" },
@@ -73,7 +72,7 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
       dietaryType: existingUser?.dietaryType || [],
       remindIn: existingUser?.remindIn,
       dateFinished: userFinishDate,
-      subTrainerId: existingUser?.subTrainerId || "",
+      subTrainerId: existingUser?.subTrainerId || undefined,
     },
   });
 
