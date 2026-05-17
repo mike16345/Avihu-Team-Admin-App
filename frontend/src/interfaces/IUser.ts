@@ -20,4 +20,3 @@ export interface IUser extends IBaseUser {
 }
 
 export interface IUserPost extends IBaseUser {}
-
