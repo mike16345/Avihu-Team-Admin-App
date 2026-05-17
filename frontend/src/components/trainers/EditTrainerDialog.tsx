@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -106,6 +106,10 @@ export const EditTrainerDialog = ({ open, onOpenChange, data }: EditTrainerDialo
       });
     },
   });
+
+  const disableSwitch = useMemo(() => {
+    return trainer.videoLibraryAccess;
+  }, [trainer.videoLibraryAccess]);
 
   useEffect(() => {
     form.reset({
@@ -301,7 +305,12 @@ export const EditTrainerDialog = ({ open, onOpenChange, data }: EditTrainerDialo
                       </p>
                     </div>
                     <FormControl>
-                      <Switch dir="rtl" checked={field.value} onCheckedChange={field.onChange} />
+                      <Switch
+                        disabled={disableSwitch}
+                        dir="rtl"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
                     </FormControl>
                   </FormItem>
                 )}

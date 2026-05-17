@@ -11,6 +11,7 @@ const userSchema = z.object({
   planType: z.string().min(1, { message: "בחר סוג תוכנית" }),
   remindIn: z.coerce.number(),
   dietaryType: z.string().array().optional(),
+  subTrainerId: z.string().optional(),
 });
 
 export default userSchema;
