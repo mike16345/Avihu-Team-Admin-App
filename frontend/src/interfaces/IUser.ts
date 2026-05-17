@@ -3,6 +3,7 @@ export interface IBaseUser {
   lastName: string;
   email: string;
   phone: string;
+  subTrainerId?: string;
   dietaryType?: string[];
   dateFinished: Date;
   planType: string;
