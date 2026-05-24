@@ -25,15 +25,16 @@ export type AppRouteAccessKey =
 
 const nonUserRoles: AppRole[] = ["admin", "trainer", "subTrainer"];
 const adminAndTrainerRoles: AppRole[] = ["admin", "trainer"];
+const adminRoles: AppRole[] = ["admin"];
 
 export const ROUTE_ROLE_ACCESS: Record<AppRouteAccessKey, AppRole[]> = {
   home: nonUserRoles,
-  trainerAnalytics: ["admin"],
-  trainers: ["admin"],
-  trainerDetails: ["admin"],
+  trainerAnalytics: adminRoles,
+  trainers: adminRoles,
+  trainerDetails: adminRoles,
   subTrainers: adminAndTrainerRoles,
   users: nonUserRoles,
-  leads: nonUserRoles,
+  leads: adminRoles,
   blogs: nonUserRoles,
   blogCreate: nonUserRoles,
   dietPlans: nonUserRoles,

@@ -1,4 +1,4 @@
-import { endOfDay, format, startOfDay, subMonths, subYears, type Locale } from "date-fns";
+import { endOfDay, format, startOfDay, subMonths, subWeeks, subYears, type Locale } from "date-fns";
 import { he } from "date-fns/locale";
 import { DateRange } from "react-day-picker";
 
@@ -70,9 +70,10 @@ export const getSourceRangeParams = (
 
 export const getDefaultSourceRange = (): DateRange => {
   const today = endOfDay(new Date());
+  const weekBefore = subWeeks(today, 1);
 
   return {
-    from: startOfDay(subMonths(today, 1)),
+    from: startOfDay(weekBefore),
     to: today,
   };
 };
