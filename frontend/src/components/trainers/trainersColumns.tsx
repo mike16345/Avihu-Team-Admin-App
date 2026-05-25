@@ -43,12 +43,11 @@ export const trainersColumns: ColumnDef<PaginatedTrainerRow>[] = [
   {
     id: "utilization",
     header: "ניצולת",
-    cell: ({ row }) =>  {
-      return  <TrainerUtilization current={row.original.traineeCount} limit={row.original.clientLimit
-
-      } />
-    }
-    ,
+    cell: ({ row }) => {
+      return (
+        <TrainerUtilization current={row.original.traineeCount} limit={row.original.clientLimit} />
+      );
+    },
   },
   {
     accessorKey: "status",
