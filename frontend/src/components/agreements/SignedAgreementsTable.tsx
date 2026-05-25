@@ -149,7 +149,7 @@ const SignedAgreementsTable = ({ paginationKey }: SignedAgreementsTableProps) =>
     return <ErrorPage message="לא נמצא מזהה מנהל לצורך טעינת ההסכמים." />;
   }
 
-  if (isError) return <ErrorPage message={error.message} />;
+  if (isError && error?.status == 500) return <ErrorPage message={error.message} />;
 
   return (
     <DataTableHebrew
