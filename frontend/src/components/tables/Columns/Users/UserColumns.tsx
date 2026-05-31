@@ -173,6 +173,7 @@ export const columns: ColumnDef<IUser>[] = [
     header: "תום הליווי",
     cell: ({ row }) => {
       const user = row.original;
+      if (!user.dateFinished) return "עדיין בליווי";
 
       return user.dateFinished ? format(user.dateFinished, "PPP", { locale: he }) : null;
     },
