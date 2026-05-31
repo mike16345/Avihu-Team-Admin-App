@@ -8,7 +8,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { BiPencil } from "react-icons/bi";
-import { convertItemsToOptions, removePointerEventsFromBody } from "@/lib/utils";
+import { convertStringsToOptions, removePointerEventsFromBody } from "@/lib/utils";
 import {
   Command,
   CommandEmpty,
@@ -17,10 +17,9 @@ import {
   CommandItem,
   CommandList,
 } from "../ui/command";
-import Loader from "../ui/Loader";
 import { useFormContext } from "react-hook-form";
 import { WorkoutSchemaType } from "@/schemas/workoutPlanSchema";
-import useMuscleGroupsQuery from "@/hooks/queries/MuscleGroups/useMuscleGroupsQuery";
+import { MUSCLE_GROUPS } from "@/constants/muscleGroups";
 
 interface MuscleGroupSelectorProps {
   handleDismiss: (value?: string) => void;
@@ -41,18 +40,15 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
   const [value, setValue] = useState<string>(existingMuscleGroup || ``);
   const [open, setOpen] = useState(!Boolean(existingMuscleGroup));
 
-  const muscleGroupsQuery = useMuscleGroupsQuery();
-
   const muscleGroupOptions = useMemo(() => {
     const muscleGroupsInWorkout = muscleGroups.map((muscleGroup) => muscleGroup.muscleGroup);
 
-    const filteredExistingMuscleGroups = muscleGroupsQuery.data?.data.filter(
-      (muscleGroup) =>
-        muscleGroupsInWorkout.find((mgName) => muscleGroup.name == mgName) == undefined
+    const filteredExistingMuscleGroups = MUSCLE_GROUPS.filter(
+      (muscleGroup) => muscleGroupsInWorkout.find((mgName) => muscleGroup == mgName) == undefined
     );
 
-    return convertItemsToOptions(filteredExistingMuscleGroups || [], "name", "name");
-  }, [muscleGroupsQuery.data, muscleGroups]);
+    return convertStringsToOptions(filteredExistingMuscleGroups || []);
+  }, [muscleGroups]);
 
   const updateSelection = (selection: string) => {
     handleChange(selection);
@@ -92,7 +88,6 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
           <CommandInput dir="rtl" placeholder="בחר קבוצת שריר..." />
           <CommandList>
             <CommandGroup dir="rtl">
-              {muscleGroupsQuery.isLoading && <Loader size="medium" />}
               {muscleGroupOptions?.map((option, i) => (
                 <CommandItem
                   key={option.name + i}

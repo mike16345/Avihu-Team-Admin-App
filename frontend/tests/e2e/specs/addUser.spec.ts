@@ -32,24 +32,24 @@ const expectAddUserPage = async (page: Page) => {
 };
 
 const openAddUserDirectly = async (page: Page, mockApi: MockApiController) => {
-  mockApi.useScenario("auth.login.success", "auth.session.valid", "analytics.dashboard.success");
+  mockApi.useScenario("auth.login.success", "analytics.dashboard.success");
   await loginAsAdmin(page);
 
   await expect(page).not.toHaveURL(/\/login$/);
   await expect(page.getByTestId("sidebar-link-users")).toBeVisible();
-  mockApi.useScenario("auth.session.valid", "analytics.dashboard.success");
+  mockApi.useScenario("analytics.dashboard.success");
 
   await page.goto(ADD_USER_PATH, GOTO_OPTIONS);
   await expectAddUserPage(page);
 };
 
 const openAddUserFromUsersList = async (page: Page, mockApi: MockApiController) => {
-  mockApi.useScenario("auth.login.success", "auth.session.valid", "analytics.dashboard.success");
+  mockApi.useScenario("auth.login.success", "analytics.dashboard.success");
   await loginAsAdmin(page);
 
   await expect(page).not.toHaveURL(/\/login$/);
   await expect(page.getByTestId("sidebar-link-users")).toBeVisible();
-  mockApi.useScenario("auth.session.valid", "analytics.dashboard.success", "users.success");
+  mockApi.useScenario("analytics.dashboard.success", "users.success");
 
   await page.goto(USERS_PATH, GOTO_OPTIONS);
   await expect(page.getByTestId("users-table")).toBeVisible();
@@ -158,7 +158,6 @@ test.describe("add user page data states", () => {
     const createRequests = trackRequests(page, "POST", "/users");
 
     mockApi.useScenario(
-      "auth.session.valid",
       "users.create.success",
       "users.one.success",
       "forms.responses.success",
@@ -187,7 +186,7 @@ test.describe("add user page data states", () => {
   test("falls back to the users list when create succeeds without an id", async ({ page }) => {
     const createRequests = trackRequests(page, "POST", "/users");
 
-    mockApi.useScenario("auth.session.valid", "users.create.empty", "users.success");
+    mockApi.useScenario("users.create.empty", "users.success");
 
     await fillRequiredFields(page, { email: "empty@example.com" });
     await submitForm(page);
@@ -208,7 +207,7 @@ test.describe("add user page data states", () => {
     test(`stays on the form when the create request returns ${scenario}`, async ({ page }) => {
       const createRequests = trackRequests(page, "POST", "/users");
 
-      mockApi.useScenario("auth.session.valid", scenario);
+      mockApi.useScenario(scenario);
 
       await fillRequiredFields(page, { email: `${scenario}@example.com` });
       await submitForm(page);
@@ -223,7 +222,7 @@ test.describe("add user page data states", () => {
   test("stays on the form when the create request fails at the network layer", async ({ page }) => {
     const createRequests = trackRequests(page, "POST", "/users");
 
-    mockApi.useScenario("auth.session.valid", "users.create.network-failure");
+    mockApi.useScenario("users.create.network-failure");
 
     await fillRequiredFields(page, { email: "network@example.com" });
     await submitForm(page);
@@ -238,7 +237,6 @@ test.describe("add user page data states", () => {
     const createRequests = trackRequests(page, "POST", "/users");
 
     mockApi.useScenario(
-      "auth.session.valid",
       { key: "users.create.success", overrides: { delayMs: 800 } },
       "users.one.success",
       "forms.responses.success",
@@ -304,7 +302,6 @@ test.describe("add user page interactions", () => {
     const createRequests = trackRequests(page, "POST", "/users");
 
     mockApi.useScenario(
-      "auth.session.valid",
       { key: "users.create.success", overrides: { delayMs: 900 } },
       "users.one.success",
       "forms.responses.success",

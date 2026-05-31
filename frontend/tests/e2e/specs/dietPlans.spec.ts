@@ -52,7 +52,7 @@ const openDietPlansDirectly = async (
   await expectPathname(page, DASHBOARD_PATH);
   await expect(page.getByTestId("admin-dashboard")).toBeVisible();
 
-  mockApi.useScenario("auth.session.valid", "analytics.dashboard.success", ...scenarioSelections);
+  mockApi.useScenario("analytics.dashboard.success", ...scenarioSelections);
   await page.goto(DIET_PLANS_PATH, GOTO_OPTIONS);
 
   await expectPathname(page, DIET_PLANS_PATH);

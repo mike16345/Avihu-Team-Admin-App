@@ -19,6 +19,7 @@ type SidebarDestination = {
 const normalizePathname = (pathname: string) => pathname.replace(/\/+$/, "") || "/";
 
 const baseSidebarScenarios = (): MockScenarioSelection[] => [
+  "auth.logout.success",
   "analytics.dashboard.success",
   "users.success",
   "blogs.success",
@@ -258,6 +259,32 @@ test.describe("sidebar controls", () => {
 
     await page.goto("/", GOTO_OPTIONS);
     await expectPathname(page, "/login");
+    await expect(page.getByTestId("login-page")).toBeVisible();
+
+    mockApi.assertNoUnhandledRequests();
+  });
+
+  test("logs out immediately even when the server logout is slow", async ({ page }) => {
+    const mockApi = await installMockApi(page);
+
+    await loginAsAdmin(page, mockApi, [
+      { key: "auth.logout.success", overrides: { delayMs: 2_500 } },
+      "analytics.dashboard.success",
+      "users.success",
+      "blogs.success",
+      "templates.diet.success",
+      "templates.workouts.success",
+      "leads.success",
+      "forms.presets.success",
+      "forms.responses.success",
+      "agreements.signed.success",
+    ]);
+
+    await page.getByTestId("sidebar-logout").click();
+
+    await expect
+      .poll(() => normalizePathname(new URL(page.url()).pathname), { timeout: 1_000 })
+      .toBe("/login");
     await expect(page.getByTestId("login-page")).toBeVisible();
 
     mockApi.assertNoUnhandledRequests();
