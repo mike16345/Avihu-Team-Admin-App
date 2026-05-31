@@ -22,6 +22,7 @@ export interface CurrentAgreement {
   agreementId: string;
   version: number;
   pdfUrl: string;
+  title?: string;
   questions: FormQuestionType[];
 }
 

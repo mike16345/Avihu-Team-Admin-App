@@ -93,8 +93,11 @@ export const refreshAccessToken = async (refreshToken: string) => {
   return unwrapAuthResponse<RefreshResponse>(response.data);
 };
 
-export const logoutRefreshSession = async (refreshToken: string) => {
-  const accessToken = getAccessToken();
+export const logoutRefreshSession = async (
+  refreshToken: string,
+  accessTokenOverride?: string
+) => {
+  const accessToken = accessTokenOverride ?? getAccessToken();
 
   await authClient.post(
     `${AUTH_ENDPOINT}/logout`,

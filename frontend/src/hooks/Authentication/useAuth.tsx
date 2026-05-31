@@ -4,6 +4,7 @@ import { useUsersStore } from "@/store/userStore";
 import { LoginResponse } from "@/interfaces/IAuth";
 import {
   clearAuthSession,
+  getAccessToken,
   getRefreshToken,
   loadPersistedAuthSession,
   setAuthSession,
@@ -34,6 +35,13 @@ function useAuth(): AuthContext {
     setCurrentUser(null);
     setAuthed(false);
   }, [queryClient, setCurrentUser]);
+
+  const clearClientAuthState = useCallback(() => {
+    clearAuthSession(false);
+    sessionStorage.clear();
+    resetAuthState();
+    setLoading(false);
+  }, [resetAuthState]);
 
   const hydrateAuthSession = useCallback(async () => {
     const persistedSession = loadPersistedAuthSession();
@@ -94,15 +102,14 @@ function useAuth(): AuthContext {
     },
     async logout() {
       const refreshToken = getRefreshToken();
+      const accessToken = getAccessToken();
 
-      try {
-        if (refreshToken) {
-          await logoutRefreshSession(refreshToken);
-        }
-      } finally {
-        clearAuthSession(false);
-        sessionStorage.clear();
-        resetAuthState();
+      clearClientAuthState();
+
+      if (refreshToken) {
+        void logoutRefreshSession(refreshToken, accessToken).catch(() => {
+          // Local logout is already complete; a server-side failure should not block the user.
+        });
       }
     },
   };

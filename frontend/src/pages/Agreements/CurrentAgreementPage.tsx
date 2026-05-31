@@ -3,6 +3,8 @@ import { toast } from "sonner";
 import AgreementQuestionsEditor from "@/components/agreements/AgreementQuestionsEditor";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import Loader from "@/components/ui/Loader";
 import { pdfjs, Document, Page } from "react-pdf";
 import { AgreementTemplateActivateBody } from "@/hooks/api/useAgreementsAdminApi";
@@ -30,6 +32,7 @@ const CurrentAgreementPage = () => {
   const { isPending: isSaving, mutateAsync: activateTemplate } = useActivateAgreement();
 
   const [pendingVersion, setPendingVersion] = useState<number | null>(null);
+  const [agreementTitle, setAgreementTitle] = useState("");
   const [questions, setQuestions] = useState<IFormQuestion[]>([]);
   const [numPages, setNumPages] = useState(0);
   const { isOpen, toggle, bind } = useDisclosure();
@@ -74,6 +77,7 @@ const CurrentAgreementPage = () => {
       const params: AgreementTemplateActivateBody = {
         agreementId: currentAgreement.data.agreementId,
         version,
+        title: agreementTitle.trim(),
         questions: questions.map((question) => {
           const q = {
             _id: question.id,
@@ -108,6 +112,7 @@ const CurrentAgreementPage = () => {
     if (pendingVersion) return;
 
     setQuestions(currentAgreement.data.questions ?? []);
+    setAgreementTitle(currentAgreement.data.title ?? "");
   }, [currentAgreement, pendingVersion]);
 
   if (isLoading) return <Loader size="xl" />;
@@ -165,6 +170,15 @@ const CurrentAgreementPage = () => {
 
           <CollapsibleContent>
             <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="agreement-title">כותרת</Label>
+                <Input
+                  id="agreement-title"
+                  value={agreementTitle}
+                  onChange={(event) => setAgreementTitle(event.target.value)}
+                  placeholder="הכנס כותרת להסכם"
+                />
+              </div>
               <AgreementQuestionsEditor questions={questions} onChange={setQuestions} />
               <div className="flex justify-end">
                 <Button onClick={handleActivate} disabled={isSaving}>
