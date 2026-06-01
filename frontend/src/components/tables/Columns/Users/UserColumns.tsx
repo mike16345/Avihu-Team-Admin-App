@@ -21,6 +21,20 @@ import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import DeleteModal from "@/components/Alerts/DeleteModal";
 import { invalidateQueryKeys } from "@/QueryClient/queryClient";
 import { QueryKeys } from "@/enums/QueryKeys";
+import { Badge } from "@/components/ui/badge";
+
+const hebrewRoleMap: Record<string, string> = {
+  admin: "מנהל",
+  user: "משתמש",
+  trainer: "מאמן",
+  subTrainer: "צוות",
+};
+const roleColorMap: Record<string, string> = {
+  admin: "bg-primary",
+  user: "bg-muted-foreground",
+  trainer: "bg-primary",
+  subTrainer: "bg-primary",
+};
 
 export const columns: ColumnDef<IUser>[] = [
   {
@@ -79,6 +93,27 @@ export const columns: ColumnDef<IUser>[] = [
       return <span dir="ltr">{String(row.renderValue())}</span>;
     },
   },
+
+  {
+    accessorKey: "role",
+    id: `תפקיד`,
+    header: ({ column }) => {
+      return (
+        <Button
+          className="m-0 px-1 py-1"
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          תפקיד
+          <ArrowUpDown className="h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => {
+      const role: string = row.original.role;
+      return <Badge className={roleColorMap[role]}>{hebrewRoleMap[role] || role}</Badge>;
+    },
+  },
   {
     accessorKey: "hasAccess",
     header: "רשות",
@@ -113,6 +148,7 @@ export const columns: ColumnDef<IUser>[] = [
 
       return (
         <Switch
+          data-testid={`users-access-switch-${row.original._id}`}
           dir="rtl"
           disabled={isToggling}
           id="access-switch"
@@ -139,7 +175,7 @@ export const columns: ColumnDef<IUser>[] = [
       const user = row.original;
       if (!user.dateFinished) return "עדיין בליווי";
 
-      return format(user?.dateFinished, "PPP", { locale: he });
+      return user.dateFinished ? format(user.dateFinished, "PPP", { locale: he }) : null;
     },
   },
   {
@@ -155,16 +191,23 @@ export const columns: ColumnDef<IUser>[] = [
         <>
           <DropdownMenu dir="rtl">
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
+              <Button
+                data-testid={`users-row-menu-${user._id}`}
+                variant="ghost"
+                className="h-8 w-8 p-0"
+              >
                 <span className="sr-only">Open menu</span>
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
+            <DropdownMenuContent data-testid={`users-row-menu-content-${user._id}`}>
               <DropdownMenuLabel>פעולות</DropdownMenuLabel>
               <DropdownMenuSeparator />
 
-              <DropdownMenuItem onClick={() => handleViewUser && handleViewUser(user)}>
+              <DropdownMenuItem
+                data-testid={`users-row-view-${user._id}`}
+                onClick={() => handleViewUser && handleViewUser(user)}
+              >
                 צפה
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setIsDeleteModalOpen(true)}>מחק</DropdownMenuItem>

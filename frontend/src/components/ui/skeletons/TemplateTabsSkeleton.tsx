@@ -2,7 +2,7 @@ import { Skeleton } from "../skeleton";
 
 const TemplateTabsSkeleton = () => {
   return (
-    <div>
+    <div data-testid="template-tabs-skeleton">
       <Skeleton className="h-8 w-32 mt-5" />
       <Skeleton className="h-8 w-72 mt-8" />
       <Skeleton className="h-10 w-full mt-7" />

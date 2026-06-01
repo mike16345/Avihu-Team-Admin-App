@@ -110,7 +110,7 @@ const LeadsTablePage = () => {
   }
 
   return (
-    <div className="space-y-4">
+    <div data-testid="leads-page" className="space-y-4">
       <h1 className="text-2xl font-semibold">לידים</h1>
       <DataTableHebrew
         data={leads}
@@ -130,6 +130,7 @@ const LeadsTablePage = () => {
           setPage(safePage);
         }}
         paginationKey="leads"
+        testIdPrefix="leads"
       />
     </div>
   );

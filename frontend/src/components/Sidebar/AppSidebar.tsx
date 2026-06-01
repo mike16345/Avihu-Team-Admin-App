@@ -1,15 +1,21 @@
+import React from "react";
 import {
-  Home,
+  BarChart3,
   BicepsFlexed,
-  LucideIcon,
-  User,
-  Edit,
-  SquareMenu,
-  User2,
-  Inbox,
   ChevronDown,
   Clipboard,
+  Edit,
+  Home,
+  Inbox,
+  LucideIcon,
+  SquareMenu,
+  User,
+  User2,
+  Users,
+  UserCog,
 } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Sidebar,
   SidebarContent,
@@ -24,16 +30,16 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Link, useLocation } from "react-router-dom";
+import { useUsersStore } from "@/store/userStore";
 import LogoutButton from "../Navbar/LogoutButton";
 import { ModeToggle } from "../theme/mode-toggle";
-import { useUsersStore } from "@/store/userStore";
-import { userFullName } from "@/lib/utils";
 import { Separator } from "../ui/separator";
-import React from "react";
+import { type AppRouteAccessKey, canAccessRoute, normalizeAppRole } from "@/routes/routeAccess";
+import { LuChevronsUpDown } from "react-icons/lu";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 type LinkProps = {
+  accessKey: AppRouteAccessKey;
   title: string;
   url: string;
   icon: LucideIcon;
@@ -43,6 +49,7 @@ type SidebarItem = {
   title: string;
   icon: LucideIcon;
   url?: string;
+  accessKey?: AppRouteAccessKey;
   children?: LinkProps[];
 };
 
@@ -52,26 +59,51 @@ const sidebarGroups: SidebarItem[][] = [
       url: "/",
       title: "בית",
       icon: Home,
+      accessKey: "home",
+    },
+    {
+      url: "/trainer-analytics",
+      title: "לוח בקרה",
+      icon: BarChart3,
+      accessKey: "trainerAnalytics",
+    },
+    {
+      url: "/trainers",
+      title: "מאמנים",
+      icon: User2,
+      accessKey: "trainers",
+    },
+    {
+      url: "/sub-trainers",
+      title: "הצוות שלי",
+      icon: UserCog,
+      accessKey: "subTrainers",
     },
     {
       url: "/users",
-      title: "משתמשים",
-      icon: User,
+      title: "לקוחות",
+      icon: Users,
+      accessKey: "users",
     },
+  ],
+  [
     {
       url: "/blogs",
       title: "מאמרים",
       icon: Edit,
+      accessKey: "blogs",
     },
     {
       url: "/dietPlans",
       title: "תפריטים",
       icon: SquareMenu,
+      accessKey: "dietPlans",
     },
     {
       url: "/workoutPlans",
       title: "תוכנית אימון",
       icon: BicepsFlexed,
+      accessKey: "workoutPlans",
     },
   ],
   [
@@ -79,27 +111,52 @@ const sidebarGroups: SidebarItem[][] = [
       url: "/leads",
       title: "לידים",
       icon: Inbox,
+      accessKey: "leads",
     },
     {
       url: "/form-builder",
       title: "שאלונים",
       icon: Clipboard,
+      accessKey: "formBuilder",
     },
   ],
 ];
 
 const SidebarItems = () => {
   const location = useLocation();
+  const currentUser = useUsersStore((state) => state.currentUser);
+  const role = normalizeAppRole(currentUser?.role);
+
+  const createSidebarTestId = (url?: string) =>
+    url
+      ? `sidebar-link-${
+          url === "/" ? "home" : url.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "")
+        }`
+      : undefined;
+
+  const visibleGroups = sidebarGroups
+    .map((group) =>
+      group.filter((item) => {
+        if (item.children?.length) {
+          return item.children.some((child) => canAccessRoute(role, child.accessKey));
+        }
+
+        return item.accessKey ? canAccessRoute(role, item.accessKey) : true;
+      })
+    )
+    .filter((group) => group.length > 0);
 
   return (
     <>
-      {sidebarGroups.map((group, index) => (
+      {visibleGroups.map((group, index) => (
         <React.Fragment key={index}>
           {!!index && <Separator className="my-4" />}
           {group.map((item) => {
-            const hasChildren = Boolean(item.children?.length);
+            const visibleChildren =
+              item.children?.filter((child) => canAccessRoute(role, child.accessKey)) ?? [];
+            const hasChildren = visibleChildren.length > 0;
             const isActive = hasChildren
-              ? item.children?.some((child) => child.url === location.pathname)
+              ? visibleChildren.some((child) => child.url === location.pathname)
               : location.pathname === item.url;
 
             if (!hasChildren && item.url) {
@@ -107,8 +164,9 @@ const SidebarItems = () => {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={isActive}>
                     <Link
+                      data-testid={createSidebarTestId(item.url)}
                       className={`w-full rounded-full ${
-                        isActive && "text-secondary bg-secondary-foreground"
+                        isActive && "bg-secondary-foreground text-secondary"
                       }`}
                       to={item.url}
                     >
@@ -123,7 +181,7 @@ const SidebarItems = () => {
             return (
               <SidebarMenuItem key={item.title}>
                 <Collapsible defaultOpen={Boolean(isActive)} className="group/collapsible">
-                  <CollapsibleTrigger className="flex items-center w-full justify-between" asChild>
+                  <CollapsibleTrigger className="flex w-full items-center justify-between" asChild>
                     <SidebarMenuButton isActive={Boolean(isActive)}>
                       <div className="flex items-center gap-2">
                         <item.icon />
@@ -135,19 +193,20 @@ const SidebarItems = () => {
 
                   <CollapsibleContent>
                     <SidebarMenuSub>
-                      {item.children?.map((child) => {
+                      {visibleChildren.map((child) => {
                         const childActive = location.pathname === child.url;
 
                         return (
                           <SidebarMenuSubItem key={child.title}>
                             <SidebarMenuSubButton asChild isActive={childActive}>
                               <Link
+                                data-testid={createSidebarTestId(child.url)}
                                 className={`flex items-center gap-2 ${
-                                  childActive && "text-secondary bg-secondary"
+                                  childActive && "bg-secondary text-secondary"
                                 }`}
                                 to={child.url}
                               >
-                                {child.icon ? <child.icon /> : null}
+                                <child.icon />
                                 <span>{child.title}</span>
                               </Link>
                             </SidebarMenuSubButton>
@@ -172,10 +231,14 @@ const Header = () => {
   return (
     <>
       {currentUser && (
-        <SidebarHeader>
-          <div className="flex items-center gap-2 text-lg font-semibold ">
-            <User2 size={20} />
-            <span>{userFullName(currentUser)}</span>
+        <SidebarHeader className=" border-b border-accented bg-background py-3">
+          <div className="flex items-center gap-5 text-lg font-semibold">
+            <img
+              className="h-10 w-10 rounded-lg shadow-lg border border-muted"
+              src="../public/images/app-logo.png"
+              alt=""
+            />
+            <span>מערכת ניהול</span>
           </div>
         </SidebarHeader>
       )}
@@ -184,10 +247,12 @@ const Header = () => {
 };
 
 export function AppSidebar() {
+  const user = useUsersStore((state) => state.currentUser);
+
   return (
-    <Sidebar side="right">
+    <Sidebar side="right" data-testid="app-sidebar">
       <Header />
-      <SidebarContent>
+      <SidebarContent className="bg-background">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -196,12 +261,37 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="flex flex-row items-center">
-        <div className="flex-1">
-          <LogoutButton />
-        </div>
-        <ModeToggle />
-      </SidebarFooter>
+      <Popover>
+        <PopoverTrigger asChild>
+          <SidebarFooter className="flex flex-row items-center border-t border-accented bg-background gap-3 py-4 cursor-pointer hover:bg-muted">
+            <img
+              src={`https://api.dicebear.com/9.x/initials/svg?seed=${user?.firstName}&radius=50&size=36`}
+              alt="avatar"
+            />
+
+            <div>
+              <div className="text-sm ">
+                {user?.firstName} {user?.lastName}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {user?.email.slice(0, 22).padStart(25, "...")}
+              </div>
+            </div>
+
+            <div className="w-full flex justify-end text-accented">
+              <LuChevronsUpDown />
+            </div>
+          </SidebarFooter>
+        </PopoverTrigger>
+        <PopoverContent>
+          <div className="flex items-center flex-row gap-2">
+            <div className="flex-1">
+              <LogoutButton />
+            </div>
+            <ModeToggle />
+          </div>
+        </PopoverContent>
+      </Popover>
     </Sidebar>
   );
 }

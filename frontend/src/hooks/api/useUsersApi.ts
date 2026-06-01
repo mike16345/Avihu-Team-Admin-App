@@ -1,11 +1,11 @@
 import { deleteItem, fetchData, sendData, updateItem } from "@/API/api";
-import { ISession, IUser, IUserPost } from "@/interfaces/IUser";
+import { IUser, IUserPost } from "@/interfaces/IUser";
 import { ApiResponse } from "@/types/types";
 
 const USERS_ENDPOINT = "users";
 
 export const useUsersApi = () => {
-  const addUser = (user: IUserPost) => sendData<IUser>(USERS_ENDPOINT, user);
+  const addUser = (user: IUserPost) => sendData<ApiResponse<IUser>>(USERS_ENDPOINT, user);
 
   const updateUser = (userID: string, user: IUser) =>
     updateItem(`${USERS_ENDPOINT}/one`, user, null, { id: userID });
@@ -34,30 +34,15 @@ export const useUsersApi = () => {
     });
   };
 
-  const loginUser = (email: string, password: string) =>
-    sendData<ApiResponse<ISession>>(USERS_ENDPOINT + `/user/login`, {
-      email,
-      password,
-      isAdminApp: true,
-    });
-
-  const checkUserSessionToken = (token: ISession) => {
-    return sendData<ApiResponse<{ isValid: boolean }>>(USERS_ENDPOINT + `/user/session`, {
-      token,
-    }).then((res) => res.data);
-  };
-
   const getAllUsers = () => fetchData<ApiResponse<IUser[]>>(USERS_ENDPOINT).then((res) => res.data);
 
   return {
     addUser,
-    checkUserSessionToken,
     updateUserField,
     updateUser,
     deleteManyUsers,
     deleteUser,
     getUser,
     getAllUsers,
-    loginUser,
   };
 };

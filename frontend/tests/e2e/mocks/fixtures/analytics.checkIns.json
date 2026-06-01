@@ -1,0 +1,23 @@
+{
+  "success": {
+    "data": [],
+    "message": "\u05de\u05e9\u05ea\u05de\u05e9\u05d9 \u05d1\u05d3\u05d9\u05e7\u05d4 \u05e0\u05d8\u05e2\u05e0\u05d5"
+  },
+  "populated": {
+    "data": [
+      {
+        "_id": "checkin-user-001",
+        "firstName": "\u05de\u05d9\u05db\u05dc",
+        "lastName": "\u05db\u05d4\u05df",
+        "isChecked": false
+      },
+      {
+        "_id": "checkin-user-002",
+        "firstName": "\u05d3\u05e0\u05d9\u05d0\u05dc",
+        "lastName": "\u05dc\u05d5\u05d9",
+        "isChecked": false
+      }
+    ],
+    "message": "\u05de\u05e9\u05ea\u05de\u05e9\u05d9 \u05d1\u05d3\u05d9\u05e7\u05d4 \u05e0\u05d8\u05e2\u05e0\u05d5"
+  }
+}

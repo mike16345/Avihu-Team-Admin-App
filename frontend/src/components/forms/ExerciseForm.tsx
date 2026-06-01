@@ -7,13 +7,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -33,6 +27,7 @@ import TextEditor from "../ui/TextEditor";
 import { buildPhotoUrl } from "@/lib/utils";
 import { Button } from "../ui/button";
 import Loader from "../ui/Loader";
+import MuscleGroupDropdown from "../ui/MuscleGroupDropdown";
 
 const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
   const exerciseForm = useForm<z.infer<typeof exerciseSchema>>({
@@ -45,7 +40,6 @@ const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
     },
   });
 
-  const { data: muscleGroups } = useMuscleGroupsQuery();
   const { data: exercise, isLoading } = useExerciseQuery(objectId || "undefined");
 
   const { reset } = exerciseForm;
@@ -183,20 +177,13 @@ const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>קבוצת שריר</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger dir="rtl">
-                    <SelectValue placeholder={field.value} />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent dir="rtl">
-                  {muscleGroups?.data?.map((muscleGroup) => (
-                    <SelectItem key={muscleGroup.name} value={muscleGroup.name}>
-                      {muscleGroup.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+
+              <MuscleGroupDropdown
+                onSelect={field.onChange}
+                value={field.value}
+                listEmptyMessage="לא נמצאו קבוצות שריר"
+              />
+
               <FormMessage />
             </FormItem>
           )}

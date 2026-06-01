@@ -406,3 +406,8 @@ FodyWeavers.xsd
 
 # npmrc
 .npmrc
+
+
+# playwright test results
+playwright-report/
+test-results/

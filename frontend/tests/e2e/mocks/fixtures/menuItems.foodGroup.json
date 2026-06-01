@@ -1,0 +1,76 @@
+{
+  "success": {
+    "data": [
+      {
+        "_id": "menu-item-001",
+        "name": "Chicken Breast"
+      },
+      {
+        "_id": "menu-item-002",
+        "name": "Greek Yogurt"
+      }
+    ],
+    "message": "Menu items loaded"
+  },
+  "large": {
+    "data": [
+      {
+        "_id": "menu-item-001",
+        "name": "Menu Item 01"
+      },
+      {
+        "_id": "menu-item-002",
+        "name": "Menu Item 02"
+      },
+      {
+        "_id": "menu-item-003",
+        "name": "Menu Item 03"
+      },
+      {
+        "_id": "menu-item-004",
+        "name": "Menu Item 04"
+      },
+      {
+        "_id": "menu-item-005",
+        "name": "Menu Item 05"
+      },
+      {
+        "_id": "menu-item-006",
+        "name": "Menu Item 06"
+      },
+      {
+        "_id": "menu-item-007",
+        "name": "Menu Item 07"
+      },
+      {
+        "_id": "menu-item-008",
+        "name": "Menu Item 08"
+      },
+      {
+        "_id": "menu-item-009",
+        "name": "Menu Item 09"
+      },
+      {
+        "_id": "menu-item-010",
+        "name": "Menu Item 10"
+      },
+      {
+        "_id": "menu-item-011",
+        "name": "Menu Item 11"
+      },
+      {
+        "_id": "menu-item-012",
+        "name": "Menu Item 12"
+      }
+    ],
+    "message": "Large menu items list loaded"
+  },
+  "empty": {
+    "data": [],
+    "message": "No menu items"
+  },
+  "null_data": {
+    "data": null,
+    "message": "Menu items payload missing"
+  }
+}

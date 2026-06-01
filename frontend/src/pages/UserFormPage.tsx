@@ -43,7 +43,7 @@ const UserFormPage = () => {
   if (isLoading) return <Loader size="large" />;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div data-testid="user-form-page" className="flex flex-col gap-4">
       <h1 className="font-bold text-3xl text-center sm:text-start">פרטי משתמש</h1>
       <BackButton navLink={backButtonUrl} />
       <UserForm

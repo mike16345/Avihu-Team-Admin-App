@@ -1,0 +1,49 @@
+{
+  "success": {
+    "accessToken": "mock-access-token",
+    "refreshToken": "mock-refresh-token",
+    "sessionId": "session-admin-001",
+    "user": {
+      "_id": "user-admin-001",
+      "firstName": "מיכל",
+      "lastName": "כהן",
+      "email": "admin@example.com",
+      "role": "admin",
+      "phone": "0501234567",
+      "dietaryType": [],
+      "dateFinished": "2026-12-31T00:00:00.000Z",
+      "planType": "premium",
+      "remindIn": 3,
+      "dateJoined": "2025-01-15T00:00:00.000Z",
+      "isChecked": true,
+      "checkInAt": 1735689600,
+      "hasAccess": true,
+      "onboardingCompleted": true
+    }
+  },
+  "refresh_success": {
+    "accessToken": "mock-refreshed-access-token",
+    "refreshToken": "mock-rotated-refresh-token",
+    "user": {
+      "_id": "user-admin-001",
+      "firstName": "מיכל",
+      "lastName": "כהן",
+      "email": "admin@example.com",
+      "role": "admin",
+      "hasAccess": true
+    }
+  },
+  "me_success": {
+    "user": {
+      "_id": "user-admin-001",
+      "firstName": "מיכל",
+      "lastName": "כהן",
+      "email": "admin@example.com",
+      "role": "admin",
+      "hasAccess": true
+    }
+  },
+  "error_unauthorized": {
+    "message": "אימייל או סיסמה שגויים"
+  }
+}

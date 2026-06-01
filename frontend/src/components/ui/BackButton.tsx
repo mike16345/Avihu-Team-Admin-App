@@ -2,6 +2,7 @@ import React from "react";
 import { Button } from "./button";
 import { IoArrowBackCircleOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 interface BackButtonProps {
   navLink: string;
@@ -33,9 +34,11 @@ const BackButton: React.FC<BackButtonProps> = ({
 
   return (
     <Button
-      className={`${
-        fixedPosition && `absolute top-5 left-12`
-      } group hover:bg-primary transition-colors duration-500`}
+      data-testid="back-button"
+      className={cn(
+        fixedPosition ? "absolute left-12 top-5" : "",
+        "group transition-colors duration-500 hover:bg-primary"
+      )}
       variant="secondary"
       onClick={variant === `navigation` ? handleBack : handleClick}
     >

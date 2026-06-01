@@ -117,7 +117,7 @@ const DietPlanTemplatePage = () => {
   };
 
   return (
-    <div className="flex flex-col gap-3">
+    <div data-testid="diet-plan-templates-page" className="flex flex-col gap-3">
       <h1 className="text-2xl sm:text-right text-center">תפריטים</h1>
       <TemplateTabs tabs={tabs} />
     </div>

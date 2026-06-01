@@ -29,6 +29,7 @@ const DeleteModal: React.FC<IDeleteModalProps> = ({
         children: alertMessage,
       }}
       alertDialogCancelProps={{
+        "data-testid": "delete-modal-cancel",
         onClick: (e) => {
           e.stopPropagation();
           onCancel();
@@ -37,6 +38,7 @@ const DeleteModal: React.FC<IDeleteModalProps> = ({
         children: "בטל",
       }}
       alertDialogActionProps={{
+        "data-testid": "delete-modal-confirm",
         onClick: (e) => {
           e.stopPropagation();
           onConfirm();

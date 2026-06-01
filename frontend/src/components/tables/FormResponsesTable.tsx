@@ -84,6 +84,7 @@ const FormResponsesTable = ({ userId, paginationKey }: FormResponsesTableProps) 
       getRowClassName={() => "cursor-pointer"}
       handleHoverOnRow={() => false}
       getRowId={(row) => row._id || ""}
+      testIdPrefix={paginationKey ?? "form-responses"}
       filters={
         FormTypeOptions.length ? (
           <FilterMultiSelect

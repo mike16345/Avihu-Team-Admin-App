@@ -6,7 +6,7 @@ import { Button } from "./button";
 import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "./command";
 import Loader from "./Loader";
 
-interface ComboBoxProps {
+export interface ComboBoxProps {
   options: Option[];
   value: any;
   onSelect: (val: any) => void;
@@ -24,6 +24,8 @@ const ComboBox: FC<ComboBoxProps> = ({
   inputPlaceholder = "חפש...",
 }) => {
   const [open, setOpen] = useState(false);
+  const selectedOption = options.find((option) => option.value === value);
+  const selectedLabel = selectedOption?.name ?? value;
 
   useEffect(() => {
     return () => setOpen(false);
@@ -33,11 +35,11 @@ const ComboBox: FC<ComboBoxProps> = ({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger className="w-full  flex justify-between" dir="rtl" asChild>
         <Button variant="outline" role="combobox" aria-expanded={open}>
-          <span>{value || `בחר`}</span>
+          <span>{selectedLabel || "בחר"}</span>
           <ChevronsUpDown className="mr-4 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0">
+      <PopoverContent className="min-w-[var(--radix-popover-trigger-width)] p-0" align="start">
         <Command>
           <CommandInput dir="rtl" placeholder={inputPlaceholder} />
 
