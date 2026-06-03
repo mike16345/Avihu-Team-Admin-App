@@ -21,6 +21,20 @@ import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import DeleteModal from "@/components/Alerts/DeleteModal";
 import { invalidateQueryKeys } from "@/QueryClient/queryClient";
 import { QueryKeys } from "@/enums/QueryKeys";
+import { Badge } from "@/components/ui/badge";
+
+const hebrewRoleMap: Record<string, string> = {
+  admin: "מנהל",
+  user: "משתמש",
+  trainer: "מאמן",
+  subTrainer: "צוות",
+};
+const roleColorMap: Record<string, string> = {
+  admin: "bg-primary",
+  user: "bg-muted-foreground",
+  trainer: "bg-primary",
+  subTrainer: "bg-primary",
+};
 
 export const columns: ColumnDef<IUser>[] = [
   {
@@ -77,6 +91,27 @@ export const columns: ColumnDef<IUser>[] = [
     header: "פלאפון",
     cell(row) {
       return <span dir="ltr">{String(row.renderValue())}</span>;
+    },
+  },
+
+  {
+    accessorKey: "role",
+    id: `תפקיד`,
+    header: ({ column }) => {
+      return (
+        <Button
+          className="m-0 px-1 py-1"
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          תפקיד
+          <ArrowUpDown className="h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => {
+      const role: string = row.original.role;
+      return <Badge className={roleColorMap[role]}>{hebrewRoleMap[role] || role}</Badge>;
     },
   },
   {
@@ -138,8 +173,9 @@ export const columns: ColumnDef<IUser>[] = [
     header: "תום הליווי",
     cell: ({ row }) => {
       const user = row.original;
+      if (!user.dateFinished) return "עדיין בליווי";
 
-      return format(user.dateFinished, "PPP", { locale: he });
+      return user.dateFinished ? format(user.dateFinished, "PPP", { locale: he }) : null;
     },
   },
   {

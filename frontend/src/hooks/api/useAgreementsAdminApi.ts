@@ -29,6 +29,7 @@ export interface AgreementTemplateUploadBody {
 export interface AgreementTemplateActivateBody {
   agreementId: string;
   version: number;
+  title: string;
   groupId?: string;
   questions: IFormQuestion[];
   adminId?: string;

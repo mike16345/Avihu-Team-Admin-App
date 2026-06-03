@@ -64,4 +64,24 @@ export const analyticsScenarios = {
       variant: "success",
     }),
   ],
+  "analytics.dashboard.users.unauthorized": [
+    jsonFixtureRoute({
+      method: "GET",
+      pathname: `${ANALYTICS_ENDPOINT}/checkIns`,
+      fixture: "analytics.checkIns",
+      variant: "success",
+    }),
+    apiErrorRoute({
+      method: "GET",
+      pathname: `${ANALYTICS_ENDPOINT}/users`,
+      message: "Unauthorized",
+      status: 401,
+    }),
+    jsonFixtureRoute({
+      method: "GET",
+      pathname: `${ANALYTICS_ENDPOINT}/users/expiring`,
+      fixture: "analytics.users-expiring",
+      variant: "success",
+    }),
+  ],
 } satisfies MockScenarioMap;

@@ -9,7 +9,7 @@ const LogoutButton: FC = () => {
   return (
     <Button
       data-testid="sidebar-logout"
-      className="w-full flex items-center gap-2"
+      className="w-full flex items-center gap-2 text-destructive"
       onClick={logout}
       variant={"outline"}
     >

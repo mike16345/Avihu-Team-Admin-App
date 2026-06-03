@@ -43,7 +43,7 @@ const openUsersDirectly = async (
   await expect(page).not.toHaveURL(/\/login$/);
   await expect(page.getByTestId("sidebar-link-users")).toBeVisible();
 
-  mockApi.useScenario("auth.session.valid", "analytics.dashboard.success", ...scenarioSelections);
+  mockApi.useScenario("analytics.dashboard.success", ...scenarioSelections);
   await page.goto(USERS_PATH, GOTO_OPTIONS);
 
   if (options.expectTable !== false) {
@@ -108,7 +108,7 @@ test.describe("users page routing and entry", () => {
     await expect(page).not.toHaveURL(/\/login$/);
     await expect(page.getByTestId("sidebar-link-users")).toBeVisible();
 
-    mockApi.useScenario("auth.session.valid", "analytics.dashboard.success", "users.large");
+    mockApi.useScenario("analytics.dashboard.success", "users.large");
     await page.goto(`${USERS_PATH}?page=-3&limit=20`, GOTO_OPTIONS);
 
     await expect(page.getByTestId("users-table")).toBeVisible();

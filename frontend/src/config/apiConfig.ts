@@ -1,6 +1,9 @@
-import axios, { AxiosInstance } from "axios";
-import secureLocalStorage from "react-secure-storage";
-import { USER_TOKEN_STORAGE_KEY } from "@/constants/constants";
+import { refreshAuthSession } from "@/services/authRefresh";
+import { clearAuthSession, getAccessToken } from "@/services/authSession";
+import { API_KEY_HEADER, getApiKey } from "@/services/apiKey";
+import { shouldClearPersistedAuth } from "@/services/authErrors";
+import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "axios";
+import { useUsersStore } from "@/store/userStore";
 
 export const determineServerUrl = (): string => {
   return import.meta.env.VITE_SERVER_PREVIEW_URL || import.meta.env.VITE_SERVER;
@@ -13,38 +16,53 @@ const axiosInstance: AxiosInstance = axios.create({
   timeout: 25000,
 });
 
-/**
- * Global 401 handler — when JWT expires anywhere in the app, clear the
- * stored token and bounce the user to /login so they re-authenticate.
- * Prevents getting stuck on screens with stale tokens.
- *
- * Skips session/login endpoints so we don't loop on the login screen itself.
- */
-const AUTH_FLOW_PATHS = ["users/user/login", "users/user/session", "users/user/logout"];
-let redirectingToLogin = false;
+type RetriableRequestConfig = InternalAxiosRequestConfig & {
+  _retry?: boolean;
+};
+
+axiosInstance.interceptors.request.use((config) => {
+  const apiKey = getApiKey();
+  const accessToken = getAccessToken();
+
+  if (apiKey && !config.headers[API_KEY_HEADER]) {
+    config.headers[API_KEY_HEADER] = apiKey;
+  }
+
+  if (accessToken && !config.headers.Authorization) {
+    config.headers.Authorization = `Bearer ${accessToken}`;
+  }
+
+  return config;
+});
 
 axiosInstance.interceptors.response.use(
   (response) => response,
-  (error) => {
-    const status = error?.response?.status;
-    const url: string = error?.config?.url || "";
-    const isAuthFlow = AUTH_FLOW_PATHS.some((p) => url.includes(p));
+  async (error: AxiosError) => {
+    const originalRequest = error.config as RetriableRequestConfig | undefined;
 
-    if (status === 401 && !isAuthFlow && !redirectingToLogin) {
-      redirectingToLogin = true;
-      try {
-        secureLocalStorage.removeItem(USER_TOKEN_STORAGE_KEY);
-      } catch {
-        /* ignore */
-      }
-      // Avoid the redirect if we're already on login
-      if (!window.location.pathname.includes("/login")) {
-        window.location.replace("/login");
-      } else {
-        redirectingToLogin = false;
-      }
+    if (error.response?.status !== 401 || !originalRequest || originalRequest._retry) {
+      return Promise.reject(error);
     }
-    return Promise.reject(error);
+
+    originalRequest._retry = true;
+
+    try {
+      await refreshAuthSession();
+
+      const accessToken = getAccessToken();
+
+      if (accessToken) {
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+      }
+
+      return axiosInstance.request(originalRequest);
+    } catch (refreshError) {
+      if (shouldClearPersistedAuth(refreshError)) {
+        clearAuthSession();
+      }
+
+      return Promise.reject(refreshError);
+    }
   }
 );
 

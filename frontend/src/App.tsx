@@ -12,7 +12,7 @@ function App() {
   const { authed } = useAuth();
 
   return (
-    <SidebarProvider className="flex size-full">
+    <SidebarProvider className="flex size-full ">
       {authed && <AppSidebar />}
       <div className="size-full p-4 overflow-y-auto custom-scrollbar ">
         {authed && <SidebarTrigger data-testid="sidebar-trigger" />}

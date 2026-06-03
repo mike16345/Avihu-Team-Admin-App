@@ -1,13 +1,13 @@
 import { deleteItem } from "@/API/api";
 import { determineServerUrl } from "@/config/apiConfig";
+import { authFetch } from "@/services/authFetch";
 import { v4 as uuidv4 } from "uuid";
 
 export const useImageApi = () => {
   const fetchSignedUrl = async (url: string) => {
     try {
-      const response = await fetch(url, {
+      const response = await authFetch(url, {
         method: "POST",
-        headers: { "X-Api-Key": import.meta.env.VITE_API_AUTH_TOKEN },
       });
       const { data } = await response.json();
       return data;

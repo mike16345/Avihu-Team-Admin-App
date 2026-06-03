@@ -24,6 +24,7 @@ import { IUser, IUserPost } from "@/interfaces/IUser";
 import CustomButton from "../ui/CustomButton";
 import userSchema from "@/schemas/userSchema";
 import UserPlanTypes from "@/enums/UserPlanTypes";
+import SubTrainerDropdown from "../ui/SubTrainerDropdown";
 
 const remindInOptions = [
   { value: "604800", name: "שבוע" },
@@ -71,6 +72,7 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
       dietaryType: existingUser?.dietaryType || [],
       remindIn: existingUser?.remindIn,
       dateFinished: userFinishDate,
+      subTrainerId: existingUser?.subTrainerId || undefined,
     },
   });
 
@@ -176,6 +178,17 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
                 </SelectContent>
               </Select>
               <FormMessage data-testid="user-form-plan-type-error" />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={userForm.control}
+          name="subTrainerId"
+          render={({ field }) => (
+            <FormItem className="sm:w-1/2">
+              <FormLabel>מאמן</FormLabel>
+              <SubTrainerDropdown onSelect={field.onChange} value={field.value} />
+              <FormMessage data-testid="user-form-sub-trainer-error" />
             </FormItem>
           )}
         />

@@ -1,34 +1,49 @@
 {
   "success": {
-    "data": {
-      "_id": "session-admin-001",
-      "userId": "user-admin-001",
-      "type": "login",
-      "data": {
-        "user": {
-          "_id": "user-admin-001",
-          "firstName": "\u05de\u05d9\u05db\u05dc",
-          "lastName": "\u05db\u05d4\u05df",
-          "email": "admin@example.com",
-          "phone": "0501234567",
-          "dietaryType": [],
-          "dateFinished": "2026-12-31T00:00:00.000Z",
-          "planType": "premium",
-          "remindIn": 3,
-          "dateJoined": "2025-01-15T00:00:00.000Z",
-          "isChecked": true,
-          "checkInAt": 1735689600,
-          "hasAccess": true,
-          "onboardingCompleted": true
-        }
-      },
-      "createdAt": "2026-03-01T08:00:00.000Z",
-      "updatedAt": "2026-03-01T08:00:00.000Z"
-    },
-    "message": "\u05d4\u05ea\u05d7\u05d1\u05e8\u05d5\u05ea \u05d1\u05d5\u05e6\u05e2\u05d4 \u05d1\u05d4\u05e6\u05dc\u05d7\u05d4"
+    "accessToken": "mock-access-token",
+    "refreshToken": "mock-refresh-token",
+    "sessionId": "session-admin-001",
+    "user": {
+      "_id": "user-admin-001",
+      "firstName": "מיכל",
+      "lastName": "כהן",
+      "email": "admin@example.com",
+      "role": "admin",
+      "phone": "0501234567",
+      "dietaryType": [],
+      "dateFinished": "2026-12-31T00:00:00.000Z",
+      "planType": "premium",
+      "remindIn": 3,
+      "dateJoined": "2025-01-15T00:00:00.000Z",
+      "isChecked": true,
+      "checkInAt": 1735689600,
+      "hasAccess": true,
+      "onboardingCompleted": true
+    }
+  },
+  "refresh_success": {
+    "accessToken": "mock-refreshed-access-token",
+    "refreshToken": "mock-rotated-refresh-token",
+    "user": {
+      "_id": "user-admin-001",
+      "firstName": "מיכל",
+      "lastName": "כהן",
+      "email": "admin@example.com",
+      "role": "admin",
+      "hasAccess": true
+    }
+  },
+  "me_success": {
+    "user": {
+      "_id": "user-admin-001",
+      "firstName": "מיכל",
+      "lastName": "כהן",
+      "email": "admin@example.com",
+      "role": "admin",
+      "hasAccess": true
+    }
   },
   "error_unauthorized": {
-    "data": null,
-    "message": "\u05d0\u05d9\u05de\u05d9\u05d9\u05dc \u05d0\u05d5 \u05e1\u05d9\u05e1\u05de\u05d4 \u05e9\u05d2\u05d5\u05d9\u05d9\u05dd"
+    "message": "אימייל או סיסמה שגויים"
   }
 }

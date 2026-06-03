@@ -1,7 +1,8 @@
-import { UsersPage } from "@/pages/UsersPage";
+import { Route, Routes, Navigate } from "react-router-dom";
+import { useUsersStore } from "@/store/userStore";
+import { UsersTable } from "@/components/tables/UsersTable";
 import { UserDashboard } from "@/pages/UserDashboard";
 import { ViewDietPlanPage } from "@/pages/ViewDietPlanPage";
-import { Route, Routes } from "react-router";
 import DietPlanTemplatePage from "@/pages/DietPlanTemplatePage";
 import WorkoutsTemplatePage from "@/pages/WorkoutsTemplatePage";
 import CreateWorkoutPlanWrapper from "@/components/Wrappers/CreateWorkoutPlanWrapper";
@@ -18,45 +19,174 @@ import FormBuilderPage from "@/pages/FormBuilderPage";
 import FormPresetsPage from "@/pages/FormPresetsPage";
 import FormResponseDetailsPage from "@/pages/FormResponseDetailsPage";
 import CurrentAgreementPage from "@/pages/Agreements/CurrentAgreementPage";
+import SubTrainersPage from "@/pages/SubTrainersPage";
+import TrainerAnalyticsDashboardPage from "@/pages/TrainerAnalyticsDashboardPage";
+import TrainerDetailsPage from "@/pages/TrainerDetailsPage";
+import TrainersPage from "@/pages/TrainersPage";
+import ErrorPage from "@/pages/ErrorPage";
+import {
+  type AppRouteAccessKey,
+  canAccessRoute,
+  getDefaultRouteForRole,
+  normalizeAppRole,
+} from "./routeAccess";
+
+type AppRouteDefinition = {
+  accessKey: AppRouteAccessKey;
+  element: JSX.Element;
+  path: string;
+};
+
+const appRouteDefinitions: AppRouteDefinition[] = [
+  {
+    accessKey: "home",
+    path: "/",
+    element: <AdminDashboard />,
+  },
+  {
+    accessKey: "trainerAnalytics",
+    path: "/trainer-analytics",
+    element: <TrainerAnalyticsDashboardPage />,
+  },
+  {
+    accessKey: "trainerDetails",
+    path: "/trainers/:id",
+    element: <TrainerDetailsPage />,
+  },
+  {
+    accessKey: "trainers",
+    path: "/trainers",
+    element: <TrainersPage />,
+  },
+  {
+    accessKey: "subTrainers",
+    path: "/sub-trainers",
+    element: <SubTrainersPage />,
+  },
+  {
+    accessKey: "users",
+    path: "/users/*",
+    element: <UsersTable />,
+  },
+  {
+    accessKey: "leads",
+    path: "/leads",
+    element: <LeadsTablePage />,
+  },
+  {
+    accessKey: "blogs",
+    path: "/blogs/",
+    element: <BlogPage />,
+  },
+  {
+    accessKey: "blogs",
+    path: "/blogs/:id",
+    element: <BlogPreviewPage />,
+  },
+  {
+    accessKey: "blogCreate",
+    path: "/blogs/create/",
+    element: <BlogEditor />,
+  },
+  {
+    accessKey: "blogCreate",
+    path: "/blogs/create/:id",
+    element: <BlogEditor />,
+  },
+  {
+    accessKey: "users",
+    path: "/users/add",
+    element: <UserFormPage />,
+  },
+  {
+    accessKey: "users",
+    path: "/users/edit/:id",
+    element: <UserFormPage />,
+  },
+  {
+    accessKey: "users",
+    path: "/users/:id",
+    element: <UserDashboard />,
+  },
+  {
+    accessKey: "dietPlanDetails",
+    path: "/diet-plans/:id",
+    element: (
+      <DietPlanWrapper>
+        <ViewDietPlanPage />
+      </DietPlanWrapper>
+    ),
+  },
+  {
+    accessKey: "workoutPlanDetails",
+    path: "/workout-plans/:id",
+    element: (
+      <CreateWorkoutPlanWrapper>
+        <WorkoutPlans />
+      </CreateWorkoutPlanWrapper>
+    ),
+  },
+  {
+    accessKey: "workoutPlans",
+    path: "/workoutPlans",
+    element: <WorkoutsTemplatePage />,
+  },
+  {
+    accessKey: "dietPlans",
+    path: "/dietPlans/",
+    element: <DietPlanTemplatePage />,
+  },
+  {
+    accessKey: "presets",
+    path: "/presets/*",
+    element: <PresetRoutes />,
+  },
+  {
+    accessKey: "formBuilder",
+    path: "/form-builder/:id",
+    element: <FormBuilderPage />,
+  },
+  {
+    accessKey: "formBuilder",
+    path: "/form-builder",
+    element: <FormPresetsPage />,
+  },
+  {
+    accessKey: "formResponses",
+    path: "/form-responses/:id",
+    element: <FormResponseDetailsPage />,
+  },
+  {
+    accessKey: "agreementsCurrent",
+    path: "/agreements/current",
+    element: <CurrentAgreementPage />,
+  },
+];
 
 export const AppRoutes = () => {
+  const currentUser = useUsersStore((state) => state.currentUser);
+  const role = normalizeAppRole(currentUser?.role);
+  const fallbackRoute = getDefaultRouteForRole(role);
+
+  const getUnauthorizedElement = () => {
+    if (fallbackRoute) {
+      return <Navigate to={fallbackRoute} replace />;
+    }
+
+    return <ErrorPage message="אין לך הרשאה לצפות במערכת" />;
+  };
+
   return (
-    <>
-      <Routes>
-        <Route path="/" element={<AdminDashboard />} />
-        <Route path="/users/*" element={<UsersPage />} />
-        <Route path="/leads" element={<LeadsTablePage />} />
-        <Route path="/blogs/" element={<BlogPage />} />
-        <Route path="/blogs/:id" element={<BlogPreviewPage />} />
-        <Route path="/blogs/create/" element={<BlogEditor />} />
-        <Route path="/blogs/create/:id" element={<BlogEditor />} />
-        <Route path="/users/add" element={<UserFormPage />} />
-        <Route path="/users/edit/:id" element={<UserFormPage />} />
-        <Route path="/users/:id" element={<UserDashboard />} />
+    <Routes>
+      {appRouteDefinitions.map((route) => (
         <Route
-          path="/diet-plans/:id"
-          element={
-            <DietPlanWrapper>
-              <ViewDietPlanPage />
-            </DietPlanWrapper>
-          }
+          key={`${route.accessKey}-${route.path}`}
+          path={route.path}
+          element={canAccessRoute(role, route.accessKey) ? route.element : getUnauthorizedElement()}
         />
-        <Route
-          path="/workout-plans/:id"
-          element={
-            <CreateWorkoutPlanWrapper>
-              <WorkoutPlans />
-            </CreateWorkoutPlanWrapper>
-          }
-        />
-        <Route path="/workoutPlans" element={<WorkoutsTemplatePage />} />
-        <Route path="/dietPlans/" element={<DietPlanTemplatePage />} />
-        <Route path="/presets/*" element={<PresetRoutes />} />
-        <Route path="/form-builder/:id" element={<FormBuilderPage />} />
-        <Route path="/form-builder" element={<FormPresetsPage />} />
-        <Route path="/form-responses/:id" element={<FormResponseDetailsPage />} />
-        <Route path="/agreements/current" element={<CurrentAgreementPage />} />
-      </Routes>
-    </>
+      ))}
+
+      <Route path="*" element={getUnauthorizedElement()} />
+    </Routes>
   );
 };
