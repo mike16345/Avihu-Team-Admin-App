@@ -3,9 +3,15 @@
  *
  *  - Bulk upload via header button
  *  - Per-slot upload for missing angles (placeholder card)
- *  - Per-photo delete + replace (hover overlay) — requires server-side
- *    `DELETE /userImageUrls` endpoint to be deployed; gracefully falls back
- *    to a friendly toast if the endpoint is missing (404/405).
+ *  - Per-photo delete + replace (hover overlay).
+ *    Delete strategy:
+ *      • Server: call DELETE /s3/photos/one with `photoId: "images/<key>"` and
+ *        `userId`. This endpoint is already deployed and removes the file
+ *        from S3. The newer version of the handler (not yet deployed) also
+ *        pulls the URL from MongoDB.
+ *      • Client: until the server-side MongoDB cleanup ships, we maintain a
+ *        local "hidden keys" list in localStorage so the gallery doesn't
+ *        show broken images after a delete + refresh.
  *  - Click a photo to open the compare modal
  */
 import { FC, useMemo, useRef, useState } from "react";
@@ -31,6 +37,35 @@ type PhotoGroup = {
   uploadDate?: string; // DD/MM/YYYY — extracted from the storage key
   photos: PhotoSlot[];
 };
+
+/**
+ * Local "hidden" photo keys per user. Populated when the trainer deletes a
+ * photo — the S3 object is gone, but MongoDB still has the URL until the
+ * updated server is deployed. Without this hack, deleted photos would
+ * resurrect on every page refresh and show as broken images.
+ */
+const HIDDEN_KEYS_STORAGE = "avihu_hidden_photo_keys";
+function readHiddenKeys(userId: string): Set<string> {
+  try {
+    const raw = localStorage.getItem(HIDDEN_KEYS_STORAGE);
+    const all = raw ? (JSON.parse(raw) as Record<string, string[]>) : {};
+    return new Set(all[userId] || []);
+  } catch {
+    return new Set();
+  }
+}
+function addHiddenKey(userId: string, key: string) {
+  try {
+    const raw = localStorage.getItem(HIDDEN_KEYS_STORAGE);
+    const all = raw ? (JSON.parse(raw) as Record<string, string[]>) : {};
+    const list = new Set(all[userId] || []);
+    list.add(key);
+    all[userId] = Array.from(list);
+    localStorage.setItem(HIDDEN_KEYS_STORAGE, JSON.stringify(all));
+  } catch {
+    /* localStorage unavailable — ignore */
+  }
+}
 
 /** Storage keys look like `{userId}/{YYYY-MM-DD}/{filename}`. */
 function extractUploadDate(storageKey?: string): string | undefined {
@@ -95,7 +130,20 @@ export const WeightProgressionPhotos: FC = () => {
   const replaceInputRef = useRef<HTMLInputElement | null>(null);
   const pendingReplaceKeyRef = useRef<string | null>(null);
 
-  const groups: PhotoGroup[] = useMemo(() => groupPhotos(photos as string[]), [photos]);
+  // Filter out keys the trainer deleted locally but the server still returns
+  // (until the MongoDB cleanup is deployed). We compare against each item's
+  // storage key (stripping the CloudFront prefix).
+  const visiblePhotos: string[] = useMemo(() => {
+    if (!id) return photos as string[];
+    const hidden = readHiddenKeys(id);
+    if (hidden.size === 0) return photos as string[];
+    return (photos as string[]).filter((url) => {
+      const key = extractStorageKey(url);
+      return !key || !hidden.has(key);
+    });
+  }, [photos, id]);
+
+  const groups: PhotoGroup[] = useMemo(() => groupPhotos(visiblePhotos), [visiblePhotos]);
 
   const openCompareAtAngle = (angleIdx: number) => {
     if (groups.length < 2) return;
@@ -205,31 +253,38 @@ export const WeightProgressionPhotos: FC = () => {
   };
 
   /**
-   * Delete a single photo from the server. Falls back gracefully if the
-   * server endpoint isn't deployed yet (404/405).
+   * Delete a photo via the existing `DELETE /s3/photos/one` endpoint.
+   * The server takes `photoId` (the S3 Key, which is `images/<storageKey>`).
+   * We also pass `userId` so the (updated) server can clean MongoDB too —
+   * older deploys will just ignore it and only delete from S3.
+   *
+   * Until the server-side MongoDB cleanup is deployed, we add the key to
+   * a localStorage "hidden" list so the photo doesn't reappear on refresh.
    */
   const deletePhoto = async (storageKey: string) => {
     if (!id || !storageKey) return false;
+    const s3Key = `images/${storageKey}`;
     try {
-      await deleteItem<ApiResponse<string[]>>(
-        "userImageUrls",
+      await deleteItem<ApiResponse<string>>(
+        "s3/photos/one",
         undefined,
         undefined,
-        { userId: id, imageUrl: storageKey }
+        { photoId: s3Key, userId: id }
       );
+      // Always hide locally — this protects against the case where the
+      // server deletes from S3 but the deployed Lambda doesn't yet remove
+      // the URL from MongoDB. Once the server cleanup is live this becomes
+      // a harmless no-op (the URL won't be returned anyway).
+      addHiddenKey(id, storageKey);
       return true;
     } catch (e: any) {
       const status = e?.status || e?.response?.status;
-      // 404/405 — route doesn't exist; 500/502/503 — endpoint exists but the
-      // Lambda crashed (likely because the handler isn't deployed yet).
-      // Show the same friendly message for both cases until the server
-      // changes are deployed.
-      if (status === 404 || status === 405 || status === 500 || status === 502 || status === 503) {
-        toast.error("מחיקת תמונה תהיה זמינה אחרי פריסת השרת — המתכנתת צריכה לדפלוי את ה-DELETE endpoint");
-        return false;
-      }
       if (status === 401) {
         toast.error("ההתחברות פגה — התנתק והתחבר מחדש");
+        return false;
+      }
+      if (status === 404 || status === 405) {
+        toast.error("מחיקת תמונה אינה זמינה כרגע — צריך פריסת שרת");
         return false;
       }
       toast.error(`שגיאה במחיקת התמונה (${status || "?"})`);
