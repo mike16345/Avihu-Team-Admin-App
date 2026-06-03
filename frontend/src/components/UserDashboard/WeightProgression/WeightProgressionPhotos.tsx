@@ -220,8 +220,12 @@ export const WeightProgressionPhotos: FC = () => {
       return true;
     } catch (e: any) {
       const status = e?.status || e?.response?.status;
-      if (status === 404 || status === 405) {
-        toast.error("מחיקת תמונה תהיה זמינה אחרי עדכון השרת (מתכנת/ת תפרוס את ה-DELETE endpoint).");
+      // 404/405 — route doesn't exist; 500/502/503 — endpoint exists but the
+      // Lambda crashed (likely because the handler isn't deployed yet).
+      // Show the same friendly message for both cases until the server
+      // changes are deployed.
+      if (status === 404 || status === 405 || status === 500 || status === 502 || status === 503) {
+        toast.error("מחיקת תמונה תהיה זמינה אחרי פריסת השרת — המתכנתת צריכה לדפלוי את ה-DELETE endpoint");
         return false;
       }
       if (status === 401) {
