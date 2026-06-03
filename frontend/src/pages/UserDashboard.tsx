@@ -128,8 +128,13 @@ export const UserDashboard = () => {
     try {
       await updateUser.mutateAsync({ id: currentUser._id!, user: updated });
       setStatus(pendingStatus);
-    } catch (e) {
-      console.error(e);
+    } catch (e: any) {
+      // Visible diagnostic so we know exactly what went wrong on the API call
+      console.error("Status update failed:", {
+        status: e?.status || e?.response?.status,
+        message: e?.message || e?.data?.message,
+        body: e?.data,
+      });
     } finally {
       setPendingStatus(null);
     }
