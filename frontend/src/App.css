@@ -86,7 +86,7 @@ body {
 }
 
 * :not(.icon) {
-  font-family: "Varela Round" !important;
+  font-family: "Heebo", "Varela Round" !important;
 }
 
 * {

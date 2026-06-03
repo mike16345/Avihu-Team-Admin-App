@@ -24,7 +24,7 @@ function useAuth(): AuthContext {
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState<ISession | null>(null);
 
-  const { data } = useCheckUserSessionQuery(token);
+  const { data, isError, isLoading: queryLoading } = useCheckUserSessionQuery(token);
 
   const checkUserToken = () => {
     const userToken = secureLocalStorage.getItem(USER_TOKEN_STORAGE_KEY);
@@ -45,12 +45,20 @@ function useAuth(): AuthContext {
   }, []);
 
   useEffect(() => {
-    if (!data) return;
-
-    setAuthed(data.isValid);
-    if (!data.isValid) setCurrentUser(null);
-    setLoading(false);
-  }, [data]);
+    if (data) {
+      setAuthed(data.isValid);
+      if (!data.isValid) setCurrentUser(null);
+      setLoading(false);
+      return;
+    }
+    // Session check failed (server returned 500 or similar) — fall back to
+    // trusting the locally stored token instead of leaving the app stuck
+    // on a loader screen.
+    if (isError && !queryLoading && token) {
+      setAuthed(true);
+      setLoading(false);
+    }
+  }, [data, isError, queryLoading, token]);
 
   return {
     authed,

@@ -13,7 +13,7 @@ const useCheckUserSessionQuery = (token: ISession | null) => {
     queryFn: () => checkUserSessionToken(token!),
     enabled: !!token,
     staleTime: FULL_DAY_STALE_TIME / 2,
-    retry: createRetryFunction(401, 2),
+    retry: false,
   });
 };
 

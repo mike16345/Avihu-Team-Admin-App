@@ -1,118 +1,566 @@
-﻿import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { FC, useEffect, useState } from "react";
+/**
+ * WeightProgressionPhotos — תמונות התקדמות
+ *
+ *  - Bulk upload via header button
+ *  - Per-slot upload for missing angles (placeholder card)
+ *  - Per-photo delete + replace (hover overlay) — requires server-side
+ *    `DELETE /userImageUrls` endpoint to be deployed; gracefully falls back
+ *    to a friendly toast if the endpoint is missing (404/405).
+ *  - Click a photo to open the compare modal
+ */
+import { FC, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { FullscreenImage } from "./FullscreenImage";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { FaCamera, FaXmark, FaShare, FaArrowsRotate, FaTrash } from "react-icons/fa6";
+import { FaUpload } from "react-icons/fa";
 import Loader from "@/components/ui/Loader";
 import useUserWeighInPhotosQuery from "@/hooks/queries/weighInPhotos/useUserWeighInPhotosQuery";
+import { sendData, deleteItem } from "@/API/api";
+import { determineServerUrl } from "@/config/apiConfig";
+import { ApiResponse } from "@/types/types";
 
-interface WeightProgressionPhotosProps {
-  onClickPhoto?: (photo: string) => void;
-}
+// Kept for backward compatibility with useWeighInPhotosApi (and any imports)
+export type Photo = { url?: string; _id?: string; date?: string };
 
-type SelectedFullscreenImage = {
-  photo: string;
-  index: number;
+const ANGLE_LABELS = ["מלפנים", "מאחור", "מהצד ימין", "מהצד שמאל"];
+
+type PhotoSlot = { label: string; url?: string; storageKey?: string };
+type PhotoGroup = {
+  cycleNumber: number;
+  uploadDate?: string; // DD/MM/YYYY — extracted from the storage key
+  photos: PhotoSlot[];
 };
 
-export const WeightProgressionPhotos: FC<WeightProgressionPhotosProps> = ({ onClickPhoto }) => {
+/** Storage keys look like `{userId}/{YYYY-MM-DD}/{filename}`. */
+function extractUploadDate(storageKey?: string): string | undefined {
+  if (!storageKey) return undefined;
+  const parts = storageKey.split("/");
+  const datePart = parts.length >= 3 ? parts[parts.length - 2] : undefined;
+  if (!datePart) return undefined;
+  // Convert YYYY-MM-DD → DD/MM/YYYY
+  const m = datePart.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return datePart;
+  return `${m[3]}/${m[2]}/${m[1]}`;
+}
+
+/**
+ * Strip the CloudFront prefix from a full URL to get the storage key the
+ * server actually stores (e.g. "{userId}/{date}/{imageName}"). If the URL
+ * doesn't include `/images/`, returns it unchanged so we don't accidentally
+ * try to delete something we can't identify.
+ */
+function extractStorageKey(fullUrl?: string): string | undefined {
+  if (!fullUrl) return undefined;
+  const marker = "/images/";
+  const idx = fullUrl.indexOf(marker);
+  if (idx < 0) return fullUrl;
+  return fullUrl.slice(idx + marker.length);
+}
+
+/**
+ * Group flat photo URLs into groups of 4 (one cycle per 4 photos).
+ */
+function groupPhotos(photos: string[]): PhotoGroup[] {
+  if (!photos?.length) return [];
+  const groups: PhotoGroup[] = [];
+  for (let i = 0; i < photos.length; i += 4) {
+    const batch = photos.slice(i, i + 4);
+    const cycleNumber = Math.floor(i / 4) + 1;
+    const slots: PhotoSlot[] = ANGLE_LABELS.map((label, idx) => ({
+      label,
+      url: batch[idx],
+      storageKey: extractStorageKey(batch[idx]),
+    }));
+    // Use the first available storage key in the cycle for the upload date.
+    const uploadDate = slots.map((s) => extractUploadDate(s.storageKey)).find(Boolean);
+    groups.push({ cycleNumber, uploadDate, photos: slots });
+  }
+  // Newest cycle (highest cycleNumber) appears first.
+  return groups.reverse();
+}
+
+export const WeightProgressionPhotos: FC = () => {
   const { id } = useParams();
+  const queryClient = useQueryClient();
   const { data: photos = [], isLoading } = useUserWeighInPhotosQuery(id);
 
-  const [fullScreenImage, setFullScreenImage] = useState<SelectedFullscreenImage | null>(null);
+  const [compareOpen, setCompareOpen] = useState(false);
+  const [compareAngle, setCompareAngle] = useState(0);
+  const [compareLeftGroup, setCompareLeftGroup] = useState<number>(0);
+  const [compareRightGroup, setCompareRightGroup] = useState<number>(0);
+  const [uploading, setUploading] = useState(false);
+  const [busyKey, setBusyKey] = useState<string | null>(null); // storageKey of the photo being deleted/replaced
+  // For per-photo "replace" we need an invisible file picker we can trigger programmatically.
+  const replaceInputRef = useRef<HTMLInputElement | null>(null);
+  const pendingReplaceKeyRef = useRef<string | null>(null);
 
-  const maxPhotosIndex = photos.length - 1;
-  const minPhotosIndex = 0;
+  const groups: PhotoGroup[] = useMemo(() => groupPhotos(photos as string[]), [photos]);
 
-  const handleKeyDown = (e: KeyboardEvent) => {
-    switch (e.key) {
-      case "ArrowLeft":
-      case "ArrowRight":
-        handleClickArrowKey(e.key);
-        break;
-      case "Escape":
-        handleCloseFullscreenImage();
-        break;
-      default:
-        break;
+  const openCompareAtAngle = (angleIdx: number) => {
+    if (groups.length < 2) return;
+    setCompareAngle(angleIdx);
+    setCompareLeftGroup(0);
+    setCompareRightGroup(groups.length - 1);
+    setCompareOpen(true);
+  };
+
+  const refresh = () => {
+    queryClient.invalidateQueries({ queryKey: [id + "-photos"] });
+  };
+
+  /**
+   * Upload one or more photos to S3 and register their URLs with the user.
+   * Returns the number of files that completed all 3 steps (signedUrl → S3 → DB).
+   */
+  const uploadFiles = async (files: FileList): Promise<number> => {
+    if (!id || !files.length) return 0;
+    // Snapshot the FileList into a plain array — the live FileList can be
+    // emptied by `input.value = ""` while we're still iterating asynchronously,
+    // which previously caused `files.length` to drop to 0 mid-upload and made
+    // the toast show "failed: -1".
+    const fileArr: File[] = Array.from(files);
+    const total = fileArr.length;
+    setUploading(true);
+    const today = new Date().toISOString().split("T")[0];
+    const apiBase = determineServerUrl();
+    let uploaded = 0;
+    let lastError: string | null = null;
+    let authExpired = false;
+
+    for (let i = 0; i < total; i++) {
+      const file = fileArr[i];
+      const imageName = `progress-${Date.now()}-${i}`;
+      const signedUrlEndpoint = `${apiBase}/signedUrl?userId=${id}&date=${today}&imageName=${imageName}`;
+
+      try {
+        const signedRes = await fetch(signedUrlEndpoint, {
+          method: "POST",
+          headers: { "X-Api-Key": import.meta.env.VITE_API_AUTH_TOKEN },
+        });
+        if (!signedRes.ok) {
+          lastError = `שגיאה בקבלת URL להעלאה (${signedRes.status})`;
+          continue;
+        }
+        const { data: presignedUrl } = await signedRes.json();
+        const uploadRes = await fetch(presignedUrl, {
+          method: "PUT",
+          headers: { "Content-Type": file.type || "image/jpeg" },
+          body: file,
+        });
+        if (!uploadRes.ok) {
+          lastError = `שגיאה בהעלאה ל-S3 (${uploadRes.status})`;
+          continue;
+        }
+        const urlToStore = `${id}/${today}/${imageName}`;
+        try {
+          await sendData<ApiResponse<string[]>>("userImageUrls", {
+            userId: id,
+            imageUrl: urlToStore,
+          });
+          uploaded++;
+        } catch (e: any) {
+          const status = e?.status || e?.response?.status;
+          if (status === 401) {
+            authExpired = true;
+            lastError = "ההתחברות פגה — צריך להתחבר מחדש";
+            break;
+          }
+          lastError = `שגיאה ברישום ה-URL (${status || "?"})`;
+        }
+      } catch {
+        lastError = "שגיאה לא צפויה בהעלאה";
+      }
     }
-  };
 
-  const handleClickArrowKey = (key: string) => {
-    if (!fullScreenImage) return;
-    const currIndex = fullScreenImage.index;
+    setUploading(false);
+    const failed = total - uploaded;
+    const photosWord = (n: number) => (n === 1 ? "תמונה אחת" : `${n} תמונות`);
 
-    if ((key === "ArrowLeft" || key === "previous") && currIndex > minPhotosIndex) {
-      setFullScreenImage({ photo: photos[currIndex - 1], index: currIndex - 1 });
-    } else if ((key === "ArrowRight" || key === "next") && currIndex < maxPhotosIndex) {
-      setFullScreenImage({ photo: photos[currIndex + 1], index: currIndex + 1 });
-    }
-  };
-
-  const handleClickPhoto = (photo: string, index: number) => {
-    if (onClickPhoto) onClickPhoto(photo);
-    setFullScreenImage({ photo, index });
-  };
-
-  const handleCloseFullscreenImage = () => {
-    setFullScreenImage(null);
-  };
-
-  useEffect(() => {
-    if (fullScreenImage) {
-      document.addEventListener("keydown", handleKeyDown);
+    if (uploaded > 0) {
+      refresh();
+      if (failed === 0) {
+        toast.success(
+          uploaded === 1 ? "התמונה הועלתה בהצלחה!" : `${uploaded} תמונות הועלו בהצלחה!`
+        );
+      } else {
+        toast.warning(
+          `הועלו ${photosWord(uploaded)} · נכשלו ${photosWord(failed)}${
+            lastError ? ` — ${lastError}` : ""
+          }`
+        );
+      }
     } else {
-      document.removeEventListener("keydown", handleKeyDown);
+      if (authExpired) {
+        toast.error("ההתחברות פגה — התנתק והתחבר מחדש כדי להעלות תמונות");
+      } else if (total === 1) {
+        toast.error(lastError || "ההעלאה נכשלה");
+      } else {
+        toast.error(
+          `כל ההעלאות נכשלו (${total} תמונות)${lastError ? ` — ${lastError}` : ""}`
+        );
+      }
     }
+    return uploaded;
+  };
 
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [fullScreenImage]);
+  /**
+   * Delete a single photo from the server. Falls back gracefully if the
+   * server endpoint isn't deployed yet (404/405).
+   */
+  const deletePhoto = async (storageKey: string) => {
+    if (!id || !storageKey) return false;
+    try {
+      await deleteItem<ApiResponse<string[]>>(
+        "userImageUrls",
+        undefined,
+        undefined,
+        { userId: id, imageUrl: storageKey }
+      );
+      return true;
+    } catch (e: any) {
+      const status = e?.status || e?.response?.status;
+      if (status === 404 || status === 405) {
+        toast.error("מחיקת תמונה תהיה זמינה אחרי עדכון השרת (מתכנת/ת תפרוס את ה-DELETE endpoint).");
+        return false;
+      }
+      if (status === 401) {
+        toast.error("ההתחברות פגה — התנתק והתחבר מחדש");
+        return false;
+      }
+      toast.error(`שגיאה במחיקת התמונה (${status || "?"})`);
+      return false;
+    }
+  };
+
+  const handleDelete = async (slot: PhotoSlot) => {
+    if (!slot.storageKey) return;
+    const ok = window.confirm(`למחוק את התמונה "${slot.label}"? פעולה זו אינה הפיכה.`);
+    if (!ok) return;
+    setBusyKey(slot.storageKey);
+    const success = await deletePhoto(slot.storageKey);
+    setBusyKey(null);
+    if (success) {
+      refresh();
+      toast.success("התמונה נמחקה");
+    }
+  };
+
+  const handleReplaceClick = (slot: PhotoSlot) => {
+    if (!slot.storageKey) return;
+    pendingReplaceKeyRef.current = slot.storageKey;
+    replaceInputRef.current?.click();
+  };
+
+  const handleReplaceFileChosen = async (files: FileList | null) => {
+    const key = pendingReplaceKeyRef.current;
+    pendingReplaceKeyRef.current = null;
+    if (!key || !files || !files.length) return;
+    setBusyKey(key);
+    // Upload new → delete old (only if upload succeeded)
+    const uploadedCount = await uploadFiles(files);
+    if (uploadedCount > 0) {
+      const deleted = await deletePhoto(key);
+      if (deleted) {
+        refresh();
+        toast.success("התמונה הוחלפה");
+      }
+    }
+    setBusyKey(null);
+  };
 
   if (isLoading) return <Loader size="large" />;
 
   return (
-    <>
-      {photos.length > 0 && (
-        <Card className="flex flex-col gap-4">
-          <CardHeader className="text-lg font-semibold">
-            <CardTitle>תמונות</CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            {photos.map((photo, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => handleClickPhoto(photo, i)}
-                className="group relative w-full overflow-hidden rounded-lg border border-border/60 bg-muted/20 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-              >
-                <div className="aspect-[3/4] w-full">
-                  <img
-                    className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
-                    src={photo}
-                    alt={`Photo ${i + 1}`}
-                    loading="lazy"
-                  />
+    <div dir="rtl" style={{ fontFamily: "Heebo, system-ui, sans-serif" }}>
+      {/* hidden input for the per-photo replace flow */}
+      <input
+        ref={replaceInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          handleReplaceFileChosen(e.target.files);
+          e.target.value = "";
+        }}
+      />
+
+      <div className="rounded-2xl border border-slate-200/80 bg-white p-8 shadow-sm">
+        {/* Header */}
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-slate-900">
+            <FaCamera size={16} className="text-blue-600" />
+            <span className="text-lg font-bold">תמונות התקדמות</span>
+          </div>
+          <label
+            className={`inline-flex cursor-pointer items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-md transition-all ${
+              uploading
+                ? "cursor-not-allowed bg-slate-400"
+                : "bg-slate-900 hover:bg-slate-800 hover:shadow-lg"
+            }`}
+          >
+            <FaUpload size={12} />
+            <span>{uploading ? "מעלה..." : "העלה תמונות חדשות"}</span>
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              disabled={uploading}
+              className="hidden"
+              onChange={(e) => {
+                const files = e.target.files;
+                if (files && files.length) uploadFiles(files);
+                e.target.value = "";
+              }}
+            />
+          </label>
+        </div>
+
+        {/* Empty state */}
+        {groups.length === 0 && (
+          <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-12 text-center">
+            <FaCamera size={28} className="mx-auto mb-2 text-slate-300" />
+            <h3 className="text-base font-bold text-slate-700">אין תמונות התקדמות עדיין</h3>
+            <p className="mt-1 text-sm text-slate-400">
+              לחץ "העלה תמונות חדשות" כדי להוסיף את המחזור הראשון.
+            </p>
+          </div>
+        )}
+
+        {/* Groups by date — newest cycle first, always-visible scrollbar.
+            max-h shows roughly 2 rows of photos so older cycles are scrollable. */}
+        <div
+          className="modal-sets-scroll flex flex-col gap-10 pl-2"
+          style={{ maxHeight: "min(78vh, 880px)" }}
+        >
+          {groups.map((group) => (
+            <div key={group.cycleNumber}>
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <div className="h-px flex-1 bg-slate-100" />
+                <div className="flex items-baseline gap-2 px-4">
+                  <span className="text-sm font-bold text-slate-800">
+                    מחזור {group.cycleNumber}
+                  </span>
+                  {group.uploadDate && (
+                    <span className="text-xs font-medium text-slate-400">
+                      · {group.uploadDate}
+                    </span>
+                  )}
                 </div>
-              </button>
-            ))}
-          </CardContent>
-        </Card>
-      )}
-      {photos.length == 0 && (
-        <div className="flex size-full items-center justify-center rounded-lg border border-dashed border-border/60 bg-muted/20 py-10">
-          <h1 className="text-center text-sm text-muted-foreground">אין תמונות מעקב</h1>
+                <div className="h-px flex-1 bg-slate-100" />
+              </div>
+              <div className="grid grid-cols-2 gap-5 sm:grid-cols-4">
+                {group.photos.map((p, i) => {
+                  const isBusy = !!p.storageKey && busyKey === p.storageKey;
+                  if (p.url) {
+                    return (
+                      <div
+                        key={i}
+                        className="group relative aspect-[3/4] overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition-all hover:border-blue-300 hover:shadow-md"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => openCompareAtAngle(i)}
+                          className="absolute inset-0 z-0"
+                          aria-label={`פתח השוואה — ${p.label}`}
+                        >
+                          <img
+                            src={p.url}
+                            alt={p.label}
+                            className="h-full w-full object-cover"
+                            loading="lazy"
+                          />
+                        </button>
+
+                        {/* Hover action bar (top-left) */}
+                        <div className="pointer-events-none absolute right-2 top-2 z-10 flex items-center gap-1 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleReplaceClick(p);
+                            }}
+                            disabled={isBusy}
+                            title="החלף תמונה"
+                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/95 text-slate-700 shadow-sm transition-all hover:bg-blue-50 hover:text-blue-700 disabled:opacity-50"
+                          >
+                            <FaArrowsRotate size={12} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(p);
+                            }}
+                            disabled={isBusy}
+                            title="מחק תמונה"
+                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/95 text-rose-600 shadow-sm transition-all hover:bg-rose-50 disabled:opacity-50"
+                          >
+                            <FaTrash size={11} />
+                          </button>
+                        </div>
+
+                        {/* Busy overlay during delete/replace */}
+                        {isBusy && (
+                          <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/70 text-xs font-semibold text-slate-700 backdrop-blur-sm">
+                            פועל...
+                          </div>
+                        )}
+
+                        {/* Bottom label */}
+                        <div className="pointer-events-none absolute inset-x-3 bottom-3 z-10 flex items-center justify-center rounded-lg bg-white/95 py-1.5 text-xs font-semibold text-slate-700 backdrop-blur-sm">
+                          {p.label}
+                        </div>
+                      </div>
+                    );
+                  }
+                  // Missing slot — per-card upload
+                  return (
+                    <label
+                      key={i}
+                      className="group relative aspect-[3/4] cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition-all hover:border-blue-300 hover:shadow-md"
+                    >
+                      <input
+                        type="file"
+                        accept="image/*"
+                        disabled={uploading}
+                        className="hidden"
+                        onChange={(e) => {
+                          const files = e.target.files;
+                          if (files && files.length) uploadFiles(files);
+                          e.target.value = "";
+                        }}
+                      />
+                      <div className="flex h-full w-full flex-col items-center justify-center gap-3 text-slate-400 transition-colors group-hover:text-blue-500">
+                        <FaCamera size={32} />
+                        <span className="text-sm font-medium">{p.label}</span>
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Comparison modal */}
+      {compareOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/90 p-4 backdrop-blur-sm"
+          onClick={() => setCompareOpen(false)}
+          dir="rtl"
+        >
+          <div
+            className="relative flex h-full max-h-[90vh] w-full max-w-6xl flex-col gap-3 rounded-3xl bg-white p-5 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+            style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
+          >
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold text-slate-500">זווית:</span>
+                <div className="flex items-center gap-1 rounded-xl bg-slate-100 p-1">
+                  {ANGLE_LABELS.map((label, i) => (
+                    <button
+                      key={label}
+                      onClick={() => setCompareAngle(i)}
+                      className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+                        compareAngle === i
+                          ? "bg-blue-600 text-white shadow-sm"
+                          : "text-slate-600 hover:bg-white"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">
+                  <FaShare size={11} />
+                  <span>שתף עם המתאמן</span>
+                </button>
+                <button
+                  onClick={() => setCompareOpen(false)}
+                  className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100"
+                >
+                  <FaXmark size={16} />
+                </button>
+              </div>
+            </div>
+
+            <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 md:grid-cols-2">
+              <ComparePane
+                groupIdx={compareRightGroup}
+                groupLabel="לפני"
+                groups={groups}
+                angle={compareAngle}
+                onChange={setCompareRightGroup}
+                badgeColor="bg-slate-700"
+              />
+              <ComparePane
+                groupIdx={compareLeftGroup}
+                groupLabel="אחרי"
+                groups={groups}
+                angle={compareAngle}
+                onChange={setCompareLeftGroup}
+                badgeColor="bg-blue-600"
+              />
+            </div>
+          </div>
         </div>
       )}
-      {fullScreenImage && (
-        <FullscreenImage
-          img={fullScreenImage.photo}
-          onClose={handleCloseFullscreenImage}
-          onArrowPress={(direction) => handleClickArrowKey(direction)}
-          isNext={fullScreenImage.index < maxPhotosIndex}
-          isPrevious={fullScreenImage.index > minPhotosIndex}
-        />
-      )}
-    </>
+    </div>
   );
 };
+
+function ComparePane({
+  groupIdx,
+  groupLabel,
+  groups,
+  angle,
+  onChange,
+  badgeColor,
+}: {
+  groupIdx: number;
+  groupLabel: string;
+  groups: PhotoGroup[];
+  angle: number;
+  onChange: (n: number) => void;
+  badgeColor: string;
+}) {
+  const group = groups[groupIdx];
+  const photo = group?.photos[angle];
+  return (
+    <div className="flex min-h-0 flex-col gap-2 rounded-2xl border border-slate-200 bg-slate-50/30 p-3">
+      <div className="flex items-center justify-between gap-2">
+        <span
+          className={`inline-flex items-center rounded-full ${badgeColor} px-3 py-1 text-xs font-bold text-white`}
+        >
+          {groupLabel}
+        </span>
+        <select
+          value={groupIdx}
+          onChange={(e) => onChange(Number(e.target.value))}
+          className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-700 focus:border-blue-500 focus:outline-none"
+        >
+          {groups.map((g, i) => (
+            <option key={i} value={i}>
+              {g.date}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white">
+        {photo?.url ? (
+          <img src={photo.url} alt={photo.label} className="max-h-full max-w-full object-contain" />
+        ) : (
+          <div className="flex flex-col items-center gap-2 text-slate-300">
+            <FaCamera size={32} />
+            <span className="text-sm">חסרה תמונה</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

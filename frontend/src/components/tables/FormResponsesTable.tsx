@@ -1,34 +1,73 @@
+/**
+ * FormResponsesTable — clean card-based redesign
+ *
+ * Keeps all the existing data hooks (useFormResponsesQuery, toggleIsCheckedResponse,
+ * deleteFormById) but replaces the DataTableHebrew table with a card grid: each
+ * form response is a clickable card showing user / form / date / type / read state.
+ */
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { DataTableHebrew } from "@/components/tables/DataTableHebrew";
-import { useFormResponseColumns } from "@/components/tables/Columns/forms/FormResponseColumns";
-import useFormResponsesQuery from "@/hooks/queries/formResponses/useFormResponsesQuery";
-import { FormResponse } from "@/interfaces/IFormResponse";
-import ErrorPage from "@/pages/ErrorPage";
-import FilterMultiSelect from "./FilterMultiSelect";
-import { FormTypes } from "@/interfaces/IForm";
-import { FormTypeOptions } from "@/constants/form";
 import { useMutation } from "@tanstack/react-query";
-import useFormResponsesApi from "@/hooks/api/useFormResponsesApi";
 import { toast } from "sonner";
+import {
+  FaClipboardList,
+  FaCircleCheck,
+  FaRegCircle,
+  FaTrash,
+  FaMagnifyingGlass,
+  FaEye,
+} from "react-icons/fa6";
+import useFormResponsesQuery from "@/hooks/queries/formResponses/useFormResponsesQuery";
+import useFormResponsesApi from "@/hooks/api/useFormResponsesApi";
+import { FormResponse } from "@/interfaces/IFormResponse";
+import { FormTypes } from "@/interfaces/IForm";
+import { FormTypeOptions, FormTypesInHebrew } from "@/constants/form";
+import ErrorPage from "@/pages/ErrorPage";
+import Loader from "@/components/ui/Loader";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import queryClient from "@/QueryClient/queryClient";
 import { formResponsesKeys } from "@/hooks/queries/formResponses/formResponsesKeys";
 import { resolveUserName } from "@/components/agreements/SignedAgreementsTable";
+import DeleteModal from "@/components/Alerts/DeleteModal";
+import DateUtils from "@/lib/dateUtils";
+import FilterMultiSelect from "./FilterMultiSelect";
 
 type FormResponsesTableProps = {
   userId?: string;
   paginationKey?: string;
 };
 
-const FormResponsesTable = ({ userId, paginationKey }: FormResponsesTableProps) => {
+const formatDate = (submittedAt?: string) => {
+  if (!submittedAt) return "—";
+  const d = new Date(submittedAt);
+  if (Number.isNaN(d.getTime())) return submittedAt;
+  return DateUtils.formatDate(d, "DD/MM/YYYY");
+};
+
+// Map form type → accent color
+const TYPE_ACCENT: Record<string, { bg: string; text: string; ring: string }> = {
+  start: { bg: "bg-blue-50", text: "text-blue-700", ring: "ring-blue-200" },
+  monthly: { bg: "bg-emerald-50", text: "text-emerald-700", ring: "ring-emerald-200" },
+  general: { bg: "bg-slate-100", text: "text-slate-700", ring: "ring-slate-200" },
+};
+const accentOf = (type?: string) => TYPE_ACCENT[type || "general"] || TYPE_ACCENT.general;
+
+const initialsOf = (name: string) =>
+  name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((s) => s[0])
+    .join("")
+    .toUpperCase();
+
+const FormResponsesTable = ({ userId }: FormResponsesTableProps) => {
   const navigate = useNavigate();
   const { data, isLoading, isError, error } = useFormResponsesQuery(
     userId ? { userId } : undefined
   );
 
-  const columns = useFormResponseColumns();
-  const { deleteFormById } = useFormResponsesApi();
+  const { deleteFormById, toggleIsCheckedResponse } = useFormResponsesApi();
 
   const deleteResponseMutation = useMutation({
     mutationFn: (id: string) => deleteFormById(id),
@@ -41,63 +80,218 @@ const FormResponsesTable = ({ userId, paginationKey }: FormResponsesTableProps) 
     },
   });
 
-  const handleViewResponse = (response: FormResponse) => {
-    if (!response?._id) return;
-    navigate(`/form-responses/${response._id}`);
+  const [selectedTypes, setSelectedTypes] = useState<FormTypes[]>([]);
+  const [query, setQuery] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState<FormResponse | null>(null);
+  const [pendingToggleId, setPendingToggleId] = useState<string | null>(null);
+
+  const all: FormResponse[] = data?.data || [];
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return all.filter((r) => {
+      if (selectedTypes.length && !selectedTypes.includes(r.formType as FormTypes)) {
+        return false;
+      }
+      if (!q) return true;
+      const user = (resolveUserName(r.userId) ?? "").toLowerCase();
+      const form = (r.formTitle ?? r.formId?.name ?? "").toLowerCase();
+      return user.includes(q) || form.includes(q);
+    });
+  }, [all, selectedTypes, query]);
+
+  const stats = useMemo(() => {
+    const total = all.length;
+    const viewed = all.filter((r) => r.isChecked).length;
+    return { total, viewed, unviewed: total - viewed };
+  }, [all]);
+
+  const handleView = (r: FormResponse) => {
+    if (!r?._id) return;
+    navigate(`/form-responses/${r._id}`);
   };
 
-  const [selectedGroups, setSelectedGroups] = useState<FormTypes[]>([]);
-
-  const filteredData = useMemo(() => {
-    if (selectedGroups.length === 0) return data?.data || [];
-    return (data?.data || []).filter((response) =>
-      selectedGroups.includes(response.formType as FormTypes)
-    );
-  }, [data, selectedGroups]);
-
-  const searchFn = (response: FormResponse, query: string) => {
-    const normalizedQuery = query.trim().toLowerCase();
-    if (!normalizedQuery) return true;
-
-    const userName = resolveUserName(response.userId) ?? "";
-    const formName = response.formTitle ?? response.formId?.name ?? "";
-
-    return [userName, formName].some((value) => value.toLowerCase().includes(normalizedQuery));
+  const handleToggleViewed = async (r: FormResponse, next: boolean) => {
+    if (!r._id) return;
+    setPendingToggleId(r._id);
+    try {
+      await toggleIsCheckedResponse(r._id, next);
+      queryClient.invalidateQueries({ queryKey: formResponsesKeys.all });
+    } catch {
+      toast.error("לא הצלחנו לעדכן את סטטוס הצפייה");
+    } finally {
+      setPendingToggleId(null);
+    }
   };
 
-  if (isError) return <ErrorPage message={error?.message} />;
+  const errorStatus = (error as any)?.status;
+  const isExpectedEmpty = errorStatus === 401 || errorStatus === 403 || errorStatus === 404;
+  if (isError && !isExpectedEmpty) return <ErrorPage message={error?.message} />;
+  if (isLoading) return <Loader size="large" />;
 
   return (
-    <DataTableHebrew
-      data={filteredData}
-      columns={columns}
-      paginationKey={paginationKey}
-      isLoadingNextPage={isLoading}
-      handleSetData={() => {}}
-      handleViewData={handleViewResponse}
-      searchFn={searchFn}
-      searchPlaceholder="חיפוש לפי משתמש או שאלון"
-      handleDeleteData={(response) => {
-        if (response._id) deleteResponseMutation.mutate(response._id);
-      }}
-      handleViewNestedData={() => {}}
-      getRowClassName={() => "cursor-pointer"}
-      handleHoverOnRow={() => false}
-      getRowId={(row) => row._id || ""}
-      testIdPrefix={paginationKey ?? "form-responses"}
-      filters={
-        FormTypeOptions.length ? (
-          <FilterMultiSelect
-            className="w-72"
-            label="סוג השאלון"
-            options={FormTypeOptions}
-            selected={selectedGroups}
-            onChange={(values) => setSelectedGroups(values as FormTypes[])}
-            placeholder="כל הקבוצות"
-          />
-        ) : null
-      }
-    />
+    <div
+      dir="rtl"
+      className="flex flex-col gap-4"
+      style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
+    >
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50">
+            <FaClipboardList size={18} className="text-blue-600" />
+          </div>
+          <div>
+            <h2 className="text-base font-bold text-slate-900">שאלוני מתאמנים</h2>
+            <p className="text-xs text-slate-500">
+              {stats.total} שאלונים · {stats.viewed} נצפו · {stats.unviewed} ממתינים
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative">
+            <FaMagnifyingGlass
+              size={12}
+              className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+            />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="חיפוש לפי משתמש או שאלון"
+              className="h-9 w-64 rounded-xl border border-slate-200 bg-white pr-8 pl-3 text-sm placeholder:text-slate-400 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+            />
+          </div>
+          {FormTypeOptions.length > 0 && (
+            <FilterMultiSelect
+              className="w-56"
+              label="סוג"
+              options={FormTypeOptions}
+              selected={selectedTypes}
+              onChange={(values) => setSelectedTypes(values as FormTypes[])}
+              placeholder="כל הסוגים"
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Grid */}
+      {filtered.length === 0 ? (
+        <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-16 text-center shadow-sm">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50">
+            <FaClipboardList size={24} className="text-slate-300" />
+          </div>
+          <h3 className="text-base font-bold text-slate-700">
+            {all.length === 0 ? "אין שאלונים עדיין" : "לא נמצאו תוצאות"}
+          </h3>
+          <p className="max-w-sm text-sm text-slate-400">
+            {all.length === 0
+              ? "כאשר מתאמן ימלא שאלון, התשובות יופיעו כאן."
+              : "נסה סינון אחר או חיפוש שונה."}
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {filtered.map((r) => {
+            const userName = resolveUserName(r.userId) ?? "משתמש לא ידוע";
+            const formName = r.formTitle ?? r.formId?.name ?? "שאלון ללא שם";
+            const typeKey = (r.formType ?? r.formId?.type) as string | undefined;
+            const typeLabel = typeKey ? FormTypesInHebrew[typeKey as FormTypes] ?? typeKey : "—";
+            const accent = accentOf(typeKey);
+            const viewed = Boolean(r.isChecked);
+            const togglePending = pendingToggleId === r._id;
+
+            return (
+              <article
+                key={r._id}
+                className={`group relative flex flex-col gap-3 rounded-2xl border bg-white p-4 shadow-sm transition-all hover:shadow-md ${
+                  viewed ? "border-slate-200/80" : "border-blue-200"
+                }`}
+              >
+                {/* Top row: avatar + names + type pill */}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-sm font-bold text-white shadow-sm">
+                      {initialsOf(userName)}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-bold text-slate-900">{userName}</p>
+                      <p
+                        className="mt-0.5 truncate text-xs text-slate-500"
+                        title={formName}
+                      >
+                        {formName}
+                      </p>
+                    </div>
+                  </div>
+                  <span
+                    className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ring-inset ${accent.bg} ${accent.text} ${accent.ring}`}
+                  >
+                    {typeLabel}
+                  </span>
+                </div>
+
+                {/* Middle row: date + viewed badge */}
+                <div className="flex items-center justify-between gap-2 border-t border-slate-100 pt-3">
+                  <div className="flex items-center gap-2 text-xs text-slate-500">
+                    <span className="text-slate-400">נשלח:</span>
+                    <span className="font-semibold text-slate-700">
+                      {formatDate(r.submittedAt)}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleToggleViewed(r, !viewed)}
+                    disabled={togglePending}
+                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold transition-all ${
+                      viewed
+                        ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                        : "bg-amber-50 text-amber-700 hover:bg-amber-100"
+                    }`}
+                  >
+                    {viewed ? <FaCircleCheck size={11} /> : <FaRegCircle size={11} />}
+                    {viewed ? "נצפה" : "סמן כנצפה"}
+                  </button>
+                </div>
+
+                {/* Bottom actions */}
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleView(r)}
+                    className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800"
+                  >
+                    <FaEye size={11} />
+                    <span>צפה בתשובות</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmDelete(r)}
+                    title="מחק"
+                    className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 text-slate-400 transition-all hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600"
+                  >
+                    <FaTrash size={12} />
+                  </button>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
+
+      <DeleteModal
+        isModalOpen={!!confirmDelete}
+        setIsModalOpen={(open) => !open && setConfirmDelete(null)}
+        onCancel={() => setConfirmDelete(null)}
+        onConfirm={() => {
+          if (confirmDelete?._id) {
+            deleteResponseMutation.mutate(confirmDelete._id);
+          }
+          setConfirmDelete(null);
+        }}
+      />
+    </div>
   );
 };
 

@@ -29,19 +29,38 @@ type WeighChartProps = {
 };
 
 export const WeightChart: FC<WeighChartProps> = ({ weighIns }) => {
-  const minWeighIn = Math.min(...weighIns.map((weight) => weight.weight));
+  // Filter out invalid entries (weight 0 / null / NaN) so the line draws cleanly
+  const cleanData = weighIns.filter(
+    (w) => typeof w.weight === "number" && !isNaN(w.weight) && w.weight > 0
+  );
+  const minWeighIn = cleanData.length > 0 ? Math.min(...cleanData.map((w) => w.weight)) : 0;
+
+  if (cleanData.length === 0) {
+    return (
+      <div className="flex h-full w-full items-center justify-center text-sm text-slate-400">
+        אין נתוני שקילה תקינים
+      </div>
+    );
+  }
 
   return (
-    <div className="size-full ">
-      <CardContent>
-        <ChartContainer config={chartConfig}>
+    <div className="h-full w-full">
+      <CardContent
+        className="h-full w-full p-0"
+        style={{ aspectRatio: "auto" } as React.CSSProperties}
+      >
+        <ChartContainer
+          config={chartConfig}
+          className="h-full w-full"
+          style={{ aspectRatio: "auto" } as React.CSSProperties}
+        >
           <LineChart
-            data={weighIns}
+            data={cleanData}
             margin={{
               top: 20,
-              left: 25,
+              left: 10,
               bottom: 0,
-              right: 10,
+              right: 35,
             }}
           >
             <defs>
@@ -56,6 +75,7 @@ export const WeightChart: FC<WeighChartProps> = ({ weighIns }) => {
               axisLine={false}
               tickLine={false}
               tickMargin={8}
+              reversed
               tickFormatter={(value: string) => {
                 const date = DateUtils.convertToDate(value);
                 const month = DateUtils.formatDate(date, "DD/MM");
@@ -65,8 +85,9 @@ export const WeightChart: FC<WeighChartProps> = ({ weighIns }) => {
             />
             <YAxis
               dataKey={"weight"}
+              orientation="right"
               axisLine={false}
-              width={10}
+              width={35}
               tickLine={false}
               domain={[minWeighIn, "auto"]}
             />
@@ -104,12 +125,12 @@ export const WeightChart: FC<WeighChartProps> = ({ weighIns }) => {
             <Line
               dataKey="weight"
               type="natural"
-              stroke="url(#weightStroke)"
-              strokeWidth={2}
-              dot={{ r: 2 }}
-              activeDot={{
-                r: 5,
-              }}
+              stroke="#0ea5e9"
+              strokeWidth={2.5}
+              dot={{ r: 3, fill: "#fff", stroke: "#0ea5e9", strokeWidth: 2 }}
+              activeDot={{ r: 5, fill: "#0ea5e9" }}
+              connectNulls
+              isAnimationActive={false}
             />
           </LineChart>
         </ChartContainer>

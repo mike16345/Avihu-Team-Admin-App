@@ -9,6 +9,8 @@ export interface IBaseUser {
   remindIn: number;
 }
 
+export type AccountStatus = "active" | "user" | "disabled";
+
 export interface IUser extends IBaseUser {
   _id?: string;
   dateJoined: Date;
@@ -16,6 +18,7 @@ export interface IUser extends IBaseUser {
   checkInAt: number;
   hasAccess: boolean;
   onboardingCompleted: boolean;
+  accountStatus?: AccountStatus;
 }
 
 export interface IUserPost extends IBaseUser {}

@@ -2,6 +2,7 @@ import { Route, Routes } from "react-router-dom";
 import RequireAuth from "./hooks/Authentication/RequireAuthentication";
 import useAuth from "./hooks/Authentication/useAuth";
 import LoginPage from "./pages/LoginPage";
+import DesignPreview from "./pages/DesignPreview";
 import { AppRoutes } from "./routes/AppRoutes";
 import "./App.css";
 import { AppSidebar } from "./components/Sidebar/AppSidebar";
@@ -20,6 +21,7 @@ function App() {
         </RequireAuth>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/preview" element={<DesignPreview />} />
         </Routes>
       </div>
     </SidebarProvider>

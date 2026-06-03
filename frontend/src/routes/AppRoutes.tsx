@@ -1,4 +1,4 @@
-import { UsersTable } from "@/components/tables/UsersTable";
+import { UsersPage } from "@/pages/UsersPage";
 import { UserDashboard } from "@/pages/UserDashboard";
 import { ViewDietPlanPage } from "@/pages/ViewDietPlanPage";
 import { Route, Routes } from "react-router";
@@ -24,7 +24,7 @@ export const AppRoutes = () => {
     <>
       <Routes>
         <Route path="/" element={<AdminDashboard />} />
-        <Route path="/users/*" element={<UsersTable />} />
+        <Route path="/users/*" element={<UsersPage />} />
         <Route path="/leads" element={<LeadsTablePage />} />
         <Route path="/blogs/" element={<BlogPage />} />
         <Route path="/blogs/:id" element={<BlogPreviewPage />} />

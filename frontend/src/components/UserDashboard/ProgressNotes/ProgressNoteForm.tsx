@@ -1,3 +1,9 @@
+/**
+ * ProgressNoteForm — single-row layout
+ *
+ * All inputs (date, trainer, diet/workouts/cardio %) live on ONE horizontal
+ * row as compact dropdowns/inputs. Content editor + save sit beneath.
+ */
 import { useEffect, useState } from "react";
 import {
   Form,
@@ -58,12 +64,9 @@ const ProgressNoteForm = () => {
 
   const onSubmit = (values: z.infer<typeof progressNoteSchema>) => {
     if (!id) return;
-
     const note = { ...values, userId: id };
-
     if (isEdit) {
       if (!progressNote?._id) return;
-
       updateNote.mutate({ ...note, noteId: progressNote?._id });
     } else {
       addNote.mutate(note);
@@ -72,7 +75,6 @@ const ProgressNoteForm = () => {
 
   useEffect(() => {
     if (!progressNote) return setIsEdit(false);
-
     setIsEdit(true);
     reset(progressNote);
   }, [progressNote]);
@@ -81,45 +83,52 @@ const ProgressNoteForm = () => {
     <Form {...progressNoteForm}>
       <form
         onSubmit={progressNoteForm.handleSubmit(onSubmit)}
-        className="space-y-4 w-full"
+        className="flex w-full flex-col gap-3"
         dir="rtl"
       >
-        <FormField
-          control={progressNoteForm.control}
-          name="date"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="block">תאריך</FormLabel>
-              <FormControl>
-                <DatePicker
-                  selectedDate={field.value}
-                  onChangeDate={(date: Date) => field.onChange(date)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={progressNoteForm.control}
-          name="trainer"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>שם המאמן</FormLabel>
-              <FormControl>
-                <Input placeholder="הכנס פריט כאן..." {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className="flex gap-5 w-full flex-wrap justify-around">
+        {/* All meta fields in one row */}
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+          <FormField
+            control={progressNoteForm.control}
+            name="date"
+            render={({ field }) => (
+              <FormItem className="space-y-1">
+                <FormLabel className="text-[11px] font-semibold text-slate-600">
+                  תאריך
+                </FormLabel>
+                <FormControl>
+                  <DatePicker
+                    selectedDate={field.value}
+                    onChangeDate={(date: Date) => field.onChange(date)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={progressNoteForm.control}
+            name="trainer"
+            render={({ field }) => (
+              <FormItem className="space-y-1">
+                <FormLabel className="text-[11px] font-semibold text-slate-600">
+                  שם המאמן
+                </FormLabel>
+                <FormControl>
+                  <Input placeholder="שם המאמן..." className="h-9 text-sm" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={progressNoteForm.control}
             name="diet"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>תזונה</FormLabel>
+              <FormItem className="space-y-1">
+                <FormLabel className="text-[11px] font-semibold text-slate-600">
+                  🥗 תזונה
+                </FormLabel>
                 <FormControl>
                   <CustomSelect
                     items={progressOptions}
@@ -135,8 +144,10 @@ const ProgressNoteForm = () => {
             control={progressNoteForm.control}
             name="workouts"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>אימונים</FormLabel>
+              <FormItem className="space-y-1">
+                <FormLabel className="text-[11px] font-semibold text-slate-600">
+                  💪 אימונים
+                </FormLabel>
                 <FormControl>
                   <CustomSelect
                     items={progressOptions}
@@ -148,13 +159,14 @@ const ProgressNoteForm = () => {
               </FormItem>
             )}
           />
-
           <FormField
             control={progressNoteForm.control}
             name="cardio"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>אירובי</FormLabel>
+              <FormItem className="space-y-1">
+                <FormLabel className="text-[11px] font-semibold text-slate-600">
+                  🏃 אירובי
+                </FormLabel>
                 <FormControl>
                   <CustomSelect
                     items={progressOptions}
@@ -167,12 +179,16 @@ const ProgressNoteForm = () => {
             )}
           />
         </div>
+
+        {/* Content */}
         <FormField
           control={progressNoteForm.control}
           name="content"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>תוכן</FormLabel>
+            <FormItem className="space-y-1">
+              <FormLabel className="text-[11px] font-semibold text-slate-600">
+                תוכן (אופציונלי)
+              </FormLabel>
               <FormControl>
                 <TextEditor value={field.value} onChange={(val) => field.onChange(val)} />
               </FormControl>
@@ -180,14 +196,21 @@ const ProgressNoteForm = () => {
             </FormItem>
           )}
         />
-        <CustomButton
-          variant="success"
-          className="w-full"
-          type="submit"
-          title="שמור"
-          disabled={!isDirty}
-          isLoading={addNote.isPending || updateNote.isPending}
-        />
+
+        {/* Footer */}
+        <div className="flex items-center justify-between gap-2 pt-1">
+          <p className="text-[11px] text-slate-400">
+            {isEdit ? "שינויים יישמרו רק אחרי לחיצה על שמור." : ""}
+          </p>
+          <CustomButton
+            variant="success"
+            className="min-w-[140px]"
+            type="submit"
+            title={isEdit ? "שמור שינויים" : "שמור פתק"}
+            disabled={!isDirty}
+            isLoading={addNote.isPending || updateNote.isPending}
+          />
+        </div>
       </form>
     </Form>
   );
