@@ -57,11 +57,6 @@ const WorkoutTabs: React.FC<WorkoutTabsProps> = ({ workoutPlan, cardioPlan, tips
         {tab === "cardio" && cardioPlan}
         {tab === "tips" && (
           <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
-            <h3 className="mb-3 text-base font-bold text-slate-900">דגשי תוכנית האימון</h3>
-            <p className="mb-3 text-xs text-slate-500">
-              מקום להוסיף הנחיות כלליות לתוכנית — לדוגמה: זמן מנוחה, סדר אימונים שבועי,
-              דגשים על טכניקה וכו'.
-            </p>
             {tips}
           </div>
         )}

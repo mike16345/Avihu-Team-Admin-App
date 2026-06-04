@@ -1,9 +1,11 @@
 /**
- * WorkoutPlanContainer — redesigned workout card.
- *
- * A single collapsible workout (e.g. "אימון A") that contains muscle-group
- * blocks. Wraps the existing react-hook-form field-array and drag-drop
- * behaviour with a polished card UI matching the rest of the panel.
+ * WorkoutPlanContainer — matches the DesignPreview WorkoutCard:
+ *  - rounded-2xl card with purple-200 border + shadow when open
+ *  - 9×9 chevron toggle (purple-100 active background)
+ *  - rounded input for the workout name
+ *  - inline meta count
+ *  - delete button on the far left
+ *  - body has slate-50/30 wash + dashed "הוסף קבוצת שריר" CTA
  */
 import React, { useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
@@ -35,7 +37,6 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
 
   const [isOpen, setIsOpen] = useState(false);
   const muscleGroups = (watch(`${parentPath}.muscleGroups`) as IMuscleGroupWorkouts[]) ?? [];
-
   const totalExercises = muscleGroups.reduce((s, g) => s + (g.exercises?.length ?? 0), 0);
 
   const handleAddMuscleGroup = () => {
@@ -51,18 +52,17 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
     <div
       dir="rtl"
       className={`overflow-hidden rounded-2xl border bg-white shadow-sm transition-all ${
-        isOpen ? "border-blue-200 shadow-md" : "border-slate-200/80"
+        isOpen ? "border-purple-200 shadow-md" : "border-slate-200"
       }`}
       style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
     >
-      {/* Header: toggle + name + meta + delete */}
       <div className="flex items-center gap-3 px-5 py-4">
         <button
           type="button"
           onClick={() => setIsOpen((s) => !s)}
           className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-colors ${
             isOpen
-              ? "bg-blue-100 text-blue-700"
+              ? "bg-purple-100 text-purple-700"
               : "border border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
           }`}
           aria-label={isOpen ? "סגור אימון" : "פתח אימון"}
@@ -77,7 +77,7 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
             <FormItem className="flex-1">
               <input
                 {...field}
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm transition-colors focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200"
                 placeholder="שם האימון"
               />
               <FormMessage />
@@ -85,9 +85,8 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
           )}
         />
 
-        <span className="hidden text-xs font-medium text-slate-400 sm:inline">
-          {muscleGroups.length} {muscleGroups.length === 1 ? "קבוצה" : "קבוצות"} · {totalExercises}{" "}
-          {totalExercises === 1 ? "תרגיל" : "תרגילים"}
+        <span className="hidden text-xs text-slate-400 sm:inline">
+          {muscleGroups.length} קבוצות · {totalExercises} תרגילים
         </span>
 
         <button
@@ -128,7 +127,7 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
           <button
             type="button"
             onClick={handleAddMuscleGroup}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-white px-4 py-3 text-xs font-semibold text-slate-500 transition-all hover:border-blue-300 hover:bg-blue-50/40 hover:text-blue-700"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-white px-4 py-3 text-xs font-semibold text-slate-500 transition-all hover:border-purple-300 hover:bg-purple-50/40 hover:text-purple-700"
           >
             <FaPlus size={11} />
             <span>הוסף קבוצת שריר</span>

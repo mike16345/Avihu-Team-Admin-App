@@ -1,12 +1,15 @@
 /**
- * WorkoutPlans — redesigned wrapper that composes WorkoutTabs with the
- * workout list (workouts / cardio / tips). Keeps all the existing form-state
- * hooks (`useFormContext` + `useFieldArray`) and drag-drop behaviour.
+ * WorkoutPlans — matches the original DesignPreview layout:
+ *  - One sticky pill-tab bar at the top with the three sections, no
+ *    separate "page header" card.
+ *  - Workouts: drag-sortable list of WorkoutPlanContainer cards + a
+ *    dashed "הוסף אימון" CTA at the bottom.
+ *  - Cardio + Tips: rendered as in the original.
  */
 import { useRef, useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { toast } from "sonner";
-import { FaPlus, FaDumbbell } from "react-icons/fa6";
+import { FaPlus } from "react-icons/fa6";
 import { WorkoutSchemaType } from "@/schemas/workoutPlanSchema";
 import WorkoutTabs from "./WorkoutTabs";
 import CardioWrapper from "./cardio/CardioWrapper";
@@ -56,14 +59,6 @@ const WorkoutPlans = () => {
     toast.success("אימון נמחק בהצלחה!");
   };
 
-  const totalWorkouts = workoutPlans?.length ?? 0;
-  const totalExercises =
-    workoutPlans?.reduce(
-      (sum, w) =>
-        sum + (w.muscleGroups?.reduce((s, g) => s + (g.exercises?.length ?? 0), 0) ?? 0),
-      0
-    ) ?? 0;
-
   return (
     <>
       <div
@@ -71,22 +66,6 @@ const WorkoutPlans = () => {
         className="flex w-full flex-col gap-4"
         style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
       >
-        {/* Page header */}
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50">
-              <FaDumbbell size={16} className="text-blue-600" />
-            </div>
-            <div>
-              <h1 className="text-base font-bold text-slate-900">תוכנית אימונים</h1>
-              <p className="text-xs text-slate-500">
-                {totalWorkouts} {totalWorkouts === 1 ? "אימון" : "אימונים"} ·{" "}
-                {totalExercises} תרגילים
-              </p>
-            </div>
-          </div>
-        </div>
-
         <WorkoutTabs
           tips={
             <TextEditor
@@ -96,7 +75,7 @@ const WorkoutPlans = () => {
           }
           cardioPlan={<CardioWrapper />}
           workoutPlan={
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-3">
               <DragDropWrapper
                 items={workoutPlans}
                 strategy="vertical"
@@ -105,7 +84,7 @@ const WorkoutPlans = () => {
               >
                 {({ item, index }) => (
                   <SortableItem
-                    className="relative w-full overflow-hidden rounded-2xl"
+                    className="relative w-full overflow-visible"
                     idKey={"_id"}
                     item={item}
                   >
@@ -122,10 +101,10 @@ const WorkoutPlans = () => {
               <button
                 type="button"
                 onClick={onAddWorkout}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50/40 px-4 py-4 text-sm font-semibold text-slate-500 transition-all hover:border-blue-300 hover:bg-blue-50/40 hover:text-blue-700"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50/40 px-4 py-3.5 text-sm font-semibold text-slate-500 transition-all hover:border-purple-300 hover:bg-purple-50/40 hover:text-purple-700"
               >
                 <FaPlus size={12} />
-                <span>הוסף אימון חדש</span>
+                <span>הוסף אימון</span>
               </button>
             </div>
           }
