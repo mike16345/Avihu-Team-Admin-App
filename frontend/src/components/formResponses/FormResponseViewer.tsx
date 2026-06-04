@@ -11,6 +11,8 @@
  * Logic and data flow are unchanged.
  */
 import { useEffect, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { FormResponse } from "@/interfaces/IFormResponse";
 import { FormTypesInHebrew } from "@/constants/form";
 import { FormTypes } from "@/interfaces/IForm";
@@ -19,13 +21,46 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { FullscreenImage } from "@/components/UserDashboard/WeightProgression/FullscreenImage";
 import CustomSelect from "../ui/CustomSelect";
 import { buildPhotoUrl, convertItemsToOptions } from "@/lib/utils";
+import { sendData } from "@/API/api";
+import { ApiResponse } from "@/types/types";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { FaClipboardList, FaCalendarDay, FaUser, FaImage } from "react-icons/fa6";
+import { FaClipboardList, FaCalendarDay, FaImage, FaImages, FaCheck } from "react-icons/fa6";
+
+/**
+ * Extract storage keys for all file-upload answers in this response.
+ * Storage keys are what the server stores in `userImageUrls.imageUrls[]`
+ * (e.g. "userId/date/filename") — we strip any `/images/` prefix and the
+ * CloudFront URL prefix because `buildPhotoUrl` adds them back when displaying.
+ */
+function extractAllPhotoKeys(response: FormResponse): string[] {
+  const keys: string[] = [];
+  const stripPrefix = (val: string): string | null => {
+    if (!val || typeof val !== "string") return null;
+    // If it's a full URL with /images/, take what's after.
+    const idx = val.indexOf("/images/");
+    if (idx >= 0) return val.slice(idx + "/images/".length);
+    // Otherwise return as-is (already a storage key).
+    return val.replace(/^\/+/, "");
+  };
+  (response.sections ?? []).forEach((section) => {
+    (section.questions ?? []).forEach((q) => {
+      if (q.type !== "file-upload" || !q.answer) return;
+      const candidates: any[] = Array.isArray(q.answer) ? q.answer : [q.answer];
+      candidates.forEach((c) => {
+        if (typeof c === "string") {
+          const k = stripPrefix(c);
+          if (k) keys.push(k);
+        }
+      });
+    });
+  });
+  return Array.from(new Set(keys));
+}
 
 type FormResponseSection = FormResponse["sections"][number];
 type FormResponseQuestion = FormResponseSection["questions"][number];
@@ -224,9 +259,56 @@ const FormResponseViewer = ({
 }: FormResponseViewerProps) => {
   const sections = response.sections ?? [];
   const isMobile = useIsMobile();
+  const queryClient = useQueryClient();
 
   const [activeSectionId, setActiveSectionId] = useState(sections[0]?._id ?? "");
   const [fullscreenState, setFullscreenState] = useState<FullscreenState | null>(null);
+  const [importingPhotos, setImportingPhotos] = useState(false);
+  const [importedThisSession, setImportedThisSession] = useState(false);
+
+  // Photo keys found in any file-upload question in this response.
+  const photoKeys = useMemo(() => extractAllPhotoKeys(response), [response]);
+
+  /**
+   * Add all file-upload images from this response into the trainee's
+   * progress-photos gallery (`userImageUrls`). Uses the existing public
+   * `POST /userImageUrls` endpoint — works without any server deploy.
+   */
+  const handleAddPhotosToGallery = async () => {
+    const userIdValue =
+      typeof response.userId === "string" ? response.userId : (response.userId as any)?._id;
+    if (!userIdValue || photoKeys.length === 0) {
+      toast.error("אין תמונות לייבא או חסר מזהה משתמש");
+      return;
+    }
+    setImportingPhotos(true);
+    let added = 0;
+    let lastError: string | null = null;
+    for (const key of photoKeys) {
+      try {
+        await sendData<ApiResponse<string[]>>("userImageUrls", {
+          userId: userIdValue,
+          imageUrl: key,
+        });
+        added++;
+      } catch (e: any) {
+        lastError = e?.message || "שגיאה לא ידועה";
+      }
+    }
+    setImportingPhotos(false);
+    if (added > 0) {
+      // Refresh the trainee's photo gallery query if it's cached
+      queryClient.invalidateQueries({ queryKey: [userIdValue + "-photos"] });
+      setImportedThisSession(true);
+      toast.success(
+        added === photoKeys.length
+          ? `${added} תמונות נוספו לגלריית התמונות של המתאמן`
+          : `${added} מתוך ${photoKeys.length} תמונות נוספו · ${lastError || ""}`
+      );
+    } else {
+      toast.error(lastError || "לא הצלחנו להוסיף את התמונות לגלריה");
+    }
+  };
 
   const formName = response.formTitle ?? response.formId?.name ?? "—";
   const rawFormType = response.formType ?? response.formId?.type;
@@ -270,15 +352,15 @@ const FormResponseViewer = ({
   return (
     <div
       dir="rtl"
-      className="flex flex-col gap-4"
+      className="flex flex-col gap-6 p-2"
       style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
     >
       {/* Header card */}
-      <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
-        <div className="flex flex-wrap items-start justify-between gap-4">
+      <div className="rounded-2xl border border-slate-200/80 bg-white p-8 shadow-sm">
+        <div className="flex flex-wrap items-start justify-between gap-5">
           {/* Left: avatar + names */}
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-base font-bold text-white shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-lg font-bold text-white shadow-sm">
               {initialsOf(displayRespondent)}
             </div>
             <div className="min-w-0">
@@ -286,10 +368,10 @@ const FormResponseViewer = ({
                 <FaClipboardList size={11} />
                 פרטי תשובה
               </div>
-              <h1 className="mt-0.5 truncate text-lg font-bold text-slate-900">
+              <h1 className="mt-0.5 truncate text-xl font-bold text-slate-900">
                 {displayRespondent}
               </h1>
-              <p className="truncate text-xs text-slate-500">{formName}</p>
+              <p className="truncate text-sm text-slate-500">{formName}</p>
             </div>
           </div>
 
@@ -309,6 +391,51 @@ const FormResponseViewer = ({
             </span>
           </div>
         </div>
+
+        {/* "Add photos to gallery" CTA — only when the response contains photos */}
+        {photoKeys.length > 0 && (
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-blue-200 bg-blue-50/60 px-4 py-3">
+            <div className="flex items-start gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm">
+                <FaImages size={14} />
+              </span>
+              <div className="text-right">
+                <p className="text-sm font-bold text-slate-900">
+                  {photoKeys.length} תמונות הועלו בשאלון
+                </p>
+                <p className="text-xs text-slate-500">
+                  אפשר להוסיף אותן לגלריית תמונות ההתקדמות של המתאמן בלחיצה אחת
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleAddPhotosToGallery}
+              disabled={importingPhotos || importedThisSession}
+              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all ${
+                importedThisSession
+                  ? "cursor-default bg-emerald-600"
+                  : importingPhotos
+                  ? "cursor-not-allowed bg-blue-400"
+                  : "bg-blue-600 hover:bg-blue-700"
+              }`}
+            >
+              {importedThisSession ? (
+                <>
+                  <FaCheck size={11} />
+                  נוספו לגלריה
+                </>
+              ) : importingPhotos ? (
+                "מוסיף..."
+              ) : (
+                <>
+                  <FaImages size={12} />
+                  הוסף לגלריית התמונות
+                </>
+              )}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Body — sections + questions */}
@@ -352,9 +479,9 @@ const FormResponseViewer = ({
           )}
 
           {/* Active section */}
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
-            <div className="mb-4 flex items-center justify-between gap-2">
-              <h2 className="text-base font-bold text-slate-900">
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-8 shadow-sm">
+            <div className="mb-6 flex items-center justify-between gap-2">
+              <h2 className="text-lg font-bold text-slate-900">
                 {activeSection
                   ? getSectionLabel(
                       activeSection.title,
@@ -371,21 +498,21 @@ const FormResponseViewer = ({
             </div>
 
             {activeSection?.questions?.length ? (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {activeSection.questions.map((question, index) => (
                   <article
                     key={question._id || `${question.question}-${index}`}
-                    className="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 transition-colors hover:bg-slate-50"
+                    className="rounded-xl border border-slate-200/80 bg-slate-50/40 p-5 transition-colors hover:bg-slate-50"
                   >
-                    <div className="mb-2 flex items-start gap-2">
-                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-100 text-[10px] font-bold text-blue-700">
+                    <div className="mb-3 flex items-start gap-3">
+                      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 text-[11px] font-bold text-blue-700">
                         {index + 1}
                       </span>
                       <p className="text-sm font-bold leading-snug text-slate-900">
                         {question.question}
                       </p>
                     </div>
-                    <div className="pr-7 leading-6">
+                    <div className="pr-9 leading-6">
                       {renderQuestionAnswer(question, (images, selectedIndex) =>
                         setFullscreenState({ images, index: selectedIndex })
                       )}

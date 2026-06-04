@@ -71,6 +71,24 @@ export const FormSchema = z
         message: ERROR_MESSAGES.required,
       });
     }
+
+    // The starting questionnaire ("start" type) must include at least 4
+    // photo questions — typically the 4 progress angles (front / back /
+    // right / left). Counted across all sections.
+    if (data.type === "start") {
+      const photoQuestions = (data.sections ?? []).reduce(
+        (count, section) =>
+          count + (section.questions ?? []).filter((q) => q.type === "file-upload").length,
+        0
+      );
+      if (photoQuestions < 4) {
+        ctx.addIssue({
+          path: ["sections"],
+          code: z.ZodIssueCode.custom,
+          message: `שאלון התחלה חייב לכלול לפחות 4 שאלות מסוג העלאת תמונה (מצאנו ${photoQuestions}). מומלץ: מלפנים, מאחור, מהצד ימין, מהצד שמאל.`,
+        });
+      }
+    }
   });
 
 // -----------------------------------------
