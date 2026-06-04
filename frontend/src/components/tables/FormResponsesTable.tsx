@@ -260,7 +260,7 @@ const FormResponsesTable = ({ userId }: FormResponsesTableProps) => {
                   <button
                     type="button"
                     onClick={() => handleView(r)}
-                    className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800"
+                    className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-blue-500 px-3 py-2 text-xs font-semibold text-white shadow-sm transition-all hover:bg-blue-600 hover:shadow"
                   >
                     <FaEye size={11} />
                     <span>צפה בתשובות</span>
