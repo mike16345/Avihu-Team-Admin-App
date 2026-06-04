@@ -1,13 +1,17 @@
+/**
+ * WorkoutPlans — redesigned wrapper that composes WorkoutTabs with the
+ * workout list (workouts / cardio / tips). Keeps all the existing form-state
+ * hooks (`useFormContext` + `useFieldArray`) and drag-drop behaviour.
+ */
+import { useRef, useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
+import { toast } from "sonner";
+import { FaPlus, FaDumbbell } from "react-icons/fa6";
 import { WorkoutSchemaType } from "@/schemas/workoutPlanSchema";
-import { Button } from "../ui/button";
-import { BsPlusCircleFill } from "react-icons/bs";
 import WorkoutTabs from "./WorkoutTabs";
 import CardioWrapper from "./cardio/CardioWrapper";
 import WorkoutPlanContainer from "./WorkoutPlanContainer";
 import DeleteModal from "../Alerts/DeleteModal";
-import { useRef, useState } from "react";
-import { toast } from "sonner";
 import { DragDropWrapper } from "../Wrappers/DragDropWrapper";
 import { SortableItem } from "../DragAndDrop/SortableItem";
 import { generateUUID } from "@/lib/utils";
@@ -37,7 +41,6 @@ const WorkoutPlans = () => {
       muscleGroups: [],
       _id: generateUUID(),
     };
-
     addWorkoutPlan(newWorkoutPlan);
   };
 
@@ -48,62 +51,87 @@ const WorkoutPlans = () => {
 
   const onConfirmDeleteWorkout = () => {
     if (workoutIndex.current == null) return;
-
     removeWorkoutPlan(workoutIndex.current!);
     workoutIndex.current = null;
     toast.success("אימון נמחק בהצלחה!");
   };
 
+  const totalWorkouts = workoutPlans?.length ?? 0;
+  const totalExercises =
+    workoutPlans?.reduce(
+      (sum, w) =>
+        sum + (w.muscleGroups?.reduce((s, g) => s + (g.exercises?.length ?? 0), 0) ?? 0),
+      0
+    ) ?? 0;
+
   return (
     <>
-      <div className="size-full flex flex-col p-1.5">
-        <div className="size-full">
-          <WorkoutTabs
-            tips={
-              <TextEditor
-                value={watch("tips")?.join(" ") || ""}
-                onChange={(val) => setValue("tips", [val])}
-              />
-            }
-            cardioPlan={<CardioWrapper />}
-            workoutPlan={
-              <div className={`flex flex-col  gap-4 w-full`}>
-                <DragDropWrapper
-                  items={workoutPlans}
-                  strategy="vertical"
-                  idKey="_id"
-                  setItems={replace}
-                >
-                  {({ item, index }) => (
-                    <SortableItem
-                      className="relative w-full border-b-2 last:border-b-0 rounded"
-                      idKey={"_id"}
-                      item={item}
-                    >
-                      {() => {
-                        return (
-                          <WorkoutPlanContainer
-                            onDeleteWorkout={(index) => onClickDeleteWorkout(index)}
-                            parentPath={`workoutPlans.${index}`}
-                          />
-                        );
-                      }}
-                    </SortableItem>
-                  )}
-                </DragDropWrapper>
-                <div className="w-full flex items-center justify-center mb-2">
-                  <Button type="button" className="w-full sm:w-32" onClick={onAddWorkout}>
-                    <div className="flex flex-col items-center font-bold">
-                      הוסף אימון
-                      <BsPlusCircleFill />
-                    </div>
-                  </Button>
-                </div>
-              </div>
-            }
-          />
+      <div
+        dir="rtl"
+        className="flex w-full flex-col gap-4"
+        style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
+      >
+        {/* Page header */}
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50">
+              <FaDumbbell size={16} className="text-blue-600" />
+            </div>
+            <div>
+              <h1 className="text-base font-bold text-slate-900">תוכנית אימונים</h1>
+              <p className="text-xs text-slate-500">
+                {totalWorkouts} {totalWorkouts === 1 ? "אימון" : "אימונים"} ·{" "}
+                {totalExercises} תרגילים
+              </p>
+            </div>
+          </div>
         </div>
+
+        <WorkoutTabs
+          tips={
+            <TextEditor
+              value={watch("tips")?.join(" ") || ""}
+              onChange={(val) => setValue("tips", [val])}
+            />
+          }
+          cardioPlan={<CardioWrapper />}
+          workoutPlan={
+            <div className="flex flex-col gap-4">
+              <DragDropWrapper
+                items={workoutPlans}
+                strategy="vertical"
+                idKey="_id"
+                setItems={replace}
+              >
+                {({ item, index }) => (
+                  <SortableItem
+                    className="relative w-full overflow-hidden rounded-2xl"
+                    idKey={"_id"}
+                    item={item}
+                  >
+                    {() => (
+                      <WorkoutPlanContainer
+                        onDeleteWorkout={(index) => onClickDeleteWorkout(index)}
+                        parentPath={`workoutPlans.${index}`}
+                      />
+                    )}
+                  </SortableItem>
+                )}
+              </DragDropWrapper>
+
+              <button
+                type="button"
+                onClick={onAddWorkout}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50/40 px-4 py-4 text-sm font-semibold text-slate-500 transition-all hover:border-blue-300 hover:bg-blue-50/40 hover:text-blue-700"
+              >
+                <FaPlus size={12} />
+                <span>הוסף אימון חדש</span>
+              </button>
+            </div>
+          }
+        />
       </div>
+
       <DeleteModal
         isModalOpen={isDeleteModalOpen}
         setIsModalOpen={setIsDeleteModalOpen}
