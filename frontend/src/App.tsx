@@ -5,16 +5,14 @@ import LoginPage from "./pages/LoginPage";
 import { AppRoutes } from "./routes/AppRoutes";
 import "./App.css";
 import { AppSidebar } from "./components/Sidebar/AppSidebar";
-import { SidebarProvider, SidebarTrigger } from "./components/ui/sidebar";
 
 function App() {
   const { authed } = useAuth();
 
   return (
-    <SidebarProvider className="flex size-full ">
+    <div className="flex size-full">
       {authed && <AppSidebar />}
-      <div className="size-full p-4 overflow-y-auto custom-scrollbar ">
-        {authed && <SidebarTrigger data-testid="sidebar-trigger" />}
+      <div className="size-full overflow-y-auto p-4 custom-scrollbar">
         <RequireAuth>
           <AppRoutes />
         </RequireAuth>
@@ -22,7 +20,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
         </Routes>
       </div>
-    </SidebarProvider>
+    </div>
   );
 }
 

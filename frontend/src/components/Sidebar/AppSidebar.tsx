@@ -1,42 +1,42 @@
-import React from "react";
+/**
+ * AppSidebar — auto-hide sidebar (redesign 2026-06-03).
+ *
+ * Behavior:
+ *  - The full sidebar is hidden off-screen by default (right side, RTL).
+ *  - A thin invisible "hover zone" sits flush against the right edge.
+ *  - Moving the mouse close to the right edge slides the sidebar in.
+ *  - When the mouse leaves both the hover zone and the sidebar, it slides
+ *    back out. There's a small dismissal delay so a quick stray cursor
+ *    doesn't make it flicker.
+ *  - A persistent small chevron at the right edge hints to the user that
+ *    something is there.
+ *
+ * Visuals match the rest of the redesigned admin panel:
+ *  - Heebo, slate-200/80 borders, white card, blue accents, rounded items.
+ */
+import React, { useEffect, useRef, useState } from "react";
 import {
   BarChart3,
   BicepsFlexed,
   ChevronDown,
+  ChevronLeft,
   Clipboard,
   Edit,
   Home,
   Inbox,
   LucideIcon,
   SquareMenu,
-  User,
   User2,
   Users,
   UserCog,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
-} from "@/components/ui/sidebar";
 import { useUsersStore } from "@/store/userStore";
 import LogoutButton from "../Navbar/LogoutButton";
 import { ModeToggle } from "../theme/mode-toggle";
-import { Separator } from "../ui/separator";
 import { type AppRouteAccessKey, canAccessRoute, normalizeAppRole } from "@/routes/routeAccess";
-import { LuChevronsUpDown } from "react-icons/lu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { LuChevronsUpDown } from "react-icons/lu";
 
 type LinkProps = {
   accessKey: AppRouteAccessKey;
@@ -55,50 +55,20 @@ type SidebarItem = {
 
 const sidebarGroups: SidebarItem[][] = [
   [
-    {
-      url: "/",
-      title: "בית",
-      icon: Home,
-      accessKey: "home",
-    },
+    { url: "/", title: "בית", icon: Home, accessKey: "home" },
     {
       url: "/trainer-analytics",
       title: "לוח בקרה",
       icon: BarChart3,
       accessKey: "trainerAnalytics",
     },
-    {
-      url: "/trainers",
-      title: "מאמנים",
-      icon: User2,
-      accessKey: "trainers",
-    },
-    {
-      url: "/sub-trainers",
-      title: "הצוות שלי",
-      icon: UserCog,
-      accessKey: "subTrainers",
-    },
-    {
-      url: "/users",
-      title: "לקוחות",
-      icon: Users,
-      accessKey: "users",
-    },
+    { url: "/trainers", title: "מאמנים", icon: User2, accessKey: "trainers" },
+    { url: "/sub-trainers", title: "הצוות שלי", icon: UserCog, accessKey: "subTrainers" },
+    { url: "/users", title: "לקוחות", icon: Users, accessKey: "users" },
   ],
   [
-    {
-      url: "/blogs",
-      title: "מאמרים",
-      icon: Edit,
-      accessKey: "blogs",
-    },
-    {
-      url: "/dietPlans",
-      title: "תפריטים",
-      icon: SquareMenu,
-      accessKey: "dietPlans",
-    },
+    { url: "/blogs", title: "מאמרים", icon: Edit, accessKey: "blogs" },
+    { url: "/dietPlans", title: "תפריטים", icon: SquareMenu, accessKey: "dietPlans" },
     {
       url: "/workoutPlans",
       title: "תוכנית אימון",
@@ -107,32 +77,46 @@ const sidebarGroups: SidebarItem[][] = [
     },
   ],
   [
-    {
-      url: "/leads",
-      title: "לידים",
-      icon: Inbox,
-      accessKey: "leads",
-    },
-    {
-      url: "/form-builder",
-      title: "שאלונים",
-      icon: Clipboard,
-      accessKey: "formBuilder",
-    },
+    { url: "/leads", title: "לידים", icon: Inbox, accessKey: "leads" },
+    { url: "/form-builder", title: "שאלונים", icon: Clipboard, accessKey: "formBuilder" },
   ],
 ];
 
-const SidebarItems = () => {
+const SIDEBAR_WIDTH = 272; // px — matches `w-72` for the visible drawer
+const HOVER_TRIGGER_WIDTH = 14; // px — thin invisible strip on the right edge
+const CLOSE_DELAY_MS = 200; // small grace period before re-hiding
+
+const SidebarLink: React.FC<{
+  to: string;
+  icon: LucideIcon;
+  title: string;
+  active: boolean;
+  testId?: string;
+}> = ({ to, icon: Icon, title, active, testId }) => (
+  <li>
+    <Link
+      to={to}
+      data-testid={testId}
+      className={`group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold transition-all ${
+        active
+          ? "bg-blue-600 text-white shadow-sm"
+          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+      }`}
+    >
+      <Icon
+        size={17}
+        className={active ? "text-white" : "text-slate-400 group-hover:text-slate-700"}
+        strokeWidth={2.2}
+      />
+      <span>{title}</span>
+    </Link>
+  </li>
+);
+
+const SidebarItems: React.FC = () => {
   const location = useLocation();
   const currentUser = useUsersStore((state) => state.currentUser);
   const role = normalizeAppRole(currentUser?.role);
-
-  const createSidebarTestId = (url?: string) =>
-    url
-      ? `sidebar-link-${
-          url === "/" ? "home" : url.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "")
-        }`
-      : undefined;
 
   const visibleGroups = sidebarGroups
     .map((group) =>
@@ -140,158 +124,222 @@ const SidebarItems = () => {
         if (item.children?.length) {
           return item.children.some((child) => canAccessRoute(role, child.accessKey));
         }
-
         return item.accessKey ? canAccessRoute(role, item.accessKey) : true;
       })
     )
     .filter((group) => group.length > 0);
 
   return (
-    <>
-      {visibleGroups.map((group, index) => (
-        <React.Fragment key={index}>
-          {!!index && <Separator className="my-4" />}
-          {group.map((item) => {
-            const visibleChildren =
-              item.children?.filter((child) => canAccessRoute(role, child.accessKey)) ?? [];
-            const hasChildren = visibleChildren.length > 0;
-            const isActive = hasChildren
-              ? visibleChildren.some((child) => child.url === location.pathname)
-              : location.pathname === item.url;
+    <nav className="flex flex-col gap-2">
+      {visibleGroups.map((group, gIdx) => (
+        <React.Fragment key={gIdx}>
+          {gIdx > 0 && <div className="my-1 h-px bg-slate-100" />}
+          <ul className="flex flex-col gap-0.5">
+            {group.map((item) => {
+              const visibleChildren =
+                item.children?.filter((child) => canAccessRoute(role, child.accessKey)) ?? [];
+              const hasChildren = visibleChildren.length > 0;
+              const isActive = hasChildren
+                ? visibleChildren.some((child) => child.url === location.pathname)
+                : location.pathname === item.url;
 
-            if (!hasChildren && item.url) {
+              if (!hasChildren && item.url) {
+                return (
+                  <SidebarLink
+                    key={item.title}
+                    to={item.url}
+                    icon={item.icon}
+                    title={item.title}
+                    active={isActive}
+                    testId={`sidebar-link-${
+                      item.url === "/"
+                        ? "home"
+                        : item.url.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "")
+                    }`}
+                  />
+                );
+              }
+
+              // Group with children (collapsible). Not used in the current
+              // config but kept for future extensibility.
               return (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={isActive}>
-                    <Link
-                      data-testid={createSidebarTestId(item.url)}
-                      className={`w-full rounded-full ${
-                        isActive && "bg-secondary-foreground text-secondary"
-                      }`}
-                      to={item.url}
-                    >
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              );
-            }
-
-            return (
-              <SidebarMenuItem key={item.title}>
-                <Collapsible defaultOpen={Boolean(isActive)} className="group/collapsible">
-                  <CollapsibleTrigger className="flex w-full items-center justify-between" asChild>
-                    <SidebarMenuButton isActive={Boolean(isActive)}>
-                      <div className="flex items-center gap-2">
-                        <item.icon />
+                <li key={item.title}>
+                  <details open={isActive} className="group rounded-xl">
+                    <summary className="flex cursor-pointer list-none items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900">
+                      <span className="flex items-center gap-3">
+                        <item.icon
+                          size={17}
+                          className="text-slate-400"
+                          strokeWidth={2.2}
+                        />
                         <span>{item.title}</span>
-                      </div>
-                      <ChevronDown className="mr-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
+                      </span>
+                      <ChevronDown
+                        size={14}
+                        className="text-slate-400 transition-transform group-open:rotate-180"
+                      />
+                    </summary>
+                    <ul className="mt-1 flex flex-col gap-0.5 pr-7">
                       {visibleChildren.map((child) => {
                         const childActive = location.pathname === child.url;
-
                         return (
-                          <SidebarMenuSubItem key={child.title}>
-                            <SidebarMenuSubButton asChild isActive={childActive}>
-                              <Link
-                                data-testid={createSidebarTestId(child.url)}
-                                className={`flex items-center gap-2 ${
-                                  childActive && "bg-secondary text-secondary"
-                                }`}
-                                to={child.url}
-                              >
-                                <child.icon />
-                                <span>{child.title}</span>
-                              </Link>
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
+                          <SidebarLink
+                            key={child.title}
+                            to={child.url}
+                            icon={child.icon}
+                            title={child.title}
+                            active={childActive}
+                          />
                         );
                       })}
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </Collapsible>
-              </SidebarMenuItem>
-            );
-          })}
+                    </ul>
+                  </details>
+                </li>
+              );
+            })}
+          </ul>
         </React.Fragment>
       ))}
-    </>
-  );
-};
-
-const Header = () => {
-  const currentUser = useUsersStore((state) => state.currentUser);
-
-  return (
-    <>
-      {currentUser && (
-        <SidebarHeader className=" border-b border-accented bg-background py-3">
-          <div className="flex items-center gap-5 text-lg font-semibold">
-            <img
-              className="h-10 w-10 rounded-lg shadow-lg border border-muted"
-              src="../public/images/app-logo.png"
-              alt=""
-            />
-            <span>מערכת ניהול</span>
-          </div>
-        </SidebarHeader>
-      )}
-    </>
+    </nav>
   );
 };
 
 export function AppSidebar() {
   const user = useUsersStore((state) => state.currentUser);
+  const [open, setOpen] = useState(false);
+  // For "did the user pin it open via click" — future enhancement; for now,
+  // pure hover is sufficient.
+  const closeTimerRef = useRef<number | null>(null);
+
+  const cancelClose = () => {
+    if (closeTimerRef.current !== null) {
+      window.clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+  };
+
+  const scheduleClose = () => {
+    cancelClose();
+    closeTimerRef.current = window.setTimeout(() => setOpen(false), CLOSE_DELAY_MS);
+  };
+
+  useEffect(() => () => cancelClose(), []);
+
+  // Close on Escape, as a courtesy.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
 
   return (
-    <Sidebar side="right" data-testid="app-sidebar">
-      <Header />
-      <SidebarContent className="bg-background">
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarItems />
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-      <Popover>
-        <PopoverTrigger asChild>
-          <SidebarFooter className="flex flex-row items-center border-t border-accented bg-background gap-3 py-4 cursor-pointer hover:bg-muted">
-            <img
-              src={`https://api.dicebear.com/9.x/initials/svg?seed=${user?.firstName}&radius=50&size=36`}
-              alt="avatar"
-            />
+    <div
+      dir="rtl"
+      style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
+      data-testid="app-sidebar"
+    >
+      {/* Invisible hover trigger glued to the right edge */}
+      <div
+        onMouseEnter={() => {
+          cancelClose();
+          setOpen(true);
+        }}
+        onMouseLeave={scheduleClose}
+        style={{
+          position: "fixed",
+          right: 0,
+          top: 0,
+          bottom: 0,
+          width: HOVER_TRIGGER_WIDTH,
+          zIndex: 40,
+        }}
+      />
 
-            <div>
-              <div className="text-sm ">
-                {user?.firstName} {user?.lastName}
-              </div>
-              <div className="text-xs text-muted-foreground">
-                {user?.email.slice(0, 22).padStart(25, "...")}
-              </div>
-            </div>
+      {/* Subtle visual hint — a thin handle on the edge */}
+      <div
+        aria-hidden
+        className={`pointer-events-none fixed top-1/2 -translate-y-1/2 transition-opacity duration-200 ${
+          open ? "opacity-0" : "opacity-100"
+        }`}
+        style={{ right: 2, zIndex: 41 }}
+      >
+        <div className="flex h-16 w-1.5 items-center justify-center rounded-full bg-gradient-to-b from-blue-500 to-blue-700 shadow-sm" />
+      </div>
 
-            <div className="w-full flex justify-end text-accented">
-              <LuChevronsUpDown />
+      {/* The drawer itself */}
+      <aside
+        onMouseEnter={cancelClose}
+        onMouseLeave={scheduleClose}
+        className={`fixed right-0 top-0 z-50 flex h-screen flex-col border-l border-slate-200/80 bg-white shadow-2xl transition-transform duration-300 ease-out ${
+          open ? "translate-x-0" : "translate-x-full"
+        }`}
+        style={{ width: SIDEBAR_WIDTH }}
+      >
+        {/* Header */}
+        {user && (
+          <header className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
+            <div className="flex items-center gap-3">
+              <img
+                src="/images/app-logo.png"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).style.display = "none";
+                }}
+                alt=""
+                className="h-10 w-10 rounded-lg border border-slate-200 object-cover shadow-sm"
+              />
+              <div>
+                <p className="text-base font-bold text-slate-900">מערכת ניהול</p>
+                <p className="text-[11px] text-slate-400">Avihu Team</p>
+              </div>
             </div>
-          </SidebarFooter>
-        </PopoverTrigger>
-        <PopoverContent>
-          <div className="flex items-center flex-row gap-2">
-            <div className="flex-1">
-              <LogoutButton />
-            </div>
-            <ModeToggle />
-          </div>
-        </PopoverContent>
-      </Popover>
-    </Sidebar>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              aria-label="סגור תפריט"
+              className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+            >
+              <ChevronLeft size={16} />
+            </button>
+          </header>
+        )}
+
+        {/* Items */}
+        <div className="flex-1 overflow-y-auto px-3 py-4">
+          <SidebarItems />
+        </div>
+
+        {/* User footer */}
+        {user && (
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className="flex w-full items-center gap-3 border-t border-slate-100 px-4 py-3 text-right transition-colors hover:bg-slate-50"
+              >
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-300 to-amber-500 text-sm font-bold text-amber-900 shadow-sm">
+                  {((user.firstName?.[0] || "") + (user.lastName?.[0] || "")).toUpperCase() || "?"}
+                </div>
+                <div className="min-w-0 flex-1 text-right">
+                  <p className="truncate text-sm font-semibold text-slate-900">
+                    {user.firstName} {user.lastName}
+                  </p>
+                  <p className="truncate text-[11px] text-slate-500">{user.email}</p>
+                </div>
+                <LuChevronsUpDown className="text-slate-400" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent dir="rtl" className="w-56 p-2">
+              <div className="flex flex-col gap-2">
+                <LogoutButton />
+                <ModeToggle />
+              </div>
+            </PopoverContent>
+          </Popover>
+        )}
+      </aside>
+    </div>
   );
 }
