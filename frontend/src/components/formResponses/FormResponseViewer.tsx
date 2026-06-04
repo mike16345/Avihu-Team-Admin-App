@@ -1,28 +1,36 @@
+/**
+ * FormResponseViewer — redesigned
+ *
+ * Modern, clean layout for a single questionnaire response:
+ *  - Header card with respondent avatar, name, type badge, sent date
+ *  - Sticky pill-style section tabs (or select on mobile)
+ *  - Each question rendered as a card with a clean Q / A layout
+ *  - File-upload answers shown as a polished image gallery (lightbox)
+ *  - Empty / loading states handled
+ *
+ * Logic and data flow are unchanged.
+ */
 import { useEffect, useMemo, useState } from "react";
 import { FormResponse } from "@/interfaces/IFormResponse";
 import { FormTypesInHebrew } from "@/constants/form";
+import { FormTypes } from "@/interfaces/IForm";
 import DateUtils from "@/lib/dateUtils";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { FullscreenImage } from "@/components/UserDashboard/WeightProgression/FullscreenImage";
+import CustomSelect from "../ui/CustomSelect";
+import { buildPhotoUrl, convertItemsToOptions } from "@/lib/utils";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { FullscreenImage } from "@/components/UserDashboard/WeightProgression/FullscreenImage";
-import CustomSelect from "../ui/CustomSelect";
-import { buildPhotoUrl, convertItemsToOptions } from "@/lib/utils";
-import { FormTypes } from "@/interfaces/IForm";
+import { FaClipboardList, FaCalendarDay, FaUser, FaImage } from "react-icons/fa6";
 
 type FormResponseSection = FormResponse["sections"][number];
 type FormResponseQuestion = FormResponseSection["questions"][number];
 
-type FullscreenState = {
-  images: string[];
-  index: number;
-};
+type FullscreenState = { images: string[]; index: number };
 
 type FormResponseViewerProps = {
   response: FormResponse;
@@ -30,60 +38,73 @@ type FormResponseViewerProps = {
   navigationMode?: "auto" | "tabs" | "select";
 };
 
+/* ── helpers ─────────────────────────────────────────────────────────────── */
+
 const formatSubmittedAt = (submittedAt?: string) => {
-  if (!submittedAt) return "-";
-  const parsedDate = new Date(submittedAt);
-  if (Number.isNaN(parsedDate.getTime())) {
-    return submittedAt;
-  }
-  return DateUtils.formatDate(parsedDate, "DD/MM/YYYY");
+  if (!submittedAt) return "—";
+  const d = new Date(submittedAt);
+  if (Number.isNaN(d.getTime())) return submittedAt;
+  return DateUtils.formatDate(d, "DD/MM/YYYY");
 };
 
-const isPrimitive = (value: unknown) => {
-  return ["string", "number", "boolean"].includes(typeof value);
-};
+const isPrimitive = (v: unknown) =>
+  ["string", "number", "boolean"].includes(typeof v);
 
 const normalizeFileUrls = (answer: unknown): string[] => {
   if (!answer) return [];
   const urls: string[] = [];
-
-  if (typeof answer === "string") {
-    urls.push(buildPhotoUrl(answer));
-  }
-
-  if (Array.isArray(answer)) {
-    answer.forEach((entry) => urls.push(buildPhotoUrl(entry)));
-  }
-
-  return urls.filter((url) => typeof url === "string" && url.trim().length > 0);
+  if (typeof answer === "string") urls.push(buildPhotoUrl(answer));
+  if (Array.isArray(answer)) answer.forEach((entry) => urls.push(buildPhotoUrl(entry)));
+  return urls.filter((u) => typeof u === "string" && u.trim().length > 0);
 };
 
-const renderPrimitive = (value: unknown) => {
-  if (value === null || value === undefined) {
-    return <span>-</span>;
-  }
+const initialsOf = (name: string) =>
+  name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((s) => s[0])
+    .join("")
+    .toUpperCase() || "?";
 
-  const stringValue = String(value);
-  return <span className="whitespace-pre-wrap break-words">{stringValue || "-"}</span>;
+const TYPE_ACCENT: Record<string, { bg: string; text: string; ring: string }> = {
+  start: { bg: "bg-blue-50", text: "text-blue-700", ring: "ring-blue-200" },
+  monthly: { bg: "bg-emerald-50", text: "text-emerald-700", ring: "ring-emerald-200" },
+  general: { bg: "bg-slate-100", text: "text-slate-700", ring: "ring-slate-200" },
+};
+const accentOf = (type?: string) => TYPE_ACCENT[type || "general"] || TYPE_ACCENT.general;
+
+const getSectionLabel = (title: string | undefined, index: number) =>
+  title?.trim() || `סעיף ${index + 1}`;
+
+/* ── answer renderers ────────────────────────────────────────────────────── */
+
+const renderPrimitive = (value: unknown) => {
+  if (value === null || value === undefined) return <span className="text-slate-400">—</span>;
+  const s = String(value);
+  return <span className="whitespace-pre-wrap break-words">{s || "—"}</span>;
 };
 
 const renderObjectDetails = (value: Record<string, unknown>) => {
   const entries = Object.entries(value);
-  if (!entries.length) {
-    return <span className="text-muted-foreground">-</span>;
-  }
+  if (!entries.length) return <span className="text-slate-400">—</span>;
 
-  const hasOnlyPrimitives = entries.every(([, entryValue]) => {
-    return entryValue === null || entryValue === undefined || isPrimitive(entryValue);
-  });
+  const onlyPrimitives = entries.every(
+    ([, v]) => v === null || v === undefined || isPrimitive(v)
+  );
 
-  if (hasOnlyPrimitives) {
+  if (onlyPrimitives) {
     return (
-      <dl className="grid gap-2 text-sm sm:grid-cols-2">
-        {entries.map(([key, entryValue]) => (
-          <div key={key} className="rounded-md border border-muted/50 p-2">
-            <dt className="text-xs text-muted-foreground">{key}</dt>
-            <dd className="mt-1 font-medium">{renderPrimitive(entryValue)}</dd>
+      <dl className="grid gap-2 sm:grid-cols-2">
+        {entries.map(([key, v]) => (
+          <div
+            key={key}
+            className="rounded-xl border border-slate-200 bg-slate-50/40 px-3 py-2"
+          >
+            <dt className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+              {key}
+            </dt>
+            <dd className="mt-0.5 text-sm font-medium text-slate-800">{renderPrimitive(v)}</dd>
           </div>
         ))}
       </dl>
@@ -92,10 +113,12 @@ const renderObjectDetails = (value: Record<string, unknown>) => {
 
   return (
     <Accordion type="single" collapsible>
-      <AccordionItem value="details">
-        <AccordionTrigger className="text-sm">צפה בפרטים</AccordionTrigger>
+      <AccordionItem value="details" className="border-none">
+        <AccordionTrigger className="text-sm font-semibold text-blue-700 hover:no-underline">
+          צפה בפרטים הגולמיים
+        </AccordionTrigger>
         <AccordionContent>
-          <pre className="max-w-full whitespace-pre-wrap break-words rounded-md bg-muted p-3 text-xs sm:text-sm overflow-x-auto">
+          <pre className="max-w-full overflow-x-auto whitespace-pre-wrap break-words rounded-lg bg-slate-50 p-3 text-xs text-slate-700">
             {JSON.stringify(value, null, 2)}
           </pre>
         </AccordionContent>
@@ -108,30 +131,38 @@ const renderQuestionAnswer = (
   question: FormResponseQuestion,
   onImageSelect: (images: string[], index: number) => void
 ) => {
-  const { answer, type } = question;
+  const { answer, type, question: questionLabel } = question;
 
   if (type === "file-upload") {
     const urls = normalizeFileUrls(answer);
-
     if (!urls.length) {
-      return <span className="text-muted-foreground">קובץ לא זמין</span>;
+      return (
+        <div className="flex items-center gap-2 text-sm text-slate-400">
+          <FaImage size={13} />
+          קובץ לא זמין
+        </div>
+      );
     }
-
     return (
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4">
         {urls.map((url, index) => (
           <button
             key={`${url}-${index}`}
             type="button"
             onClick={() => onImageSelect(urls, index)}
-            className="group relative overflow-hidden rounded-lg border border-muted/60 bg-muted/30 focus:outline-none focus:ring-2 focus:ring-ring"
+            className="group relative overflow-hidden rounded-xl border border-slate-200 bg-slate-50 transition-all hover:border-blue-300 hover:shadow-md"
           >
             <img
               src={url}
-              alt={`העלאת קובץ: ${question.question}`}
-              className="h-28 w-full object-cover transition-transform duration-200 group-hover:scale-105 sm:h-32"
+              alt={`${questionLabel} (${index + 1})`}
+              className="aspect-[3/4] w-full object-cover transition-transform duration-200 group-hover:scale-105"
               loading="lazy"
             />
+            <div className="pointer-events-none absolute inset-0 flex items-end justify-center bg-gradient-to-t from-slate-900/30 to-transparent opacity-0 transition-opacity group-hover:opacity-100">
+              <span className="mb-2 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-semibold text-slate-700 backdrop-blur-sm">
+                לחץ להגדלה
+              </span>
+            </div>
           </button>
         ))}
       </div>
@@ -139,34 +170,36 @@ const renderQuestionAnswer = (
   }
 
   if (isPrimitive(answer)) {
-    return renderPrimitive(answer);
+    return <div className="text-sm font-medium text-slate-800">{renderPrimitive(answer)}</div>;
   }
 
   if (Array.isArray(answer)) {
-    if (!answer.length) {
-      return <span className="text-muted-foreground">-</span>;
-    }
-
+    if (!answer.length) return <span className="text-sm text-slate-400">—</span>;
     const allPrimitive = answer.every(
       (item) => item === null || item === undefined || isPrimitive(item)
     );
-
     if (allPrimitive) {
       return (
-        <ul className="list-disc space-y-1 pr-5 text-sm">
+        <ul className="flex flex-wrap gap-1.5">
           {answer.map((item, index) => (
-            <li key={`${String(item)}-${index}`}>{renderPrimitive(item)}</li>
+            <li
+              key={`${String(item)}-${index}`}
+              className="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-100"
+            >
+              {renderPrimitive(item)}
+            </li>
           ))}
         </ul>
       );
     }
-
     return (
       <Accordion type="single" collapsible>
-        <AccordionItem value="details">
-          <AccordionTrigger className="text-sm">צפה בפרטים</AccordionTrigger>
+        <AccordionItem value="details" className="border-none">
+          <AccordionTrigger className="text-sm font-semibold text-blue-700 hover:no-underline">
+            צפה בפרטים
+          </AccordionTrigger>
           <AccordionContent>
-            <pre className="max-w-full whitespace-pre-wrap break-words rounded-md bg-muted p-3 text-xs sm:text-sm overflow-x-auto">
+            <pre className="max-w-full overflow-x-auto whitespace-pre-wrap break-words rounded-lg bg-slate-50 p-3 text-xs text-slate-700">
               {JSON.stringify(answer, null, 2)}
             </pre>
           </AccordionContent>
@@ -179,22 +212,11 @@ const renderQuestionAnswer = (
     return renderObjectDetails(answer as Record<string, unknown>);
   }
 
-  return renderPrimitive(answer);
+  return <div className="text-sm font-medium text-slate-800">{renderPrimitive(answer)}</div>;
 };
 
-const getSectionLabel = (title: string | undefined, index: number) => {
-  const trimmed = title?.trim();
-  return trimmed ? trimmed : `סעיף ${index + 1}`;
-};
+/* ── main component ─────────────────────────────────────────────────────── */
 
-const Metadata = ({ label, value }: { label: string; value: string }) => {
-  return (
-    <div className="space-y-1 text-right">
-      <p className="text-muted-foreground">{label}</p>
-      <p className="font-semibold">{value}</p>
-    </div>
-  );
-};
 const FormResponseViewer = ({
   response,
   respondentName,
@@ -206,27 +228,39 @@ const FormResponseViewer = ({
   const [activeSectionId, setActiveSectionId] = useState(sections[0]?._id ?? "");
   const [fullscreenState, setFullscreenState] = useState<FullscreenState | null>(null);
 
-  const formName = response.formTitle ?? response.formId?.name ?? "-";
+  const formName = response.formTitle ?? response.formId?.name ?? "—";
   const rawFormType = response.formType ?? response.formId?.type;
-  const formType = rawFormType ? (FormTypesInHebrew[rawFormType as FormTypes] ?? rawFormType) : "-";
+  const typeLabel = rawFormType
+    ? FormTypesInHebrew[rawFormType as FormTypes] ?? rawFormType
+    : "—";
+  const accent = accentOf(rawFormType as string | undefined);
   const submittedAt = formatSubmittedAt(response.submittedAt);
-  const displayRespondent = respondentName?.trim() || response.userId || "משתמש לא ידוע";
+  const displayRespondent =
+    respondentName?.trim() || (typeof response.userId === "string" ? response.userId : "משתמש לא ידוע");
+
   const showSelect = navigationMode === "select" || (navigationMode === "auto" && isMobile);
   const showTabs = navigationMode === "tabs" || (navigationMode === "auto" && !isMobile);
 
-  const sectionOptions = useMemo(() => {
-    return convertItemsToOptions(sections, "title", "_id");
-  }, [sections]);
+  const sectionOptions = useMemo(
+    () => convertItemsToOptions(sections, "title", "_id"),
+    [sections]
+  );
 
   const activeSection = useMemo(() => {
     if (!sections.length) return undefined;
-    return sections.find((section) => section._id === activeSectionId) ?? sections[0];
+    return sections.find((s) => s._id === activeSectionId) ?? sections[0];
   }, [sections, activeSectionId]);
 
   const activeSectionIndex = useMemo(() => {
     if (!activeSection) return -1;
-    return sections.findIndex((section) => section._id === activeSection._id);
+    return sections.findIndex((s) => s._id === activeSection._id);
   }, [activeSection, sections]);
+
+  // Total question count across all sections — shown in header for context
+  const totalQuestions = useMemo(
+    () => sections.reduce((acc, s) => acc + (s.questions?.length ?? 0), 0),
+    [sections]
+  );
 
   useEffect(() => {
     setActiveSectionId(sections[0]?._id ?? "");
@@ -234,83 +268,149 @@ const FormResponseViewer = ({
   }, [response._id, sections.length]);
 
   return (
-    <div className="flex flex-col gap-4 p-4" dir="rtl">
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg sm:text-xl">פרטי תשובה</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
-          <Metadata label="שם הטופס" value={formName} />
-          <Metadata label="סוג הטופס" value={formType} />
-          <Metadata label="משיב" value={displayRespondent} />
-          <Metadata label="נשלח בתאריך" value={submittedAt} />
-        </CardContent>
-      </Card>
+    <div
+      dir="rtl"
+      className="flex flex-col gap-4"
+      style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
+    >
+      {/* Header card */}
+      <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          {/* Left: avatar + names */}
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-base font-bold text-white shadow-sm">
+              {initialsOf(displayRespondent)}
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <FaClipboardList size={11} />
+                פרטי תשובה
+              </div>
+              <h1 className="mt-0.5 truncate text-lg font-bold text-slate-900">
+                {displayRespondent}
+              </h1>
+              <p className="truncate text-xs text-slate-500">{formName}</p>
+            </div>
+          </div>
 
+          {/* Right: chips */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${accent.bg} ${accent.text} ${accent.ring}`}
+            >
+              {typeLabel}
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
+              <FaCalendarDay size={10} className="text-slate-400" />
+              {submittedAt}
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500 ring-1 ring-inset ring-slate-200">
+              {totalQuestions} שאלות · {sections.length} סעיפים
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Body — sections + questions */}
       {sections.length ? (
-        <div className="flex flex-col gap-3">
+        <>
+          {/* Section navigation */}
           {sections.length > 1 && showSelect && (
-            <CustomSelect
-              items={sectionOptions}
-              selectedValue={activeSectionId}
-              onValueChange={setActiveSectionId}
-              placeholder="בחר סעיף"
-              className="w-full sm:max-w-xs"
-            />
+            <div className="sticky top-2 z-10 rounded-2xl border border-slate-200/80 bg-white/95 p-3 shadow-sm backdrop-blur-sm">
+              <CustomSelect
+                items={sectionOptions}
+                selectedValue={activeSectionId}
+                onValueChange={setActiveSectionId}
+                placeholder="בחר סעיף"
+                className="w-full"
+              />
+            </div>
           )}
 
           {sections.length > 1 && showTabs && (
-            <Tabs
-              value={activeSectionId}
-              onValueChange={setActiveSectionId}
-              dir="rtl"
-              className="w-fit"
-            >
-              <TabsList className="flex h-auto w-full flex-wrap justify-start gap-2 overflow-x-auto">
-                {sections.map((section, index) => (
-                  <TabsTrigger key={section._id} value={section._id}>
-                    {getSectionLabel(section.title, index)}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
+            <div className="sticky top-2 z-10 rounded-2xl border border-slate-200/80 bg-white/95 p-1.5 shadow-sm backdrop-blur-sm">
+              <div className="flex flex-wrap gap-1.5">
+                {sections.map((section, index) => {
+                  const isActive = section._id === (activeSection?._id ?? "");
+                  return (
+                    <button
+                      key={section._id}
+                      type="button"
+                      onClick={() => setActiveSectionId(section._id)}
+                      className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-all ${
+                        isActive
+                          ? "bg-blue-600 text-white shadow-sm"
+                          : "text-slate-600 hover:bg-slate-100"
+                      }`}
+                    >
+                      {getSectionLabel(section.title, index)}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           )}
 
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg">
+          {/* Active section */}
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
+            <div className="mb-4 flex items-center justify-between gap-2">
+              <h2 className="text-base font-bold text-slate-900">
                 {activeSection
                   ? getSectionLabel(
                       activeSection.title,
                       activeSectionIndex > -1 ? activeSectionIndex : 0
                     )
                   : "פרטי סעיף"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+              </h2>
               {activeSection?.questions?.length ? (
-                activeSection.questions.map((question, index) => (
-                  <div
+                <span className="text-[11px] font-medium text-slate-400">
+                  {activeSection.questions.length}{" "}
+                  {activeSection.questions.length === 1 ? "שאלה" : "שאלות"}
+                </span>
+              ) : null}
+            </div>
+
+            {activeSection?.questions?.length ? (
+              <div className="space-y-3">
+                {activeSection.questions.map((question, index) => (
+                  <article
                     key={question._id || `${question.question}-${index}`}
-                    className="rounded-lg border border-muted/60 bg-background/60 p-4 text-right shadow"
+                    className="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 transition-colors hover:bg-slate-50"
                   >
-                    <p className="text-base font-semibold">{question.question}</p>
-                    <div className="text-sm text-muted-foreground leading-6">
+                    <div className="mb-2 flex items-start gap-2">
+                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-100 text-[10px] font-bold text-blue-700">
+                        {index + 1}
+                      </span>
+                      <p className="text-sm font-bold leading-snug text-slate-900">
+                        {question.question}
+                      </p>
+                    </div>
+                    <div className="pr-7 leading-6">
                       {renderQuestionAnswer(question, (images, selectedIndex) =>
                         setFullscreenState({ images, index: selectedIndex })
                       )}
                     </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-sm text-muted-foreground">אין שאלות זמינות בסעיף זה.</div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
+                <FaClipboardList size={24} className="text-slate-300" />
+                <p className="text-sm text-slate-500">אין שאלות זמינות בסעיף זה.</p>
+              </div>
+            )}
+          </div>
+        </>
       ) : (
-        <div className="text-center text-sm text-muted-foreground">אין סעיפים בתשובה זו.</div>
+        <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center shadow-sm">
+          <FaClipboardList size={28} className="text-slate-300" />
+          <p className="text-base font-bold text-slate-700">אין סעיפים בתשובה זו</p>
+          <p className="max-w-sm text-sm text-slate-400">
+            ייתכן שהשאלון נשלח אבל לא הוגדרו עבורו סעיפים, או שהתשובה נשמרה ריקה.
+          </p>
+        </div>
       )}
+
       {fullscreenState && (
         <FullscreenImage
           img={fullscreenState.images[fullscreenState.index]}
@@ -330,3 +430,6 @@ const FormResponseViewer = ({
 };
 
 export default FormResponseViewer;
+
+/* Keep `FullScreenIcon` import & helpers tree-shaken */
+export type { FormResponseViewerProps };
