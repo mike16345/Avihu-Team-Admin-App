@@ -90,9 +90,7 @@ const Section: React.FC<{
       </div>
       <div>
         <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">{title}</h3>
-        {description && (
-          <p className="text-xs text-slate-500 dark:text-slate-400">{description}</p>
-        )}
+        {description && <p className="text-xs text-slate-500 dark:text-slate-400">{description}</p>}
       </div>
     </header>
     <div className="p-5">{children}</div>
@@ -343,10 +341,7 @@ const BlogEditor = () => {
         title="מדיה"
         description="לינק חיצוני (YouTube וכו') או תמונת כיסוי."
       >
-        <Tabs
-          value={mediaType}
-          onValueChange={(val) => handleChangeMediaType(val as MediaType)}
-        >
+        <Tabs value={mediaType} onValueChange={(val) => handleChangeMediaType(val as MediaType)}>
           <TabsList className="inline-flex w-fit gap-1 rounded-xl bg-slate-100 dark:bg-slate-800 p-1">
             <TabsTrigger
               value="link"
@@ -470,9 +465,7 @@ const BlogEditor = () => {
             </button>
             <DeleteModal
               isModalOpen={isOpen}
-              setIsModalOpen={
-                setOpen as unknown as React.Dispatch<React.SetStateAction<boolean>>
-              }
+              setIsModalOpen={setOpen as unknown as React.Dispatch<React.SetStateAction<boolean>>}
               onConfirm={handleDeleteBlog}
               onCancel={() => setOpen(false)}
             />

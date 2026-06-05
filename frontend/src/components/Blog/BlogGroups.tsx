@@ -23,22 +23,40 @@ import { ApiResponse } from "@/types/types";
 import { ILessonGroup } from "@/interfaces/IBlog";
 import useBlogsQuery from "@/hooks/queries/blogs/useBlogsQuery";
 import { useNavigate } from "react-router-dom";
-import {
-  FaArrowRight,
-  FaLayerGroup,
-  FaPlus,
-  FaPenToSquare,
-  FaTrash,
-} from "react-icons/fa6";
+import { FaArrowRight, FaLayerGroup, FaPlus, FaPenToSquare, FaTrash } from "react-icons/fa6";
 import DeleteModal from "../Alerts/DeleteModal";
 
 const PALETTE: { bg: string; text: string; ring: string }[] = [
-  { bg: "bg-blue-50 dark:bg-blue-950/40", text: "text-blue-700 dark:text-blue-300", ring: "ring-blue-200/60 dark:ring-blue-900/40" },
-  { bg: "bg-emerald-50 dark:bg-emerald-950/40", text: "text-emerald-700 dark:text-emerald-300", ring: "ring-emerald-200/60 dark:ring-emerald-900/40" },
-  { bg: "bg-purple-50 dark:bg-purple-950/40", text: "text-purple-700 dark:text-purple-300", ring: "ring-purple-200/60 dark:ring-purple-900/40" },
-  { bg: "bg-rose-50 dark:bg-rose-950/40", text: "text-rose-700 dark:text-rose-300", ring: "ring-rose-200/60 dark:ring-rose-900/40" },
-  { bg: "bg-amber-50 dark:bg-amber-950/40", text: "text-amber-700 dark:text-amber-300", ring: "ring-amber-200/60 dark:ring-amber-900/40" },
-  { bg: "bg-cyan-50 dark:bg-cyan-950/40", text: "text-cyan-700 dark:text-cyan-300", ring: "ring-cyan-200/60 dark:ring-cyan-900/40" },
+  {
+    bg: "bg-blue-50 dark:bg-blue-950/40",
+    text: "text-blue-700 dark:text-blue-300",
+    ring: "ring-blue-200/60 dark:ring-blue-900/40",
+  },
+  {
+    bg: "bg-emerald-50 dark:bg-emerald-950/40",
+    text: "text-emerald-700 dark:text-emerald-300",
+    ring: "ring-emerald-200/60 dark:ring-emerald-900/40",
+  },
+  {
+    bg: "bg-purple-50 dark:bg-purple-950/40",
+    text: "text-purple-700 dark:text-purple-300",
+    ring: "ring-purple-200/60 dark:ring-purple-900/40",
+  },
+  {
+    bg: "bg-rose-50 dark:bg-rose-950/40",
+    text: "text-rose-700 dark:text-rose-300",
+    ring: "ring-rose-200/60 dark:ring-rose-900/40",
+  },
+  {
+    bg: "bg-amber-50 dark:bg-amber-950/40",
+    text: "text-amber-700 dark:text-amber-300",
+    ring: "ring-amber-200/60 dark:ring-amber-900/40",
+  },
+  {
+    bg: "bg-cyan-50 dark:bg-cyan-950/40",
+    text: "text-cyan-700 dark:text-cyan-300",
+    ring: "ring-cyan-200/60 dark:ring-cyan-900/40",
+  },
 ];
 const paletteFor = (name?: string) => {
   if (!name) return PALETTE[0];
@@ -116,9 +134,7 @@ const BlogGroups = () => {
             <FaLayerGroup size={18} />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-              ניהול קבוצות
-            </h1>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">ניהול קבוצות</h1>
             <p className="text-sm text-slate-500 dark:text-slate-400">
               קבוצות לסיווג המאמרים. כל קבוצה תופיע גם כפילטר באפליקציית המתאמן.
             </p>
