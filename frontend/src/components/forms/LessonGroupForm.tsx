@@ -95,11 +95,7 @@ const LessonGroupForm: FC<LessonGroupFormProps> = ({ objectId, closeSheet }) => 
             <FormItem className="space-y-1.5">
               <FieldLabel required>שם הקבוצה</FieldLabel>
               <FormControl>
-                <Input
-                  {...field}
-                  placeholder="לדוגמה: מתכונים לחיטוב"
-                  className="h-10 text-sm"
-                />
+                <Input {...field} placeholder="לדוגמה: מתכונים לחיטוב" className="h-10 text-sm" />
               </FormControl>
               <FormMessage className="text-xs font-semibold text-rose-600 dark:text-rose-400" />
             </FormItem>
