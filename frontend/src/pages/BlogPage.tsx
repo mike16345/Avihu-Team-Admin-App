@@ -18,7 +18,8 @@ import useLessonGroupsQuery from "@/hooks/queries/lessonGroups/useLessonGroupsQu
 import { ILessonGroup } from "@/interfaces/IBlog";
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaNewspaper, FaPlus, FaLayerGroup, FaMagnifyingGlass, FaXmark } from "react-icons/fa6";
+import { FaNewspaper, FaPlus, FaMagnifyingGlass, FaXmark } from "react-icons/fa6";
+import LessonGroupsSheet from "@/components/Blog/LessonGroupsSheet";
 
 const BlogPage = () => {
   const navigate = useNavigate();
@@ -36,9 +37,11 @@ const BlogPage = () => {
 
   const [selectedGroups, setSelectedGroups] = useState<ILessonGroup[]>([]);
   const [query, setQuery] = useState("");
+  // Inline groups sheet — replaces the old standalone /presets/blogs/groups
+  // page. Opened from the "+ קבוצה חדשה" chip on the filter rail.
+  const [groupsSheetOpen, setGroupsSheetOpen] = useState(false);
 
   const handleCreateNewBlog = () => navigate("/blogs/create");
-  const handleViewBlogGroups = () => navigate("/presets/blogs/groups");
 
   const allBlogs = useMemo(
     () => blogPages?.pages.flatMap((page) => page.results) ?? [],
@@ -98,24 +101,14 @@ const BlogPage = () => {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={handleViewBlogGroups}
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 transition-colors hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50/40 dark:hover:bg-blue-950/30 hover:text-blue-700 dark:hover:text-blue-300"
-          >
-            <FaLayerGroup size={12} />
-            ניהול קבוצות
-          </button>
-          <button
-            type="button"
-            onClick={handleCreateNewBlog}
-            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-blue-700 hover:shadow"
-          >
-            <FaPlus size={12} />
-            מאמר חדש
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={handleCreateNewBlog}
+          className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-blue-700 hover:shadow"
+        >
+          <FaPlus size={12} />
+          מאמר חדש
+        </button>
       </div>
 
       {/* Stats + search row */}
@@ -172,32 +165,39 @@ const BlogPage = () => {
         )}
       </div>
 
-      {/* Group filter chips */}
-      {groups.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 ms-1">
-            קבוצות:
-          </span>
-          {groups.map((group) => {
-            const active = selectedGroups.some((g) => g.name === group.name);
-            return (
-              <button
-                key={group._id || group.name}
-                type="button"
-                onClick={() => toggleGroup(group)}
-                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all ${
-                  active
-                    ? "border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 shadow-sm"
-                    : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-blue-300 dark:hover:border-blue-700 hover:text-blue-700 dark:hover:text-blue-300"
-                }`}
-              >
-                {group.name}
-                {active && <FaXmark size={9} className="opacity-70" />}
-              </button>
-            );
-          })}
-        </div>
-      )}
+      {/* Group filter chips + inline manage */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 ms-1">
+          קבוצות:
+        </span>
+        {groups.map((group) => {
+          const active = selectedGroups.some((g) => g.name === group.name);
+          return (
+            <button
+              key={group._id || group.name}
+              type="button"
+              onClick={() => toggleGroup(group)}
+              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all ${
+                active
+                  ? "border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 shadow-sm"
+                  : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-blue-300 dark:hover:border-blue-700 hover:text-blue-700 dark:hover:text-blue-300"
+              }`}
+            >
+              {group.name}
+              {active && <FaXmark size={9} className="opacity-70" />}
+            </button>
+          );
+        })}
+        {/* Inline manage entry-point — replaces the old standalone page. */}
+        <button
+          type="button"
+          onClick={() => setGroupsSheetOpen(true)}
+          className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400 transition-colors hover:border-blue-400 dark:hover:border-blue-600 hover:bg-blue-50/40 dark:hover:bg-blue-950/30 hover:text-blue-700 dark:hover:text-blue-300"
+        >
+          <FaPlus size={9} />
+          {groups.length === 0 ? "קבוצה ראשונה" : "ערוך קבוצות"}
+        </button>
+      </div>
 
       {/* Cards */}
       <BlogList
@@ -208,6 +208,11 @@ const BlogPage = () => {
         isLoading={isLoading}
         isError={isError}
         error={error}
+      />
+
+      <LessonGroupsSheet
+        open={groupsSheetOpen}
+        onClose={() => setGroupsSheetOpen(false)}
       />
     </div>
   );

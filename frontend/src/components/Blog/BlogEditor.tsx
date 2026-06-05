@@ -33,6 +33,7 @@ import TextEditor from "../ui/TextEditor";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import DeleteModal from "../Alerts/DeleteModal";
 import { useDisclosure } from "@/hooks/useDisclosure";
+import LessonGroupsSheet from "./LessonGroupsSheet";
 import {
   FaArrowRight,
   FaTrash,
@@ -40,6 +41,7 @@ import {
   FaLink,
   FaPenToSquare,
   FaNewspaper,
+  FaPlus,
 } from "react-icons/fa6";
 
 type MediaType = "link" | "image";
@@ -125,6 +127,9 @@ const BlogEditor = () => {
   const [linkTouched, setLinkTouched] = useState(false);
 
   const { isOpen, setOpen } = useDisclosure();
+  // Inline group management sheet — opened from "+ קבוצה חדשה" link
+  // below the group ComboBox.
+  const [groupsSheetOpen, setGroupsSheetOpen] = useState(false);
 
   const onSuccess = async () => {
     toast.success("מאמר נשמר בהצלחה!");
@@ -332,6 +337,14 @@ const BlogEditor = () => {
             inputPlaceholder="בחר קבוצה…"
             listEmptyMessage="אין קבוצות כרגע"
           />
+          <button
+            type="button"
+            onClick={() => setGroupsSheetOpen(true)}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 transition-colors hover:text-blue-700"
+          >
+            <FaPlus size={9} />
+            קבוצה חדשה / ערוך קבוצות
+          </button>
         </div>
       </Section>
 
@@ -488,6 +501,15 @@ const BlogEditor = () => {
           {isSaving ? "שומר…" : isEdit ? "שמור שינויים" : "פרסם מאמר"}
         </button>
       </div>
+
+      <LessonGroupsSheet
+        open={groupsSheetOpen}
+        onClose={() => setGroupsSheetOpen(false)}
+        onCreated={(name) => {
+          // Auto-pick the freshly created group on the blog being edited.
+          handleFieldChange("group", { name } as IBlog["group"]);
+        }}
+      />
     </div>
   );
 };
