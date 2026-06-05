@@ -1,18 +1,19 @@
 /**
- * AppSidebar — auto-hide sidebar (redesign 2026-06-03).
+ * AppSidebar — auto-hide sidebar with the dark-teal admin look the team
+ * asked for (iCount-style).
  *
- * Behavior:
- *  - The full sidebar is hidden off-screen by default (right side, RTL).
- *  - A thin invisible "hover zone" sits flush against the right edge.
- *  - Moving the mouse close to the right edge slides the sidebar in.
- *  - When the mouse leaves both the hover zone and the sidebar, it slides
- *    back out. There's a small dismissal delay so a quick stray cursor
- *    doesn't make it flicker.
- *  - A persistent small chevron at the right edge hints to the user that
- *    something is there.
+ * Behavior (unchanged):
+ *  - Hidden off-screen by default on the right (RTL).
+ *  - A thin invisible hover strip on the right edge slides it in.
+ *  - Closes on mouse-leave (with a short grace period) or Escape.
+ *  - A faint visual handle hints to the user that something is there.
  *
- * Visuals match the rest of the redesigned admin panel:
- *  - Heebo, slate-200/80 borders, white card, blue accents, rounded items.
+ * Visuals (new):
+ *  - Deep slate-teal background (#1d3540 in light, slate-950 in dark).
+ *  - Light text + slate-400 inactive icons.
+ *  - Active item: rounded-full emerald pill with white text/icon.
+ *  - Section dividers fade into the dark surface.
+ *  - Round emerald CTA button-like footer for the user identity.
  */
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -82,9 +83,28 @@ const sidebarGroups: SidebarItem[][] = [
   ],
 ];
 
-const SIDEBAR_WIDTH = 272; // px — matches `w-72` for the visible drawer
-const HOVER_TRIGGER_WIDTH = 14; // px — thin invisible strip on the right edge
-const CLOSE_DELAY_MS = 200; // small grace period before re-hiding
+const SIDEBAR_WIDTH = 272;
+const HOVER_TRIGGER_WIDTH = 14;
+const CLOSE_DELAY_MS = 200;
+
+/**
+ * Theme tokens — keep all the dark-teal colors in one place so the look
+ * is easy to nudge later without hunting through the JSX.
+ */
+const T = {
+  surface: "bg-[#1f3a44]",
+  surfaceDark: "dark:bg-slate-950",
+  border: "border-white/5",
+  borderSoft: "border-white/10",
+  textPrimary: "text-slate-100",
+  textMuted: "text-slate-400",
+  textSubtle: "text-slate-500",
+  hoverItem: "hover:bg-white/5 hover:text-white",
+  activeItem: "bg-emerald-500 text-white shadow-md shadow-emerald-500/20",
+  iconInactive: "text-slate-400 group-hover:text-slate-100",
+  iconActive: "text-white",
+  divider: "bg-white/10",
+};
 
 const SidebarLink: React.FC<{
   to: string;
@@ -97,17 +117,13 @@ const SidebarLink: React.FC<{
     <Link
       to={to}
       data-testid={testId}
-      className={`group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold transition-all ${
-        active
-          ? "bg-blue-600 text-white shadow-sm"
-          : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 hover:text-slate-900"
+      className={`group flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-semibold transition-all ${
+        active ? T.activeItem : `${T.textMuted} ${T.hoverItem}`
       }`}
     >
       <Icon
         size={17}
-        className={
-          active ? "text-white" : "text-slate-400 dark:text-slate-500 group-hover:text-slate-700"
-        }
+        className={active ? T.iconActive : T.iconInactive}
         strokeWidth={2.2}
       />
       <span>{title}</span>
@@ -132,11 +148,11 @@ const SidebarItems: React.FC = () => {
     .filter((group) => group.length > 0);
 
   return (
-    <nav className="flex flex-col gap-2">
+    <nav className="flex flex-col gap-3">
       {visibleGroups.map((group, gIdx) => (
         <React.Fragment key={gIdx}>
-          {gIdx > 0 && <div className="my-1 h-px bg-slate-100 dark:bg-slate-800" />}
-          <ul className="flex flex-col gap-0.5">
+          {gIdx > 0 && <div className={`my-1 h-px ${T.divider}`} />}
+          <ul className="flex flex-col gap-1">
             {group.map((item) => {
               const visibleChildren =
                 item.children?.filter((child) => canAccessRoute(role, child.accessKey)) ?? [];
@@ -162,23 +178,20 @@ const SidebarItems: React.FC = () => {
                 );
               }
 
-              // Group with children (collapsible). Not used in the current
-              // config but kept for future extensibility.
+              // Collapsible group with children — kept for future use.
               return (
                 <li key={item.title}>
-                  <details open={isActive} className="group rounded-xl">
-                    <summary className="flex cursor-pointer list-none items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 transition-colors hover:bg-slate-100 hover:text-slate-900">
+                  <details open={isActive} className="group rounded-full">
+                    <summary
+                      className={`flex cursor-pointer list-none items-center justify-between rounded-full px-4 py-2.5 text-sm font-semibold transition-colors ${T.textMuted} ${T.hoverItem}`}
+                    >
                       <span className="flex items-center gap-3">
-                        <item.icon
-                          size={17}
-                          className="text-slate-400 dark:text-slate-500"
-                          strokeWidth={2.2}
-                        />
+                        <item.icon size={17} className={T.iconInactive} strokeWidth={2.2} />
                         <span>{item.title}</span>
                       </span>
                       <ChevronDown
                         size={14}
-                        className="text-slate-400 dark:text-slate-500 transition-transform group-open:rotate-180"
+                        className={`${T.textSubtle} transition-transform group-open:rotate-180`}
                       />
                     </summary>
                     <ul className="mt-1 flex flex-col gap-0.5 pr-7">
@@ -209,8 +222,6 @@ const SidebarItems: React.FC = () => {
 export function AppSidebar() {
   const user = useUsersStore((state) => state.currentUser);
   const [open, setOpen] = useState(false);
-  // For "did the user pin it open via click" — future enhancement; for now,
-  // pure hover is sufficient.
   const closeTimerRef = useRef<number | null>(null);
 
   const cancelClose = () => {
@@ -227,7 +238,6 @@ export function AppSidebar() {
 
   useEffect(() => () => cancelClose(), []);
 
-  // Close on Escape, as a courtesy.
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -256,7 +266,7 @@ export function AppSidebar() {
         }}
       />
 
-      {/* Subtle visual hint — a thin handle on the edge */}
+      {/* Edge hint — emerald handle now to match the new accent */}
       <div
         aria-hidden
         className={`pointer-events-none fixed top-1/2 -translate-y-1/2 transition-opacity duration-200 ${
@@ -264,42 +274,42 @@ export function AppSidebar() {
         }`}
         style={{ right: 2, zIndex: 41 }}
       >
-        <div className="flex h-16 w-1.5 items-center justify-center rounded-full bg-gradient-to-b from-blue-500 to-blue-700 shadow-sm" />
+        <div className="flex h-16 w-1.5 items-center justify-center rounded-full bg-gradient-to-b from-emerald-400 to-emerald-600 shadow-sm" />
       </div>
 
       {/* The drawer itself */}
       <aside
         onMouseEnter={cancelClose}
         onMouseLeave={scheduleClose}
-        className={`fixed right-0 top-0 z-50 flex h-screen flex-col border-l border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 shadow-2xl transition-transform duration-300 ease-out ${
+        className={`fixed right-0 top-0 z-50 flex h-screen flex-col ${T.surface} ${T.surfaceDark} border-l ${T.border} shadow-2xl transition-transform duration-300 ease-out ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
         style={{ width: SIDEBAR_WIDTH }}
       >
         {/* Header */}
         {user && (
-          <header className="flex items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 px-5 py-4">
+          <header className={`flex items-center justify-between gap-3 border-b ${T.borderSoft} px-5 py-4`}>
             <div className="flex items-center gap-3">
-              <img
-                src="/images/app-logo.png"
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).style.display = "none";
-                }}
-                alt=""
-                className="h-10 w-10 rounded-lg border border-slate-200 dark:border-slate-800 object-cover shadow-sm"
-              />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/95 p-1 shadow-sm">
+                <img
+                  src="/images/app-logo.png"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).style.display = "none";
+                  }}
+                  alt=""
+                  className="h-full w-full rounded-md object-contain"
+                />
+              </div>
               <div>
-                <p className="text-base font-bold text-slate-900 dark:text-slate-100">
-                  מערכת ניהול
-                </p>
-                <p className="text-[11px] text-slate-400 dark:text-slate-500">Avihu Team</p>
+                <p className={`text-base font-bold ${T.textPrimary}`}>מערכת ניהול</p>
+                <p className={`text-[11px] ${T.textSubtle}`}>Avihu Team</p>
               </div>
             </div>
             <button
               type="button"
               onClick={() => setOpen(false)}
               aria-label="סגור תפריט"
-              className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 dark:text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
+              className={`flex h-7 w-7 items-center justify-center rounded-full ${T.textMuted} transition-colors hover:bg-white/10 hover:text-white`}
             >
               <ChevronLeft size={16} />
             </button>
@@ -307,30 +317,28 @@ export function AppSidebar() {
         )}
 
         {/* Items */}
-        <div className="flex-1 overflow-y-auto px-3 py-4">
+        <div className="flex-1 overflow-y-auto px-3 py-5">
           <SidebarItems />
         </div>
 
-        {/* User footer */}
+        {/* User footer — emerald pill style like the reference's CTA */}
         {user && (
           <Popover>
             <PopoverTrigger asChild>
               <button
                 type="button"
-                className="flex w-full items-center gap-3 border-t border-slate-100 dark:border-slate-800 px-4 py-3 text-right transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
+                className={`flex w-full items-center gap-3 border-t ${T.borderSoft} px-4 py-3 text-right transition-colors hover:bg-white/5`}
               >
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-300 to-amber-500 text-sm font-bold text-amber-900 shadow-sm">
                   {((user.firstName?.[0] || "") + (user.lastName?.[0] || "")).toUpperCase() || "?"}
                 </div>
                 <div className="min-w-0 flex-1 text-right">
-                  <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
+                  <p className={`truncate text-sm font-semibold ${T.textPrimary}`}>
                     {user.firstName} {user.lastName}
                   </p>
-                  <p className="truncate text-[11px] text-slate-500 dark:text-slate-400">
-                    {user.email}
-                  </p>
+                  <p className={`truncate text-[11px] ${T.textMuted}`}>{user.email}</p>
                 </div>
-                <LuChevronsUpDown className="text-slate-400 dark:text-slate-500" />
+                <LuChevronsUpDown className={T.textMuted} />
               </button>
             </PopoverTrigger>
             <PopoverContent dir="rtl" className="w-56 p-2">
