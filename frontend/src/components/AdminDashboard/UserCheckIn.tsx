@@ -138,7 +138,25 @@ const UserCheckIn = () => {
     >
       {/* Header: tabs + search — all in one compact row */}
       <header className="flex flex-wrap items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-4 py-3">
-        {/* Pill tabs — monochrome */}
+        {/* Search — right side in RTL */}
+        <div className="relative min-w-[140px] max-w-[200px]">
+          <FaMagnifyingGlass
+            size={10}
+            className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
+          />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="חיפוש…"
+            className="h-8 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 pr-7 pl-2 text-xs text-slate-700 dark:text-slate-200 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+          />
+        </div>
+
+        {/* Spacer pushes pills to the left in RTL */}
+        <div className="flex-1" />
+
+        {/* Pill tabs — left side in RTL */}
         {TABS.map((tab) => {
           const active = activeView === tab.view;
           const count = counts[tab.view];
@@ -170,20 +188,6 @@ const UserCheckIn = () => {
           );
         })}
 
-        {/* Search — grows to fill remaining space */}
-        <div className="relative ms-auto min-w-[140px] flex-1 max-w-[240px]">
-          <FaMagnifyingGlass
-            size={10}
-            className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
-          />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="חיפוש…"
-            className="h-8 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 pr-7 pl-2 text-xs text-slate-700 dark:text-slate-200 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
-          />
-        </div>
       </header>
 
       {/* Body */}
