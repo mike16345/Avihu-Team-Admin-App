@@ -46,9 +46,7 @@ const writeSaved = (key: string, top: number) => {
   }
 };
 
-export function useScrollRestoration(
-  containerRef: React.RefObject<HTMLElement | null>
-) {
+export function useScrollRestoration(containerRef: React.RefObject<HTMLElement | null>) {
   const location = useLocation();
   const navigationType = useNavigationType();
   const previousKeyRef = useRef<string | null>(null);

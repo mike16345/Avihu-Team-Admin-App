@@ -70,7 +70,10 @@ interface CreateWorkoutPlanWrapperProps {
   embedded?: boolean;
 }
 
-const CreateWorkoutPlanWrapper = ({ children, embedded = false }: CreateWorkoutPlanWrapperProps) => {
+const CreateWorkoutPlanWrapper = ({
+  children,
+  embedded = false,
+}: CreateWorkoutPlanWrapperProps) => {
   const form = useForm<WorkoutSchemaType>({
     resolver: zodResolver(fullWorkoutPlanSchema),
     defaultValues: {
@@ -240,7 +243,9 @@ const CreateWorkoutPlanWrapper = ({ children, embedded = false }: CreateWorkoutP
             style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
           >
             <div className="flex flex-col">
-              <span className="text-sm font-bold text-slate-900 dark:text-slate-100">טען תבנית קיימת</span>
+              <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                טען תבנית קיימת
+              </span>
               <span className="text-xs text-slate-500 dark:text-slate-400">
                 בחר תבנית שמורה כדי לאכלס את התוכנית במהירות
               </span>
@@ -252,8 +257,7 @@ const CreateWorkoutPlanWrapper = ({ children, embedded = false }: CreateWorkoutP
                 onSelect={(preset) => {
                   reset({
                     ...preset,
-                    cardio:
-                      preset.cardio || { type: "simple", plan: defaultSimpleCardioOption },
+                    cardio: preset.cardio || { type: "simple", plan: defaultSimpleCardioOption },
                   });
                   setSelectedPreset(preset.name);
                 }}
@@ -303,9 +307,7 @@ const CreateWorkoutPlanWrapper = ({ children, embedded = false }: CreateWorkoutP
                 }
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-emerald-700 hover:shadow disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {updateWorkoutPlan.isPending || addWorkoutPlan.isPending
-                  ? "שומר…"
-                  : "שמור תוכנית"}
+                {updateWorkoutPlan.isPending || addWorkoutPlan.isPending ? "שומר…" : "שמור תוכנית"}
               </button>
             </div>
           ) : (

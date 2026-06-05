@@ -114,10 +114,7 @@ const ExtraItems: FC<ExtraItemsProps> = ({ trigger, existingItems = [], onAddIte
           </SheetHeader>
 
           <Form {...formControl}>
-            <form
-              onSubmit={formControl.handleSubmit(onSubmit)}
-              className="space-y-4 text-right"
-            >
+            <form onSubmit={formControl.handleSubmit(onSubmit)} className="space-y-4 text-right">
               <FormField
                 control={formControl.control}
                 name="name"
@@ -127,11 +124,7 @@ const ExtraItems: FC<ExtraItemsProps> = ({ trigger, existingItems = [], onAddIte
                       שם פריט
                     </FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="הכנס פריט כאן…"
-                        className="h-10 text-sm"
-                        {...field}
-                      />
+                      <Input placeholder="הכנס פריט כאן…" className="h-10 text-sm" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

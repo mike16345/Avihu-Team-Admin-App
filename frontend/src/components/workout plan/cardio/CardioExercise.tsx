@@ -43,12 +43,7 @@ const CardioExercise: React.FC<CardioExerciseProps> = ({ parentPath }) => {
             <FormItem className="space-y-1">
               <Label>זמן חימום (דק׳)</Label>
               <FormControl>
-                <Input
-                  {...field}
-                  type="number"
-                  className="h-9 text-sm"
-                  placeholder="לפני התרגיל"
-                />
+                <Input {...field} type="number" className="h-9 text-sm" placeholder="לפני התרגיל" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -60,9 +55,7 @@ const CardioExercise: React.FC<CardioExerciseProps> = ({ parentPath }) => {
           <ComboBox
             options={cardioWorkouts || []}
             value={cardioExercise}
-            onSelect={(val) =>
-              setValue(`${parentPath}.cardioExercise`, val, { shouldDirty: true })
-            }
+            onSelect={(val) => setValue(`${parentPath}.cardioExercise`, val, { shouldDirty: true })}
           />
         </FormItem>
       </div>

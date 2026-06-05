@@ -9,12 +9,7 @@
  */
 import React from "react";
 import { useFormContext } from "react-hook-form";
-import {
-  FaBowlFood,
-  FaWeightScale,
-  FaFire,
-  FaClipboardCheck,
-} from "react-icons/fa6";
+import { FaBowlFood, FaWeightScale, FaFire, FaClipboardCheck } from "react-icons/fa6";
 import type { IDietPlan } from "@/interfaces/IDietPlan";
 
 interface StatProps {

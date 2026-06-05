@@ -9,9 +9,7 @@
 import React from "react";
 
 const Bar: React.FC<{ className?: string }> = ({ className = "" }) => (
-  <div
-    className={`animate-pulse rounded-md bg-slate-200/70 dark:bg-slate-800 ${className}`}
-  />
+  <div className={`animate-pulse rounded-md bg-slate-200/70 dark:bg-slate-800 ${className}`} />
 );
 
 const Card: React.FC<{ children?: React.ReactNode; className?: string }> = ({

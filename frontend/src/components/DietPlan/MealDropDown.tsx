@@ -228,11 +228,7 @@ export const MealDropDown: FC<MealDropDownProps> = ({
           {mealSections.every((s) => {
             const block = meal?.[s.key] as DietItemQuantityBlock | undefined;
             return !(Number(block?.quantity) || 0);
-          }) && (
-            <span className="text-xs text-slate-400 dark:text-slate-500">
-              אין מנות עדיין
-            </span>
-          )}
+          }) && <span className="text-xs text-slate-400 dark:text-slate-500">אין מנות עדיין</span>}
         </div>
 
         <button
@@ -272,12 +268,7 @@ export const MealDropDown: FC<MealDropDownProps> = ({
                       </span>
                     </div>
                     <FormControl>
-                      <Input
-                        dir="rtl"
-                        type="number"
-                        {...field}
-                        className="h-9 text-sm"
-                      />
+                      <Input dir="rtl" type="number" {...field} className="h-9 text-sm" />
                     </FormControl>
                     <FormMessage />
 

@@ -40,22 +40,78 @@ interface MuscleGroupSelectorProps {
  * which is what the user asked for.
  */
 const MUSCLE_DOTS: Record<string, { dot: string; ring: string; text: string }> = {
-  חזה: { dot: "bg-rose-500", ring: "hover:border-rose-300 dark:hover:border-rose-700", text: "group-hover:text-rose-700 dark:group-hover:text-rose-300" },
-  גב: { dot: "bg-emerald-500", ring: "hover:border-emerald-300 dark:hover:border-emerald-700", text: "group-hover:text-emerald-700 dark:group-hover:text-emerald-300" },
-  כתפיים: { dot: "bg-amber-500", ring: "hover:border-amber-300 dark:hover:border-amber-700", text: "group-hover:text-amber-700 dark:group-hover:text-amber-300" },
-  "יד קדמית": { dot: "bg-blue-500", ring: "hover:border-blue-300 dark:hover:border-blue-700", text: "group-hover:text-blue-700 dark:group-hover:text-blue-300" },
-  "יד אחורית": { dot: "bg-indigo-500", ring: "hover:border-indigo-300 dark:hover:border-indigo-700", text: "group-hover:text-indigo-700 dark:group-hover:text-indigo-300" },
-  ביצפס: { dot: "bg-blue-500", ring: "hover:border-blue-300 dark:hover:border-blue-700", text: "group-hover:text-blue-700 dark:group-hover:text-blue-300" },
-  טריצפס: { dot: "bg-indigo-500", ring: "hover:border-indigo-300 dark:hover:border-indigo-700", text: "group-hover:text-indigo-700 dark:group-hover:text-indigo-300" },
-  רגליים: { dot: "bg-violet-500", ring: "hover:border-violet-300 dark:hover:border-violet-700", text: "group-hover:text-violet-700 dark:group-hover:text-violet-300" },
-  ישבן: { dot: "bg-fuchsia-500", ring: "hover:border-fuchsia-300 dark:hover:border-fuchsia-700", text: "group-hover:text-fuchsia-700 dark:group-hover:text-fuchsia-300" },
-  תאומים: { dot: "bg-teal-500", ring: "hover:border-teal-300 dark:hover:border-teal-700", text: "group-hover:text-teal-700 dark:group-hover:text-teal-300" },
-  טרפזים: { dot: "bg-cyan-500", ring: "hover:border-cyan-300 dark:hover:border-cyan-700", text: "group-hover:text-cyan-700 dark:group-hover:text-cyan-300" },
-  אמות: { dot: "bg-sky-500", ring: "hover:border-sky-300 dark:hover:border-sky-700", text: "group-hover:text-sky-700 dark:group-hover:text-sky-300" },
-  בטן: { dot: "bg-orange-500", ring: "hover:border-orange-300 dark:hover:border-orange-700", text: "group-hover:text-orange-700 dark:group-hover:text-orange-300" },
+  חזה: {
+    dot: "bg-rose-500",
+    ring: "hover:border-rose-300 dark:hover:border-rose-700",
+    text: "group-hover:text-rose-700 dark:group-hover:text-rose-300",
+  },
+  גב: {
+    dot: "bg-emerald-500",
+    ring: "hover:border-emerald-300 dark:hover:border-emerald-700",
+    text: "group-hover:text-emerald-700 dark:group-hover:text-emerald-300",
+  },
+  כתפיים: {
+    dot: "bg-amber-500",
+    ring: "hover:border-amber-300 dark:hover:border-amber-700",
+    text: "group-hover:text-amber-700 dark:group-hover:text-amber-300",
+  },
+  "יד קדמית": {
+    dot: "bg-blue-500",
+    ring: "hover:border-blue-300 dark:hover:border-blue-700",
+    text: "group-hover:text-blue-700 dark:group-hover:text-blue-300",
+  },
+  "יד אחורית": {
+    dot: "bg-indigo-500",
+    ring: "hover:border-indigo-300 dark:hover:border-indigo-700",
+    text: "group-hover:text-indigo-700 dark:group-hover:text-indigo-300",
+  },
+  ביצפס: {
+    dot: "bg-blue-500",
+    ring: "hover:border-blue-300 dark:hover:border-blue-700",
+    text: "group-hover:text-blue-700 dark:group-hover:text-blue-300",
+  },
+  טריצפס: {
+    dot: "bg-indigo-500",
+    ring: "hover:border-indigo-300 dark:hover:border-indigo-700",
+    text: "group-hover:text-indigo-700 dark:group-hover:text-indigo-300",
+  },
+  רגליים: {
+    dot: "bg-violet-500",
+    ring: "hover:border-violet-300 dark:hover:border-violet-700",
+    text: "group-hover:text-violet-700 dark:group-hover:text-violet-300",
+  },
+  ישבן: {
+    dot: "bg-fuchsia-500",
+    ring: "hover:border-fuchsia-300 dark:hover:border-fuchsia-700",
+    text: "group-hover:text-fuchsia-700 dark:group-hover:text-fuchsia-300",
+  },
+  תאומים: {
+    dot: "bg-teal-500",
+    ring: "hover:border-teal-300 dark:hover:border-teal-700",
+    text: "group-hover:text-teal-700 dark:group-hover:text-teal-300",
+  },
+  טרפזים: {
+    dot: "bg-cyan-500",
+    ring: "hover:border-cyan-300 dark:hover:border-cyan-700",
+    text: "group-hover:text-cyan-700 dark:group-hover:text-cyan-300",
+  },
+  אמות: {
+    dot: "bg-sky-500",
+    ring: "hover:border-sky-300 dark:hover:border-sky-700",
+    text: "group-hover:text-sky-700 dark:group-hover:text-sky-300",
+  },
+  בטן: {
+    dot: "bg-orange-500",
+    ring: "hover:border-orange-300 dark:hover:border-orange-700",
+    text: "group-hover:text-orange-700 dark:group-hover:text-orange-300",
+  },
 };
 const dotsFor = (group: string) =>
-  MUSCLE_DOTS[group] || { dot: "bg-slate-400", ring: "hover:border-slate-300 dark:hover:border-slate-700", text: "" };
+  MUSCLE_DOTS[group] || {
+    dot: "bg-slate-400",
+    ring: "hover:border-slate-300 dark:hover:border-slate-700",
+    text: "",
+  };
 
 const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
   handleChange,

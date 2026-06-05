@@ -45,7 +45,9 @@ const WorkoutTabs: React.FC<WorkoutTabsProps> = ({ workoutPlan, cardioPlan, tips
                   : "text-slate-600 dark:text-slate-300 hover:bg-slate-100"
               }`}
             >
-              <span className={active ? "text-white" : "text-slate-500 dark:text-slate-400"}>{t.icon}</span>
+              <span className={active ? "text-white" : "text-slate-500 dark:text-slate-400"}>
+                {t.icon}
+              </span>
               <span>{t.label}</span>
             </button>
           );

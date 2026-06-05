@@ -50,8 +50,7 @@ function installPopstateOnce() {
   if (popstateInstalled || typeof window === "undefined") return;
   popstateInstalled = true;
   window.addEventListener("popstate", () => {
-    const current =
-      window.location.pathname + window.location.search + window.location.hash;
+    const current = window.location.pathname + window.location.search + window.location.hash;
     if (!activeGuard?.isDirty) {
       lastUrl = current;
       return;
@@ -84,10 +83,7 @@ export function tryGuardedNav(next: () => void): boolean {
   return true;
 }
 
-export function useNavigationGuard(
-  isDirty: boolean,
-  onAttempt: (next: () => void) => void
-): void {
+export function useNavigationGuard(isDirty: boolean, onAttempt: (next: () => void) => void): void {
   // Keep the latest callback in a ref so the global slot always sees
   // fresh closures.
   const onAttemptRef = useRef(onAttempt);
@@ -111,10 +107,7 @@ export function useNavigationGuard(
  * "proceed-on-target-url" API the old hook exposed. They get back a
  * stable `proceed` function that re-runs the deferred action.
  */
-export function useNavigationBlocker(
-  isDirty: boolean,
-  onBlock: (next: () => void) => void
-) {
+export function useNavigationBlocker(isDirty: boolean, onBlock: (next: () => void) => void) {
   useNavigationGuard(isDirty, onBlock);
   const proceed = useCallback((next: () => void) => next(), []);
   const reset = useCallback(() => {

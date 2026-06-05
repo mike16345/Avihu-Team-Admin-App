@@ -7,14 +7,7 @@
 import { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  FaHeartPulse,
-  FaPencil,
-  FaPlus,
-  FaFloppyDisk,
-  FaXmark,
-  FaTrash,
-} from "react-icons/fa6";
+import { FaHeartPulse, FaPencil, FaPlus, FaFloppyDisk, FaXmark, FaTrash } from "react-icons/fa6";
 import moment from "moment-timezone";
 import { toast } from "sonner";
 import { useMeasurementApi } from "@/hooks/api/useMeasurementsApi";
@@ -46,7 +39,7 @@ const blankMeasurement = (): IMuscleMeasurement =>
     glutes: NaN,
     thigh: NaN,
     calf: NaN,
-  } as IMuscleMeasurement);
+  }) as IMuscleMeasurement;
 
 const MeasurementsProgression = () => {
   const { id } = useParams();
@@ -80,7 +73,8 @@ const MeasurementsProgression = () => {
   const earliest = sorted[sorted.length - 1];
 
   const getDelta = (key: MeasurementKey) => {
-    if (!latest || !earliest) return { text: "0", color: "text-slate-400 dark:text-slate-500", arrow: "" };
+    if (!latest || !earliest)
+      return { text: "0", color: "text-slate-400 dark:text-slate-500", arrow: "" };
     const diff = (latest[key] as number) - (earliest[key] as number);
     if (diff === 0) return { text: "0", color: "text-slate-400 dark:text-slate-500", arrow: "" };
     if (diff < 0) return { text: `${diff}`, color: "text-emerald-600", arrow: "↓" };
@@ -206,7 +200,9 @@ const MeasurementsProgression = () => {
           <div className="flex items-center gap-2">
             <FaHeartPulse size={15} className="text-purple-600" />
             <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">מעקב היקפים</h3>
-            <span className="text-xs text-slate-400 dark:text-slate-500">({measurements.length} מדידות)</span>
+            <span className="text-xs text-slate-400 dark:text-slate-500">
+              ({measurements.length} מדידות)
+            </span>
           </div>
           <button
             onClick={startNew}
@@ -220,7 +216,9 @@ const MeasurementsProgression = () => {
 
         {measurements.length === 0 && editingId !== "__new__" ? (
           <div className="px-4 py-10 text-center">
-            <p className="text-sm text-slate-400 dark:text-slate-500">אין מדידות עדיין — הוסף את המדידה הראשונה</p>
+            <p className="text-sm text-slate-400 dark:text-slate-500">
+              אין מדידות עדיין — הוסף את המדידה הראשונה
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -293,7 +291,11 @@ const MeasurementsProgression = () => {
                           <td
                             key={c.key}
                             className={`px-4 py-3 text-center font-semibold ${
-                              isEmpty ? "text-slate-300" : i === 0 ? c.color : "text-slate-700 dark:text-slate-200"
+                              isEmpty
+                                ? "text-slate-300"
+                                : i === 0
+                                  ? c.color
+                                  : "text-slate-700 dark:text-slate-200"
                             }`}
                           >
                             {isEmpty ? "—" : val}
@@ -350,7 +352,9 @@ function EditRow({
   highlight?: boolean;
 }) {
   return (
-    <tr className={`border-t border-slate-100 dark:border-slate-800 ${highlight ? "bg-emerald-50/50" : "bg-blue-50/60"}`}>
+    <tr
+      className={`border-t border-slate-100 dark:border-slate-800 ${highlight ? "bg-emerald-50/50" : "bg-blue-50/60"}`}
+    >
       <td className="px-4 py-3 text-right">
         <input
           type="text"

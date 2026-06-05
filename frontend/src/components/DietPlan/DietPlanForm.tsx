@@ -74,9 +74,7 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ children }) => {
         tips={
           <TextEditor
             value={instructions}
-            onChange={(val) =>
-              setValue("customInstructions", [val], { shouldDirty: true })
-            }
+            onChange={(val) => setValue("customInstructions", [val], { shouldDirty: true })}
           />
         }
         supplements={

@@ -218,10 +218,28 @@ export const UserDashboard = () => {
 
   const cancelPlanTypeChange = () => setPendingPlanType(null);
 
-  const statusColors: Record<AccountStatus, { border: string; bg: string; text: string; dot: string }> = {
-    active: { border: "border-emerald-200 dark:border-emerald-900/60", bg: "bg-emerald-50 dark:bg-emerald-950/40", text: "text-emerald-700 dark:text-emerald-300", dot: "bg-emerald-500" },
-    user: { border: "border-blue-200 dark:border-blue-900/60", bg: "bg-blue-50 dark:bg-blue-950/40", text: "text-blue-700 dark:text-blue-300", dot: "bg-blue-500" },
-    disabled: { border: "border-red-200 dark:border-red-900/60", bg: "bg-red-50 dark:bg-red-950/40", text: "text-red-700 dark:text-red-300", dot: "bg-red-500" },
+  const statusColors: Record<
+    AccountStatus,
+    { border: string; bg: string; text: string; dot: string }
+  > = {
+    active: {
+      border: "border-emerald-200 dark:border-emerald-900/60",
+      bg: "bg-emerald-50 dark:bg-emerald-950/40",
+      text: "text-emerald-700 dark:text-emerald-300",
+      dot: "bg-emerald-500",
+    },
+    user: {
+      border: "border-blue-200 dark:border-blue-900/60",
+      bg: "bg-blue-50 dark:bg-blue-950/40",
+      text: "text-blue-700 dark:text-blue-300",
+      dot: "bg-blue-500",
+    },
+    disabled: {
+      border: "border-red-200 dark:border-red-900/60",
+      bg: "bg-red-50 dark:bg-red-950/40",
+      text: "text-red-700 dark:text-red-300",
+      dot: "bg-red-500",
+    },
   };
   const sc = statusColors[status];
 
@@ -251,7 +269,9 @@ export const UserDashboard = () => {
             </div>
             <div className="flex flex-col gap-1">
               <div>
-                <p className="text-xs uppercase tracking-widest text-slate-400 dark:text-slate-500">לקוח</p>
+                <p className="text-xs uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                  לקוח
+                </p>
                 <h2 className="text-2xl font-bold leading-tight text-slate-900 dark:text-slate-100">
                   {currentUser?.firstName} {currentUser?.lastName}
                 </h2>
@@ -342,7 +362,10 @@ export const UserDashboard = () => {
               : "text-slate-700 dark:text-slate-200 hover:bg-slate-100"
           }`}
         >
-          <FaUser size={14} className={mainTab === "profile" ? "text-white" : "text-slate-500 dark:text-slate-400"} />
+          <FaUser
+            size={14}
+            className={mainTab === "profile" ? "text-white" : "text-slate-500 dark:text-slate-400"}
+          />
           <span>פרופיל מתאמן</span>
         </button>
         <div className="flex items-center gap-1">
@@ -359,7 +382,9 @@ export const UserDashboard = () => {
                 }`}
               >
                 <span>{t.label}</span>
-                <span className={active ? "text-white" : "text-slate-500 dark:text-slate-400"}>{t.icon}</span>
+                <span className={active ? "text-white" : "text-slate-500 dark:text-slate-400"}>
+                  {t.icon}
+                </span>
               </button>
             );
           })}
@@ -591,8 +616,8 @@ function StatusConfirmationModal({
           {isDangerous ? "⚠️ אישור חסימת מתאמן" : isActivation ? "✅ הפעלת מתאמן" : "שינוי סטטוס"}
         </h3>
         <p className="mb-4 text-sm text-slate-600 dark:text-slate-300">
-          אתה עומד לשנות את הסטטוס של <span className="font-bold text-slate-900 dark:text-slate-100">{userName}</span>{" "}
-          מ-
+          אתה עומד לשנות את הסטטוס של{" "}
+          <span className="font-bold text-slate-900 dark:text-slate-100">{userName}</span> מ-
           <span className="font-bold">"{STATUS_LABEL[fromStatus]}"</span> ל-
           <span className="font-bold">"{STATUS_LABEL[toStatus]}"</span>
         </p>

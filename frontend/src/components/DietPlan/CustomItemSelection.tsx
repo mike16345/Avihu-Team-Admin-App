@@ -27,9 +27,7 @@ export const CustomItemSelection: FC<CustomItemSelectionProps> = ({
 
   const toggleSelect = (item: string) => {
     setSelectedItems((prev) => {
-      const next = prev.includes(item)
-        ? prev.filter((i) => i !== item)
-        : [...prev, item];
+      const next = prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item];
       onItemToggle(next);
       return next;
     });

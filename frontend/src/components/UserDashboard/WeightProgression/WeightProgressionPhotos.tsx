@@ -244,9 +244,7 @@ export const WeightProgressionPhotos: FC = () => {
       } else if (total === 1) {
         toast.error(lastError || "ההעלאה נכשלה");
       } else {
-        toast.error(
-          `כל ההעלאות נכשלו (${total} תמונות)${lastError ? ` — ${lastError}` : ""}`
-        );
+        toast.error(`כל ההעלאות נכשלו (${total} תמונות)${lastError ? ` — ${lastError}` : ""}`);
       }
     }
     return uploaded;
@@ -265,12 +263,10 @@ export const WeightProgressionPhotos: FC = () => {
     if (!id || !storageKey) return false;
     const s3Key = `images/${storageKey}`;
     try {
-      await deleteItem<ApiResponse<string>>(
-        "s3/photos/one",
-        undefined,
-        undefined,
-        { photoId: s3Key, userId: id }
-      );
+      await deleteItem<ApiResponse<string>>("s3/photos/one", undefined, undefined, {
+        photoId: s3Key,
+        userId: id,
+      });
       // Always hide locally — this protects against the case where the
       // server deletes from S3 but the deployed Lambda doesn't yet remove
       // the URL from MongoDB. Once the server cleanup is live this becomes
@@ -379,7 +375,9 @@ export const WeightProgressionPhotos: FC = () => {
         {groups.length === 0 && (
           <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 px-4 py-12 text-center">
             <FaCamera size={28} className="mx-auto mb-2 text-slate-300" />
-            <h3 className="text-base font-bold text-slate-700 dark:text-slate-200">אין תמונות התקדמות עדיין</h3>
+            <h3 className="text-base font-bold text-slate-700 dark:text-slate-200">
+              אין תמונות התקדמות עדיין
+            </h3>
             <p className="mt-1 text-sm text-slate-400 dark:text-slate-500">
               לחץ "העלה תמונות חדשות" כדי להוסיף את המחזור הראשון.
             </p>
@@ -517,7 +515,9 @@ export const WeightProgressionPhotos: FC = () => {
           >
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">זווית:</span>
+                <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+                  זווית:
+                </span>
                 <div className="flex items-center gap-1 rounded-xl bg-slate-100 dark:bg-slate-800 p-1">
                   {ANGLE_LABELS.map((label, i) => (
                     <button

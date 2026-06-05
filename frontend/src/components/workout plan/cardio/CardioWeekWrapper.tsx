@@ -35,12 +35,14 @@ const CardioWeekWrapper: React.FC<CardioWeekWrapperProps> = ({
   const [openWorkout, setOpenWorkout] = useState<string | null>(null);
 
   const addExercise = () => {
-    const previous = workouts[workouts.length - 1] as unknown as {
-      cardioExercise?: string;
-      distance?: string;
-      warmUpAmount?: number;
-      tips?: string;
-    } | undefined;
+    const previous = workouts[workouts.length - 1] as unknown as
+      | {
+          cardioExercise?: string;
+          distance?: string;
+          warmUpAmount?: number;
+          tips?: string;
+        }
+      | undefined;
     append({
       ...(previous || {}),
       name: `אימון ${workouts.length + 1}`,

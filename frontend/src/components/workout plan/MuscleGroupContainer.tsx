@@ -26,21 +26,39 @@ interface IMuscleGroupContainerProps extends CollapsibleProps {
  */
 const MUSCLE_COLORS: Record<string, { bg: string; text: string }> = {
   חזה: { bg: "bg-rose-50 dark:bg-rose-950/40", text: "text-rose-700 dark:text-rose-300" },
-  גב: { bg: "bg-emerald-50 dark:bg-emerald-950/40", text: "text-emerald-700 dark:text-emerald-300" },
+  גב: {
+    bg: "bg-emerald-50 dark:bg-emerald-950/40",
+    text: "text-emerald-700 dark:text-emerald-300",
+  },
   כתפיים: { bg: "bg-amber-50 dark:bg-amber-950/40", text: "text-amber-700 dark:text-amber-300" },
   "יד קדמית": { bg: "bg-blue-50 dark:bg-blue-950/40", text: "text-blue-700 dark:text-blue-300" },
-  "יד אחורית": { bg: "bg-indigo-50 dark:bg-indigo-950/40", text: "text-indigo-700 dark:text-indigo-300" },
+  "יד אחורית": {
+    bg: "bg-indigo-50 dark:bg-indigo-950/40",
+    text: "text-indigo-700 dark:text-indigo-300",
+  },
   ביצפס: { bg: "bg-blue-50 dark:bg-blue-950/40", text: "text-blue-700 dark:text-blue-300" },
-  טריצפס: { bg: "bg-indigo-50 dark:bg-indigo-950/40", text: "text-indigo-700 dark:text-indigo-300" },
-  רגליים: { bg: "bg-violet-50 dark:bg-violet-950/40", text: "text-violet-700 dark:text-violet-300" },
-  ישבן: { bg: "bg-fuchsia-50 dark:bg-fuchsia-950/40", text: "text-fuchsia-700 dark:text-fuchsia-300" },
+  טריצפס: {
+    bg: "bg-indigo-50 dark:bg-indigo-950/40",
+    text: "text-indigo-700 dark:text-indigo-300",
+  },
+  רגליים: {
+    bg: "bg-violet-50 dark:bg-violet-950/40",
+    text: "text-violet-700 dark:text-violet-300",
+  },
+  ישבן: {
+    bg: "bg-fuchsia-50 dark:bg-fuchsia-950/40",
+    text: "text-fuchsia-700 dark:text-fuchsia-300",
+  },
   תאומים: { bg: "bg-teal-50 dark:bg-teal-950/40", text: "text-teal-700 dark:text-teal-300" },
   טרפזים: { bg: "bg-cyan-50 dark:bg-cyan-950/40", text: "text-cyan-700 dark:text-cyan-300" },
   אמות: { bg: "bg-sky-50 dark:bg-sky-950/40", text: "text-sky-700 dark:text-sky-300" },
   בטן: { bg: "bg-orange-50 dark:bg-orange-950/40", text: "text-orange-700 dark:text-orange-300" },
 };
 const colorsFor = (group?: string) =>
-  (group && MUSCLE_COLORS[group]) || { bg: "bg-slate-100 dark:bg-slate-800", text: "text-slate-700 dark:text-slate-200" };
+  (group && MUSCLE_COLORS[group]) || {
+    bg: "bg-slate-100 dark:bg-slate-800",
+    text: "text-slate-700 dark:text-slate-200",
+  };
 
 export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
   muscleGroup,

@@ -112,9 +112,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
   const exerciseOptions = useMemo(() => {
     if (!exerciseQuery.data) return [];
     const exercisesInGroup = exercises?.map((e) => e.name);
-    const filtered = exerciseQuery.data.filter(
-      (e) => !exercisesInGroup?.includes(e.name)
-    );
+    const filtered = exerciseQuery.data.filter((e) => !exercisesInGroup?.includes(e.name));
     return convertItemsToOptions(filtered, "name");
   }, [exerciseQuery.data, exercises]);
 
@@ -124,11 +122,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
   }, [exerciseMethodResponse]);
 
   return (
-    <div
-      dir="rtl"
-      style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
-      className="w-full"
-    >
+    <div dir="rtl" style={{ fontFamily: "Heebo, system-ui, sans-serif" }} className="w-full">
       <div className="grid gap-4 lg:grid-cols-2">
         <DragDropWrapper items={exercises || []} setItems={handleMoveExercise} idKey="_id">
           {({ item, index }) => (
@@ -175,7 +169,9 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                       <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800">
                         <img
                           className="aspect-video w-full object-cover"
-                          src={imageUrl ? buildPhotoUrl(imageUrl) : getYouTubeThumbnail(linkToVideo)}
+                          src={
+                            imageUrl ? buildPhotoUrl(imageUrl) : getYouTubeThumbnail(linkToVideo)
+                          }
                           alt={name}
                           loading="lazy"
                         />

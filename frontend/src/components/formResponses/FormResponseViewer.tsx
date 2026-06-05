@@ -82,8 +82,7 @@ const formatSubmittedAt = (submittedAt?: string) => {
   return DateUtils.formatDate(d, "DD/MM/YYYY");
 };
 
-const isPrimitive = (v: unknown) =>
-  ["string", "number", "boolean"].includes(typeof v);
+const isPrimitive = (v: unknown) => ["string", "number", "boolean"].includes(typeof v);
 
 const normalizeFileUrls = (answer: unknown): string[] => {
   if (!answer) return [];
@@ -103,9 +102,21 @@ const initialsOf = (name: string) =>
     .toUpperCase() || "?";
 
 const TYPE_ACCENT: Record<string, { bg: string; text: string; ring: string }> = {
-  start: { bg: "bg-blue-50 dark:bg-blue-950/40", text: "text-blue-700 dark:text-blue-300", ring: "ring-blue-200" },
-  monthly: { bg: "bg-emerald-50 dark:bg-emerald-950/40", text: "text-emerald-700 dark:text-emerald-300", ring: "ring-emerald-200" },
-  general: { bg: "bg-slate-100 dark:bg-slate-800", text: "text-slate-700 dark:text-slate-200", ring: "ring-slate-200" },
+  start: {
+    bg: "bg-blue-50 dark:bg-blue-950/40",
+    text: "text-blue-700 dark:text-blue-300",
+    ring: "ring-blue-200",
+  },
+  monthly: {
+    bg: "bg-emerald-50 dark:bg-emerald-950/40",
+    text: "text-emerald-700 dark:text-emerald-300",
+    ring: "ring-emerald-200",
+  },
+  general: {
+    bg: "bg-slate-100 dark:bg-slate-800",
+    text: "text-slate-700 dark:text-slate-200",
+    ring: "ring-slate-200",
+  },
 };
 const accentOf = (type?: string) => TYPE_ACCENT[type || "general"] || TYPE_ACCENT.general;
 
@@ -115,7 +126,8 @@ const getSectionLabel = (title: string | undefined, index: number) =>
 /* ── answer renderers ────────────────────────────────────────────────────── */
 
 const renderPrimitive = (value: unknown) => {
-  if (value === null || value === undefined) return <span className="text-slate-400 dark:text-slate-500">—</span>;
+  if (value === null || value === undefined)
+    return <span className="text-slate-400 dark:text-slate-500">—</span>;
   const s = String(value);
   return <span className="whitespace-pre-wrap break-words">{s || "—"}</span>;
 };
@@ -124,9 +136,7 @@ const renderObjectDetails = (value: Record<string, unknown>) => {
   const entries = Object.entries(value);
   if (!entries.length) return <span className="text-slate-400 dark:text-slate-500">—</span>;
 
-  const onlyPrimitives = entries.every(
-    ([, v]) => v === null || v === undefined || isPrimitive(v)
-  );
+  const onlyPrimitives = entries.every(([, v]) => v === null || v === undefined || isPrimitive(v));
 
   if (onlyPrimitives) {
     return (
@@ -139,7 +149,9 @@ const renderObjectDetails = (value: Record<string, unknown>) => {
             <dt className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
               {key}
             </dt>
-            <dd className="mt-0.5 text-sm font-medium text-slate-800 dark:text-slate-100">{renderPrimitive(v)}</dd>
+            <dd className="mt-0.5 text-sm font-medium text-slate-800 dark:text-slate-100">
+              {renderPrimitive(v)}
+            </dd>
           </div>
         ))}
       </dl>
@@ -205,11 +217,16 @@ const renderQuestionAnswer = (
   }
 
   if (isPrimitive(answer)) {
-    return <div className="text-sm font-medium text-slate-800 dark:text-slate-100">{renderPrimitive(answer)}</div>;
+    return (
+      <div className="text-sm font-medium text-slate-800 dark:text-slate-100">
+        {renderPrimitive(answer)}
+      </div>
+    );
   }
 
   if (Array.isArray(answer)) {
-    if (!answer.length) return <span className="text-sm text-slate-400 dark:text-slate-500">—</span>;
+    if (!answer.length)
+      return <span className="text-sm text-slate-400 dark:text-slate-500">—</span>;
     const allPrimitive = answer.every(
       (item) => item === null || item === undefined || isPrimitive(item)
     );
@@ -247,7 +264,11 @@ const renderQuestionAnswer = (
     return renderObjectDetails(answer as Record<string, unknown>);
   }
 
-  return <div className="text-sm font-medium text-slate-800 dark:text-slate-100">{renderPrimitive(answer)}</div>;
+  return (
+    <div className="text-sm font-medium text-slate-800 dark:text-slate-100">
+      {renderPrimitive(answer)}
+    </div>
+  );
 };
 
 /* ── main component ─────────────────────────────────────────────────────── */
@@ -313,20 +334,18 @@ const FormResponseViewer = ({
   const formName = response.formTitle ?? response.formId?.name ?? "—";
   const rawFormType = response.formType ?? response.formId?.type;
   const typeLabel = rawFormType
-    ? FormTypesInHebrew[rawFormType as FormTypes] ?? rawFormType
+    ? (FormTypesInHebrew[rawFormType as FormTypes] ?? rawFormType)
     : "—";
   const accent = accentOf(rawFormType as string | undefined);
   const submittedAt = formatSubmittedAt(response.submittedAt);
   const displayRespondent =
-    respondentName?.trim() || (typeof response.userId === "string" ? response.userId : "משתמש לא ידוע");
+    respondentName?.trim() ||
+    (typeof response.userId === "string" ? response.userId : "משתמש לא ידוע");
 
   const showSelect = navigationMode === "select" || (navigationMode === "auto" && isMobile);
   const showTabs = navigationMode === "tabs" || (navigationMode === "auto" && !isMobile);
 
-  const sectionOptions = useMemo(
-    () => convertItemsToOptions(sections, "title", "_id"),
-    [sections]
-  );
+  const sectionOptions = useMemo(() => convertItemsToOptions(sections, "title", "_id"), [sections]);
 
   const activeSection = useMemo(() => {
     if (!sections.length) return undefined;
@@ -416,8 +435,8 @@ const FormResponseViewer = ({
                 importedThisSession
                   ? "cursor-default bg-emerald-600"
                   : importingPhotos
-                  ? "cursor-not-allowed bg-blue-400"
-                  : "bg-blue-600 hover:bg-blue-700"
+                    ? "cursor-not-allowed bg-blue-400"
+                    : "bg-blue-600 hover:bg-blue-700"
               }`}
             >
               {importedThisSession ? (
@@ -523,7 +542,9 @@ const FormResponseViewer = ({
             ) : (
               <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 p-8 text-center">
                 <FaClipboardList size={24} className="text-slate-300" />
-                <p className="text-sm text-slate-500 dark:text-slate-400">אין שאלות זמינות בסעיף זה.</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  אין שאלות זמינות בסעיף זה.
+                </p>
               </div>
             )}
           </div>
@@ -531,7 +552,9 @@ const FormResponseViewer = ({
       ) : (
         <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-10 text-center shadow-sm">
           <FaClipboardList size={28} className="text-slate-300" />
-          <p className="text-base font-bold text-slate-700 dark:text-slate-200">אין סעיפים בתשובה זו</p>
+          <p className="text-base font-bold text-slate-700 dark:text-slate-200">
+            אין סעיפים בתשובה זו
+          </p>
           <p className="max-w-sm text-sm text-slate-400 dark:text-slate-500">
             ייתכן שהשאלון נשלח אבל לא הוגדרו עבורו סעיפים, או שהתשובה נשמרה ריקה.
           </p>

@@ -23,10 +23,7 @@ interface WorkoutContainerProps {
   onDeleteWorkout: (index: number) => void;
 }
 
-const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
-  parentPath,
-  onDeleteWorkout,
-}) => {
+const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({ parentPath, onDeleteWorkout }) => {
   const { control, watch } = useFormContext<WorkoutSchemaType>();
   const workoutIndex = Number(parentPath.split(".")[1]);
 
@@ -156,9 +153,7 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
                 )}`}
               >
                 {mg.muscleGroup || "קבוצה"}
-                {mg.exercises?.length ? (
-                  <span className="mx-1 opacity-60">·</span>
-                ) : null}
+                {mg.exercises?.length ? <span className="mx-1 opacity-60">·</span> : null}
                 {mg.exercises?.length ? (
                   <span className="opacity-75">{mg.exercises.length}</span>
                 ) : null}

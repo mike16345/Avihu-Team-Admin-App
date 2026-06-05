@@ -14,12 +14,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
-import {
-  FaArrowTrendDown,
-  FaArrowTrendUp,
-  FaScaleBalanced,
-  FaCalendarDay,
-} from "react-icons/fa6";
+import { FaArrowTrendDown, FaArrowTrendUp, FaScaleBalanced, FaCalendarDay } from "react-icons/fa6";
 import { FaStickyNote } from "react-icons/fa";
 import { HiOutlineX } from "react-icons/hi";
 import { useWeighInsApi } from "@/hooks/api/useWeighInsApi";
@@ -108,7 +103,9 @@ export const WeightProgression = () => {
     return (
       <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-10 text-center">
         <FaScaleBalanced size={28} className="mx-auto mb-2 text-slate-300" />
-        <h3 className="text-base font-bold text-slate-700 dark:text-slate-200">אין מעקב שקילה עדיין</h3>
+        <h3 className="text-base font-bold text-slate-700 dark:text-slate-200">
+          אין מעקב שקילה עדיין
+        </h3>
         <p className="mt-1 text-sm text-slate-400 dark:text-slate-500">
           כאשר המתאמן יקליט שקילה ראשונה, נתוני המעקב יופיעו כאן.
         </p>
@@ -120,13 +117,13 @@ export const WeightProgression = () => {
   const changeColor = isLoss
     ? "text-emerald-600"
     : stats?.change === 0
-    ? "text-slate-700 dark:text-slate-200"
-    : "text-rose-600";
+      ? "text-slate-700 dark:text-slate-200"
+      : "text-rose-600";
   const changeBg = isLoss
     ? "bg-emerald-50 dark:bg-emerald-950/40"
     : stats?.change === 0
-    ? "bg-slate-50 dark:bg-slate-800"
-    : "bg-rose-50 dark:bg-rose-950/40";
+      ? "bg-slate-50 dark:bg-slate-800"
+      : "bg-rose-50 dark:bg-rose-950/40";
 
   return (
     <div
@@ -255,7 +252,9 @@ function StatCard({
   bg?: string;
 }) {
   return (
-    <div className={`rounded-xl border border-slate-200/80 dark:border-slate-800/80 ${bg} p-3 shadow-sm`}>
+    <div
+      className={`rounded-xl border border-slate-200/80 dark:border-slate-800/80 ${bg} p-3 shadow-sm`}
+    >
       <div className="flex items-center gap-1.5">
         {icon}
         <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">

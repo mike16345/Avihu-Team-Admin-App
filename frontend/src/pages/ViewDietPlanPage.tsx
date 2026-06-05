@@ -244,8 +244,8 @@ export const ViewDietPlanPage = ({ embedded = false }: ViewDietPlanPageProps) =>
         )}
 
         <DietPlanForm>
-          {(meals?.length || 0) > 0 && (
-            embedded ? (
+          {(meals?.length || 0) > 0 &&
+            (embedded ? (
               <div className="sticky bottom-0 z-10 mt-3 flex flex-col gap-2 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 p-3 shadow-lg backdrop-blur sm:flex-row sm:items-center sm:justify-end">
                 <button
                   type="button"
@@ -265,9 +265,7 @@ export const ViewDietPlanPage = ({ embedded = false }: ViewDietPlanPageProps) =>
                   }
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-emerald-700 hover:shadow disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {createDietPlan.isPending || editDietPlan.isPending
-                    ? "שומר…"
-                    : "שמור תפריט"}
+                  {createDietPlan.isPending || editDietPlan.isPending ? "שומר…" : "שמור תפריט"}
                 </button>
               </div>
             ) : (
@@ -289,8 +287,7 @@ export const ViewDietPlanPage = ({ embedded = false }: ViewDietPlanPageProps) =>
                   isLoading={createDietPlan.isPending || editDietPlan.isPending}
                 />
               </div>
-            )
-          )}
+            ))}
         </DietPlanForm>
       </Form>
       <InputModal

@@ -41,17 +41,61 @@ type FlatExercise = {
 };
 
 const groupColors: Record<string, { bg: string; text: string; gradient: string }> = {
-  חזה: { bg: "bg-blue-50 dark:bg-blue-950/40", text: "text-blue-700 dark:text-blue-300", gradient: "from-blue-500 to-blue-600" },
-  גב: { bg: "bg-emerald-50 dark:bg-emerald-950/40", text: "text-emerald-700 dark:text-emerald-300", gradient: "from-emerald-500 to-emerald-600" },
-  טרפזים: { bg: "bg-amber-50 dark:bg-amber-950/40", text: "text-amber-700 dark:text-amber-300", gradient: "from-amber-500 to-amber-600" },
-  כתפיים: { bg: "bg-purple-50", text: "text-purple-700 dark:text-purple-300", gradient: "from-purple-500 to-purple-600" },
-  "יד קידמית": { bg: "bg-cyan-50 dark:bg-cyan-950/40", text: "text-cyan-700 dark:text-cyan-300", gradient: "from-cyan-500 to-cyan-600" },
-  "יד אחורית": { bg: "bg-teal-50 dark:bg-teal-950/40", text: "text-teal-700 dark:text-teal-300", gradient: "from-teal-500 to-teal-600" },
-  רגליים: { bg: "bg-pink-50 dark:bg-pink-950/40", text: "text-pink-700 dark:text-pink-300", gradient: "from-pink-500 to-pink-600" },
-  ישבן: { bg: "bg-orange-50 dark:bg-orange-950/40", text: "text-orange-700 dark:text-orange-300", gradient: "from-orange-500 to-orange-600" },
-  תאומים: { bg: "bg-indigo-50 dark:bg-indigo-950/40", text: "text-indigo-700 dark:text-indigo-300", gradient: "from-indigo-500 to-indigo-600" },
-  אמות: { bg: "bg-rose-50 dark:bg-rose-950/40", text: "text-rose-700 dark:text-rose-300", gradient: "from-rose-500 to-rose-600" },
-  בטן: { bg: "bg-yellow-50 dark:bg-yellow-950/40", text: "text-yellow-700 dark:text-yellow-300", gradient: "from-yellow-500 to-yellow-600" },
+  חזה: {
+    bg: "bg-blue-50 dark:bg-blue-950/40",
+    text: "text-blue-700 dark:text-blue-300",
+    gradient: "from-blue-500 to-blue-600",
+  },
+  גב: {
+    bg: "bg-emerald-50 dark:bg-emerald-950/40",
+    text: "text-emerald-700 dark:text-emerald-300",
+    gradient: "from-emerald-500 to-emerald-600",
+  },
+  טרפזים: {
+    bg: "bg-amber-50 dark:bg-amber-950/40",
+    text: "text-amber-700 dark:text-amber-300",
+    gradient: "from-amber-500 to-amber-600",
+  },
+  כתפיים: {
+    bg: "bg-purple-50",
+    text: "text-purple-700 dark:text-purple-300",
+    gradient: "from-purple-500 to-purple-600",
+  },
+  "יד קידמית": {
+    bg: "bg-cyan-50 dark:bg-cyan-950/40",
+    text: "text-cyan-700 dark:text-cyan-300",
+    gradient: "from-cyan-500 to-cyan-600",
+  },
+  "יד אחורית": {
+    bg: "bg-teal-50 dark:bg-teal-950/40",
+    text: "text-teal-700 dark:text-teal-300",
+    gradient: "from-teal-500 to-teal-600",
+  },
+  רגליים: {
+    bg: "bg-pink-50 dark:bg-pink-950/40",
+    text: "text-pink-700 dark:text-pink-300",
+    gradient: "from-pink-500 to-pink-600",
+  },
+  ישבן: {
+    bg: "bg-orange-50 dark:bg-orange-950/40",
+    text: "text-orange-700 dark:text-orange-300",
+    gradient: "from-orange-500 to-orange-600",
+  },
+  תאומים: {
+    bg: "bg-indigo-50 dark:bg-indigo-950/40",
+    text: "text-indigo-700 dark:text-indigo-300",
+    gradient: "from-indigo-500 to-indigo-600",
+  },
+  אמות: {
+    bg: "bg-rose-50 dark:bg-rose-950/40",
+    text: "text-rose-700 dark:text-rose-300",
+    gradient: "from-rose-500 to-rose-600",
+  },
+  בטן: {
+    bg: "bg-yellow-50 dark:bg-yellow-950/40",
+    text: "text-yellow-700 dark:text-yellow-300",
+    gradient: "from-yellow-500 to-yellow-600",
+  },
 };
 
 const defaultColor = {
@@ -127,8 +171,8 @@ export const WorkoutProgression = () => {
     const serverArr: any[] = Array.isArray(rawData)
       ? rawData
       : Array.isArray(rawData?.data)
-      ? rawData.data
-      : [];
+        ? rawData.data
+        : [];
     const fromServer: string[] = serverArr.map((mg) => mg?.name).filter(Boolean);
     const fromData = new Set<string>(flatExercises.map((e) => e.group));
 
@@ -206,8 +250,7 @@ export const WorkoutProgression = () => {
     errorStatus === 403 ||
     errorStatus === 404 ||
     (error as any)?.data?.message === "Data could not be retrieved!";
-  if (error && !isExpectedEmpty)
-    return <ErrorPage message={(error as any).data?.message} />;
+  if (error && !isExpectedEmpty) return <ErrorPage message={(error as any).data?.message} />;
 
   return (
     <div
@@ -245,7 +288,9 @@ export const WorkoutProgression = () => {
       {!flatExercises.length && (
         <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-10 text-center">
           <FaDumbbell size={28} className="mx-auto mb-2 text-slate-300" />
-          <h3 className="text-base font-bold text-slate-700 dark:text-slate-200">אין אימונים מתועדים עדיין</h3>
+          <h3 className="text-base font-bold text-slate-700 dark:text-slate-200">
+            אין אימונים מתועדים עדיין
+          </h3>
           <p className="mt-1 text-sm text-slate-400 dark:text-slate-500">
             כאשר {userFirstName || "המתאמן"} יתעד אימון ראשון, הנתונים יופיעו כאן.
           </p>
@@ -254,186 +299,194 @@ export const WorkoutProgression = () => {
 
       {flatExercises.length > 0 && (
         <>
-
           {/* Exercise cards grid — scrollable with subtle scrollbar */}
           <div className="workout-cards-scroll max-h-[calc(100vh-280px)] overflow-y-auto pe-2 -me-2">
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {filteredExercises.map((exercise) => {
-              const first = exercise.sessions[0];
-              const last = exercise.sessions[exercise.sessions.length - 1];
-              const isBodyweight = exercise.sessions.every((s) => s.weight === 0);
-              const gain = isBodyweight ? last.reps - first.reps : last.weight - first.weight;
-              const gainPercent = isBodyweight
-                ? first.reps === 0
-                  ? 0
-                  : Math.round(((last.reps - first.reps) / first.reps) * 100)
-                : first.weight === 0
-                ? 0
-                : Math.round(((last.weight - first.weight) / first.weight) * 100);
-              const colors = groupColors[exercise.group] || defaultColor;
-              const isSelected =
-                selectedExercise === exercise.name && selectedMuscleGroup === exercise.group;
+              {filteredExercises.map((exercise) => {
+                const first = exercise.sessions[0];
+                const last = exercise.sessions[exercise.sessions.length - 1];
+                const isBodyweight = exercise.sessions.every((s) => s.weight === 0);
+                const gain = isBodyweight ? last.reps - first.reps : last.weight - first.weight;
+                const gainPercent = isBodyweight
+                  ? first.reps === 0
+                    ? 0
+                    : Math.round(((last.reps - first.reps) / first.reps) * 100)
+                  : first.weight === 0
+                    ? 0
+                    : Math.round(((last.weight - first.weight) / first.weight) * 100);
+                const colors = groupColors[exercise.group] || defaultColor;
+                const isSelected =
+                  selectedExercise === exercise.name && selectedMuscleGroup === exercise.group;
 
-              const isExpanded = expandedCard === `${exercise.group}-${exercise.name}`;
-              const sparklineValues = exercise.sessions.map((s) =>
-                isBodyweight ? s.reps : s.weight
-              );
+                const isExpanded = expandedCard === `${exercise.group}-${exercise.name}`;
+                const sparklineValues = exercise.sessions.map((s) =>
+                  isBodyweight ? s.reps : s.weight
+                );
 
-              return (
-                <div
-                  key={`${exercise.group}-${exercise.name}`}
-                  className={`overflow-hidden rounded-xl border bg-white dark:bg-slate-900 shadow-sm transition-all hover:shadow-md ${
-                    isSelected ? "border-blue-400 ring-2 ring-blue-200" : "border-slate-200/80 dark:border-slate-800/80"
-                  }`}
-                >
-                  <button
-                    onClick={() => openExerciseDetails(exercise)}
-                    className="w-full p-4 text-right"
+                return (
+                  <div
+                    key={`${exercise.group}-${exercise.name}`}
+                    className={`overflow-hidden rounded-xl border bg-white dark:bg-slate-900 shadow-sm transition-all hover:shadow-md ${
+                      isSelected
+                        ? "border-blue-400 ring-2 ring-blue-200"
+                        : "border-slate-200/80 dark:border-slate-800/80"
+                    }`}
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1">
-                        <span
-                          className={`inline-flex items-center rounded-full ${colors.bg} px-2 py-0.5 text-[10px] font-semibold ${colors.text}`}
+                    <button
+                      onClick={() => openExerciseDetails(exercise)}
+                      className="w-full p-4 text-right"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1">
+                          <span
+                            className={`inline-flex items-center rounded-full ${colors.bg} px-2 py-0.5 text-[10px] font-semibold ${colors.text}`}
+                          >
+                            {exercise.group}
+                          </span>
+                          <h3 className="mt-1.5 text-sm font-bold text-slate-900 dark:text-slate-100">
+                            {exercise.name}
+                          </h3>
+                        </div>
+                        <div
+                          className={`flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br ${colors.gradient} text-white shadow-sm`}
                         >
-                          {exercise.group}
-                        </span>
-                        <h3 className="mt-1.5 text-sm font-bold text-slate-900 dark:text-slate-100">{exercise.name}</h3>
+                          <FaDumbbell size={12} />
+                        </div>
                       </div>
-                      <div
-                        className={`flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br ${colors.gradient} text-white shadow-sm`}
-                      >
-                        <FaDumbbell size={12} />
-                      </div>
-                    </div>
 
-                    <div className="mt-3 flex items-end justify-between gap-2">
-                      <div>
-                        <p className="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500">נוכחי</p>
-                        <p className="text-xl font-bold text-slate-900 dark:text-slate-100">
-                          {isBodyweight
-                            ? `${last.reps} ${last.reps > 30 ? "שנ׳" : "חזרות"}`
-                            : `${last.weight} ק״ג`}
-                        </p>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                          {isBodyweight ? "ללא משקל" : `${last.reps} חזרות`}
-                        </p>
+                      <div className="mt-3 flex items-end justify-between gap-2">
+                        <div>
+                          <p className="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                            נוכחי
+                          </p>
+                          <p className="text-xl font-bold text-slate-900 dark:text-slate-100">
+                            {isBodyweight
+                              ? `${last.reps} ${last.reps > 30 ? "שנ׳" : "חזרות"}`
+                              : `${last.weight} ק״ג`}
+                          </p>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                            {isBodyweight ? "ללא משקל" : `${last.reps} חזרות`}
+                          </p>
+                        </div>
+                        <div
+                          className={`text-end ${
+                            gain > 0
+                              ? "text-emerald-600"
+                              : gain < 0
+                                ? "text-rose-600"
+                                : "text-slate-400 dark:text-slate-500"
+                          }`}
+                        >
+                          <p className="text-xs font-semibold">
+                            {gain > 0 ? "↑" : gain < 0 ? "↓" : "—"} {Math.abs(gain)}
+                            {isBodyweight ? (last.reps > 30 ? " שנ׳" : "") : " ק״ג"}
+                          </p>
+                          <p className="text-[10px] font-bold">
+                            {gainPercent > 0 ? "+" : ""}
+                            {gainPercent}% מתחילת ליווי
+                          </p>
+                        </div>
                       </div>
-                      <div
-                        className={`text-end ${
-                          gain > 0
-                            ? "text-emerald-600"
-                            : gain < 0
-                            ? "text-rose-600"
-                            : "text-slate-400 dark:text-slate-500"
-                        }`}
-                      >
-                        <p className="text-xs font-semibold">
-                          {gain > 0 ? "↑" : gain < 0 ? "↓" : "—"} {Math.abs(gain)}
-                          {isBodyweight ? (last.reps > 30 ? " שנ׳" : "") : " ק״ג"}
-                        </p>
-                        <p className="text-[10px] font-bold">
-                          {gainPercent > 0 ? "+" : ""}
-                          {gainPercent}% מתחילת ליווי
-                        </p>
+
+                      {/* Mini sparkline */}
+                      <div className="mt-3">
+                        <MiniSparkline values={sparklineValues} gradient={colors.gradient} />
                       </div>
-                    </div>
+                    </button>
 
-                    {/* Mini sparkline */}
-                    <div className="mt-3">
-                      <MiniSparkline values={sparklineValues} gradient={colors.gradient} />
-                    </div>
-                  </button>
+                    {/* Expand button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setExpandedCard(isExpanded ? null : `${exercise.group}-${exercise.name}`);
+                      }}
+                      className="mx-4 mb-4 inline-flex w-[calc(100%-2rem)] items-center justify-center gap-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1.5 text-[11px] font-semibold text-slate-600 dark:text-slate-300 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
+                    >
+                      {isExpanded ? <FaChevronUp size={9} /> : <FaChevronDown size={9} />}
+                      <span>{isExpanded ? "הסתר היסטוריה" : "ראה היסטוריה מלאה"}</span>
+                    </button>
 
-                  {/* Expand button */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setExpandedCard(
-                        isExpanded ? null : `${exercise.group}-${exercise.name}`
-                      );
-                    }}
-                    className="mx-4 mb-4 inline-flex w-[calc(100%-2rem)] items-center justify-center gap-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1.5 text-[11px] font-semibold text-slate-600 dark:text-slate-300 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
-                  >
-                    {isExpanded ? <FaChevronUp size={9} /> : <FaChevronDown size={9} />}
-                    <span>{isExpanded ? "הסתר היסטוריה" : "ראה היסטוריה מלאה"}</span>
-                  </button>
-
-                  {/* Expanded history */}
-                  {isExpanded && (() => {
-                    // PR-broken sessions: each session where weight (or reps for bodyweight)
-                    // EXCEEDS the previous best — i.e. the trainee broke a record.
-                    const prSessionIndices = new Set<number>();
-                    let runningBest = -Infinity;
-                    exercise.sessions.forEach((s, idx) => {
-                      const v = isBodyweight ? s.reps : s.weight;
-                      if (v > runningBest) {
-                        runningBest = v;
-                        prSessionIndices.add(idx);
-                      }
-                    });
-                    return (
-                      <div className="border-t border-slate-100 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-800/40 px-4 py-3">
-                        <table className="w-full text-xs">
-                          <thead>
-                            <tr className="text-slate-500 dark:text-slate-400">
-                              <th className="pb-2 text-right text-[10px] font-semibold uppercase tracking-wider">
-                                תאריך
-                              </th>
-                              <th className="pb-2 text-center text-[10px] font-semibold uppercase tracking-wider">
-                                {isBodyweight ? "זמן/חזרות" : "משקל"}
-                              </th>
-                              <th className="pb-2 text-center text-[10px] font-semibold uppercase tracking-wider">
-                                חזרות
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {exercise.sessions
-                              .map((s, idx) => ({ s, idx }))
-                              .reverse()
-                              .map(({ s, idx }) => {
-                                const isPR = prSessionIndices.has(idx);
-                                return (
-                                  <tr
-                                    key={idx}
-                                    className={`border-t border-slate-100 dark:border-slate-800 ${
-                                      isPR ? "bg-blue-50/60" : ""
-                                    }`}
-                                  >
-                                    <td className="py-1.5 text-right text-slate-700 dark:text-slate-200">
-                                      {s.date.toLocaleDateString("he-IL")}
-                                      {isPR && (
-                                        <span className="ms-1.5 inline-flex items-center rounded-full bg-blue-100 px-1.5 py-0.5 text-[9px] font-bold text-blue-700 dark:text-blue-300">
-                                          🏆 שיא
-                                        </span>
-                                      )}
-                                    </td>
-                                    <td
-                                      className={`py-1.5 text-center font-semibold ${
-                                        isPR ? colors.text : "text-slate-700 dark:text-slate-200"
-                                      }`}
-                                    >
-                                      {isBodyweight ? "—" : `${s.weight} ק״ג`}
-                                    </td>
-                                    <td
-                                      className={`py-1.5 text-center font-semibold ${
-                                        isPR ? colors.text : "text-slate-700 dark:text-slate-200"
-                                      }`}
-                                    >
-                                      {s.reps}
-                                      {isBodyweight && s.reps > 30 && " שנ׳"}
-                                    </td>
-                                  </tr>
-                                );
-                              })}
-                          </tbody>
-                        </table>
-                      </div>
-                    );
-                  })()}
-                </div>
-              );
-            })}
+                    {/* Expanded history */}
+                    {isExpanded &&
+                      (() => {
+                        // PR-broken sessions: each session where weight (or reps for bodyweight)
+                        // EXCEEDS the previous best — i.e. the trainee broke a record.
+                        const prSessionIndices = new Set<number>();
+                        let runningBest = -Infinity;
+                        exercise.sessions.forEach((s, idx) => {
+                          const v = isBodyweight ? s.reps : s.weight;
+                          if (v > runningBest) {
+                            runningBest = v;
+                            prSessionIndices.add(idx);
+                          }
+                        });
+                        return (
+                          <div className="border-t border-slate-100 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-800/40 px-4 py-3">
+                            <table className="w-full text-xs">
+                              <thead>
+                                <tr className="text-slate-500 dark:text-slate-400">
+                                  <th className="pb-2 text-right text-[10px] font-semibold uppercase tracking-wider">
+                                    תאריך
+                                  </th>
+                                  <th className="pb-2 text-center text-[10px] font-semibold uppercase tracking-wider">
+                                    {isBodyweight ? "זמן/חזרות" : "משקל"}
+                                  </th>
+                                  <th className="pb-2 text-center text-[10px] font-semibold uppercase tracking-wider">
+                                    חזרות
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {exercise.sessions
+                                  .map((s, idx) => ({ s, idx }))
+                                  .reverse()
+                                  .map(({ s, idx }) => {
+                                    const isPR = prSessionIndices.has(idx);
+                                    return (
+                                      <tr
+                                        key={idx}
+                                        className={`border-t border-slate-100 dark:border-slate-800 ${
+                                          isPR ? "bg-blue-50/60" : ""
+                                        }`}
+                                      >
+                                        <td className="py-1.5 text-right text-slate-700 dark:text-slate-200">
+                                          {s.date.toLocaleDateString("he-IL")}
+                                          {isPR && (
+                                            <span className="ms-1.5 inline-flex items-center rounded-full bg-blue-100 px-1.5 py-0.5 text-[9px] font-bold text-blue-700 dark:text-blue-300">
+                                              🏆 שיא
+                                            </span>
+                                          )}
+                                        </td>
+                                        <td
+                                          className={`py-1.5 text-center font-semibold ${
+                                            isPR
+                                              ? colors.text
+                                              : "text-slate-700 dark:text-slate-200"
+                                          }`}
+                                        >
+                                          {isBodyweight ? "—" : `${s.weight} ק״ג`}
+                                        </td>
+                                        <td
+                                          className={`py-1.5 text-center font-semibold ${
+                                            isPR
+                                              ? colors.text
+                                              : "text-slate-700 dark:text-slate-200"
+                                          }`}
+                                        >
+                                          {s.reps}
+                                          {isBodyweight && s.reps > 30 && " שנ׳"}
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
+                              </tbody>
+                            </table>
+                          </div>
+                        );
+                      })()}
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -523,9 +576,7 @@ function ExerciseDetailModal({
       .sort((a, b) => {
         const [da, ma, ya] = a.date.split(".").length > 1 ? a.date.split(".") : a.date.split("/");
         const [db, mb, yb] = b.date.split(".").length > 1 ? b.date.split(".") : b.date.split("/");
-        return (
-          new Date(`${ya}-${ma}-${da}`).getTime() - new Date(`${yb}-${mb}-${db}`).getTime()
-        );
+        return new Date(`${ya}-${ma}-${da}`).getTime() - new Date(`${yb}-${mb}-${db}`).getTime();
       });
   }, [rawSets]);
 
@@ -534,10 +585,9 @@ function ExerciseDetailModal({
   );
 
   const firstPR = sessions[0] ? Math.max(...sessions[0].sets.map((s) => s.weight)) : 0;
-  const lastPR =
-    sessions[sessions.length - 1]
-      ? Math.max(...sessions[sessions.length - 1].sets.map((s) => s.weight))
-      : 0;
+  const lastPR = sessions[sessions.length - 1]
+    ? Math.max(...sessions[sessions.length - 1].sets.map((s) => s.weight))
+    : 0;
   const totalGain = +(lastPR - firstPR).toFixed(1);
 
   return (
@@ -559,7 +609,9 @@ function ExerciseDetailModal({
             >
               קבוצת שריר: {exercise.group}
             </span>
-            <h2 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">{exercise.name}</h2>
+            <h2 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
+              {exercise.name}
+            </h2>
             <p className="text-sm text-slate-500 dark:text-slate-400">תרגיל — מעקב סטים מלא</p>
           </div>
           <button
@@ -572,7 +624,10 @@ function ExerciseDetailModal({
         </div>
 
         {/* Two-column body — explicit height to ensure scrolling */}
-        <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[1fr_360px]" style={{ height: "calc(90vh - 140px)" }}>
+        <div
+          className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[1fr_360px]"
+          style={{ height: "calc(90vh - 140px)" }}
+        >
           {/* Right column = sets log */}
           <div
             className="modal-sets-scroll flex h-full min-h-0 flex-col gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/30 p-3 pe-2 lg:order-2"
@@ -605,7 +660,9 @@ function ExerciseDetailModal({
                 <div
                   key={session.date}
                   className={`shrink-0 overflow-hidden rounded-2xl border bg-white dark:bg-slate-900 shadow-sm transition-all ${
-                    isOpen ? "border-blue-200 dark:border-blue-900/60 shadow-md" : "border-slate-200 dark:border-slate-800"
+                    isOpen
+                      ? "border-blue-200 dark:border-blue-900/60 shadow-md"
+                      : "border-slate-200 dark:border-slate-800"
                   }`}
                 >
                   <button
@@ -663,20 +720,22 @@ function ExerciseDetailModal({
                     <div className="flex flex-col gap-1.5 border-t border-slate-100 dark:border-slate-800 p-2.5">
                       {session.sets.map((s, idx) => {
                         // Compute if this set is the PR within the session
-                        const sessionMaxWeight = Math.max(
-                          ...session.sets.map((x) => x.weight)
-                        );
+                        const sessionMaxWeight = Math.max(...session.sets.map((x) => x.weight));
                         const isSessionPR = s.weight === sessionMaxWeight && s.weight > 0;
                         return (
                           <div
                             key={idx}
                             className={`flex items-center gap-2 rounded-lg border bg-white dark:bg-slate-900 px-2.5 py-1.5 text-xs ${
-                              isSessionPR ? "border-blue-300 bg-blue-50/40" : "border-slate-200 dark:border-slate-800"
+                              isSessionPR
+                                ? "border-blue-300 bg-blue-50/40"
+                                : "border-slate-200 dark:border-slate-800"
                             }`}
                           >
                             <span
                               className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[11px] font-bold ${
-                                isSessionPR ? "bg-blue-600 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200"
+                                isSessionPR
+                                  ? "bg-blue-600 text-white"
+                                  : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200"
                               }`}
                             >
                               {s.setNumber}
@@ -684,10 +743,16 @@ function ExerciseDetailModal({
                             <div className="flex flex-1 items-center justify-between gap-2">
                               <div className="flex items-baseline gap-3">
                                 <span className="font-bold text-slate-900 dark:text-slate-100">
-                                  {s.weight} <span className="text-[10px] text-slate-500 dark:text-slate-400">ק״ג</span>
+                                  {s.weight}{" "}
+                                  <span className="text-[10px] text-slate-500 dark:text-slate-400">
+                                    ק״ג
+                                  </span>
                                 </span>
                                 <span className="text-slate-700 dark:text-slate-200">
-                                  {s.reps} <span className="text-[10px] text-slate-500 dark:text-slate-400">חזרות</span>
+                                  {s.reps}{" "}
+                                  <span className="text-[10px] text-slate-500 dark:text-slate-400">
+                                    חזרות
+                                  </span>
                                 </span>
                               </div>
                               {s.program && (
@@ -715,8 +780,12 @@ function ExerciseDetailModal({
             <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-0 pb-3 pt-5">
               <div className="mb-3 flex items-center justify-between px-5">
                 <div>
-                  <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">התקדמות שיא לאורך זמן</h4>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">המשקל הכבד ביותר בכל אימון</p>
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                    התקדמות שיא לאורך זמן
+                  </h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    המשקל הכבד ביותר בכל אימון
+                  </p>
                 </div>
                 {totalGain !== 0 && (
                   <span
@@ -777,7 +846,9 @@ function PRTrendChart({
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
 
   if (sessions.length === 0) {
-    return <p className="py-10 text-center text-xs text-slate-400 dark:text-slate-500">אין נתונים</p>;
+    return (
+      <p className="py-10 text-center text-xs text-slate-400 dark:text-slate-500">אין נתונים</p>
+    );
   }
 
   // Detect bodyweight exercise — if all weights are 0, plot reps instead
@@ -907,13 +978,17 @@ function PRTrendChart({
             {coords[0].value} {unit}
           </span>
           <span className="text-[10px] text-slate-400 dark:text-slate-500">{coords[0].date}</span>
-          <span className="text-[9px] font-semibold text-slate-400 dark:text-slate-500">חדש ביותר</span>
+          <span className="text-[9px] font-semibold text-slate-400 dark:text-slate-500">
+            חדש ביותר
+          </span>
         </div>
         <div className="flex flex-col items-end">
           <span className="font-bold text-slate-700 dark:text-slate-200">
             {coords[coords.length - 1].value} {unit}
           </span>
-          <span className="text-[10px] text-slate-400 dark:text-slate-500">{coords[coords.length - 1].date}</span>
+          <span className="text-[10px] text-slate-400 dark:text-slate-500">
+            {coords[coords.length - 1].date}
+          </span>
           <span className="text-[9px] font-semibold text-slate-400 dark:text-slate-500">ראשון</span>
         </div>
       </div>
@@ -934,10 +1009,7 @@ function ExerciseGoals({
       </div>
     );
   }
-  const heaviestSet = allSets.reduce(
-    (max, s) => (s.weight > max.weight ? s : max),
-    allSets[0]
-  );
+  const heaviestSet = allSets.reduce((max, s) => (s.weight > max.weight ? s : max), allSets[0]);
   const currentPR = heaviestSet.weight;
   const currentReps = heaviestSet.reps;
 
@@ -959,8 +1031,12 @@ function ExerciseGoals({
 
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
         <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-2.5">
-          <p className="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500">שיא נוכחי</p>
-          <p className="mt-0.5 text-lg font-bold text-slate-900 dark:text-slate-100">{currentPR} ק״ג</p>
+          <p className="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500">
+            שיא נוכחי
+          </p>
+          <p className="mt-0.5 text-lg font-bold text-slate-900 dark:text-slate-100">
+            {currentPR} ק״ג
+          </p>
           <p className="text-[11px] text-slate-500 dark:text-slate-400">{currentReps} חזרות</p>
         </div>
         <div className="rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50/40 p-2.5">
@@ -976,7 +1052,10 @@ function ExerciseGoals({
                 className="w-14 rounded-lg border border-blue-300 bg-white dark:bg-slate-900 px-1 py-0.5 text-lg font-bold text-blue-700 dark:text-blue-300 focus:border-blue-500 focus:outline-none"
               />
             ) : (
-              <button onClick={() => setEditing(true)} className="text-lg font-bold text-blue-700 dark:text-blue-300">
+              <button
+                onClick={() => setEditing(true)}
+                className="text-lg font-bold text-blue-700 dark:text-blue-300"
+              >
                 {goalWeight} ק״ג
               </button>
             )}
@@ -1046,12 +1125,18 @@ function MonthlyPRs({
 }) {
   if (sessions.length === 0) return null;
 
-  const byMonth = new Map<string, { date: string; weight: number; reps: number; setNumber: number }>();
+  const byMonth = new Map<
+    string,
+    { date: string; weight: number; reps: number; setNumber: number }
+  >();
   sessions.forEach((session) => {
     const [, month, year] = session.date.split(/[./]/);
     const key = `${month}/${year}`;
     if (!session.sets.length) return;
-    const topSet = session.sets.reduce((max, s) => (s.weight > max.weight ? s : max), session.sets[0]);
+    const topSet = session.sets.reduce(
+      (max, s) => (s.weight > max.weight ? s : max),
+      session.sets[0]
+    );
     const existing = byMonth.get(key);
     if (!existing || topSet.weight > existing.weight) {
       byMonth.set(key, {
@@ -1093,7 +1178,9 @@ function MonthlyPRs({
       <div className="mb-3 flex items-center gap-2">
         <FaBoltLightning size={14} className="text-amber-500" />
         <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">שיאים חודשיים</h4>
-        <span className="text-[10px] text-slate-400 dark:text-slate-500">(המשקל הכבד ביותר בכל חודש)</span>
+        <span className="text-[10px] text-slate-400 dark:text-slate-500">
+          (המשקל הכבד ביותר בכל חודש)
+        </span>
       </div>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         {months.map((m, i) => {
@@ -1113,7 +1200,9 @@ function MonthlyPRs({
                     {m.pr.weight}
                     <span className="text-xs text-slate-500 dark:text-slate-400"> ק״ג</span>
                   </p>
-                  <p className="mt-0.5 text-[10px] text-slate-500 dark:text-slate-400">{m.pr.reps} חזרות</p>
+                  <p className="mt-0.5 text-[10px] text-slate-500 dark:text-slate-400">
+                    {m.pr.reps} חזרות
+                  </p>
                 </div>
                 <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-md">
                   <FaBoltLightning size={11} />
@@ -1125,8 +1214,8 @@ function MonthlyPRs({
                     delta > 0
                       ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
                       : delta < 0
-                      ? "bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300"
-                      : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+                        ? "bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300"
+                        : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
                   }`}
                 >
                   <span>{delta > 0 ? "↑" : delta < 0 ? "↓" : "→"}</span>
@@ -1251,8 +1340,12 @@ function ProgressNoteCreator({
               <FaNoteSticky size={16} />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">צור פתק התקדמות</h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">בחר טווח תאריכים ותרגילים ליצירת פתק אוטומטי</p>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+                צור פתק התקדמות
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                בחר טווח תאריכים ותרגילים ליצירת פתק אוטומטי
+              </p>
             </div>
           </div>
           <button
@@ -1375,7 +1468,9 @@ function ProgressNoteCreator({
           <div className="flex min-h-0 flex-col gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
             <div className="flex items-center justify-between gap-2">
               <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">הפתק המוצע</h3>
+                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+                  הפתק המוצע
+                </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
                   ניתן לערוך את הטקסט ידנית לפני שליחה
                 </p>
@@ -1402,7 +1497,9 @@ function ProgressNoteCreator({
               {selectedExercises.length === 0 ? (
                 <div className="flex h-full min-h-[300px] flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/30 text-center">
                   <FaNoteSticky size={28} className="text-slate-300" />
-                  <p className="text-sm text-slate-400 dark:text-slate-500">בחר תרגילים כדי ליצור פתק התקדמות.</p>
+                  <p className="text-sm text-slate-400 dark:text-slate-500">
+                    בחר תרגילים כדי ליצור פתק התקדמות.
+                  </p>
                 </div>
               ) : (
                 <textarea
@@ -1489,4 +1586,3 @@ function MiniSparkline({ values, gradient }: { values: number[]; gradient: strin
     </svg>
   );
 }
-

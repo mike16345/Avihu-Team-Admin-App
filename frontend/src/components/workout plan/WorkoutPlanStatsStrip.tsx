@@ -9,12 +9,7 @@
  */
 import React from "react";
 import { useFormContext } from "react-hook-form";
-import {
-  FaDumbbell,
-  FaListUl,
-  FaPersonRunning,
-  FaClipboardCheck,
-} from "react-icons/fa6";
+import { FaDumbbell, FaListUl, FaPersonRunning, FaClipboardCheck } from "react-icons/fa6";
 import type { WorkoutSchemaType } from "@/schemas/workoutPlanSchema";
 
 interface StatProps {
@@ -25,11 +20,20 @@ interface StatProps {
 }
 
 const TONE: Record<StatProps["tone"], { iconBg: string; iconText: string }> = {
-  purple: { iconBg: "bg-purple-100 dark:bg-purple-900/40", iconText: "text-purple-700 dark:text-purple-300" },
+  purple: {
+    iconBg: "bg-purple-100 dark:bg-purple-900/40",
+    iconText: "text-purple-700 dark:text-purple-300",
+  },
   rose: { iconBg: "bg-rose-100 dark:bg-rose-900/40", iconText: "text-rose-700 dark:text-rose-300" },
-  emerald: { iconBg: "bg-emerald-100 dark:bg-emerald-900/40", iconText: "text-emerald-700 dark:text-emerald-300" },
+  emerald: {
+    iconBg: "bg-emerald-100 dark:bg-emerald-900/40",
+    iconText: "text-emerald-700 dark:text-emerald-300",
+  },
   sky: { iconBg: "bg-sky-100 dark:bg-sky-900/40", iconText: "text-sky-700 dark:text-sky-300" },
-  amber: { iconBg: "bg-amber-100 dark:bg-amber-900/40", iconText: "text-amber-700 dark:text-amber-300" },
+  amber: {
+    iconBg: "bg-amber-100 dark:bg-amber-900/40",
+    iconText: "text-amber-700 dark:text-amber-300",
+  },
 };
 
 const StatCard: React.FC<StatProps> = ({ icon, label, value, tone }) => {
@@ -45,7 +49,9 @@ const StatCard: React.FC<StatProps> = ({ icon, label, value, tone }) => {
         <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
           {label}
         </span>
-        <span className="truncate text-base font-bold text-slate-900 dark:text-slate-100">{value}</span>
+        <span className="truncate text-base font-bold text-slate-900 dark:text-slate-100">
+          {value}
+        </span>
       </div>
     </div>
   );
@@ -62,11 +68,7 @@ const WorkoutPlanStatsStrip: React.FC = () => {
 
   const exerciseCount = workoutPlans.reduce(
     (sum, wp) =>
-      sum +
-      (wp.muscleGroups?.reduce(
-        (mgSum, mg) => mgSum + (mg.exercises?.length || 0),
-        0
-      ) || 0),
+      sum + (wp.muscleGroups?.reduce((mgSum, mg) => mgSum + (mg.exercises?.length || 0), 0) || 0),
     0
   );
 

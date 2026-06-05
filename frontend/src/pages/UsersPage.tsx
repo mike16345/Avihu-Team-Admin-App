@@ -95,7 +95,9 @@ export const UsersPage = () => {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">מתאמנים</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">ניהול ומעקב אחרי כל המתאמנים שלך</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            ניהול ומעקב אחרי כל המתאמנים שלך
+          </p>
         </div>
         <button
           data-testid="users-add-button"
@@ -109,7 +111,11 @@ export const UsersPage = () => {
 
       {/* Stats summary */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <StatCard label="סה״כ מתאמנים" value={stats.total} color="text-slate-900 dark:text-slate-100" />
+        <StatCard
+          label="סה״כ מתאמנים"
+          value={stats.total}
+          color="text-slate-900 dark:text-slate-100"
+        />
         <StatCard label="פעילים" value={stats.active} color="text-emerald-600" />
         <StatCard label="משתמשים" value={stats.inOnboarding} color="text-blue-600" />
         <StatCard label="מסתיימים השבוע" value={stats.endingSoon} color="text-rose-600" />
@@ -154,9 +160,7 @@ export const UsersPage = () => {
             <UserCard
               key={user._id}
               user={user}
-              onView={() =>
-                navigate(`/users/${user._id}?tab=${weightTab}`, { state: user })
-              }
+              onView={() => navigate(`/users/${user._id}?tab=${weightTab}`, { state: user })}
             />
           ))}
         </div>
@@ -202,13 +206,7 @@ function StatCard({ label, value, color }: { label: string; value: number; color
   );
 }
 
-function UserCard({
-  user,
-  onView,
-}: {
-  user: IUser;
-  onView: () => void;
-}) {
+function UserCard({ user, onView }: { user: IUser; onView: () => void }) {
   const initials = ((user.firstName?.[0] || "") + (user.lastName?.[0] || "")).toUpperCase() || "?";
 
   const daysLeft = user.dateFinished
@@ -221,7 +219,11 @@ function UserCard({
   const status = isInactive ? "כבוי" : "פעיל";
   const statusColors = isInactive
     ? { dot: "bg-red-500", bg: "bg-red-50", text: "text-red-700" }
-    : { dot: "bg-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-950/40", text: "text-emerald-700 dark:text-emerald-300" };
+    : {
+        dot: "bg-emerald-500",
+        bg: "bg-emerald-50 dark:bg-emerald-950/40",
+        text: "text-emerald-700 dark:text-emerald-300",
+      };
 
   return (
     <div
@@ -271,9 +273,7 @@ function UserCard({
               isExpiringSoon ? "text-rose-600" : "text-slate-800 dark:text-slate-100"
             }`}
           >
-            {user.dateFinished
-              ? DateUtils.formatDate(user.dateFinished, "DD/MM/YYYY")
-              : "—"}
+            {user.dateFinished ? DateUtils.formatDate(user.dateFinished, "DD/MM/YYYY") : "—"}
           </p>
         </div>
         <div>

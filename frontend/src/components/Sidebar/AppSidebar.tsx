@@ -105,7 +105,9 @@ const SidebarLink: React.FC<{
     >
       <Icon
         size={17}
-        className={active ? "text-white" : "text-slate-400 dark:text-slate-500 group-hover:text-slate-700"}
+        className={
+          active ? "text-white" : "text-slate-400 dark:text-slate-500 group-hover:text-slate-700"
+        }
         strokeWidth={2.2}
       />
       <span>{title}</span>
@@ -236,11 +238,7 @@ export function AppSidebar() {
   }, [open]);
 
   return (
-    <div
-      dir="rtl"
-      style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
-      data-testid="app-sidebar"
-    >
+    <div dir="rtl" style={{ fontFamily: "Heebo, system-ui, sans-serif" }} data-testid="app-sidebar">
       {/* Invisible hover trigger glued to the right edge */}
       <div
         onMouseEnter={() => {
@@ -291,7 +289,9 @@ export function AppSidebar() {
                 className="h-10 w-10 rounded-lg border border-slate-200 dark:border-slate-800 object-cover shadow-sm"
               />
               <div>
-                <p className="text-base font-bold text-slate-900 dark:text-slate-100">מערכת ניהול</p>
+                <p className="text-base font-bold text-slate-900 dark:text-slate-100">
+                  מערכת ניהול
+                </p>
                 <p className="text-[11px] text-slate-400 dark:text-slate-500">Avihu Team</p>
               </div>
             </div>
@@ -326,7 +326,9 @@ export function AppSidebar() {
                   <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
                     {user.firstName} {user.lastName}
                   </p>
-                  <p className="truncate text-[11px] text-slate-500 dark:text-slate-400">{user.email}</p>
+                  <p className="truncate text-[11px] text-slate-500 dark:text-slate-400">
+                    {user.email}
+                  </p>
                 </div>
                 <LuChevronsUpDown className="text-slate-400 dark:text-slate-500" />
               </button>

@@ -16,12 +16,7 @@ interface SetsInputProps {
   onUpdateSet?: (index: number, newSet: any) => void;
 }
 
-const SetsInput: React.FC<SetsInputProps> = ({
-  index,
-  setNumber,
-  fieldNamePrefix,
-  children,
-}) => {
+const SetsInput: React.FC<SetsInputProps> = ({ index, setNumber, fieldNamePrefix, children }) => {
   const { control } = useFormContext();
   const basePath = `${fieldNamePrefix}.${index}`;
 
@@ -40,13 +35,7 @@ const SetsInput: React.FC<SetsInputProps> = ({
               מינ׳ חזרות
             </FormLabel>
             <FormControl>
-              <Input
-                {...field}
-                type="number"
-                min={0}
-                placeholder="8"
-                className="h-9 text-sm"
-              />
+              <Input {...field} type="number" min={0} placeholder="8" className="h-9 text-sm" />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -62,13 +51,7 @@ const SetsInput: React.FC<SetsInputProps> = ({
               מקס׳ חזרות
             </FormLabel>
             <FormControl>
-              <Input
-                {...field}
-                type="number"
-                min={0}
-                placeholder="12"
-                className="h-9 text-sm"
-              />
+              <Input {...field} type="number" min={0} placeholder="12" className="h-9 text-sm" />
             </FormControl>
             <FormMessage />
           </FormItem>
