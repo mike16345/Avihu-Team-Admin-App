@@ -13,6 +13,7 @@ import Shortcut from "@/components/AdminDashboard/Shortcut";
 import UserCheckIn from "@/components/AdminDashboard/UserCheckIn";
 import AnalyticsPill from "@/components/AdminDashboard/AnalyticsPill";
 import DashboardCharts from "@/components/AdminDashboard/DashboardCharts";
+import NewClientsCard from "@/components/AdminDashboard/NewClientsCard";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { useUsersStore } from "@/store/userStore";
 import { BiFoodMenu } from "react-icons/bi";
@@ -119,13 +120,19 @@ const AdminDashboard = () => {
         </div>
       </section>
 
-      {/* Two-column: UserCheckIn (right/main) + alerts+charts (left) */}
-      <section className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-        {/* Right column — main card */}
+      {/* Three-column on xl, two-column on lg, stack on mobile.
+          Right: UserCheckIn (main).
+          Center: New clients without any plan.
+          Left: alert pills + charts. */}
+      <section className="grid grid-cols-1 gap-5 lg:grid-cols-2 xl:grid-cols-3">
+        {/* Right column — main check-in card */}
         <UserCheckIn />
 
+        {/* Center column — new clients needing full setup */}
+        <NewClientsCard />
+
         {/* Left column — alerts + charts stacked */}
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-5 lg:col-span-2 xl:col-span-1">
           {/* Alert pills under "דורשי טיפול" heading */}
           <div>
             <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
