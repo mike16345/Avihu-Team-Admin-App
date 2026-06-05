@@ -210,10 +210,7 @@ const BlogPage = () => {
         error={error}
       />
 
-      <LessonGroupsSheet
-        open={groupsSheetOpen}
-        onClose={() => setGroupsSheetOpen(false)}
-      />
+      <LessonGroupsSheet open={groupsSheetOpen} onClose={() => setGroupsSheetOpen(false)} />
     </div>
   );
 };

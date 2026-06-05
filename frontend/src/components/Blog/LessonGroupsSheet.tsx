@@ -26,13 +26,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { toast } from "sonner";
 import LessonGroupForm from "../forms/LessonGroupForm";
-import {
-  FaArrowRight,
-  FaLayerGroup,
-  FaPenToSquare,
-  FaPlus,
-  FaTrash,
-} from "react-icons/fa6";
+import { FaArrowRight, FaLayerGroup, FaPenToSquare, FaPlus, FaTrash } from "react-icons/fa6";
 import DeleteModal from "../Alerts/DeleteModal";
 import { ILessonGroup } from "@/interfaces/IBlog";
 
@@ -129,11 +123,7 @@ const LessonGroupsSheet: React.FC<LessonGroupsSheetProps> = ({
           <SheetHeader className="space-y-1 pb-4 text-right">
             <SheetTitle className="flex items-center gap-2 text-right text-xl font-bold text-slate-900 dark:text-slate-100">
               <FaLayerGroup size={16} className="text-blue-600 dark:text-blue-400" />
-              {view.kind === "list"
-                ? "קבוצות מאמרים"
-                : view.id
-                ? "עריכת קבוצה"
-                : "קבוצה חדשה"}
+              {view.kind === "list" ? "קבוצות מאמרים" : view.id ? "עריכת קבוצה" : "קבוצה חדשה"}
             </SheetTitle>
             <SheetDescription className="text-right text-xs text-slate-500 dark:text-slate-400">
               {view.kind === "list"
@@ -156,9 +146,7 @@ const LessonGroupsSheet: React.FC<LessonGroupsSheetProps> = ({
 
               {/* List */}
               {isLoading ? (
-                <p className="py-6 text-center text-sm text-slate-400 dark:text-slate-500">
-                  טוען…
-                </p>
+                <p className="py-6 text-center text-sm text-slate-400 dark:text-slate-500">טוען…</p>
               ) : groups.length === 0 ? (
                 <p className="py-6 text-center text-sm text-slate-400 dark:text-slate-500">
                   אין קבוצות עדיין
@@ -234,8 +222,8 @@ const LessonGroupsSheet: React.FC<LessonGroupsSheetProps> = ({
         alertMessage={
           pendingDelete ? (
             <>
-              למחוק את <strong>"{pendingDelete.name}"</strong>? המאמרים בקבוצה זו לא יימחקו —
-              הם פשוט יישארו ללא סיווג.
+              למחוק את <strong>"{pendingDelete.name}"</strong>? המאמרים בקבוצה זו לא יימחקו — הם
+              פשוט יישארו ללא סיווג.
             </>
           ) : undefined
         }
@@ -261,9 +249,7 @@ const FormShim: React.FC<{
         // Grab the value from the form's name input before LessonGroupForm
         // fires its own submit handler.
         const target = e.target as HTMLFormElement;
-        const nameInput = target.querySelector('input[name="name"]') as
-          | HTMLInputElement
-          | null;
+        const nameInput = target.querySelector('input[name="name"]') as HTMLInputElement | null;
         if (nameInput?.value && onSavedName) onSavedName(nameInput.value.trim());
       }}
     >
