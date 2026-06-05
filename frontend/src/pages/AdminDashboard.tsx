@@ -11,14 +11,10 @@
  */
 import Shortcut from "@/components/AdminDashboard/Shortcut";
 import UserCheckIn from "@/components/AdminDashboard/UserCheckIn";
-import AnalyticsPill from "@/components/AdminDashboard/AnalyticsPill";
-import DashboardCharts from "@/components/AdminDashboard/DashboardCharts";
 import NewClientsCard from "@/components/AdminDashboard/NewClientsCard";
-import { QueryKeys } from "@/enums/QueryKeys";
 import { useUsersStore } from "@/store/userStore";
 import { BiFoodMenu } from "react-icons/bi";
 import { FaDumbbell } from "react-icons/fa";
-import { FaAppleWhole, FaCalendarXmark } from "react-icons/fa6";
 import { FiUserPlus } from "react-icons/fi";
 import { MdOutlinePostAdd } from "react-icons/md";
 import { FaHouse } from "react-icons/fa6";
@@ -120,55 +116,10 @@ const AdminDashboard = () => {
         </div>
       </section>
 
-      {/* Three-column on xl, two-column on lg, stack on mobile.
-          Right: UserCheckIn (main).
-          Center: New clients without any plan.
-          Left: alert pills + charts. */}
-      <section className="grid grid-cols-1 gap-5 lg:grid-cols-2 xl:grid-cols-3">
-        {/* Right column — main check-in card */}
+      {/* Two-column: UserCheckIn (right) + NewClients (left) */}
+      <section className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         <UserCheckIn />
-
-        {/* Center column — new clients needing full setup */}
         <NewClientsCard />
-
-        {/* Left column — alerts + charts stacked */}
-        <div className="flex flex-col gap-5 lg:col-span-2 xl:col-span-1">
-          {/* Alert pills under "דורשי טיפול" heading */}
-          <div>
-            <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              דורשי טיפול
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <AnalyticsPill
-                icon={<FaDumbbell size={13} />}
-                label="ללא אימון"
-                dataKey={QueryKeys.NO_WORKOUT_PLAN}
-                activeBg="bg-purple-50 dark:bg-purple-950/40"
-                activeText="text-purple-700 dark:text-purple-300"
-                activeRing="border-purple-300 dark:border-purple-700"
-              />
-              <AnalyticsPill
-                icon={<FaAppleWhole size={13} />}
-                label="ללא תזונה"
-                dataKey={QueryKeys.NO_DIET_PLAN}
-                activeBg="bg-emerald-50 dark:bg-emerald-950/40"
-                activeText="text-emerald-700 dark:text-emerald-300"
-                activeRing="border-emerald-300 dark:border-emerald-700"
-              />
-              <AnalyticsPill
-                icon={<FaCalendarXmark size={13} />}
-                label="מסיימים החודש"
-                dataKey={QueryKeys.EXPIRING_USERS}
-                activeBg="bg-rose-50 dark:bg-rose-950/40"
-                activeText="text-rose-700 dark:text-rose-300"
-                activeRing="border-rose-300 dark:border-rose-700"
-              />
-            </div>
-          </div>
-
-          {/* Charts */}
-          <DashboardCharts />
-        </div>
       </section>
     </div>
   );

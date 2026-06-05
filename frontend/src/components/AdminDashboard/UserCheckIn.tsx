@@ -14,7 +14,15 @@ import useAnalyticsApi from "@/hooks/api/useAnalyticsApi";
 import Loader from "../ui/Loader";
 import { toast } from "sonner";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
-import { FaCheck, FaUserCheck, FaArrowLeft } from "react-icons/fa6";
+import {
+  FaCheck,
+  FaUserCheck,
+  FaArrowLeft,
+  FaDumbbell,
+  FaAppleWhole,
+  FaCalendarXmark,
+} from "react-icons/fa6";
+import AnalyticsPill from "./AnalyticsPill";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import ErrorPage from "@/pages/ErrorPage";
 import { FULL_DAY_STALE_TIME } from "@/constants/constants";
@@ -88,6 +96,34 @@ const UserCheckIn = () => {
           </span>
         )}
       </header>
+
+      {/* Alert pills — דורשי טיפול */}
+      <div className="flex flex-wrap items-center gap-2 border-b border-slate-100 dark:border-slate-800 px-5 py-3">
+        <AnalyticsPill
+          icon={<FaDumbbell size={13} />}
+          label="ללא אימון"
+          dataKey={QueryKeys.NO_WORKOUT_PLAN}
+          activeBg="bg-purple-50 dark:bg-purple-950/40"
+          activeText="text-purple-700 dark:text-purple-300"
+          activeRing="border-purple-300 dark:border-purple-700"
+        />
+        <AnalyticsPill
+          icon={<FaAppleWhole size={13} />}
+          label="ללא תזונה"
+          dataKey={QueryKeys.NO_DIET_PLAN}
+          activeBg="bg-emerald-50 dark:bg-emerald-950/40"
+          activeText="text-emerald-700 dark:text-emerald-300"
+          activeRing="border-emerald-300 dark:border-emerald-700"
+        />
+        <AnalyticsPill
+          icon={<FaCalendarXmark size={13} />}
+          label="מסיימים החודש"
+          dataKey={QueryKeys.EXPIRING_USERS}
+          activeBg="bg-rose-50 dark:bg-rose-950/40"
+          activeText="text-rose-700 dark:text-rose-300"
+          activeRing="border-rose-300 dark:border-rose-700"
+        />
+      </div>
 
       {/* Body */}
       <div className="flex-1 overflow-y-auto p-3">
