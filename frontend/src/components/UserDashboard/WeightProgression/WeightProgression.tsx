@@ -106,10 +106,10 @@ export const WeightProgression = () => {
 
   if (!weighIns.length) {
     return (
-      <div className="rounded-xl border border-dashed border-slate-200 bg-white px-4 py-10 text-center">
+      <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-10 text-center">
         <FaScaleBalanced size={28} className="mx-auto mb-2 text-slate-300" />
-        <h3 className="text-base font-bold text-slate-700">אין מעקב שקילה עדיין</h3>
-        <p className="mt-1 text-sm text-slate-400">
+        <h3 className="text-base font-bold text-slate-700 dark:text-slate-200">אין מעקב שקילה עדיין</h3>
+        <p className="mt-1 text-sm text-slate-400 dark:text-slate-500">
           כאשר המתאמן יקליט שקילה ראשונה, נתוני המעקב יופיעו כאן.
         </p>
       </div>
@@ -120,13 +120,13 @@ export const WeightProgression = () => {
   const changeColor = isLoss
     ? "text-emerald-600"
     : stats?.change === 0
-    ? "text-slate-700"
+    ? "text-slate-700 dark:text-slate-200"
     : "text-rose-600";
   const changeBg = isLoss
-    ? "bg-emerald-50"
+    ? "bg-emerald-50 dark:bg-emerald-950/40"
     : stats?.change === 0
-    ? "bg-slate-50"
-    : "bg-rose-50";
+    ? "bg-slate-50 dark:bg-slate-800"
+    : "bg-rose-50 dark:bg-rose-950/40";
 
   return (
     <div
@@ -143,10 +143,10 @@ export const WeightProgression = () => {
           accent="text-blue-600"
         />
         <StatCard
-          icon={<FaScaleBalanced size={14} className="text-slate-400" />}
+          icon={<FaScaleBalanced size={14} className="text-slate-400 dark:text-slate-500" />}
           label="משקל התחלתי"
           value={`${stats?.starting} ק״ג`}
-          accent="text-slate-700"
+          accent="text-slate-700 dark:text-slate-200"
         />
         <StatCard
           icon={
@@ -165,37 +165,37 @@ export const WeightProgression = () => {
           icon={<FaCalendarDay size={14} className="text-indigo-600" />}
           label="שקילה אחרונה"
           value={stats?.lastDate || "—"}
-          accent="text-slate-700"
+          accent="text-slate-700 dark:text-slate-200"
         />
       </div>
 
       {/* Chart (right) + Calendar (left) */}
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-[320px_1fr]">
-        <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm">
-          <h3 className="mb-2 text-sm font-bold text-slate-800">לוח שנה</h3>
+        <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-4 shadow-sm">
+          <h3 className="mb-2 text-sm font-bold text-slate-800 dark:text-slate-100">לוח שנה</h3>
           <WeightCalendar weighIns={weighIns} />
         </div>
 
         {/* Chart card — double-click flips to notes view */}
         <div
           ref={cardRef}
-          className="relative overflow-hidden rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm select-none"
+          className="relative overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-4 shadow-sm select-none"
           title={notesOpen ? "לחץ פעמיים לחזרה לגרף" : "לחץ פעמיים לפתקי התקדמות"}
         >
           {/* Header */}
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold text-slate-800">
+              <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">
                 {notesOpen ? "פתקי התקדמות" : "גרף משקל"}
               </h3>
-              <span className="hidden items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500 sm:inline-flex">
+              <span className="hidden items-center gap-1 rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-medium text-slate-500 dark:text-slate-400 sm:inline-flex">
                 <FaStickyNote size={9} className="text-amber-500" />
                 {notesOpen ? "לחץ פעמיים לחזרה לגרף" : "לחץ פעמיים לפתקים"}
               </span>
             </div>
             <div className="flex items-center gap-2">
               {!notesOpen && (
-                <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
+                <span className="rounded-full bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 text-[10px] font-semibold text-blue-700 dark:text-blue-300">
                   {stats?.totalRecords} שקילות
                 </span>
               )}
@@ -204,7 +204,7 @@ export const WeightProgression = () => {
                   type="button"
                   data-notes-close
                   onClick={() => setNotesOpen(false)}
-                  className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+                  className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 hover:text-slate-700"
                   aria-label="סגור"
                 >
                   <HiOutlineX size={16} />
@@ -246,7 +246,7 @@ function StatCard({
   label,
   value,
   accent,
-  bg = "bg-white",
+  bg = "bg-white dark:bg-slate-900",
 }: {
   icon: React.ReactNode;
   label: string;
@@ -255,10 +255,10 @@ function StatCard({
   bg?: string;
 }) {
   return (
-    <div className={`rounded-xl border border-slate-200/80 ${bg} p-3 shadow-sm`}>
+    <div className={`rounded-xl border border-slate-200/80 dark:border-slate-800/80 ${bg} p-3 shadow-sm`}>
       <div className="flex items-center gap-1.5">
         {icon}
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
           {label}
         </p>
       </div>

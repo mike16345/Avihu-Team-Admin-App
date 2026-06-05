@@ -103,9 +103,9 @@ const initialsOf = (name: string) =>
     .toUpperCase() || "?";
 
 const TYPE_ACCENT: Record<string, { bg: string; text: string; ring: string }> = {
-  start: { bg: "bg-blue-50", text: "text-blue-700", ring: "ring-blue-200" },
-  monthly: { bg: "bg-emerald-50", text: "text-emerald-700", ring: "ring-emerald-200" },
-  general: { bg: "bg-slate-100", text: "text-slate-700", ring: "ring-slate-200" },
+  start: { bg: "bg-blue-50 dark:bg-blue-950/40", text: "text-blue-700 dark:text-blue-300", ring: "ring-blue-200" },
+  monthly: { bg: "bg-emerald-50 dark:bg-emerald-950/40", text: "text-emerald-700 dark:text-emerald-300", ring: "ring-emerald-200" },
+  general: { bg: "bg-slate-100 dark:bg-slate-800", text: "text-slate-700 dark:text-slate-200", ring: "ring-slate-200" },
 };
 const accentOf = (type?: string) => TYPE_ACCENT[type || "general"] || TYPE_ACCENT.general;
 
@@ -115,14 +115,14 @@ const getSectionLabel = (title: string | undefined, index: number) =>
 /* ── answer renderers ────────────────────────────────────────────────────── */
 
 const renderPrimitive = (value: unknown) => {
-  if (value === null || value === undefined) return <span className="text-slate-400">—</span>;
+  if (value === null || value === undefined) return <span className="text-slate-400 dark:text-slate-500">—</span>;
   const s = String(value);
   return <span className="whitespace-pre-wrap break-words">{s || "—"}</span>;
 };
 
 const renderObjectDetails = (value: Record<string, unknown>) => {
   const entries = Object.entries(value);
-  if (!entries.length) return <span className="text-slate-400">—</span>;
+  if (!entries.length) return <span className="text-slate-400 dark:text-slate-500">—</span>;
 
   const onlyPrimitives = entries.every(
     ([, v]) => v === null || v === undefined || isPrimitive(v)
@@ -134,12 +134,12 @@ const renderObjectDetails = (value: Record<string, unknown>) => {
         {entries.map(([key, v]) => (
           <div
             key={key}
-            className="rounded-xl border border-slate-200 bg-slate-50/40 px-3 py-2"
+            className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-800/40 px-3 py-2"
           >
-            <dt className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+            <dt className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
               {key}
             </dt>
-            <dd className="mt-0.5 text-sm font-medium text-slate-800">{renderPrimitive(v)}</dd>
+            <dd className="mt-0.5 text-sm font-medium text-slate-800 dark:text-slate-100">{renderPrimitive(v)}</dd>
           </div>
         ))}
       </dl>
@@ -149,11 +149,11 @@ const renderObjectDetails = (value: Record<string, unknown>) => {
   return (
     <Accordion type="single" collapsible>
       <AccordionItem value="details" className="border-none">
-        <AccordionTrigger className="text-sm font-semibold text-blue-700 hover:no-underline">
+        <AccordionTrigger className="text-sm font-semibold text-blue-700 dark:text-blue-300 hover:no-underline">
           צפה בפרטים הגולמיים
         </AccordionTrigger>
         <AccordionContent>
-          <pre className="max-w-full overflow-x-auto whitespace-pre-wrap break-words rounded-lg bg-slate-50 p-3 text-xs text-slate-700">
+          <pre className="max-w-full overflow-x-auto whitespace-pre-wrap break-words rounded-lg bg-slate-50 dark:bg-slate-800 p-3 text-xs text-slate-700 dark:text-slate-200">
             {JSON.stringify(value, null, 2)}
           </pre>
         </AccordionContent>
@@ -172,7 +172,7 @@ const renderQuestionAnswer = (
     const urls = normalizeFileUrls(answer);
     if (!urls.length) {
       return (
-        <div className="flex items-center gap-2 text-sm text-slate-400">
+        <div className="flex items-center gap-2 text-sm text-slate-400 dark:text-slate-500">
           <FaImage size={13} />
           קובץ לא זמין
         </div>
@@ -185,7 +185,7 @@ const renderQuestionAnswer = (
             key={`${url}-${index}`}
             type="button"
             onClick={() => onImageSelect(urls, index)}
-            className="group relative overflow-hidden rounded-xl border border-slate-200 bg-slate-50 transition-all hover:border-blue-300 hover:shadow-md"
+            className="group relative overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 transition-all hover:border-blue-300 hover:shadow-md"
           >
             <img
               src={url}
@@ -194,7 +194,7 @@ const renderQuestionAnswer = (
               loading="lazy"
             />
             <div className="pointer-events-none absolute inset-0 flex items-end justify-center bg-gradient-to-t from-slate-900/30 to-transparent opacity-0 transition-opacity group-hover:opacity-100">
-              <span className="mb-2 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-semibold text-slate-700 backdrop-blur-sm">
+              <span className="mb-2 rounded-full bg-white/90 dark:bg-slate-900/90 px-2 py-0.5 text-[10px] font-semibold text-slate-700 dark:text-slate-200 backdrop-blur-sm">
                 לחץ להגדלה
               </span>
             </div>
@@ -205,11 +205,11 @@ const renderQuestionAnswer = (
   }
 
   if (isPrimitive(answer)) {
-    return <div className="text-sm font-medium text-slate-800">{renderPrimitive(answer)}</div>;
+    return <div className="text-sm font-medium text-slate-800 dark:text-slate-100">{renderPrimitive(answer)}</div>;
   }
 
   if (Array.isArray(answer)) {
-    if (!answer.length) return <span className="text-sm text-slate-400">—</span>;
+    if (!answer.length) return <span className="text-sm text-slate-400 dark:text-slate-500">—</span>;
     const allPrimitive = answer.every(
       (item) => item === null || item === undefined || isPrimitive(item)
     );
@@ -219,7 +219,7 @@ const renderQuestionAnswer = (
           {answer.map((item, index) => (
             <li
               key={`${String(item)}-${index}`}
-              className="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-100"
+              className="rounded-full bg-blue-50 dark:bg-blue-950/40 px-2.5 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-300 ring-1 ring-inset ring-blue-100"
             >
               {renderPrimitive(item)}
             </li>
@@ -230,11 +230,11 @@ const renderQuestionAnswer = (
     return (
       <Accordion type="single" collapsible>
         <AccordionItem value="details" className="border-none">
-          <AccordionTrigger className="text-sm font-semibold text-blue-700 hover:no-underline">
+          <AccordionTrigger className="text-sm font-semibold text-blue-700 dark:text-blue-300 hover:no-underline">
             צפה בפרטים
           </AccordionTrigger>
           <AccordionContent>
-            <pre className="max-w-full overflow-x-auto whitespace-pre-wrap break-words rounded-lg bg-slate-50 p-3 text-xs text-slate-700">
+            <pre className="max-w-full overflow-x-auto whitespace-pre-wrap break-words rounded-lg bg-slate-50 dark:bg-slate-800 p-3 text-xs text-slate-700 dark:text-slate-200">
               {JSON.stringify(answer, null, 2)}
             </pre>
           </AccordionContent>
@@ -247,7 +247,7 @@ const renderQuestionAnswer = (
     return renderObjectDetails(answer as Record<string, unknown>);
   }
 
-  return <div className="text-sm font-medium text-slate-800">{renderPrimitive(answer)}</div>;
+  return <div className="text-sm font-medium text-slate-800 dark:text-slate-100">{renderPrimitive(answer)}</div>;
 };
 
 /* ── main component ─────────────────────────────────────────────────────── */
@@ -356,7 +356,7 @@ const FormResponseViewer = ({
       style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
     >
       {/* Header card */}
-      <div className="rounded-2xl border border-slate-200/80 bg-white p-8 shadow-sm">
+      <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-8 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-5">
           {/* Left: avatar + names */}
           <div className="flex items-center gap-4">
@@ -364,14 +364,14 @@ const FormResponseViewer = ({
               {initialsOf(displayRespondent)}
             </div>
             <div className="min-w-0">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                 <FaClipboardList size={11} />
                 פרטי תשובה
               </div>
-              <h1 className="mt-0.5 truncate text-xl font-bold text-slate-900">
+              <h1 className="mt-0.5 truncate text-xl font-bold text-slate-900 dark:text-slate-100">
                 {displayRespondent}
               </h1>
-              <p className="truncate text-sm text-slate-500">{formName}</p>
+              <p className="truncate text-sm text-slate-500 dark:text-slate-400">{formName}</p>
             </div>
           </div>
 
@@ -382,11 +382,11 @@ const FormResponseViewer = ({
             >
               {typeLabel}
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
-              <FaCalendarDay size={10} className="text-slate-400" />
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 dark:bg-slate-800 px-3 py-1 text-xs font-medium text-slate-600 dark:text-slate-300">
+              <FaCalendarDay size={10} className="text-slate-400 dark:text-slate-500" />
               {submittedAt}
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500 ring-1 ring-inset ring-slate-200">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-50 dark:bg-slate-800 px-3 py-1 text-xs font-medium text-slate-500 dark:text-slate-400 ring-1 ring-inset ring-slate-200">
               {totalQuestions} שאלות · {sections.length} סעיפים
             </span>
           </div>
@@ -400,10 +400,10 @@ const FormResponseViewer = ({
                 <FaImages size={14} />
               </span>
               <div className="text-right">
-                <p className="text-sm font-bold text-slate-900">
+                <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
                   {photoKeys.length} תמונות הועלו בשאלון
                 </p>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   אפשר להוסיף אותן לגלריית תמונות ההתקדמות של המתאמן בלחיצה אחת
                 </p>
               </div>
@@ -443,7 +443,7 @@ const FormResponseViewer = ({
         <>
           {/* Section navigation */}
           {sections.length > 1 && showSelect && (
-            <div className="sticky top-2 z-10 rounded-2xl border border-slate-200/80 bg-white/95 p-3 shadow-sm backdrop-blur-sm">
+            <div className="sticky top-2 z-10 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white/95 p-3 shadow-sm backdrop-blur-sm">
               <CustomSelect
                 items={sectionOptions}
                 selectedValue={activeSectionId}
@@ -455,7 +455,7 @@ const FormResponseViewer = ({
           )}
 
           {sections.length > 1 && showTabs && (
-            <div className="sticky top-2 z-10 rounded-2xl border border-slate-200/80 bg-white/95 p-1.5 shadow-sm backdrop-blur-sm">
+            <div className="sticky top-2 z-10 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white/95 p-1.5 shadow-sm backdrop-blur-sm">
               <div className="flex flex-wrap gap-1.5">
                 {sections.map((section, index) => {
                   const isActive = section._id === (activeSection?._id ?? "");
@@ -467,7 +467,7 @@ const FormResponseViewer = ({
                       className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-all ${
                         isActive
                           ? "bg-blue-600 text-white shadow-sm"
-                          : "text-slate-600 hover:bg-slate-100"
+                          : "text-slate-600 dark:text-slate-300 hover:bg-slate-100"
                       }`}
                     >
                       {getSectionLabel(section.title, index)}
@@ -479,9 +479,9 @@ const FormResponseViewer = ({
           )}
 
           {/* Active section */}
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-8 shadow-sm">
+          <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-8 shadow-sm">
             <div className="mb-6 flex items-center justify-between gap-2">
-              <h2 className="text-lg font-bold text-slate-900">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
                 {activeSection
                   ? getSectionLabel(
                       activeSection.title,
@@ -490,7 +490,7 @@ const FormResponseViewer = ({
                   : "פרטי סעיף"}
               </h2>
               {activeSection?.questions?.length ? (
-                <span className="text-[11px] font-medium text-slate-400">
+                <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500">
                   {activeSection.questions.length}{" "}
                   {activeSection.questions.length === 1 ? "שאלה" : "שאלות"}
                 </span>
@@ -502,13 +502,13 @@ const FormResponseViewer = ({
                 {activeSection.questions.map((question, index) => (
                   <article
                     key={question._id || `${question.question}-${index}`}
-                    className="rounded-xl border border-slate-200/80 bg-slate-50/40 p-5 transition-colors hover:bg-slate-50"
+                    className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-slate-50/40 dark:bg-slate-800/40 p-5 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
                   >
                     <div className="mb-3 flex items-start gap-3">
-                      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 text-[11px] font-bold text-blue-700">
+                      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 text-[11px] font-bold text-blue-700 dark:text-blue-300">
                         {index + 1}
                       </span>
-                      <p className="text-sm font-bold leading-snug text-slate-900">
+                      <p className="text-sm font-bold leading-snug text-slate-900 dark:text-slate-100">
                         {question.question}
                       </p>
                     </div>
@@ -521,18 +521,18 @@ const FormResponseViewer = ({
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
+              <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 p-8 text-center">
                 <FaClipboardList size={24} className="text-slate-300" />
-                <p className="text-sm text-slate-500">אין שאלות זמינות בסעיף זה.</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">אין שאלות זמינות בסעיף זה.</p>
               </div>
             )}
           </div>
         </>
       ) : (
-        <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center shadow-sm">
+        <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-10 text-center shadow-sm">
           <FaClipboardList size={28} className="text-slate-300" />
-          <p className="text-base font-bold text-slate-700">אין סעיפים בתשובה זו</p>
-          <p className="max-w-sm text-sm text-slate-400">
+          <p className="text-base font-bold text-slate-700 dark:text-slate-200">אין סעיפים בתשובה זו</p>
+          <p className="max-w-sm text-sm text-slate-400 dark:text-slate-500">
             ייתכן שהשאלון נשלח אבל לא הוגדרו עבורו סעיפים, או שהתשובה נשמרה ריקה.
           </p>
         </div>

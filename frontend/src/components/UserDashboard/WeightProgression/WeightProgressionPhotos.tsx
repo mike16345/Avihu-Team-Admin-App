@@ -344,10 +344,10 @@ export const WeightProgressionPhotos: FC = () => {
         }}
       />
 
-      <div className="rounded-2xl border border-slate-200/80 bg-white p-8 shadow-sm">
+      <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-8 shadow-sm">
         {/* Header */}
         <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-slate-900">
+          <div className="flex items-center gap-2 text-slate-900 dark:text-slate-100">
             <FaCamera size={16} className="text-blue-600" />
             <span className="text-lg font-bold">תמונות התקדמות</span>
           </div>
@@ -377,10 +377,10 @@ export const WeightProgressionPhotos: FC = () => {
 
         {/* Empty state */}
         {groups.length === 0 && (
-          <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-12 text-center">
+          <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 px-4 py-12 text-center">
             <FaCamera size={28} className="mx-auto mb-2 text-slate-300" />
-            <h3 className="text-base font-bold text-slate-700">אין תמונות התקדמות עדיין</h3>
-            <p className="mt-1 text-sm text-slate-400">
+            <h3 className="text-base font-bold text-slate-700 dark:text-slate-200">אין תמונות התקדמות עדיין</h3>
+            <p className="mt-1 text-sm text-slate-400 dark:text-slate-500">
               לחץ "העלה תמונות חדשות" כדי להוסיף את המחזור הראשון.
             </p>
           </div>
@@ -395,18 +395,18 @@ export const WeightProgressionPhotos: FC = () => {
           {groups.map((group) => (
             <div key={group.cycleNumber}>
               <div className="mb-4 flex items-center justify-between gap-3">
-                <div className="h-px flex-1 bg-slate-100" />
+                <div className="h-px flex-1 bg-slate-100 dark:bg-slate-800" />
                 <div className="flex items-baseline gap-2 px-4">
-                  <span className="text-sm font-bold text-slate-800">
+                  <span className="text-sm font-bold text-slate-800 dark:text-slate-100">
                     מחזור {group.cycleNumber}
                   </span>
                   {group.uploadDate && (
-                    <span className="text-xs font-medium text-slate-400">
+                    <span className="text-xs font-medium text-slate-400 dark:text-slate-500">
                       · {group.uploadDate}
                     </span>
                   )}
                 </div>
-                <div className="h-px flex-1 bg-slate-100" />
+                <div className="h-px flex-1 bg-slate-100 dark:bg-slate-800" />
               </div>
               <div className="grid grid-cols-2 gap-5 sm:grid-cols-4">
                 {group.photos.map((p, i) => {
@@ -415,7 +415,7 @@ export const WeightProgressionPhotos: FC = () => {
                     return (
                       <div
                         key={i}
-                        className="group relative aspect-[3/4] overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition-all hover:border-blue-300 hover:shadow-md"
+                        className="group relative aspect-[3/4] overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 transition-all hover:border-blue-300 hover:shadow-md"
                       >
                         <button
                           type="button"
@@ -441,7 +441,7 @@ export const WeightProgressionPhotos: FC = () => {
                             }}
                             disabled={isBusy}
                             title="החלף תמונה"
-                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/95 text-slate-700 shadow-sm transition-all hover:bg-blue-50 hover:text-blue-700 disabled:opacity-50"
+                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/95 text-slate-700 dark:text-slate-200 shadow-sm transition-all hover:bg-blue-50 hover:text-blue-700 disabled:opacity-50"
                           >
                             <FaArrowsRotate size={12} />
                           </button>
@@ -461,13 +461,13 @@ export const WeightProgressionPhotos: FC = () => {
 
                         {/* Busy overlay during delete/replace */}
                         {isBusy && (
-                          <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/70 text-xs font-semibold text-slate-700 backdrop-blur-sm">
+                          <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/70 text-xs font-semibold text-slate-700 dark:text-slate-200 backdrop-blur-sm">
                             פועל...
                           </div>
                         )}
 
                         {/* Bottom label */}
-                        <div className="pointer-events-none absolute inset-x-3 bottom-3 z-10 flex items-center justify-center rounded-lg bg-white/95 py-1.5 text-xs font-semibold text-slate-700 backdrop-blur-sm">
+                        <div className="pointer-events-none absolute inset-x-3 bottom-3 z-10 flex items-center justify-center rounded-lg bg-white/95 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 backdrop-blur-sm">
                           {p.label}
                         </div>
                       </div>
@@ -477,7 +477,7 @@ export const WeightProgressionPhotos: FC = () => {
                   return (
                     <label
                       key={i}
-                      className="group relative aspect-[3/4] cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition-all hover:border-blue-300 hover:shadow-md"
+                      className="group relative aspect-[3/4] cursor-pointer overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 transition-all hover:border-blue-300 hover:shadow-md"
                     >
                       <input
                         type="file"
@@ -490,7 +490,7 @@ export const WeightProgressionPhotos: FC = () => {
                           e.target.value = "";
                         }}
                       />
-                      <div className="flex h-full w-full flex-col items-center justify-center gap-3 text-slate-400 transition-colors group-hover:text-blue-500">
+                      <div className="flex h-full w-full flex-col items-center justify-center gap-3 text-slate-400 dark:text-slate-500 transition-colors group-hover:text-blue-500">
                         <FaCamera size={32} />
                         <span className="text-sm font-medium">{p.label}</span>
                       </div>
@@ -511,14 +511,14 @@ export const WeightProgressionPhotos: FC = () => {
           dir="rtl"
         >
           <div
-            className="relative flex h-full max-h-[90vh] w-full max-w-6xl flex-col gap-3 rounded-3xl bg-white p-5 shadow-2xl"
+            className="relative flex h-full max-h-[90vh] w-full max-w-6xl flex-col gap-3 rounded-3xl bg-white dark:bg-slate-900 p-5 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
             style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
           >
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-slate-500">זווית:</span>
-                <div className="flex items-center gap-1 rounded-xl bg-slate-100 p-1">
+                <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">זווית:</span>
+                <div className="flex items-center gap-1 rounded-xl bg-slate-100 dark:bg-slate-800 p-1">
                   {ANGLE_LABELS.map((label, i) => (
                     <button
                       key={label}
@@ -526,7 +526,7 @@ export const WeightProgressionPhotos: FC = () => {
                       className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
                         compareAngle === i
                           ? "bg-blue-600 text-white shadow-sm"
-                          : "text-slate-600 hover:bg-white"
+                          : "text-slate-600 dark:text-slate-300 hover:bg-white"
                       }`}
                     >
                       {label}
@@ -541,7 +541,7 @@ export const WeightProgressionPhotos: FC = () => {
                 </button>
                 <button
                   onClick={() => setCompareOpen(false)}
-                  className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100"
+                  className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100"
                 >
                   <FaXmark size={16} />
                 </button>
@@ -591,7 +591,7 @@ function ComparePane({
   const group = groups[groupIdx];
   const photo = group?.photos[angle];
   return (
-    <div className="flex min-h-0 flex-col gap-2 rounded-2xl border border-slate-200 bg-slate-50/30 p-3">
+    <div className="flex min-h-0 flex-col gap-2 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/30 p-3">
       <div className="flex items-center justify-between gap-2">
         <span
           className={`inline-flex items-center rounded-full ${badgeColor} px-3 py-1 text-xs font-bold text-white`}
@@ -601,7 +601,7 @@ function ComparePane({
         <select
           value={groupIdx}
           onChange={(e) => onChange(Number(e.target.value))}
-          className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-700 focus:border-blue-500 focus:outline-none"
+          className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-2 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200 focus:border-blue-500 focus:outline-none"
         >
           {groups.map((g, i) => (
             <option key={i} value={i}>
@@ -610,7 +610,7 @@ function ComparePane({
           ))}
         </select>
       </div>
-      <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white">
+      <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
         {photo?.url ? (
           <img src={photo.url} alt={photo.label} className="max-h-full max-w-full object-contain" />
         ) : (

@@ -32,6 +32,11 @@ import { defaultSimpleCardioOption } from "@/constants/cardioOptions";
 import { ICompleteWorkoutPlan, ISimpleCardioType } from "@/interfaces/IWorkoutPlan";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 import FormResponseBubbleWrapper from "../formResponses/FormResponseBubbleWrapper";
+import WorkoutPlanStatsStrip from "../workout plan/WorkoutPlanStatsStrip";
+import WorkoutPlanSkeleton from "../workout plan/WorkoutPlanSkeleton";
+import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
+import UnsavedChangesDialog from "../Alerts/UnsavedChangesDialog";
+import { summariseWorkoutDirty } from "@/utils/dirtyFieldsSummary";
 
 const calculateMinPerWorkout = (workout: WorkoutSchemaType) => {
   let workoutPlan = workout;
@@ -54,7 +59,18 @@ const calculateMinPerWorkout = (workout: WorkoutSchemaType) => {
   return workoutPlan;
 };
 
-const CreateWorkoutPlanWrapper = ({ children }: { children: React.ReactNode }) => {
+interface CreateWorkoutPlanWrapperProps {
+  children: React.ReactNode;
+  /**
+   * When true the wrapper renders without the standalone-page header
+   * (h1, back button, user details, form-response bubble) — used when the
+   * editor is embedded inside the user dashboard. A clean stats strip is
+   * shown instead, summarising the current plan.
+   */
+  embedded?: boolean;
+}
+
+const CreateWorkoutPlanWrapper = ({ children, embedded = false }: CreateWorkoutPlanWrapperProps) => {
   const form = useForm<WorkoutSchemaType>({
     resolver: zodResolver(fullWorkoutPlanSchema),
     defaultValues: {
@@ -64,7 +80,7 @@ const CreateWorkoutPlanWrapper = ({ children }: { children: React.ReactNode }) =
     },
   });
   const {
-    formState: { isDirty },
+    formState: { isDirty, dirtyFields },
     reset,
   } = form;
   const { id = "" } = useParams();
@@ -75,9 +91,18 @@ const CreateWorkoutPlanWrapper = ({ children }: { children: React.ReactNode }) =
   const [selectedPreset, setSelectedPreset] = useState("");
   const [openPresetModal, setOpenPresetModal] = useState(false);
 
+  /**
+   * Unsaved-changes guard — intercept any navigation while the form is
+   * dirty and show our custom dialog. Hooks into useNavigationBlocker
+   * (works with the classic BrowserRouter, unlike RR's useBlocker).
+   */
+  const [pendingNav, setPendingNav] = useState<(() => void) | null>(null);
+  const [savingToProceed, setSavingToProceed] = useState(false);
+  useNavigationBlocker(isDirty, (next) => setPendingNav(() => next));
+
   const onSuccess = () => {
     toast.success(`תכנית אימון נשמרה בהצלחה!`);
-    navigation(MainRoutes.USERS + `/${id}?tab=${weightTab}`);
+    if (!embedded) navigation(MainRoutes.USERS + `/${id}?tab=${weightTab}`);
     invalidateQueryKeys([`${QueryKeys.USER_WORKOUT_PLAN}${id}`, QueryKeys.NO_WORKOUT_PLAN]);
   };
 
@@ -94,7 +119,7 @@ const CreateWorkoutPlanWrapper = ({ children }: { children: React.ReactNode }) =
     });
   };
 
-  const { data } = useWorkoutPlanQuery(id);
+  const { data, isLoading: isLoadingPlan, isFetching: isFetchingPlan } = useWorkoutPlanQuery(id);
   const userQuery = useUserQuery(id, isNoUserWithId);
   const workoutPlanPresets = useWorkoutPlanPresetsQuery();
 
@@ -156,23 +181,86 @@ const CreateWorkoutPlanWrapper = ({ children }: { children: React.ReactNode }) =
     reset(data.data);
   }, [data]);
 
+  // Keep the browser-level beforeunload warning too (for tab close /
+  // refresh). The custom in-app dialog is driven by useNavigationBlocker
+  // above; the helper hook here only handles `window.onbeforeunload`.
   useUnsavedChangesWarning(isDirty);
+
+  /**
+   * After a successful save (data refetches → useEffect resets form →
+   * isDirty becomes false), if the user chose "Save and continue" in the
+   * dialog, honour the pending navigation now.
+   */
+  useEffect(() => {
+    if (!savingToProceed) return;
+    if (isDirty) return;
+    if (pendingNav) {
+      const next = pendingNav;
+      setPendingNav(null);
+      next();
+    }
+    setSavingToProceed(false);
+  }, [savingToProceed, isDirty, pendingNav]);
+
+  /**
+   * Show the skeleton on first load only — once we've ever had data (or
+   * confirmed there is none, i.e. 404), the user can build a plan from
+   * scratch. We avoid showing the skeleton on background refetches.
+   */
+  const showSkeleton = isLoadingPlan && isFetchingPlan && !data;
+  if (embedded && showSkeleton) {
+    return <WorkoutPlanSkeleton />;
+  }
 
   return (
     <Form {...form}>
       <div className="flex flex-col gap-4 w-full">
-        <div className="space-y-2">
-          <h1 className="text-4xl">תוכנית אימון</h1>
-          <BackButton navLink={MainRoutes.USERS + `/${id}?tab=${weightTab}`} />
+        {!embedded && (
+          <div className="space-y-2">
+            <h1 className="text-4xl">תוכנית אימון</h1>
+            <BackButton navLink={MainRoutes.USERS + `/${id}?tab=${weightTab}`} />
 
-          {user && <BasicUserDetails user={user} />}
-          <FormResponseBubbleWrapper
-            userId={id}
-            query={{
-              formType: user && user?.onboardingCompleted ? "monthly" : "onboarding",
-              userId: id,
-            }} // TODO: Check if user is onboarded
-          />
+            {user && <BasicUserDetails user={user} />}
+            <FormResponseBubbleWrapper
+              userId={id}
+              query={{
+                formType: user && user?.onboardingCompleted ? "monthly" : "onboarding",
+                userId: id,
+              }} // TODO: Check if user is onboarded
+            />
+          </div>
+        )}
+
+        {embedded && <WorkoutPlanStatsStrip />}
+
+        {embedded ? (
+          <div
+            dir="rtl"
+            className="flex flex-col gap-2 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between"
+            style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
+          >
+            <div className="flex flex-col">
+              <span className="text-sm font-bold text-slate-900 dark:text-slate-100">טען תבנית קיימת</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">
+                בחר תבנית שמורה כדי לאכלס את התוכנית במהירות
+              </span>
+            </div>
+            <div className="sm:min-w-[260px]">
+              <ComboBox
+                value={selectedPreset}
+                options={workoutPresetsOptions}
+                onSelect={(preset) => {
+                  reset({
+                    ...preset,
+                    cardio:
+                      preset.cardio || { type: "simple", plan: defaultSimpleCardioOption },
+                  });
+                  setSelectedPreset(preset.name);
+                }}
+              />
+            </div>
+          </div>
+        ) : (
           <div className="sm:w-fit sm:min-w-40">
             <ComboBox
               value={selectedPreset}
@@ -182,40 +270,92 @@ const CreateWorkoutPlanWrapper = ({ children }: { children: React.ReactNode }) =
                   ...preset,
                   cardio: preset.cardio || { type: "simple", plan: defaultSimpleCardioOption },
                 });
-
                 setSelectedPreset(preset.name);
               }}
             />
           </div>
-        </div>
+        )}
         <form className="space-y-2" onSubmit={form.handleSubmit(onSubmit, onInvalidSubmit)}>
           {children}
 
-          <div className="flex flex-col sm:flex-row sm:justify-end sm:sticky sm:bottom-0 gap-2 py-1">
-            <CustomButton
-              className=" w-auto sm:w-fit"
-              variant="secondary"
-              type="button"
-              onClick={() => setOpenPresetModal(true)}
-              title="שמור תוכנית כתבנית"
-              disabled={updateWorkoutPlan.isPending || addWorkoutPlan.isPending}
-              isLoading={addWorkoutPlanPreset.isPending}
-            />
-            <CustomButton
-              className="w-full font-bold sm:w-32"
-              variant="success"
-              type="submit"
-              title="שמור תוכנית"
-              disabled={addWorkoutPlanPreset.isPending}
-              isLoading={updateWorkoutPlan.isPending || addWorkoutPlan.isPending}
-            />
-          </div>
+          {embedded ? (
+            <div
+              dir="rtl"
+              className="sticky bottom-0 z-10 mt-3 flex flex-col gap-2 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 p-3 shadow-lg backdrop-blur sm:flex-row sm:items-center sm:justify-end"
+              style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
+            >
+              {/* In RTL, the first child renders on the right — so "שמור
+                  כתבנית" appears right of the green "שמור תוכנית" button. */}
+              <button
+                type="button"
+                onClick={() => setOpenPresetModal(true)}
+                disabled={updateWorkoutPlan.isPending || addWorkoutPlan.isPending}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 transition-colors hover:border-purple-300 dark:hover:border-purple-700 hover:bg-purple-50/40 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {addWorkoutPlanPreset.isPending ? "שומר תבנית…" : "שמור כתבנית"}
+              </button>
+              <button
+                type="submit"
+                disabled={
+                  addWorkoutPlanPreset.isPending ||
+                  updateWorkoutPlan.isPending ||
+                  addWorkoutPlan.isPending
+                }
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-emerald-700 hover:shadow disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {updateWorkoutPlan.isPending || addWorkoutPlan.isPending
+                  ? "שומר…"
+                  : "שמור תוכנית"}
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col sm:flex-row sm:justify-end sm:sticky sm:bottom-0 gap-2 py-1">
+              <CustomButton
+                className=" w-auto sm:w-fit"
+                variant="secondary"
+                type="button"
+                onClick={() => setOpenPresetModal(true)}
+                title="שמור תוכנית כתבנית"
+                disabled={updateWorkoutPlan.isPending || addWorkoutPlan.isPending}
+                isLoading={addWorkoutPlanPreset.isPending}
+              />
+              <CustomButton
+                className="w-full font-bold sm:w-32"
+                variant="success"
+                type="submit"
+                title="שמור תוכנית"
+                disabled={addWorkoutPlanPreset.isPending}
+                isLoading={updateWorkoutPlan.isPending || addWorkoutPlan.isPending}
+              />
+            </div>
+          )}
         </form>
       </div>
       <InputModal
         onClose={() => setOpenPresetModal(false)}
         open={openPresetModal}
         onSubmit={(val) => handleAddPreset(val)}
+      />
+
+      <UnsavedChangesDialog
+        open={pendingNav !== null}
+        isSaving={updateWorkoutPlan.isPending || addWorkoutPlan.isPending}
+        subject="תוכנית האימונים"
+        changes={summariseWorkoutDirty(dirtyFields)}
+        onSaveAndContinue={() => {
+          setSavingToProceed(true);
+          form.handleSubmit(onSubmit, onInvalidSubmit)();
+        }}
+        onDiscard={() => {
+          if (data?.data) reset(data.data);
+          else reset();
+          const next = pendingNav;
+          setPendingNav(null);
+          if (next) next();
+        }}
+        onCancel={() => {
+          setPendingNav(null);
+        }}
       />
     </Form>
   );

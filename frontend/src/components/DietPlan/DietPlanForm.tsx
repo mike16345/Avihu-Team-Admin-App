@@ -74,39 +74,61 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ children }) => {
         tips={
           <TextEditor
             value={instructions}
-            onChange={(val) => setValue("customInstructions", [val])}
+            onChange={(val) =>
+              setValue("customInstructions", [val], { shouldDirty: true })
+            }
           />
         }
         supplements={
-          <TextEditor value={supplements} onChange={(val) => setValue("supplements", [val])} />
+          <TextEditor
+            value={supplements}
+            onChange={(val) => setValue("supplements", [val], { shouldDirty: true })}
+          />
         }
         dietplan={
           <div className="w-full flex flex-col  gap-5">
-            <div>
-              <Label className="font-bold">קלוריות חופשיות</Label>
-              <Input
-                className="md:w-1/3"
-                type="number"
-                value={freeCalories}
-                onChange={(e) => setValue("freeCalories", Number(e.target.value))}
-              />
-            </div>
-            <div className=" w-full flex flex-col gap-2 ">
-              <div className="space-y-4">
-                {fields.map((field, index) => (
-                  <div key={field.id} className={`border-b`}>
-                    <MealDropDown
-                      customItems={customItems}
-                      mealNumber={index + 1}
-                      mealIndex={index}
-                      onDelete={() => {
-                        setMealToDelete(index);
-                        setOpenDeleteModal(true);
-                      }}
-                    />
-                  </div>
-                ))}
+            <div
+              dir="rtl"
+              className="flex items-center gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 shadow-sm w-fit"
+              style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
+            >
+              <div className="flex flex-col">
+                <Label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  קלוריות חופשיות
+                </Label>
+                <span className="text-[11px] text-slate-400 dark:text-slate-500">
+                  מתווסף לסך היומי
+                </span>
               </div>
+              <div className="relative">
+                <Input
+                  className="h-9 w-28 pe-12 text-end text-sm font-bold"
+                  type="number"
+                  value={freeCalories}
+                  onChange={(e) =>
+                    setValue("freeCalories", Number(e.target.value), {
+                      shouldDirty: true,
+                    })
+                  }
+                />
+                <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-xs text-slate-400 dark:text-slate-500">
+                  קק״ל
+                </span>
+              </div>
+            </div>
+            <div className="w-full flex flex-col gap-3">
+              {fields.map((field, index) => (
+                <MealDropDown
+                  key={field.id}
+                  customItems={customItems}
+                  mealNumber={index + 1}
+                  mealIndex={index}
+                  onDelete={() => {
+                    setMealToDelete(index);
+                    setOpenDeleteModal(true);
+                  }}
+                />
+              ))}
               <AddButton tip="הוסף ארוחה" onClick={handleAddMeal} />
             </div>
           </div>

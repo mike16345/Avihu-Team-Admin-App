@@ -1,17 +1,32 @@
 import { useMemo } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import useFormResponseQuery from "@/hooks/queries/formResponses/useFormResponseQuery";
 import Loader from "@/components/ui/Loader";
 import ErrorPage from "@/pages/ErrorPage";
 import FormResponseViewer from "@/components/formResponses/FormResponseViewer";
 import { useUsersStore } from "@/store/userStore";
 import useUserQuery from "@/hooks/queries/user/useUserQuery";
-import BackButton from "@/components/ui/BackButton";
+import { FaArrowRight } from "react-icons/fa6";
 import { getFullUserName, isUserIdObject } from "@/components/agreements/SignedAgreementsTable";
 
 const FormResponseDetailsPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { users } = useUsersStore();
+
+  /**
+   * Prefer history.back so we restore the previous page's exact state
+   * (scroll position, active tab, etc.). Fall back to the form-builder
+   * route only if there's no history (e.g. deep-link).
+   */
+  const handleBack = () => {
+    const canGoBack =
+      typeof window !== "undefined" &&
+      typeof window.history.state?.idx === "number" &&
+      window.history.state.idx > 0;
+    if (canGoBack) navigate(-1);
+    else navigate("/form-builder");
+  };
 
   const { data, isLoading, isError, error } = useFormResponseQuery(id);
   const response = data?.data;
@@ -35,8 +50,21 @@ const FormResponseDetailsPage = () => {
   if (isError && !response) return <ErrorPage message={error?.message} />;
 
   return (
-    <div className="size-full flex flex-col gap-4">
-      <BackButton fixedPosition navLink="/form-builder" />
+    <div
+      dir="rtl"
+      className="size-full flex flex-col gap-4"
+      style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
+    >
+      {/* In-flow back button — restores the previous page's scroll/tab state. */}
+      <button
+        type="button"
+        onClick={handleBack}
+        className="inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-slate-500 dark:text-slate-400 transition-colors hover:text-blue-600"
+      >
+        <FaArrowRight size={11} />
+        <span>חזרה</span>
+      </button>
+
       {response ? (
         <FormResponseViewer response={response} respondentName={respondentName} />
       ) : (

@@ -17,7 +17,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <AuthProviderWrapper>
           <App />
         </AuthProviderWrapper>
-        <Toaster dir="rtl" richColors position="bottom-left" />
+        <Toaster dir="rtl" richColors closeButton position="bottom-left" />
         {/* <ReactQueryDevtools client={queryClient} /> */}
       </PersistQueryClientProvider>
     </ThemeProvider>

@@ -80,9 +80,9 @@ const MeasurementsProgression = () => {
   const earliest = sorted[sorted.length - 1];
 
   const getDelta = (key: MeasurementKey) => {
-    if (!latest || !earliest) return { text: "0", color: "text-slate-400", arrow: "" };
+    if (!latest || !earliest) return { text: "0", color: "text-slate-400 dark:text-slate-500", arrow: "" };
     const diff = (latest[key] as number) - (earliest[key] as number);
-    if (diff === 0) return { text: "0", color: "text-slate-400", arrow: "" };
+    if (diff === 0) return { text: "0", color: "text-slate-400 dark:text-slate-500", arrow: "" };
     if (diff < 0) return { text: `${diff}`, color: "text-emerald-600", arrow: "↓" };
     return { text: `+${diff}`, color: "text-rose-600", arrow: "↑" };
   };
@@ -182,14 +182,14 @@ const MeasurementsProgression = () => {
             return (
               <div
                 key={c.key}
-                className="rounded-xl border border-slate-200/80 bg-white p-3 shadow-sm"
+                className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-3 shadow-sm"
               >
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   {c.label}
                 </p>
                 <p className={`mt-1 text-2xl font-bold ${c.color}`}>
                   {latest?.[c.key] ?? "—"}
-                  <span className="text-xs text-slate-400 me-1">ס״מ</span>
+                  <span className="text-xs text-slate-400 dark:text-slate-500 me-1">ס״מ</span>
                 </p>
                 <p className={`mt-0.5 text-xs font-semibold ${delta.color}`}>
                   {delta.arrow} {delta.text} מהתחלה
@@ -201,12 +201,12 @@ const MeasurementsProgression = () => {
       )}
 
       {/* Table card */}
-      <div className="overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm">
-        <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+      <div className="overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 shadow-sm">
+        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 px-4 py-3">
           <div className="flex items-center gap-2">
             <FaHeartPulse size={15} className="text-purple-600" />
-            <h3 className="text-base font-bold text-slate-900">מעקב היקפים</h3>
-            <span className="text-xs text-slate-400">({measurements.length} מדידות)</span>
+            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">מעקב היקפים</h3>
+            <span className="text-xs text-slate-400 dark:text-slate-500">({measurements.length} מדידות)</span>
           </div>
           <button
             onClick={startNew}
@@ -220,13 +220,13 @@ const MeasurementsProgression = () => {
 
         {measurements.length === 0 && editingId !== "__new__" ? (
           <div className="px-4 py-10 text-center">
-            <p className="text-sm text-slate-400">אין מדידות עדיין — הוסף את המדידה הראשונה</p>
+            <p className="text-sm text-slate-400 dark:text-slate-500">אין מדידות עדיין — הוסף את המדידה הראשונה</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-slate-50/60 text-slate-500">
+                <tr className="bg-slate-50/60 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400">
                   <th className="px-4 py-2 text-right text-xs font-semibold uppercase tracking-wider">
                     תאריך
                   </th>
@@ -274,14 +274,14 @@ const MeasurementsProgression = () => {
                   return (
                     <tr
                       key={rowId}
-                      className={`border-t border-slate-100 transition-colors ${
+                      className={`border-t border-slate-100 dark:border-slate-800 transition-colors ${
                         i === 0 ? "bg-blue-50/30 hover:bg-blue-50/50" : "hover:bg-slate-50/60"
                       }`}
                     >
-                      <td className="px-4 py-3 text-right font-semibold text-slate-700">
+                      <td className="px-4 py-3 text-right font-semibold text-slate-700 dark:text-slate-200">
                         {m.date}
                         {i === 0 && (
-                          <span className="ms-2 inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700">
+                          <span className="ms-2 inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:text-blue-300">
                             אחרונה
                           </span>
                         )}
@@ -293,7 +293,7 @@ const MeasurementsProgression = () => {
                           <td
                             key={c.key}
                             className={`px-4 py-3 text-center font-semibold ${
-                              isEmpty ? "text-slate-300" : i === 0 ? c.color : "text-slate-700"
+                              isEmpty ? "text-slate-300" : i === 0 ? c.color : "text-slate-700 dark:text-slate-200"
                             }`}
                           >
                             {isEmpty ? "—" : val}
@@ -305,7 +305,7 @@ const MeasurementsProgression = () => {
                           <button
                             onClick={() => startEdit(m)}
                             disabled={editingId !== null}
-                            className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-colors hover:border-blue-300 hover:text-blue-600 disabled:opacity-40"
+                            className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 transition-colors hover:border-blue-300 hover:text-blue-600 disabled:opacity-40"
                             aria-label="ערוך"
                           >
                             <FaPencil size={10} />
@@ -313,7 +313,7 @@ const MeasurementsProgression = () => {
                           <button
                             onClick={() => handleDelete(m)}
                             disabled={editingId !== null}
-                            className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-colors hover:border-red-300 hover:text-red-600 disabled:opacity-40"
+                            className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 transition-colors hover:border-red-300 hover:text-red-600 disabled:opacity-40"
                             aria-label="מחק"
                           >
                             <FaTrash size={10} />
@@ -350,13 +350,13 @@ function EditRow({
   highlight?: boolean;
 }) {
   return (
-    <tr className={`border-t border-slate-100 ${highlight ? "bg-emerald-50/50" : "bg-blue-50/60"}`}>
+    <tr className={`border-t border-slate-100 dark:border-slate-800 ${highlight ? "bg-emerald-50/50" : "bg-blue-50/60"}`}>
       <td className="px-4 py-3 text-right">
         <input
           type="text"
           value={draft.date}
           onChange={(e) => setDraft({ ...draft, date: e.target.value })}
-          className="w-28 rounded-lg border border-slate-300 px-2 py-1 text-center text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-200"
+          className="w-28 rounded-lg border border-slate-300 dark:border-slate-700 px-2 py-1 text-center text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-200"
           dir="ltr"
           placeholder="DD/MM/YYYY"
         />
@@ -375,7 +375,7 @@ function EditRow({
                 setDraft({ ...draft, [c.key]: num } as IMuscleMeasurement);
               }}
               placeholder="—"
-              className="w-16 rounded-lg border border-slate-300 px-2 py-1 text-center text-sm placeholder:text-slate-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-200"
+              className="w-16 rounded-lg border border-slate-300 dark:border-slate-700 px-2 py-1 text-center text-sm placeholder:text-slate-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-200"
             />
           </td>
         );
@@ -393,7 +393,7 @@ function EditRow({
           <button
             onClick={onCancel}
             disabled={saving}
-            className="inline-flex h-7 items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100"
+            className="inline-flex h-7 items-center gap-1 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-2.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100"
           >
             <FaXmark size={9} />
             <span>בטל</span>

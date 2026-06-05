@@ -41,22 +41,22 @@ type FlatExercise = {
 };
 
 const groupColors: Record<string, { bg: string; text: string; gradient: string }> = {
-  חזה: { bg: "bg-blue-50", text: "text-blue-700", gradient: "from-blue-500 to-blue-600" },
-  גב: { bg: "bg-emerald-50", text: "text-emerald-700", gradient: "from-emerald-500 to-emerald-600" },
-  טרפזים: { bg: "bg-amber-50", text: "text-amber-700", gradient: "from-amber-500 to-amber-600" },
-  כתפיים: { bg: "bg-purple-50", text: "text-purple-700", gradient: "from-purple-500 to-purple-600" },
-  "יד קידמית": { bg: "bg-cyan-50", text: "text-cyan-700", gradient: "from-cyan-500 to-cyan-600" },
-  "יד אחורית": { bg: "bg-teal-50", text: "text-teal-700", gradient: "from-teal-500 to-teal-600" },
-  רגליים: { bg: "bg-pink-50", text: "text-pink-700", gradient: "from-pink-500 to-pink-600" },
-  ישבן: { bg: "bg-orange-50", text: "text-orange-700", gradient: "from-orange-500 to-orange-600" },
-  תאומים: { bg: "bg-indigo-50", text: "text-indigo-700", gradient: "from-indigo-500 to-indigo-600" },
-  אמות: { bg: "bg-rose-50", text: "text-rose-700", gradient: "from-rose-500 to-rose-600" },
-  בטן: { bg: "bg-yellow-50", text: "text-yellow-700", gradient: "from-yellow-500 to-yellow-600" },
+  חזה: { bg: "bg-blue-50 dark:bg-blue-950/40", text: "text-blue-700 dark:text-blue-300", gradient: "from-blue-500 to-blue-600" },
+  גב: { bg: "bg-emerald-50 dark:bg-emerald-950/40", text: "text-emerald-700 dark:text-emerald-300", gradient: "from-emerald-500 to-emerald-600" },
+  טרפזים: { bg: "bg-amber-50 dark:bg-amber-950/40", text: "text-amber-700 dark:text-amber-300", gradient: "from-amber-500 to-amber-600" },
+  כתפיים: { bg: "bg-purple-50", text: "text-purple-700 dark:text-purple-300", gradient: "from-purple-500 to-purple-600" },
+  "יד קידמית": { bg: "bg-cyan-50 dark:bg-cyan-950/40", text: "text-cyan-700 dark:text-cyan-300", gradient: "from-cyan-500 to-cyan-600" },
+  "יד אחורית": { bg: "bg-teal-50 dark:bg-teal-950/40", text: "text-teal-700 dark:text-teal-300", gradient: "from-teal-500 to-teal-600" },
+  רגליים: { bg: "bg-pink-50 dark:bg-pink-950/40", text: "text-pink-700 dark:text-pink-300", gradient: "from-pink-500 to-pink-600" },
+  ישבן: { bg: "bg-orange-50 dark:bg-orange-950/40", text: "text-orange-700 dark:text-orange-300", gradient: "from-orange-500 to-orange-600" },
+  תאומים: { bg: "bg-indigo-50 dark:bg-indigo-950/40", text: "text-indigo-700 dark:text-indigo-300", gradient: "from-indigo-500 to-indigo-600" },
+  אמות: { bg: "bg-rose-50 dark:bg-rose-950/40", text: "text-rose-700 dark:text-rose-300", gradient: "from-rose-500 to-rose-600" },
+  בטן: { bg: "bg-yellow-50 dark:bg-yellow-950/40", text: "text-yellow-700 dark:text-yellow-300", gradient: "from-yellow-500 to-yellow-600" },
 };
 
 const defaultColor = {
-  bg: "bg-slate-50",
-  text: "text-slate-700",
+  bg: "bg-slate-50 dark:bg-slate-800",
+  text: "text-slate-700 dark:text-slate-200",
   gradient: "from-slate-500 to-slate-600",
 };
 
@@ -216,7 +216,7 @@ export const WorkoutProgression = () => {
       style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
     >
       {/* Filter bar + Note creator — ALWAYS VISIBLE */}
-      <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-white px-3 py-2 shadow-sm">
+      <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 px-3 py-2 shadow-sm">
         <div className="flex flex-wrap items-center gap-1">
           {availableGroups.map((g) => (
             <button
@@ -225,7 +225,7 @@ export const WorkoutProgression = () => {
               className={`inline-flex items-center gap-2 rounded-lg px-3 py-1 text-xs font-semibold transition-all ${
                 filter === g
                   ? "bg-blue-600 text-white shadow-sm"
-                  : "text-slate-600 hover:bg-slate-100"
+                  : "text-slate-600 dark:text-slate-300 hover:bg-slate-100"
               }`}
             >
               {g}
@@ -243,10 +243,10 @@ export const WorkoutProgression = () => {
 
       {/* Empty state */}
       {!flatExercises.length && (
-        <div className="rounded-xl border border-dashed border-slate-200 bg-white px-4 py-10 text-center">
+        <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-10 text-center">
           <FaDumbbell size={28} className="mx-auto mb-2 text-slate-300" />
-          <h3 className="text-base font-bold text-slate-700">אין אימונים מתועדים עדיין</h3>
-          <p className="mt-1 text-sm text-slate-400">
+          <h3 className="text-base font-bold text-slate-700 dark:text-slate-200">אין אימונים מתועדים עדיין</h3>
+          <p className="mt-1 text-sm text-slate-400 dark:text-slate-500">
             כאשר {userFirstName || "המתאמן"} יתעד אימון ראשון, הנתונים יופיעו כאן.
           </p>
         </div>
@@ -282,8 +282,8 @@ export const WorkoutProgression = () => {
               return (
                 <div
                   key={`${exercise.group}-${exercise.name}`}
-                  className={`overflow-hidden rounded-xl border bg-white shadow-sm transition-all hover:shadow-md ${
-                    isSelected ? "border-blue-400 ring-2 ring-blue-200" : "border-slate-200/80"
+                  className={`overflow-hidden rounded-xl border bg-white dark:bg-slate-900 shadow-sm transition-all hover:shadow-md ${
+                    isSelected ? "border-blue-400 ring-2 ring-blue-200" : "border-slate-200/80 dark:border-slate-800/80"
                   }`}
                 >
                   <button
@@ -297,7 +297,7 @@ export const WorkoutProgression = () => {
                         >
                           {exercise.group}
                         </span>
-                        <h3 className="mt-1.5 text-sm font-bold text-slate-900">{exercise.name}</h3>
+                        <h3 className="mt-1.5 text-sm font-bold text-slate-900 dark:text-slate-100">{exercise.name}</h3>
                       </div>
                       <div
                         className={`flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br ${colors.gradient} text-white shadow-sm`}
@@ -308,13 +308,13 @@ export const WorkoutProgression = () => {
 
                     <div className="mt-3 flex items-end justify-between gap-2">
                       <div>
-                        <p className="text-[10px] uppercase tracking-wider text-slate-400">נוכחי</p>
-                        <p className="text-xl font-bold text-slate-900">
+                        <p className="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500">נוכחי</p>
+                        <p className="text-xl font-bold text-slate-900 dark:text-slate-100">
                           {isBodyweight
                             ? `${last.reps} ${last.reps > 30 ? "שנ׳" : "חזרות"}`
                             : `${last.weight} ק״ג`}
                         </p>
-                        <p className="text-[11px] text-slate-500">
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400">
                           {isBodyweight ? "ללא משקל" : `${last.reps} חזרות`}
                         </p>
                       </div>
@@ -324,7 +324,7 @@ export const WorkoutProgression = () => {
                             ? "text-emerald-600"
                             : gain < 0
                             ? "text-rose-600"
-                            : "text-slate-400"
+                            : "text-slate-400 dark:text-slate-500"
                         }`}
                       >
                         <p className="text-xs font-semibold">
@@ -352,7 +352,7 @@ export const WorkoutProgression = () => {
                         isExpanded ? null : `${exercise.group}-${exercise.name}`
                       );
                     }}
-                    className="mx-4 mb-4 inline-flex w-[calc(100%-2rem)] items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-600 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
+                    className="mx-4 mb-4 inline-flex w-[calc(100%-2rem)] items-center justify-center gap-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1.5 text-[11px] font-semibold text-slate-600 dark:text-slate-300 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
                   >
                     {isExpanded ? <FaChevronUp size={9} /> : <FaChevronDown size={9} />}
                     <span>{isExpanded ? "הסתר היסטוריה" : "ראה היסטוריה מלאה"}</span>
@@ -372,10 +372,10 @@ export const WorkoutProgression = () => {
                       }
                     });
                     return (
-                      <div className="border-t border-slate-100 bg-slate-50/40 px-4 py-3">
+                      <div className="border-t border-slate-100 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-800/40 px-4 py-3">
                         <table className="w-full text-xs">
                           <thead>
-                            <tr className="text-slate-500">
+                            <tr className="text-slate-500 dark:text-slate-400">
                               <th className="pb-2 text-right text-[10px] font-semibold uppercase tracking-wider">
                                 תאריך
                               </th>
@@ -396,28 +396,28 @@ export const WorkoutProgression = () => {
                                 return (
                                   <tr
                                     key={idx}
-                                    className={`border-t border-slate-100 ${
+                                    className={`border-t border-slate-100 dark:border-slate-800 ${
                                       isPR ? "bg-blue-50/60" : ""
                                     }`}
                                   >
-                                    <td className="py-1.5 text-right text-slate-700">
+                                    <td className="py-1.5 text-right text-slate-700 dark:text-slate-200">
                                       {s.date.toLocaleDateString("he-IL")}
                                       {isPR && (
-                                        <span className="ms-1.5 inline-flex items-center rounded-full bg-blue-100 px-1.5 py-0.5 text-[9px] font-bold text-blue-700">
+                                        <span className="ms-1.5 inline-flex items-center rounded-full bg-blue-100 px-1.5 py-0.5 text-[9px] font-bold text-blue-700 dark:text-blue-300">
                                           🏆 שיא
                                         </span>
                                       )}
                                     </td>
                                     <td
                                       className={`py-1.5 text-center font-semibold ${
-                                        isPR ? colors.text : "text-slate-700"
+                                        isPR ? colors.text : "text-slate-700 dark:text-slate-200"
                                       }`}
                                     >
                                       {isBodyweight ? "—" : `${s.weight} ק״ג`}
                                     </td>
                                     <td
                                       className={`py-1.5 text-center font-semibold ${
-                                        isPR ? colors.text : "text-slate-700"
+                                        isPR ? colors.text : "text-slate-700 dark:text-slate-200"
                                       }`}
                                     >
                                       {s.reps}
@@ -460,14 +460,14 @@ export const WorkoutProgression = () => {
       <button
         id="progress-note"
         onClick={() => setNoteOpen(true)}
-        className="group relative flex h-[280px] w-full flex-col items-center justify-center gap-3 overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-amber-50/40 via-white to-blue-50/30 p-6 text-center shadow-sm transition-all hover:border-amber-300 hover:shadow-md"
+        className="group relative flex h-[280px] w-full flex-col items-center justify-center gap-3 overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-gradient-to-br from-amber-50/40 via-white to-blue-50/30 p-6 text-center shadow-sm transition-all hover:border-amber-300 hover:shadow-md"
       >
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 ring-2 ring-amber-200/60 transition-transform group-hover:scale-110">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 ring-2 ring-amber-200/60 transition-transform group-hover:scale-110">
           <FaNoteSticky size={22} />
         </div>
         <div>
-          <h3 className="text-lg font-bold text-slate-900">צור פתק התקדמות</h3>
-          <p className="mt-1 text-sm text-slate-500">
+          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">צור פתק התקדמות</h3>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             לחץ ליצירת פתק אוטומטי עם סיכום ההתקדמות של {userFirstName || "המתאמן"}
           </p>
         </div>
@@ -547,24 +547,24 @@ function ExerciseDetailModal({
       onClick={onClose}
     >
       <div
-        className="relative flex h-full max-h-[90vh] w-full max-w-7xl flex-col gap-4 overflow-hidden rounded-3xl bg-white p-6 shadow-2xl"
+        className="relative flex h-full max-h-[90vh] w-full max-w-7xl flex-col gap-4 overflow-hidden rounded-3xl bg-white dark:bg-slate-900 p-6 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
         style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
       >
         {/* Header */}
-        <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-4">
+        <div className="flex items-start justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
           <div>
             <span
               className={`inline-flex items-center rounded-full ${colors.bg} px-2.5 py-0.5 text-xs font-semibold ${colors.text}`}
             >
               קבוצת שריר: {exercise.group}
             </span>
-            <h2 className="mt-2 text-2xl font-bold text-slate-900">{exercise.name}</h2>
-            <p className="text-sm text-slate-500">תרגיל — מעקב סטים מלא</p>
+            <h2 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">{exercise.name}</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400">תרגיל — מעקב סטים מלא</p>
           </div>
           <button
             onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100"
+            className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100"
             aria-label="סגור"
           >
             <FaXmark size={18} />
@@ -575,11 +575,11 @@ function ExerciseDetailModal({
         <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[1fr_360px]" style={{ height: "calc(90vh - 140px)" }}>
           {/* Right column = sets log */}
           <div
-            className="modal-sets-scroll flex h-full min-h-0 flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50/30 p-3 pe-2 lg:order-2"
+            className="modal-sets-scroll flex h-full min-h-0 flex-col gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/30 p-3 pe-2 lg:order-2"
             style={{ overflowY: "scroll" }}
           >
             {sessions.length === 0 && (
-              <p className="px-2 py-6 text-center text-sm text-slate-400">
+              <p className="px-2 py-6 text-center text-sm text-slate-400 dark:text-slate-500">
                 אין סטים מתועדים לתרגיל זה
               </p>
             )}
@@ -604,63 +604,63 @@ function ExerciseDetailModal({
               return (
                 <div
                   key={session.date}
-                  className={`shrink-0 overflow-hidden rounded-2xl border bg-white shadow-sm transition-all ${
-                    isOpen ? "border-blue-200 shadow-md" : "border-slate-200"
+                  className={`shrink-0 overflow-hidden rounded-2xl border bg-white dark:bg-slate-900 shadow-sm transition-all ${
+                    isOpen ? "border-blue-200 dark:border-blue-900/60 shadow-md" : "border-slate-200 dark:border-slate-800"
                   }`}
                 >
                   <button
                     onClick={() => setOpenDate(isOpen ? null : session.date)}
-                    className="flex w-full items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-slate-50"
+                    className="flex w-full items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
                   >
                     <div className="flex items-center gap-3">
                       <div
                         className={`flex h-14 w-14 shrink-0 flex-col items-center justify-center gap-0.5 rounded-2xl text-center leading-none ${
                           isOpen
                             ? "bg-blue-600 text-white shadow-sm"
-                            : "border border-slate-200 bg-slate-50/60 text-slate-700"
+                            : "border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60 text-slate-700 dark:text-slate-200"
                         }`}
                       >
                         <span
                           className={`text-[9px] font-semibold uppercase tracking-wider ${
-                            isOpen ? "text-white/80" : "text-slate-400"
+                            isOpen ? "text-white/80" : "text-slate-400 dark:text-slate-500"
                           }`}
                         >
                           {monthName}
                         </span>
                         <span
                           className={`text-xl font-bold ${
-                            isOpen ? "text-white" : "text-slate-900"
+                            isOpen ? "text-white" : "text-slate-900 dark:text-slate-100"
                           }`}
                         >
                           {day}
                         </span>
                         <span
                           className={`text-[8px] font-medium ${
-                            isOpen ? "text-white/70" : "text-slate-400"
+                            isOpen ? "text-white/70" : "text-slate-400 dark:text-slate-500"
                           }`}
                         >
                           {year}
                         </span>
                       </div>
                       <div className="flex flex-col items-start gap-1">
-                        <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">
+                        <span className="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-xs font-semibold text-slate-700 dark:text-slate-200">
                           {session.sets.length} סטים
                         </span>
-                        <span className="text-[10px] text-slate-400">
+                        <span className="text-[10px] text-slate-400 dark:text-slate-500">
                           שיא: {Math.max(...session.sets.map((s) => s.weight))} ק״ג
                         </span>
                       </div>
                     </div>
                     <FaChevronDown
                       size={11}
-                      className={`shrink-0 text-slate-400 transition-transform ${
+                      className={`shrink-0 text-slate-400 dark:text-slate-500 transition-transform ${
                         isOpen ? "" : "-rotate-90"
                       }`}
                     />
                   </button>
 
                   {isOpen && (
-                    <div className="flex flex-col gap-1.5 border-t border-slate-100 p-2.5">
+                    <div className="flex flex-col gap-1.5 border-t border-slate-100 dark:border-slate-800 p-2.5">
                       {session.sets.map((s, idx) => {
                         // Compute if this set is the PR within the session
                         const sessionMaxWeight = Math.max(
@@ -670,28 +670,28 @@ function ExerciseDetailModal({
                         return (
                           <div
                             key={idx}
-                            className={`flex items-center gap-2 rounded-lg border bg-white px-2.5 py-1.5 text-xs ${
-                              isSessionPR ? "border-blue-300 bg-blue-50/40" : "border-slate-200"
+                            className={`flex items-center gap-2 rounded-lg border bg-white dark:bg-slate-900 px-2.5 py-1.5 text-xs ${
+                              isSessionPR ? "border-blue-300 bg-blue-50/40" : "border-slate-200 dark:border-slate-800"
                             }`}
                           >
                             <span
                               className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[11px] font-bold ${
-                                isSessionPR ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-700"
+                                isSessionPR ? "bg-blue-600 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200"
                               }`}
                             >
                               {s.setNumber}
                             </span>
                             <div className="flex flex-1 items-center justify-between gap-2">
                               <div className="flex items-baseline gap-3">
-                                <span className="font-bold text-slate-900">
-                                  {s.weight} <span className="text-[10px] text-slate-500">ק״ג</span>
+                                <span className="font-bold text-slate-900 dark:text-slate-100">
+                                  {s.weight} <span className="text-[10px] text-slate-500 dark:text-slate-400">ק״ג</span>
                                 </span>
-                                <span className="text-slate-700">
-                                  {s.reps} <span className="text-[10px] text-slate-500">חזרות</span>
+                                <span className="text-slate-700 dark:text-slate-200">
+                                  {s.reps} <span className="text-[10px] text-slate-500 dark:text-slate-400">חזרות</span>
                                 </span>
                               </div>
                               {s.program && (
-                                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+                                <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-semibold text-slate-600 dark:text-slate-300">
                                   {s.program}
                                 </span>
                               )}
@@ -712,18 +712,18 @@ function ExerciseDetailModal({
             style={{ overflowY: "scroll" }}
           >
             {/* PR Chart */}
-            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white px-0 pb-3 pt-5">
+            <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-0 pb-3 pt-5">
               <div className="mb-3 flex items-center justify-between px-5">
                 <div>
-                  <h4 className="text-sm font-bold text-slate-900">התקדמות שיא לאורך זמן</h4>
-                  <p className="text-xs text-slate-500">המשקל הכבד ביותר בכל אימון</p>
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">התקדמות שיא לאורך זמן</h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">המשקל הכבד ביותר בכל אימון</p>
                 </div>
                 {totalGain !== 0 && (
                   <span
                     className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
                       totalGain > 0
-                        ? "bg-emerald-100 text-emerald-700"
-                        : "bg-rose-100 text-rose-700"
+                        ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
+                        : "bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300"
                     }`}
                   >
                     {totalGain > 0 ? "↑ +" : "↓ "}
@@ -777,7 +777,7 @@ function PRTrendChart({
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
 
   if (sessions.length === 0) {
-    return <p className="py-10 text-center text-xs text-slate-400">אין נתונים</p>;
+    return <p className="py-10 text-center text-xs text-slate-400 dark:text-slate-500">אין נתונים</p>;
   }
 
   // Detect bodyweight exercise — if all weights are 0, plot reps instead
@@ -801,7 +801,7 @@ function PRTrendChart({
         <p className="text-3xl font-bold text-blue-600">
           {points[0].value} {unit}
         </p>
-        <p className="mt-1 text-xs text-slate-400">{points[0].date}</p>
+        <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">{points[0].date}</p>
       </div>
     );
   }
@@ -886,35 +886,35 @@ function PRTrendChart({
       {/* Hover tooltip */}
       {hovered && (
         <div
-          className="pointer-events-none absolute rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs shadow-lg"
+          className="pointer-events-none absolute rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-2.5 py-1.5 text-xs shadow-lg"
           style={{
             left: `${(hovered.x / W) * 100}%`,
             top: `${(hovered.y / H) * 100}%`,
             transform: "translate(-50%, calc(-100% - 10px))",
           }}
         >
-          <p className="font-bold text-slate-900">
+          <p className="font-bold text-slate-900 dark:text-slate-100">
             {hovered.value} {unit}
           </p>
-          <p className="text-[10px] text-slate-500">{hovered.date}</p>
+          <p className="text-[10px] text-slate-500 dark:text-slate-400">{hovered.date}</p>
         </div>
       )}
 
       {/* Legend: first (newest, left) and last (oldest, right) values */}
-      <div className="mt-2 flex items-center justify-between px-1 text-[11px] text-slate-500">
+      <div className="mt-2 flex items-center justify-between px-1 text-[11px] text-slate-500 dark:text-slate-400">
         <div className="flex flex-col items-start">
           <span className="font-bold text-blue-600">
             {coords[0].value} {unit}
           </span>
-          <span className="text-[10px] text-slate-400">{coords[0].date}</span>
-          <span className="text-[9px] font-semibold text-slate-400">חדש ביותר</span>
+          <span className="text-[10px] text-slate-400 dark:text-slate-500">{coords[0].date}</span>
+          <span className="text-[9px] font-semibold text-slate-400 dark:text-slate-500">חדש ביותר</span>
         </div>
         <div className="flex flex-col items-end">
-          <span className="font-bold text-slate-700">
+          <span className="font-bold text-slate-700 dark:text-slate-200">
             {coords[coords.length - 1].value} {unit}
           </span>
-          <span className="text-[10px] text-slate-400">{coords[coords.length - 1].date}</span>
-          <span className="text-[9px] font-semibold text-slate-400">ראשון</span>
+          <span className="text-[10px] text-slate-400 dark:text-slate-500">{coords[coords.length - 1].date}</span>
+          <span className="text-[9px] font-semibold text-slate-400 dark:text-slate-500">ראשון</span>
         </div>
       </div>
     </div>
@@ -929,7 +929,7 @@ function ExerciseGoals({
   const allSets = sessions.flatMap((s) => s.sets);
   if (allSets.length === 0) {
     return (
-      <div className="rounded-2xl border border-slate-200 bg-blue-50/30 p-4 text-center text-xs text-slate-400">
+      <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-blue-50/30 p-4 text-center text-xs text-slate-400 dark:text-slate-500">
         אין סטים מתועדים — לא ניתן להציב יעד עדיין
       </div>
     );
@@ -950,20 +950,20 @@ function ExerciseGoals({
   const gapPct = currentPR > 0 ? ((gap / currentPR) * 100).toFixed(1) : "0";
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-blue-50/40 via-white to-white p-4">
+    <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-blue-50/40 via-white to-white p-4">
       <div className="mb-3 flex items-center gap-2">
         <FaArrowTrendUp size={14} className="text-blue-600" />
-        <h4 className="text-sm font-bold text-slate-900">יעד הבא</h4>
-        <span className="text-[10px] text-slate-400">(להציב מטרה למתאמן)</span>
+        <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">יעד הבא</h4>
+        <span className="text-[10px] text-slate-400 dark:text-slate-500">(להציב מטרה למתאמן)</span>
       </div>
 
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-        <div className="rounded-xl border border-slate-200 bg-white p-2.5">
-          <p className="text-[10px] uppercase tracking-wider text-slate-400">שיא נוכחי</p>
-          <p className="mt-0.5 text-lg font-bold text-slate-900">{currentPR} ק״ג</p>
-          <p className="text-[11px] text-slate-500">{currentReps} חזרות</p>
+        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-2.5">
+          <p className="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500">שיא נוכחי</p>
+          <p className="mt-0.5 text-lg font-bold text-slate-900 dark:text-slate-100">{currentPR} ק״ג</p>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400">{currentReps} חזרות</p>
         </div>
-        <div className="rounded-xl border border-blue-200 bg-blue-50/40 p-2.5">
+        <div className="rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50/40 p-2.5">
           <p className="text-[10px] uppercase tracking-wider text-blue-600">יעד</p>
           <div className="mt-0.5 flex items-baseline gap-1">
             {editing ? (
@@ -973,21 +973,21 @@ function ExerciseGoals({
                 onChange={(e) => setGoalWeight(Number(e.target.value))}
                 onBlur={() => setEditing(false)}
                 autoFocus
-                className="w-14 rounded-lg border border-blue-300 bg-white px-1 py-0.5 text-lg font-bold text-blue-700 focus:border-blue-500 focus:outline-none"
+                className="w-14 rounded-lg border border-blue-300 bg-white dark:bg-slate-900 px-1 py-0.5 text-lg font-bold text-blue-700 dark:text-blue-300 focus:border-blue-500 focus:outline-none"
               />
             ) : (
-              <button onClick={() => setEditing(true)} className="text-lg font-bold text-blue-700">
+              <button onClick={() => setEditing(true)} className="text-lg font-bold text-blue-700 dark:text-blue-300">
                 {goalWeight} ק״ג
               </button>
             )}
-            <span className="text-xs text-slate-500">×</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">×</span>
             <input
               type="number"
               value={goalReps}
               onChange={(e) => setGoalReps(Number(e.target.value))}
-              className="w-10 rounded-lg border border-blue-200 bg-white px-1 py-0.5 text-sm font-bold text-blue-700 focus:border-blue-500 focus:outline-none"
+              className="w-10 rounded-lg border border-blue-200 dark:border-blue-900/60 bg-white dark:bg-slate-900 px-1 py-0.5 text-sm font-bold text-blue-700 dark:text-blue-300 focus:border-blue-500 focus:outline-none"
             />
-            <span className="text-[10px] text-slate-500">חזרות</span>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400">חזרות</span>
             <button
               onClick={() => setEditing(true)}
               className="ms-auto text-blue-600"
@@ -1000,12 +1000,12 @@ function ExerciseGoals({
             type="date"
             value={goalDate}
             onChange={(e) => setGoalDate(e.target.value)}
-            className="mt-1.5 w-full rounded-lg border border-blue-200 bg-white px-2 py-1 text-xs text-slate-700 focus:border-blue-500 focus:outline-none"
+            className="mt-1.5 w-full rounded-lg border border-blue-200 dark:border-blue-900/60 bg-white dark:bg-slate-900 px-2 py-1 text-xs text-slate-700 dark:text-slate-200 focus:border-blue-500 focus:outline-none"
           />
         </div>
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50/40 p-2.5">
+        <div className="rounded-xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/40 p-2.5">
           <p className="text-[10px] uppercase tracking-wider text-emerald-600">פער</p>
-          <p className="mt-0.5 text-lg font-bold text-emerald-700">
+          <p className="mt-0.5 text-lg font-bold text-emerald-700 dark:text-emerald-300">
             {gap > 0 ? "+" : ""}
             {gap} ק״ג
           </p>
@@ -1017,13 +1017,13 @@ function ExerciseGoals({
       </div>
 
       <div className="mt-3">
-        <div className="mb-1 flex items-center justify-between text-[10px] text-slate-500">
+        <div className="mb-1 flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
           <span>0 ק״ג</span>
-          <span className="font-bold text-slate-700">
+          <span className="font-bold text-slate-700 dark:text-slate-200">
             יעד: {goalWeight} ק״ג × {goalReps}
           </span>
         </div>
-        <div className="relative h-2 overflow-hidden rounded-full bg-slate-100">
+        <div className="relative h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
           <div
             className="absolute inset-y-0 right-0 rounded-full bg-gradient-to-l from-blue-500 to-emerald-500"
             style={{
@@ -1031,7 +1031,7 @@ function ExerciseGoals({
             }}
           />
         </div>
-        <p className="mt-1 text-center text-[10px] font-semibold text-slate-500">
+        <p className="mt-1 text-center text-[10px] font-semibold text-slate-500 dark:text-slate-400">
           {goalWeight > 0 ? ((currentPR / goalWeight) * 100).toFixed(0) : 0}% מהיעד הושג
         </p>
       </div>
@@ -1089,11 +1089,11 @@ function MonthlyPRs({
   ];
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4">
+    <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4">
       <div className="mb-3 flex items-center gap-2">
         <FaBoltLightning size={14} className="text-amber-500" />
-        <h4 className="text-sm font-bold text-slate-900">שיאים חודשיים</h4>
-        <span className="text-[10px] text-slate-400">(המשקל הכבד ביותר בכל חודש)</span>
+        <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">שיאים חודשיים</h4>
+        <span className="text-[10px] text-slate-400 dark:text-slate-500">(המשקל הכבד ביותר בכל חודש)</span>
       </div>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         {months.map((m, i) => {
@@ -1102,18 +1102,18 @@ function MonthlyPRs({
           return (
             <div
               key={m.key}
-              className="relative overflow-hidden rounded-xl border border-slate-200 bg-gradient-to-br from-amber-50/60 via-white to-white p-3"
+              className="relative overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-amber-50/60 via-white to-white p-3"
             >
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                     {monthNames[m.month - 1]} {m.year}
                   </p>
-                  <p className="mt-0.5 text-xl font-bold text-slate-900">
+                  <p className="mt-0.5 text-xl font-bold text-slate-900 dark:text-slate-100">
                     {m.pr.weight}
-                    <span className="text-xs text-slate-500"> ק״ג</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400"> ק״ג</span>
                   </p>
-                  <p className="mt-0.5 text-[10px] text-slate-500">{m.pr.reps} חזרות</p>
+                  <p className="mt-0.5 text-[10px] text-slate-500 dark:text-slate-400">{m.pr.reps} חזרות</p>
                 </div>
                 <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-md">
                   <FaBoltLightning size={11} />
@@ -1123,10 +1123,10 @@ function MonthlyPRs({
                 <div
                   className={`mt-2 inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-[10px] font-bold ${
                     delta > 0
-                      ? "bg-emerald-100 text-emerald-700"
+                      ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
                       : delta < 0
-                      ? "bg-rose-100 text-rose-700"
-                      : "bg-slate-100 text-slate-600"
+                      ? "bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300"
+                      : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
                   }`}
                 >
                   <span>{delta > 0 ? "↑" : delta < 0 ? "↓" : "→"}</span>
@@ -1241,23 +1241,23 @@ function ProgressNoteCreator({
       style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
     >
       <div
-        className="relative flex h-full max-h-[90vh] w-full max-w-6xl flex-col gap-4 overflow-hidden rounded-3xl bg-white p-6 shadow-2xl"
+        className="relative flex h-full max-h-[90vh] w-full max-w-6xl flex-col gap-4 overflow-hidden rounded-3xl bg-white dark:bg-slate-900 p-6 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-4">
+        <div className="flex items-start justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 ring-1 ring-amber-200">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 ring-1 ring-amber-200">
               <FaNoteSticky size={16} />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-900">צור פתק התקדמות</h2>
-              <p className="text-xs text-slate-500">בחר טווח תאריכים ותרגילים ליצירת פתק אוטומטי</p>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">צור פתק התקדמות</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">בחר טווח תאריכים ותרגילים ליצירת פתק אוטומטי</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100"
+            className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100"
           >
             <FaXmark size={18} />
           </button>
@@ -1268,13 +1268,13 @@ function ProgressNoteCreator({
           {/* Right: Form */}
           <div className="modal-sets-scroll flex min-h-0 flex-col gap-4 overflow-y-auto pl-1">
             {/* Date range */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-4">
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500">
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4">
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 טווח תאריכים
               </label>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <p className="mb-1 text-[10px] text-slate-400">מ-</p>
+                  <p className="mb-1 text-[10px] text-slate-400 dark:text-slate-500">מ-</p>
                   <input
                     type="date"
                     value={startDate}
@@ -1282,11 +1282,11 @@ function ProgressNoteCreator({
                       setStartDate(e.target.value);
                       setManualText(null);
                     }}
-                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <p className="mb-1 text-[10px] text-slate-400">עד</p>
+                  <p className="mb-1 text-[10px] text-slate-400 dark:text-slate-500">עד</p>
                   <input
                     type="date"
                     value={endDate}
@@ -1294,15 +1294,15 @@ function ProgressNoteCreator({
                       setEndDate(e.target.value);
                       setManualText(null);
                     }}
-                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                   />
                 </div>
               </div>
             </div>
 
             {/* Muscle group */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-4">
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500">
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4">
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 קבוצת שרירים
               </label>
               <div className="relative">
@@ -1313,7 +1313,7 @@ function ProgressNoteCreator({
                     setSelectedExercises([]);
                     setManualText(null);
                   }}
-                  className="w-full cursor-pointer appearance-none rounded-xl border border-slate-200 bg-white px-3 py-2 pe-9 text-sm font-semibold text-slate-700 focus:border-blue-500 focus:outline-none"
+                  className="w-full cursor-pointer appearance-none rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-2 pe-9 text-sm font-semibold text-slate-700 dark:text-slate-200 focus:border-blue-500 focus:outline-none"
                 >
                   {availableGroups
                     .filter((g) => g !== "הכל")
@@ -1325,19 +1325,19 @@ function ProgressNoteCreator({
                 </select>
                 <FaChevronDown
                   size={10}
-                  className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
                 />
               </div>
             </div>
 
             {/* Exercise selector */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-4">
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500">
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4">
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 תרגילים ({availableExercises.length})
               </label>
               <div className="flex flex-col gap-2">
                 {availableExercises.length === 0 ? (
-                  <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50/60 px-3 py-4 text-center text-xs text-slate-400">
+                  <p className="rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60 px-3 py-4 text-center text-xs text-slate-400 dark:text-slate-500">
                     אין תרגילים בקבוצה זו
                   </p>
                 ) : (
@@ -1350,7 +1350,7 @@ function ProgressNoteCreator({
                         className={`flex items-center justify-between gap-2 rounded-xl border px-3 py-2 text-right text-sm transition-all ${
                           selected
                             ? "border-amber-300 bg-amber-50/60 text-amber-800"
-                            : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+                            : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"
                         }`}
                       >
                         <span className="font-medium">{ex.name}</span>
@@ -1358,7 +1358,7 @@ function ProgressNoteCreator({
                           className={`flex h-5 w-5 items-center justify-center rounded-md border ${
                             selected
                               ? "border-amber-500 bg-amber-500 text-white"
-                              : "border-slate-300 bg-white"
+                              : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
                           }`}
                         >
                           {selected && "✓"}
@@ -1372,11 +1372,11 @@ function ProgressNoteCreator({
           </div>
 
           {/* Left: Generated note preview */}
-          <div className="flex min-h-0 flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-5">
+          <div className="flex min-h-0 flex-col gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
             <div className="flex items-center justify-between gap-2">
               <div>
-                <h3 className="text-base font-bold text-slate-900">הפתק המוצע</h3>
-                <p className="text-xs text-slate-500">
+                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">הפתק המוצע</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   ניתן לערוך את הטקסט ידנית לפני שליחה
                 </p>
               </div>
@@ -1384,14 +1384,14 @@ function ProgressNoteCreator({
                 <button
                   onClick={copyToClipboard}
                   disabled={!noteText}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:opacity-40"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:opacity-40"
                 >
                   {copied ? "✓ הועתק!" : "העתק"}
                 </button>
                 <button
                   onClick={regenerate}
                   disabled={selectedExercises.length === 0}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 hover:border-amber-300 hover:bg-amber-50 hover:text-amber-700 disabled:opacity-40"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:border-amber-300 hover:bg-amber-50 hover:text-amber-700 disabled:opacity-40"
                 >
                   רענן פתק
                 </button>
@@ -1400,15 +1400,15 @@ function ProgressNoteCreator({
 
             <div className="flex-1 min-h-0">
               {selectedExercises.length === 0 ? (
-                <div className="flex h-full min-h-[300px] flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-200 bg-slate-50/30 text-center">
+                <div className="flex h-full min-h-[300px] flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/30 text-center">
                   <FaNoteSticky size={28} className="text-slate-300" />
-                  <p className="text-sm text-slate-400">בחר תרגילים כדי ליצור פתק התקדמות.</p>
+                  <p className="text-sm text-slate-400 dark:text-slate-500">בחר תרגילים כדי ליצור פתק התקדמות.</p>
                 </div>
               ) : (
                 <textarea
                   value={noteText}
                   onChange={(e) => setManualText(e.target.value)}
-                  className="h-full min-h-[300px] w-full resize-none rounded-2xl border border-slate-200 bg-slate-50/30 p-4 text-sm leading-relaxed text-slate-800 focus:border-blue-500 focus:outline-none"
+                  className="h-full min-h-[300px] w-full resize-none rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/30 p-4 text-sm leading-relaxed text-slate-800 dark:text-slate-100 focus:border-blue-500 focus:outline-none"
                   dir="rtl"
                 />
               )}

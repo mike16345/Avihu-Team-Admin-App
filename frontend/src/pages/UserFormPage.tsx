@@ -174,24 +174,24 @@ const UserFormPage = () => {
       {/* Back button */}
       <button
         onClick={() => navigate("/users")}
-        className="inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-blue-600"
+        className="inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-blue-600"
       >
         <FaArrowRight size={11} />
         <span>חזרה לרשימת המתאמנים</span>
       </button>
 
       {/* Header — compact */}
-      <div className="relative overflow-hidden rounded-xl border border-slate-200/80 bg-white p-3 shadow-sm">
+      <div className="relative overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-3 shadow-sm">
         <div className="absolute inset-y-0 right-0 w-1 bg-blue-400" />
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-blue-400 text-base font-bold text-white ring-2 ring-white">
             {initials}
           </div>
           <div>
-            <p className="text-[10px] uppercase tracking-widest text-slate-400">
+            <p className="text-[10px] uppercase tracking-widest text-slate-400 dark:text-slate-500">
               {isEdit ? "עריכת מתאמן" : "מתאמן חדש"}
             </p>
-            <h2 className="text-base font-bold leading-tight text-slate-900">
+            <h2 className="text-base font-bold leading-tight text-slate-900 dark:text-slate-100">
               {firstName || lastName ? `${firstName} ${lastName}`.trim() : "ללא שם"}
             </h2>
           </div>
@@ -201,10 +201,10 @@ const UserFormPage = () => {
       {/* Form */}
       <form onSubmit={handleSubmit} className="flex flex-col gap-3" data-testid="user-form">
         {/* Personal details card */}
-        <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm">
+        <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-4 shadow-sm">
           <div className="mb-3 flex items-center gap-2">
             <FaUser size={13} className="text-blue-600" />
-            <h2 className="text-sm font-bold text-slate-900">פרטים אישיים</h2>
+            <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">פרטים אישיים</h2>
           </div>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <Field label="שם פרטי" error={errors.firstName} required>
@@ -253,10 +253,10 @@ const UserFormPage = () => {
         </div>
 
         {/* Plan card */}
-        <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm">
+        <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-4 shadow-sm">
           <div className="mb-3 flex items-center gap-2">
             <FaCalendarDays size={13} className="text-indigo-600" />
-            <h2 className="text-sm font-bold text-slate-900">תוכנית וליווי</h2>
+            <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">תוכנית וליווי</h2>
           </div>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <Field label="סוג תוכנית" error={errors.planType} required>
@@ -286,7 +286,7 @@ const UserFormPage = () => {
                 <div className="relative">
                   <FaCalendarCheck
                     size={12}
-                    className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-slate-400"
+                    className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
                   />
                   <input
                     data-testid="user-form-date-finished"
@@ -303,7 +303,7 @@ const UserFormPage = () => {
                       type="button"
                       onClick={() => applyDatePreset(p.days)}
                       data-testid="user-form-date-preset"
-                      className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
+                      className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-slate-600 dark:text-slate-300 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
                     >
                       {p.label}
                     </button>
@@ -315,10 +315,10 @@ const UserFormPage = () => {
         </div>
 
         {/* Dietary restrictions card */}
-        <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm">
+        <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-4 shadow-sm">
           <div className="mb-3 flex items-center gap-2">
             <FaCheck size={13} className="text-emerald-600" />
-            <h2 className="text-sm font-bold text-slate-900">הגבלות תזונה</h2>
+            <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">הגבלות תזונה</h2>
           </div>
           <div className="flex flex-wrap gap-2">
             {DIETARY_OPTIONS.map((opt) => {
@@ -330,8 +330,8 @@ const UserFormPage = () => {
                   onClick={() => toggleDietary(opt)}
                   className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-sm font-semibold transition-all ${
                     selected
-                      ? "border-emerald-300 bg-emerald-50 text-emerald-700"
-                      : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                      ? "border-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300"
+                      : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700"
                   }`}
                 >
                   {selected ? <FaCheck size={10} /> : <FaXmark size={10} className="opacity-30" />}
@@ -343,14 +343,14 @@ const UserFormPage = () => {
         </div>
 
         {/* Action bar */}
-        <div className="sticky bottom-0 z-10 -mx-4 flex items-center justify-between gap-2 border-t border-slate-200/80 bg-white/95 px-4 py-3 backdrop-blur-sm">
+        <div className="sticky bottom-0 z-10 -mx-4 flex items-center justify-between gap-2 border-t border-slate-200/80 dark:border-slate-800/80 bg-white/95 px-4 py-3 backdrop-blur-sm">
           {/* Delete (only in edit mode) */}
           {isEdit ? (
             <button
               type="button"
               onClick={() => setShowDeleteConfirm(true)}
               disabled={deleteUserMutation.isPending}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-3 py-2 text-sm font-semibold text-red-600 transition-all hover:border-red-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-semibold text-red-600 transition-all hover:border-red-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <FaTrash size={11} />
               <span>מחיקת מתאמן</span>
@@ -363,7 +363,7 @@ const UserFormPage = () => {
             <button
               type="button"
               onClick={() => navigate("/users")}
-              className="rounded-xl border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+              className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-5 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
             >
               ביטול
             </button>
@@ -388,15 +388,15 @@ const UserFormPage = () => {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-md rounded-2xl border border-red-200 bg-white p-5 shadow-2xl"
+            className="w-full max-w-md rounded-2xl border border-red-200 bg-white dark:bg-slate-900 p-5 shadow-2xl"
           >
             <div className="mb-3 flex items-center gap-2 text-red-600">
               <FaTriangleExclamation size={20} />
               <h3 className="text-lg font-bold">מחיקת מתאמן</h3>
             </div>
-            <p className="mb-3 text-sm text-slate-700">
+            <p className="mb-3 text-sm text-slate-700 dark:text-slate-200">
               אתה עומד למחוק את{" "}
-              <span className="font-bold text-slate-900">
+              <span className="font-bold text-slate-900 dark:text-slate-100">
                 {firstName} {lastName}
               </span>
               .
@@ -415,7 +415,7 @@ const UserFormPage = () => {
                 type="button"
                 onClick={() => setShowDeleteConfirm(false)}
                 disabled={deleteUserMutation.isPending}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
               >
                 ביטול
               </button>
@@ -439,10 +439,10 @@ const UserFormPage = () => {
 // =========== Helpers ===========
 
 function inputCls(hasError: boolean): string {
-  return `w-full rounded-lg border bg-white px-3 py-1.5 text-sm shadow-sm transition-all focus:outline-none focus:ring-2 ${
+  return `w-full rounded-lg border bg-white dark:bg-slate-900 px-3 py-1.5 text-sm shadow-sm transition-all focus:outline-none focus:ring-2 ${
     hasError
       ? "border-red-300 focus:border-red-500 focus:ring-red-200"
-      : "border-slate-200 focus:border-blue-500 focus:ring-blue-200"
+      : "border-slate-200 dark:border-slate-800 focus:border-blue-500 focus:ring-blue-200"
   }`;
 }
 
@@ -459,7 +459,7 @@ function Field({
 }) {
   return (
     <div className="flex flex-col gap-1">
-      <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+      <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
         {label}
         {required && <span className="ms-0.5 text-red-500">*</span>}
       </label>
@@ -507,7 +507,7 @@ function SelectInput({
       </select>
       <FaChevronDown
         size={10}
-        className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 text-slate-400"
+        className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
       />
     </div>
   );

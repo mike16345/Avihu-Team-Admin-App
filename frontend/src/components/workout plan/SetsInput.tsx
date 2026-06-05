@@ -1,3 +1,8 @@
+/**
+ * SetsInput — a single row in the sets table.
+ *
+ * Layout: [purple pill "סט N"] [min reps input] [max reps input] [actions]
+ */
 import React, { ReactNode } from "react";
 import { Input } from "@/components/ui/input";
 import { useFormContext } from "react-hook-form";
@@ -6,9 +11,9 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/
 interface SetsInputProps {
   index: number;
   setNumber: number;
-  fieldNamePrefix: string; // e.g. workoutPlans.0.muscleGroups.0.exercises.0.sets
+  fieldNamePrefix: string;
   children?: ReactNode;
-  onUpdateSet?: (index: number, newSet: any) => void; // optional callback for whole set update
+  onUpdateSet?: (index: number, newSet: any) => void;
 }
 
 const SetsInput: React.FC<SetsInputProps> = ({
@@ -16,41 +21,31 @@ const SetsInput: React.FC<SetsInputProps> = ({
   setNumber,
   fieldNamePrefix,
   children,
-  onUpdateSet,
 }) => {
-  const { control, getValues } = useFormContext();
-
+  const { control } = useFormContext();
   const basePath = `${fieldNamePrefix}.${index}`;
 
-  // Optional: example handler if you want to update the entire set object from inside
-  const handleFullSetChange = (partialUpdate: Partial<any>) => {
-    if (!onUpdateSet) return;
-
-    const currentSet = getValues(basePath);
-    onUpdateSet(index, { ...currentSet, ...partialUpdate });
-  };
-
   return (
-    <div className="flex items-center gap-2">
-      <div className="w-10 mt-6 font-semibold">סט {setNumber}</div>
+    <div className="flex items-end gap-3" dir="rtl">
+      <div className="mt-6 inline-flex h-8 min-w-[58px] items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/40 px-3 text-xs font-bold text-purple-700 dark:text-purple-300">
+        סט {setNumber}
+      </div>
 
       <FormField
         control={control}
         name={`${basePath}.minReps`}
         render={({ field }) => (
-          <FormItem className="w-24">
-            <FormLabel>מינימום חזרות</FormLabel>
+          <FormItem className="w-24 space-y-1">
+            <FormLabel className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              מינ׳ חזרות
+            </FormLabel>
             <FormControl>
               <Input
                 {...field}
                 type="number"
                 min={0}
-                placeholder="8/10/12..."
-                // Example usage if you want to handle full set update:
-                // onChange={e => {
-                //   field.onChange(e);
-                //   handleFullSetChange({ minReps: e.target.valueAsNumber });
-                // }}
+                placeholder="8"
+                className="h-9 text-sm"
               />
             </FormControl>
             <FormMessage />
@@ -62,18 +57,17 @@ const SetsInput: React.FC<SetsInputProps> = ({
         control={control}
         name={`${basePath}.maxReps`}
         render={({ field }) => (
-          <FormItem className="w-24">
-            <FormLabel>מקסימום חזרות</FormLabel>
+          <FormItem className="w-24 space-y-1">
+            <FormLabel className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              מקס׳ חזרות
+            </FormLabel>
             <FormControl>
               <Input
                 {...field}
                 type="number"
                 min={0}
-                placeholder="8/10/12..."
-                // onChange={e => {
-                //   field.onChange(e);
-                //   handleFullSetChange({ maxReps: e.target.valueAsNumber });
-                // }}
+                placeholder="12"
+                className="h-9 text-sm"
               />
             </FormControl>
             <FormMessage />

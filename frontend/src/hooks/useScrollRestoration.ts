@@ -10,13 +10,22 @@
  * `location.key` (which is stable across history entries). This survives
  * full reloads within the same browser tab.
  *
- * The scrolling element is the main content container (`<div>` inside
- * `App.tsx`), not the `window`. Pass its ref to this hook.
+ * Async-rendering problem
+ * -----------------------
+ * Most pages load data with React Query, so when the user clicks "back"
+ * the container is initially short — the saved scrollTop gets clamped to
+ * the (small) maxScrollTop, leaving the page at 0. To handle this we
+ * observe the container's size for ~1.5s after navigation and keep
+ * re-applying the saved scrollTop until either:
+ *   - the container is tall enough to honour the saved value, or
+ *   - the user scrolls manually (we stop interfering), or
+ *   - the timeout expires.
  */
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { useLocation, useNavigationType } from "react-router-dom";
 
 const STORAGE_PREFIX = "avihu:scroll:";
+const RESTORE_WINDOW_MS = 1500;
 
 const readSaved = (key: string): number => {
   try {
@@ -45,9 +54,9 @@ export function useScrollRestoration(
   const previousKeyRef = useRef<string | null>(null);
 
   /**
-   * Save the scroll position of the OUTGOING location whenever the
-   * incoming location changes. We snapshot in a useLayoutEffect so we
-   * read the scrollTop before the new render scrolls the container.
+   * Save scroll position of the OUTGOING location whenever the incoming
+   * location changes. Snapshot in useLayoutEffect to read scrollTop
+   * before the new render scrolls the container.
    */
   useLayoutEffect(() => {
     const outgoingKey = previousKeyRef.current;
@@ -58,24 +67,81 @@ export function useScrollRestoration(
   }, [location.key, containerRef]);
 
   /**
-   * Apply scroll position for the INCOMING location. POP = restore;
-   * anything else = top.
+   * Apply scroll position for the INCOMING location.
+   *   POP        → restore (and keep retrying while content streams in)
+   *   PUSH/REPL  → jump to top
    */
-  useLayoutEffect(() => {
+  useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    if (navigationType === "POP") {
-      const saved = readSaved(location.key);
-      el.scrollTop = saved;
-    } else {
+
+    if (navigationType !== "POP") {
       el.scrollTop = 0;
+      return;
     }
+
+    const target = readSaved(location.key);
+    if (target <= 0) {
+      el.scrollTop = 0;
+      return;
+    }
+
+    // Apply once immediately.
+    el.scrollTop = target;
+
+    // If the container is too short for the target, keep re-applying as
+    // content streams in. Stop when we reach target (or close enough),
+    // when the user scrolls, or after RESTORE_WINDOW_MS.
+    let cancelled = false;
+    let userInterfered = false;
+    let lastSet = target;
+
+    const reapply = () => {
+      if (cancelled || userInterfered) return;
+      const maxScroll = el.scrollHeight - el.clientHeight;
+      const want = Math.min(target, Math.max(0, maxScroll));
+      if (Math.abs(el.scrollTop - want) > 1) {
+        lastSet = want;
+        el.scrollTop = want;
+      }
+      // Done — content reached the target height.
+      if (want >= target - 1) {
+        cleanup();
+      }
+    };
+
+    // If the user scrolls during the restoration window, stop forcing
+    // them back. We detect this by comparing to the value we last set.
+    const onScroll = () => {
+      if (Math.abs(el.scrollTop - lastSet) > 4) {
+        userInterfered = true;
+        cleanup();
+      }
+    };
+
+    const ro = new ResizeObserver(reapply);
+    // Observe both the container and its first child — the child is the
+    // real content whose growth we care about.
+    ro.observe(el);
+    if (el.firstElementChild) ro.observe(el.firstElementChild);
+
+    el.addEventListener("scroll", onScroll, { passive: true });
+
+    const timeoutId = window.setTimeout(cleanup, RESTORE_WINDOW_MS);
+
+    function cleanup() {
+      if (cancelled) return;
+      cancelled = true;
+      ro.disconnect();
+      el?.removeEventListener("scroll", onScroll);
+      window.clearTimeout(timeoutId);
+    }
+
+    return cleanup;
   }, [location.key, navigationType, containerRef]);
 
   /**
-   * Snapshot the current scroll position before the tab unloads, so a
-   * full page reload (followed by a back navigation in another tab)
-   * doesn't lose it.
+   * Snapshot before tab unload so a refresh-then-back still works.
    */
   useEffect(() => {
     const onUnload = () => {

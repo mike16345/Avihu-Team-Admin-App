@@ -94,8 +94,8 @@ export const UsersPage = () => {
       {/* Page header */}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">מתאמנים</h1>
-          <p className="text-sm text-slate-500">ניהול ומעקב אחרי כל המתאמנים שלך</p>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">מתאמנים</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400">ניהול ומעקב אחרי כל המתאמנים שלך</p>
         </div>
         <button
           data-testid="users-add-button"
@@ -109,7 +109,7 @@ export const UsersPage = () => {
 
       {/* Stats summary */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <StatCard label="סה״כ מתאמנים" value={stats.total} color="text-slate-900" />
+        <StatCard label="סה״כ מתאמנים" value={stats.total} color="text-slate-900 dark:text-slate-100" />
         <StatCard label="פעילים" value={stats.active} color="text-emerald-600" />
         <StatCard label="משתמשים" value={stats.inOnboarding} color="text-blue-600" />
         <StatCard label="מסתיימים השבוע" value={stats.endingSoon} color="text-rose-600" />
@@ -120,17 +120,17 @@ export const UsersPage = () => {
         <div className="relative flex-1">
           <FaMagnifyingGlass
             size={12}
-            className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-slate-400"
+            className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
           />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="חיפוש לפי שם / סוג תוכנית / אימייל / טלפון"
-            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 ps-10 pe-4 text-sm shadow-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-2.5 ps-10 pe-4 text-sm shadow-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
           />
         </div>
-        <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white p-1 shadow-sm">
+        <div className="flex items-center gap-1 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-1 shadow-sm">
           {(["הכל", "פעיל", "מסתיים בקרוב", "ללא תאריך סיום"] as const).map((s) => (
             <button
               key={s}
@@ -138,7 +138,7 @@ export const UsersPage = () => {
               className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
                 statusFilter === s
                   ? "bg-blue-600 text-white shadow-sm"
-                  : "text-slate-600 hover:bg-slate-50"
+                  : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
               }`}
             >
               {s}
@@ -183,7 +183,7 @@ export const UsersPage = () => {
       `}</style>
 
       {filtered.length === 0 && (
-        <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-12 text-center text-sm text-slate-400">
+        <div className="rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-12 text-center text-sm text-slate-400 dark:text-slate-500">
           לא נמצאו מתאמנים תואמים
         </div>
       )}
@@ -195,8 +195,8 @@ export const UsersPage = () => {
 
 function StatCard({ label, value, color }: { label: string; value: number; color: string }) {
   return (
-    <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm">
-      <p className="text-xs text-slate-500">{label}</p>
+    <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-4 shadow-sm">
+      <p className="text-xs text-slate-500 dark:text-slate-400">{label}</p>
       <p className={`mt-1 text-2xl font-bold ${color}`}>{value}</p>
     </div>
   );
@@ -221,14 +221,14 @@ function UserCard({
   const status = isInactive ? "כבוי" : "פעיל";
   const statusColors = isInactive
     ? { dot: "bg-red-500", bg: "bg-red-50", text: "text-red-700" }
-    : { dot: "bg-emerald-500", bg: "bg-emerald-50", text: "text-emerald-700" };
+    : { dot: "bg-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-950/40", text: "text-emerald-700 dark:text-emerald-300" };
 
   return (
     <div
-      className={`group relative flex flex-col gap-3 rounded-2xl border bg-white p-5 text-right shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg ${
+      className={`group relative flex flex-col gap-3 rounded-2xl border bg-white dark:bg-slate-900 p-5 text-right shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg ${
         isExpiringSoon
           ? "border-rose-300 hover:border-rose-400"
-          : "border-slate-200/80 hover:border-blue-300"
+          : "border-slate-200/80 dark:border-slate-800/80 hover:border-blue-300"
       }`}
     >
       <button
@@ -243,10 +243,10 @@ function UserCard({
             {initials}
           </div>
           <div>
-            <p className="text-base font-bold text-slate-900">
+            <p className="text-base font-bold text-slate-900 dark:text-slate-100">
               {user.firstName} {user.lastName}
             </p>
-            <p className="text-xs text-slate-500">{user.planType || "—"}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{user.planType || "—"}</p>
           </div>
         </div>
         <span
@@ -257,18 +257,18 @@ function UserCard({
         </span>
       </div>
 
-      <div className="relative z-10 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3 text-xs pointer-events-none">
+      <div className="relative z-10 grid grid-cols-2 gap-2 border-t border-slate-100 dark:border-slate-800 pt-3 text-xs pointer-events-none">
         <div>
-          <p className="text-slate-400">תחילת ליווי</p>
-          <p className="mt-0.5 font-bold text-slate-800">
+          <p className="text-slate-400 dark:text-slate-500">תחילת ליווי</p>
+          <p className="mt-0.5 font-bold text-slate-800 dark:text-slate-100">
             {user.dateJoined ? DateUtils.formatDate(user.dateJoined, "DD/MM/YYYY") : "—"}
           </p>
         </div>
         <div>
-          <p className="text-slate-400">סיום ליווי</p>
+          <p className="text-slate-400 dark:text-slate-500">סיום ליווי</p>
           <p
             className={`mt-0.5 font-bold ${
-              isExpiringSoon ? "text-rose-600" : "text-slate-800"
+              isExpiringSoon ? "text-rose-600" : "text-slate-800 dark:text-slate-100"
             }`}
           >
             {user.dateFinished
@@ -277,21 +277,21 @@ function UserCard({
           </p>
         </div>
         <div>
-          <p className="text-slate-400">טלפון</p>
-          <p className="mt-0.5 font-bold text-slate-800" dir="ltr">
+          <p className="text-slate-400 dark:text-slate-500">טלפון</p>
+          <p className="mt-0.5 font-bold text-slate-800 dark:text-slate-100" dir="ltr">
             {user.phone || "—"}
           </p>
         </div>
         <div>
-          <p className="text-slate-400">אימייל</p>
-          <p className="mt-0.5 truncate font-bold text-slate-800" dir="ltr">
+          <p className="text-slate-400 dark:text-slate-500">אימייל</p>
+          <p className="mt-0.5 truncate font-bold text-slate-800 dark:text-slate-100" dir="ltr">
             {user.email || "—"}
           </p>
         </div>
       </div>
 
       {isExpiringSoon && (
-        <div className="relative z-10 rounded-lg bg-rose-50 px-2 py-1 text-center text-[11px] font-semibold text-rose-700 pointer-events-none">
+        <div className="relative z-10 rounded-lg bg-rose-50 dark:bg-rose-950/40 px-2 py-1 text-center text-[11px] font-semibold text-rose-700 dark:text-rose-300 pointer-events-none">
           ⚠️ הליווי מסתיים בעוד {daysLeft} ימים
         </div>
       )}
