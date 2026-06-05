@@ -195,19 +195,19 @@ const UserCheckIn = () => {
           navUrl: `/users/${u._id}?tab=${weightTab}`,
         }))
       : activeView === "noWorkout"
-      ? (noWorkoutData?.data ?? []).map((u: any) => ({
-          ...u,
-          navUrl: `/workout-plans/${u._id}`,
-        }))
-      : activeView === "noDiet"
-      ? (noDietData?.data ?? []).map((u: any) => ({
-          ...u,
-          navUrl: `/diet-plans/${u._id}`,
-        }))
-      : (expiringData?.data ?? []).map((u: any) => ({
-          ...u,
-          navUrl: `/users/${u._id}?tab=${weightTab}`,
-        }));
+        ? (noWorkoutData?.data ?? []).map((u: any) => ({
+            ...u,
+            navUrl: `/workout-plans/${u._id}`,
+          }))
+        : activeView === "noDiet"
+          ? (noDietData?.data ?? []).map((u: any) => ({
+              ...u,
+              navUrl: `/diet-plans/${u._id}`,
+            }))
+          : (expiringData?.data ?? []).map((u: any) => ({
+              ...u,
+              navUrl: `/users/${u._id}?tab=${weightTab}`,
+            }));
 
   const meta = VIEW_META[activeView];
 
@@ -228,9 +228,7 @@ const UserCheckIn = () => {
             {meta.icon}
           </div>
           <div>
-            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-              {meta.label}
-            </h3>
+            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">{meta.label}</h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               {activeView === "checkin"
                 ? "לחץ על שם כדי לפתוח פרופיל, או על ה-V כדי לסמן כנבדק"
@@ -238,7 +236,9 @@ const UserCheckIn = () => {
             </p>
           </div>
         </div>
-        <span className={`inline-flex h-7 min-w-[2rem] items-center justify-center rounded-full px-2.5 text-xs font-bold ${meta.countBg}`}>
+        <span
+          className={`inline-flex h-7 min-w-[2rem] items-center justify-center rounded-full px-2.5 text-xs font-bold ${meta.countBg}`}
+        >
           {counts[activeView]}
         </span>
       </header>
