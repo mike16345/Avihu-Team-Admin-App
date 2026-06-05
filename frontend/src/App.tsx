@@ -17,10 +17,7 @@ function App() {
   return (
     <div className="flex size-full">
       {authed && <AppSidebar />}
-      <div
-        ref={mainScrollRef}
-        className="size-full overflow-y-auto px-20 py-14 custom-scrollbar"
-      >
+      <div ref={mainScrollRef} className="size-full overflow-y-auto px-20 py-14 custom-scrollbar">
         <RequireAuth>
           <AppRoutes />
         </RequireAuth>
