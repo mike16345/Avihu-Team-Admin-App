@@ -17,11 +17,7 @@ import useAnalyticsApi from "@/hooks/api/useAnalyticsApi";
 import Loader from "../ui/Loader";
 import { toast } from "sonner";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
-import {
-  FaCheck,
-  FaArrowLeft,
-  FaMagnifyingGlass,
-} from "react-icons/fa6";
+import { FaCheck, FaArrowLeft, FaMagnifyingGlass } from "react-icons/fa6";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import ErrorPage from "@/pages/ErrorPage";
 import { FULL_DAY_STALE_TIME, HOUR_STALE_TIME } from "@/constants/constants";
@@ -116,21 +112,19 @@ const UserCheckIn = () => {
     activeView === "checkin"
       ? (checkinUsers ?? []).map((u) => ({ ...u, navUrl: `/users/${u._id}?tab=${weightTab}` }))
       : activeView === "noWorkout"
-      ? (noWorkoutData?.data ?? []).map((u: any) => ({ ...u, navUrl: `/workout-plans/${u._id}` }))
-      : activeView === "noDiet"
-      ? (noDietData?.data ?? []).map((u: any) => ({ ...u, navUrl: `/diet-plans/${u._id}` }))
-      : (expiringData?.data ?? []).map((u: any) => ({
-          ...u,
-          navUrl: `/users/${u._id}?tab=${weightTab}`,
-        }));
+        ? (noWorkoutData?.data ?? []).map((u: any) => ({ ...u, navUrl: `/workout-plans/${u._id}` }))
+        : activeView === "noDiet"
+          ? (noDietData?.data ?? []).map((u: any) => ({ ...u, navUrl: `/diet-plans/${u._id}` }))
+          : (expiringData?.data ?? []).map((u: any) => ({
+              ...u,
+              navUrl: `/users/${u._id}?tab=${weightTab}`,
+            }));
 
   const activeList = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return rawList;
     return rawList.filter(
-      (u) =>
-        u.firstName?.toLowerCase().includes(q) ||
-        u.lastName?.toLowerCase().includes(q)
+      (u) => u.firstName?.toLowerCase().includes(q) || u.lastName?.toLowerCase().includes(q)
     );
   }, [rawList, search]);
 
@@ -205,7 +199,11 @@ const UserCheckIn = () => {
               <FaCheck size={18} />
             </div>
             <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">
-              {search ? "לא נמצאו תוצאות" : activeView === "checkin" ? "כל המתאמנים נבדקו!" : "הכל מסודר!"}
+              {search
+                ? "לא נמצאו תוצאות"
+                : activeView === "checkin"
+                  ? "כל המתאמנים נבדקו!"
+                  : "הכל מסודר!"}
             </p>
           </div>
         )}
