@@ -103,8 +103,14 @@ body {
     1px 1px 0 #000 !important;
 }
 
+/* Heebo is the Hebrew system font — set via Tailwind's font-sans token
+   (see tailwind.config.js). We force it here on every non-icon element
+   with !important so any leftover inline styles or third-party defaults
+   don't sneak through. The previous "Google Sans !important" rule has
+   been replaced: Google Sans has no Hebrew glyphs, which caused the
+   browser to fall back to inconsistent system fonts for Hebrew text. */
 * :not(.icon) {
-  font-family: "Google Sans" !important;
+  font-family: "Heebo", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Hebrew", Arial, sans-serif !important;
 }
 
 * {
