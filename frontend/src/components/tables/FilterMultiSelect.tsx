@@ -52,10 +52,20 @@ const FilterMultiSelect = ({
   };
 
   const active = selected.length > 0;
+  /**
+   * Summary mirrors the original behaviour the rest of the app expects:
+   *   none      → placeholder
+   *   1 picked  → "<name>"
+   *   many      → "<first name> ועוד N"
+   * Some surfaces (e.g. ExerciseProgressNotePanel) rely on the summary
+   * to show *which* item is picked at a glance, not just the count.
+   */
   const summary = useMemo(() => {
     if (!selected.length) return placeholder;
     if (selected.length === 1) return optionMap[selected[0]] ?? selected[0];
-    return `${selected.length} נבחרו`;
+    const firstLabel = optionMap[selected[0]] ?? selected[0];
+    const restCount = selected.length - 1;
+    return `${firstLabel} ועוד ${restCount}`;
   }, [selected, optionMap, placeholder]);
 
   return (
@@ -75,7 +85,7 @@ const FilterMultiSelect = ({
         >
           <FaFilter size={10} className="shrink-0 opacity-60" />
           <span className="shrink-0">{label}:</span>
-          <span className="max-w-[10rem] truncate font-normal">{summary}</span>
+          <span className="max-w-[12rem] truncate font-normal">{summary}</span>
           {active ? (
             <span
               role="button"
@@ -105,8 +115,8 @@ const FilterMultiSelect = ({
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        align="end"
-        className="max-h-64 w-56 overflow-y-auto rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-1 shadow-lg"
+        align="center"
+        className="max-h-64 w-72 overflow-y-auto rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-1 shadow-lg"
         style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
       >
         {options.map((option) => (

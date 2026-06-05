@@ -60,14 +60,14 @@ const UnsavedChangesDialog: React.FC<UnsavedChangesDialogProps> = ({
             <p className="mb-2 text-right text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               שינויים שביצעת ({changes.length})
             </p>
-            <ul className="space-y-1 text-right">
+            <ul className="space-y-1">
               {changes.slice(0, 8).map((c, i) => (
                 <li
                   key={i}
-                  className="flex items-center justify-end gap-2 text-xs text-slate-700 dark:text-slate-200"
+                  className="flex items-center justify-start gap-2 text-xs text-slate-700 dark:text-slate-200"
                 >
-                  <span>{c}</span>
                   <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                  <span>{c}</span>
                 </li>
               ))}
               {changes.length > 8 && (

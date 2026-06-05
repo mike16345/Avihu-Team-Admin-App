@@ -20,6 +20,7 @@ import {
   FaPencil,
 } from "react-icons/fa6";
 import { extractExercises } from "@/lib/workoutUtils";
+import { generateExerciseProgressNote } from "@/lib/exerciseProgressNote";
 import useUserRecordedSets from "@/hooks/queries/recordedSets/useUserRecordedSets";
 import useMuscleGroupsQuery from "@/hooks/queries/MuscleGroups/useMuscleGroupsQuery";
 import Loader from "@/components/ui/Loader";
@@ -534,6 +535,7 @@ export const WorkoutProgression = () => {
           flatExercises={flatExercises}
           availableGroups={availableGroups}
           userName={userFirstName}
+          recordedWorkouts={recordedWorkouts}
           onClose={() => setNoteOpen(false)}
         />
       )}
@@ -1239,11 +1241,13 @@ function ProgressNoteCreator({
   flatExercises,
   availableGroups,
   userName,
+  recordedWorkouts,
   onClose,
 }: {
   flatExercises: FlatExercise[];
   availableGroups: string[];
   userName?: string;
+  recordedWorkouts?: any[];
   onClose: () => void;
 }) {
   // Date range — last 30 days by default
@@ -1270,45 +1274,47 @@ function ProgressNoteCreator({
     setManualText(null);
   };
 
+  /**
+   * Generate the message using the ORIGINAL `generateExerciseProgressNote`
+   * helper from `@/lib/exerciseProgressNote`. This restores the structured
+   * Hebrew format the team is used to:
+   *
+   *   מה איתך {שם},
+   *   עברתי על ההתקדמות שלך באימונים.
+   *
+   *   מ-*{from} עד {to}*:
+   *
+   *   *{קבוצת שריר}*:
+   *
+   *   *{תרגיל}*
+   *   התחלה בתוכנית: משקל X (חזרות: Y)
+   *   {תאריך הראשון בטווח}: משקל X (חזרות: Y)
+   *   {תאריך האחרון בטווח}: משקל X (חזרות: Y)
+   *
+   *   מטרה:
+   *   ...
+   *   מטרה כללית:
+   *
+   * The original generator expects `selectedByMuscleGroup` (Record<group,
+   * exercises[]>). In this redesigned modal we only support picking from
+   * one group at a time, so we feed it a single-entry record.
+   */
   const generatedNote = useMemo(() => {
     if (selectedExercises.length === 0) return "";
-    const sFmt = new Date(startDate).toLocaleDateString("he-IL");
-    const eFmt = new Date(endDate).toLocaleDateString("he-IL");
-
-    const lines: string[] = [];
-    lines.push(`היי ${userName || ""} 👋`);
-    lines.push("");
-    lines.push(`רצינו לעדכן אותך על ההתקדמות שלך מתאריך ${sFmt} עד ${eFmt}:`);
-    lines.push("");
-
-    selectedExercises.forEach((name) => {
-      const ex = flatExercises.find((e) => e.name === name);
-      if (!ex || ex.sessions.length === 0) return;
-      const first = ex.sessions[0];
-      const last = ex.sessions[ex.sessions.length - 1];
-      const isBodyweight = ex.sessions.every((s) => s.weight === 0);
-      if (isBodyweight) {
-        const diff = last.reps - first.reps;
-        const arrow = diff > 0 ? "↑" : diff < 0 ? "↓" : "→";
-        lines.push(
-          `💪 ${name}: התחלת עם ${first.reps} חזרות, היום ${last.reps} (${arrow} ${Math.abs(diff)})`
-        );
-      } else {
-        const diff = +(last.weight - first.weight).toFixed(1);
-        const arrow = diff > 0 ? "↑" : diff < 0 ? "↓" : "→";
-        const pct = first.weight > 0 ? Math.round((diff / first.weight) * 100) : 0;
-        lines.push(
-          `💪 ${name}: התחלת עם ${first.weight} ק״ג, היום ${last.weight} ק״ג (${arrow} ${
-            diff > 0 ? "+" : ""
-          }${diff} ק״ג · ${pct > 0 ? "+" : ""}${pct}%)`
-        );
-      }
+    return generateExerciseProgressNote({
+      userName,
+      selectedByMuscleGroup: { [muscleGroup]: selectedExercises },
+      muscleGroupOrder: [muscleGroup],
+      dateRange: {
+        from: startDate ? new Date(startDate) : undefined,
+        to: endDate ? new Date(endDate) : undefined,
+      },
+      recordedWorkouts,
     });
-
-    lines.push("");
-    lines.push("המשך כך — אתה בכיוון הנכון! 🚀");
-    return lines.join("\n");
-  }, [selectedExercises, startDate, endDate, flatExercises, userName]);
+  }, [selectedExercises, muscleGroup, startDate, endDate, recordedWorkouts, userName]);
+  // Suppress unused-var warning — `flatExercises` is still consumed
+  // elsewhere (availableExercises filter); kept here for clarity.
+  void flatExercises;
 
   const noteText = manualText !== null ? manualText : generatedNote;
 
