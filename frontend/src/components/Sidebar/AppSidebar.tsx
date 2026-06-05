@@ -121,11 +121,7 @@ const SidebarLink: React.FC<{
         active ? T.activeItem : `${T.textMuted} ${T.hoverItem}`
       }`}
     >
-      <Icon
-        size={17}
-        className={active ? T.iconActive : T.iconInactive}
-        strokeWidth={2.2}
-      />
+      <Icon size={17} className={active ? T.iconActive : T.iconInactive} strokeWidth={2.2} />
       <span>{title}</span>
     </Link>
   </li>
@@ -288,7 +284,9 @@ export function AppSidebar() {
       >
         {/* Header */}
         {user && (
-          <header className={`flex items-center justify-between gap-3 border-b ${T.borderSoft} px-5 py-4`}>
+          <header
+            className={`flex items-center justify-between gap-3 border-b ${T.borderSoft} px-5 py-4`}
+          >
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/95 p-1 shadow-sm">
                 <img
