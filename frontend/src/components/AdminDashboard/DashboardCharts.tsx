@@ -16,12 +16,7 @@ import useAnalyticsApi from "@/hooks/api/useAnalyticsApi";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { HOUR_STALE_TIME } from "@/constants/constants";
 import { useUsersStore } from "@/store/userStore";
-import {
-  FaDumbbell,
-  FaAppleWhole,
-  FaCalendarXmark,
-  FaChartBar,
-} from "react-icons/fa6";
+import { FaDumbbell, FaAppleWhole, FaCalendarXmark, FaChartBar } from "react-icons/fa6";
 
 const ProgressBar: React.FC<{
   label: string;
@@ -40,8 +35,7 @@ const ProgressBar: React.FC<{
           {label}
         </span>
         <span className="font-bold text-slate-900 dark:text-slate-100">
-          {value}/{total}{" "}
-          <span className="font-normal text-slate-400">({pct}%)</span>
+          {value}/{total} <span className="font-normal text-slate-400">({pct}%)</span>
         </span>
       </div>
       <div className={`h-2 w-full overflow-hidden rounded-full ${bgColor}`}>
@@ -93,9 +87,7 @@ const DashboardCharts: React.FC = () => {
             <FaChartBar size={14} />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-              כיסוי תוכניות
-            </h3>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">כיסוי תוכניות</h3>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
               כמה מתוך {totalUsers} מתאמנים כבר מוגדרים?
             </p>
@@ -128,9 +120,7 @@ const DashboardCharts: React.FC = () => {
             <FaCalendarXmark size={14} />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-              סיום תהליכים
-            </h3>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">סיום תהליכים</h3>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
               מתאמנים שמסיימים את התוכנית בקרוב
             </p>
@@ -142,9 +132,7 @@ const DashboardCharts: React.FC = () => {
             <span className="text-5xl font-bold text-rose-600 dark:text-rose-400">
               {expiringCount}
             </span>
-            <span className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              מסיימים החודש
-            </span>
+            <span className="mt-1 text-xs text-slate-500 dark:text-slate-400">מסיימים החודש</span>
           </div>
           {/* Visual bar */}
           <div className="flex flex-1 flex-col gap-1">

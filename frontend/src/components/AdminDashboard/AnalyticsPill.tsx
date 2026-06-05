@@ -14,11 +14,7 @@ import { QueryKeys } from "@/enums/QueryKeys";
 import { HOUR_STALE_TIME } from "@/constants/constants";
 import { weightTab } from "@/pages/UserDashboard";
 import { userFullName } from "@/lib/utils";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { FaArrowLeft } from "react-icons/fa6";
 import Loader from "../ui/Loader";
 
@@ -114,9 +110,7 @@ const AnalyticsPill: React.FC<AnalyticsPillProps> = ({
         align="start"
       >
         <div className="sticky top-0 z-10 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3">
-          <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
-            {label}
-          </p>
+          <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{label}</p>
           <p className="text-xs text-slate-500 dark:text-slate-400">
             {count} {count === 1 ? "מתאמן" : "מתאמנים"}
           </p>
@@ -134,9 +128,7 @@ const AnalyticsPill: React.FC<AnalyticsPillProps> = ({
                 key={item._id || i}
                 onClick={() => {
                   setOpen(false);
-                  navigate(
-                    `${action.navUrl}${item._id}${action.query || ""}`
-                  );
+                  navigate(`${action.navUrl}${item._id}${action.query || ""}`);
                 }}
                 className="group flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-right transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
               >
