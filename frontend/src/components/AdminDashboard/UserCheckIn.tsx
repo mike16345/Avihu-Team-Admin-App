@@ -1,23 +1,37 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+/**
+ * UserCheckIn — "clients to check" widget on the home dashboard.
+ *
+ * Visual refresh:
+ *  - Rounded-2xl card with header (icon + title + count badge)
+ *  - Each user is a row with avatar (initials), name, and a green check
+ *    button to mark them off.
+ *  - "Open profile" by clicking the row (single click, not double — old
+ *    behaviour was hard to discover).
+ */
 import { UsersCheckIn } from "@/interfaces/IAnalytics";
 import { useNavigate } from "react-router-dom";
 import useAnalyticsApi from "@/hooks/api/useAnalyticsApi";
 import Loader from "../ui/Loader";
 import { toast } from "sonner";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
-import { FaCheck } from "react-icons/fa";
+import { FaCheck, FaUserCheck, FaArrowLeft } from "react-icons/fa6";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import ErrorPage from "@/pages/ErrorPage";
 import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 import { weightTab } from "@/pages/UserDashboard";
 import { QueryKeys } from "@/enums/QueryKeys";
 
+const getInitials = (firstName?: string, lastName?: string) => {
+  const f = firstName?.[0] || "";
+  const l = lastName?.[0] || "";
+  return (f + l).toUpperCase() || "?";
+};
+
 const UserCheckIn = () => {
   const navigate = useNavigate();
   const { getAllCheckInUsers, checkOffUser } = useAnalyticsApi();
   const queryClient = useQueryClient();
 
-  // Fetching all users to check in
   const {
     isLoading,
     isError,
@@ -32,7 +46,7 @@ const UserCheckIn = () => {
   const mutation = useMutation({
     mutationFn: (id: string) => checkOffUser(id).then((res) => res.data),
     onSuccess: (data) => {
-      toast.success(`משתמש סומן בהצלחה!`);
+      toast.success("המתאמן סומן כנבדק");
       queryClient.setQueryData<UsersCheckIn[] | undefined>(
         [QueryKeys.USERS_TO_CHECK],
         (oldData) => oldData?.filter((user) => user._id !== data._id) ?? []
@@ -45,50 +59,90 @@ const UserCheckIn = () => {
     },
   });
 
-  const handleCheckChange = (id: string) => {
-    mutation.mutate(id);
-  };
-
   if (isError) return <ErrorPage message={error?.message} />;
 
   return (
-    <Card className=" shadow-md max-h-[75vh] overflow-y-auto  ">
-      <CardHeader>
-        <CardTitle>לקוחות לבדיקה</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {isLoading && <Loader size="large" />}
-        {users &&
-          users?.map((user) => (
-            <div
-              key={user._id}
-              onDoubleClick={() => navigate(`/users/${user._id}?tab=${weightTab}`)}
-              className="w-full cursor-pointer flex  justify-between items-center border-b-2 p-3 hover:bg-accent"
-            >
-              <div className="flex items-center gap-1 ">
-                <h2>{user.firstName}</h2>
-                <h2>{user.lastName}</h2>
-              </div>
-              <div
-                className="hover:opacity-40"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleCheckChange(user._id);
-                }}
-              >
-                <FaCheck className="text-success" />
-              </div>
-            </div>
-          ))}
-        {users?.length === 0 && (
-          <div className="size-full flex items-center justify-center">
-            <h2 className=" text-center text-xl  font-bold text-success">
-              לא נשארו לקוחות לבדיקה!
-            </h2>
+    <section
+      dir="rtl"
+      className="flex h-full max-h-[75vh] flex-col overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
+      style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
+    >
+      {/* Header */}
+      <header className="flex items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 px-5 py-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-300 ring-1 ring-amber-200/60 dark:ring-amber-900/40">
+            <FaUserCheck size={16} />
+          </div>
+          <div>
+            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+              מתאמנים לבדיקה
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              לחץ על שם כדי לפתוח פרופיל, או על ה-V כדי לסמן כנבדק
+            </p>
+          </div>
+        </div>
+        {users && users.length > 0 && (
+          <span className="inline-flex h-7 min-w-[2rem] items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/40 px-2.5 text-xs font-bold text-amber-700 dark:text-amber-300">
+            {users.length}
+          </span>
+        )}
+      </header>
+
+      {/* Body */}
+      <div className="flex-1 overflow-y-auto p-3">
+        {isLoading && (
+          <div className="flex justify-center py-6">
+            <Loader size="large" />
           </div>
         )}
-      </CardContent>
-    </Card>
+        {users && users.length === 0 && (
+          <div className="flex flex-col items-center justify-center gap-2 py-10 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-300">
+              <FaCheck size={20} />
+            </div>
+            <p className="text-base font-bold text-emerald-700 dark:text-emerald-300">
+              כל המתאמנים נבדקו!
+            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">תוכל לחזור מחר.</p>
+          </div>
+        )}
+        <ul className="flex flex-col gap-1">
+          {users?.map((user) => (
+            <li
+              key={user._id}
+              onClick={() => navigate(`/users/${user._id}?tab=${weightTab}`)}
+              className="group flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
+            >
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-xs font-bold text-white shadow-sm">
+                {getInitials(user.firstName, user.lastName)}
+              </div>
+              <div className="flex-1 truncate">
+                <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">
+                  {user.firstName} {user.lastName}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  mutation.mutate(user._id);
+                }}
+                disabled={mutation.isPending}
+                aria-label={`סמן את ${user.firstName} כנבדק`}
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-400 dark:text-slate-500 transition-colors hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-600 disabled:opacity-50"
+              >
+                <FaCheck size={11} />
+              </button>
+              <FaArrowLeft
+                size={10}
+                className="text-slate-300 dark:text-slate-600 transition-all group-hover:-translate-x-0.5 group-hover:text-blue-500"
+              />
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
   );
 };
 
