@@ -1,19 +1,18 @@
 /**
- * AppSidebar — auto-hide sidebar with the dark-teal admin look the team
- * asked for (iCount-style).
+ * AppSidebar — auto-hide drawer that matches the rest of the admin panel.
  *
- * Behavior (unchanged):
+ * Behavior:
  *  - Hidden off-screen by default on the right (RTL).
  *  - A thin invisible hover strip on the right edge slides it in.
  *  - Closes on mouse-leave (with a short grace period) or Escape.
- *  - A faint visual handle hints to the user that something is there.
+ *  - A faint blue handle hints to the user that something is there.
  *
- * Visuals (new):
- *  - Deep slate-teal background (#1d3540 in light, slate-950 in dark).
- *  - Light text + slate-400 inactive icons.
- *  - Active item: rounded-full emerald pill with white text/icon.
- *  - Section dividers fade into the dark surface.
- *  - Round emerald CTA button-like footer for the user identity.
+ * Visuals:
+ *  - White surface + slate borders, Heebo font, blue accents.
+ *  - Active item: rounded-full blue pill (iCount-inspired layout, kept
+ *    in our existing palette).
+ *  - All colour tokens hoisted into a single `T` object below so future
+ *    tweaks live in one place.
  */
 import React, { useEffect, useRef, useState } from "react";
 import {
