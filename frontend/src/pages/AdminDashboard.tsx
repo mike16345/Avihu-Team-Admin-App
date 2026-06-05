@@ -14,7 +14,6 @@
 import AnalyticsCard from "@/components/AdminDashboard/AnalyticsCard";
 import Shortcut from "@/components/AdminDashboard/Shortcut";
 import UserCheckIn from "@/components/AdminDashboard/UserCheckIn";
-import GenericCarousel from "@/components/ui/carousel/GenericCarousel";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { useUsersStore } from "@/store/userStore";
 import { BiFoodMenu } from "react-icons/bi";
@@ -121,17 +120,17 @@ const AdminDashboard = () => {
         </div>
       </section>
 
-      {/* Attention area */}
-      <section className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-        <UserCheckIn />
-        <div className="min-w-0">
-          <GenericCarousel
-            carouselItems={[
-              <AnalyticsCard title="ללא תוכנית אימון" dataKey={QueryKeys.NO_WORKOUT_PLAN} />,
-              <AnalyticsCard title="ללא תפריט תזונה" dataKey={QueryKeys.NO_DIET_PLAN} />,
-              <AnalyticsCard title="מסיימים תהליך החודש" dataKey={QueryKeys.EXPIRING_USERS} />,
-            ]}
-          />
+      {/* Attention area — all four insight cards visible at once.
+          Two rows × two columns on lg+; single column on narrow screens. */}
+      <section>
+        <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          מבט מהיר
+        </p>
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+          <UserCheckIn />
+          <AnalyticsCard title="ללא תוכנית אימון" dataKey={QueryKeys.NO_WORKOUT_PLAN} />
+          <AnalyticsCard title="ללא תפריט תזונה" dataKey={QueryKeys.NO_DIET_PLAN} />
+          <AnalyticsCard title="מסיימים תהליך החודש" dataKey={QueryKeys.EXPIRING_USERS} />
         </div>
       </section>
     </div>
