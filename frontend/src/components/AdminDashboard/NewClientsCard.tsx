@@ -15,13 +15,7 @@ import { QueryKeys } from "@/enums/QueryKeys";
 import { HOUR_STALE_TIME } from "@/constants/constants";
 import { userFullName } from "@/lib/utils";
 import Loader from "../ui/Loader";
-import {
-  FaUserPlus,
-  FaArrowLeft,
-  FaDumbbell,
-  FaAppleWhole,
-  FaCheck,
-} from "react-icons/fa6";
+import { FaUserPlus, FaArrowLeft, FaDumbbell, FaAppleWhole, FaCheck } from "react-icons/fa6";
 
 const getInitials = (firstName?: string, lastName?: string) => {
   const f = firstName?.[0] || "";
