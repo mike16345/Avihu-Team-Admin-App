@@ -19,13 +19,7 @@ import Loader from "@/components/ui/Loader";
 import ErrorPage from "@/pages/ErrorPage";
 import useBlogQuery from "@/hooks/queries/blogs/useBlogQuery";
 import { buildPhotoUrl, extractVideoId, getYouTubeThumbnail } from "@/lib/utils";
-import {
-  FaArrowRight,
-  FaPenToSquare,
-  FaPlay,
-  FaUpRightFromSquare,
-  FaImage,
-} from "react-icons/fa6";
+import { FaArrowRight, FaPenToSquare, FaPlay, FaUpRightFromSquare, FaImage } from "react-icons/fa6";
 
 const BlogPreviewPage = () => {
   const { id } = useParams();
@@ -35,8 +29,7 @@ const BlogPreviewPage = () => {
   const imageUrl = useMemo(() => {
     if (!blog) return undefined;
     const hasYoutubeLink = Boolean(blog.link && extractVideoId(blog.link));
-    const fallbackImage =
-      hasYoutubeLink && blog.link ? getYouTubeThumbnail(blog.link) : undefined;
+    const fallbackImage = hasYoutubeLink && blog.link ? getYouTubeThumbnail(blog.link) : undefined;
     return blog.imageUrl ? buildPhotoUrl(blog.imageUrl) : fallbackImage;
   }, [blog]);
 

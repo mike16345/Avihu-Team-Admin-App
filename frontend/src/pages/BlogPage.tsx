@@ -18,13 +18,7 @@ import useLessonGroupsQuery from "@/hooks/queries/lessonGroups/useLessonGroupsQu
 import { ILessonGroup } from "@/interfaces/IBlog";
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  FaNewspaper,
-  FaPlus,
-  FaLayerGroup,
-  FaMagnifyingGlass,
-  FaXmark,
-} from "react-icons/fa6";
+import { FaNewspaper, FaPlus, FaLayerGroup, FaMagnifyingGlass, FaXmark } from "react-icons/fa6";
 
 const BlogPage = () => {
   const navigate = useNavigate();
@@ -97,9 +91,7 @@ const BlogPage = () => {
             <FaNewspaper size={20} />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-              מאמרים
-            </h1>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">מאמרים</h1>
             <p className="text-sm text-slate-500 dark:text-slate-400">
               ניהול תוכן שמופיע במסך המאמרים של אפליקציית המתאמן
             </p>

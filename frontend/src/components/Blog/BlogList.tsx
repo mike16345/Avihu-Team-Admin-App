@@ -52,9 +52,7 @@ const BlogList: React.FC<BlogListProps> = ({
         <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-slate-900 shadow-sm">
           <FaNewspaper size={28} className="text-slate-300 dark:text-slate-600" />
         </div>
-        <h3 className="text-base font-bold text-slate-700 dark:text-slate-200">
-          אין מאמרים עדיין
-        </h3>
+        <h3 className="text-base font-bold text-slate-700 dark:text-slate-200">אין מאמרים עדיין</h3>
         <p className="max-w-sm text-sm text-slate-500 dark:text-slate-400">
           לחץ על "מאמר חדש" כדי להוסיף את המאמר הראשון שלך לאפליקציה.
         </p>
