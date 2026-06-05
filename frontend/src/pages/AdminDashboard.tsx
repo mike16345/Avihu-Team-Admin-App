@@ -127,15 +127,9 @@ const AdminDashboard = () => {
         <div className="min-w-0">
           <GenericCarousel
             carouselItems={[
-              <AnalyticsCard
-                title="ללא תוכנית אימון"
-                dataKey={QueryKeys.NO_WORKOUT_PLAN}
-              />,
+              <AnalyticsCard title="ללא תוכנית אימון" dataKey={QueryKeys.NO_WORKOUT_PLAN} />,
               <AnalyticsCard title="ללא תפריט תזונה" dataKey={QueryKeys.NO_DIET_PLAN} />,
-              <AnalyticsCard
-                title="מסיימים תהליך החודש"
-                dataKey={QueryKeys.EXPIRING_USERS}
-              />,
+              <AnalyticsCard title="מסיימים תהליך החודש" dataKey={QueryKeys.EXPIRING_USERS} />,
             ]}
           />
         </div>

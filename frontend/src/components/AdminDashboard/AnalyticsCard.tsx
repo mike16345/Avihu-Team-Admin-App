@@ -19,13 +19,7 @@ import { QueryKeys } from "@/enums/QueryKeys";
 import { HOUR_STALE_TIME } from "@/constants/constants";
 import { weightTab } from "@/pages/UserDashboard";
 import { userFullName } from "@/lib/utils";
-import {
-  FaDumbbell,
-  FaAppleWhole,
-  FaCalendarXmark,
-  FaArrowLeft,
-  FaCheck,
-} from "react-icons/fa6";
+import { FaDumbbell, FaAppleWhole, FaCalendarXmark, FaArrowLeft, FaCheck } from "react-icons/fa6";
 
 interface AnalyticsCardProps {
   title: string;
