@@ -88,22 +88,24 @@ const HOVER_TRIGGER_WIDTH = 14;
 const CLOSE_DELAY_MS = 200;
 
 /**
- * Theme tokens — keep all the dark-teal colors in one place so the look
- * is easy to nudge later without hunting through the JSX.
+ * Theme tokens — keeps our existing white/blue palette while adopting
+ * the iCount-inspired layout (rounded-full pills for active items,
+ * generous spacing). One central object so future colour tweaks land
+ * in a single diff.
  */
 const T = {
-  surface: "bg-[#1f3a44]",
-  surfaceDark: "dark:bg-slate-950",
-  border: "border-white/5",
-  borderSoft: "border-white/10",
-  textPrimary: "text-slate-100",
-  textMuted: "text-slate-400",
-  textSubtle: "text-slate-500",
-  hoverItem: "hover:bg-white/5 hover:text-white",
-  activeItem: "bg-emerald-500 text-white shadow-md shadow-emerald-500/20",
-  iconInactive: "text-slate-400 group-hover:text-slate-100",
+  surface: "bg-white",
+  surfaceDark: "dark:bg-slate-900",
+  border: "border-slate-200/80",
+  borderSoft: "border-slate-100 dark:border-slate-800",
+  textPrimary: "text-slate-900 dark:text-slate-100",
+  textMuted: "text-slate-600 dark:text-slate-300",
+  textSubtle: "text-slate-400 dark:text-slate-500",
+  hoverItem: "hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900",
+  activeItem: "bg-blue-600 text-white shadow-sm shadow-blue-600/20",
+  iconInactive: "text-slate-400 dark:text-slate-500 group-hover:text-slate-700",
   iconActive: "text-white",
-  divider: "bg-white/10",
+  divider: "bg-slate-100 dark:bg-slate-800",
 };
 
 const SidebarLink: React.FC<{
@@ -270,7 +272,7 @@ export function AppSidebar() {
         }`}
         style={{ right: 2, zIndex: 41 }}
       >
-        <div className="flex h-16 w-1.5 items-center justify-center rounded-full bg-gradient-to-b from-emerald-400 to-emerald-600 shadow-sm" />
+        <div className="flex h-16 w-1.5 items-center justify-center rounded-full bg-gradient-to-b from-blue-500 to-blue-700 shadow-sm" />
       </div>
 
       {/* The drawer itself */}
@@ -288,16 +290,14 @@ export function AppSidebar() {
             className={`flex items-center justify-between gap-3 border-b ${T.borderSoft} px-5 py-4`}
           >
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/95 p-1 shadow-sm">
-                <img
-                  src="/images/app-logo.png"
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).style.display = "none";
-                  }}
-                  alt=""
-                  className="h-full w-full rounded-md object-contain"
-                />
-              </div>
+              <img
+                src="/images/app-logo.png"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).style.display = "none";
+                }}
+                alt=""
+                className="h-10 w-10 rounded-lg border border-slate-200 dark:border-slate-800 object-cover shadow-sm"
+              />
               <div>
                 <p className={`text-base font-bold ${T.textPrimary}`}>מערכת ניהול</p>
                 <p className={`text-[11px] ${T.textSubtle}`}>Avihu Team</p>
