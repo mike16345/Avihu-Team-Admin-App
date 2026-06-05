@@ -187,7 +187,6 @@ const UserCheckIn = () => {
             </button>
           );
         })}
-
       </header>
 
       {/* Body */}
