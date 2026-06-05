@@ -1,23 +1,23 @@
 /**
  * AdminDashboard — the home page (`/`).
  *
- * Sections (in order):
- *   1. Hero greeting — "שלום {שם}" + time-aware label + soft tagline.
- *   2. Quick actions grid — 4 colored shortcut cards.
- *   3. Two-column attention area:
- *      · Left: clients to check (UserCheckIn)
- *      · Right: rotating analytics carousel (no workout / no diet /
- *        expiring this month) — three coloured AnalyticsCards.
- *
- * No API changes — just a friendlier top-of-app first impression.
+ * Sections:
+ *   1. Hero greeting — time-aware "בוקר טוב / צהריים / ערב" + date.
+ *   2. Quick actions — 4 colored shortcut cards.
+ *   3. Alert pills — compact badges for "ללא אימון", "ללא תזונה",
+ *      "מסיימים החודש". Each pops open a small scrollable list.
+ *   4. UserCheckIn — main attention card (full width).
+ *   5. Two summary charts — plan coverage + expiry timeline.
  */
-import AnalyticsCard from "@/components/AdminDashboard/AnalyticsCard";
 import Shortcut from "@/components/AdminDashboard/Shortcut";
 import UserCheckIn from "@/components/AdminDashboard/UserCheckIn";
+import AnalyticsPill from "@/components/AdminDashboard/AnalyticsPill";
+import DashboardCharts from "@/components/AdminDashboard/DashboardCharts";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { useUsersStore } from "@/store/userStore";
 import { BiFoodMenu } from "react-icons/bi";
 import { FaDumbbell } from "react-icons/fa";
+import { FaAppleWhole, FaCalendarXmark } from "react-icons/fa6";
 import { FiUserPlus } from "react-icons/fi";
 import { MdOutlinePostAdd } from "react-icons/md";
 import { FaHouse } from "react-icons/fa6";
@@ -59,7 +59,6 @@ const shortcuts: {
   },
 ];
 
-/** Returns "בוקר טוב" / "צהריים טובים" / "ערב טוב" by local time. */
 const getGreeting = () => {
   const h = new Date().getHours();
   if (h < 6) return "לילה טוב";
@@ -101,7 +100,7 @@ const AdminDashboard = () => {
         </div>
       </header>
 
-      {/* Quick action shortcuts */}
+      {/* Quick actions */}
       <section>
         <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
           פעולות מהירות
@@ -120,17 +119,48 @@ const AdminDashboard = () => {
         </div>
       </section>
 
-      {/* Attention area — all four insight cards visible at once.
-          Two rows × two columns on lg+; single column on narrow screens. */}
-      <section>
-        <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-          מבט מהיר
-        </p>
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-          <UserCheckIn />
-          <AnalyticsCard title="ללא תוכנית אימון" dataKey={QueryKeys.NO_WORKOUT_PLAN} />
-          <AnalyticsCard title="ללא תפריט תזונה" dataKey={QueryKeys.NO_DIET_PLAN} />
-          <AnalyticsCard title="מסיימים תהליך החודש" dataKey={QueryKeys.EXPIRING_USERS} />
+      {/* Two-column: UserCheckIn (right/main) + alerts+charts (left) */}
+      <section className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+        {/* Right column — main card */}
+        <UserCheckIn />
+
+        {/* Left column — alerts + charts stacked */}
+        <div className="flex flex-col gap-5">
+          {/* Alert pills under "דורשי טיפול" heading */}
+          <div>
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              דורשי טיפול
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <AnalyticsPill
+                icon={<FaDumbbell size={13} />}
+                label="ללא אימון"
+                dataKey={QueryKeys.NO_WORKOUT_PLAN}
+                activeBg="bg-purple-50 dark:bg-purple-950/40"
+                activeText="text-purple-700 dark:text-purple-300"
+                activeRing="border-purple-300 dark:border-purple-700"
+              />
+              <AnalyticsPill
+                icon={<FaAppleWhole size={13} />}
+                label="ללא תזונה"
+                dataKey={QueryKeys.NO_DIET_PLAN}
+                activeBg="bg-emerald-50 dark:bg-emerald-950/40"
+                activeText="text-emerald-700 dark:text-emerald-300"
+                activeRing="border-emerald-300 dark:border-emerald-700"
+              />
+              <AnalyticsPill
+                icon={<FaCalendarXmark size={13} />}
+                label="מסיימים החודש"
+                dataKey={QueryKeys.EXPIRING_USERS}
+                activeBg="bg-rose-50 dark:bg-rose-950/40"
+                activeText="text-rose-700 dark:text-rose-300"
+                activeRing="border-rose-300 dark:border-rose-700"
+              />
+            </div>
+          </div>
+
+          {/* Charts */}
+          <DashboardCharts />
         </div>
       </section>
     </div>
