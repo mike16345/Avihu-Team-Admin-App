@@ -75,13 +75,17 @@ const DietPlanMetaPanel: React.FC = () => {
   const builderOptions = React.useMemo(() => {
     const list: { value: string; label: string }[] = [];
     if (currentUser?._id) {
+      const name = `${currentUser.firstName || ""} ${currentUser.lastName || ""}`.trim();
+      const fallback = currentUser.email || "אני";
       list.push({
         value: currentUser._id,
-        label: `${currentUser.firstName || ""} ${currentUser.lastName || ""}`.trim() || "אני",
+        label: name ? `${name} (אני)` : `${fallback} (אני)`,
       });
     }
     subTrainers.forEach((t) => {
-      if (t._id) list.push({ value: t._id, label: t.fullName || "ללא שם" });
+      if (t._id && t._id !== currentUser?._id) {
+        list.push({ value: t._id, label: t.fullName || "ללא שם" });
+      }
     });
     return list;
   }, [currentUser, subTrainers]);

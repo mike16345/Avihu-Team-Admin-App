@@ -20,7 +20,13 @@ import Loader from "@/components/ui/Loader";
 
 const MINIMUM_WARNING_DAYS = 3;
 
-type StatusFilter = "הכל" | "פעיל" | "משתמשים" | "מסתיים בקרוב" | "ללא תאריך סיום";
+type StatusFilter =
+  | "הכל"
+  | "פעיל"
+  | "משתמשים"
+  | "הקפאה"
+  | "מסתיים בקרוב"
+  | "ללא תאריך סיום";
 
 export const UsersPage = () => {
   const navigate = useNavigate();
@@ -67,6 +73,7 @@ export const UsersPage = () => {
       // appears in only one bucket at a time.
       if (statusFilter === "פעיל") return deriveAccountStatus(u) === "active";
       if (statusFilter === "משתמשים") return deriveAccountStatus(u) === "user";
+      if (statusFilter === "הקפאה") return deriveAccountStatus(u) === "frozen";
       if (statusFilter === "ללא תאריך סיום") return !u.dateFinished;
 
       return true;
@@ -83,12 +90,13 @@ export const UsersPage = () => {
     // set for the dashboard attention lists.
     const active = sortedUsers.filter((u) => deriveAccountStatus(u) === "active").length;
     const asUser = sortedUsers.filter((u) => deriveAccountStatus(u) === "user").length;
+    const frozen = sortedUsers.filter((u) => deriveAccountStatus(u) === "frozen").length;
     const endingSoon = sortedUsers.filter((u) => {
       if (!u.dateFinished) return false;
       const d = DateUtils.getDaysDifference(new Date(), u.dateFinished);
       return d <= 7 && d >= 0;
     }).length;
-    return { total, active, inOnboarding: asUser, endingSoon };
+    return { total, active, inOnboarding: asUser, frozen, endingSoon };
   }, [sortedUsers]);
 
   if (isLoading) return <Loader size="large" />;
@@ -118,15 +126,12 @@ export const UsersPage = () => {
         </button>
       </div>
 
-      {/* Stats summary */}
+      {/* Stats summary — 4 cards (סה״כ removed per Avihu: redundant
+          with the breakdown below it). */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <StatCard
-          label="סה״כ מתאמנים"
-          value={stats.total}
-          color="text-slate-900 dark:text-slate-100"
-        />
         <StatCard label="פעילים" value={stats.active} color="text-emerald-600" />
         <StatCard label="משתמשים" value={stats.inOnboarding} color="text-blue-600" />
+        <StatCard label="בהקפאה" value={stats.frozen} color="text-cyan-600" />
         <StatCard label="מסתיימים השבוע" value={stats.endingSoon} color="text-rose-600" />
       </div>
 
@@ -146,7 +151,16 @@ export const UsersPage = () => {
           />
         </div>
         <div className="flex items-center gap-1 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-1 shadow-sm">
-          {(["הכל", "פעיל", "משתמשים", "מסתיים בקרוב", "ללא תאריך סיום"] as const).map((s) => (
+          {(
+            [
+              "הכל",
+              "פעיל",
+              "משתמשים",
+              "הקפאה",
+              "מסתיים בקרוב",
+              "ללא תאריך סיום",
+            ] as const
+          ).map((s) => (
             <button
               key={s}
               onClick={() => setStatusFilter(s)}
@@ -223,16 +237,34 @@ function UserCard({ user, onView }: { user: IUser; onView: () => void }) {
     : null;
 
   const isExpiringSoon = daysLeft !== null && daysLeft <= MINIMUM_WARNING_DAYS && daysLeft >= 0;
-  const isInactive = user.hasAccess === false;
 
-  const status = isInactive ? "כבוי" : "פעיל";
-  const statusColors = isInactive
-    ? { dot: "bg-red-500", bg: "bg-red-50", text: "text-red-700" }
-    : {
-        dot: "bg-emerald-500",
-        bg: "bg-emerald-50 dark:bg-emerald-950/40",
-        text: "text-emerald-700 dark:text-emerald-300",
-      };
+  // Use the *derived* status (lib/userStatus). This is the single
+  // source of truth — same logic as the home dashboard cards, the
+  // status badge on the trainee profile page, and the stats counts
+  // up-top. The card used to show only "פעיל" / "כבוי" with a raw
+  // hasAccess check, which misclassified everyone with status "user"
+  // as "פעיל" (and broke the "משתמשים" filter visually).
+  const derived = deriveAccountStatus(user);
+  const status =
+    derived === "active"
+      ? "פעיל"
+      : derived === "user"
+        ? "משתמש"
+        : derived === "frozen"
+          ? "הקפאה"
+          : "כבוי";
+  const statusColors =
+    derived === "disabled"
+      ? { dot: "bg-rose-500", bg: "bg-rose-50 dark:bg-rose-950/40", text: "text-rose-700 dark:text-rose-300" }
+      : derived === "user"
+        ? { dot: "bg-blue-500", bg: "bg-blue-50 dark:bg-blue-950/40", text: "text-blue-700 dark:text-blue-300" }
+        : derived === "frozen"
+          ? { dot: "bg-cyan-500", bg: "bg-cyan-50 dark:bg-cyan-950/40", text: "text-cyan-700 dark:text-cyan-300" }
+          : {
+              dot: "bg-emerald-500",
+              bg: "bg-emerald-50 dark:bg-emerald-950/40",
+              text: "text-emerald-700 dark:text-emerald-300",
+            };
 
   return (
     <div

@@ -41,9 +41,12 @@ import {
   FaCircleExclamation,
   FaBullseye,
   FaSeedling,
+  FaStar,
 } from "react-icons/fa6";
 import { useUsersStore } from "@/store/userStore";
 import { useSubTrainersQuery } from "@/hooks/queries/subTrainers/useSubTrainersQuery";
+import { useFavoriteDietPresets } from "@/hooks/useFavoriteDietPresets";
+import DietFavoriteStar from "./DietFavoriteStar";
 
 interface DietPlanPresetGridProps {
   data: (IDietPlanPreset & { _id?: string })[];
@@ -75,6 +78,10 @@ const DietPlanPresetGrid: React.FC<DietPlanPresetGridProps> = ({
   // Meal-count filter — derived from preset.meals.length. Stored as
   // string so it composes with the rest of the dropdown options.
   const [mealCounts, setMealCounts] = useState<string[]>([]);
+  // Favourites filter — when on, only starred presets are shown.
+  // Independent of the rest of the chip filters above.
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
+  const { isFavorite, count: favoritesCount } = useFavoriteDietPresets();
 
   const currentUser = useUsersStore((s) => s.currentUser);
   const { data: subTrainers = [] } = useSubTrainersQuery();
@@ -98,7 +105,8 @@ const DietPlanPresetGrid: React.FC<DietPlanPresetGridProps> = ({
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return data.filter((p) => {
+    const matches = data.filter((p) => {
+      if (favoritesOnly && !isFavorite(p._id)) return false;
       if (q && !(p.name || "").toLowerCase().includes(q)) return false;
       if (goals.length && !(p.goal && goals.includes(p.goal))) return false;
       if (buckets.length) {
@@ -121,6 +129,12 @@ const DietPlanPresetGrid: React.FC<DietPlanPresetGridProps> = ({
       }
       return true;
     });
+    // Float favourites to the top — same UX rule as the workout grid.
+    return [...matches].sort((a, b) => {
+      const af = isFavorite(a._id) ? 1 : 0;
+      const bf = isFavorite(b._id) ? 1 : 0;
+      return bf - af;
+    });
   }, [
     data,
     search,
@@ -133,6 +147,8 @@ const DietPlanPresetGrid: React.FC<DietPlanPresetGridProps> = ({
     restrictions,
     builders,
     mealCounts,
+    favoritesOnly,
+    isFavorite,
   ]);
 
   const anyFilterActive =
@@ -239,6 +255,32 @@ const DietPlanPresetGrid: React.FC<DietPlanPresetGridProps> = ({
             onToggle={(v) => setFreeCalB(toggle(freeCalB, v))}
           />
 
+          {/* Favourites toggle — surfaces starred presets only. */}
+          <button
+            type="button"
+            onClick={() => setFavoritesOnly((v) => !v)}
+            aria-pressed={favoritesOnly}
+            className={`inline-flex h-9 items-center gap-2 rounded-xl border px-3 text-xs font-bold transition-all ${
+              favoritesOnly
+                ? "border-amber-300 bg-amber-50 text-amber-700 shadow-sm dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
+                : "border-slate-200 bg-white text-slate-600 hover:border-amber-300 hover:bg-amber-50 hover:text-amber-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
+            }`}
+          >
+            <FaStar size={11} />
+            מועדפים
+            {favoritesCount > 0 && (
+              <span
+                className={`inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[10px] font-bold ${
+                  favoritesOnly
+                    ? "bg-amber-500 text-white"
+                    : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                }`}
+              >
+                {favoritesCount}
+              </span>
+            )}
+          </button>
+
           {anyFilterActive && (
             <button
               type="button"
@@ -320,7 +362,11 @@ const DietPlanPresetGrid: React.FC<DietPlanPresetGridProps> = ({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                  <div className="flex items-center gap-1">
+                    {/* Star is always visible — primary affordance,
+                        same UX rule as the workout card. */}
+                    <DietFavoriteStar presetId={preset._id} />
+                    <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                     <button
                       type="button"
                       onClick={(e) => {
@@ -344,6 +390,7 @@ const DietPlanPresetGrid: React.FC<DietPlanPresetGridProps> = ({
                     >
                       <FaTrash size={11} />
                     </button>
+                    </div>
                   </div>
                 </div>
 

@@ -52,7 +52,12 @@ export const deriveAccountStatus = (user: IUser | undefined): AccountStatus => {
   // Step 2 — never re-enable a disabled user via the date rule.
   if (base === "disabled") return "disabled";
 
-  // Step 3 — auto-downgrade expired actives to "user".
+  // Step 3 — frozen is explicit. Don't auto-downgrade frozen users
+  // by dateFinished — the trainer paused them on purpose; the date
+  // logic shouldn't override that.
+  if (base === "frozen") return "frozen";
+
+  // Step 4 — auto-downgrade expired actives to "user".
   if (base === "active" && hasContractEnded(user)) return "user";
 
   return base;

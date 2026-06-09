@@ -328,7 +328,7 @@ const CreateWorkoutPlanWrapper = ({
                   updateWorkoutPlan.isPending ||
                   addWorkoutPlan.isPending
                 }
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-emerald-700 hover:shadow disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex items-center justify-center gap-2 rounded-xl brand-gradient brand-gradient-hover px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-blue-500/25 transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
               >
                 {updateWorkoutPlan.isPending || addWorkoutPlan.isPending ? "שומר…" : "שמור תוכנית"}
               </button>
@@ -344,14 +344,17 @@ const CreateWorkoutPlanWrapper = ({
                 disabled={updateWorkoutPlan.isPending || addWorkoutPlan.isPending}
                 isLoading={addWorkoutPlanPreset.isPending}
               />
-              <CustomButton
-                className="w-full font-bold sm:w-32"
-                variant="success"
+              <button
                 type="submit"
-                title="שמור תוכנית"
-                disabled={addWorkoutPlanPreset.isPending}
-                isLoading={updateWorkoutPlan.isPending || addWorkoutPlan.isPending}
-              />
+                disabled={
+                  addWorkoutPlanPreset.isPending ||
+                  updateWorkoutPlan.isPending ||
+                  addWorkoutPlan.isPending
+                }
+                className="inline-flex w-full sm:w-32 items-center justify-center gap-2 rounded-xl brand-gradient brand-gradient-hover px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-blue-500/25 transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+              >
+                {updateWorkoutPlan.isPending || addWorkoutPlan.isPending ? "שומר…" : "שמור תוכנית"}
+              </button>
             </div>
           )}
         </form>

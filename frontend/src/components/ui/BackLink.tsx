@@ -14,13 +14,15 @@ import { useNavigate } from "react-router-dom";
 import { FaArrowRight } from "react-icons/fa6";
 
 interface BackLinkProps {
-  /** Fallback route when there's no history entry to pop. */
-  to: string;
+  /** Fallback route when there's no history entry to pop. Optional —
+   *  defaults to home ("/"), which is the safest landing spot when
+   *  the user arrived directly via URL. */
+  to?: string;
   /** Override the default "חזרה" label. */
   label?: string;
 }
 
-const BackLink: React.FC<BackLinkProps> = ({ to, label = "חזרה" }) => {
+const BackLink: React.FC<BackLinkProps> = ({ to = "/", label = "חזרה" }) => {
   const navigate = useNavigate();
   const canGoBack =
     typeof window !== "undefined" &&

@@ -100,7 +100,7 @@ const UnsavedChangesDialog: React.FC<UnsavedChangesDialogProps> = ({
             type="button"
             onClick={onSaveAndContinue}
             disabled={isSaving}
-            className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white shadow-sm transition-all hover:bg-emerald-700 hover:shadow disabled:opacity-60"
+            className="rounded-xl brand-gradient brand-gradient-hover px-4 py-2 text-sm font-bold text-white shadow-md shadow-blue-500/25 transition-all hover:-translate-y-0.5 disabled:opacity-60 disabled:hover:translate-y-0"
           >
             {isSaving ? "שומר…" : "שמור והמשך"}
           </button>

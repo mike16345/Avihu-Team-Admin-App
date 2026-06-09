@@ -27,7 +27,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       className="toaster group"
       style={
         {
-          fontFamily: "Heebo, system-ui, sans-serif",
+          fontFamily: "Assistant, Heebo, system-ui, sans-serif",
           "--width": "300px",
           "--border-radius": "14px",
         } as React.CSSProperties
@@ -40,7 +40,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
           description: "!text-[11px] !mt-0.5 !opacity-80 !leading-snug",
           icon: "!ms-0 !me-0.5 [&_svg]:!h-3.5 [&_svg]:!w-3.5",
           actionButton:
-            "!rounded-md !bg-emerald-600 !text-white !text-[11px] !font-semibold !px-2.5 !py-1 hover:!bg-emerald-700",
+            "!rounded-md !bg-blue-600 !text-white !text-[11px] !font-semibold !px-2.5 !py-1 hover:!bg-blue-700",
           cancelButton:
             "!rounded-md !border !border-slate-200 dark:!border-slate-800 !bg-white dark:!bg-slate-900 !text-slate-600 dark:!text-slate-300 !text-[11px] !font-semibold !px-2.5 !py-1",
           closeButton:

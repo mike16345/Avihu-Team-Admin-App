@@ -84,19 +84,28 @@ const pillClass = (active: boolean, _toneActive?: string) => {
 const PresetMetaPanel: React.FC = () => {
   const { control, watch } = useFormContext();
 
-  // "Builder" picker — main trainer (current user) + sub-trainers
+  // "Builder" picker — current user (whoever's logged in) + every
+  // sub-trainer they manage. SafeAuthUser doesn't always carry the
+  // first/last name, so we fall back to the email so the current
+  // user *always* appears in the list.
   const currentUser = useUsersStore((s) => s.currentUser);
   const { data: subTrainers = [] } = useSubTrainersQuery();
   const builderOptions = React.useMemo(() => {
     const list: { value: string; label: string }[] = [];
     if (currentUser?._id) {
+      const name = `${currentUser.firstName || ""} ${currentUser.lastName || ""}`.trim();
+      const fallback = currentUser.email || "אני";
       list.push({
         value: currentUser._id,
-        label: `${currentUser.firstName || ""} ${currentUser.lastName || ""}`.trim() || "אני",
+        label: name ? `${name} (אני)` : `${fallback} (אני)`,
       });
     }
     subTrainers.forEach((t) => {
-      if (t._id) list.push({ value: t._id, label: t.fullName || "ללא שם" });
+      // Don't duplicate the current user if they happen to also
+      // appear in the sub-trainers list (defensive).
+      if (t._id && t._id !== currentUser?._id) {
+        list.push({ value: t._id, label: t.fullName || "ללא שם" });
+      }
     });
     return list;
   }, [currentUser, subTrainers]);

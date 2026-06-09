@@ -389,7 +389,7 @@ function EditRow({
           <button
             onClick={onSave}
             disabled={saving}
-            className="inline-flex h-7 items-center gap-1 rounded-lg bg-emerald-600 px-2.5 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-60"
+            className="inline-flex h-7 items-center gap-1 rounded-lg brand-gradient brand-gradient-hover px-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 disabled:opacity-60 disabled:hover:translate-y-0"
           >
             <FaFloppyDisk size={9} />
             <span>{saving ? "שומר..." : "שמור"}</span>

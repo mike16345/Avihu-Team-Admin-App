@@ -18,7 +18,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { progressNoteSchema } from "@/schemas/progressNoteSchema";
 import { Input } from "@/components/ui/input";
-import CustomButton from "@/components/ui/CustomButton";
 import CustomSelect from "@/components/ui/CustomSelect";
 import DatePicker from "@/components/ui/DatePicker";
 import { useProgressNoteContext } from "@/context/useProgressNoteContext";
@@ -202,14 +201,17 @@ const ProgressNoteForm = () => {
           <p className="text-[11px] text-slate-400">
             {isEdit ? "שינויים יישמרו רק אחרי לחיצה על שמור." : ""}
           </p>
-          <CustomButton
-            variant="success"
-            className="min-w-[140px]"
+          <button
             type="submit"
-            title={isEdit ? "שמור שינויים" : "שמור פתק"}
-            disabled={!isDirty}
-            isLoading={addNote.isPending || updateNote.isPending}
-          />
+            disabled={!isDirty || addNote.isPending || updateNote.isPending}
+            className="inline-flex min-w-[140px] items-center justify-center gap-2 rounded-xl brand-gradient brand-gradient-hover px-5 py-2 text-sm font-bold text-white shadow-md shadow-blue-500/25 transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+          >
+            {addNote.isPending || updateNote.isPending
+              ? "שומר…"
+              : isEdit
+                ? "שמור שינויים"
+                : "שמור פתק"}
+          </button>
         </div>
       </form>
     </Form>

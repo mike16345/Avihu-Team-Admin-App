@@ -295,6 +295,11 @@ export const MealDropDown: FC<MealDropDownProps> = ({
                           }
                         />
                         <ExtraItems
+                          // Pass the macro section so the history hook
+                          // shows trainer-relevant suggestions only
+                          // (e.g. previously-typed protein items when
+                          // editing the protein section, etc.).
+                          section={section.key}
                           existingItems={
                             (getValues(
                               `${mealPath}.${section.key}.extraItems` as const

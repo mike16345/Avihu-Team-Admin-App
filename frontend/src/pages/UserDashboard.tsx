@@ -83,12 +83,14 @@ const STATUS_LABEL: Record<AccountStatus, string> = {
   active: "פעיל",
   user: "משתמש",
   disabled: "כבוי",
+  frozen: "הקפאה",
 };
 
 const STATUS_DESCRIPTION: Record<AccountStatus, string> = {
   active: "מתאמן פעיל — יש גישה מלאה לאפליקציה",
   user: "משתמש רשום — יש גישה לאפליקציה",
   disabled: "חסום — לא יוכל להתחבר לאפליקציה",
+  frozen: "הקפאה זמנית — שומר על גישה לאפליקציה, מוסתר מרשימות מעקב",
 };
 
 export const UserDashboard = () => {
@@ -219,16 +221,40 @@ export const UserDashboard = () => {
 
   const confirmStatusChange = async () => {
     if (!pendingStatus || !currentUser) return;
+
+    // Build the payload. Freeze captures a snapshot of how many
+    // days were left until dateFinished at the moment of pause,
+    // so the trainer can later honour that remaining time even if
+    // the calendar moves on while the trainee is paused.
     const updated: IUser = {
       ...currentUser,
       accountStatus: pendingStatus,
+      // Frozen users keep app access — only "disabled" blocks it.
       hasAccess: pendingStatus !== "disabled",
     };
+
+    if (pendingStatus === "frozen") {
+      const finished = currentUser?.dateFinished
+        ? new Date(currentUser.dateFinished).getTime()
+        : null;
+      const daysRemaining =
+        finished !== null && !Number.isNaN(finished)
+          ? Math.max(0, Math.ceil((finished - Date.now()) / (1000 * 60 * 60 * 24)))
+          : 0;
+      updated.frozenAt = new Date();
+      updated.frozenDaysRemaining = daysRemaining;
+    } else if (currentUser.accountStatus === "frozen") {
+      // Moving OUT of frozen — clear the snapshot so it doesn't
+      // mislead the trainer later. The previous freeze info has
+      // served its purpose.
+      updated.frozenAt = undefined;
+      updated.frozenDaysRemaining = undefined;
+    }
+
     try {
       await updateUser.mutateAsync({ id: currentUser._id!, user: updated });
       setStatus(pendingStatus);
     } catch (e: any) {
-      // Visible diagnostic so we know exactly what went wrong on the API call
       console.error("Status update failed:", {
         status: e?.status || e?.response?.status,
         message: e?.message || e?.data?.message,
@@ -285,6 +311,12 @@ export const UserDashboard = () => {
       bg: "bg-red-50 dark:bg-red-950/40",
       text: "text-red-700 dark:text-red-300",
       dot: "bg-red-500",
+    },
+    frozen: {
+      border: "border-cyan-200 dark:border-cyan-900/60",
+      bg: "bg-cyan-50 dark:bg-cyan-950/40",
+      text: "text-cyan-700 dark:text-cyan-300",
+      dot: "bg-cyan-500",
     },
   };
   const sc = statusColors[status];
@@ -404,6 +436,7 @@ export const UserDashboard = () => {
                 >
                   <option value="active">פעיל</option>
                   <option value="user">משתמש</option>
+                  <option value="frozen">הקפאה</option>
                   <option value="disabled">כבוי</option>
                 </select>
                 <span
@@ -479,7 +512,7 @@ export const UserDashboard = () => {
               up. Single source of truth: the `status` state, which is
               derived from `data.accountStatus` (or hasAccess fallback)
               and updated optimistically by the dropdown change handler. */}
-          <div className="mb-4 flex items-center gap-3 rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-slate-50/60 dark:bg-slate-800/40 px-4 py-3">
+          <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-slate-50/60 dark:bg-slate-800/40 px-4 py-3">
             <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
               סטטוס במערכת:
             </span>
@@ -489,7 +522,9 @@ export const UserDashboard = () => {
                   ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
                   : status === "user"
                     ? "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300"
-                    : "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300"
+                    : status === "frozen"
+                      ? "bg-cyan-50 text-cyan-700 dark:bg-cyan-950/40 dark:text-cyan-300"
+                      : "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300"
               }`}
             >
               <span
@@ -498,7 +533,9 @@ export const UserDashboard = () => {
                     ? "bg-emerald-500"
                     : status === "user"
                       ? "bg-blue-500"
-                      : "bg-rose-500"
+                      : status === "frozen"
+                        ? "bg-cyan-500"
+                        : "bg-rose-500"
                 }`}
               />
               {STATUS_LABEL[status]}
@@ -506,6 +543,15 @@ export const UserDashboard = () => {
             <span className="text-[11px] text-slate-500 dark:text-slate-400">
               {STATUS_DESCRIPTION[status]}
             </span>
+            {/* Freeze snapshot — surfaces the captured days remaining
+                so the trainer always sees what was preserved when
+                they paused this trainee. Shown only when relevant. */}
+            {status === "frozen" &&
+              typeof currentUser?.frozenDaysRemaining === "number" && (
+                <span className="ms-auto inline-flex items-center gap-1.5 rounded-lg border border-cyan-200 dark:border-cyan-900/40 bg-white dark:bg-slate-900 px-2.5 py-1 text-[11px] font-bold text-cyan-700 dark:text-cyan-300">
+                  ❄️ נשארו {currentUser.frozenDaysRemaining} ימי ליווי בעת ההקפאה
+                </span>
+              )}
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <ProfileField label="שם פרטי" value={currentUser?.firstName} />
@@ -637,6 +683,20 @@ export const UserDashboard = () => {
           toStatus={pendingStatus}
           userName={`${currentUser?.firstName} ${currentUser?.lastName}`}
           isPending={updateUser.isPending}
+          // Days remaining from now until dateFinished — only relevant
+          // when freezing. The modal displays it prominently so the
+          // trainer can see what's being captured.
+          daysRemaining={
+            currentUser?.dateFinished
+              ? Math.max(
+                  0,
+                  Math.ceil(
+                    (new Date(currentUser.dateFinished).getTime() - Date.now()) /
+                      (1000 * 60 * 60 * 24)
+                  )
+                )
+              : null
+          }
           onConfirm={confirmStatusChange}
           onCancel={cancelStatusChange}
         />
@@ -731,6 +791,7 @@ function StatusConfirmationModal({
   toStatus,
   userName,
   isPending,
+  daysRemaining,
   onConfirm,
   onCancel,
 }: {
@@ -738,24 +799,35 @@ function StatusConfirmationModal({
   toStatus: AccountStatus;
   userName: string;
   isPending: boolean;
+  daysRemaining: number | null;
   onConfirm: () => void;
   onCancel: () => void;
 }) {
   const isDangerous = toStatus === "disabled";
   const isActivation = fromStatus === "disabled" && toStatus !== "disabled";
+  const isFreeze = toStatus === "frozen";
 
   return (
     <div
       dir="rtl"
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
-      onClick={onCancel}
+      // Backdrop click cancels — but ONLY when the mutation isn't in
+      // flight. Otherwise an accidental click outside while saving
+      // would orphan the request and leave the UI inconsistent.
+      onClick={() => !isPending && onCancel()}
     >
       <div
         onClick={(e) => e.stopPropagation()}
         className="w-full max-w-md rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-2xl"
       >
         <h3 className="mb-1 text-lg font-bold text-slate-900 dark:text-slate-100">
-          {isDangerous ? "⚠️ אישור חסימת מתאמן" : isActivation ? "✅ הפעלת מתאמן" : "שינוי סטטוס"}
+          {isDangerous
+            ? "⚠️ אישור חסימת מתאמן"
+            : isActivation
+              ? "✅ הפעלת מתאמן"
+              : isFreeze
+                ? "❄️ אישור הקפאת מתאמן"
+                : "שינוי סטטוס"}
         </h3>
         <p className="mb-4 text-sm text-slate-600 dark:text-slate-300">
           אתה עומד לשנות את הסטטוס של{" "}
@@ -768,7 +840,9 @@ function StatusConfirmationModal({
           className={`mb-4 rounded-xl border p-3 text-sm ${
             isDangerous
               ? "border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/40 text-red-800 dark:text-red-300"
-              : "border-blue-200 dark:border-blue-900/60 bg-blue-50 dark:bg-blue-950/40 text-blue-800"
+              : isFreeze
+                ? "border-cyan-200 dark:border-cyan-900/60 bg-cyan-50 dark:bg-cyan-950/40 text-cyan-800 dark:text-cyan-300"
+                : "border-blue-200 dark:border-blue-900/60 bg-blue-50 dark:bg-blue-950/40 text-blue-800"
           }`}
         >
           <p className="font-semibold">{STATUS_DESCRIPTION[toStatus]}</p>
@@ -776,6 +850,23 @@ function StatusConfirmationModal({
             <p className="mt-1 text-xs">
               💡 המתאמן יראה הודעת "ההרשאה פגה" בפתיחה הבאה של האפליקציה.
             </p>
+          )}
+          {/* Freeze-specific block: show days remaining + a clear
+              note that this will be saved in the profile so the
+              trainer can honour it when unfreezing later. */}
+          {isFreeze && (
+            <div className="mt-3 rounded-lg bg-white dark:bg-slate-900 border border-cyan-200 dark:border-cyan-900/40 p-3">
+              <p className="text-[11px] font-bold text-cyan-700 dark:text-cyan-300 mb-1">
+                💎 ימי ליווי שנותרו במועד ההקפאה
+              </p>
+              <p className="text-2xl font-extrabold text-slate-900 dark:text-slate-100">
+                {daysRemaining !== null ? daysRemaining : "—"}
+                <span className="ms-1 text-sm font-bold text-slate-500">ימים</span>
+              </p>
+              <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                המספר יישמר בפרופיל של המתאמן כדי שתוכל לכבד אותו בעת שחרור מהקפאה.
+              </p>
+            </div>
           )}
         </div>
 

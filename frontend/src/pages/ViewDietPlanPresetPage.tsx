@@ -19,7 +19,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import CustomButton from "@/components/ui/CustomButton";
 import { useQueryClient } from "@tanstack/react-query";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { useNavigate } from "react-router-dom";
@@ -122,7 +121,11 @@ export const ViewDietPlanPresetPage = () => {
       className="flex flex-col gap-5 size-full"
       style={{ fontFamily: "Assistant, Heebo, system-ui, sans-serif" }}
     >
-      <BackLink to={MainRoutes.DIET_PLANS} label="חזרה לרשימת התפריטים" />
+      {/* Back link uses navigate(-1) — context-aware. If the trainer
+          arrived from the home dashboard shortcut → back returns
+          home; if they came from the diet templates list → back
+          returns to the list. Either way they don't lose context. */}
+      <BackLink label="חזרה" />
 
       {/* Hero header — same family shell as forms/workouts/leads */}
       <div className="relative overflow-hidden rounded-2xl border border-blue-100/60 bg-white shadow-sm dark:border-blue-900/40 dark:bg-slate-900">
@@ -173,13 +176,14 @@ export const ViewDietPlanPresetPage = () => {
         <DietPlanMetaPanel />
         <DietPlanForm>
           {(meals?.length || 0) > 0 && (
-            <CustomButton
-              className="font-bold sm:w-32 w-full md:fixed md:bottom-10 md:end-10"
-              variant="success"
-              title="שמור תבנית"
-              isLoading={createPreset.isPending || updatePreset.isPending}
+            <button
+              type="button"
+              disabled={createPreset.isPending || updatePreset.isPending}
               onClick={presetNameForm.handleSubmit(handleSubmit)}
-            />
+              className="inline-flex items-center justify-center gap-2 rounded-xl brand-gradient brand-gradient-hover px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-blue-500/25 transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 sm:w-32 w-full md:fixed md:bottom-10 md:end-10"
+            >
+              {createPreset.isPending || updatePreset.isPending ? "שומר…" : "שמור תבנית"}
+            </button>
           )}
         </DietPlanForm>
       </Form>

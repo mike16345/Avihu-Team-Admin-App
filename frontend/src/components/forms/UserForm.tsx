@@ -21,7 +21,6 @@ import { Input } from "../ui/input";
 import DatePicker from "../ui/DatePicker";
 import DietaryTypeSelector from "../templates/dietTemplates/DietaryTypeSelector";
 import { IUser, IUserPost } from "@/interfaces/IUser";
-import CustomButton from "../ui/CustomButton";
 import userSchema from "@/schemas/userSchema";
 import UserPlanTypes from "@/enums/UserPlanTypes";
 import SubTrainerDropdown from "../ui/SubTrainerDropdown";
@@ -257,14 +256,14 @@ const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) 
             </FormItem>
           )}
         />
-        <CustomButton
+        <button
           data-testid="user-form-submit"
-          title="שמור משתמש"
           type="submit"
-          className="sm:w-32 w-full"
-          variant={"success"}
-          isLoading={pending}
-        />
+          disabled={pending}
+          className="inline-flex w-full sm:w-32 items-center justify-center gap-2 rounded-xl brand-gradient brand-gradient-hover px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-blue-500/25 transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+        >
+          {pending ? "שומר…" : "שמור משתמש"}
+        </button>
       </form>
     </Form>
   );

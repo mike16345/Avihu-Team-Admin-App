@@ -11,14 +11,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import CustomButton from "@/components/ui/CustomButton";
 import BackLink from "@/components/ui/BackLink";
 import useAddWorkoutPreset from "@/hooks/mutations/workouts/useAddWorkoutPreset";
 import { Input } from "@/components/ui/input";
 import { collectAllErrors, ValidationErrorEntry } from "@/lib/utils";
 import WorkoutPresetPicker from "./WorkoutPresetPicker";
 import ValidationErrorsDialog from "../../Alerts/ValidationErrorsDialog";
-import { FaFolderOpen, FaDumbbell, FaTag } from "react-icons/fa6";
+import { FaFolderOpen, FaDumbbell, FaTag, FaCheck } from "react-icons/fa6";
 import useWorkoutPlanPresetsQuery from "@/hooks/queries/workoutPlans/useWorkoutPlanPresetsQuery";
 import { ISimpleCardioType, IWorkoutPlanPreset } from "@/interfaces/IWorkoutPlan";
 import { cleanWorkoutObject, parseErrorFromObject } from "@/utils/workoutPlanUtils";
@@ -153,7 +152,11 @@ export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ childr
         className="flex flex-col gap-5 p-4 h-full"
         style={{ fontFamily: "Assistant, Heebo, system-ui, sans-serif" }}
       >
-        <BackLink to={MainRoutes.WORKOUT_PLANS_PRESETS} label="חזרה לרשימת התבניות" />
+        {/* Context-aware back link: navigate(-1) if there's history,
+            else fall back to home. Preserves entry-point context
+            regardless of whether the trainer came from the home
+            shortcut or the templates list. */}
+        <BackLink label="חזרה" />
 
         {/* Hero header — matches the libraries (forms / templates /
             menus / leads) so the editor reads as part of the same
@@ -221,15 +224,30 @@ export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ childr
             <PresetMetaPanel />
 
             <div className="border-b-2 rounded">{children}</div>
-            <div className="flex sm:justify-end py-1.5 sm:sticky sm:bottom-0">
-              <CustomButton
-                className="w-full sm:w-32"
-                variant="success"
+            {/* Sticky save bar — brand-gradient (was flat green).
+                Lives in a thin row of slate-50 wash so it reads as
+                "form footer" even when stuck to the page bottom. */}
+            <div className="sm:sticky sm:bottom-0 -mx-1 mt-2 flex justify-end gap-2 rounded-xl bg-gradient-to-t from-white via-white to-transparent py-2">
+              <button
                 type="submit"
-                title="שמור תוכנית אימון"
                 disabled={addWorkoutPreset.isPending || updateWorkoutPlanPreset.isPending}
-                isLoading={addWorkoutPreset.isPending || updateWorkoutPlanPreset.isPending}
-              />
+                className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl brand-gradient brand-gradient-hover px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-blue-500/25 transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0 disabled:cursor-not-allowed"
+              >
+                {addWorkoutPreset.isPending || updateWorkoutPlanPreset.isPending ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeOpacity="0.3" />
+                      <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                    </svg>
+                    שומר…
+                  </>
+                ) : (
+                  <>
+                    <FaCheck size={12} />
+                    שמור תבנית
+                  </>
+                )}
+              </button>
             </div>
           </form>
         </Form>
