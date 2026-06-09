@@ -25,7 +25,8 @@ import useUserQuery from "@/hooks/queries/user/useUserQuery";
 import useAddUser from "@/hooks/mutations/User/useAddUser";
 import useUpdateUser from "@/hooks/mutations/User/useUpdateUser";
 import useDeleteUser from "@/hooks/mutations/User/useDeleteUser";
-import { FaTrash, FaTriangleExclamation } from "react-icons/fa6";
+import { FaTrash, FaTriangleExclamation, FaUserTie } from "react-icons/fa6";
+import { useSubTrainersQuery } from "@/hooks/queries/subTrainers/useSubTrainersQuery";
 import { IUserPost } from "@/interfaces/IUser";
 import UserPlanTypes from "@/enums/UserPlanTypes";
 import { weightTab } from "./UserDashboard";
@@ -80,6 +81,10 @@ const UserFormPage = () => {
   const [remindIn, setRemindIn] = useState<number>(604800);
   const [dateFinished, setDateFinished] = useState<string>("");
   const [dietaryType, setDietaryType] = useState<string[]>([]);
+  // The trainee's assigned sub-trainer. Empty string = the main
+  // trainer (Avihu) himself. Carried through unchanged on edits so
+  // we never silently strip the field on save.
+  const [subTrainerId, setSubTrainerId] = useState<string>("");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -92,6 +97,7 @@ const UserFormPage = () => {
       setRemindIn(existingUser.remindIn || 604800);
       setDateFinished(toDateInput(existingUser.dateFinished));
       setDietaryType(existingUser.dietaryType || []);
+      setSubTrainerId(((existingUser as { subTrainerId?: string }).subTrainerId) || "");
     }
   }, [existingUser]);
 
@@ -124,7 +130,7 @@ const UserFormPage = () => {
     ev.preventDefault();
     if (!validate()) return;
 
-    const user: IUserPost = {
+    const user: IUserPost & { subTrainerId?: string } = {
       firstName: firstName.trim(),
       lastName: lastName.trim(),
       phone: phone.trim(),
@@ -133,6 +139,9 @@ const UserFormPage = () => {
       remindIn,
       dateFinished: new Date(dateFinished),
       dietaryType,
+      // Empty string = "the main trainer" — server treats absence
+      // and "" identically (no sub-trainer assigned).
+      ...(subTrainerId ? { subTrainerId } : {}),
     };
 
     try {
@@ -312,6 +321,16 @@ const UserFormPage = () => {
               </div>
             </Field>
           </div>
+
+          {/* Responsible trainer — links the trainee to a sub-trainer
+              under the head coach. Empty selection = the main trainer
+              (Avihu) handles them directly. The dropdown is hidden
+              entirely when the trainer has no sub-trainers, so single-
+              trainer accounts don't see a confusing empty field. */}
+          <TrainerAssignmentField
+            value={subTrainerId}
+            onChange={setSubTrainerId}
+          />
         </div>
 
         {/* Dietary restrictions card */}
@@ -509,6 +528,65 @@ function SelectInput({
         size={10}
         className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
       />
+    </div>
+  );
+}
+
+/**
+ * TrainerAssignmentField — sub-trainer selector. Lives in this file
+ * (not extracted as shared UI) because it's tightly coupled to the
+ * UserFormPage's Field/SelectInput primitives and styling. The
+ * dropdown auto-hides when the head trainer has no sub-trainers,
+ * keeping single-trainer accounts uncluttered.
+ */
+function TrainerAssignmentField({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const { data: subTrainers, isLoading } = useSubTrainersQuery();
+
+  // No sub-trainers at all → don't render anything. Single-trainer
+  // accounts shouldn't see a field that does nothing.
+  if (!isLoading && (!subTrainers || subTrainers.length === 0)) return null;
+
+  const options = [
+    { value: "", label: "אני (מאמן ראשי)" },
+    ...((subTrainers ?? []).map((t: { _id: string; fullName: string }) => ({
+      value: t._id,
+      label: t.fullName,
+    })) as { value: string; label: string }[]),
+  ];
+
+  return (
+    <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
+      <Field label="מאמן אחראי">
+        <div className="relative">
+          <FaUserTie
+            size={12}
+            className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
+          />
+          <select
+            data-testid="user-form-sub-trainer"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            disabled={isLoading}
+            className={`${inputCls(false)} cursor-pointer appearance-none ps-9 pe-9`}
+          >
+            {options.map((o) => (
+              <option key={o.value || "main"} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+          <FaChevronDown
+            size={10}
+            className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
+          />
+        </div>
+      </Field>
     </div>
   );
 }

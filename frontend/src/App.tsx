@@ -15,9 +15,12 @@ function App() {
   useScrollRestoration(mainScrollRef);
 
   return (
-    <div className="flex size-full">
+    <div className="flex h-full w-full" dir="rtl">
       {authed && <AppSidebar />}
-      <div ref={mainScrollRef} className="size-full overflow-y-auto px-20 py-14 custom-scrollbar">
+      <div
+        ref={mainScrollRef}
+        className="flex-1 min-w-0 h-full overflow-y-auto px-20 py-14 custom-scrollbar"
+      >
         <RequireAuth>
           <AppRoutes />
         </RequireAuth>

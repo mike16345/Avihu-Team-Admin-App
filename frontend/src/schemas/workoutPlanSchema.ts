@@ -118,15 +118,63 @@ export const workoutPlanSchema = z.object({
     .min(MIN_EXERCISES, { message: ERROR_MESSAGES.arrayMin(MIN_EXERCISES, "קבוצות שרירים") }),
 });
 
-export const fullWorkoutPlanSchema = z.object({
-  tips: z
-    .array(z.string().min(MIN_NAME_LENGTH, { message: ERROR_MESSAGES.stringMin(MIN_NAME_LENGTH) }))
-    .optional(),
-  workoutPlans: z
-    .array(workoutPlanSchema)
-    .min(MIN_WORKOUTS, { message: ERROR_MESSAGES.arrayMin(MIN_WORKOUTS, "תכניות אימון") }),
-  cardio: cardioPlanSchema,
+/**
+ * Optional metadata fields the trainer fills in when building a preset
+ * or per-user workout plan. None of these are required so older presets
+ * keep validating; they're surfaced in the UI as filter chips and tags.
+ *
+ * IMPORTANT: keep field names stable — the mobile Client-App must remain
+ * agnostic to these fields (it does not read presets, but if the server
+ * later mirrors them onto the per-user workoutPlan, ignoring unknown
+ * fields is safer than depending on a specific shape).
+ */
+export const WORKOUT_LEVELS = ["beginner", "intermediate", "advanced", "pro"] as const;
+export const WORKOUT_GOALS = [
+  "fat-loss", // חיטוב
+  "muscle-gain", // מסה
+  "strength", // כוח
+  "endurance", // סיבולת
+  "toning", // חיזוק / טונוס
+  "rehab", // שיקום
+] as const;
+
+export const WORKOUT_EQUIPMENT = [
+  "gym", // חדר כושר מלא
+  "studio", // סטודיו
+  "weights", // משקולות (בית/חופשי)
+  "bodyweight", // משקל גוף בלבד
+  "weights-bodyweight", // משקולות + משקל גוף
+] as const;
+
+export const workoutMetaSchema = z.object({
+  workoutsPerWeek: z.coerce.number().min(1).max(7).optional(),
+  durationMinutes: z.coerce.number().min(10).max(240).optional(),
+  level: z.enum(WORKOUT_LEVELS).optional(),
+  goal: z.enum(WORKOUT_GOALS).optional(),
+  equipment: z.enum(WORKOUT_EQUIPMENT).optional(),
+  /**
+   * Optional list of muscle-group focus tags. Trainers pick "full-body"
+   * OR up to 3 specific groups. Stored as string slugs so the field is
+   * agnostic to UI translations.
+   */
+  muscleFocus: z.array(z.string()).max(3).optional(),
+  note: z.string().max(500).optional(),
+  limitations: z.string().max(500).optional(),
+  /** Sub-trainer (or main trainer) id of whoever built this plan. */
+  builtByTrainerId: z.string().optional(),
 });
+
+export const fullWorkoutPlanSchema = z
+  .object({
+    tips: z
+      .array(z.string().min(MIN_NAME_LENGTH, { message: ERROR_MESSAGES.stringMin(MIN_NAME_LENGTH) }))
+      .optional(),
+    workoutPlans: z
+      .array(workoutPlanSchema)
+      .min(MIN_WORKOUTS, { message: ERROR_MESSAGES.arrayMin(MIN_WORKOUTS, "תכניות אימון") }),
+    cardio: cardioPlanSchema,
+  })
+  .merge(workoutMetaSchema);
 
 export const workoutPresetSchema = fullWorkoutPlanSchema.merge(
   z.object({

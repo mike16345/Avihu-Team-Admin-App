@@ -1,25 +1,20 @@
 /**
- * AppSidebar — auto-hide drawer that matches the rest of the admin panel.
+ * AppSidebar — single expanding sidebar.
  *
- * Behavior:
- *  - Hidden off-screen by default on the right (RTL).
- *  - A thin invisible hover strip on the right edge slides it in.
- *  - Closes on mouse-leave (with a short grace period) or Escape.
- *  - A faint blue handle hints to the user that something is there.
+ * Default state: narrow icon rail (76px) with logo + icons.
+ * On hover anywhere on the rail, the rail itself smoothly expands to
+ * 272px and the labels fade in beside each icon. Leaving collapses it
+ * back. This is one continuous panel — not two stacked panels — so the
+ * transition between collapsed and expanded feels natural.
  *
- * Visuals:
- *  - White surface + slate borders, Heebo font, blue accents.
- *  - Active item: rounded-full blue pill (iCount-inspired layout, kept
- *    in our existing palette).
- *  - All colour tokens hoisted into a single `T` object below so future
- *    tweaks live in one place.
+ * Layout note: the rail is `fixed` to the right edge. A sibling spacer
+ * div takes 76px of layout width so main content doesn't shift when
+ * the rail expands (the expansion overlays content, doesn't push it).
  */
 import React, { useEffect, useRef, useState } from "react";
 import {
   BarChart3,
   BicepsFlexed,
-  ChevronDown,
-  ChevronLeft,
   Clipboard,
   Edit,
   Home,
@@ -36,26 +31,45 @@ import LogoutButton from "../Navbar/LogoutButton";
 import { ModeToggle } from "../theme/mode-toggle";
 import { type AppRouteAccessKey, canAccessRoute, normalizeAppRole } from "@/routes/routeAccess";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { LuChevronsUpDown } from "react-icons/lu";
 
-type LinkProps = {
+type NavItem = {
   accessKey: AppRouteAccessKey;
   title: string;
   url: string;
   icon: LucideIcon;
 };
 
-type SidebarItem = {
-  title: string;
-  icon: LucideIcon;
-  url?: string;
-  accessKey?: AppRouteAccessKey;
-  children?: LinkProps[];
-};
-
-const sidebarGroups: SidebarItem[][] = [
+/**
+ * Three sidebar groups, separated by thin dividers:
+ *  1. Daily work — used by every role (trainer / admin / owner alike).
+ *  2. Leads.
+ *  3. Management — admin / owner only. The `accessKey` filter inside
+ *     `canAccessRoute()` hides items the current role isn't allowed
+ *     to see, so a plain trainer never even sees group #3.
+ *
+ * Empty groups (after access filtering) collapse silently so the
+ * separator above them doesn't render either.
+ */
+const sidebarGroups: NavItem[][] = [
+  // Group 1 — Daily work
   [
     { url: "/", title: "בית", icon: Home, accessKey: "home" },
+    { url: "/users", title: "לקוחות", icon: Users, accessKey: "users" },
+    { url: "/blogs", title: "מאמרים", icon: Edit, accessKey: "blogs" },
+    {
+      url: "/workoutPlans",
+      title: "תוכנית אימון",
+      icon: BicepsFlexed,
+      accessKey: "workoutPlans",
+    },
+    { url: "/dietPlans", title: "תפריט תזונה", icon: SquareMenu, accessKey: "dietPlans" },
+    { url: "/form-builder", title: "שאלונים", icon: Clipboard, accessKey: "formBuilder" },
+    { url: "/sub-trainers", title: "הצוות שלי", icon: UserCog, accessKey: "subTrainers" },
+  ],
+  // Group 2 — Leads
+  [{ url: "/leads", title: "לידים", icon: Inbox, accessKey: "leads" }],
+  // Group 3 — Management (admin / owner only)
+  [
     {
       url: "/trainer-analytics",
       title: "לוח בקרה",
@@ -63,162 +77,56 @@ const sidebarGroups: SidebarItem[][] = [
       accessKey: "trainerAnalytics",
     },
     { url: "/trainers", title: "מאמנים", icon: User2, accessKey: "trainers" },
-    { url: "/sub-trainers", title: "הצוות שלי", icon: UserCog, accessKey: "subTrainers" },
-    { url: "/users", title: "לקוחות", icon: Users, accessKey: "users" },
-  ],
-  [
-    { url: "/blogs", title: "מאמרים", icon: Edit, accessKey: "blogs" },
-    { url: "/dietPlans", title: "תפריטים", icon: SquareMenu, accessKey: "dietPlans" },
-    {
-      url: "/workoutPlans",
-      title: "תוכנית אימון",
-      icon: BicepsFlexed,
-      accessKey: "workoutPlans",
-    },
-  ],
-  [
-    { url: "/leads", title: "לידים", icon: Inbox, accessKey: "leads" },
-    { url: "/form-builder", title: "שאלונים", icon: Clipboard, accessKey: "formBuilder" },
   ],
 ];
 
-const SIDEBAR_WIDTH = 272;
-const HOVER_TRIGGER_WIDTH = 14;
+const COLLAPSED_WIDTH = 76;
+const EXPANDED_WIDTH = 240;
 const CLOSE_DELAY_MS = 200;
 
 /**
- * Theme tokens — keeps our existing white/blue palette while adopting
- * the iCount-inspired layout (rounded-full pills for active items,
- * generous spacing). One central object so future colour tweaks land
- * in a single diff.
+ * Single nav link. The icon stays anchored to the right (in RTL),
+ * and the label slides/fades in to its left when `expanded` is true.
+ * `whitespace-nowrap` on the label prevents wrapping during the
+ * expand animation.
  */
-const T = {
-  surface: "bg-white",
-  surfaceDark: "dark:bg-slate-900",
-  border: "border-slate-200/80",
-  borderSoft: "border-slate-100 dark:border-slate-800",
-  textPrimary: "text-slate-900 dark:text-slate-100",
-  textMuted: "text-slate-600 dark:text-slate-300",
-  textSubtle: "text-slate-400 dark:text-slate-500",
-  hoverItem: "hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900",
-  activeItem: "bg-blue-600 text-white shadow-sm shadow-blue-600/20",
-  iconInactive: "text-slate-400 dark:text-slate-500 group-hover:text-slate-700",
-  iconActive: "text-white",
-  divider: "bg-slate-100 dark:bg-slate-800",
-};
-
-const SidebarLink: React.FC<{
+const NavLink: React.FC<{
   to: string;
   icon: LucideIcon;
   title: string;
   active: boolean;
+  expanded: boolean;
   testId?: string;
-}> = ({ to, icon: Icon, title, active, testId }) => (
-  <li>
-    <Link
-      to={to}
-      data-testid={testId}
-      className={`group flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-semibold transition-all ${
-        active ? T.activeItem : `${T.textMuted} ${T.hoverItem}`
+}> = ({ to, icon: Icon, title, active, expanded, testId }) => (
+  <Link
+    to={to}
+    data-testid={testId}
+    aria-label={title}
+    className={`group relative flex h-11 items-center gap-3 overflow-hidden rounded-2xl px-3 transition-all ${
+      active
+        ? "bg-blue-600 text-white shadow-md shadow-blue-600/30"
+        : "text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+    }`}
+  >
+    <span className="flex h-5 w-5 shrink-0 items-center justify-center">
+      <Icon size={19} strokeWidth={2.1} />
+    </span>
+    <span
+      className={`whitespace-nowrap text-sm font-semibold transition-opacity duration-200 ${
+        expanded ? "opacity-100" : "opacity-0 pointer-events-none"
       }`}
     >
-      <Icon size={17} className={active ? T.iconActive : T.iconInactive} strokeWidth={2.2} />
-      <span>{title}</span>
-    </Link>
-  </li>
+      {title}
+    </span>
+  </Link>
 );
 
-const SidebarItems: React.FC = () => {
-  const location = useLocation();
-  const currentUser = useUsersStore((state) => state.currentUser);
-  const role = normalizeAppRole(currentUser?.role);
-
-  const visibleGroups = sidebarGroups
-    .map((group) =>
-      group.filter((item) => {
-        if (item.children?.length) {
-          return item.children.some((child) => canAccessRoute(role, child.accessKey));
-        }
-        return item.accessKey ? canAccessRoute(role, item.accessKey) : true;
-      })
-    )
-    .filter((group) => group.length > 0);
-
-  return (
-    <nav className="flex flex-col gap-3">
-      {visibleGroups.map((group, gIdx) => (
-        <React.Fragment key={gIdx}>
-          {gIdx > 0 && <div className={`my-1 h-px ${T.divider}`} />}
-          <ul className="flex flex-col gap-1">
-            {group.map((item) => {
-              const visibleChildren =
-                item.children?.filter((child) => canAccessRoute(role, child.accessKey)) ?? [];
-              const hasChildren = visibleChildren.length > 0;
-              const isActive = hasChildren
-                ? visibleChildren.some((child) => child.url === location.pathname)
-                : location.pathname === item.url;
-
-              if (!hasChildren && item.url) {
-                return (
-                  <SidebarLink
-                    key={item.title}
-                    to={item.url}
-                    icon={item.icon}
-                    title={item.title}
-                    active={isActive}
-                    testId={`sidebar-link-${
-                      item.url === "/"
-                        ? "home"
-                        : item.url.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "")
-                    }`}
-                  />
-                );
-              }
-
-              // Collapsible group with children — kept for future use.
-              return (
-                <li key={item.title}>
-                  <details open={isActive} className="group rounded-full">
-                    <summary
-                      className={`flex cursor-pointer list-none items-center justify-between rounded-full px-4 py-2.5 text-sm font-semibold transition-colors ${T.textMuted} ${T.hoverItem}`}
-                    >
-                      <span className="flex items-center gap-3">
-                        <item.icon size={17} className={T.iconInactive} strokeWidth={2.2} />
-                        <span>{item.title}</span>
-                      </span>
-                      <ChevronDown
-                        size={14}
-                        className={`${T.textSubtle} transition-transform group-open:rotate-180`}
-                      />
-                    </summary>
-                    <ul className="mt-1 flex flex-col gap-0.5 pr-7">
-                      {visibleChildren.map((child) => {
-                        const childActive = location.pathname === child.url;
-                        return (
-                          <SidebarLink
-                            key={child.title}
-                            to={child.url}
-                            icon={child.icon}
-                            title={child.title}
-                            active={childActive}
-                          />
-                        );
-                      })}
-                    </ul>
-                  </details>
-                </li>
-              );
-            })}
-          </ul>
-        </React.Fragment>
-      ))}
-    </nav>
-  );
-};
-
 export function AppSidebar() {
+  const location = useLocation();
   const user = useUsersStore((state) => state.currentUser);
-  const [open, setOpen] = useState(false);
+  const role = normalizeAppRole(user?.role);
+
+  const [expanded, setExpanded] = useState(false);
   const closeTimerRef = useRef<number | null>(null);
 
   const cancelClose = () => {
@@ -227,126 +135,184 @@ export function AppSidebar() {
       closeTimerRef.current = null;
     }
   };
-
   const scheduleClose = () => {
     cancelClose();
-    closeTimerRef.current = window.setTimeout(() => setOpen(false), CLOSE_DELAY_MS);
+    closeTimerRef.current = window.setTimeout(() => setExpanded(false), CLOSE_DELAY_MS);
   };
 
   useEffect(() => () => cancelClose(), []);
 
+  // Escape collapses
   useEffect(() => {
-    if (!open) return;
+    if (!expanded) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") setExpanded(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+  }, [expanded]);
+
+  if (!user) return null;
+
+  // Filter each group; drop entirely empty groups so we don't render
+  // dangling dividers.
+  const visibleGroups = sidebarGroups
+    .map((group) => group.filter((item) => canAccessRoute(role, item.accessKey)))
+    .filter((group) => group.length > 0);
+  const getInitials = () =>
+    ((user.firstName?.[0] || "") + (user.lastName?.[0] || "")).toUpperCase() || "?";
 
   return (
-    <div dir="rtl" style={{ fontFamily: "Heebo, system-ui, sans-serif" }} data-testid="app-sidebar">
-      {/* Invisible hover trigger glued to the right edge */}
-      <div
+    <>
+      {/* Spacer — reserves the collapsed width in the flex layout so the
+          main content doesn't shift when the sidebar expands. */}
+      <div style={{ width: COLLAPSED_WIDTH, minWidth: COLLAPSED_WIDTH }} aria-hidden />
+
+      {/* The sidebar itself — fixed to the right edge, expands on hover. */}
+      <aside
+        dir="rtl"
+        data-testid="app-sidebar"
         onMouseEnter={() => {
           cancelClose();
-          setOpen(true);
+          setExpanded(true);
         }}
         onMouseLeave={scheduleClose}
         style={{
-          position: "fixed",
-          right: 0,
-          top: 0,
-          bottom: 0,
-          width: HOVER_TRIGGER_WIDTH,
-          zIndex: 40,
+          fontFamily: "Heebo, system-ui, sans-serif",
+          width: expanded ? EXPANDED_WIDTH : COLLAPSED_WIDTH,
         }}
-      />
-
-      {/* Edge hint — emerald handle now to match the new accent */}
-      <div
-        aria-hidden
-        className={`pointer-events-none fixed top-1/2 -translate-y-1/2 transition-opacity duration-200 ${
-          open ? "opacity-0" : "opacity-100"
-        }`}
-        style={{ right: 2, zIndex: 41 }}
+        className="fixed right-0 top-0 z-50 flex h-screen flex-col border-l border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-sm transition-[width] duration-300 ease-out"
       >
-        <div className="flex h-16 w-1.5 items-center justify-center rounded-full bg-gradient-to-b from-blue-500 to-blue-700 shadow-sm" />
-      </div>
-
-      {/* The drawer itself */}
-      <aside
-        onMouseEnter={cancelClose}
-        onMouseLeave={scheduleClose}
-        className={`fixed right-0 top-0 z-50 flex h-screen flex-col ${T.surface} ${T.surfaceDark} border-l ${T.border} shadow-2xl transition-transform duration-300 ease-out ${
-          open ? "translate-x-0" : "translate-x-full"
-        }`}
-        style={{ width: SIDEBAR_WIDTH }}
-      >
-        {/* Header */}
-        {user && (
-          <header
-            className={`flex items-center justify-between gap-3 border-b ${T.borderSoft} px-5 py-4`}
+        {/* Header — logo + (label that fades in on expand) */}
+        <Link
+          to="/"
+          aria-label="ראשי"
+          className="flex h-24 shrink-0 items-center gap-2.5 overflow-hidden px-2"
+        >
+          <img
+            src="/images/app-logo.png"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).style.display = "none";
+            }}
+            alt="Elevate Coach"
+            className="h-20 w-20 shrink-0 object-contain"
+          />
+          <span
+            className={`flex flex-col whitespace-nowrap transition-opacity duration-200 ${
+              expanded ? "opacity-100" : "opacity-0 pointer-events-none"
+            }`}
           >
-            <div className="flex items-center gap-3">
-              <img
-                src="/images/app-logo.png"
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).style.display = "none";
-                }}
-                alt=""
-                className="h-10 w-10 rounded-lg border border-slate-200 dark:border-slate-800 object-cover shadow-sm"
-              />
-              <div>
-                <p className={`text-base font-bold ${T.textPrimary}`}>מערכת ניהול</p>
-                <p className={`text-[11px] ${T.textSubtle}`}>Avihu Team</p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              aria-label="סגור תפריט"
-              className={`flex h-7 w-7 items-center justify-center rounded-full ${T.textMuted} transition-colors hover:bg-white/10 hover:text-white`}
+            <span className="text-base font-bold text-slate-900 dark:text-slate-100 leading-tight">
+              Elevate Coach
+            </span>
+            <span className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
+              פאנל ניהול
+            </span>
+          </span>
+        </Link>
+
+        {/* Nav — grouped with thin dividers between groups */}
+        <nav className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden px-3 py-3">
+          {visibleGroups.map((group, gIdx) => (
+            <React.Fragment key={gIdx}>
+              {gIdx > 0 && (
+                <div
+                  aria-hidden
+                  className="my-3 mx-1 h-px bg-slate-300 dark:bg-slate-600"
+                />
+              )}
+              <ul className="flex flex-col gap-1">
+                {group.map((item) => (
+                  <li key={item.url}>
+                    <NavLink
+                      to={item.url}
+                      icon={item.icon}
+                      title={item.title}
+                      active={location.pathname === item.url}
+                      expanded={expanded}
+                      testId={`sidebar-link-${
+                        item.url === "/"
+                          ? "home"
+                          : item.url.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "")
+                      }`}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </React.Fragment>
+          ))}
+        </nav>
+
+        {/* Footer — theme toggle + user row */}
+        <div className="flex flex-col gap-2 border-t border-slate-100 dark:border-slate-800 px-3 py-3">
+          {/* Theme */}
+          <div className="flex h-12 items-center gap-3 overflow-hidden rounded-2xl px-2">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center">
+              <ModeToggle />
+            </span>
+            <span
+              className={`whitespace-nowrap text-sm font-semibold text-slate-500 dark:text-slate-400 transition-opacity duration-200 ${
+                expanded ? "opacity-100" : "opacity-0 pointer-events-none"
+              }`}
             >
-              <ChevronLeft size={16} />
-            </button>
-          </header>
-        )}
+              מצב כהה
+            </span>
+          </div>
 
-        {/* Items */}
-        <div className="flex-1 overflow-y-auto px-3 py-5">
-          <SidebarItems />
-        </div>
-
-        {/* User footer — emerald pill style like the reference's CTA */}
-        {user && (
+          {/* User popover */}
           <Popover>
             <PopoverTrigger asChild>
               <button
                 type="button"
-                className={`flex w-full items-center gap-3 border-t ${T.borderSoft} px-4 py-3 text-right transition-colors hover:bg-white/5`}
+                aria-label="חשבון משתמש"
+                className="flex h-12 items-center gap-3 overflow-hidden rounded-2xl px-1.5 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
               >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-300 to-amber-500 text-sm font-bold text-amber-900 shadow-sm">
-                  {((user.firstName?.[0] || "") + (user.lastName?.[0] || "")).toUpperCase() || "?"}
-                </div>
-                <div className="min-w-0 flex-1 text-right">
-                  <p className={`truncate text-sm font-semibold ${T.textPrimary}`}>
+                <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full brand-gradient text-sm font-bold text-white shadow-md shadow-blue-600/30 ring-2 ring-white dark:ring-slate-900">
+                  {getInitials()}
+                  <span className="absolute -bottom-0.5 -left-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-950" />
+                </span>
+                <span
+                  className={`flex min-w-0 flex-col text-right whitespace-nowrap transition-opacity duration-200 ${
+                    expanded ? "opacity-100" : "opacity-0 pointer-events-none"
+                  }`}
+                >
+                  <span className="truncate text-sm font-bold text-slate-900 dark:text-slate-100">
                     {user.firstName} {user.lastName}
-                  </p>
-                  <p className={`truncate text-[11px] ${T.textMuted}`}>{user.email}</p>
-                </div>
-                <LuChevronsUpDown className={T.textMuted} />
+                  </span>
+                  <span className="truncate text-[10px] text-slate-500 dark:text-slate-400">
+                    {user.email}
+                  </span>
+                </span>
               </button>
             </PopoverTrigger>
-            <PopoverContent dir="rtl" className="w-56 p-2">
-              <div className="flex flex-col gap-2">
+            <PopoverContent
+              dir="rtl"
+              side="left"
+              sideOffset={12}
+              align="end"
+              className="w-64 p-3"
+              style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
+            >
+              <div className="mb-2 flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full brand-gradient text-sm font-bold text-white">
+                  {getInitials()}
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-bold text-slate-900 dark:text-slate-100">
+                    {user.firstName} {user.lastName}
+                  </p>
+                  <p className="truncate text-[11px] text-slate-500 dark:text-slate-400">
+                    {user.email}
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col gap-1">
                 <LogoutButton />
-                <ModeToggle />
               </div>
             </PopoverContent>
           </Popover>
-        )}
+        </div>
       </aside>
-    </div>
+    </>
   );
 }

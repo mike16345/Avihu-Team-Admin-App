@@ -81,6 +81,7 @@ const FormResponsesTable = ({ userId }: FormResponsesTableProps) => {
   });
 
   const [selectedTypes, setSelectedTypes] = useState<FormTypes[]>([]);
+  const [statusFilter, setStatusFilter] = useState<"all" | "waiting" | "viewed">("all");
   const [query, setQuery] = useState("");
   const [confirmDelete, setConfirmDelete] = useState<FormResponse | null>(null);
   const [pendingToggleId, setPendingToggleId] = useState<string | null>(null);
@@ -93,6 +94,8 @@ const FormResponsesTable = ({ userId }: FormResponsesTableProps) => {
       if (selectedTypes.length && !selectedTypes.includes(r.formType as FormTypes)) {
         return false;
       }
+      if (statusFilter === "viewed" && !r.isChecked) return false;
+      if (statusFilter === "waiting" && r.isChecked) return false;
       if (!q) return true;
       const user = (resolveUserName(r.userId) ?? "").toLowerCase();
       const form = (r.formTitle ?? r.formId?.name ?? "").toLowerCase();
@@ -129,51 +132,79 @@ const FormResponsesTable = ({ userId }: FormResponsesTableProps) => {
   if (isError && !isExpectedEmpty) return <ErrorPage message={error?.message} />;
   if (isLoading) return <Loader size="large" />;
 
+  const STATUS_TABS: { value: typeof statusFilter; label: string; count: number }[] = [
+    { value: "all", label: "הכל", count: stats.total },
+    { value: "waiting", label: "ממתינים", count: stats.unviewed },
+    { value: "viewed", label: "נצפו", count: stats.viewed },
+  ];
+
   return (
     <div
       dir="rtl"
       className="flex flex-col gap-4"
-      style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
+      style={{ fontFamily: "Rubik, Heebo, system-ui, sans-serif" }}
     >
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50">
-            <FaClipboardList size={18} className="text-blue-600" />
-          </div>
-          <div>
-            <h2 className="text-base font-bold text-slate-900">שאלוני מתאמנים</h2>
-            <p className="text-xs text-slate-500">
-              {stats.total} שאלונים · {stats.viewed} נצפו · {stats.unviewed} ממתינים
-            </p>
-          </div>
+      {/* Slim toolbar — search + status tabs + type filter */}
+      <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 shadow-sm">
+        <div className="relative min-w-[220px] flex-1 max-w-[360px]">
+          <FaMagnifyingGlass
+            size={11}
+            className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+          />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="חיפוש לפי משתמש או שאלון…"
+            className="h-9 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 pr-8 pl-3 text-sm placeholder:text-slate-400 focus:border-blue-400 focus:outline-none focus:bg-white"
+          />
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="relative">
-            <FaMagnifyingGlass
-              size={12}
-              className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
-            />
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="חיפוש לפי משתמש או שאלון"
-              className="h-9 w-64 rounded-xl border border-slate-200 bg-white pr-8 pl-3 text-sm placeholder:text-slate-400 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
-            />
-          </div>
-          {FormTypeOptions.length > 0 && (
-            <FilterMultiSelect
-              className="w-56"
-              label="סוג"
-              options={FormTypeOptions}
-              selected={selectedTypes}
-              onChange={(values) => setSelectedTypes(values as FormTypes[])}
-              placeholder="כל הסוגים"
-            />
-          )}
+        {/* Status segmented control */}
+        <div className="inline-flex h-9 items-center gap-0.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 p-0.5">
+          {STATUS_TABS.map((t) => {
+            const active = statusFilter === t.value;
+            return (
+              <button
+                key={t.value}
+                type="button"
+                onClick={() => setStatusFilter(t.value)}
+                className={`inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-xs font-bold transition-all ${
+                  active
+                    ? "bg-white dark:bg-slate-900 text-blue-700 dark:text-blue-300 shadow-sm"
+                    : "text-slate-600 dark:text-slate-300 hover:text-blue-700"
+                }`}
+              >
+                {t.label}
+                <span
+                  className={`inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[10px] font-bold ${
+                    active
+                      ? "bg-blue-600 text-white"
+                      : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
+                  }`}
+                >
+                  {t.count}
+                </span>
+              </button>
+            );
+          })}
         </div>
+
+        {FormTypeOptions.length > 0 && (
+          <FilterMultiSelect
+            className="w-48"
+            label="סוג"
+            options={FormTypeOptions}
+            selected={selectedTypes}
+            onChange={(values) => setSelectedTypes(values as FormTypes[])}
+            placeholder="כל הסוגים"
+          />
+        )}
+
+        <span className="ms-auto text-xs text-slate-500 dark:text-slate-400">
+          {filtered.length} {filtered.length === 1 ? "תוצאה" : "תוצאות"}
+          {filtered.length !== all.length && ` מתוך ${all.length}`}
+        </span>
       </div>
 
       {/* Grid */}
@@ -212,7 +243,7 @@ const FormResponsesTable = ({ userId }: FormResponsesTableProps) => {
                 {/* Top row: avatar + names + type pill */}
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-start gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-sm font-bold text-white shadow-sm">
+                    <div className="brand-gradient flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white shadow-sm">
                       {initialsOf(userName)}
                     </div>
                     <div className="min-w-0">

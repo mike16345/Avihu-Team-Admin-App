@@ -10,7 +10,7 @@
  *
  * חיבור: useUserQuery (קיים) → GET /users/one
  */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import useUpdateUser from "@/hooks/mutations/User/useUpdateUser";
 import type { AccountStatus, IUser } from "@/interfaces/IUser";
@@ -26,6 +26,7 @@ import {
   FaArrowRight,
   FaPenToSquare,
 } from "react-icons/fa6";
+import { FaWhatsapp } from "react-icons/fa6";
 import Loader from "@/components/ui/Loader";
 import ErrorPage from "./ErrorPage";
 import useUserQuery from "@/hooks/queries/user/useUserQuery";
@@ -36,6 +37,9 @@ import MeasurementsProgression from "@/components/UserDashboard/MeasurementProgr
 import UserFormResponses from "@/components/UserDashboard/FormResponses/UserFormResponses";
 import { WeightProgressionPhotos } from "@/components/UserDashboard/WeightProgression/WeightProgressionPhotos";
 import CreateWorkoutPlanWrapper from "@/components/Wrappers/CreateWorkoutPlanWrapper";
+import WorkoutPlanHistorySection from "@/components/UserDashboard/WorkoutPlanHistory/WorkoutPlanHistorySection";
+import SwapTemporaryPlanModal from "@/components/UserDashboard/WorkoutPlanHistory/SwapTemporaryPlanModal";
+import { FaArrowsRotate } from "react-icons/fa6";
 import WorkoutPlans from "@/components/workout plan/WorkoutPlans";
 import DietPlanWrapper from "@/components/DietPlan/DietPlanWrapper";
 import { ViewDietPlanPage } from "@/pages/ViewDietPlanPage";
@@ -70,12 +74,10 @@ const getInitials = (firstName?: string, lastName?: string) => {
   return (f + l).toUpperCase() || "?";
 };
 
-// Derive the 3-state status from user data
-const deriveStatus = (user: IUser | undefined): AccountStatus => {
-  if (!user) return "active";
-  if (user.accountStatus) return user.accountStatus;
-  return user.hasAccess === false ? "disabled" : "active";
-};
+// Shared deriver — also applies the auto-downgrade rule for users
+// whose dateFinished has passed (active → user). See lib/userStatus.
+import { deriveAccountStatus, hasContractEnded } from "@/lib/userStatus";
+const deriveStatus = deriveAccountStatus;
 
 const STATUS_LABEL: Record<AccountStatus, string> = {
   active: "פעיל",
@@ -155,10 +157,54 @@ export const UserDashboard = () => {
   const [planType, setPlanType] = useState<string>("");
   const [pendingPlanType, setPendingPlanType] = useState<string | null>(null);
 
+  // Swap-temporary-plan modal (workout tab). Lives at this level so
+  // the action bar above the editor can open it and the modal sits
+  // outside the editor's form context.
+  const [swapModalOpen, setSwapModalOpen] = useState(false);
+
+  // Seed local state from either the fetched `data` OR the navigation
+  // `state` payload — when the trainer clicks into a user from the
+  // list, `useUserQuery` is disabled (the row already has the user
+  // object) so `data` is undefined and the header dropdowns would
+  // render "בחר סוג" / default-active even when the user's saved
+  // planType + accountStatus differ. Reading from the merged source
+  // keeps the dropdowns in sync with what the profile card shows.
   useEffect(() => {
-    setStatus(deriveStatus(data));
-    setPlanType(data?.planType || "");
-  }, [data]);
+    const src = (data || stateUser) as IUser | undefined;
+    setStatus(deriveStatus(src));
+    setPlanType(src?.planType || "");
+  }, [data, stateUser]);
+
+  // Auto-downgrade persistence: if the trainer opens a profile whose
+  // contract has ended (dateFinished < today) but the stored status
+  // is still "active", quietly persist the downgrade to "user" so the
+  // server and every other view (lists, filters) stay in sync. Fires
+  // once per profile open. We guard on `id` to avoid re-firing on the
+  // optimistic update echo, and skip if there's already a pending
+  // status change (the trainer is mid-edit).
+  const autoDowngradeFiredRef = useRef<string | null>(null);
+  useEffect(() => {
+    const src = (data || stateUser) as IUser | undefined;
+    if (!src?._id) return;
+    if (autoDowngradeFiredRef.current === src._id) return;
+    const storedBase: AccountStatus = src.accountStatus
+      ? src.accountStatus
+      : src.hasAccess === false
+        ? "disabled"
+        : "active";
+    if (storedBase !== "active") return;
+    if (!hasContractEnded(src)) return;
+    if (pendingStatus) return;
+    autoDowngradeFiredRef.current = src._id;
+    updateUser.mutate({
+      id: src._id,
+      user: {
+        ...src,
+        accountStatus: "user",
+        hasAccess: true, // "user" still has app access — only "disabled" blocks it
+      } as IUser,
+    });
+  }, [data, stateUser, pendingStatus, updateUser]);
 
   if (isLoading) return <Loader size="large" />;
   if (isError && !data) return <ErrorPage message={error.message} />;
@@ -300,6 +346,27 @@ export const UserDashboard = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            {currentUser?.phone && (
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                  צור קשר
+                </label>
+                <a
+                  href={`https://wa.me/${(currentUser.phone || "")
+                    .replace(/\D/g, "")
+                    .replace(/^0/, "972")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`שלח הודעה ב-WhatsApp ל-${currentUser.firstName ?? "מתאמן"}`}
+                  title="פתח שיחת WhatsApp"
+                  className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-emerald-100 hover:shadow dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300"
+                >
+                  <FaWhatsapp size={16} className="text-emerald-600 dark:text-emerald-300" />
+                  WhatsApp
+                </a>
+              </div>
+            )}
+
             <div className="flex flex-col gap-1">
               <label className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                 סוג תוכנית
@@ -407,6 +474,39 @@ export const UserDashboard = () => {
               <span>עריכה</span>
             </button>
           </div>
+          {/* Status badge — mirrors the header status dropdown so the
+              trainer sees the trainee's account state without scrolling
+              up. Single source of truth: the `status` state, which is
+              derived from `data.accountStatus` (or hasAccess fallback)
+              and updated optimistically by the dropdown change handler. */}
+          <div className="mb-4 flex items-center gap-3 rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-slate-50/60 dark:bg-slate-800/40 px-4 py-3">
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+              סטטוס במערכת:
+            </span>
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold ${
+                status === "active"
+                  ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
+                  : status === "user"
+                    ? "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300"
+                    : "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300"
+              }`}
+            >
+              <span
+                className={`h-1.5 w-1.5 rounded-full ${
+                  status === "active"
+                    ? "bg-emerald-500"
+                    : status === "user"
+                      ? "bg-blue-500"
+                      : "bg-rose-500"
+                }`}
+              />
+              {STATUS_LABEL[status]}
+            </span>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400">
+              {STATUS_DESCRIPTION[status]}
+            </span>
+          </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <ProfileField label="שם פרטי" value={currentUser?.firstName} />
             <ProfileField label="שם משפחה" value={currentUser?.lastName} />
@@ -467,10 +567,52 @@ export const UserDashboard = () => {
       )}
 
       {mainTab === "workout" && (
-        <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-5 shadow-sm">
-          <CreateWorkoutPlanWrapper embedded>
-            <WorkoutPlans />
-          </CreateWorkoutPlanWrapper>
+        <div className="flex flex-col gap-4">
+          {/* Workout-plan editor with a thin, quiet action row above it.
+              Per council: the loud blue banner was builder pride, not
+              user value. Swap is a verb → small header button. History
+              is a record → renders below the editor, only when it has
+              content (WorkoutPlanHistorySection hides itself when
+              empty). */}
+          <div className="flex items-center justify-end">
+            <button
+              type="button"
+              onClick={() => setSwapModalOpen(true)}
+              title="להחליף את התוכנית הפעילה לתקופה מוגבלת. התוכנית הקודמת תישמר בהיסטוריה ותהיה ניתנת לשחזור."
+              className="inline-flex items-center gap-1.5 rounded-xl border border-blue-100/60 dark:border-blue-900/40 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-bold text-blue-700 dark:text-blue-300 shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow"
+            >
+              <FaArrowsRotate size={11} />
+              <span>החלפה זמנית</span>
+            </button>
+          </div>
+
+          {/* Existing workout-plan editor */}
+          <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-5 shadow-sm">
+            <CreateWorkoutPlanWrapper embedded>
+              <WorkoutPlans />
+            </CreateWorkoutPlanWrapper>
+          </div>
+
+          {/* Plan history — below the editor, hidden when empty (see
+              hideWhenEmpty prop). Reference material lives out of the
+              primary task path. */}
+          {currentUser?._id && (
+            <WorkoutPlanHistorySection
+              userId={currentUser._id}
+              activePlan={undefined /* TODO: feed active plan once available in this scope */}
+              hideWhenEmpty
+            />
+          )}
+
+          {/* Swap modal */}
+          {currentUser?._id && swapModalOpen && (
+            <SwapTemporaryPlanModal
+              open={swapModalOpen}
+              onClose={() => setSwapModalOpen(false)}
+              userId={currentUser._id}
+              currentPlanId={undefined /* TODO: pass current plan _id when accessible here */}
+            />
+          )}
         </div>
       )}
 

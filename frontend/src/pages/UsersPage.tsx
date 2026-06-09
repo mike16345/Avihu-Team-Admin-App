@@ -14,12 +14,13 @@ import { weightTab } from "@/pages/UserDashboard";
 import { IUser } from "@/interfaces/IUser";
 import useUsersQuery from "@/hooks/queries/user/useUsersQuery";
 import DateUtils from "@/lib/dateUtils";
+import { deriveAccountStatus } from "@/lib/userStatus";
 import ErrorPage from "@/pages/ErrorPage";
 import Loader from "@/components/ui/Loader";
 
 const MINIMUM_WARNING_DAYS = 3;
 
-type StatusFilter = "הכל" | "פעיל" | "מסתיים בקרוב" | "ללא תאריך סיום";
+type StatusFilter = "הכל" | "פעיל" | "משתמשים" | "מסתיים בקרוב" | "ללא תאריך סיום";
 
 export const UsersPage = () => {
   const navigate = useNavigate();
@@ -60,7 +61,12 @@ export const UsersPage = () => {
 
       if (statusFilter === "מסתיים בקרוב")
         return daysLeft !== null && daysLeft <= MINIMUM_WARNING_DAYS && daysLeft >= 0;
-      if (statusFilter === "פעיל") return u.hasAccess !== false;
+      // "פעיל" / "משתמשים" filters use the *derived* status
+      // (lib/userStatus). Users whose dateFinished has passed
+      // auto-fall from "active" → "user", so the same trainee
+      // appears in only one bucket at a time.
+      if (statusFilter === "פעיל") return deriveAccountStatus(u) === "active";
+      if (statusFilter === "משתמשים") return deriveAccountStatus(u) === "user";
       if (statusFilter === "ללא תאריך סיום") return !u.dateFinished;
 
       return true;
@@ -69,17 +75,20 @@ export const UsersPage = () => {
 
   const stats = useMemo(() => {
     const total = sortedUsers.length;
-    const active = sortedUsers.filter((u) => u.hasAccess !== false).length;
-    // "משתמשים" — מתאמנים בשלב onboarding (לפני שסיימו את התהליך)
-    const inOnboarding = sortedUsers.filter(
-      (u: any) => u.onboardingCompleted === false || u.onboardingStep !== "completed"
-    ).length;
+    // Counts go through the *derived* status (lib/userStatus). This is
+    // the single source of truth the home dashboard and the trainee
+    // profile also use, so the four pills here can't drift from those
+    // views. Notably: users whose dateFinished has passed auto-drop
+    // from "פעילים" and land in "משתמשים" — exactly the rule Avihu
+    // set for the dashboard attention lists.
+    const active = sortedUsers.filter((u) => deriveAccountStatus(u) === "active").length;
+    const asUser = sortedUsers.filter((u) => deriveAccountStatus(u) === "user").length;
     const endingSoon = sortedUsers.filter((u) => {
       if (!u.dateFinished) return false;
       const d = DateUtils.getDaysDifference(new Date(), u.dateFinished);
       return d <= 7 && d >= 0;
     }).length;
-    return { total, active, inOnboarding, endingSoon };
+    return { total, active, inOnboarding: asUser, endingSoon };
   }, [sortedUsers]);
 
   if (isLoading) return <Loader size="large" />;
@@ -137,7 +146,7 @@ export const UsersPage = () => {
           />
         </div>
         <div className="flex items-center gap-1 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-1 shadow-sm">
-          {(["הכל", "פעיל", "מסתיים בקרוב", "ללא תאריך סיום"] as const).map((s) => (
+          {(["הכל", "פעיל", "משתמשים", "מסתיים בקרוב", "ללא תאריך סיום"] as const).map((s) => (
             <button
               key={s}
               onClick={() => setStatusFilter(s)}

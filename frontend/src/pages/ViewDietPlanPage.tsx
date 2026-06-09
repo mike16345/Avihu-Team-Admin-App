@@ -12,7 +12,7 @@ import CustomButton from "@/components/ui/CustomButton";
 import { useNavigate } from "react-router-dom";
 import { MainRoutes } from "@/enums/Routes";
 import { QueryKeys } from "@/enums/QueryKeys";
-import BackButton from "@/components/ui/BackButton";
+import BackLink from "@/components/ui/BackLink";
 import BasicUserDetails from "@/components/UserDashboard/UserInfo/BasicUserDetails";
 import { useUsersStore } from "@/store/userStore";
 import { weightTab } from "./UserDashboard";
@@ -23,7 +23,7 @@ import useUpdateDietPlan from "@/hooks/mutations/DietPlans/useUpdateDietPlan";
 import useAddDietPlan from "@/hooks/mutations/DietPlans/useAddDietPlan";
 import useUserQuery from "@/hooks/queries/user/useUserQuery";
 import { presetNameSchema } from "@/schemas/dietPlanPresetSchema";
-import { convertItemsToOptions, getNestedZodError } from "@/lib/utils";
+import { getNestedZodError } from "@/lib/utils";
 import useDietPlanPresetsQuery from "@/hooks/queries/dietPlans/useDietPlanPresetsQuery";
 import { cleanWorkoutObject } from "@/utils/workoutPlanUtils";
 import { normalizeDietPlan } from "@/utils/dietPlanUtils";
@@ -32,7 +32,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@/components/ui/form";
 import { useDirtyFormContext } from "@/context/useFormContext";
 import useGetDietPlan from "@/hooks/queries/dietPlans/useGetDietPlan";
-import CustomSelect from "@/components/ui/CustomSelect";
+import DietPlanPresetPicker from "@/components/templates/dietTemplates/DietPlanPresetPicker";
+import { FaUtensils, FaChevronDown } from "react-icons/fa6";
 import FormResponseBubbleWrapper from "@/components/formResponses/FormResponseBubbleWrapper";
 import DietPlanStatsStrip from "@/components/DietPlan/DietPlanStatsStrip";
 import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
@@ -60,6 +61,7 @@ export const ViewDietPlanPage = ({ embedded = false }: ViewDietPlanPageProps) =>
 
   const [isNewPlan, setIsNewPlan] = useState(false);
   const [openPresetModal, setOpenPresetModal] = useState(false);
+  const [openPickerModal, setOpenPickerModal] = useState(false);
 
   const { setIsDirty } = useDirtyFormContext();
 
@@ -148,10 +150,8 @@ export const ViewDietPlanPage = ({ embedded = false }: ViewDietPlanPageProps) =>
     }
   };
 
-  const handleSelect = (presetName: string) => {
-    const selectedPreset = dietPlanPresets.data?.data.find((preset) => preset.name === presetName);
-    if (!selectedPreset) return;
-    const { name: _presetName, ...presetData } = selectedPreset;
+  const handleSelectPreset = (preset: any) => {
+    const { name: _presetName, ...presetData } = preset;
     void _presetName;
     reset(normalizeDietPlan(presetData as IDietPlan));
   };
@@ -190,10 +190,6 @@ export const ViewDietPlanPage = ({ embedded = false }: ViewDietPlanPageProps) =>
 
   if (isLoading) return <Loader size="large" />;
 
-  const presetOptions = dietPlanPresets.data?.data
-    ? convertItemsToOptions(dietPlanPresets.data?.data, "name", "name")
-    : [];
-
   return (
     <div
       dir="rtl"
@@ -207,14 +203,15 @@ export const ViewDietPlanPage = ({ embedded = false }: ViewDietPlanPageProps) =>
             userId={id}
             query={{ formType: user?.onboardingCompleted ? "monthly" : "onboarding", userId: id }}
           />
-          <BackButton navLink={MainRoutes.USERS + `/${id}?tab=${weightTab}`} />
+          <BackLink to={MainRoutes.USERS + `/${id}?tab=${weightTab}`} label="חזרה לפרופיל המתאמן" />
         </>
       )}
 
       <Form {...form}>
         {embedded && <DietPlanStatsStrip />}
 
-        {/* Preset selector — same card pattern as workout-plan editor. */}
+        {/* Preset picker — opens DietPlanPresetPicker modal with full
+            search + filter capabilities (matches the templates page). */}
         {embedded ? (
           <div className="flex flex-col gap-2 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-col">
@@ -222,25 +219,33 @@ export const ViewDietPlanPage = ({ embedded = false }: ViewDietPlanPageProps) =>
                 טען תבנית קיימת
               </span>
               <span className="text-xs text-slate-500 dark:text-slate-400">
-                בחר תפריט שמור כדי לאכלס את התוכנית במהירות
+                סנן לפי סוג תפריט, קלוריות והגבלות ובחר את המתאים למתאמן
               </span>
             </div>
-            <div className="sm:min-w-[260px]">
-              <CustomSelect
-                className="w-full"
-                placeholder="בחר תפריט"
-                onValueChange={handleSelect}
-                items={presetOptions}
-              />
-            </div>
+            <button
+              type="button"
+              onClick={() => setOpenPickerModal(true)}
+              className="inline-flex items-center justify-between gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 px-3 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 transition-colors hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 sm:min-w-[260px]"
+            >
+              <span className="inline-flex items-center gap-2">
+                <FaUtensils size={11} className="text-emerald-600" />
+                בחר תפריט מתבנית
+              </span>
+              <FaChevronDown size={9} className="text-slate-400" />
+            </button>
           </div>
         ) : (
-          <CustomSelect
-            className="sm:w-[350px] mr-1"
-            placeholder="בחר תפריט"
-            onValueChange={handleSelect}
-            items={presetOptions}
-          />
+          <button
+            type="button"
+            onClick={() => setOpenPickerModal(true)}
+            className="mr-1 inline-flex w-full items-center justify-between gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition-colors hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 sm:w-[350px]"
+          >
+            <span className="inline-flex items-center gap-2">
+              <FaUtensils size={11} className="text-emerald-600" />
+              בחר תפריט מתבנית
+            </span>
+            <FaChevronDown size={9} className="text-slate-400" />
+          </button>
         )}
 
         <DietPlanForm>
@@ -294,6 +299,13 @@ export const ViewDietPlanPage = ({ embedded = false }: ViewDietPlanPageProps) =>
         onClose={() => setOpenPresetModal(false)}
         open={openPresetModal}
         onSubmit={(val) => handleAddPreset(val)}
+      />
+
+      <DietPlanPresetPicker
+        open={openPickerModal}
+        onOpenChange={setOpenPickerModal}
+        presets={(dietPlanPresets.data?.data as any[]) ?? []}
+        onSelect={handleSelectPreset}
       />
 
       <UnsavedChangesDialog

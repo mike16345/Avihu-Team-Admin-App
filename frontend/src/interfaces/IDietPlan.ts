@@ -34,7 +34,32 @@ export interface IDietPlan {
   supplements: string[];
 }
 
-export interface IDietPlanPreset extends IDietPlan {
+/**
+ * Optional trainer-tagged meta on a diet-plan preset. Used by the
+ * admin panel to filter and surface key info without opening the menu.
+ * All fields are optional — older presets without tagging keep working.
+ */
+export type DietGoal = "cutting" | "mass";
+export type DietaryRestriction =
+  | "lactose-free"
+  | "vegetarian"
+  | "no-fish"
+  | "no-meat"
+  | "vegan"
+  | "gluten-free";
+
+export interface IDietPlanMeta {
+  goal?: DietGoal;
+  calories?: number;
+  proteinServings?: number;
+  carbServings?: number;
+  fatServings?: number;
+  dietaryRestrictions?: DietaryRestriction[];
+  /** Sub-trainer (or main-trainer) id of whoever built this menu. */
+  builtByTrainerId?: string;
+}
+
+export interface IDietPlanPreset extends IDietPlan, IDietPlanMeta {
   name: string;
 }
 

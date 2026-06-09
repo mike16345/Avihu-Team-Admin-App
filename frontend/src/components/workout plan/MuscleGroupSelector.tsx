@@ -159,7 +159,7 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1 text-xs font-semibold text-slate-600 dark:text-slate-300 transition-colors hover:border-purple-300 dark:hover:border-purple-700 hover:bg-purple-50/60 dark:hover:bg-purple-900/30 hover:text-purple-700 dark:hover:text-purple-300"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1 text-xs font-semibold text-slate-600 dark:text-slate-300 transition-colors hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50/60 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300"
           style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
         >
           {hasSelection ? <FaPenToSquare size={11} /> : <FaPlus size={11} />}
@@ -193,7 +193,7 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="חיפוש מהיר…"
-              className="w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60 py-2 pr-9 pl-3 text-sm text-slate-700 dark:text-slate-200 outline-none transition-colors placeholder:text-slate-400 focus:border-purple-300 focus:bg-white"
+              className="w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60 py-2 pr-9 pl-3 text-sm text-slate-700 dark:text-slate-200 outline-none transition-colors placeholder:text-slate-400 focus:border-blue-300 focus:bg-white"
             />
           </div>
         </div>
@@ -215,7 +215,7 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
                     onClick={() => updateSelection(group)}
                     className={`group flex items-center gap-2.5 rounded-xl border bg-white dark:bg-slate-900 px-3 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 transition-all ${
                       isSelected
-                        ? "border-purple-400 ring-2 ring-purple-200 dark:ring-purple-900/40"
+                        ? "border-blue-400 ring-2 ring-blue-200 dark:ring-blue-900/40"
                         : `border-slate-200 dark:border-slate-800 ${d.ring}`
                     } hover:shadow-sm`}
                   >

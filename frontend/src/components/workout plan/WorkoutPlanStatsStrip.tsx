@@ -21,8 +21,8 @@ interface StatProps {
 
 const TONE: Record<StatProps["tone"], { iconBg: string; iconText: string }> = {
   purple: {
-    iconBg: "bg-purple-100 dark:bg-purple-900/40",
-    iconText: "text-purple-700 dark:text-purple-300",
+    iconBg: "bg-blue-100 dark:bg-blue-900/40",
+    iconText: "text-blue-700 dark:text-blue-300",
   },
   rose: { iconBg: "bg-rose-100 dark:bg-rose-900/40", iconText: "text-rose-700 dark:text-rose-300" },
   emerald: {

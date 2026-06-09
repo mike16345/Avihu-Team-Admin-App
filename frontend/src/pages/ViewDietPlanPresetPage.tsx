@@ -24,13 +24,15 @@ import { useQueryClient } from "@tanstack/react-query";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { useNavigate } from "react-router-dom";
 import { MainRoutes } from "@/enums/Routes";
-import BackButton from "@/components/ui/BackButton";
+import BackLink from "@/components/ui/BackLink";
 import { useDirtyFormContext } from "@/context/useFormContext";
 import { dietPlanSchema, validateDietPlan } from "@/components/DietPlan/DietPlanSchema";
 import useDietPlanPresetQuery from "@/hooks/queries/dietPlans/useDietPlanPresetQuery";
 import useAddDietPlanPreset from "@/hooks/mutations/DietPlans/useAddDietPlanPreset";
 import useUpdateDietPlanPreset from "@/hooks/mutations/DietPlans/useUpdateDietPlanPreset";
 import { presetNameSchema, PresetNameSchemaType } from "@/schemas/dietPlanPresetSchema";
+import DietPlanMetaPanel from "@/components/templates/dietTemplates/DietPlanMetaPanel";
+import { FaUtensils, FaTag } from "react-icons/fa6";
 
 export const ViewDietPlanPresetPage = () => {
   const { setErrors, setIsDirty } = useDirtyFormContext();
@@ -114,36 +116,67 @@ export const ViewDietPlanPresetPage = () => {
   if (error) return <ErrorPage message={error.message} />;
 
   return (
-    <div data-testid="diet-plan-preset-page" className=" flex flex-col gap-4 size-full ">
-      <BackButton navLink={MainRoutes.DIET_PLANS} />
-      <div className="w-1/3 ">
+    <div
+      data-testid="diet-plan-preset-page"
+      dir="rtl"
+      className="flex flex-col gap-5 size-full"
+      style={{ fontFamily: "Assistant, Heebo, system-ui, sans-serif" }}
+    >
+      <BackLink to={MainRoutes.DIET_PLANS} label="חזרה לרשימת התפריטים" />
+
+      {/* Hero header — same family shell as forms/workouts/leads */}
+      <div className="relative overflow-hidden rounded-2xl border border-blue-100/60 bg-white shadow-sm dark:border-blue-900/40 dark:bg-slate-900">
+        <div className="pointer-events-none absolute -top-16 -left-16 h-40 w-40 rounded-full bg-blue-100/60 dark:bg-blue-950/30 blur-3xl" />
+        <div className="relative flex items-center gap-4 p-5">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl brand-gradient text-white shadow-md shadow-blue-500/25">
+            <FaUtensils size={18} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">תבנית תפריט</h1>
+            <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
+              בנה תפריט תזונה חוזר לשימוש למתאמנים — שם, תיוג, ארוחות ותוספים
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Identity card — name in a styled input that matches the
+          workout preset editor (same pattern, same field affordance). */}
+      <div className="rounded-2xl border border-blue-100/60 bg-white p-5 shadow-sm dark:border-blue-900/40 dark:bg-slate-900">
         <Form {...presetNameForm}>
           <form>
             <FormField
               control={presetNameForm.control}
               name="name"
-              render={({ field }) => {
-                return (
-                  <FormItem>
-                    <FormLabel className="font-bold underline pb-3">שם התפריט:</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="שם לתפריט..." />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                );
-              }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    <FaTag size={10} />
+                    שם התפריט
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="שם לתפריט…"
+                      className="h-11 w-full max-w-xs rounded-xl border-blue-100/60 bg-blue-50/30 text-base font-semibold text-slate-800 placeholder:text-sm placeholder:font-normal placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-200/60 dark:border-blue-900/40 dark:bg-blue-950/15 dark:text-slate-100 dark:focus:bg-slate-900"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
           </form>
         </Form>
       </div>
+
       <Form {...planForm}>
+        <DietPlanMetaPanel />
         <DietPlanForm>
           {(meals?.length || 0) > 0 && (
             <CustomButton
               className="font-bold sm:w-32 w-full md:fixed md:bottom-10 md:end-10"
               variant="success"
-              title="שמור תפריט"
+              title="שמור תבנית"
               isLoading={createPreset.isPending || updatePreset.isPending}
               onClick={presetNameForm.handleSubmit(handleSubmit)}
             />

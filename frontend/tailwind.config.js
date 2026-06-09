@@ -28,6 +28,35 @@ module.exports = {
         heebo: ["Heebo", ...defaultTheme.fontFamily.sans],
       },
       colors: {
+        /**
+         * Elevate Coach brand palette.
+         * Primary blue (#1565FF) replaces Tailwind's default blue-600 in
+         * UI accents; secondary (#0A3DCC) is the darker partner used in
+         * gradients and hover states. The `brand-*` tokens are also
+         * exposed for direct utilities like `bg-brand-primary` /
+         * `text-brand-secondary`.
+         */
+        "brand-primary": "#1565FF",
+        "brand-secondary": "#0A3DCC",
+        "brand-dark": "#0D1117",
+        "brand-darkgray": "#1F2937",
+        "brand-lightgray": "#E5E7EB",
+        // Override Tailwind's `blue` palette so every existing
+        // `bg-blue-600` / `border-blue-600` reference automatically
+        // picks up the brand colour.
+        blue: {
+          50: "#EBF2FF",
+          100: "#D6E5FF",
+          200: "#ADC9FF",
+          300: "#7FA8FF",
+          400: "#4D85FF",
+          500: "#1565FF",
+          600: "#1565FF",
+          700: "#0A3DCC",
+          800: "#082E99",
+          900: "#051F66",
+          950: "#020F33",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

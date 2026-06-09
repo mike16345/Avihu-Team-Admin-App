@@ -251,6 +251,42 @@ export const getNestedError = (
   return null;
 };
 
+/**
+ * Walk a react-hook-form `errors` object and return EVERY validation
+ * message inside it (depth-first). Each entry includes a human-readable
+ * Hebrew path so the user can see exactly which field failed.
+ *
+ * Example output:
+ *  [
+ *    { path: "אימון 1 קבוצת שריר 2 תרגיל 3", message: "חייב להיות 1 תווים" },
+ *    { path: "אימון 1 קבוצת שריר 2 תרגיל 3 חזרות מינ׳", message: "חייב להיות >= 1" },
+ *    ...
+ *  ]
+ */
+export type ValidationErrorEntry = { path: string; message: string };
+
+export const collectAllErrors = (
+  obj: Record<string, any> | undefined | null,
+  path: (string | number)[] = []
+): ValidationErrorEntry[] => {
+  if (!obj || typeof obj !== "object") return [];
+
+  // react-hook-form leaf shape: { message: string, type: ..., ref: ... }
+  if (typeof obj.message === "string") {
+    return [{ path: path.join(" ").trim() || "שדה", message: obj.message }];
+  }
+
+  const out: ValidationErrorEntry[] = [];
+  for (const [k, value] of Object.entries(obj)) {
+    if (!value || typeof value !== "object") continue;
+    const formattedKey = isNaN(Number(k))
+      ? hebrewPathTranslations[k] ?? k
+      : `${Number(k) + 1}`;
+    out.push(...collectAllErrors(value, [...path, formattedKey]));
+  }
+  return out;
+};
+
 // Use for schema.safeParse()
 export const getZodErrorIssues = (issues: ZodIssue[]) => {
   return issues.map((issue) => ({

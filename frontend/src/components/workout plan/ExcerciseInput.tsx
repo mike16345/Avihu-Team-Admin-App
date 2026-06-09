@@ -178,12 +178,20 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                       </div>
                     )}
 
-                    {/* Method + rest time */}
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                      <FormItem className="space-y-1">
+                    {/*
+                     * Method + rest time.
+                     * Each FormItem gets `min-w-0` so the ComboBox text
+                     * (which can be long, e.g. "Pyramid Training") can
+                     * truncate inside the grid column instead of pushing
+                     * into the neighbouring "rest time" cell.
+                     * The rest-time number input is capped at w-24 so the
+                     * 60-second value never wraps and stays compact.
+                     */}
+                    <div className="grid grid-cols-[1fr_auto] gap-3 items-start">
+                      <FormItem className="space-y-1 min-w-0">
                         <SectionLabel>שיטת אימון</SectionLabel>
                         <div className="flex items-center gap-2">
-                          <div className="flex-1">
+                          <div className="flex-1 min-w-0 overflow-hidden">
                             <ComboBox
                               options={exerciseMethods}
                               value={item.exerciseMethod}
@@ -196,7 +204,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                             type="button"
                             variant="outline"
                             size="sm"
-                            className="h-8 px-3 text-xs"
+                            className="h-8 px-3 text-xs shrink-0"
                             onClick={() => handleUpdateExercise("exerciseMethod", undefined, index)}
                           >
                             נקה
@@ -208,7 +216,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                         control={control}
                         name={`${parentPath}.exercises.${index}.restTime`}
                         render={({ field }) => (
-                          <FormItem className="space-y-1">
+                          <FormItem className="space-y-1 w-24">
                             <SectionLabel>זמן מנוחה (שנ׳)</SectionLabel>
                             <Input
                               type="number"

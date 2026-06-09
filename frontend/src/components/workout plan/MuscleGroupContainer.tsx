@@ -116,7 +116,7 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
             onClick={() => setIsOpen((s) => !s)}
             className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
               isOpen
-                ? "bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300"
+                ? "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300"
                 : "border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
             }`}
             aria-label={isOpen ? "סגור" : "פתח"}

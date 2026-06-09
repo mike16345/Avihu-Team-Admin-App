@@ -22,7 +22,7 @@ const SetsInput: React.FC<SetsInputProps> = ({ index, setNumber, fieldNamePrefix
 
   return (
     <div className="flex items-end gap-3" dir="rtl">
-      <div className="mt-6 inline-flex h-8 min-w-[58px] items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/40 px-3 text-xs font-bold text-purple-700 dark:text-purple-300">
+      <div className="mt-6 inline-flex h-8 min-w-[58px] items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/40 px-3 text-xs font-bold text-blue-700 dark:text-blue-300">
         סט {setNumber}
       </div>
 

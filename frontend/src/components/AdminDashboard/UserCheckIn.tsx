@@ -10,20 +10,23 @@
  *   - Colour is kept minimal: only the active pill gets a subtle
  *     slate fill, everything else is neutral. No rainbow.
  */
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { UsersCheckIn } from "@/interfaces/IAnalytics";
 import { useNavigate } from "react-router-dom";
 import useAnalyticsApi from "@/hooks/api/useAnalyticsApi";
 import Loader from "../ui/Loader";
 import { toast } from "sonner";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
-import { FaCheck, FaArrowLeft, FaMagnifyingGlass } from "react-icons/fa6";
+import { FaCheck, FaMagnifyingGlass } from "react-icons/fa6";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import ErrorPage from "@/pages/ErrorPage";
 import { FULL_DAY_STALE_TIME, HOUR_STALE_TIME } from "@/constants/constants";
 import { weightTab } from "@/pages/UserDashboard";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { userFullName } from "@/lib/utils";
+import { useUsersStore } from "@/store/userStore";
+import useUsersQuery from "@/hooks/queries/user/useUsersQuery";
+import { deriveAccountStatus } from "@/lib/userStatus";
 
 type ActiveView = "checkin" | "noWorkout" | "noDiet" | "expiring";
 
@@ -47,6 +50,41 @@ const UserCheckIn = () => {
     useAnalyticsApi();
   const [activeView, setActiveView] = useState<ActiveView>("checkin");
   const [search, setSearch] = useState("");
+
+  // STRICT allow-list per Avihu's repeated directive: a user appears
+  // in לבדיקה / ללא אימון / ללא תזונה / מסיימים ONLY when we can
+  // confirm `deriveAccountStatus(user) === "active"` from the users
+  // store. If we can't confirm (store loading, or user missing from
+  // store) — we hide them. "If in doubt, hide it."
+  //
+  // The deny-list variant let too many through (a sub-trainer saw
+  // 180+ trainees because most of those analytics entries weren't
+  // in the sub-trainer's store at all — deny-list says "I can't
+  // prove inactive, so show".)
+  //
+  // Loading correctness: when `isUsersLoading` is true the parent
+  // renders a loader — so we never flash "0" during the few hundred
+  // ms it takes the users query to resolve. After it resolves the
+  // allow-list applies and counts settle on the real value.
+  //
+  // We additionally normalise IDs to strings (Mongo can return
+  // ObjectId wrappers depending on the serializer) to avoid Set
+  // misses between the analytics response and the users store.
+  const { isLoading: isUsersLoading } = useUsersQuery();
+  const allUsers = useUsersStore((s) => s.users);
+  const activeIdSet = useMemo(() => {
+    const s = new Set<string>();
+    for (const u of allUsers ?? []) {
+      if (!u._id) continue;
+      if (deriveAccountStatus(u) === "active") s.add(String(u._id));
+    }
+    return s;
+  }, [allUsers]);
+  const onlyActive = useCallback(
+    <T extends { _id: string }>(list: T[]) =>
+      list.filter((u) => activeIdSet.has(String(u._id))),
+    [activeIdSet]
+  );
 
   // ---------- queries ----------
   const {
@@ -95,14 +133,39 @@ const UserCheckIn = () => {
   });
 
   // ---------- derived ----------
+  // Filter every source list by accountStatus === "active" (see
+  // onlyActive helper above). Counts must reflect the filtered list,
+  // not the raw API response — otherwise the pill badge lies about
+  // how many rows the trainer actually sees below.
+  const checkinActive = useMemo(
+    () => onlyActive((checkinUsers ?? []) as { _id: string }[]),
+    [checkinUsers, onlyActive]
+  );
+  const noWorkoutActive = useMemo(
+    () => onlyActive((noWorkoutData?.data ?? []) as { _id: string }[]),
+    [noWorkoutData, onlyActive]
+  );
+  const noDietActive = useMemo(
+    () => onlyActive((noDietData?.data ?? []) as { _id: string }[]),
+    [noDietData, onlyActive]
+  );
+  const expiringActive = useMemo(
+    () => onlyActive((expiringData?.data ?? []) as { _id: string }[]),
+    [expiringData, onlyActive]
+  );
+
   const counts: Record<ActiveView, number> = {
-    checkin: checkinUsers?.length ?? 0,
-    noWorkout: noWorkoutData?.data?.length ?? 0,
-    noDiet: noDietData?.data?.length ?? 0,
-    expiring: expiringData?.data?.length ?? 0,
+    checkin: checkinActive.length,
+    noWorkout: noWorkoutActive.length,
+    noDiet: noDietActive.length,
+    expiring: expiringActive.length,
   };
 
+  // Until the users store is loaded we can't apply the allow-list,
+  // so treat that as a loading state too — otherwise the count
+  // briefly renders as 0 before the store resolves.
   const isLoading =
+    isUsersLoading ||
     (activeView === "checkin" && loadingCheckin) ||
     (activeView === "noWorkout" && loadingW) ||
     (activeView === "noDiet" && loadingD) ||
@@ -110,12 +173,12 @@ const UserCheckIn = () => {
 
   const rawList: { _id: string; firstName?: string; lastName?: string; navUrl: string }[] =
     activeView === "checkin"
-      ? (checkinUsers ?? []).map((u) => ({ ...u, navUrl: `/users/${u._id}?tab=${weightTab}` }))
+      ? (checkinActive as any[]).map((u) => ({ ...u, navUrl: `/users/${u._id}?tab=${weightTab}` }))
       : activeView === "noWorkout"
-        ? (noWorkoutData?.data ?? []).map((u: any) => ({ ...u, navUrl: `/workout-plans/${u._id}` }))
+        ? (noWorkoutActive as any[]).map((u) => ({ ...u, navUrl: `/workout-plans/${u._id}` }))
         : activeView === "noDiet"
-          ? (noDietData?.data ?? []).map((u: any) => ({ ...u, navUrl: `/diet-plans/${u._id}` }))
-          : (expiringData?.data ?? []).map((u: any) => ({
+          ? (noDietActive as any[]).map((u) => ({ ...u, navUrl: `/diet-plans/${u._id}` }))
+          : (expiringActive as any[]).map((u) => ({
               ...u,
               navUrl: `/users/${u._id}?tab=${weightTab}`,
             }));
@@ -239,10 +302,6 @@ const UserCheckIn = () => {
                   <FaCheck size={10} />
                 </button>
               )}
-              <FaArrowLeft
-                size={9}
-                className="shrink-0 text-slate-300 dark:text-slate-600 transition-all group-hover:-translate-x-0.5 group-hover:text-slate-500"
-              />
             </li>
           ))}
         </ul>

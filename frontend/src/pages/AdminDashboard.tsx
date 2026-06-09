@@ -84,7 +84,7 @@ const AdminDashboard = () => {
       {/* Hero greeting */}
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-300 ring-1 ring-blue-200/60 dark:ring-blue-900/40">
+          <div className="brand-gradient flex h-12 w-12 items-center justify-center rounded-2xl text-white shadow-md shadow-blue-600/20">
             <FaHouse size={18} />
           </div>
           <div>

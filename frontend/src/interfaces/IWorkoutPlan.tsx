@@ -9,7 +9,71 @@ export interface IWorkoutPlan {
   muscleGroups: IMuscleGroupWorkouts[];
 }
 
-export interface ICompleteWorkoutPlan {
+/**
+ * Optional metadata for any workout plan (preset or per-user).
+ * Trainers set these when building the plan; the UI uses them for
+ * filtering and quick-scan badges. Older plans / mobile clients that
+ * don't know about these fields keep working — all fields are optional.
+ */
+export type WorkoutLevel = "beginner" | "intermediate" | "advanced" | "pro";
+export type WorkoutGoal =
+  | "fat-loss"
+  | "muscle-gain"
+  | "strength"
+  | "endurance"
+  | "toning"
+  | "rehab";
+
+export type WorkoutEquipment =
+  | "gym"
+  | "studio"
+  | "weights"
+  | "bodyweight"
+  | "weights-bodyweight";
+
+export interface IWorkoutPlanMeta {
+  workoutsPerWeek?: number;
+  durationMinutes?: number;
+  level?: WorkoutLevel;
+  goal?: WorkoutGoal;
+  /** Equipment required to follow the plan (gym, studio, weights, bodyweight). */
+  equipment?: WorkoutEquipment;
+  /** "full-body" or up to 3 muscle-group slugs the plan emphasises. */
+  muscleFocus?: string[];
+  note?: string;
+  limitations?: string;
+  /** Sub-trainer (or main trainer) id of whoever built this plan. */
+  builtByTrainerId?: string;
+}
+
+/**
+ * History / temporary-swap fields (mirrored on server in
+ * `IWorkoutPlanHistory`). Each trainee may have many plan docs over
+ * time — at most one has `archivedAt = null` (the active plan).
+ * Restore = clone an archived doc to a new active one.
+ */
+export interface IWorkoutPlanHistory {
+  _id?: string;
+  /** Null when this plan is currently active for the trainee. */
+  archivedAt?: Date | string | null;
+  /** Pointer to the plan that replaced this one (set when archived). */
+  replacedByPlanId?: string;
+  /** Trainer id who created/assigned this plan (audit trail). */
+  assignedBy?: string;
+  /** When this assignment became active. */
+  assignedAt?: Date | string;
+  /**
+   * Optional end-date for a temporary swap. Surfaces an orange
+   * banner; restore is MANUAL — no cron. Pure metadata.
+   */
+  temporaryUntil?: Date | string;
+  /** When temporary, points to the archived plan to restore to. */
+  restoreToPlanId?: string;
+  /** Human label shown in history ("Full-Body חודש יוני"). */
+  assignmentLabel?: string;
+}
+
+export interface ICompleteWorkoutPlan extends IWorkoutPlanMeta, IWorkoutPlanHistory {
   userId?: string;
   workoutPlans: IWorkoutPlan[];
   cardio: ICardioPlan;
@@ -45,7 +109,7 @@ export interface IMuscleGroupWorkouts {
   exercises: IExercise[];
 }
 
-export interface IWorkoutPlanPreset {
+export interface IWorkoutPlanPreset extends IWorkoutPlanMeta {
   name: string;
   tips?: string[];
   workoutPlans: IWorkoutPlan[];

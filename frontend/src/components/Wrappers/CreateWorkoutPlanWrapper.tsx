@@ -16,9 +16,12 @@ import useUserQuery from "@/hooks/queries/user/useUserQuery";
 import { MainRoutes } from "@/enums/Routes";
 import { weightTab } from "@/pages/UserDashboard";
 import BackButton from "../ui/BackButton";
-import ComboBox from "../ui/combo-box";
 import useWorkoutPlanPresetsQuery from "@/hooks/queries/workoutPlans/useWorkoutPlanPresetsQuery";
-import { convertItemsToOptions, getNestedError, getZodErrorIssues } from "@/lib/utils";
+import { collectAllErrors, getZodErrorIssues, ValidationErrorEntry } from "@/lib/utils";
+import ValidationErrorsDialog from "../Alerts/ValidationErrorsDialog";
+import WorkoutPresetPicker from "../templates/workoutTemplates/WorkoutPresetPicker";
+import PresetMetaPanel from "../templates/workoutTemplates/PresetMetaPanel";
+import { FaFolderOpen } from "react-icons/fa6";
 import useAddWorkoutPlan from "@/hooks/mutations/workouts/useAddWorkoutPlan";
 import useUpdateWorkoutPlan from "@/hooks/mutations/workouts/useUpdateWorkoutPlan";
 import { parseErrorFromObject } from "@/utils/workoutPlanUtils";
@@ -93,6 +96,10 @@ const CreateWorkoutPlanWrapper = ({
   const [isNoUserWithId, setIsNoUserWithId] = useState(false);
   const [selectedPreset, setSelectedPreset] = useState("");
   const [openPresetModal, setOpenPresetModal] = useState(false);
+  // Rich preset-picker modal (replaces the bare ComboBox)
+  const [openPresetPicker, setOpenPresetPicker] = useState(false);
+  // Validation summary dialog — populated when the form fails to submit
+  const [validationErrors, setValidationErrors] = useState<ValidationErrorEntry[]>([]);
 
   /**
    * Unsaved-changes guard — intercept any navigation while the form is
@@ -130,10 +137,24 @@ const CreateWorkoutPlanWrapper = ({
   const updateWorkoutPlan = useUpdateWorkoutPlan({ onError, onSuccess });
   const addWorkoutPlanPreset = useAddWorkoutPreset({ onError, onSuccess: presetSuccess });
 
-  const workoutPresetsOptions = useMemo(
-    () => convertItemsToOptions(workoutPlanPresets.data?.data || [], "name"),
+  const presetList = useMemo(
+    () => workoutPlanPresets.data?.data || [],
     [workoutPlanPresets.data]
   );
+
+  /**
+   * Shared handler used by both the embedded and standalone layouts
+   * when the trainer picks a preset from the WorkoutPresetPicker modal.
+   * Forwards every meta field so the new plan inherits the trainer's
+   * tagging (level, goal, duration, notes, limitations).
+   */
+  const applyPreset = (preset: typeof presetList[number]) => {
+    reset({
+      ...preset,
+      cardio: preset.cardio || { type: "simple", plan: defaultSimpleCardioOption },
+    });
+    setSelectedPreset(preset.name);
+  };
 
   const onSubmit = (values: WorkoutSchemaType) => {
     if (!id) return Promise.reject("User ID is required!");
@@ -170,10 +191,10 @@ const CreateWorkoutPlanWrapper = ({
     return user;
   };
 
-  const onInvalidSubmit = (e: any) => {
-    const errorMessage = getNestedError(e);
-
-    toast.error(errorMessage?.title, { description: errorMessage?.description });
+  const onInvalidSubmit = (errors: any) => {
+    const all = collectAllErrors(errors);
+    if (all.length === 0) return;
+    setValidationErrors(all);
   };
 
   const user = useMemo(handleFindUser, [id]) || userQuery.data;
@@ -250,36 +271,41 @@ const CreateWorkoutPlanWrapper = ({
                 בחר תבנית שמורה כדי לאכלס את התוכנית במהירות
               </span>
             </div>
-            <div className="sm:min-w-[260px]">
-              <ComboBox
-                value={selectedPreset}
-                options={workoutPresetsOptions}
-                onSelect={(preset) => {
-                  reset({
-                    ...preset,
-                    cardio: preset.cardio || { type: "simple", plan: defaultSimpleCardioOption },
-                  });
-                  setSelectedPreset(preset.name);
-                }}
-              />
-            </div>
+            <button
+              type="button"
+              onClick={() => setOpenPresetPicker(true)}
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2 text-sm font-bold text-slate-700 dark:text-slate-200 shadow-sm transition-all hover:border-blue-300 hover:bg-blue-50/40 hover:text-blue-700 dark:hover:bg-blue-950/30"
+            >
+              <FaFolderOpen size={12} />
+              {selectedPreset ? `תבנית: ${selectedPreset}` : "בחר תבנית"}
+            </button>
           </div>
         ) : (
-          <div className="sm:w-fit sm:min-w-40">
-            <ComboBox
-              value={selectedPreset}
-              options={workoutPresetsOptions}
-              onSelect={(preset) => {
-                reset({
-                  ...preset,
-                  cardio: preset.cardio || { type: "simple", plan: defaultSimpleCardioOption },
-                });
-                setSelectedPreset(preset.name);
-              }}
-            />
+          <div
+            dir="rtl"
+            className="flex items-center gap-3"
+            style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
+          >
+            <button
+              type="button"
+              onClick={() => setOpenPresetPicker(true)}
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2 text-sm font-bold text-slate-700 dark:text-slate-200 shadow-sm transition-all hover:border-blue-300 hover:bg-blue-50/40 hover:text-blue-700 dark:hover:bg-blue-950/30"
+            >
+              <FaFolderOpen size={12} />
+              {selectedPreset ? `תבנית: ${selectedPreset}` : "בחר תבנית"}
+            </button>
+            <span className="text-xs text-slate-500 dark:text-slate-400">
+              בחר תבנית כדי לאכלס את התוכנית במהירות
+            </span>
           </div>
         )}
-        <form className="space-y-2" onSubmit={form.handleSubmit(onSubmit, onInvalidSubmit)}>
+        <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit, onInvalidSubmit)}>
+          {/* Meta panel — same 2-column layout used in the preset editor.
+              Lets the trainer tag the client's plan with frequency,
+              duration, level, goal, equipment, focus, limitations and
+              notes. All fields are optional. */}
+          <PresetMetaPanel />
+
           {children}
 
           {embedded ? (
@@ -294,7 +320,7 @@ const CreateWorkoutPlanWrapper = ({
                 type="button"
                 onClick={() => setOpenPresetModal(true)}
                 disabled={updateWorkoutPlan.isPending || addWorkoutPlan.isPending}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 transition-colors hover:border-purple-300 dark:hover:border-purple-700 hover:bg-purple-50/40 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 transition-colors hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50/40 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {addWorkoutPlanPreset.isPending ? "שומר תבנית…" : "שמור כתבנית"}
               </button>
@@ -337,6 +363,22 @@ const CreateWorkoutPlanWrapper = ({
         onClose={() => setOpenPresetModal(false)}
         open={openPresetModal}
         onSubmit={(val) => handleAddPreset(val)}
+      />
+
+      {/* Rich preset picker — opens from the "בחר תבנית" button */}
+      <WorkoutPresetPicker
+        open={openPresetPicker}
+        onOpenChange={setOpenPresetPicker}
+        presets={presetList}
+        onSelect={applyPreset}
+      />
+
+      {/* Validation summary — lists every form error in one place */}
+      <ValidationErrorsDialog
+        open={validationErrors.length > 0}
+        onOpenChange={(open) => !open && setValidationErrors([])}
+        errors={validationErrors}
+        intro="יש לתקן את השדות הבאים לפני שמירת התוכנית"
       />
 
       <UnsavedChangesDialog

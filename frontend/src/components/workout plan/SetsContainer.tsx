@@ -64,7 +64,7 @@ const SetsContainer: React.FC<SetsContainerProps> = ({ parentPath }) => {
                 <button
                   type="button"
                   onClick={() => copySet(i)}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 transition-colors hover:border-purple-300 dark:hover:border-purple-700 hover:text-purple-700 dark:hover:text-purple-300"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 transition-colors hover:border-blue-300 dark:hover:border-blue-700 hover:text-blue-700 dark:hover:text-blue-300"
                   aria-label="שכפל סט"
                   title="שכפל סט"
                 >
@@ -89,7 +89,7 @@ const SetsContainer: React.FC<SetsContainerProps> = ({ parentPath }) => {
       <button
         type="button"
         onClick={createSet}
-        className="mt-3 flex items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 transition-colors hover:border-purple-300 dark:hover:border-purple-700 hover:bg-purple-50/40 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300"
+        className="mt-3 flex items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 transition-colors hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50/40 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300"
       >
         <FaPlus size={10} />
         הוסף סט

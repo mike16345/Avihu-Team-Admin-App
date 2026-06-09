@@ -56,6 +56,10 @@ export interface Trainer extends IBaseTrainer {
   isDeleted?: boolean;
   createdAt?: string;
   updatedAt?: string;
+  /** Workout-preset IDs starred as favourites by this trainer. */
+  favoriteWorkoutPresetIds?: string[];
+  /** When true, sub-trainers inherit this trainer's favourites read-only. */
+  sharesFavorites?: boolean;
 }
 
 export interface SubTrainer extends IBaseTrainer {

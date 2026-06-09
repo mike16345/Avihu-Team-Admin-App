@@ -379,7 +379,7 @@ const FormResponseViewer = ({
         <div className="flex flex-wrap items-start justify-between gap-5">
           {/* Left: avatar + names */}
           <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-lg font-bold text-white shadow-sm">
+            <div className="brand-gradient flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-lg font-bold text-white shadow-sm">
               {initialsOf(displayRespondent)}
             </div>
             <div className="min-w-0">

@@ -15,7 +15,10 @@ import { QueryKeys } from "@/enums/QueryKeys";
 import { HOUR_STALE_TIME } from "@/constants/constants";
 import { userFullName } from "@/lib/utils";
 import Loader from "../ui/Loader";
-import { FaUserPlus, FaArrowLeft, FaDumbbell, FaAppleWhole, FaCheck } from "react-icons/fa6";
+import { FaUserPlus, FaDumbbell, FaAppleWhole, FaCheck } from "react-icons/fa6";
+import { useUsersStore } from "@/store/userStore";
+import useUsersQuery from "@/hooks/queries/user/useUsersQuery";
+import { deriveAccountStatus, hasContractEnded } from "@/lib/userStatus";
 
 const getInitials = (firstName?: string, lastName?: string) => {
   const f = firstName?.[0] || "";
@@ -41,26 +44,59 @@ const NewClientsCard: React.FC = () => {
 
   const isLoading = loadingW || loadingD;
 
+  // We also need the users store so we can gate the cross-reference
+  // by accountStatus + dateFinished. Trigger the query — it's react-
+  // query-cached so this is a no-op if another page already fetched.
+  useUsersQuery();
+  const allUsers = useUsersStore((s) => s.users);
+
   /**
    * Cross-reference: clients who appear in BOTH "no workout" AND
    * "no diet" lists → they're new and need full programme setup.
+   *
+   * Per Avihu's directive: surface ONLY those whose status is
+   * "active" AND whose dateFinished is still in the future (their
+   * coaching contract hasn't ended). Past-dateFinished users —
+   * even if technically lacking plans — aren't actionable: the
+   * trainer isn't coaching them anymore.
+   *
+   * We build a Set of eligible userIds from the users store; if the
+   * store hasn't loaded yet, we render nothing rather than flash
+   * the unfiltered list.
    */
+  // STRICT allow-list: only surface users we can confirm are
+  // `deriveAccountStatus === "active"` AND whose contract hasn't
+  // ended. Per Avihu: anyone who can't be confirmed active is
+  // hidden — "if in doubt, hide it". IDs are normalised to strings
+  // to handle Mongo ObjectId vs string mismatches.
+  const eligibleIds = useMemo(() => {
+    const s = new Set<string>();
+    for (const u of allUsers ?? []) {
+      if (!u._id) continue;
+      if (deriveAccountStatus(u) !== "active") continue;
+      if (hasContractEnded(u)) continue;
+      s.add(String(u._id));
+    }
+    return s;
+  }, [allUsers]);
+
   const newClients = useMemo(() => {
     if (!noWorkout?.data || !noDiet?.data) return [];
-    const noDietIds = new Set(noDiet.data.map((u: any) => u._id));
-    return noWorkout.data.filter((u: any) => noDietIds.has(u._id));
-  }, [noWorkout?.data, noDiet?.data]);
+    const noDietIds = new Set(noDiet.data.map((u: any) => String(u._id)));
+    return noWorkout.data.filter(
+      (u: any) => noDietIds.has(String(u._id)) && eligibleIds.has(String(u._id))
+    );
+  }, [noWorkout?.data, noDiet?.data, eligibleIds]);
 
   return (
     <section
       dir="rtl"
-      className="flex h-full max-h-[75vh] flex-col overflow-hidden rounded-2xl border border-amber-200 dark:border-amber-900/60 bg-white dark:bg-slate-900 shadow-sm"
-      style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
+      className="flex h-full max-h-[75vh] flex-col overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
     >
-      {/* Header */}
-      <header className="flex items-center justify-between gap-3 border-b border-amber-100 dark:border-amber-900/40 px-5 py-4">
+      {/* Header — neutral, brand-aligned */}
+      <header className="flex items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 px-5 py-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-300 ring-1 ring-amber-200/60 dark:ring-amber-900/40">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-300 ring-1 ring-blue-200/60">
             <FaUserPlus size={16} />
           </div>
           <div>
@@ -73,7 +109,7 @@ const NewClientsCard: React.FC = () => {
           </div>
         </div>
         {!isLoading && newClients.length > 0 && (
-          <span className="inline-flex h-7 min-w-[2rem] items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/40 px-2.5 text-xs font-bold text-amber-700 dark:text-amber-300">
+          <span className="inline-flex h-7 min-w-[2rem] items-center justify-center rounded-full bg-blue-50 dark:bg-blue-950/40 px-2.5 text-xs font-bold text-blue-700 dark:text-blue-300">
             {newClients.length}
           </span>
         )}
@@ -104,9 +140,9 @@ const NewClientsCard: React.FC = () => {
             <li
               key={user._id}
               onClick={() => navigate(`/users/${user._id}`)}
-              className="group flex cursor-pointer items-center gap-3 rounded-xl border border-amber-100 dark:border-amber-900/40 bg-amber-50/30 dark:bg-amber-950/20 px-3 py-3 transition-all hover:border-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:shadow-sm"
+              className="group flex cursor-pointer items-center gap-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-800/30 px-3 py-3 transition-all hover:border-blue-300 hover:bg-blue-50/40 dark:hover:border-blue-700 dark:hover:bg-blue-950/20 hover:shadow-sm"
             >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-xs font-bold text-white shadow-sm">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full brand-gradient text-xs font-bold text-white shadow-sm ring-2 ring-white dark:ring-slate-900">
                 {getInitials(user.firstName, user.lastName)}
               </div>
               <div className="flex-1 min-w-0">
@@ -114,20 +150,16 @@ const NewClientsCard: React.FC = () => {
                   {userFullName(user)}
                 </p>
                 <div className="mt-1 flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1 rounded-full border border-purple-200 dark:border-purple-900/60 bg-purple-50 dark:bg-purple-950/40 px-2 py-0.5 text-[10px] font-bold text-purple-700 dark:text-purple-300">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:text-slate-300">
                     <FaDumbbell size={8} />
                     ללא אימון
                   </span>
-                  <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-300">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:text-slate-300">
                     <FaAppleWhole size={8} />
                     ללא תזונה
                   </span>
                 </div>
               </div>
-              <FaArrowLeft
-                size={10}
-                className="shrink-0 text-slate-300 dark:text-slate-600 transition-all group-hover:-translate-x-0.5 group-hover:text-amber-600"
-              />
             </li>
           ))}
         </ul>
