@@ -35,13 +35,11 @@ interface SimplePresetGridProps {
 const VARIANT_META = {
   method: {
     icon: <FaSliders size={13} />,
-    iconBg:
-      "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-300 ring-blue-200/60",
+    iconBg: "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-300 ring-blue-200/60",
   },
   cardio: {
     icon: <FaPersonRunning size={13} />,
-    iconBg:
-      "bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-300 ring-rose-200/60",
+    iconBg: "bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-300 ring-rose-200/60",
   },
 };
 

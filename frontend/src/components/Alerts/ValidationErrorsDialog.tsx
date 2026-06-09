@@ -40,13 +40,9 @@ const ValidationErrorsDialog: React.FC<ValidationErrorsDialogProps> = ({
           </div>
           <div className="flex-1 min-w-0">
             <h2 className="text-right text-lg font-bold text-slate-900 dark:text-slate-100">
-              {errors.length === 1
-                ? "נמצאה שגיאה אחת"
-                : `נמצאו ${errors.length} שגיאות`}
+              {errors.length === 1 ? "נמצאה שגיאה אחת" : `נמצאו ${errors.length} שגיאות`}
             </h2>
-            <p className="mt-0.5 text-right text-xs text-slate-500 dark:text-slate-400">
-              {intro}
-            </p>
+            <p className="mt-0.5 text-right text-xs text-slate-500 dark:text-slate-400">{intro}</p>
           </div>
         </header>
 

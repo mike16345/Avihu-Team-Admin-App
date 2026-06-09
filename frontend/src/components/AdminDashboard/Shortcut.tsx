@@ -25,10 +25,7 @@ interface ShortcutProps {
   tone?: "blue" | "emerald" | "purple" | "amber" | "rose";
 }
 
-const TONES: Record<
-  NonNullable<ShortcutProps["tone"]>,
-  { avatar: string; glow: string }
-> = {
+const TONES: Record<NonNullable<ShortcutProps["tone"]>, { avatar: string; glow: string }> = {
   blue: {
     avatar: "bg-blue-600 text-white", // brand primary
     glow: "group-hover:shadow-blue-200/70 dark:group-hover:shadow-blue-900/30",

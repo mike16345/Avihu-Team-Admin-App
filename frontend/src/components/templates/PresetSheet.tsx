@@ -72,7 +72,7 @@ const PresetSheet: React.FC<PresetSheetProps> = ({ form, id, isOpen, onCloseShee
   const isFoodGroup =
     form === "fats" || form === "vegetables" || form === "carbs" || form === "protein";
 
-  const metaKey = isFoodGroup ? "foodGroup" : form ?? "";
+  const metaKey = isFoodGroup ? "foodGroup" : (form ?? "");
   const meta = FORM_META[metaKey];
   const isEdit = !!id;
 
@@ -94,9 +94,7 @@ const PresetSheet: React.FC<PresetSheetProps> = ({ form, id, isOpen, onCloseShee
                 {meta ? meta.title(isEdit) : isEdit ? "עריכת פריט" : "הוסף פריט"}
               </h2>
               <p className="mt-0.5 text-right text-xs text-slate-500 dark:text-slate-400">
-                {meta
-                  ? meta.description
-                  : "כאן ניתן להוסיף פריטים לרשימה הקיימת במערכת"}
+                {meta ? meta.description : "כאן ניתן להוסיף פריטים לרשימה הקיימת במערכת"}
               </p>
             </div>
           </div>
@@ -105,18 +103,14 @@ const PresetSheet: React.FC<PresetSheetProps> = ({ form, id, isOpen, onCloseShee
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-6 py-5">
           {form === "Exercise" && <ExerciseForm objectId={id} closeSheet={onCloseSheet} />}
-          {form === "muscleGroup" && (
-            <MuscleGroupForm objectId={id} closeSheet={onCloseSheet} />
-          )}
+          {form === "muscleGroup" && <MuscleGroupForm objectId={id} closeSheet={onCloseSheet} />}
           {form === "cardioWorkouts" && (
             <CardioWorkoutForm objectId={id} closeSheet={onCloseSheet} />
           )}
           {form === "exercisesMethods" && (
             <ExerciseMethodsForm objectId={id} closeSheet={onCloseSheet} />
           )}
-          {isFoodGroup && (
-            <MenuItemForm objectId={id} closeSheet={onCloseSheet} foodGroup={form} />
-          )}
+          {isFoodGroup && <MenuItemForm objectId={id} closeSheet={onCloseSheet} foodGroup={form} />}
           {form === "lessonGroups" && <LessonGroupForm objectId={id} closeSheet={onCloseSheet} />}
         </div>
       </DialogContent>

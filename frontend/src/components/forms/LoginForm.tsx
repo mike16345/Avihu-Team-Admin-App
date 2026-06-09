@@ -93,7 +93,10 @@ export default function LoginForm() {
       <form onSubmit={handleSubmit} method="POST" action="#" className="flex flex-col gap-4 p-8">
         {/* Email */}
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="email" className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          <label
+            htmlFor="email"
+            className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
+          >
             כתובת מייל
           </label>
           <div className="relative">

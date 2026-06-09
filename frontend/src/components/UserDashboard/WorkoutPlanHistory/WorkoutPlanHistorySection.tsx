@@ -19,7 +19,13 @@
  * button up in the workout-plan editor — see SwapTemporaryPlanModal.
  */
 import { FC, useMemo, useState } from "react";
-import { FaClockRotateLeft, FaTriangleExclamation, FaArrowsRotate, FaCalendarDays, FaUser } from "react-icons/fa6";
+import {
+  FaClockRotateLeft,
+  FaTriangleExclamation,
+  FaArrowsRotate,
+  FaCalendarDays,
+  FaUser,
+} from "react-icons/fa6";
 import useWorkoutPlanHistoryQuery from "@/hooks/queries/workoutPlans/useWorkoutPlanHistoryQuery";
 import useRestoreWorkoutPlan from "@/hooks/mutations/workouts/useRestoreWorkoutPlan";
 import { ICompleteWorkoutPlan } from "@/interfaces/IWorkoutPlan";
@@ -83,8 +89,7 @@ const WorkoutPlanHistorySection: FC<Props> = ({ userId, activePlan, hideWhenEmpt
   // future-or-recent temporaryUntil. We keep showing it for 14 days
   // past expiry — that's the "you forgot to restore" nudge window.
   const tempDays = daysUntil(activePlan?.temporaryUntil);
-  const showTempBanner =
-    !!activePlan?.temporaryUntil && tempDays !== null && tempDays > -14;
+  const showTempBanner = !!activePlan?.temporaryUntil && tempDays !== null && tempDays > -14;
   const tempIsPast = tempDays !== null && tempDays < 0;
 
   const handleRestore = (archivedPlanId?: string) => {
@@ -184,9 +189,7 @@ const WorkoutPlanHistorySection: FC<Props> = ({ userId, activePlan, hideWhenEmpt
                     new Date(activePlan.temporaryUntil),
                     "DD/MM/YYYY"
                   )}`}
-                {tempDays !== null &&
-                  tempDays >= 0 &&
-                  ` · נשארו ${tempDays} ימים`}
+                {tempDays !== null && tempDays >= 0 && ` · נשארו ${tempDays} ימים`}
               </p>
             </div>
           </div>

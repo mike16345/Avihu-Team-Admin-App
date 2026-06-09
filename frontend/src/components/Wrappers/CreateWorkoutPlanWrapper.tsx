@@ -137,10 +137,7 @@ const CreateWorkoutPlanWrapper = ({
   const updateWorkoutPlan = useUpdateWorkoutPlan({ onError, onSuccess });
   const addWorkoutPlanPreset = useAddWorkoutPreset({ onError, onSuccess: presetSuccess });
 
-  const presetList = useMemo(
-    () => workoutPlanPresets.data?.data || [],
-    [workoutPlanPresets.data]
-  );
+  const presetList = useMemo(() => workoutPlanPresets.data?.data || [], [workoutPlanPresets.data]);
 
   /**
    * Shared handler used by both the embedded and standalone layouts
@@ -148,7 +145,7 @@ const CreateWorkoutPlanWrapper = ({
    * Forwards every meta field so the new plan inherits the trainer's
    * tagging (level, goal, duration, notes, limitations).
    */
-  const applyPreset = (preset: typeof presetList[number]) => {
+  const applyPreset = (preset: (typeof presetList)[number]) => {
     reset({
       ...preset,
       cardio: preset.cardio || { type: "simple", plan: defaultSimpleCardioOption },

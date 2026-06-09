@@ -42,8 +42,7 @@ const WorkoutPresetCard: React.FC<WorkoutPresetCardProps> = ({ preset, onOpen, o
   // Only show the trainer-tagged value — no fallback to the implicit
   // count of workoutPlans. If the trainer didn't tag the frequency,
   // the badge is omitted entirely (filters treat it as un-tagged too).
-  const workoutsPerWeek =
-    typeof preset.workoutsPerWeek === "number" ? preset.workoutsPerWeek : 0;
+  const workoutsPerWeek = typeof preset.workoutsPerWeek === "number" ? preset.workoutsPerWeek : 0;
   const duration = preset.durationMinutes;
   const lvlTone = levelTone(preset.level);
   const lvlLabel = levelLabel(preset.level);

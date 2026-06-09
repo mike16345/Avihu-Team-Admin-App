@@ -28,26 +28,27 @@ interface FormPresetGridProps {
   actionButton?: ReactNode;
 }
 
-const TYPE_TONE: Record<FormTypes, { icon: ReactNode; bg: string; text: string; border: string }> = {
-  onboarding: {
-    icon: <FaPlay size={9} />,
-    bg: "bg-blue-50 dark:bg-blue-950/40",
-    text: "text-blue-700 dark:text-blue-300",
-    border: "border-blue-200 dark:border-blue-900/60",
-  },
-  monthly: {
-    icon: <FaRepeat size={9} />,
-    bg: "bg-violet-50 dark:bg-violet-950/40",
-    text: "text-violet-700 dark:text-violet-300",
-    border: "border-violet-200 dark:border-violet-900/60",
-  },
-  general: {
-    icon: <FaCalendarCheck size={9} />,
-    bg: "bg-amber-50 dark:bg-amber-950/40",
-    text: "text-amber-700 dark:text-amber-300",
-    border: "border-amber-200 dark:border-amber-900/60",
-  },
-};
+const TYPE_TONE: Record<FormTypes, { icon: ReactNode; bg: string; text: string; border: string }> =
+  {
+    onboarding: {
+      icon: <FaPlay size={9} />,
+      bg: "bg-blue-50 dark:bg-blue-950/40",
+      text: "text-blue-700 dark:text-blue-300",
+      border: "border-blue-200 dark:border-blue-900/60",
+    },
+    monthly: {
+      icon: <FaRepeat size={9} />,
+      bg: "bg-violet-50 dark:bg-violet-950/40",
+      text: "text-violet-700 dark:text-violet-300",
+      border: "border-violet-200 dark:border-violet-900/60",
+    },
+    general: {
+      icon: <FaCalendarCheck size={9} />,
+      bg: "bg-amber-50 dark:bg-amber-950/40",
+      text: "text-amber-700 dark:text-amber-300",
+      border: "border-amber-200 dark:border-amber-900/60",
+    },
+  };
 
 const TYPE_FILTERS: { value: FormTypes | "all"; label: string }[] = [
   { value: "all", label: "הכל" },
@@ -63,13 +64,22 @@ const formatDate = (d?: Date) => {
   if (!d) return null;
   try {
     const date = new Date(d);
-    return new Intl.DateTimeFormat("he-IL", { day: "2-digit", month: "2-digit", year: "numeric" }).format(date);
+    return new Intl.DateTimeFormat("he-IL", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }).format(date);
   } catch {
     return null;
   }
 };
 
-const FormPresetGrid: React.FC<FormPresetGridProps> = ({ data, onView, onDelete, actionButton }) => {
+const FormPresetGrid: React.FC<FormPresetGridProps> = ({
+  data,
+  onView,
+  onDelete,
+  actionButton,
+}) => {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<FormTypes | "all">("all");
 

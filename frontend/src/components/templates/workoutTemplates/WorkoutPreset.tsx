@@ -86,10 +86,7 @@ export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ childr
   const [openPresetPicker, setOpenPresetPicker] = useState(false);
   const [validationErrors, setValidationErrors] = useState<ValidationErrorEntry[]>([]);
 
-  const presetList = useMemo(
-    () => workoutPlanPresets?.data || [],
-    [workoutPlanPresets?.data]
-  );
+  const presetList = useMemo(() => workoutPlanPresets?.data || [], [workoutPlanPresets?.data]);
 
   const handleSelectPreset = (preset: IWorkoutPlanPreset) => {
     reset({
@@ -169,9 +166,7 @@ export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ childr
               <FaDumbbell size={18} />
             </div>
             <div className="flex-1 min-w-0">
-              <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-                תבנית אימון
-              </h1>
+              <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">תבנית אימון</h1>
               <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
                 בנה תבנית חוזרת לשימוש למתאמנים שלך — שם, מאפיינים, אימונים ואירובי
               </p>

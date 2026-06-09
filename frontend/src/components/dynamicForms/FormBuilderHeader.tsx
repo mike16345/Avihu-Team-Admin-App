@@ -23,26 +23,27 @@ interface FormBuilderHeaderProps {
   disableOnboarding?: boolean;
 }
 
-const TYPE_INFO: Record<string, { icon: React.ReactNode; bg: string; text: string; copy: string }> = {
-  onboarding: {
-    icon: <FaPlay size={11} />,
-    bg: "bg-blue-50 dark:bg-blue-950/40",
-    text: "text-blue-700 dark:text-blue-300",
-    copy: "השאלון יוצג רק בכניסה הראשונה של המתאמן למערכת.",
-  },
-  monthly: {
-    icon: <FaRepeat size={11} />,
-    bg: "bg-violet-50 dark:bg-violet-950/40",
-    text: "text-violet-700 dark:text-violet-300",
-    copy: "השאלון יוצג אוטומטית בכל ה-1 בחודש.",
-  },
-  general: {
-    icon: <FaCalendarCheck size={11} />,
-    bg: "bg-amber-50 dark:bg-amber-950/40",
-    text: "text-amber-700 dark:text-amber-300",
-    copy: "השאלון יוצג למתאמנים בתאריך שתבחר.",
-  },
-};
+const TYPE_INFO: Record<string, { icon: React.ReactNode; bg: string; text: string; copy: string }> =
+  {
+    onboarding: {
+      icon: <FaPlay size={11} />,
+      bg: "bg-blue-50 dark:bg-blue-950/40",
+      text: "text-blue-700 dark:text-blue-300",
+      copy: "השאלון יוצג רק בכניסה הראשונה של המתאמן למערכת.",
+    },
+    monthly: {
+      icon: <FaRepeat size={11} />,
+      bg: "bg-violet-50 dark:bg-violet-950/40",
+      text: "text-violet-700 dark:text-violet-300",
+      copy: "השאלון יוצג אוטומטית בכל ה-1 בחודש.",
+    },
+    general: {
+      icon: <FaCalendarCheck size={11} />,
+      bg: "bg-amber-50 dark:bg-amber-950/40",
+      text: "text-amber-700 dark:text-amber-300",
+      copy: "השאלון יוצג למתאמנים בתאריך שתבחר.",
+    },
+  };
 
 const FormBuilderHeader = ({
   formTypeOptions = FormTypeOptions,
@@ -78,7 +79,9 @@ const FormBuilderHeader = ({
     <div
       dir="rtl"
       className={`relative overflow-hidden rounded-2xl border bg-white dark:bg-slate-900 shadow-sm transition-colors ${
-        headerError ? "border-rose-300 dark:border-rose-700" : "border-slate-200 dark:border-slate-800"
+        headerError
+          ? "border-rose-300 dark:border-rose-700"
+          : "border-slate-200 dark:border-slate-800"
       }`}
       style={{ fontFamily: "Rubik, Heebo, system-ui, sans-serif" }}
     >
@@ -165,7 +168,9 @@ const FormBuilderHeader = ({
         <div
           className={`flex items-start gap-2.5 rounded-xl border border-slate-100 dark:border-slate-800 p-3 ${info.bg}`}
         >
-          <div className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${info.text}`}>
+          <div
+            className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${info.text}`}
+          >
             <FaCircleInfo size={12} />
           </div>
           <div className="flex-1">

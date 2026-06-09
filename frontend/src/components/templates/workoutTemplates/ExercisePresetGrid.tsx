@@ -119,9 +119,7 @@ const ExercisePresetGrid: React.FC<ExercisePresetGridProps> = ({
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white dark:bg-slate-800 text-slate-400 shadow-sm">
             <FaDumbbell size={20} />
           </div>
-          <p className="text-base font-bold text-slate-700 dark:text-slate-200">
-            לא נמצאו תרגילים
-          </p>
+          <p className="text-base font-bold text-slate-700 dark:text-slate-200">לא נמצאו תרגילים</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

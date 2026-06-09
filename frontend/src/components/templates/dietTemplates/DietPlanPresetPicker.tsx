@@ -131,7 +131,19 @@ const DietPlanPresetPicker: React.FC<DietPlanPresetPickerProps> = ({
       }
       return true;
     });
-  }, [presets, search, goals, buckets, proteinB, carbB, fatB, freeCalB, restrictions, builders, mealCounts]);
+  }, [
+    presets,
+    search,
+    goals,
+    buckets,
+    proteinB,
+    carbB,
+    fatB,
+    freeCalB,
+    restrictions,
+    builders,
+    mealCounts,
+  ]);
 
   const activeCount =
     goals.length +

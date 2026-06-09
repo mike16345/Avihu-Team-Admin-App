@@ -10,13 +10,7 @@
  * Hooks, mutations and schema are untouched — pure styling update.
  */
 import React, { useEffect, useState } from "react";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -238,12 +232,7 @@ const ExerciseForm: React.FC<IPresetFormProps> = ({ objectId, closeSheet }) => {
                 בחר תמונה
               </span>
               <span className="text-[11px] text-slate-400">PNG, JPG, או GIF</span>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="hidden"
-              />
+              <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
             </label>
           ) : (
             <div className="relative overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800">

@@ -69,10 +69,7 @@ const InputModal: React.FC<InputModalProps> = ({ onClose, open, onSubmit, title,
         </DialogHeader>
 
         <Form {...form}>
-          <form
-            className="flex flex-col gap-4 px-6 pb-6"
-            onSubmit={form.handleSubmit(handleSave)}
-          >
+          <form className="flex flex-col gap-4 px-6 pb-6" onSubmit={form.handleSubmit(handleSave)}>
             <FormField
               name="name"
               render={({ field }) => (

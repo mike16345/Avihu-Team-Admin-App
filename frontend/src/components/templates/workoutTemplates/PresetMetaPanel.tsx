@@ -146,9 +146,7 @@ const PresetMetaPanel: React.FC = () => {
       const el = fieldRefs.current[id];
       if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "center" });
-        const focusable = el.querySelector<HTMLElement>(
-          "input, textarea, button"
-        );
+        const focusable = el.querySelector<HTMLElement>("input, textarea, button");
         focusable?.focus({ preventScroll: true });
       }
     });
@@ -177,13 +175,9 @@ const PresetMetaPanel: React.FC = () => {
           <FaBullseye size={13} />
         </div>
         <div className="min-w-0">
-          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-            מאפייני התוכנית
-          </h3>
+          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">מאפייני התוכנית</h3>
           <p className="text-[10px] text-slate-500 dark:text-slate-400">
-            {filledCount > 0
-              ? `${filledCount} מאפיינים תויגו`
-              : "כל המאפיינים אופציונליים"}
+            {filledCount > 0 ? `${filledCount} מאפיינים תויגו` : "כל המאפיינים אופציונליים"}
           </p>
         </div>
 
@@ -289,181 +283,33 @@ const PresetMetaPanel: React.FC = () => {
 
       {/* 2-column body — collapsed when only the chip summary is needed */}
       {expanded && (
-      <div className="grid grid-cols-1 lg:grid-cols-2 bg-gradient-to-b from-white via-blue-50/10 to-white dark:from-slate-900 dark:via-blue-950/10 dark:to-slate-900">
-        {/* RIGHT column */}
-        <div className="px-5 lg:border-l lg:border-blue-100/40 lg:dark:border-blue-900/30">
-          <Field
-            ref={(el) => (fieldRefs.current["workoutsPerWeek"] = el)}
-            icon={<FaCalendarWeek size={11} />}
-            label="תדירות בשבוע"
-          >
-            <Controller
-              control={control}
-              name="workoutsPerWeek"
-              render={({ field }) => (
-                <div className="flex flex-wrap gap-1.5">
-                  {[1, 2, 3, 4, 5, 6, 7].map((n) => {
-                    const active = Number(field.value) === n;
-                    return (
-                      <button
-                        key={n}
-                        type="button"
-                        onClick={() => field.onChange(active ? undefined : n)}
-                        className={`h-9 w-9 rounded-xl border text-xs font-bold transition-all duration-150 ${
-                          active
-                            ? "brand-gradient brand-gradient-hover border-transparent text-white shadow-md shadow-blue-500/30 -translate-y-px"
-                            : "border-blue-100/60 bg-blue-50/40 text-slate-600 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 hover:-translate-y-px dark:border-blue-900/40 dark:bg-blue-950/20 dark:text-slate-300 dark:hover:border-blue-700 dark:hover:bg-blue-950/40 dark:hover:text-blue-300"
-                        }`}
-                      >
-                        {n}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            />
-          </Field>
-
-          <Field
-            ref={(el) => (fieldRefs.current["level"] = el)}
-            icon={<FaSignal size={11} />}
-            label="רמת קושי"
-          >
-            <Controller
-              control={control}
-              name="level"
-              render={({ field }) => (
-                <div className="flex flex-wrap gap-1">
-                  {LEVEL_OPTIONS.map((opt) => {
-                    const active = field.value === opt.value;
-                    return (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        onClick={() => field.onChange(active ? undefined : opt.value)}
-                        className={pillClass(
-                          active,
-                          `border ${opt.tone.border} ${opt.tone.bg} ${opt.tone.text}`
-                        )}
-                      >
-                        {opt.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            />
-          </Field>
-
-          <Field
-            ref={(el) => (fieldRefs.current["equipment"] = el)}
-            icon={<FaDumbbell size={11} />}
-            label="ציוד נדרש"
-          >
-            <Controller
-              control={control}
-              name="equipment"
-              render={({ field }) => (
-                <div className="flex flex-wrap gap-1">
-                  {EQUIPMENT_OPTIONS.map((opt) => {
-                    const active = field.value === opt.value;
-                    return (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        onClick={() => field.onChange(active ? undefined : opt.value)}
-                        className={pillClass(
-                          active,
-                          `border ${opt.tone.border} ${opt.tone.bg} ${opt.tone.text}`
-                        )}
-                      >
-                        {opt.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            />
-          </Field>
-
-          <Field
-            ref={(el) => (fieldRefs.current["muscleFocus"] = el)}
-            icon={<FaPersonRays size={11} />}
-            label='פוקוס שרירים (עד 3, או "כללי")'
-          >
-            <Controller
-              control={control}
-              name="muscleFocus"
-              render={({ field }) => {
-                const value: string[] = field.value ?? [];
-                const toggle = (v: string, isFullBody?: boolean) => {
-                  if (isFullBody) {
-                    field.onChange(value.includes(v) ? [] : [v]);
-                    return;
-                  }
-                  const withoutFB = value.filter((x) => x !== "full-body");
-                  if (withoutFB.includes(v)) {
-                    field.onChange(withoutFB.filter((x) => x !== v));
-                  } else if (withoutFB.length >= 3) {
-                    return;
-                  } else {
-                    field.onChange([...withoutFB, v]);
-                  }
-                };
-                const specificCount = value.filter((x) => x !== "full-body").length;
-                return (
-                  <div className="flex flex-wrap gap-1.5">
-                    {MUSCLE_FOCUS_OPTIONS.map((opt) => {
-                      const active = value.includes(opt.value);
-                      const disabled = !active && !opt.isFullBody && specificCount >= 3;
-                      return (
-                        <button
-                          key={opt.value}
-                          type="button"
-                          onClick={() => toggle(opt.value, opt.isFullBody)}
-                          disabled={disabled}
-                          className={`inline-flex h-9 items-center gap-1 rounded-xl border px-3 text-xs font-bold transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-40 ${
-                            active
-                              ? "brand-gradient brand-gradient-hover border-transparent text-white shadow-md shadow-blue-500/25 -translate-y-px"
-                              : "border-blue-100/60 bg-blue-50/40 text-slate-600 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 hover:-translate-y-px dark:border-blue-900/40 dark:bg-blue-950/20 dark:text-slate-300 dark:hover:border-blue-700 dark:hover:bg-blue-950/40 dark:hover:text-blue-300"
-                          }`}
-                        >
-                          {opt.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                );
-              }}
-            />
-          </Field>
-
-          {builderOptions.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 bg-gradient-to-b from-white via-blue-50/10 to-white dark:from-slate-900 dark:via-blue-950/10 dark:to-slate-900">
+          {/* RIGHT column */}
+          <div className="px-5 lg:border-l lg:border-blue-100/40 lg:dark:border-blue-900/30">
             <Field
-              ref={(el) => (fieldRefs.current["builtByTrainerId"] = el)}
-              icon={<FaUser size={11} />}
-              label="מאמן שבנה"
-              isLast
+              ref={(el) => (fieldRefs.current["workoutsPerWeek"] = el)}
+              icon={<FaCalendarWeek size={11} />}
+              label="תדירות בשבוע"
             >
               <Controller
                 control={control}
-                name="builtByTrainerId"
+                name="workoutsPerWeek"
                 render={({ field }) => (
                   <div className="flex flex-wrap gap-1.5">
-                    {builderOptions.map((b) => {
-                      const active = field.value === b.value;
+                    {[1, 2, 3, 4, 5, 6, 7].map((n) => {
+                      const active = Number(field.value) === n;
                       return (
                         <button
-                          key={b.value}
+                          key={n}
                           type="button"
-                          onClick={() => field.onChange(active ? undefined : b.value)}
-                          className={`inline-flex h-9 items-center rounded-xl border px-3 text-xs font-bold transition-all duration-150 ${
+                          onClick={() => field.onChange(active ? undefined : n)}
+                          className={`h-9 w-9 rounded-xl border text-xs font-bold transition-all duration-150 ${
                             active
-                              ? "brand-gradient brand-gradient-hover border-transparent text-white shadow-md shadow-blue-500/25 -translate-y-px"
-                              : "border-blue-100/60 bg-blue-50/40 text-slate-600 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 hover:-translate-y-px dark:border-blue-900/40 dark:bg-blue-950/20 dark:text-slate-300 dark:hover:border-blue-700"
+                              ? "brand-gradient brand-gradient-hover border-transparent text-white shadow-md shadow-blue-500/30 -translate-y-px"
+                              : "border-blue-100/60 bg-blue-50/40 text-slate-600 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 hover:-translate-y-px dark:border-blue-900/40 dark:bg-blue-950/20 dark:text-slate-300 dark:hover:border-blue-700 dark:hover:bg-blue-950/40 dark:hover:text-blue-300"
                           }`}
                         >
-                          {b.label}
+                          {n}
                         </button>
                       );
                     })}
@@ -471,142 +317,290 @@ const PresetMetaPanel: React.FC = () => {
                 )}
               />
             </Field>
-          )}
-        </div>
 
-        {/* LEFT column */}
-        <div className="px-5">
-          <Field
-            ref={(el) => (fieldRefs.current["durationMinutes"] = el)}
-            icon={<FaClock size={11} />}
-            label="משך אימון (דקות)"
-          >
-            <Controller
-              control={control}
-              name="durationMinutes"
-              render={({ field }) => (
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <input
-                    type="number"
-                    min={10}
-                    max={240}
-                    step={5}
-                    placeholder="60"
-                    value={field.value ?? ""}
-                    onChange={(e) =>
-                      field.onChange(e.target.value === "" ? undefined : Number(e.target.value))
-                    }
-                    className="h-9 w-16 rounded-xl border border-blue-100/60 bg-blue-50/40 px-2 text-center text-sm font-bold text-slate-700 placeholder:text-slate-400 placeholder:font-normal focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200/60 dark:border-blue-900/40 dark:bg-blue-950/20 dark:text-slate-200 dark:focus:bg-slate-900"
-                  />
+            <Field
+              ref={(el) => (fieldRefs.current["level"] = el)}
+              icon={<FaSignal size={11} />}
+              label="רמת קושי"
+            >
+              <Controller
+                control={control}
+                name="level"
+                render={({ field }) => (
                   <div className="flex flex-wrap gap-1">
-                    {[30, 45, 60, 75, 90, 120].map((m) => {
-                      const active = Number(field.value) === m;
+                    {LEVEL_OPTIONS.map((opt) => {
+                      const active = field.value === opt.value;
                       return (
                         <button
-                          key={m}
+                          key={opt.value}
                           type="button"
-                          onClick={() => field.onChange(active ? undefined : m)}
-                          className={`h-9 rounded-xl border px-3 text-xs font-bold transition-all duration-150 ${
-                            active
-                              ? "brand-gradient brand-gradient-hover border-transparent text-white shadow-md shadow-blue-500/30 -translate-y-px"
-                              : "border-blue-100/60 bg-blue-50/40 text-slate-600 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 hover:-translate-y-px dark:border-blue-900/40 dark:bg-blue-950/20 dark:text-slate-300 dark:hover:border-blue-700"
-                          }`}
+                          onClick={() => field.onChange(active ? undefined : opt.value)}
+                          className={pillClass(
+                            active,
+                            `border ${opt.tone.border} ${opt.tone.bg} ${opt.tone.text}`
+                          )}
                         >
-                          {m}
+                          {opt.label}
                         </button>
                       );
                     })}
                   </div>
-                </div>
-              )}
-            />
-          </Field>
+                )}
+              />
+            </Field>
 
-          <Field
-            ref={(el) => (fieldRefs.current["goal"] = el)}
-            icon={<FaBullseye size={11} />}
-            label="דגש"
-          >
-            <Controller
-              control={control}
-              name="goal"
-              render={({ field }) => (
-                <div className="flex flex-wrap gap-1">
-                  {GOAL_OPTIONS.map((opt) => {
-                    const active = field.value === opt.value;
-                    return (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        onClick={() => field.onChange(active ? undefined : opt.value)}
-                        className={pillClass(
-                          active,
-                          `border ${opt.tone.border} ${opt.tone.bg} ${opt.tone.text}`
-                        )}
-                      >
-                        {opt.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            />
-          </Field>
+            <Field
+              ref={(el) => (fieldRefs.current["equipment"] = el)}
+              icon={<FaDumbbell size={11} />}
+              label="ציוד נדרש"
+            >
+              <Controller
+                control={control}
+                name="equipment"
+                render={({ field }) => (
+                  <div className="flex flex-wrap gap-1">
+                    {EQUIPMENT_OPTIONS.map((opt) => {
+                      const active = field.value === opt.value;
+                      return (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => field.onChange(active ? undefined : opt.value)}
+                          className={pillClass(
+                            active,
+                            `border ${opt.tone.border} ${opt.tone.bg} ${opt.tone.text}`
+                          )}
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              />
+            </Field>
 
-          <Field
-            ref={(el) => (fieldRefs.current["note"] = el)}
-            icon={<FaNoteSticky size={11} />}
-            label="הערה / פידבק"
-          >
-            <Controller
-              control={control}
-              name="note"
-              render={({ field }) => (
-                <textarea
-                  {...field}
-                  value={field.value ?? ""}
-                  rows={2}
-                  placeholder="טיפ פנימי על התוכנית…"
-                  maxLength={500}
-                  onInput={(e) => {
-                    const el = e.currentTarget;
-                    el.style.height = "auto";
-                    el.style.height = `${el.scrollHeight}px`;
-                  }}
-                  className="w-full min-h-[64px] rounded-xl border border-blue-100/60 bg-blue-50/30 p-3 text-xs text-slate-700 placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200/60 resize-none overflow-hidden dark:border-blue-900/40 dark:bg-blue-950/15 dark:text-slate-200 dark:focus:bg-slate-900"
+            <Field
+              ref={(el) => (fieldRefs.current["muscleFocus"] = el)}
+              icon={<FaPersonRays size={11} />}
+              label='פוקוס שרירים (עד 3, או "כללי")'
+            >
+              <Controller
+                control={control}
+                name="muscleFocus"
+                render={({ field }) => {
+                  const value: string[] = field.value ?? [];
+                  const toggle = (v: string, isFullBody?: boolean) => {
+                    if (isFullBody) {
+                      field.onChange(value.includes(v) ? [] : [v]);
+                      return;
+                    }
+                    const withoutFB = value.filter((x) => x !== "full-body");
+                    if (withoutFB.includes(v)) {
+                      field.onChange(withoutFB.filter((x) => x !== v));
+                    } else if (withoutFB.length >= 3) {
+                      return;
+                    } else {
+                      field.onChange([...withoutFB, v]);
+                    }
+                  };
+                  const specificCount = value.filter((x) => x !== "full-body").length;
+                  return (
+                    <div className="flex flex-wrap gap-1.5">
+                      {MUSCLE_FOCUS_OPTIONS.map((opt) => {
+                        const active = value.includes(opt.value);
+                        const disabled = !active && !opt.isFullBody && specificCount >= 3;
+                        return (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => toggle(opt.value, opt.isFullBody)}
+                            disabled={disabled}
+                            className={`inline-flex h-9 items-center gap-1 rounded-xl border px-3 text-xs font-bold transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-40 ${
+                              active
+                                ? "brand-gradient brand-gradient-hover border-transparent text-white shadow-md shadow-blue-500/25 -translate-y-px"
+                                : "border-blue-100/60 bg-blue-50/40 text-slate-600 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 hover:-translate-y-px dark:border-blue-900/40 dark:bg-blue-950/20 dark:text-slate-300 dark:hover:border-blue-700 dark:hover:bg-blue-950/40 dark:hover:text-blue-300"
+                            }`}
+                          >
+                            {opt.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  );
+                }}
+              />
+            </Field>
+
+            {builderOptions.length > 0 && (
+              <Field
+                ref={(el) => (fieldRefs.current["builtByTrainerId"] = el)}
+                icon={<FaUser size={11} />}
+                label="מאמן שבנה"
+                isLast
+              >
+                <Controller
+                  control={control}
+                  name="builtByTrainerId"
+                  render={({ field }) => (
+                    <div className="flex flex-wrap gap-1.5">
+                      {builderOptions.map((b) => {
+                        const active = field.value === b.value;
+                        return (
+                          <button
+                            key={b.value}
+                            type="button"
+                            onClick={() => field.onChange(active ? undefined : b.value)}
+                            className={`inline-flex h-9 items-center rounded-xl border px-3 text-xs font-bold transition-all duration-150 ${
+                              active
+                                ? "brand-gradient brand-gradient-hover border-transparent text-white shadow-md shadow-blue-500/25 -translate-y-px"
+                                : "border-blue-100/60 bg-blue-50/40 text-slate-600 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 hover:-translate-y-px dark:border-blue-900/40 dark:bg-blue-950/20 dark:text-slate-300 dark:hover:border-blue-700"
+                            }`}
+                          >
+                            {b.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 />
-              )}
-            />
-          </Field>
+              </Field>
+            )}
+          </div>
 
-          <Field
-            ref={(el) => (fieldRefs.current["limitations"] = el)}
-            icon={<FaCircleExclamation size={11} />}
-            label="מגבלות"
-            isLast
-          >
-            <Controller
-              control={control}
-              name="limitations"
-              render={({ field }) => (
-                <textarea
-                  {...field}
-                  value={field.value ?? ""}
-                  rows={2}
-                  placeholder="פציעות / דברים להימנע…"
-                  maxLength={500}
-                  onInput={(e) => {
-                    const el = e.currentTarget;
-                    el.style.height = "auto";
-                    el.style.height = `${el.scrollHeight}px`;
-                  }}
-                  className="w-full min-h-[64px] rounded-xl border border-blue-100/60 bg-blue-50/30 p-3 text-xs text-slate-700 placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200/60 resize-none overflow-hidden dark:border-blue-900/40 dark:bg-blue-950/15 dark:text-slate-200 dark:focus:bg-slate-900"
-                />
-              )}
-            />
-          </Field>
+          {/* LEFT column */}
+          <div className="px-5">
+            <Field
+              ref={(el) => (fieldRefs.current["durationMinutes"] = el)}
+              icon={<FaClock size={11} />}
+              label="משך אימון (דקות)"
+            >
+              <Controller
+                control={control}
+                name="durationMinutes"
+                render={({ field }) => (
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <input
+                      type="number"
+                      min={10}
+                      max={240}
+                      step={5}
+                      placeholder="60"
+                      value={field.value ?? ""}
+                      onChange={(e) =>
+                        field.onChange(e.target.value === "" ? undefined : Number(e.target.value))
+                      }
+                      className="h-9 w-16 rounded-xl border border-blue-100/60 bg-blue-50/40 px-2 text-center text-sm font-bold text-slate-700 placeholder:text-slate-400 placeholder:font-normal focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200/60 dark:border-blue-900/40 dark:bg-blue-950/20 dark:text-slate-200 dark:focus:bg-slate-900"
+                    />
+                    <div className="flex flex-wrap gap-1">
+                      {[30, 45, 60, 75, 90, 120].map((m) => {
+                        const active = Number(field.value) === m;
+                        return (
+                          <button
+                            key={m}
+                            type="button"
+                            onClick={() => field.onChange(active ? undefined : m)}
+                            className={`h-9 rounded-xl border px-3 text-xs font-bold transition-all duration-150 ${
+                              active
+                                ? "brand-gradient brand-gradient-hover border-transparent text-white shadow-md shadow-blue-500/30 -translate-y-px"
+                                : "border-blue-100/60 bg-blue-50/40 text-slate-600 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 hover:-translate-y-px dark:border-blue-900/40 dark:bg-blue-950/20 dark:text-slate-300 dark:hover:border-blue-700"
+                            }`}
+                          >
+                            {m}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              />
+            </Field>
+
+            <Field
+              ref={(el) => (fieldRefs.current["goal"] = el)}
+              icon={<FaBullseye size={11} />}
+              label="דגש"
+            >
+              <Controller
+                control={control}
+                name="goal"
+                render={({ field }) => (
+                  <div className="flex flex-wrap gap-1">
+                    {GOAL_OPTIONS.map((opt) => {
+                      const active = field.value === opt.value;
+                      return (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => field.onChange(active ? undefined : opt.value)}
+                          className={pillClass(
+                            active,
+                            `border ${opt.tone.border} ${opt.tone.bg} ${opt.tone.text}`
+                          )}
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              />
+            </Field>
+
+            <Field
+              ref={(el) => (fieldRefs.current["note"] = el)}
+              icon={<FaNoteSticky size={11} />}
+              label="הערה / פידבק"
+            >
+              <Controller
+                control={control}
+                name="note"
+                render={({ field }) => (
+                  <textarea
+                    {...field}
+                    value={field.value ?? ""}
+                    rows={2}
+                    placeholder="טיפ פנימי על התוכנית…"
+                    maxLength={500}
+                    onInput={(e) => {
+                      const el = e.currentTarget;
+                      el.style.height = "auto";
+                      el.style.height = `${el.scrollHeight}px`;
+                    }}
+                    className="w-full min-h-[64px] rounded-xl border border-blue-100/60 bg-blue-50/30 p-3 text-xs text-slate-700 placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200/60 resize-none overflow-hidden dark:border-blue-900/40 dark:bg-blue-950/15 dark:text-slate-200 dark:focus:bg-slate-900"
+                  />
+                )}
+              />
+            </Field>
+
+            <Field
+              ref={(el) => (fieldRefs.current["limitations"] = el)}
+              icon={<FaCircleExclamation size={11} />}
+              label="מגבלות"
+              isLast
+            >
+              <Controller
+                control={control}
+                name="limitations"
+                render={({ field }) => (
+                  <textarea
+                    {...field}
+                    value={field.value ?? ""}
+                    rows={2}
+                    placeholder="פציעות / דברים להימנע…"
+                    maxLength={500}
+                    onInput={(e) => {
+                      const el = e.currentTarget;
+                      el.style.height = "auto";
+                      el.style.height = `${el.scrollHeight}px`;
+                    }}
+                    className="w-full min-h-[64px] rounded-xl border border-blue-100/60 bg-blue-50/30 p-3 text-xs text-slate-700 placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200/60 resize-none overflow-hidden dark:border-blue-900/40 dark:bg-blue-950/15 dark:text-slate-200 dark:focus:bg-slate-900"
+                  />
+                )}
+              />
+            </Field>
+          </div>
         </div>
-      </div>
       )}
     </section>
   );

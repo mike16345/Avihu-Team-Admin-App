@@ -139,9 +139,7 @@ const SwapTemporaryPlanModal: FC<Props> = ({ open, onClose, userId, currentPlanI
                 onClick={() => setShowPicker(true)}
                 className="flex items-center justify-between gap-2 rounded-xl border border-blue-100/60 dark:border-blue-900/40 bg-blue-50/30 dark:bg-blue-950/20 px-4 py-3 text-sm text-blue-900 dark:text-blue-200 transition-all hover:border-blue-300 dark:hover:border-blue-800"
               >
-                <span className="font-bold">
-                  {selectedPreset?.name || "לחץ כדי לבחור תבנית…"}
-                </span>
+                <span className="font-bold">{selectedPreset?.name || "לחץ כדי לבחור תבנית…"}</span>
                 <FaArrowsRotate size={11} className="text-blue-500" />
               </button>
             </div>
@@ -194,7 +192,10 @@ const SwapTemporaryPlanModal: FC<Props> = ({ open, onClose, userId, currentPlanI
                 disabled={!selectedPreset || swapMutation.isPending}
                 className="inline-flex items-center gap-1.5 rounded-xl brand-gradient brand-gradient-hover px-4 py-2 text-xs font-bold text-white shadow-md shadow-blue-500/25 transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
               >
-                <FaArrowsRotate size={11} className={swapMutation.isPending ? "animate-spin" : ""} />
+                <FaArrowsRotate
+                  size={11}
+                  className={swapMutation.isPending ? "animate-spin" : ""}
+                />
                 <span>{swapMutation.isPending ? "מחליף…" : "אשר והחלף"}</span>
               </button>
             </div>

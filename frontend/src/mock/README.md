@@ -22,24 +22,25 @@ src/mock/
 
 ## איך להחליף ל-API אמיתי
 
-| Mock Hook | API Hook אמיתי | קובץ |
-|---|---|---|
-| `useMockUserQuery` | `useUserQuery` | `hooks/queries/user/useUserQuery.tsx` |
-| `useMockUsersQuery` | `useUsersQuery` | `hooks/queries/user/useUsersQuery.tsx` |
-| `useMockWeighInsQuery` | `useUserWeighInsQuery` | `hooks/queries/weighIn/...` |
-| `useMockMeasurementsQuery` | `useMeasurementQuery` | `hooks/queries/measurement/...` |
-| `useMockDietPlanQuery` | `useUserDietPlanQuery` | `hooks/queries/dietPlan/...` |
+| Mock Hook                  | API Hook אמיתי         | קובץ                                   |
+| -------------------------- | ---------------------- | -------------------------------------- |
+| `useMockUserQuery`         | `useUserQuery`         | `hooks/queries/user/useUserQuery.tsx`  |
+| `useMockUsersQuery`        | `useUsersQuery`        | `hooks/queries/user/useUsersQuery.tsx` |
+| `useMockWeighInsQuery`     | `useUserWeighInsQuery` | `hooks/queries/weighIn/...`            |
+| `useMockMeasurementsQuery` | `useMeasurementQuery`  | `hooks/queries/measurement/...`        |
+| `useMockDietPlanQuery`     | `useUserDietPlanQuery` | `hooks/queries/dietPlan/...`           |
 
 החתימה זהה: `(userId?: string) => { data, isLoading, isError, error }`.
 
 **דוגמת החלפה:**
+
 ```ts
 // היום (Mock):
-import { useMockUserQuery } from '@/mock/hooks/useMockData';
+import { useMockUserQuery } from "@/mock/hooks/useMockData";
 const { data: user } = useMockUserQuery(id);
 
 // אחר כך (API אמיתי):
-import useUserQuery from '@/hooks/queries/user/useUserQuery';
+import useUserQuery from "@/hooks/queries/user/useUserQuery";
 const { data: user } = useUserQuery(id);
 ```
 

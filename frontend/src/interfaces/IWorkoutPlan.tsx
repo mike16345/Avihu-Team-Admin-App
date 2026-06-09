@@ -24,12 +24,7 @@ export type WorkoutGoal =
   | "toning"
   | "rehab";
 
-export type WorkoutEquipment =
-  | "gym"
-  | "studio"
-  | "weights"
-  | "bodyweight"
-  | "weights-bodyweight";
+export type WorkoutEquipment = "gym" | "studio" | "weights" | "bodyweight" | "weights-bodyweight";
 
 export interface IWorkoutPlanMeta {
   workoutsPerWeek?: number;

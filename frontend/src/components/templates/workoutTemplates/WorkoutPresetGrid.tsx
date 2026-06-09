@@ -149,7 +149,10 @@ const WorkoutPresetGrid: React.FC<WorkoutPresetGridProps> = ({
         const tags = p.muscleFocus ?? [];
         if (!tags.some((t) => muscleFilter.includes(t))) return false;
       }
-      if (builderFilter.length > 0 && !(p.builtByTrainerId && builderFilter.includes(p.builtByTrainerId)))
+      if (
+        builderFilter.length > 0 &&
+        !(p.builtByTrainerId && builderFilter.includes(p.builtByTrainerId))
+      )
         return false;
       return true;
     });
@@ -161,7 +164,19 @@ const WorkoutPresetGrid: React.FC<WorkoutPresetGridProps> = ({
       const bf = isFavorite(b._id) ? 1 : 0;
       return bf - af;
     });
-  }, [data, search, weekFilter, durationFilter, levelFilter, goalFilter, equipmentFilter, muscleFilter, builderFilter, favoritesOnly, isFavorite]);
+  }, [
+    data,
+    search,
+    weekFilter,
+    durationFilter,
+    levelFilter,
+    goalFilter,
+    equipmentFilter,
+    muscleFilter,
+    builderFilter,
+    favoritesOnly,
+    isFavorite,
+  ]);
 
   const anyFilterActive =
     weekFilter.length +

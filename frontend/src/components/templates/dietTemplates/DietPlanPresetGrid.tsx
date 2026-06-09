@@ -121,7 +121,19 @@ const DietPlanPresetGrid: React.FC<DietPlanPresetGridProps> = ({
       }
       return true;
     });
-  }, [data, search, goals, buckets, proteinB, carbB, fatB, freeCalB, restrictions, builders, mealCounts]);
+  }, [
+    data,
+    search,
+    goals,
+    buckets,
+    proteinB,
+    carbB,
+    fatB,
+    freeCalB,
+    restrictions,
+    builders,
+    mealCounts,
+  ]);
 
   const anyFilterActive =
     goals.length +
@@ -263,7 +275,6 @@ const DietPlanPresetGrid: React.FC<DietPlanPresetGridProps> = ({
             </button>
           )}
         </div>
-
       </div>
 
       {/* Grid */}
@@ -325,7 +336,8 @@ const DietPlanPresetGrid: React.FC<DietPlanPresetGridProps> = ({
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (preset._id && confirm(`למחוק את "${preset.name}"?`)) onDelete(preset._id);
+                        if (preset._id && confirm(`למחוק את "${preset.name}"?`))
+                          onDelete(preset._id);
                       }}
                       aria-label="מחיקה"
                       className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 text-slate-400 transition-colors hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/40"
@@ -669,7 +681,9 @@ const MacroStat: React.FC<{
   const t = MACRO_TONE[tone];
   return (
     <div className={`flex flex-col items-center gap-0.5 rounded-lg ${t.bg} p-2`}>
-      <div className={`flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider ${t.text}`}>
+      <div
+        className={`flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider ${t.text}`}
+      >
         {icon}
         {label}
       </div>

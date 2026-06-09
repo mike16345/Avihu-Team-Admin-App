@@ -41,9 +41,7 @@ export const useMockUserQuery = (userId?: string): QueryResult<IUser | undefined
   ok(userId ? getMockUser(userId) : undefined);
 
 /** שקילות של מתאמן — מקביל ל-useWeighInsApi.getUserWeighIns */
-export const useMockWeighInsQuery = (
-  userId?: string
-): QueryResult<IWeighIns | undefined> =>
+export const useMockWeighInsQuery = (userId?: string): QueryResult<IWeighIns | undefined> =>
   ok(userId ? mockWeighInsByUser[userId] : undefined);
 
 /** מדידות היקפים — מקביל ל-useMeasurementsApi.getUserMeasurements */
@@ -53,7 +51,5 @@ export const useMockMeasurementsQuery = (
   ok(userId ? mockMeasurementsByUser[userId] : undefined);
 
 /** תפריט תזונה — מקביל ל-useDietPlanApi.getUserDietPlan */
-export const useMockDietPlanQuery = (
-  userId?: string
-): QueryResult<IDietPlan | undefined> =>
+export const useMockDietPlanQuery = (userId?: string): QueryResult<IDietPlan | undefined> =>
   ok(userId ? mockDietPlanByUser[userId] : undefined);

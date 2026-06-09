@@ -66,12 +66,10 @@ export const useWorkoutPlanApi = () => {
 
   /** Restore an archived plan: clones it as a new active doc. */
   const restoreWorkoutPlan = (userId: string, archivedPlanId: string) =>
-    sendData<ICompleteWorkoutPlan>(
-      `${WORKOUT_PLAN_ENDPOINT}/restore`,
-      {},
-      null,
-      { userId, archivedPlanId }
-    );
+    sendData<ICompleteWorkoutPlan>(`${WORKOUT_PLAN_ENDPOINT}/restore`, {}, null, {
+      userId,
+      archivedPlanId,
+    });
 
   return {
     getWorkoutPlan,

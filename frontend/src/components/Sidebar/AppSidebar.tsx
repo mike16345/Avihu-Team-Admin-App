@@ -216,10 +216,7 @@ export function AppSidebar() {
           {visibleGroups.map((group, gIdx) => (
             <React.Fragment key={gIdx}>
               {gIdx > 0 && (
-                <div
-                  aria-hidden
-                  className="my-3 mx-1 h-px bg-slate-300 dark:bg-slate-600"
-                />
+                <div aria-hidden className="my-3 mx-1 h-px bg-slate-300 dark:bg-slate-600" />
               )}
               <ul className="flex flex-col gap-1">
                 {group.map((item) => (

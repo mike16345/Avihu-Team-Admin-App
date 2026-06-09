@@ -208,12 +208,8 @@ export const equipmentTone = (v?: WorkoutEquipment) =>
 export const muscleFocusLabel = (v: string) =>
   MUSCLE_FOCUS_OPTIONS.find((o) => o.value === v)?.label ?? v;
 
-export const levelLabel = (v?: WorkoutLevel) =>
-  LEVEL_OPTIONS.find((o) => o.value === v)?.label;
-export const levelTone = (v?: WorkoutLevel) =>
-  LEVEL_OPTIONS.find((o) => o.value === v)?.tone;
+export const levelLabel = (v?: WorkoutLevel) => LEVEL_OPTIONS.find((o) => o.value === v)?.label;
+export const levelTone = (v?: WorkoutLevel) => LEVEL_OPTIONS.find((o) => o.value === v)?.tone;
 
-export const goalLabel = (v?: WorkoutGoal) =>
-  GOAL_OPTIONS.find((o) => o.value === v)?.label;
-export const goalTone = (v?: WorkoutGoal) =>
-  GOAL_OPTIONS.find((o) => o.value === v)?.tone;
+export const goalLabel = (v?: WorkoutGoal) => GOAL_OPTIONS.find((o) => o.value === v)?.label;
+export const goalTone = (v?: WorkoutGoal) => GOAL_OPTIONS.find((o) => o.value === v)?.tone;

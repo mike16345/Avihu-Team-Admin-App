@@ -101,5 +101,4 @@ export const mockUsers: IUser[] = [
   },
 ];
 
-export const getMockUser = (id: string): IUser | undefined =>
-  mockUsers.find((u) => u._id === id);
+export const getMockUser = (id: string): IUser | undefined => mockUsers.find((u) => u._id === id);

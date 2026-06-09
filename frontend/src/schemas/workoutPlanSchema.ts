@@ -167,7 +167,9 @@ export const workoutMetaSchema = z.object({
 export const fullWorkoutPlanSchema = z
   .object({
     tips: z
-      .array(z.string().min(MIN_NAME_LENGTH, { message: ERROR_MESSAGES.stringMin(MIN_NAME_LENGTH) }))
+      .array(
+        z.string().min(MIN_NAME_LENGTH, { message: ERROR_MESSAGES.stringMin(MIN_NAME_LENGTH) })
+      )
       .optional(),
     workoutPlans: z
       .array(workoutPlanSchema)

@@ -16,12 +16,7 @@ import { IForm } from "@/interfaces/IForm";
 import useFormPresetsQuery from "@/hooks/queries/formPresets/useFormPresetsQuery";
 import DateUtils from "@/lib/dateUtils";
 import { Button } from "@/components/ui/button";
-import {
-  FaArrowRight,
-  FaClipboardList,
-  FaFloppyDisk,
-  FaSpinner,
-} from "react-icons/fa6";
+import { FaArrowRight, FaClipboardList, FaFloppyDisk, FaSpinner } from "react-icons/fa6";
 
 const FormBuilderPage = () => {
   const { id } = useParams();
@@ -108,10 +103,7 @@ const FormBuilderPage = () => {
       style={{ fontFamily: "Rubik, Heebo, system-ui, sans-serif" }}
     >
       <RHFForm {...form}>
-        <form
-          className="flex flex-col gap-5"
-          onSubmit={handleSubmit(onSubmit, onInvalidSubmit)}
-        >
+        <form className="flex flex-col gap-5" onSubmit={handleSubmit(onSubmit, onInvalidSubmit)}>
           {/* Top bar — back, title, save */}
           <div className="sticky top-0 z-30 -mx-1 flex flex-wrap items-center gap-3 border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 px-3 py-3 backdrop-blur supports-[backdrop-filter]:bg-white/75 dark:supports-[backdrop-filter]:bg-slate-900/75">
             <button

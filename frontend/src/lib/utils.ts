@@ -279,9 +279,7 @@ export const collectAllErrors = (
   const out: ValidationErrorEntry[] = [];
   for (const [k, value] of Object.entries(obj)) {
     if (!value || typeof value !== "object") continue;
-    const formattedKey = isNaN(Number(k))
-      ? hebrewPathTranslations[k] ?? k
-      : `${Number(k) + 1}`;
+    const formattedKey = isNaN(Number(k)) ? (hebrewPathTranslations[k] ?? k) : `${Number(k) + 1}`;
     out.push(...collectAllErrors(value, [...path, formattedKey]));
   }
   return out;

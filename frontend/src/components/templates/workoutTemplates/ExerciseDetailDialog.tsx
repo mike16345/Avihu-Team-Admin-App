@@ -13,12 +13,7 @@ import React, { useMemo } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { IExercisePresetItem } from "@/interfaces/IWorkoutPlan";
 import { buildPhotoUrl } from "@/lib/utils";
-import {
-  FaDumbbell,
-  FaCircleInfo,
-  FaArrowUpRightFromSquare,
-  FaPenToSquare,
-} from "react-icons/fa6";
+import { FaDumbbell, FaCircleInfo, FaArrowUpRightFromSquare, FaPenToSquare } from "react-icons/fa6";
 
 interface ExerciseDetailDialogProps {
   open: boolean;

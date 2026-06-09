@@ -18,11 +18,7 @@ interface FavoriteStarProps {
   buttonSize?: "sm" | "md";
 }
 
-const FavoriteStar: React.FC<FavoriteStarProps> = ({
-  presetId,
-  size = 13,
-  buttonSize = "md",
-}) => {
+const FavoriteStar: React.FC<FavoriteStarProps> = ({ presetId, size = 13, buttonSize = "md" }) => {
   const { isFavorite, toggle } = useFavoriteWorkoutPresets();
   const active = isFavorite(presetId);
   const dims = buttonSize === "sm" ? "h-7 w-7" : "h-8 w-8";

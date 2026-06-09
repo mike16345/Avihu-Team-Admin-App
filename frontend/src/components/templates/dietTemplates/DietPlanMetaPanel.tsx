@@ -6,11 +6,7 @@
 import React, { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import { IDietPlan, DietGoal, DietaryRestriction, IMeal } from "@/interfaces/IDietPlan";
-import {
-  dietGoalOptions,
-  dietGoalTone,
-  dietaryRestrictionOptions,
-} from "@/lib/dietMeta";
+import { dietGoalOptions, dietGoalTone, dietaryRestrictionOptions } from "@/lib/dietMeta";
 import { useUsersStore } from "@/store/userStore";
 import { useSubTrainersQuery } from "@/hooks/queries/subTrainers/useSubTrainersQuery";
 import {
@@ -123,11 +119,7 @@ const DietPlanMetaPanel: React.FC = () => {
       <div className="grid grid-cols-1 gap-x-5 gap-y-3 md:grid-cols-2 md:divide-x md:divide-slate-100 md:dark:divide-slate-800 md:rtl:divide-x-reverse">
         {/* RIGHT col: meal-count + goal + calories + builder */}
         <div className="flex flex-col gap-3 md:pl-5">
-          <Field
-            label="מספר ארוחות"
-            icon={<FaUtensils size={9} />}
-            hint="מחושב אוטומטית"
-          >
+          <Field label="מספר ארוחות" icon={<FaUtensils size={9} />} hint="מחושב אוטומטית">
             <div className="flex h-9 w-fit min-w-[3rem] items-center justify-center rounded-xl bg-emerald-50 px-3 text-base font-bold tabular-nums text-emerald-700 ring-1 ring-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:ring-emerald-900/60">
               {meals.length}
             </div>
@@ -170,11 +162,7 @@ const DietPlanMetaPanel: React.FC = () => {
             />
           </Field>
 
-          <Field
-            label="סה״כ קלוריות"
-            icon={<FaFire size={9} />}
-            hint="מחושב אוטומטית"
-          >
+          <Field label="סה״כ קלוריות" icon={<FaFire size={9} />} hint="מחושב אוטומטית">
             <div className="flex h-14 w-full items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-900/60 dark:bg-amber-950/40 px-4">
               <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
                 <FaFire size={16} />
@@ -239,12 +227,7 @@ const DietPlanMetaPanel: React.FC = () => {
                 value={carbs}
                 tone="amber"
               />
-              <MacroDisplay
-                icon={<FaDroplet size={9} />}
-                label="שומן"
-                value={fats}
-                tone="sky"
-              />
+              <MacroDisplay icon={<FaDroplet size={9} />} label="שומן" value={fats} tone="sky" />
               <MacroDisplay
                 icon={<FaCarrot size={9} />}
                 label="ירק"

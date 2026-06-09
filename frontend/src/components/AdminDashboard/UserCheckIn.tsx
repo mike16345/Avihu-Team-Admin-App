@@ -81,8 +81,7 @@ const UserCheckIn = () => {
     return s;
   }, [allUsers]);
   const onlyActive = useCallback(
-    <T extends { _id: string }>(list: T[]) =>
-      list.filter((u) => activeIdSet.has(String(u._id))),
+    <T extends { _id: string }>(list: T[]) => list.filter((u) => activeIdSet.has(String(u._id))),
     [activeIdSet]
   );
 

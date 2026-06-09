@@ -307,10 +307,38 @@ type DietMeal = {
 };
 
 const initialMeals: DietMeal[] = [
-  { id: "m-1", name: "ארוחה 1 — בוקר", protein: { amount: 2, mode: "קבוע" }, carbs: { amount: 3, mode: "בחירה" }, fats: { amount: 1, mode: "קבוע" }, vegetables: { amount: 1, mode: "בחירה" } },
-  { id: "m-2", name: "ארוחה 2 — לפני אימון", protein: { amount: 1, mode: "קבוע" }, carbs: { amount: 2, mode: "קבוע" }, fats: { amount: 0, mode: "קבוע" }, vegetables: { amount: 0, mode: "קבוע" } },
-  { id: "m-3", name: "ארוחה 3 — צהריים", protein: { amount: 3, mode: "קבוע" }, carbs: { amount: 3, mode: "בחירה" }, fats: { amount: 2, mode: "קבוע" }, vegetables: { amount: 2, mode: "בחירה" } },
-  { id: "m-4", name: "ארוחה 4 — ערב", protein: { amount: 2, mode: "קבוע" }, carbs: { amount: 1, mode: "בחירה" }, fats: { amount: 1, mode: "קבוע" }, vegetables: { amount: 2, mode: "בחירה" } },
+  {
+    id: "m-1",
+    name: "ארוחה 1 — בוקר",
+    protein: { amount: 2, mode: "קבוע" },
+    carbs: { amount: 3, mode: "בחירה" },
+    fats: { amount: 1, mode: "קבוע" },
+    vegetables: { amount: 1, mode: "בחירה" },
+  },
+  {
+    id: "m-2",
+    name: "ארוחה 2 — לפני אימון",
+    protein: { amount: 1, mode: "קבוע" },
+    carbs: { amount: 2, mode: "קבוע" },
+    fats: { amount: 0, mode: "קבוע" },
+    vegetables: { amount: 0, mode: "קבוע" },
+  },
+  {
+    id: "m-3",
+    name: "ארוחה 3 — צהריים",
+    protein: { amount: 3, mode: "קבוע" },
+    carbs: { amount: 3, mode: "בחירה" },
+    fats: { amount: 2, mode: "קבוע" },
+    vegetables: { amount: 2, mode: "בחירה" },
+  },
+  {
+    id: "m-4",
+    name: "ארוחה 4 — ערב",
+    protein: { amount: 2, mode: "קבוע" },
+    carbs: { amount: 1, mode: "בחירה" },
+    fats: { amount: 1, mode: "קבוע" },
+    vegetables: { amount: 2, mode: "בחירה" },
+  },
 ];
 
 // Diet notes templates — common notes a trainer might want to add quickly
@@ -352,12 +380,7 @@ const noteTemplates: { category: NoteCategory; items: string[] }[] = [
   },
   {
     category: "להימנע",
-    items: [
-      "סוכר מעובד וממתקים",
-      "מאפים תעשייתיים",
-      "אלכוהול בכל הימים",
-      "מזון מטוגן ושמן רווי",
-    ],
+    items: ["סוכר מעובד וממתקים", "מאפים תעשייתיים", "אלכוהול בכל הימים", "מזון מטוגן ושמן רווי"],
   },
   {
     category: "אורח חיים",
@@ -387,56 +410,246 @@ type Supplement = {
   notes?: string;
 };
 
-const supplementCatalog: { id: string; name: string; category: SupplementCategory; defaultDosage: string; defaultTiming: string; icon: string }[] = [
+const supplementCatalog: {
+  id: string;
+  name: string;
+  category: SupplementCategory;
+  defaultDosage: string;
+  defaultTiming: string;
+  icon: string;
+}[] = [
   // חלבון
-  { id: "sc-1", name: "אבקת חלבון Whey", category: "חלבון", defaultDosage: "30 גרם", defaultTiming: "אחרי אימון", icon: "🥛" },
-  { id: "sc-2", name: "אבקת חלבון קזאין", category: "חלבון", defaultDosage: "30 גרם", defaultTiming: "לפני שינה", icon: "🌙" },
-  { id: "sc-3", name: "BCAA", category: "חלבון", defaultDosage: "10 גרם", defaultTiming: "במהלך אימון", icon: "💪" },
+  {
+    id: "sc-1",
+    name: "אבקת חלבון Whey",
+    category: "חלבון",
+    defaultDosage: "30 גרם",
+    defaultTiming: "אחרי אימון",
+    icon: "🥛",
+  },
+  {
+    id: "sc-2",
+    name: "אבקת חלבון קזאין",
+    category: "חלבון",
+    defaultDosage: "30 גרם",
+    defaultTiming: "לפני שינה",
+    icon: "🌙",
+  },
+  {
+    id: "sc-3",
+    name: "BCAA",
+    category: "חלבון",
+    defaultDosage: "10 גרם",
+    defaultTiming: "במהלך אימון",
+    icon: "💪",
+  },
   // ויטמינים
-  { id: "sc-4", name: "מולטי-ויטמין", category: "ויטמינים", defaultDosage: "טבליה אחת", defaultTiming: "בוקר עם האוכל", icon: "💊" },
-  { id: "sc-5", name: "ויטמין D3", category: "ויטמינים", defaultDosage: "2000 IU", defaultTiming: "בוקר", icon: "☀️" },
-  { id: "sc-6", name: "אומגה 3", category: "ויטמינים", defaultDosage: "2 קפסולות", defaultTiming: "עם ארוחה", icon: "🐟" },
-  { id: "sc-7", name: "מגנזיום", category: "ויטמינים", defaultDosage: "300-400 מ״ג", defaultTiming: "לפני שינה", icon: "🌿" },
+  {
+    id: "sc-4",
+    name: "מולטי-ויטמין",
+    category: "ויטמינים",
+    defaultDosage: "טבליה אחת",
+    defaultTiming: "בוקר עם האוכל",
+    icon: "💊",
+  },
+  {
+    id: "sc-5",
+    name: "ויטמין D3",
+    category: "ויטמינים",
+    defaultDosage: "2000 IU",
+    defaultTiming: "בוקר",
+    icon: "☀️",
+  },
+  {
+    id: "sc-6",
+    name: "אומגה 3",
+    category: "ויטמינים",
+    defaultDosage: "2 קפסולות",
+    defaultTiming: "עם ארוחה",
+    icon: "🐟",
+  },
+  {
+    id: "sc-7",
+    name: "מגנזיום",
+    category: "ויטמינים",
+    defaultDosage: "300-400 מ״ג",
+    defaultTiming: "לפני שינה",
+    icon: "🌿",
+  },
   // התאוששות
-  { id: "sc-8", name: "גלוטמין", category: "התאוששות", defaultDosage: "5-10 גרם", defaultTiming: "אחרי אימון / לפני שינה", icon: "🛌" },
-  { id: "sc-9", name: "ZMA", category: "התאוששות", defaultDosage: "מינון מלא", defaultTiming: "לפני שינה", icon: "💤" },
+  {
+    id: "sc-8",
+    name: "גלוטמין",
+    category: "התאוששות",
+    defaultDosage: "5-10 גרם",
+    defaultTiming: "אחרי אימון / לפני שינה",
+    icon: "🛌",
+  },
+  {
+    id: "sc-9",
+    name: "ZMA",
+    category: "התאוששות",
+    defaultDosage: "מינון מלא",
+    defaultTiming: "לפני שינה",
+    icon: "💤",
+  },
   // ביצועים
-  { id: "sc-10", name: "קריאטין", category: "ביצועים", defaultDosage: "5 גרם", defaultTiming: "כל יום באותה שעה", icon: "⚡" },
-  { id: "sc-11", name: "Pre-Workout", category: "ביצועים", defaultDosage: "מנה אחת", defaultTiming: "20-30 דק׳ לפני אימון", icon: "🔥" },
-  { id: "sc-12", name: "קפאין", category: "ביצועים", defaultDosage: "200 מ״ג", defaultTiming: "לפני אימון", icon: "☕" },
+  {
+    id: "sc-10",
+    name: "קריאטין",
+    category: "ביצועים",
+    defaultDosage: "5 גרם",
+    defaultTiming: "כל יום באותה שעה",
+    icon: "⚡",
+  },
+  {
+    id: "sc-11",
+    name: "Pre-Workout",
+    category: "ביצועים",
+    defaultDosage: "מנה אחת",
+    defaultTiming: "20-30 דק׳ לפני אימון",
+    icon: "🔥",
+  },
+  {
+    id: "sc-12",
+    name: "קפאין",
+    category: "ביצועים",
+    defaultDosage: "200 מ״ג",
+    defaultTiming: "לפני אימון",
+    icon: "☕",
+  },
   // פיברים
-  { id: "sc-13", name: "פיברים תזונתיים", category: "פיברים", defaultDosage: "5 גרם", defaultTiming: "בוקר", icon: "🌾" },
-  { id: "sc-14", name: "פרוביוטיקה", category: "פיברים", defaultDosage: "קפסולה אחת", defaultTiming: "בוקר על קיבה ריקה", icon: "🦠" },
+  {
+    id: "sc-13",
+    name: "פיברים תזונתיים",
+    category: "פיברים",
+    defaultDosage: "5 גרם",
+    defaultTiming: "בוקר",
+    icon: "🌾",
+  },
+  {
+    id: "sc-14",
+    name: "פרוביוטיקה",
+    category: "פיברים",
+    defaultDosage: "קפסולה אחת",
+    defaultTiming: "בוקר על קיבה ריקה",
+    icon: "🦠",
+  },
 ];
 
 const initialSupplements: Supplement[] = [
-  { id: "sup-1", name: "אבקת חלבון Whey", category: "חלבון", dosage: "30 גרם", timing: "אחרי אימון" },
-  { id: "sup-2", name: "קריאטין", category: "ביצועים", dosage: "5 גרם", timing: "כל יום באותה שעה" },
-  { id: "sup-3", name: "אומגה 3", category: "ויטמינים", dosage: "2 קפסולות", timing: "עם ארוחת בוקר" },
+  {
+    id: "sup-1",
+    name: "אבקת חלבון Whey",
+    category: "חלבון",
+    dosage: "30 גרם",
+    timing: "אחרי אימון",
+  },
+  {
+    id: "sup-2",
+    name: "קריאטין",
+    category: "ביצועים",
+    dosage: "5 גרם",
+    timing: "כל יום באותה שעה",
+  },
+  {
+    id: "sup-3",
+    name: "אומגה 3",
+    category: "ויטמינים",
+    dosage: "2 קפסולות",
+    timing: "עם ארוחת בוקר",
+  },
 ];
 
-const supplementCategoryColors: Record<SupplementCategory, { bg: string; text: string; gradient: string }> = {
+const supplementCategoryColors: Record<
+  SupplementCategory,
+  { bg: string; text: string; gradient: string }
+> = {
   חלבון: { bg: "bg-blue-100", text: "text-blue-700", gradient: "from-blue-500 to-indigo-600" },
-  ויטמינים: { bg: "bg-amber-100", text: "text-amber-700", gradient: "from-amber-500 to-orange-600" },
-  התאוששות: { bg: "bg-purple-100", text: "text-purple-700", gradient: "from-purple-500 to-fuchsia-600" },
+  ויטמינים: {
+    bg: "bg-amber-100",
+    text: "text-amber-700",
+    gradient: "from-amber-500 to-orange-600",
+  },
+  התאוששות: {
+    bg: "bg-purple-100",
+    text: "text-purple-700",
+    gradient: "from-purple-500 to-fuchsia-600",
+  },
   ביצועים: { bg: "bg-rose-100", text: "text-rose-700", gradient: "from-rose-500 to-red-600" },
-  פיברים: { bg: "bg-emerald-100", text: "text-emerald-700", gradient: "from-emerald-500 to-teal-600" },
+  פיברים: {
+    bg: "bg-emerald-100",
+    text: "text-emerald-700",
+    gradient: "from-emerald-500 to-teal-600",
+  },
 };
 
-const noteCategoryColors: Record<NoteCategory, { bg: string; text: string; gradient: string; emoji: string }> = {
-  שתייה: { bg: "bg-blue-100", text: "text-blue-700", gradient: "from-blue-500 to-indigo-600", emoji: "💧" },
-  תזמון: { bg: "bg-purple-100", text: "text-purple-700", gradient: "from-purple-500 to-fuchsia-600", emoji: "⏰" },
-  מומלץ: { bg: "bg-emerald-100", text: "text-emerald-700", gradient: "from-emerald-500 to-teal-600", emoji: "✅" },
-  להימנע: { bg: "bg-rose-100", text: "text-rose-700", gradient: "from-rose-500 to-red-600", emoji: "🚫" },
-  "אורח חיים": { bg: "bg-amber-100", text: "text-amber-700", gradient: "from-amber-500 to-orange-600", emoji: "🌿" },
+const noteCategoryColors: Record<
+  NoteCategory,
+  { bg: string; text: string; gradient: string; emoji: string }
+> = {
+  שתייה: {
+    bg: "bg-blue-100",
+    text: "text-blue-700",
+    gradient: "from-blue-500 to-indigo-600",
+    emoji: "💧",
+  },
+  תזמון: {
+    bg: "bg-purple-100",
+    text: "text-purple-700",
+    gradient: "from-purple-500 to-fuchsia-600",
+    emoji: "⏰",
+  },
+  מומלץ: {
+    bg: "bg-emerald-100",
+    text: "text-emerald-700",
+    gradient: "from-emerald-500 to-teal-600",
+    emoji: "✅",
+  },
+  להימנע: {
+    bg: "bg-rose-100",
+    text: "text-rose-700",
+    gradient: "from-rose-500 to-red-600",
+    emoji: "🚫",
+  },
+  "אורח חיים": {
+    bg: "bg-amber-100",
+    text: "text-amber-700",
+    gradient: "from-amber-500 to-orange-600",
+    emoji: "🌿",
+  },
 };
 
 // Approximate calories per "unit" (serving) — for the macro summary
 const macrosPerUnit = {
-  protein: { kcal: 150, color: "bg-blue-50 ring-blue-200 text-blue-700", barColor: "bg-blue-500", icon: "ח", label: "חלבון" },
-  carbs: { kcal: 115, color: "bg-orange-50 ring-orange-200 text-orange-700", barColor: "bg-orange-500", icon: "פ", label: "פחמימות" },
-  fats: { kcal: 100, color: "bg-amber-50 ring-amber-200 text-amber-700", barColor: "bg-amber-500", icon: "ש", label: "שומנים" },
-  vegetables: { kcal: 25, color: "bg-emerald-50 ring-emerald-200 text-emerald-700", barColor: "bg-emerald-500", icon: "י", label: "ירקות" },
+  protein: {
+    kcal: 150,
+    color: "bg-blue-50 ring-blue-200 text-blue-700",
+    barColor: "bg-blue-500",
+    icon: "ח",
+    label: "חלבון",
+  },
+  carbs: {
+    kcal: 115,
+    color: "bg-orange-50 ring-orange-200 text-orange-700",
+    barColor: "bg-orange-500",
+    icon: "פ",
+    label: "פחמימות",
+  },
+  fats: {
+    kcal: 100,
+    color: "bg-amber-50 ring-amber-200 text-amber-700",
+    barColor: "bg-amber-500",
+    icon: "ש",
+    label: "שומנים",
+  },
+  vegetables: {
+    kcal: 25,
+    color: "bg-emerald-50 ring-emerald-200 text-emerald-700",
+    barColor: "bg-emerald-500",
+    icon: "י",
+    label: "ירקות",
+  },
 };
 
 // Workout plan data
@@ -486,52 +699,232 @@ const buildExerciseImage = (label: string, _gradient: [string, string]) => {
 
 const exerciseCatalog: CatalogExercise[] = [
   // חזה
-  { id: "ec-1", name: "לחיצת חזה עם מוט", group: "חזה", image: buildExerciseImage("לחיצת חזה", ["#3b82f6", "#6366f1"]) },
-  { id: "ec-2", name: "לחיצת חזה עליון עם משקולות חופשי", group: "חזה", image: buildExerciseImage("לחיצת עליון", ["#3b82f6", "#6366f1"]) },
-  { id: "ec-3", name: "פרפר בכבל קרוס בעמידה (דגש אמצעי)", group: "חזה", image: buildExerciseImage("פרפר כבל", ["#3b82f6", "#6366f1"]) },
-  { id: "ec-4", name: "לחיצת חזה במכונה", group: "חזה", image: buildExerciseImage("לחיצת מכונה", ["#3b82f6", "#6366f1"]) },
-  { id: "ec-5", name: "פלייז עם משקולות", group: "חזה", image: buildExerciseImage("פלייז", ["#3b82f6", "#6366f1"]) },
+  {
+    id: "ec-1",
+    name: "לחיצת חזה עם מוט",
+    group: "חזה",
+    image: buildExerciseImage("לחיצת חזה", ["#3b82f6", "#6366f1"]),
+  },
+  {
+    id: "ec-2",
+    name: "לחיצת חזה עליון עם משקולות חופשי",
+    group: "חזה",
+    image: buildExerciseImage("לחיצת עליון", ["#3b82f6", "#6366f1"]),
+  },
+  {
+    id: "ec-3",
+    name: "פרפר בכבל קרוס בעמידה (דגש אמצעי)",
+    group: "חזה",
+    image: buildExerciseImage("פרפר כבל", ["#3b82f6", "#6366f1"]),
+  },
+  {
+    id: "ec-4",
+    name: "לחיצת חזה במכונה",
+    group: "חזה",
+    image: buildExerciseImage("לחיצת מכונה", ["#3b82f6", "#6366f1"]),
+  },
+  {
+    id: "ec-5",
+    name: "פלייז עם משקולות",
+    group: "חזה",
+    image: buildExerciseImage("פלייז", ["#3b82f6", "#6366f1"]),
+  },
   // גב
-  { id: "ec-6", name: "דדליפט", group: "גב", image: buildExerciseImage("דדליפט", ["#10b981", "#0d9488"]) },
-  { id: "ec-7", name: "מתח רחב", group: "גב", image: buildExerciseImage("מתח", ["#10b981", "#0d9488"]) },
-  { id: "ec-8", name: "פולי עליון", group: "גב", image: buildExerciseImage("פולי", ["#10b981", "#0d9488"]) },
-  { id: "ec-9", name: "חתירה בכבל", group: "גב", image: buildExerciseImage("חתירה כבל", ["#10b981", "#0d9488"]) },
-  { id: "ec-10", name: "חתירה במוט", group: "גב", image: buildExerciseImage("חתירה מוט", ["#10b981", "#0d9488"]) },
+  {
+    id: "ec-6",
+    name: "דדליפט",
+    group: "גב",
+    image: buildExerciseImage("דדליפט", ["#10b981", "#0d9488"]),
+  },
+  {
+    id: "ec-7",
+    name: "מתח רחב",
+    group: "גב",
+    image: buildExerciseImage("מתח", ["#10b981", "#0d9488"]),
+  },
+  {
+    id: "ec-8",
+    name: "פולי עליון",
+    group: "גב",
+    image: buildExerciseImage("פולי", ["#10b981", "#0d9488"]),
+  },
+  {
+    id: "ec-9",
+    name: "חתירה בכבל",
+    group: "גב",
+    image: buildExerciseImage("חתירה כבל", ["#10b981", "#0d9488"]),
+  },
+  {
+    id: "ec-10",
+    name: "חתירה במוט",
+    group: "גב",
+    image: buildExerciseImage("חתירה מוט", ["#10b981", "#0d9488"]),
+  },
   // טרפזים
-  { id: "ec-11", name: "משיכות כתפיים (שראגס)", group: "טרפזים", image: buildExerciseImage("שראגס", ["#14b8a6", "#0891b2"]) },
-  { id: "ec-12", name: "משיכה לסנטר", group: "טרפזים", image: buildExerciseImage("משיכה", ["#14b8a6", "#0891b2"]) },
+  {
+    id: "ec-11",
+    name: "משיכות כתפיים (שראגס)",
+    group: "טרפזים",
+    image: buildExerciseImage("שראגס", ["#14b8a6", "#0891b2"]),
+  },
+  {
+    id: "ec-12",
+    name: "משיכה לסנטר",
+    group: "טרפזים",
+    image: buildExerciseImage("משיכה", ["#14b8a6", "#0891b2"]),
+  },
   // כתפיים
-  { id: "ec-13", name: "לחיצת כתפיים במוט", group: "כתפיים", image: buildExerciseImage("לחיצת כתף", ["#f97316", "#d97706"]) },
-  { id: "ec-14", name: "הרמות צד עם משקולות", group: "כתפיים", image: buildExerciseImage("הרמות צד", ["#f97316", "#d97706"]) },
-  { id: "ec-15", name: "הרמות קדמיות", group: "כתפיים", image: buildExerciseImage("הרמות קד׳", ["#f97316", "#d97706"]) },
+  {
+    id: "ec-13",
+    name: "לחיצת כתפיים במוט",
+    group: "כתפיים",
+    image: buildExerciseImage("לחיצת כתף", ["#f97316", "#d97706"]),
+  },
+  {
+    id: "ec-14",
+    name: "הרמות צד עם משקולות",
+    group: "כתפיים",
+    image: buildExerciseImage("הרמות צד", ["#f97316", "#d97706"]),
+  },
+  {
+    id: "ec-15",
+    name: "הרמות קדמיות",
+    group: "כתפיים",
+    image: buildExerciseImage("הרמות קד׳", ["#f97316", "#d97706"]),
+  },
   // יד קידמית
-  { id: "ec-16", name: "כפיפת מרפק עם משקולות", group: "יד קידמית", image: buildExerciseImage("כפיפת מרפק", ["#ec4899", "#e11d48"]) },
-  { id: "ec-17", name: "כפיפת מרפק עם מוט", group: "יד קידמית", image: buildExerciseImage("מרפק מוט", ["#ec4899", "#e11d48"]) },
-  { id: "ec-18", name: "פטיש (Hammer Curl)", group: "יד קידמית", image: buildExerciseImage("פטיש", ["#ec4899", "#e11d48"]) },
+  {
+    id: "ec-16",
+    name: "כפיפת מרפק עם משקולות",
+    group: "יד קידמית",
+    image: buildExerciseImage("כפיפת מרפק", ["#ec4899", "#e11d48"]),
+  },
+  {
+    id: "ec-17",
+    name: "כפיפת מרפק עם מוט",
+    group: "יד קידמית",
+    image: buildExerciseImage("מרפק מוט", ["#ec4899", "#e11d48"]),
+  },
+  {
+    id: "ec-18",
+    name: "פטיש (Hammer Curl)",
+    group: "יד קידמית",
+    image: buildExerciseImage("פטיש", ["#ec4899", "#e11d48"]),
+  },
   // יד אחורית
-  { id: "ec-19", name: "פשיטת מרפק בכבל (טריצפס)", group: "יד אחורית", image: buildExerciseImage("טריצפס כבל", ["#f43f5e", "#dc2626"]) },
-  { id: "ec-20", name: "פשיטה מאחורי הראש", group: "יד אחורית", image: buildExerciseImage("פשיטה אח׳", ["#f43f5e", "#dc2626"]) },
-  { id: "ec-21", name: "מקבילים", group: "יד אחורית", image: buildExerciseImage("מקבילים", ["#f43f5e", "#dc2626"]) },
+  {
+    id: "ec-19",
+    name: "פשיטת מרפק בכבל (טריצפס)",
+    group: "יד אחורית",
+    image: buildExerciseImage("טריצפס כבל", ["#f43f5e", "#dc2626"]),
+  },
+  {
+    id: "ec-20",
+    name: "פשיטה מאחורי הראש",
+    group: "יד אחורית",
+    image: buildExerciseImage("פשיטה אח׳", ["#f43f5e", "#dc2626"]),
+  },
+  {
+    id: "ec-21",
+    name: "מקבילים",
+    group: "יד אחורית",
+    image: buildExerciseImage("מקבילים", ["#f43f5e", "#dc2626"]),
+  },
   // רגליים
-  { id: "ec-22", name: "סקוואט מוט", group: "רגליים", image: buildExerciseImage("סקוואט", ["#a855f7", "#c026d3"]) },
-  { id: "ec-23", name: "פרסה (Leg Press)", group: "רגליים", image: buildExerciseImage("פרסה", ["#a855f7", "#c026d3"]) },
-  { id: "ec-24", name: "פשיטת ברך", group: "רגליים", image: buildExerciseImage("פשיטת ברך", ["#a855f7", "#c026d3"]) },
-  { id: "ec-25", name: "כפיפת ברך", group: "רגליים", image: buildExerciseImage("כפיפת ברך", ["#a855f7", "#c026d3"]) },
-  { id: "ec-26", name: "לאנג'ים", group: "רגליים", image: buildExerciseImage("לאנג׳ים", ["#a855f7", "#c026d3"]) },
+  {
+    id: "ec-22",
+    name: "סקוואט מוט",
+    group: "רגליים",
+    image: buildExerciseImage("סקוואט", ["#a855f7", "#c026d3"]),
+  },
+  {
+    id: "ec-23",
+    name: "פרסה (Leg Press)",
+    group: "רגליים",
+    image: buildExerciseImage("פרסה", ["#a855f7", "#c026d3"]),
+  },
+  {
+    id: "ec-24",
+    name: "פשיטת ברך",
+    group: "רגליים",
+    image: buildExerciseImage("פשיטת ברך", ["#a855f7", "#c026d3"]),
+  },
+  {
+    id: "ec-25",
+    name: "כפיפת ברך",
+    group: "רגליים",
+    image: buildExerciseImage("כפיפת ברך", ["#a855f7", "#c026d3"]),
+  },
+  {
+    id: "ec-26",
+    name: "לאנג'ים",
+    group: "רגליים",
+    image: buildExerciseImage("לאנג׳ים", ["#a855f7", "#c026d3"]),
+  },
   // ישבן
-  { id: "ec-27", name: "היפ ת׳ראסט", group: "ישבן", image: buildExerciseImage("היפ ת׳", ["#8b5cf6", "#7c3aed"]) },
-  { id: "ec-28", name: "סקוואט גביעי", group: "ישבן", image: buildExerciseImage("גביעי", ["#8b5cf6", "#7c3aed"]) },
-  { id: "ec-29", name: "ברידג'", group: "ישבן", image: buildExerciseImage("ברידג", ["#8b5cf6", "#7c3aed"]) },
+  {
+    id: "ec-27",
+    name: "היפ ת׳ראסט",
+    group: "ישבן",
+    image: buildExerciseImage("היפ ת׳", ["#8b5cf6", "#7c3aed"]),
+  },
+  {
+    id: "ec-28",
+    name: "סקוואט גביעי",
+    group: "ישבן",
+    image: buildExerciseImage("גביעי", ["#8b5cf6", "#7c3aed"]),
+  },
+  {
+    id: "ec-29",
+    name: "ברידג'",
+    group: "ישבן",
+    image: buildExerciseImage("ברידג", ["#8b5cf6", "#7c3aed"]),
+  },
   // תאומים
-  { id: "ec-30", name: "עליות עקבים בעמידה", group: "תאומים", image: buildExerciseImage("עקבים עמ׳", ["#06b6d4", "#0284c7"]) },
-  { id: "ec-31", name: "עליות עקבים בישיבה", group: "תאומים", image: buildExerciseImage("עקבים יש׳", ["#06b6d4", "#0284c7"]) },
+  {
+    id: "ec-30",
+    name: "עליות עקבים בעמידה",
+    group: "תאומים",
+    image: buildExerciseImage("עקבים עמ׳", ["#06b6d4", "#0284c7"]),
+  },
+  {
+    id: "ec-31",
+    name: "עליות עקבים בישיבה",
+    group: "תאומים",
+    image: buildExerciseImage("עקבים יש׳", ["#06b6d4", "#0284c7"]),
+  },
   // אמות
-  { id: "ec-32", name: "כפיפת אמות עם מוט", group: "אמות", image: buildExerciseImage("אמות מוט", ["#f59e0b", "#ca8a04"]) },
-  { id: "ec-33", name: "פשיטת אמות", group: "אמות", image: buildExerciseImage("אמות פש׳", ["#f59e0b", "#ca8a04"]) },
+  {
+    id: "ec-32",
+    name: "כפיפת אמות עם מוט",
+    group: "אמות",
+    image: buildExerciseImage("אמות מוט", ["#f59e0b", "#ca8a04"]),
+  },
+  {
+    id: "ec-33",
+    name: "פשיטת אמות",
+    group: "אמות",
+    image: buildExerciseImage("אמות פש׳", ["#f59e0b", "#ca8a04"]),
+  },
   // בטן
-  { id: "ec-34", name: "פלאנק", group: "בטן", image: buildExerciseImage("פלאנק", ["#64748b", "#475569"]) },
-  { id: "ec-35", name: "כפיפת בטן עם משקל", group: "בטן", image: buildExerciseImage("כפיפת בטן", ["#64748b", "#475569"]) },
-  { id: "ec-36", name: "רגליים תלויות", group: "בטן", image: buildExerciseImage("רגליים", ["#64748b", "#475569"]) },
+  {
+    id: "ec-34",
+    name: "פלאנק",
+    group: "בטן",
+    image: buildExerciseImage("פלאנק", ["#64748b", "#475569"]),
+  },
+  {
+    id: "ec-35",
+    name: "כפיפת בטן עם משקל",
+    group: "בטן",
+    image: buildExerciseImage("כפיפת בטן", ["#64748b", "#475569"]),
+  },
+  {
+    id: "ec-36",
+    name: "רגליים תלויות",
+    group: "בטן",
+    image: buildExerciseImage("רגליים", ["#64748b", "#475569"]),
+  },
 ];
 
 const workoutMethods = [
@@ -553,16 +946,57 @@ const workoutPlan: Workout[] = [
         id: "wmg-1",
         group: "חזה",
         exercises: [
-          { id: "e-1", catalogId: "ec-1", method: "אימון פירמידה (Pyramid Training)", restSeconds: 60, sets: [{ setNumber: 1, minReps: 12, maxReps: 15 }, { setNumber: 2, minReps: 10, maxReps: 12 }, { setNumber: 3, minReps: 8, maxReps: 10 }, { setNumber: 4, minReps: 8, maxReps: 10 }] },
-          { id: "e-2", catalogId: "ec-2", method: "סטנדרטי", restSeconds: 75, sets: [{ setNumber: 1, minReps: 10, maxReps: 12 }, { setNumber: 2, minReps: 10, maxReps: 12 }, { setNumber: 3, minReps: 8, maxReps: 10 }] },
-          { id: "e-3", catalogId: "ec-3", method: "דרופ סט (Drop Set)", restSeconds: 45, sets: [{ setNumber: 1, minReps: 12, maxReps: 15 }, { setNumber: 2, minReps: 10, maxReps: 12 }, { setNumber: 3, minReps: 10, maxReps: 12 }] },
+          {
+            id: "e-1",
+            catalogId: "ec-1",
+            method: "אימון פירמידה (Pyramid Training)",
+            restSeconds: 60,
+            sets: [
+              { setNumber: 1, minReps: 12, maxReps: 15 },
+              { setNumber: 2, minReps: 10, maxReps: 12 },
+              { setNumber: 3, minReps: 8, maxReps: 10 },
+              { setNumber: 4, minReps: 8, maxReps: 10 },
+            ],
+          },
+          {
+            id: "e-2",
+            catalogId: "ec-2",
+            method: "סטנדרטי",
+            restSeconds: 75,
+            sets: [
+              { setNumber: 1, minReps: 10, maxReps: 12 },
+              { setNumber: 2, minReps: 10, maxReps: 12 },
+              { setNumber: 3, minReps: 8, maxReps: 10 },
+            ],
+          },
+          {
+            id: "e-3",
+            catalogId: "ec-3",
+            method: "דרופ סט (Drop Set)",
+            restSeconds: 45,
+            sets: [
+              { setNumber: 1, minReps: 12, maxReps: 15 },
+              { setNumber: 2, minReps: 10, maxReps: 12 },
+              { setNumber: 3, minReps: 10, maxReps: 12 },
+            ],
+          },
         ],
       },
       {
         id: "wmg-2",
         group: "יד אחורית",
         exercises: [
-          { id: "e-4", catalogId: "ec-19", method: "סופרסט (Superset)", restSeconds: 60, sets: [{ setNumber: 1, minReps: 10, maxReps: 12 }, { setNumber: 2, minReps: 10, maxReps: 12 }, { setNumber: 3, minReps: 8, maxReps: 10 }] },
+          {
+            id: "e-4",
+            catalogId: "ec-19",
+            method: "סופרסט (Superset)",
+            restSeconds: 60,
+            sets: [
+              { setNumber: 1, minReps: 10, maxReps: 12 },
+              { setNumber: 2, minReps: 10, maxReps: 12 },
+              { setNumber: 3, minReps: 8, maxReps: 10 },
+            ],
+          },
         ],
       },
     ],
@@ -575,7 +1009,18 @@ const workoutPlan: Workout[] = [
         id: "wmg-3",
         group: "גב",
         exercises: [
-          { id: "e-5", catalogId: "ec-6", method: "אימון פירמידה (Pyramid Training)", restSeconds: 120, sets: [{ setNumber: 1, minReps: 8, maxReps: 10 }, { setNumber: 2, minReps: 6, maxReps: 8 }, { setNumber: 3, minReps: 5, maxReps: 6 }, { setNumber: 4, minReps: 5, maxReps: 6 }] },
+          {
+            id: "e-5",
+            catalogId: "ec-6",
+            method: "אימון פירמידה (Pyramid Training)",
+            restSeconds: 120,
+            sets: [
+              { setNumber: 1, minReps: 8, maxReps: 10 },
+              { setNumber: 2, minReps: 6, maxReps: 8 },
+              { setNumber: 3, minReps: 5, maxReps: 6 },
+              { setNumber: 4, minReps: 5, maxReps: 6 },
+            ],
+          },
         ],
       },
     ],
@@ -588,7 +1033,18 @@ const workoutPlan: Workout[] = [
         id: "wmg-4",
         group: "רגליים",
         exercises: [
-          { id: "e-6", catalogId: "ec-22", method: "סטנדרטי", restSeconds: 90, sets: [{ setNumber: 1, minReps: 10, maxReps: 12 }, { setNumber: 2, minReps: 8, maxReps: 10 }, { setNumber: 3, minReps: 8, maxReps: 10 }, { setNumber: 4, minReps: 6, maxReps: 8 }] },
+          {
+            id: "e-6",
+            catalogId: "ec-22",
+            method: "סטנדרטי",
+            restSeconds: 90,
+            sets: [
+              { setNumber: 1, minReps: 10, maxReps: 12 },
+              { setNumber: 2, minReps: 8, maxReps: 10 },
+              { setNumber: 3, minReps: 8, maxReps: 10 },
+              { setNumber: 4, minReps: 6, maxReps: 8 },
+            ],
+          },
         ],
       },
     ],
@@ -601,7 +1057,17 @@ const workoutPlan: Workout[] = [
         id: "wmg-5",
         group: "בטן",
         exercises: [
-          { id: "e-7", catalogId: "ec-34", method: "סטנדרטי", restSeconds: 30, sets: [{ setNumber: 1, minReps: 60, maxReps: 90 }, { setNumber: 2, minReps: 60, maxReps: 90 }, { setNumber: 3, minReps: 60, maxReps: 90 }] },
+          {
+            id: "e-7",
+            catalogId: "ec-34",
+            method: "סטנדרטי",
+            restSeconds: 30,
+            sets: [
+              { setNumber: 1, minReps: 60, maxReps: 90 },
+              { setNumber: 2, minReps: 60, maxReps: 90 },
+              { setNumber: 3, minReps: 60, maxReps: 90 },
+            ],
+          },
         ],
       },
     ],
@@ -668,9 +1134,7 @@ const formResponses: FormResponse[] = [
       },
       {
         title: "מוטיבציה",
-        fields: [
-          { question: "את/ה מרחק נגיעה מלעשות את השינוי המטורף הזה!", answer: "מוכן 100%" },
-        ],
+        fields: [{ question: "את/ה מרחק נגיעה מלעשות את השינוי המטורף הזה!", answer: "מוכן 100%" }],
       },
     ],
   },
@@ -698,10 +1162,18 @@ const muscleGroupColors: Record<MuscleGroup, { bg: string; text: string; gradien
   חזה: { bg: "bg-blue-100", text: "text-blue-700", gradient: "from-blue-500 to-indigo-600" },
   גב: { bg: "bg-emerald-100", text: "text-emerald-700", gradient: "from-emerald-500 to-teal-600" },
   טרפזים: { bg: "bg-teal-100", text: "text-teal-700", gradient: "from-teal-500 to-cyan-600" },
-  כתפיים: { bg: "bg-orange-100", text: "text-orange-700", gradient: "from-orange-500 to-amber-600" },
+  כתפיים: {
+    bg: "bg-orange-100",
+    text: "text-orange-700",
+    gradient: "from-orange-500 to-amber-600",
+  },
   "יד קידמית": { bg: "bg-pink-100", text: "text-pink-700", gradient: "from-pink-500 to-rose-600" },
   "יד אחורית": { bg: "bg-rose-100", text: "text-rose-700", gradient: "from-rose-500 to-red-600" },
-  רגליים: { bg: "bg-purple-100", text: "text-purple-700", gradient: "from-purple-500 to-fuchsia-600" },
+  רגליים: {
+    bg: "bg-purple-100",
+    text: "text-purple-700",
+    gradient: "from-purple-500 to-fuchsia-600",
+  },
   ישבן: { bg: "bg-violet-100", text: "text-violet-700", gradient: "from-violet-500 to-purple-600" },
   תאומים: { bg: "bg-cyan-100", text: "text-cyan-700", gradient: "from-cyan-500 to-sky-600" },
   אמות: { bg: "bg-amber-100", text: "text-amber-700", gradient: "from-amber-500 to-yellow-600" },
@@ -758,11 +1230,35 @@ const photoGroups: { date: string; photos: { label: string; url?: string }[] }[]
 ];
 
 const weighings: Record<number, number | "x"> = {
-  1: "x", 2: "x", 3: "x", 4: "x", 5: "x",
-  6: 90, 7: 90, 8: 90, 9: 90,
-  10: 90, 11: 90, 12: 91, 13: 90, 14: 89.8, 15: 90, 16: 90.6,
-  17: 90.6, 18: 90.4, 19: "x", 20: 90.6, 21: 90.4, 22: 90.4, 23: 91,
-  24: 92, 25: 92.1, 26: 91.6, 27: "x", 28: 91.6, 29: "x",
+  1: "x",
+  2: "x",
+  3: "x",
+  4: "x",
+  5: "x",
+  6: 90,
+  7: 90,
+  8: 90,
+  9: 90,
+  10: 90,
+  11: 90,
+  12: 91,
+  13: 90,
+  14: 89.8,
+  15: 90,
+  16: 90.6,
+  17: 90.6,
+  18: 90.4,
+  19: "x",
+  20: 90.6,
+  21: 90.4,
+  22: 90.4,
+  23: 91,
+  24: 92,
+  25: 92.1,
+  26: 91.6,
+  27: "x",
+  28: 91.6,
+  29: "x",
 };
 const DAYS_IN_MONTH = 31; // May
 const FIRST_WEEKDAY_OFFSET = 5; // May 1, 2026 starts on Friday (Su=0,...,Fr=5)
@@ -774,7 +1270,9 @@ function WeightChart() {
     .map(([d, v]) => ({ day: Number(d), weight: v as number }))
     .sort((a, b) => a.day - b.day);
 
-  const [hover, setHover] = useState<{ x: number; y: number; day: number; weight: number } | null>(null);
+  const [hover, setHover] = useState<{ x: number; y: number; day: number; weight: number } | null>(
+    null
+  );
 
   if (points.length === 0) return null;
 
@@ -822,12 +1320,11 @@ function WeightChart() {
   const xLabels = points.filter((_, i) => i % Math.ceil(points.length / 8) === 0);
 
   return (
-    <div dir="ltr" className="relative h-full w-full rounded-xl bg-gradient-to-br from-slate-50 to-blue-50/30">
-      <svg
-        viewBox={`0 0 ${W} ${H}`}
-        preserveAspectRatio="none"
-        className="block h-full w-full"
-      >
+    <div
+      dir="ltr"
+      className="relative h-full w-full rounded-xl bg-gradient-to-br from-slate-50 to-blue-50/30"
+    >
+      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="block h-full w-full">
         <defs>
           <linearGradient id="weightArea" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#10b981" stopOpacity="0.18" />
@@ -878,7 +1375,9 @@ function WeightChart() {
         {points.map((p) => (
           <g
             key={p.day}
-            onMouseEnter={() => setHover({ x: x(p.day), y: y(p.weight), day: p.day, weight: p.weight })}
+            onMouseEnter={() =>
+              setHover({ x: x(p.day), y: y(p.weight), day: p.day, weight: p.weight })
+            }
             onMouseLeave={() => setHover(null)}
             style={{ cursor: "pointer" }}
           >
@@ -923,12 +1422,16 @@ function WeightChart() {
           dir="rtl"
         >
           <p className="font-bold">{hover.weight} ק״ג</p>
-          <p className="text-[10px] text-slate-300">
-            {String(hover.day).padStart(2, "0")}/05/2026
-          </p>
+          <p className="text-[10px] text-slate-300">{String(hover.day).padStart(2, "0")}/05/2026</p>
           <div
             className="absolute left-1/2 top-full -translate-x-1/2"
-            style={{ width: 0, height: 0, borderLeft: "4px solid transparent", borderRight: "4px solid transparent", borderTop: "4px solid #0f172a" }}
+            style={{
+              width: 0,
+              height: 0,
+              borderLeft: "4px solid transparent",
+              borderRight: "4px solid transparent",
+              borderTop: "4px solid #0f172a",
+            }}
           />
         </div>
       )}
@@ -1049,12 +1552,72 @@ const initials = (user.firstName[0] + user.lastName[0]).toUpperCase();
 
 // Mock trainees list for the navigation flow
 const traineesList = [
-  { id: "t-1", firstName: "שרון", lastName: "אבוחצירה", planType: "חיטוב", status: "פעיל" as const, dateJoined: "05/05/2026", lastActivity: "היום", weight: 70.8, weightChange: -4.4 },
-  { id: "t-2", firstName: "דניאל", lastName: "כהן", planType: "במסה", status: "פעיל" as const, dateJoined: "12/03/2026", lastActivity: "לפני יומיים", weight: 82.5, weightChange: +1.8 },
-  { id: "t-3", firstName: "מיכל", lastName: "לוי", planType: "שמירה", status: "פעיל" as const, dateJoined: "20/01/2026", lastActivity: "השבוע", weight: 62.3, weightChange: -2.1 },
-  { id: "t-4", firstName: "יוסי", lastName: "פרץ", planType: "חיטוב", status: "כבוי" as const, dateJoined: "01/09/2025", lastActivity: "לפני חודש", weight: 95.0, weightChange: -8.5 },
-  { id: "t-5", firstName: "רונית", lastName: "אזולאי", planType: "התאוששות", status: "משתמש" as const, dateJoined: "15/04/2026", lastActivity: "אתמול", weight: 58.4, weightChange: -1.2 },
-  { id: "t-6", firstName: "אבי", lastName: "מזרחי", planType: "במסה", status: "פעיל" as const, dateJoined: "28/02/2026", lastActivity: "היום", weight: 78.9, weightChange: +3.2 },
+  {
+    id: "t-1",
+    firstName: "שרון",
+    lastName: "אבוחצירה",
+    planType: "חיטוב",
+    status: "פעיל" as const,
+    dateJoined: "05/05/2026",
+    lastActivity: "היום",
+    weight: 70.8,
+    weightChange: -4.4,
+  },
+  {
+    id: "t-2",
+    firstName: "דניאל",
+    lastName: "כהן",
+    planType: "במסה",
+    status: "פעיל" as const,
+    dateJoined: "12/03/2026",
+    lastActivity: "לפני יומיים",
+    weight: 82.5,
+    weightChange: +1.8,
+  },
+  {
+    id: "t-3",
+    firstName: "מיכל",
+    lastName: "לוי",
+    planType: "שמירה",
+    status: "פעיל" as const,
+    dateJoined: "20/01/2026",
+    lastActivity: "השבוע",
+    weight: 62.3,
+    weightChange: -2.1,
+  },
+  {
+    id: "t-4",
+    firstName: "יוסי",
+    lastName: "פרץ",
+    planType: "חיטוב",
+    status: "כבוי" as const,
+    dateJoined: "01/09/2025",
+    lastActivity: "לפני חודש",
+    weight: 95.0,
+    weightChange: -8.5,
+  },
+  {
+    id: "t-5",
+    firstName: "רונית",
+    lastName: "אזולאי",
+    planType: "התאוששות",
+    status: "משתמש" as const,
+    dateJoined: "15/04/2026",
+    lastActivity: "אתמול",
+    weight: 58.4,
+    weightChange: -1.2,
+  },
+  {
+    id: "t-6",
+    firstName: "אבי",
+    lastName: "מזרחי",
+    planType: "במסה",
+    status: "פעיל" as const,
+    dateJoined: "28/02/2026",
+    lastActivity: "היום",
+    weight: 78.9,
+    weightChange: +3.2,
+  },
 ];
 
 function TraineesListPage({ onSelect }: { onSelect: (id: string) => void }) {
@@ -1100,11 +1663,15 @@ function TraineesListPage({ onSelect }: { onSelect: (id: string) => void }) {
         </div>
         <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm">
           <p className="text-xs text-slate-500">פעילים</p>
-          <p className="mt-1 text-2xl font-bold text-emerald-600">{traineesList.filter((t) => t.status === "פעיל").length}</p>
+          <p className="mt-1 text-2xl font-bold text-emerald-600">
+            {traineesList.filter((t) => t.status === "פעיל").length}
+          </p>
         </div>
         <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm">
           <p className="text-xs text-slate-500">לא פעילים</p>
-          <p className="mt-1 text-2xl font-bold text-slate-900">{traineesList.filter((t) => t.status !== "פעיל").length}</p>
+          <p className="mt-1 text-2xl font-bold text-slate-900">
+            {traineesList.filter((t) => t.status !== "פעיל").length}
+          </p>
         </div>
         <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm">
           <p className="text-xs text-slate-500">חודש זה — הצטרפו</p>
@@ -1114,7 +1681,10 @@ function TraineesListPage({ onSelect }: { onSelect: (id: string) => void }) {
 
       <div className="flex flex-col gap-3 sm:flex-row">
         <div className="relative flex-1">
-          <FaMagnifyingGlass size={12} className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-slate-400" />
+          <FaMagnifyingGlass
+            size={12}
+            className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-slate-400"
+          />
           <input
             type="text"
             value={search}
@@ -1129,7 +1699,9 @@ function TraineesListPage({ onSelect }: { onSelect: (id: string) => void }) {
               key={s}
               onClick={() => setFilterStatus(s)}
               className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
-                filterStatus === s ? "bg-blue-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-50"
+                filterStatus === s
+                  ? "bg-blue-600 text-white shadow-sm"
+                  : "text-slate-600 hover:bg-slate-50"
               }`}
             >
               {s}
@@ -1160,7 +1732,9 @@ function TraineesListPage({ onSelect }: { onSelect: (id: string) => void }) {
                     <p className="text-xs text-slate-500">{t.planType}</p>
                   </div>
                 </div>
-                <span className={`inline-flex items-center gap-1 rounded-full ${sc.bg} px-2 py-0.5 text-[10px] font-semibold ${sc.text}`}>
+                <span
+                  className={`inline-flex items-center gap-1 rounded-full ${sc.bg} px-2 py-0.5 text-[10px] font-semibold ${sc.text}`}
+                >
                   <span className={`h-1.5 w-1.5 rounded-full ${sc.dot}`} />
                   {t.status}
                 </span>
@@ -1172,8 +1746,11 @@ function TraineesListPage({ onSelect }: { onSelect: (id: string) => void }) {
                 </div>
                 <div>
                   <p className="text-slate-400">שינוי</p>
-                  <p className={`mt-0.5 font-bold ${t.weightChange < 0 ? "text-emerald-600" : t.weightChange > 0 ? "text-rose-600" : "text-slate-700"}`}>
-                    {t.weightChange > 0 ? "+" : ""}{t.weightChange} ק״ג
+                  <p
+                    className={`mt-0.5 font-bold ${t.weightChange < 0 ? "text-emerald-600" : t.weightChange > 0 ? "text-rose-600" : "text-slate-700"}`}
+                  >
+                    {t.weightChange > 0 ? "+" : ""}
+                    {t.weightChange} ק״ג
                   </p>
                 </div>
                 <div>
@@ -1229,7 +1806,13 @@ export default function DesignPreview() {
   return <TraineeDetailPage onBack={() => setView("list")} traineeId={selectedTraineeId} />;
 }
 
-function TraineeDetailPage({ onBack, traineeId }: { onBack: () => void; traineeId: string | null }) {
+function TraineeDetailPage({
+  onBack,
+  traineeId,
+}: {
+  onBack: () => void;
+  traineeId: string | null;
+}) {
   const selectedTrainee = traineesList.find((t) => t.id === traineeId) || traineesList[0];
   const [mainTab, setMainTab] = useState<MainTab>("progress");
   const [progressTab, setProgressTab] = useState<ProgressTab>("weight");
@@ -1287,8 +1870,7 @@ function TraineeDetailPage({ onBack, traineeId }: { onBack: () => void; traineeI
 
   const getPhotoUrl = (date: string, slot: number) => {
     return (
-      uploadedPhotos[`${date}-${slot}`] ||
-      allGroups.find((g) => g.date === date)?.photos[slot]?.url
+      uploadedPhotos[`${date}-${slot}`] || allGroups.find((g) => g.date === date)?.photos[slot]?.url
     );
   };
 
@@ -1336,9 +1918,21 @@ function TraineeDetailPage({ onBack, traineeId }: { onBack: () => void; traineeI
   }, [compareOpen, sortedDates]);
 
   const statusColor: Record<string, { dot: string; ring: string; text: string }> = {
-    פעיל: { dot: "bg-emerald-500 shadow-emerald-500/50", ring: "border-emerald-200 bg-emerald-50", text: "text-emerald-700" },
-    כבוי: { dot: "bg-red-500 shadow-red-500/50", ring: "border-red-200 bg-red-50", text: "text-red-700" },
-    משתמש: { dot: "bg-blue-500 shadow-blue-500/50", ring: "border-blue-200 bg-blue-50", text: "text-blue-700" },
+    פעיל: {
+      dot: "bg-emerald-500 shadow-emerald-500/50",
+      ring: "border-emerald-200 bg-emerald-50",
+      text: "text-emerald-700",
+    },
+    כבוי: {
+      dot: "bg-red-500 shadow-red-500/50",
+      ring: "border-red-200 bg-red-50",
+      text: "text-red-700",
+    },
+    משתמש: {
+      dot: "bg-blue-500 shadow-blue-500/50",
+      ring: "border-blue-200 bg-blue-50",
+      text: "text-blue-700",
+    },
   };
   const currentStatus = statusColor[status] || statusColor["פעיל"];
 
@@ -1793,10 +2387,30 @@ function TraineeDetailPage({ onBack, traineeId }: { onBack: () => void; traineeI
 
             {/* Keyboard hints */}
             <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 border-t border-slate-100 pt-3 text-xs text-slate-400">
-              <span><kbd className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-slate-600">←/→</kbd> החלף תאריך (אחרי)</span>
-              <span><kbd className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-slate-600">Shift+←/→</kbd> החלף תאריך (לפני)</span>
-              <span><kbd className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-slate-600">1-4</kbd> זווית</span>
-              <span><kbd className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-slate-600">Esc</kbd> סגור</span>
+              <span>
+                <kbd className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-slate-600">
+                  ←/→
+                </kbd>{" "}
+                החלף תאריך (אחרי)
+              </span>
+              <span>
+                <kbd className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-slate-600">
+                  Shift+←/→
+                </kbd>{" "}
+                החלף תאריך (לפני)
+              </span>
+              <span>
+                <kbd className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-slate-600">
+                  1-4
+                </kbd>{" "}
+                זווית
+              </span>
+              <span>
+                <kbd className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-slate-600">
+                  Esc
+                </kbd>{" "}
+                סגור
+              </span>
             </div>
           </div>
         </div>
@@ -1808,10 +2422,18 @@ function TraineeDetailPage({ onBack, traineeId }: { onBack: () => void; traineeI
 function DietPlanTab() {
   const [dietTab, setDietTab] = useState<"menu" | "notes" | "supplements">("menu");
   const [meals, setMeals] = useState<DietMeal[]>(initialMeals);
-  const [openMeals, setOpenMeals] = useState<Set<string>>(new Set([meals[0]?.id].filter(Boolean) as string[]));
+  const [openMeals, setOpenMeals] = useState<Set<string>>(
+    new Set([meals[0]?.id].filter(Boolean) as string[])
+  );
   const [freeCalories, setFreeCalories] = useState<number>(150);
 
-  const toggleMeal = (id: string) => setOpenMeals((p) => { const n = new Set(p); if (n.has(id)) n.delete(id); else n.add(id); return n; });
+  const toggleMeal = (id: string) =>
+    setOpenMeals((p) => {
+      const n = new Set(p);
+      if (n.has(id)) n.delete(id);
+      else n.add(id);
+      return n;
+    });
 
   // Totals across meals
   const totals = meals.reduce(
@@ -1830,7 +2452,12 @@ function DietPlanTab() {
     fats: totals.fats * macrosPerUnit.fats.kcal,
     vegetables: totals.vegetables * macrosPerUnit.vegetables.kcal,
   };
-  const totalCalories = macroCalories.protein + macroCalories.carbs + macroCalories.fats + macroCalories.vegetables + freeCalories;
+  const totalCalories =
+    macroCalories.protein +
+    macroCalories.carbs +
+    macroCalories.fats +
+    macroCalories.vegetables +
+    freeCalories;
 
   const dietTabs = [
     { id: "menu" as const, label: "תפריט תזונה", icon: <FaAppleWhole size={13} /> },
@@ -1846,7 +2473,11 @@ function DietPlanTab() {
           {dietTabs.map((t) => {
             const active = dietTab === t.id;
             return (
-              <button key={t.id} onClick={() => setDietTab(t.id)} className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all ${active ? "bg-blue-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"}`}>
+              <button
+                key={t.id}
+                onClick={() => setDietTab(t.id)}
+                className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all ${active ? "bg-blue-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"}`}
+              >
                 <span>{t.label}</span>
                 <span className={active ? "text-white" : "text-slate-500"}>{t.icon}</span>
               </button>
@@ -1854,8 +2485,13 @@ function DietPlanTab() {
           })}
         </div>
         <div className="flex items-center gap-2">
-          <button className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:border-slate-300 hover:bg-slate-50">שמור תפריט כתבנית</button>
-          <button className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800"><FaFloppyDisk size={11} />שמור תפריט</button>
+          <button className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:border-slate-300 hover:bg-slate-50">
+            שמור תפריט כתבנית
+          </button>
+          <button className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800">
+            <FaFloppyDisk size={11} />
+            שמור תפריט
+          </button>
         </div>
       </div>
 
@@ -1871,7 +2507,10 @@ function DietPlanTab() {
               </div>
               <div className="text-end">
                 <p className="text-xs uppercase tracking-wider text-slate-400">סה״כ קלוריות</p>
-                <p className="text-2xl font-bold text-slate-900">{totalCalories.toLocaleString()} <span className="text-sm text-slate-500">קק״ל</span></p>
+                <p className="text-2xl font-bold text-slate-900">
+                  {totalCalories.toLocaleString()}{" "}
+                  <span className="text-sm text-slate-500">קק״ל</span>
+                </p>
               </div>
             </div>
 
@@ -1882,20 +2521,33 @@ function DietPlanTab() {
                 const kcal = macroCalories[key];
                 const pct = totalCalories > 0 ? Math.round((kcal / totalCalories) * 100) : 0;
                 return (
-                  <div key={key} className="rounded-2xl border border-slate-200 bg-white p-4 transition-all hover:shadow-md">
+                  <div
+                    key={key}
+                    className="rounded-2xl border border-slate-200 bg-white p-4 transition-all hover:shadow-md"
+                  >
                     <div className="flex items-start justify-between">
                       <div>
                         <p className="text-xs text-slate-500">{def.label}</p>
-                        <p className="mt-1 text-2xl font-bold text-slate-900">{units}<span className="text-xs text-slate-500 mr-1">מנות</span></p>
-                        <p className="mt-0.5 text-xs text-slate-400">{kcal} קק״ל · {pct}%</p>
+                        <p className="mt-1 text-2xl font-bold text-slate-900">
+                          {units}
+                          <span className="text-xs text-slate-500 mr-1">מנות</span>
+                        </p>
+                        <p className="mt-0.5 text-xs text-slate-400">
+                          {kcal} קק״ל · {pct}%
+                        </p>
                       </div>
-                      <div className={`flex h-12 w-12 items-center justify-center rounded-2xl text-xl font-bold ring-1 ${def.color}`}>
+                      <div
+                        className={`flex h-12 w-12 items-center justify-center rounded-2xl text-xl font-bold ring-1 ${def.color}`}
+                      >
                         {def.icon}
                       </div>
                     </div>
                     {/* mini progress bar */}
                     <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-100">
-                      <div className={`h-full rounded-full ${def.barColor}`} style={{ width: `${pct}%` }} />
+                      <div
+                        className={`h-full rounded-full ${def.barColor}`}
+                        style={{ width: `${pct}%` }}
+                      />
                     </div>
                   </div>
                 );
@@ -1905,7 +2557,9 @@ function DietPlanTab() {
             {/* Free calories */}
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-dashed border-slate-200 bg-slate-50/40 px-4 py-3">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">קלוריות חופשיות</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  קלוריות חופשיות
+                </p>
                 <p className="text-xs text-slate-400">מתווסף לסה״כ הקלוריות מבלי להופיע בארוחות</p>
               </div>
               <div className="flex items-center gap-2">
@@ -1922,7 +2576,9 @@ function DietPlanTab() {
 
           {/* Template selector */}
           <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm">
-            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500">בחר תבנית תפריט מוכנה</label>
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500">
+              בחר תבנית תפריט מוכנה
+            </label>
             <div className="relative">
               <select className="w-full cursor-pointer appearance-none rounded-xl border border-slate-200 bg-white px-4 py-2.5 pe-10 text-sm text-slate-700 hover:border-emerald-300 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200">
                 <option>— בחר תבנית —</option>
@@ -1930,7 +2586,10 @@ function DietPlanTab() {
                 <option>במסה 2500 קק״ל</option>
                 <option>שמירה 2000 קק״ל</option>
               </select>
-              <FaChevronDown size={11} className="pointer-events-none absolute end-4 top-1/2 -translate-y-1/2 text-slate-400" />
+              <FaChevronDown
+                size={11}
+                className="pointer-events-none absolute end-4 top-1/2 -translate-y-1/2 text-slate-400"
+              />
             </div>
           </div>
 
@@ -1949,7 +2608,14 @@ function DietPlanTab() {
             ))}
             <button
               onClick={() => {
-                const newMeal: DietMeal = { id: `m-${Date.now()}`, name: `ארוחה ${meals.length + 1}`, protein: { amount: 1, mode: "קבוע" }, carbs: { amount: 1, mode: "קבוע" }, fats: { amount: 0, mode: "קבוע" }, vegetables: { amount: 0, mode: "קבוע" } };
+                const newMeal: DietMeal = {
+                  id: `m-${Date.now()}`,
+                  name: `ארוחה ${meals.length + 1}`,
+                  protein: { amount: 1, mode: "קבוע" },
+                  carbs: { amount: 1, mode: "קבוע" },
+                  fats: { amount: 0, mode: "קבוע" },
+                  vegetables: { amount: 0, mode: "קבוע" },
+                };
                 setMeals((p) => [...p, newMeal]);
                 setOpenMeals((p) => new Set([...p, newMeal.id]));
               }}
@@ -1982,7 +2648,13 @@ function SupplementsEditor() {
     if (supplements.some((s) => s.name === item.name)) return;
     setSupplements((p) => [
       ...p,
-      { id: `sup-${Date.now()}`, name: item.name, category: item.category, dosage: item.defaultDosage, timing: item.defaultTiming },
+      {
+        id: `sup-${Date.now()}`,
+        name: item.name,
+        category: item.category,
+        dosage: item.defaultDosage,
+        timing: item.defaultTiming,
+      },
     ]);
   };
 
@@ -1990,17 +2662,27 @@ function SupplementsEditor() {
     if (!customName.trim()) return;
     setSupplements((p) => [
       ...p,
-      { id: `sup-${Date.now()}`, name: customName.trim(), category: customCat, dosage: customDosage || "—", timing: customTiming || "—" },
+      {
+        id: `sup-${Date.now()}`,
+        name: customName.trim(),
+        category: customCat,
+        dosage: customDosage || "—",
+        timing: customTiming || "—",
+      },
     ]);
     setCustomName("");
     setCustomDosage("");
     setCustomTiming("");
   };
 
-  const updateSup = (id: string, patch: Partial<Supplement>) => setSupplements((p) => p.map((s) => (s.id === id ? { ...s, ...patch } : s)));
+  const updateSup = (id: string, patch: Partial<Supplement>) =>
+    setSupplements((p) => p.map((s) => (s.id === id ? { ...s, ...patch } : s)));
   const deleteSup = (id: string) => setSupplements((p) => p.filter((s) => s.id !== id));
 
-  const filteredCatalog = filterCat === "הכל" ? supplementCatalog : supplementCatalog.filter((c) => c.category === filterCat);
+  const filteredCatalog =
+    filterCat === "הכל"
+      ? supplementCatalog
+      : supplementCatalog.filter((c) => c.category === filterCat);
 
   return (
     <div className="flex flex-col gap-4">
@@ -2039,9 +2721,14 @@ function SupplementsEditor() {
                 const c = supplementCategoryColors[sup.category];
                 const catalogItem = supplementCatalog.find((cc) => cc.name === sup.name);
                 return (
-                  <div key={sup.id} className="group rounded-2xl border border-slate-200 bg-white p-3 transition-all hover:border-slate-300 hover:shadow-sm">
+                  <div
+                    key={sup.id}
+                    className="group rounded-2xl border border-slate-200 bg-white p-3 transition-all hover:border-slate-300 hover:shadow-sm"
+                  >
                     <div className="flex items-start gap-3">
-                      <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${c.gradient} text-2xl shadow-sm`}>
+                      <div
+                        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${c.gradient} text-2xl shadow-sm`}
+                      >
                         {catalogItem?.icon || "💊"}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -2054,17 +2741,25 @@ function SupplementsEditor() {
                           />
                           <select
                             value={sup.category}
-                            onChange={(e) => updateSup(sup.id, { category: e.target.value as SupplementCategory })}
+                            onChange={(e) =>
+                              updateSup(sup.id, { category: e.target.value as SupplementCategory })
+                            }
                             className={`rounded-full ${c.bg} px-2.5 py-0.5 text-[10px] font-bold ${c.text} border-0 focus:outline-none focus:ring-2 focus:ring-amber-200`}
                           >
-                            {(Object.keys(supplementCategoryColors) as SupplementCategory[]).map((cat) => (
-                              <option key={cat} value={cat}>{cat}</option>
-                            ))}
+                            {(Object.keys(supplementCategoryColors) as SupplementCategory[]).map(
+                              (cat) => (
+                                <option key={cat} value={cat}>
+                                  {cat}
+                                </option>
+                              )
+                            )}
                           </select>
                         </div>
                         <div className="mt-1.5 grid grid-cols-2 gap-2">
                           <div>
-                            <p className="text-[9px] uppercase tracking-wider text-slate-400">מינון</p>
+                            <p className="text-[9px] uppercase tracking-wider text-slate-400">
+                              מינון
+                            </p>
                             <input
                               type="text"
                               value={sup.dosage}
@@ -2073,7 +2768,9 @@ function SupplementsEditor() {
                             />
                           </div>
                           <div>
-                            <p className="text-[9px] uppercase tracking-wider text-slate-400">מתי לקחת</p>
+                            <p className="text-[9px] uppercase tracking-wider text-slate-400">
+                              מתי לקחת
+                            </p>
                             <input
                               type="text"
                               value={sup.timing}
@@ -2100,13 +2797,19 @@ function SupplementsEditor() {
           {/* Custom add */}
           <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50/40 p-4">
             <div className="mb-2 flex items-center justify-between">
-              <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">הוסף תוסף ידני</label>
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                הוסף תוסף ידני
+              </label>
               <select
                 value={customCat}
                 onChange={(e) => setCustomCat(e.target.value as SupplementCategory)}
                 className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-700 hover:border-amber-300 focus:border-amber-500 focus:outline-none"
               >
-                {(Object.keys(supplementCategoryColors) as SupplementCategory[]).map((c) => (<option key={c} value={c}>{c}</option>))}
+                {(Object.keys(supplementCategoryColors) as SupplementCategory[]).map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
               </select>
             </div>
             <input
@@ -2149,7 +2852,9 @@ function SupplementsEditor() {
 
           {/* Category filter */}
           <div className="mb-4 flex flex-wrap gap-1">
-            {(["הכל", ...Object.keys(supplementCategoryColors)] as Array<"הכל" | SupplementCategory>).map((c) => (
+            {(
+              ["הכל", ...Object.keys(supplementCategoryColors)] as Array<"הכל" | SupplementCategory>
+            ).map((c) => (
               <button
                 key={c}
                 onClick={() => setFilterCat(c)}
@@ -2179,12 +2884,16 @@ function SupplementsEditor() {
                       : "border border-slate-200 bg-white text-slate-700 hover:border-amber-300 hover:bg-amber-50/40 hover:text-amber-800"
                   }`}
                 >
-                  <span className={`flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br ${c.gradient} text-base shadow-sm`}>
+                  <span
+                    className={`flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br ${c.gradient} text-base shadow-sm`}
+                  >
                     {item.icon}
                   </span>
                   <div className="flex-1 text-right">
                     <p className="font-bold">{item.name}</p>
-                    <p className="text-[10px] text-slate-400">{item.defaultDosage} · {item.defaultTiming}</p>
+                    <p className="text-[10px] text-slate-400">
+                      {item.defaultDosage} · {item.defaultTiming}
+                    </p>
                   </div>
                   {isAdded ? <FaCheck size={10} /> : <FaPlus size={10} />}
                 </button>
@@ -2235,7 +2944,17 @@ function RichTextEditor({
     if (url) exec("createLink", url);
   };
 
-  const Btn = ({ onClick, title, children, active }: { onClick: () => void; title: string; children: React.ReactNode; active?: boolean }) => (
+  const Btn = ({
+    onClick,
+    title,
+    children,
+    active,
+  }: {
+    onClick: () => void;
+    title: string;
+    children: React.ReactNode;
+    active?: boolean;
+  }) => (
     <button
       type="button"
       onMouseDown={(e) => e.preventDefault()}
@@ -2255,22 +2974,48 @@ function RichTextEditor({
     <div className="overflow-hidden rounded-xl border border-slate-200 bg-white focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-200">
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-0.5 border-b border-slate-100 bg-slate-50/40 px-2 py-1.5">
-        <Btn onClick={() => exec("bold")} title="מודגש (B)"><FaBold size={11} /></Btn>
-        <Btn onClick={() => exec("italic")} title="נטוי (I)"><FaItalic size={11} /></Btn>
-        <Btn onClick={() => exec("underline")} title="קו תחתון"><FaUnderline size={11} /></Btn>
-        <Btn onClick={() => exec("strikeThrough")} title="קו חוצה"><FaStrikethrough size={11} /></Btn>
+        <Btn onClick={() => exec("bold")} title="מודגש (B)">
+          <FaBold size={11} />
+        </Btn>
+        <Btn onClick={() => exec("italic")} title="נטוי (I)">
+          <FaItalic size={11} />
+        </Btn>
+        <Btn onClick={() => exec("underline")} title="קו תחתון">
+          <FaUnderline size={11} />
+        </Btn>
+        <Btn onClick={() => exec("strikeThrough")} title="קו חוצה">
+          <FaStrikethrough size={11} />
+        </Btn>
         <span className="mx-1 h-4 w-px bg-slate-200" />
-        <Btn onClick={() => exec("insertUnorderedList")} title="רשימה"><FaListUl size={11} /></Btn>
-        <Btn onClick={() => exec("insertOrderedList")} title="רשימה ממוספרת"><FaListOl size={11} /></Btn>
-        <Btn onClick={() => exec("indent")} title="הזחה ימינה"><FaIndent size={11} /></Btn>
-        <Btn onClick={() => exec("outdent")} title="הזחה שמאלה"><FaOutdent size={11} /></Btn>
+        <Btn onClick={() => exec("insertUnorderedList")} title="רשימה">
+          <FaListUl size={11} />
+        </Btn>
+        <Btn onClick={() => exec("insertOrderedList")} title="רשימה ממוספרת">
+          <FaListOl size={11} />
+        </Btn>
+        <Btn onClick={() => exec("indent")} title="הזחה ימינה">
+          <FaIndent size={11} />
+        </Btn>
+        <Btn onClick={() => exec("outdent")} title="הזחה שמאלה">
+          <FaOutdent size={11} />
+        </Btn>
         <span className="mx-1 h-4 w-px bg-slate-200" />
-        <Btn onClick={() => setAlignment("right")} title="יישור לימין" active={align === "right"}><FaAlignRight size={11} /></Btn>
-        <Btn onClick={() => setAlignment("center")} title="יישור למרכז" active={align === "center"}><FaAlignCenter size={11} /></Btn>
-        <Btn onClick={() => setAlignment("left")} title="יישור לשמאל" active={align === "left"}><FaAlignLeft size={11} /></Btn>
+        <Btn onClick={() => setAlignment("right")} title="יישור לימין" active={align === "right"}>
+          <FaAlignRight size={11} />
+        </Btn>
+        <Btn onClick={() => setAlignment("center")} title="יישור למרכז" active={align === "center"}>
+          <FaAlignCenter size={11} />
+        </Btn>
+        <Btn onClick={() => setAlignment("left")} title="יישור לשמאל" active={align === "left"}>
+          <FaAlignLeft size={11} />
+        </Btn>
         <span className="mx-1 h-4 w-px bg-slate-200" />
-        <Btn onClick={addLink} title="הוסף קישור"><FaLink size={10} /></Btn>
-        <Btn onClick={() => exec("removeFormat")} title="נקה עיצוב"><FaEraser size={11} /></Btn>
+        <Btn onClick={addLink} title="הוסף קישור">
+          <FaLink size={10} />
+        </Btn>
+        <Btn onClick={() => exec("removeFormat")} title="נקה עיצוב">
+          <FaEraser size={11} />
+        </Btn>
         <div className="ms-auto flex items-center gap-1">
           <select
             onChange={(e) => exec("foreColor", e.target.value)}
@@ -2331,7 +3076,9 @@ function DietNotesEditor() {
   const [customCategory, setCustomCategory] = useState<NoteCategory>("מומלץ");
   const [templatesOpen, setTemplatesOpen] = useState(false);
   const [filterCategory, setFilterCategory] = useState<"הכל" | NoteCategory>("הכל");
-  const [savedTemplates, setSavedTemplates] = useState<{ id: string; name: string; notes: DietNote[] }[]>([
+  const [savedTemplates, setSavedTemplates] = useState<
+    { id: string; name: string; notes: DietNote[] }[]
+  >([
     {
       id: "tpl-1",
       name: "תבנית חיטוב סטנדרטי",
@@ -2374,7 +3121,10 @@ function DietNotesEditor() {
 
   const addCustomNote = () => {
     if (!customText.trim()) return;
-    setNotes((p) => [...p, { id: `dn-${Date.now()}`, category: customCategory, text: customText.trim() }]);
+    setNotes((p) => [
+      ...p,
+      { id: `dn-${Date.now()}`, category: customCategory, text: customText.trim() },
+    ]);
     setCustomText("");
   };
 
@@ -2385,7 +3135,9 @@ function DietNotesEditor() {
   const deleteNote = (id: string) => setNotes((p) => p.filter((n) => n.id !== id));
 
   const filteredTemplates =
-    filterCategory === "הכל" ? noteTemplates : noteTemplates.filter((t) => t.category === filterCategory);
+    filterCategory === "הכל"
+      ? noteTemplates
+      : noteTemplates.filter((t) => t.category === filterCategory);
 
   return (
     <div className="flex flex-col gap-4">
@@ -2440,16 +3192,23 @@ function DietNotesEditor() {
             {notes.map((note) => {
               const c = noteCategoryColors[note.category];
               return (
-                <div key={note.id} className="group flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-3 transition-all hover:border-slate-300 hover:shadow-sm">
+                <div
+                  key={note.id}
+                  className="group flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-3 transition-all hover:border-slate-300 hover:shadow-sm"
+                >
                   <div className="flex-1 min-w-0">
                     <div className="mb-1 flex items-center gap-2">
-                      <span className={`rounded-full ${c.bg} px-2.5 py-0.5 text-[10px] font-bold ${c.text}`}>
+                      <span
+                        className={`rounded-full ${c.bg} px-2.5 py-0.5 text-[10px] font-bold ${c.text}`}
+                      >
                         {note.category}
                       </span>
                     </div>
                     <div
                       className="rich-display text-sm leading-relaxed text-slate-800"
-                      dangerouslySetInnerHTML={{ __html: /<[^>]+>/.test(note.text) ? note.text : `<p>${note.text}</p>` }}
+                      dangerouslySetInnerHTML={{
+                        __html: /<[^>]+>/.test(note.text) ? note.text : `<p>${note.text}</p>`,
+                      }}
                     />
                   </div>
                   <button
@@ -2467,7 +3226,9 @@ function DietNotesEditor() {
 
         {/* Custom note input — rich text */}
         <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50/40 p-4">
-          <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500">הוסף דגש ידני</label>
+          <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500">
+            הוסף דגש ידני
+          </label>
           <RichTextEditor
             value={customText}
             onChange={setCustomText}
@@ -2486,8 +3247,14 @@ function DietNotesEditor() {
 
       {/* Save template dialog */}
       {saveDialogOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 p-4 backdrop-blur-sm" onClick={() => setSaveDialogOpen(false)}>
-          <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 p-4 backdrop-blur-sm"
+          onClick={() => setSaveDialogOpen(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="mb-4 flex items-center gap-2">
               <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-200">
                 <FaFloppyDisk size={14} />
@@ -2497,7 +3264,9 @@ function DietNotesEditor() {
                 <p className="text-xs text-slate-500">תוכל לטעון תבנית זו לתפריטים עתידיים</p>
               </div>
             </div>
-            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500">שם התבנית</label>
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500">
+              שם התבנית
+            </label>
             <input
               type="text"
               value={templateName}
@@ -2510,7 +3279,10 @@ function DietNotesEditor() {
               <span className="font-bold">{notes.length} דגשים</span> ייכללו בתבנית
             </div>
             <div className="flex items-center justify-end gap-2">
-              <button onClick={() => setSaveDialogOpen(false)} className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">
+              <button
+                onClick={() => setSaveDialogOpen(false)}
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+              >
                 ביטול
               </button>
               <button
@@ -2528,8 +3300,14 @@ function DietNotesEditor() {
 
       {/* Load template dialog */}
       {loadOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 p-4 backdrop-blur-sm" onClick={() => setLoadOpen(false)}>
-          <div className="w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 p-4 backdrop-blur-sm"
+          onClick={() => setLoadOpen(false)}
+        >
+          <div
+            className="w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 ring-1 ring-blue-200">
@@ -2540,7 +3318,10 @@ function DietNotesEditor() {
                   <p className="text-xs text-slate-500">בחר תבנית שמורה לטעינה</p>
                 </div>
               </div>
-              <button onClick={() => setLoadOpen(false)} className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100">
+              <button
+                onClick={() => setLoadOpen(false)}
+                className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100"
+              >
                 <FaXmark size={16} />
               </button>
             </div>
@@ -2551,7 +3332,10 @@ function DietNotesEditor() {
                 </div>
               ) : (
                 savedTemplates.map((tpl) => (
-                  <div key={tpl.id} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 transition-all hover:border-blue-300 hover:bg-blue-50/30">
+                  <div
+                    key={tpl.id}
+                    className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 transition-all hover:border-blue-300 hover:bg-blue-50/30"
+                  >
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
                       <FaClipboardList size={14} />
                     </div>
@@ -2599,27 +3383,32 @@ function DietNotesEditor() {
                   <p className="text-xs text-slate-500">בחר דגשים מוכנים והם יתווספו לרשימה</p>
                 </div>
               </div>
-              <button onClick={() => setTemplatesOpen(false)} className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100">
+              <button
+                onClick={() => setTemplatesOpen(false)}
+                className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100"
+              >
                 <FaXmark size={18} />
               </button>
             </div>
 
             {/* Filter chips */}
             <div className="flex flex-wrap gap-1.5">
-              {(["הכל", ...Object.keys(noteCategoryColors)] as Array<"הכל" | NoteCategory>).map((c) => (
-                <button
-                  key={c}
-                  onClick={() => setFilterCategory(c)}
-                  className={`inline-flex items-center gap-1 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all ${
-                    filterCategory === c
-                      ? "bg-blue-600 text-white shadow-sm"
-                      : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-                  }`}
-                >
-                  {c !== "הכל" && <span>{noteCategoryColors[c as NoteCategory].emoji}</span>}
-                  <span>{c}</span>
-                </button>
-              ))}
+              {(["הכל", ...Object.keys(noteCategoryColors)] as Array<"הכל" | NoteCategory>).map(
+                (c) => (
+                  <button
+                    key={c}
+                    onClick={() => setFilterCategory(c)}
+                    className={`inline-flex items-center gap-1 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all ${
+                      filterCategory === c
+                        ? "bg-blue-600 text-white shadow-sm"
+                        : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                    }`}
+                  >
+                    {c !== "הכל" && <span>{noteCategoryColors[c as NoteCategory].emoji}</span>}
+                    <span>{c}</span>
+                  </button>
+                )
+              )}
             </div>
 
             {/* Templates list */}
@@ -2669,8 +3458,25 @@ function DietNotesEditor() {
   );
 }
 
-function MealCard({ meal, index, isOpen, onToggle, onUpdate, onDelete }: { meal: DietMeal; index: number; isOpen: boolean; onToggle: () => void; onUpdate: (m: DietMeal) => void; onDelete: () => void; }) {
-  const updateMacro = (key: "protein" | "carbs" | "fats" | "vegetables", patch: Partial<MealItem>) => {
+function MealCard({
+  meal,
+  index,
+  isOpen,
+  onToggle,
+  onUpdate,
+  onDelete,
+}: {
+  meal: DietMeal;
+  index: number;
+  isOpen: boolean;
+  onToggle: () => void;
+  onUpdate: (m: DietMeal) => void;
+  onDelete: () => void;
+}) {
+  const updateMacro = (
+    key: "protein" | "carbs" | "fats" | "vegetables",
+    patch: Partial<MealItem>
+  ) => {
     onUpdate({ ...meal, [key]: { ...meal[key], ...patch } });
   };
 
@@ -2681,9 +3487,14 @@ function MealCard({ meal, index, isOpen, onToggle, onUpdate, onDelete }: { meal:
     meal.vegetables.amount * macrosPerUnit.vegetables.kcal;
 
   return (
-    <div className={`overflow-hidden rounded-2xl border bg-white shadow-sm transition-all ${isOpen ? "border-emerald-200 shadow-md" : "border-slate-200"}`}>
+    <div
+      className={`overflow-hidden rounded-2xl border bg-white shadow-sm transition-all ${isOpen ? "border-emerald-200 shadow-md" : "border-slate-200"}`}
+    >
       <div className="flex items-center gap-3 px-6 py-5">
-        <button onClick={onToggle} className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors ${isOpen ? "bg-emerald-100 text-emerald-700" : "border border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`}>
+        <button
+          onClick={onToggle}
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors ${isOpen ? "bg-emerald-100 text-emerald-700" : "border border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`}
+        >
           {isOpen ? <FaChevronUp size={12} /> : <FaChevronDown size={12} />}
         </button>
         <input
@@ -2693,13 +3504,27 @@ function MealCard({ meal, index, isOpen, onToggle, onUpdate, onDelete }: { meal:
           className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
         />
         <div className="hidden items-center gap-2 sm:flex">
-          <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700">ח · {meal.protein.amount}</span>
-          <span className="inline-flex items-center gap-1 rounded-full bg-orange-50 px-2 py-0.5 text-[10px] font-bold text-orange-700">פ · {meal.carbs.amount}</span>
-          <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700">ש · {meal.fats.amount}</span>
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700">י · {meal.vegetables.amount}</span>
+          <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700">
+            ח · {meal.protein.amount}
+          </span>
+          <span className="inline-flex items-center gap-1 rounded-full bg-orange-50 px-2 py-0.5 text-[10px] font-bold text-orange-700">
+            פ · {meal.carbs.amount}
+          </span>
+          <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700">
+            ש · {meal.fats.amount}
+          </span>
+          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+            י · {meal.vegetables.amount}
+          </span>
           <span className="ms-1 text-xs font-bold text-slate-700">{totalKcal} קק״ל</span>
         </div>
-        <button onClick={onDelete} className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-colors hover:border-rose-300 hover:text-rose-600" aria-label="מחק ארוחה"><FaTrash size={11} /></button>
+        <button
+          onClick={onDelete}
+          className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-colors hover:border-rose-300 hover:text-rose-600"
+          aria-label="מחק ארוחה"
+        >
+          <FaTrash size={11} />
+        </button>
       </div>
 
       {isOpen && (
@@ -2711,7 +3536,11 @@ function MealCard({ meal, index, isOpen, onToggle, onUpdate, onDelete }: { meal:
               <div key={key} className="rounded-2xl border border-slate-200 bg-white p-4">
                 <div className="mb-2 flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
-                    <span className={`flex h-7 w-7 items-center justify-center rounded-lg text-sm font-bold ring-1 ${def.color}`}>{def.icon}</span>
+                    <span
+                      className={`flex h-7 w-7 items-center justify-center rounded-lg text-sm font-bold ring-1 ${def.color}`}
+                    >
+                      {def.icon}
+                    </span>
                     <span className="text-sm font-bold text-slate-800">{def.label}</span>
                   </div>
                   <span className="text-[10px] text-slate-400">{item.amount * def.kcal} קק״ל</span>
@@ -2811,7 +3640,11 @@ function CardioPlanEditor() {
           </span>
         </div>
         <span className="text-xs text-slate-500">
-          ≈ <span className="font-bold text-slate-700">{sessionsPerWeek > 0 ? Math.round(minutesPerWeek / sessionsPerWeek) : 0}</span> דקות לאימון
+          ≈{" "}
+          <span className="font-bold text-slate-700">
+            {sessionsPerWeek > 0 ? Math.round(minutesPerWeek / sessionsPerWeek) : 0}
+          </span>{" "}
+          דקות לאימון
         </span>
       </div>
     </div>
@@ -2821,14 +3654,25 @@ function CardioPlanEditor() {
 function WorkoutNotesEditor() {
   const [notes, setNotes] = useState<{ id: string; html: string }[]>([]);
   const [customText, setCustomText] = useState("");
-  const [savedTemplates, setSavedTemplates] = useState<{ id: string; name: string; notes: { id: string; html: string }[] }[]>([
+  const [savedTemplates, setSavedTemplates] = useState<
+    { id: string; name: string; notes: { id: string; html: string }[] }[]
+  >([
     {
       id: "wtpl-1",
       name: "תבנית דגשי מתחילים",
       notes: [
-        { id: "wn-1", html: "<p><strong>חימום</strong>: 5-10 דקות הליכה / רכיבה אירובית קלה לפני כל אימון</p>" },
-        { id: "wn-2", html: "<p><strong>טכניקה לפני משקל</strong>: לעבוד על ביצוע מושלם לפני העלאת משקל</p>" },
-        { id: "wn-3", html: "<p><strong>נשימה</strong>: לנשום החוצה בעלייה (מאמץ), פנימה בירידה</p>" },
+        {
+          id: "wn-1",
+          html: "<p><strong>חימום</strong>: 5-10 דקות הליכה / רכיבה אירובית קלה לפני כל אימון</p>",
+        },
+        {
+          id: "wn-2",
+          html: "<p><strong>טכניקה לפני משקל</strong>: לעבוד על ביצוע מושלם לפני העלאת משקל</p>",
+        },
+        {
+          id: "wn-3",
+          html: "<p><strong>נשימה</strong>: לנשום החוצה בעלייה (מאמץ), פנימה בירידה</p>",
+        },
       ],
     },
   ]);
@@ -2843,12 +3687,16 @@ function WorkoutNotesEditor() {
     setCustomText("");
   };
 
-  const updateNote = (id: string, html: string) => setNotes((p) => p.map((n) => (n.id === id ? { ...n, html } : n)));
+  const updateNote = (id: string, html: string) =>
+    setNotes((p) => p.map((n) => (n.id === id ? { ...n, html } : n)));
   const deleteNote = (id: string) => setNotes((p) => p.filter((n) => n.id !== id));
 
   const saveAsTemplate = () => {
     if (!templateName.trim() || notes.length === 0) return;
-    setSavedTemplates((p) => [...p, { id: `wtpl-${Date.now()}`, name: templateName.trim(), notes: [...notes] }]);
+    setSavedTemplates((p) => [
+      ...p,
+      { id: `wtpl-${Date.now()}`, name: templateName.trim(), notes: [...notes] },
+    ]);
     setTemplateName("");
     setSaveDialogOpen(false);
   };
@@ -2873,18 +3721,27 @@ function WorkoutNotesEditor() {
         </div>
         <div className="flex items-center gap-2">
           {savedTemplates.length > 0 && (
-            <button onClick={() => setLoadOpen(true)} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:border-blue-300 hover:bg-blue-50/40 hover:text-blue-700">
+            <button
+              onClick={() => setLoadOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:border-blue-300 hover:bg-blue-50/40 hover:text-blue-700"
+            >
               <FaClipboardList size={11} />
               <span>טען תבנית</span>
             </button>
           )}
           {notes.length > 0 && (
             <>
-              <button onClick={() => setSaveDialogOpen(true)} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:border-emerald-300 hover:bg-emerald-50/40 hover:text-emerald-700">
+              <button
+                onClick={() => setSaveDialogOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:border-emerald-300 hover:bg-emerald-50/40 hover:text-emerald-700"
+              >
                 <FaFloppyDisk size={11} />
                 <span>שמור תבנית דגשים</span>
               </button>
-              <button onClick={() => setNotes([])} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:border-rose-300 hover:text-rose-600">
+              <button
+                onClick={() => setNotes([])}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:border-rose-300 hover:text-rose-600"
+              >
                 <FaTrash size={10} />
                 <span>נקה הכל</span>
               </button>
@@ -2904,7 +3761,10 @@ function WorkoutNotesEditor() {
         ) : (
           <div className="flex flex-col gap-2">
             {notes.map((note) => (
-              <div key={note.id} className="group flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-3 transition-all hover:border-slate-300 hover:shadow-sm">
+              <div
+                key={note.id}
+                className="group flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-3 transition-all hover:border-slate-300 hover:shadow-sm"
+              >
                 <div className="flex-1 min-w-0">
                   <div
                     contentEditable
@@ -2912,10 +3772,15 @@ function WorkoutNotesEditor() {
                     dir="rtl"
                     onBlur={(e) => updateNote(note.id, e.currentTarget.innerHTML)}
                     className="rich-display text-sm leading-relaxed text-slate-800 focus:outline-none"
-                    dangerouslySetInnerHTML={{ __html: /<[^>]+>/.test(note.html) ? note.html : `<p>${note.html}</p>` }}
+                    dangerouslySetInnerHTML={{
+                      __html: /<[^>]+>/.test(note.html) ? note.html : `<p>${note.html}</p>`,
+                    }}
                   />
                 </div>
-                <button onClick={() => deleteNote(note.id)} className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600">
+                <button
+                  onClick={() => deleteNote(note.id)}
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600"
+                >
                   <FaXmark size={12} />
                 </button>
               </div>
@@ -2925,7 +3790,9 @@ function WorkoutNotesEditor() {
 
         {/* Custom note input — rich text */}
         <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50/40 p-4">
-          <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500">הוסף דגש ידני</label>
+          <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500">
+            הוסף דגש ידני
+          </label>
           <RichTextEditor
             value={customText}
             onChange={setCustomText}
@@ -2944,8 +3811,14 @@ function WorkoutNotesEditor() {
 
       {/* Save template dialog */}
       {saveDialogOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 p-4 backdrop-blur-sm" onClick={() => setSaveDialogOpen(false)}>
-          <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 p-4 backdrop-blur-sm"
+          onClick={() => setSaveDialogOpen(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="mb-4 flex items-center gap-2">
               <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-200">
                 <FaFloppyDisk size={14} />
@@ -2955,7 +3828,9 @@ function WorkoutNotesEditor() {
                 <p className="text-xs text-slate-500">תוכל לטעון תבנית זו לתוכניות עתידיות</p>
               </div>
             </div>
-            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500">שם התבנית</label>
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500">
+              שם התבנית
+            </label>
             <input
               type="text"
               value={templateName}
@@ -2968,7 +3843,10 @@ function WorkoutNotesEditor() {
               <span className="font-bold">{notes.length} דגשים</span> ייכללו בתבנית
             </div>
             <div className="flex items-center justify-end gap-2">
-              <button onClick={() => setSaveDialogOpen(false)} className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">
+              <button
+                onClick={() => setSaveDialogOpen(false)}
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+              >
                 ביטול
               </button>
               <button
@@ -2986,8 +3864,14 @@ function WorkoutNotesEditor() {
 
       {/* Load template dialog */}
       {loadOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 p-4 backdrop-blur-sm" onClick={() => setLoadOpen(false)}>
-          <div className="w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 p-4 backdrop-blur-sm"
+          onClick={() => setLoadOpen(false)}
+        >
+          <div
+            className="w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 ring-1 ring-blue-200">
@@ -2998,7 +3882,10 @@ function WorkoutNotesEditor() {
                   <p className="text-xs text-slate-500">בחר תבנית שמורה לטעינה</p>
                 </div>
               </div>
-              <button onClick={() => setLoadOpen(false)} className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100">
+              <button
+                onClick={() => setLoadOpen(false)}
+                className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100"
+              >
                 <FaXmark size={16} />
               </button>
             </div>
@@ -3009,7 +3896,10 @@ function WorkoutNotesEditor() {
                 </div>
               ) : (
                 savedTemplates.map((tpl) => (
-                  <div key={tpl.id} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 transition-all hover:border-blue-300 hover:bg-blue-50/30">
+                  <div
+                    key={tpl.id}
+                    className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 transition-all hover:border-blue-300 hover:bg-blue-50/30"
+                  >
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
                       <FaClipboardList size={14} />
                     </div>
@@ -3017,10 +3907,16 @@ function WorkoutNotesEditor() {
                       <p className="text-sm font-bold text-slate-800">{tpl.name}</p>
                       <p className="text-xs text-slate-500">{tpl.notes.length} דגשים</p>
                     </div>
-                    <button onClick={() => loadTemplate(tpl.id)} className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700">
+                    <button
+                      onClick={() => loadTemplate(tpl.id)}
+                      className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
+                    >
                       טען
                     </button>
-                    <button onClick={() => deleteTemplate(tpl.id)} className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600">
+                    <button
+                      onClick={() => deleteTemplate(tpl.id)}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600"
+                    >
                       <FaTrash size={10} />
                     </button>
                   </div>
@@ -3050,7 +3946,11 @@ function WorkoutPlanTab() {
           {planTabs.map((t) => {
             const active = planTab === t.id;
             return (
-              <button key={t.id} onClick={() => setPlanTab(t.id)} className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all ${active ? "bg-blue-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"}`}>
+              <button
+                key={t.id}
+                onClick={() => setPlanTab(t.id)}
+                className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all ${active ? "bg-blue-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"}`}
+              >
                 <span>{t.label}</span>
                 <span className={active ? "text-white" : "text-slate-500"}>{t.icon}</span>
               </button>
@@ -3058,16 +3958,40 @@ function WorkoutPlanTab() {
           })}
         </div>
         <div className="flex items-center gap-2">
-          <button className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:border-slate-300 hover:bg-slate-50">שמור תוכנית כתבנית</button>
-          <button className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800"><FaFloppyDisk size={11} />שמור תוכנית</button>
+          <button className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:border-slate-300 hover:bg-slate-50">
+            שמור תוכנית כתבנית
+          </button>
+          <button className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800">
+            <FaFloppyDisk size={11} />
+            שמור תוכנית
+          </button>
         </div>
       </div>
       {planTab === "workouts" && (
         <div className="flex flex-col gap-3">
           {plan.map((w) => (
-            <WorkoutCard key={w.id} workout={w} isOpen={openWorkout === w.id} onToggle={() => setOpenWorkout(openWorkout === w.id ? null : w.id)} onUpdate={(updated) => setPlan((prev) => prev.map((p) => (p.id === w.id ? updated : p)))} onDelete={() => setPlan((prev) => prev.filter((p) => p.id !== w.id))} />
+            <WorkoutCard
+              key={w.id}
+              workout={w}
+              isOpen={openWorkout === w.id}
+              onToggle={() => setOpenWorkout(openWorkout === w.id ? null : w.id)}
+              onUpdate={(updated) =>
+                setPlan((prev) => prev.map((p) => (p.id === w.id ? updated : p)))
+              }
+              onDelete={() => setPlan((prev) => prev.filter((p) => p.id !== w.id))}
+            />
           ))}
-          <button onClick={() => { const next: Workout = { id: `w-${Date.now()}`, name: `אימון חדש`, muscleGroups: [] }; setPlan((prev) => [...prev, next]); setOpenWorkout(next.id); }} className="inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50/40 px-4 py-3.5 text-sm font-semibold text-slate-500 transition-all hover:border-purple-300 hover:bg-purple-50/40 hover:text-purple-700"><FaPlus size={12} /><span>הוסף אימון</span></button>
+          <button
+            onClick={() => {
+              const next: Workout = { id: `w-${Date.now()}`, name: `אימון חדש`, muscleGroups: [] };
+              setPlan((prev) => [...prev, next]);
+              setOpenWorkout(next.id);
+            }}
+            className="inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50/40 px-4 py-3.5 text-sm font-semibold text-slate-500 transition-all hover:border-purple-300 hover:bg-purple-50/40 hover:text-purple-700"
+          >
+            <FaPlus size={12} />
+            <span>הוסף אימון</span>
+          </button>
         </div>
       )}
       {planTab === "cardio" && <CardioPlanEditor />}
@@ -3076,31 +4000,101 @@ function WorkoutPlanTab() {
   );
 }
 
-function WorkoutCard({ workout, isOpen, onToggle, onUpdate, onDelete }: { workout: Workout; isOpen: boolean; onToggle: () => void; onUpdate: (w: Workout) => void; onDelete: () => void; }) {
+function WorkoutCard({
+  workout,
+  isOpen,
+  onToggle,
+  onUpdate,
+  onDelete,
+}: {
+  workout: Workout;
+  isOpen: boolean;
+  onToggle: () => void;
+  onUpdate: (w: Workout) => void;
+  onDelete: () => void;
+}) {
   const totalExercises = workout.muscleGroups.reduce((s, g) => s + g.exercises.length, 0);
   return (
-    <div className={`overflow-hidden rounded-2xl border bg-white shadow-sm transition-all ${isOpen ? "border-purple-200 shadow-md" : "border-slate-200"}`}>
+    <div
+      className={`overflow-hidden rounded-2xl border bg-white shadow-sm transition-all ${isOpen ? "border-purple-200 shadow-md" : "border-slate-200"}`}
+    >
       <div className="flex items-center gap-3 px-5 py-4">
-        <button onClick={onToggle} className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-colors ${isOpen ? "bg-purple-100 text-purple-700" : "border border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`}>{isOpen ? <FaChevronUp size={11} /> : <FaChevronDown size={11} />}</button>
-        <input type="text" value={workout.name} onChange={(e) => onUpdate({ ...workout, name: e.target.value })} className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200" />
-        <span className="hidden text-xs text-slate-400 sm:inline">{workout.muscleGroups.length} קבוצות · {totalExercises} תרגילים</span>
-        <button onClick={onDelete} className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-colors hover:border-rose-300 hover:text-rose-600" aria-label="מחק אימון"><FaTrash size={11} /></button>
+        <button
+          onClick={onToggle}
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-colors ${isOpen ? "bg-purple-100 text-purple-700" : "border border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`}
+        >
+          {isOpen ? <FaChevronUp size={11} /> : <FaChevronDown size={11} />}
+        </button>
+        <input
+          type="text"
+          value={workout.name}
+          onChange={(e) => onUpdate({ ...workout, name: e.target.value })}
+          className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200"
+        />
+        <span className="hidden text-xs text-slate-400 sm:inline">
+          {workout.muscleGroups.length} קבוצות · {totalExercises} תרגילים
+        </span>
+        <button
+          onClick={onDelete}
+          className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-colors hover:border-rose-300 hover:text-rose-600"
+          aria-label="מחק אימון"
+        >
+          <FaTrash size={11} />
+        </button>
       </div>
       {isOpen && (
         <div className="flex flex-col gap-3 border-t border-slate-100 bg-slate-50/30 px-5 py-4">
           {workout.muscleGroups.map((mg) => (
-            <MuscleGroupBlock key={mg.id} muscleGroup={mg} onUpdate={(updated) => onUpdate({ ...workout, muscleGroups: workout.muscleGroups.map((g) => (g.id === mg.id ? updated : g)) })} onDelete={() => onUpdate({ ...workout, muscleGroups: workout.muscleGroups.filter((g) => g.id !== mg.id) })} />
+            <MuscleGroupBlock
+              key={mg.id}
+              muscleGroup={mg}
+              onUpdate={(updated) =>
+                onUpdate({
+                  ...workout,
+                  muscleGroups: workout.muscleGroups.map((g) => (g.id === mg.id ? updated : g)),
+                })
+              }
+              onDelete={() =>
+                onUpdate({
+                  ...workout,
+                  muscleGroups: workout.muscleGroups.filter((g) => g.id !== mg.id),
+                })
+              }
+            />
           ))}
-          <button onClick={() => { const newGroup: WorkoutMuscleGroup = { id: `wmg-${Date.now()}`, group: "חזה", exercises: [] }; onUpdate({ ...workout, muscleGroups: [...workout.muscleGroups, newGroup] }); }} className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-white px-4 py-3 text-xs font-semibold text-slate-500 transition-all hover:border-purple-300 hover:bg-purple-50/40 hover:text-purple-700"><FaPlus size={11} /><span>הוסף קבוצת שריר</span></button>
+          <button
+            onClick={() => {
+              const newGroup: WorkoutMuscleGroup = {
+                id: `wmg-${Date.now()}`,
+                group: "חזה",
+                exercises: [],
+              };
+              onUpdate({ ...workout, muscleGroups: [...workout.muscleGroups, newGroup] });
+            }}
+            className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-white px-4 py-3 text-xs font-semibold text-slate-500 transition-all hover:border-purple-300 hover:bg-purple-50/40 hover:text-purple-700"
+          >
+            <FaPlus size={11} />
+            <span>הוסף קבוצת שריר</span>
+          </button>
         </div>
       )}
     </div>
   );
 }
 
-function MuscleGroupBlock({ muscleGroup, onUpdate, onDelete }: { muscleGroup: WorkoutMuscleGroup; onUpdate: (mg: WorkoutMuscleGroup) => void; onDelete: () => void; }) {
+function MuscleGroupBlock({
+  muscleGroup,
+  onUpdate,
+  onDelete,
+}: {
+  muscleGroup: WorkoutMuscleGroup;
+  onUpdate: (mg: WorkoutMuscleGroup) => void;
+  onDelete: () => void;
+}) {
   const colors = muscleGroupColors[muscleGroup.group];
-  const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set(muscleGroup.exercises[0]?.id ? [muscleGroup.exercises[0].id] : []));
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(
+    () => new Set(muscleGroup.exercises[0]?.id ? [muscleGroup.exercises[0].id] : [])
+  );
   const toggleExpanded = (id: string) => {
     setExpandedIds((prev) => {
       const next = new Set(prev);
@@ -3113,20 +4107,73 @@ function MuscleGroupBlock({ muscleGroup, onUpdate, onDelete }: { muscleGroup: Wo
     <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3">
         <div className="flex items-center gap-2">
-          <span className={`inline-flex items-center rounded-full ${colors.bg} px-3 py-1 text-xs font-bold ${colors.text}`}>קבוצת שריר: {muscleGroup.group}</span>
-          <select value={muscleGroup.group} onChange={(e) => onUpdate({ ...muscleGroup, group: e.target.value as MuscleGroup })} className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600 hover:border-slate-300 focus:border-purple-500 focus:outline-none">
-            {Object.keys(muscleGroupColors).map((g) => (<option key={g} value={g}>{g}</option>))}
+          <span
+            className={`inline-flex items-center rounded-full ${colors.bg} px-3 py-1 text-xs font-bold ${colors.text}`}
+          >
+            קבוצת שריר: {muscleGroup.group}
+          </span>
+          <select
+            value={muscleGroup.group}
+            onChange={(e) => onUpdate({ ...muscleGroup, group: e.target.value as MuscleGroup })}
+            className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600 hover:border-slate-300 focus:border-purple-500 focus:outline-none"
+          >
+            {Object.keys(muscleGroupColors).map((g) => (
+              <option key={g} value={g}>
+                {g}
+              </option>
+            ))}
           </select>
         </div>
-        <button onClick={onDelete} className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-colors hover:border-rose-300 hover:text-rose-600" aria-label="מחק קבוצת שריר"><FaTrash size={10} /></button>
+        <button
+          onClick={onDelete}
+          className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-colors hover:border-rose-300 hover:text-rose-600"
+          aria-label="מחק קבוצת שריר"
+        >
+          <FaTrash size={10} />
+        </button>
       </div>
       <div className="grid grid-cols-1 gap-3 p-4 md:grid-cols-2">
         {muscleGroup.exercises.map((ex) => (
           <div key={ex.id}>
-            <ExerciseCard exercise={ex} muscleGroup={muscleGroup.group} isExpanded={expandedIds.has(ex.id)} onToggle={() => toggleExpanded(ex.id)} onUpdate={(updated) => onUpdate({ ...muscleGroup, exercises: muscleGroup.exercises.map((e) => (e.id === ex.id ? updated : e)) })} onDelete={() => onUpdate({ ...muscleGroup, exercises: muscleGroup.exercises.filter((e) => e.id !== ex.id) })} />
+            <ExerciseCard
+              exercise={ex}
+              muscleGroup={muscleGroup.group}
+              isExpanded={expandedIds.has(ex.id)}
+              onToggle={() => toggleExpanded(ex.id)}
+              onUpdate={(updated) =>
+                onUpdate({
+                  ...muscleGroup,
+                  exercises: muscleGroup.exercises.map((e) => (e.id === ex.id ? updated : e)),
+                })
+              }
+              onDelete={() =>
+                onUpdate({
+                  ...muscleGroup,
+                  exercises: muscleGroup.exercises.filter((e) => e.id !== ex.id),
+                })
+              }
+            />
           </div>
         ))}
-        <button onClick={() => { const firstInGroup = exerciseCatalog.find((c) => c.group === muscleGroup.group); if (!firstInGroup) return; const newEx: WorkoutExercise = { id: `e-${Date.now()}`, catalogId: firstInGroup.id, method: "סטנדרטי", restSeconds: 60, sets: [{ setNumber: 1, minReps: 10, maxReps: 12 }] }; onUpdate({ ...muscleGroup, exercises: [...muscleGroup.exercises, newEx] }); setExpandedIds((prev) => new Set([...prev, newEx.id])); }} className="md:col-span-2 inline-flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 px-4 py-3 text-xs font-semibold text-slate-500 transition-all hover:border-purple-300 hover:bg-purple-50/40 hover:text-purple-700"><FaPlus size={10} /><span>הוסף תרגיל</span></button>
+        <button
+          onClick={() => {
+            const firstInGroup = exerciseCatalog.find((c) => c.group === muscleGroup.group);
+            if (!firstInGroup) return;
+            const newEx: WorkoutExercise = {
+              id: `e-${Date.now()}`,
+              catalogId: firstInGroup.id,
+              method: "סטנדרטי",
+              restSeconds: 60,
+              sets: [{ setNumber: 1, minReps: 10, maxReps: 12 }],
+            };
+            onUpdate({ ...muscleGroup, exercises: [...muscleGroup.exercises, newEx] });
+            setExpandedIds((prev) => new Set([...prev, newEx.id]));
+          }}
+          className="md:col-span-2 inline-flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 px-4 py-3 text-xs font-semibold text-slate-500 transition-all hover:border-purple-300 hover:bg-purple-50/40 hover:text-purple-700"
+        >
+          <FaPlus size={10} />
+          <span>הוסף תרגיל</span>
+        </button>
       </div>
     </div>
   );
@@ -3173,7 +4220,10 @@ function ExercisePicker({
         className="w-full rounded-md border border-slate-200 bg-white px-2.5 py-1 pe-7 text-right text-sm font-bold text-slate-800 hover:border-purple-300 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200 relative"
       >
         <span className="block truncate">{selected?.name || "— בחר תרגיל —"}</span>
-        <FaChevronDown size={8} className="pointer-events-none absolute end-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+        <FaChevronDown
+          size={8}
+          className="pointer-events-none absolute end-2.5 top-1/2 -translate-y-1/2 text-slate-400"
+        />
       </button>
 
       {open && (
@@ -3181,7 +4231,10 @@ function ExercisePicker({
           {/* Search */}
           <div className="border-b border-slate-100 p-2">
             <div className="relative">
-              <FaMagnifyingGlass size={10} className="pointer-events-none absolute start-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <FaMagnifyingGlass
+                size={10}
+                className="pointer-events-none absolute start-2.5 top-1/2 -translate-y-1/2 text-slate-400"
+              />
               <input
                 ref={inputRef}
                 type="text"
@@ -3238,18 +4291,63 @@ function ExercisePicker({
   );
 }
 
-function ExerciseCard({ exercise, isExpanded, onToggle, onUpdate, onDelete, muscleGroup }: { exercise: WorkoutExercise; isExpanded: boolean; onToggle: () => void; onUpdate: (e: WorkoutExercise) => void; onDelete: () => void; muscleGroup: MuscleGroup; }) {
+function ExerciseCard({
+  exercise,
+  isExpanded,
+  onToggle,
+  onUpdate,
+  onDelete,
+  muscleGroup,
+}: {
+  exercise: WorkoutExercise;
+  isExpanded: boolean;
+  onToggle: () => void;
+  onUpdate: (e: WorkoutExercise) => void;
+  onDelete: () => void;
+  muscleGroup: MuscleGroup;
+}) {
   const totalRepsRange = `${Math.min(...exercise.sets.map((s) => s.minReps))}-${Math.max(...exercise.sets.map((s) => s.maxReps))}`;
   const catalogEntry = exerciseCatalog.find((c) => c.id === exercise.catalogId);
-  const addSet = () => { const last = exercise.sets[exercise.sets.length - 1]; onUpdate({ ...exercise, sets: [...exercise.sets, { setNumber: exercise.sets.length + 1, minReps: last?.minReps || 10, maxReps: last?.maxReps || 12 }] }); };
-  const updateSet = (setNumber: number, updates: Partial<WorkoutSet>) => { onUpdate({ ...exercise, sets: exercise.sets.map((s) => (s.setNumber === setNumber ? { ...s, ...updates } : s)) }); };
-  const deleteSet = (setNumber: number) => { onUpdate({ ...exercise, sets: exercise.sets.filter((s) => s.setNumber !== setNumber).map((s, i) => ({ ...s, setNumber: i + 1 })) }); };
+  const addSet = () => {
+    const last = exercise.sets[exercise.sets.length - 1];
+    onUpdate({
+      ...exercise,
+      sets: [
+        ...exercise.sets,
+        {
+          setNumber: exercise.sets.length + 1,
+          minReps: last?.minReps || 10,
+          maxReps: last?.maxReps || 12,
+        },
+      ],
+    });
+  };
+  const updateSet = (setNumber: number, updates: Partial<WorkoutSet>) => {
+    onUpdate({
+      ...exercise,
+      sets: exercise.sets.map((s) => (s.setNumber === setNumber ? { ...s, ...updates } : s)),
+    });
+  };
+  const deleteSet = (setNumber: number) => {
+    onUpdate({
+      ...exercise,
+      sets: exercise.sets
+        .filter((s) => s.setNumber !== setNumber)
+        .map((s, i) => ({ ...s, setNumber: i + 1 })),
+    });
+  };
   return (
-    <div className={`overflow-hidden rounded-xl border bg-white shadow-sm transition-all ${isExpanded ? "border-purple-300" : "border-slate-200 hover:border-slate-300"}`}>
+    <div
+      className={`overflow-hidden rounded-xl border bg-white shadow-sm transition-all ${isExpanded ? "border-purple-300" : "border-slate-200 hover:border-slate-300"}`}
+    >
       <div className="flex items-stretch gap-3 p-2.5">
         <div className="flex h-28 w-40 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 shadow-sm">
           {catalogEntry ? (
-            <img src={catalogEntry.image} alt={catalogEntry.name} className="h-full w-full object-cover" />
+            <img
+              src={catalogEntry.image}
+              alt={catalogEntry.name}
+              className="h-full w-full object-cover"
+            />
           ) : (
             <FaDumbbell size={24} className="text-slate-400" />
           )}
@@ -3261,15 +4359,34 @@ function ExerciseCard({ exercise, isExpanded, onToggle, onUpdate, onDelete, musc
             onChange={(catalogId) => onUpdate({ ...exercise, catalogId })}
           />
           <div className="flex flex-wrap items-center gap-1 text-[10px] text-slate-500">
-            <span className="inline-flex items-center rounded bg-purple-50 px-1.5 py-0.5 font-bold text-purple-700">{exercise.sets.length} סטים</span>
-            <span className="inline-flex items-center rounded bg-slate-100 px-1.5 py-0.5 font-semibold">{totalRepsRange} חזרות</span>
-            <span className="inline-flex items-center rounded bg-slate-100 px-1.5 py-0.5 font-semibold">{exercise.restSeconds}״ מנוחה</span>
-            {exercise.method && <span className="truncate text-slate-400">· {exercise.method}</span>}
+            <span className="inline-flex items-center rounded bg-purple-50 px-1.5 py-0.5 font-bold text-purple-700">
+              {exercise.sets.length} סטים
+            </span>
+            <span className="inline-flex items-center rounded bg-slate-100 px-1.5 py-0.5 font-semibold">
+              {totalRepsRange} חזרות
+            </span>
+            <span className="inline-flex items-center rounded bg-slate-100 px-1.5 py-0.5 font-semibold">
+              {exercise.restSeconds}״ מנוחה
+            </span>
+            {exercise.method && (
+              <span className="truncate text-slate-400">· {exercise.method}</span>
+            )}
           </div>
         </div>
         <div className="flex flex-col items-center justify-center gap-1.5">
-          <button onClick={onToggle} className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors ${isExpanded ? "bg-purple-100 text-purple-700" : "border border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`}>{isExpanded ? <FaChevronUp size={10} /> : <FaChevronDown size={10} />}</button>
-          <button onClick={onDelete} className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-colors hover:border-rose-300 hover:text-rose-600" aria-label="מחק תרגיל"><FaXmark size={10} /></button>
+          <button
+            onClick={onToggle}
+            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors ${isExpanded ? "bg-purple-100 text-purple-700" : "border border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`}
+          >
+            {isExpanded ? <FaChevronUp size={10} /> : <FaChevronDown size={10} />}
+          </button>
+          <button
+            onClick={onDelete}
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-colors hover:border-rose-300 hover:text-rose-600"
+            aria-label="מחק תרגיל"
+          >
+            <FaXmark size={10} />
+          </button>
         </div>
       </div>
       {isExpanded && (
@@ -3278,7 +4395,9 @@ function ExerciseCard({ exercise, isExpanded, onToggle, onUpdate, onDelete, musc
             <div className="grid grid-cols-2 gap-2">
               <div className="rounded-xl border border-slate-200 bg-white p-2.5">
                 <div className="mb-1 flex items-center justify-between">
-                  <label className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">שיטת אימון</label>
+                  <label className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                    שיטת אימון
+                  </label>
                   {exercise.method && (
                     <button
                       onClick={() => onUpdate({ ...exercise, method: "" })}
@@ -3291,38 +4410,91 @@ function ExerciseCard({ exercise, isExpanded, onToggle, onUpdate, onDelete, musc
                   )}
                 </div>
                 <div className="relative">
-                  <select value={exercise.method} onChange={(e) => onUpdate({ ...exercise, method: e.target.value })} className="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white px-2 py-1.5 pe-7 text-xs font-medium text-slate-700 hover:border-purple-300 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200">
+                  <select
+                    value={exercise.method}
+                    onChange={(e) => onUpdate({ ...exercise, method: e.target.value })}
+                    className="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white px-2 py-1.5 pe-7 text-xs font-medium text-slate-700 hover:border-purple-300 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200"
+                  >
                     <option value="">— ללא שיטה —</option>
-                    {workoutMethods.map((m) => (<option key={m} value={m}>{m}</option>))}
+                    {workoutMethods.map((m) => (
+                      <option key={m} value={m}>
+                        {m}
+                      </option>
+                    ))}
                   </select>
-                  <FaChevronDown size={9} className="pointer-events-none absolute end-2 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <FaChevronDown
+                    size={9}
+                    className="pointer-events-none absolute end-2 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
                 </div>
               </div>
               <div className="rounded-xl border border-slate-200 bg-white p-2.5">
-                <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">מנוחה (שניות)</label>
-                <input type="number" value={exercise.restSeconds} onChange={(e) => onUpdate({ ...exercise, restSeconds: Number(e.target.value) })} className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-700 hover:border-purple-300 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200" />
+                <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                  מנוחה (שניות)
+                </label>
+                <input
+                  type="number"
+                  value={exercise.restSeconds}
+                  onChange={(e) => onUpdate({ ...exercise, restSeconds: Number(e.target.value) })}
+                  className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-700 hover:border-purple-300 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200"
+                />
               </div>
             </div>
             <div className="rounded-xl border border-slate-200 bg-white p-2.5">
               <div className="mb-1.5 flex items-center justify-between">
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">סטים</label>
-                <button onClick={addSet} className="inline-flex items-center gap-1 rounded-md bg-gradient-to-br from-purple-500 to-fuchsia-600 px-2 py-0.5 text-[10px] font-semibold text-white shadow-sm hover:shadow-md"><FaPlus size={8} /><span>סט</span></button>
+                <label className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                  סטים
+                </label>
+                <button
+                  onClick={addSet}
+                  className="inline-flex items-center gap-1 rounded-md bg-gradient-to-br from-purple-500 to-fuchsia-600 px-2 py-0.5 text-[10px] font-semibold text-white shadow-sm hover:shadow-md"
+                >
+                  <FaPlus size={8} />
+                  <span>סט</span>
+                </button>
               </div>
               <div className="flex flex-col gap-2">
                 {exercise.sets.map((set) => (
-                  <div key={set.setNumber} className="grid grid-cols-[auto_1fr_1fr_auto_auto] items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5">
+                  <div
+                    key={set.setNumber}
+                    className="grid grid-cols-[auto_1fr_1fr_auto_auto] items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5"
+                  >
                     <span className="text-xs font-bold text-purple-700">סט {set.setNumber}</span>
                     <div>
                       <p className="mb-0.5 text-[9px] uppercase text-slate-400">מינ׳ חזרות</p>
-                      <input type="number" value={set.minReps} onChange={(e) => updateSet(set.setNumber, { minReps: Number(e.target.value) })} className="w-full rounded-md border border-slate-200 bg-white px-1.5 py-1 text-center text-sm font-bold text-slate-700 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200" />
+                      <input
+                        type="number"
+                        value={set.minReps}
+                        onChange={(e) =>
+                          updateSet(set.setNumber, { minReps: Number(e.target.value) })
+                        }
+                        className="w-full rounded-md border border-slate-200 bg-white px-1.5 py-1 text-center text-sm font-bold text-slate-700 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200"
+                      />
                     </div>
                     <div>
                       <p className="mb-0.5 text-[9px] uppercase text-slate-400">מקס׳ חזרות</p>
-                      <input type="number" value={set.maxReps} onChange={(e) => updateSet(set.setNumber, { maxReps: Number(e.target.value) })} className="w-full rounded-md border border-slate-200 bg-white px-1.5 py-1 text-center text-sm font-bold text-slate-700 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200" />
+                      <input
+                        type="number"
+                        value={set.maxReps}
+                        onChange={(e) =>
+                          updateSet(set.setNumber, { maxReps: Number(e.target.value) })
+                        }
+                        className="w-full rounded-md border border-slate-200 bg-white px-1.5 py-1 text-center text-sm font-bold text-slate-700 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200"
+                      />
                     </div>
                     <button
                       onClick={() => {
-                        onUpdate({ ...exercise, sets: [...exercise.sets, { setNumber: exercise.sets.length + 1, minReps: set.minReps, maxReps: set.maxReps }] });
+                        onUpdate({
+                          ...exercise,
+                          sets: [
+                            ...exercise.sets,
+                            {
+                              setNumber: exercise.sets.length + 1,
+                              minReps: set.minReps,
+                              maxReps: set.maxReps,
+                            },
+                          ],
+                        });
                       }}
                       className="flex h-7 w-7 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-purple-100 hover:text-purple-700"
                       aria-label="שכפל סט"
@@ -3330,7 +4502,13 @@ function ExerciseCard({ exercise, isExpanded, onToggle, onUpdate, onDelete, musc
                     >
                       <FaCopy size={11} />
                     </button>
-                    <button onClick={() => deleteSet(set.setNumber)} className="flex h-7 w-7 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-rose-100 hover:text-rose-600" aria-label="מחק סט"><FaTrash size={10} /></button>
+                    <button
+                      onClick={() => deleteSet(set.setNumber)}
+                      className="flex h-7 w-7 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-rose-100 hover:text-rose-600"
+                      aria-label="מחק סט"
+                    >
+                      <FaTrash size={10} />
+                    </button>
                   </div>
                 ))}
               </div>
@@ -3374,9 +4552,7 @@ function FormsTab() {
   };
 
   const toggleViewed = (id: string) => {
-    setResponses((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, viewed: !r.viewed } : r))
-    );
+    setResponses((prev) => prev.map((r) => (r.id === id ? { ...r, viewed: !r.viewed } : r)));
   };
 
   return (
@@ -3516,13 +4692,7 @@ function FormsTab() {
   );
 }
 
-function FormDetailModal({
-  response,
-  onClose,
-}: {
-  response: FormResponse;
-  onClose: () => void;
-}) {
+function FormDetailModal({ response, onClose }: { response: FormResponse; onClose: () => void }) {
   const [activeSection, setActiveSection] = useState(0);
 
   return (
@@ -3642,7 +4812,9 @@ function StrengthProgress() {
     if (!first || !last || first.weight === 0) return s;
     return s + ((last.weight - first.weight) / first.weight) * 100;
   }, 0);
-  const avgGain = (totalGain / strengthData.filter((e) => e.sessions[0]?.weight > 0).length).toFixed(1);
+  const avgGain = (
+    totalGain / strengthData.filter((e) => e.sessions[0]?.weight > 0).length
+  ).toFixed(1);
   const heaviestLift = strengthData.reduce(
     (max, e) => {
       const top = Math.max(...e.sessions.map((s) => s.weight));
@@ -3665,22 +4837,45 @@ function StrengthProgress() {
       const gainPct = ((recentValue - baseValue) / baseValue) * 100;
       return { name: e.name, gainPct, group: e.group };
     })
-    .filter((x): x is { name: string; gainPct: number; group: MuscleGroup } => x !== null && x.gainPct >= 5)
+    .filter(
+      (x): x is { name: string; gainPct: number; group: MuscleGroup } =>
+        x !== null && x.gainPct >= 5
+    )
     .sort((a, b) => b.gainPct - a.gainPct);
 
   const topMonthly = monthlyProgress[0];
 
   const stats = [
-    { label: "ממוצע עלייה", value: `${avgGain}%`, sub: "מתחילת ליווי", color: "from-emerald-500 to-emerald-600", icon: <FaArrowTrendUp size={18} /> },
-    { label: "PRs החודש", value: prsThisMonth, sub: "תרגילים בהם שבר שיא", color: "from-blue-500 to-indigo-600", icon: <FaBoltLightning size={18} /> },
+    {
+      label: "ממוצע עלייה",
+      value: `${avgGain}%`,
+      sub: "מתחילת ליווי",
+      color: "from-emerald-500 to-emerald-600",
+      icon: <FaArrowTrendUp size={18} />,
+    },
+    {
+      label: "PRs החודש",
+      value: prsThisMonth,
+      sub: "תרגילים בהם שבר שיא",
+      color: "from-blue-500 to-indigo-600",
+      icon: <FaBoltLightning size={18} />,
+    },
     {
       label: "התקדמות החודש",
       value: monthlyProgress.length,
-      sub: topMonthly ? `המוביל: ${topMonthly.name} +${topMonthly.gainPct.toFixed(0)}%` : "תרגילים בולטים",
+      sub: topMonthly
+        ? `המוביל: ${topMonthly.name} +${topMonthly.gainPct.toFixed(0)}%`
+        : "תרגילים בולטים",
       color: "from-purple-500 to-fuchsia-600",
       icon: <FaArrowTrendUp size={18} />,
     },
-    { label: "הרמה כבדה ביותר", value: `${heaviestLift.weight} ק״ג`, sub: heaviestLift.name, color: "from-orange-500 to-amber-600", icon: <FaArrowTrendUp size={18} /> },
+    {
+      label: "הרמה כבדה ביותר",
+      value: `${heaviestLift.weight} ק״ג`,
+      sub: heaviestLift.name,
+      color: "from-orange-500 to-amber-600",
+      icon: <FaArrowTrendUp size={18} />,
+    },
   ];
 
   return (
@@ -3717,12 +4912,14 @@ function StrengthProgress() {
           const first = exercise.sessions[0];
           const last = exercise.sessions[exercise.sessions.length - 1];
           const isBodyweight = exercise.sessions.every((s) => s.weight === 0);
-          const gain = isBodyweight
-            ? last.reps - first.reps
-            : last.weight - first.weight;
+          const gain = isBodyweight ? last.reps - first.reps : last.weight - first.weight;
           const gainPercent = isBodyweight
-            ? first.reps === 0 ? 0 : Math.round(((last.reps - first.reps) / first.reps) * 100)
-            : first.weight === 0 ? 0 : Math.round(((last.weight - first.weight) / first.weight) * 100);
+            ? first.reps === 0
+              ? 0
+              : Math.round(((last.reps - first.reps) / first.reps) * 100)
+            : first.weight === 0
+              ? 0
+              : Math.round(((last.weight - first.weight) / first.weight) * 100);
           const colors = muscleGroupColors[exercise.group];
           const isOpen = openExercise === exercise.name;
 
@@ -3734,12 +4931,16 @@ function StrengthProgress() {
               <div className="p-5">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1">
-                    <span className={`inline-flex items-center rounded-full ${colors.bg} px-2.5 py-0.5 text-xs font-semibold ${colors.text}`}>
+                    <span
+                      className={`inline-flex items-center rounded-full ${colors.bg} px-2.5 py-0.5 text-xs font-semibold ${colors.text}`}
+                    >
                       {exercise.group}
                     </span>
                     <h3 className="mt-2 text-base font-bold text-slate-900">{exercise.name}</h3>
                   </div>
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${colors.gradient} text-white shadow-md`}>
+                  <div
+                    className={`flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${colors.gradient} text-white shadow-md`}
+                  >
                     <FaDumbbell size={14} />
                   </div>
                 </div>
@@ -3748,15 +4949,25 @@ function StrengthProgress() {
                   <div>
                     <p className="text-[10px] uppercase tracking-wider text-slate-400">נוכחי</p>
                     <p className="text-2xl font-bold text-slate-900">
-                      {isBodyweight ? `${last.reps} ${last.reps > 30 ? "שניות" : "חזרות"}` : `${last.weight} ק״ג`}
+                      {isBodyweight
+                        ? `${last.reps} ${last.reps > 30 ? "שניות" : "חזרות"}`
+                        : `${last.weight} ק״ג`}
                     </p>
                     <p className="text-xs text-slate-500">
                       {isBodyweight ? "ללא משקל" : `${last.reps} חזרות`}
                     </p>
                   </div>
-                  <div className={`text-end ${gain > 0 ? "text-emerald-600" : gain < 0 ? "text-rose-600" : "text-slate-400"}`}>
-                    <p className="text-xs font-semibold">{gain > 0 ? "↑" : gain < 0 ? "↓" : "—"} {Math.abs(gain)}{isBodyweight ? (last.reps > 30 ? " שנ׳" : "") : " ק״ג"}</p>
-                    <p className="text-[10px] font-bold">{gainPercent > 0 ? "+" : ""}{gainPercent}% מתחילת ליווי</p>
+                  <div
+                    className={`text-end ${gain > 0 ? "text-emerald-600" : gain < 0 ? "text-rose-600" : "text-slate-400"}`}
+                  >
+                    <p className="text-xs font-semibold">
+                      {gain > 0 ? "↑" : gain < 0 ? "↓" : "—"} {Math.abs(gain)}
+                      {isBodyweight ? (last.reps > 30 ? " שנ׳" : "") : " ק״ג"}
+                    </p>
+                    <p className="text-[10px] font-bold">
+                      {gainPercent > 0 ? "+" : ""}
+                      {gainPercent}% מתחילת ליווי
+                    </p>
                   </div>
                 </div>
 
@@ -3780,8 +4991,8 @@ function StrengthProgress() {
                     {exercise.detailed
                       ? "ראה תיעוד סטים מלא"
                       : isOpen
-                      ? "הסתר היסטוריה"
-                      : "ראה היסטוריה מלאה"}
+                        ? "הסתר היסטוריה"
+                        : "ראה היסטוריה מלאה"}
                   </span>
                 </button>
               </div>
@@ -3791,19 +5002,29 @@ function StrengthProgress() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="text-slate-500">
-                        <th className="pb-2 text-right text-[10px] font-semibold uppercase tracking-wider">תאריך</th>
-                        <th className="pb-2 text-center text-[10px] font-semibold uppercase tracking-wider">{isBodyweight ? "זמן/חזרות" : "משקל"}</th>
-                        <th className="pb-2 text-center text-[10px] font-semibold uppercase tracking-wider">חזרות</th>
+                        <th className="pb-2 text-right text-[10px] font-semibold uppercase tracking-wider">
+                          תאריך
+                        </th>
+                        <th className="pb-2 text-center text-[10px] font-semibold uppercase tracking-wider">
+                          {isBodyweight ? "זמן/חזרות" : "משקל"}
+                        </th>
+                        <th className="pb-2 text-center text-[10px] font-semibold uppercase tracking-wider">
+                          חזרות
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
                       {[...exercise.sessions].reverse().map((s, i) => (
                         <tr key={s.date} className="border-t border-slate-100">
                           <td className="py-2 text-right text-slate-700">{s.date}</td>
-                          <td className={`py-2 text-center font-semibold ${i === 0 ? colors.text : "text-slate-700"}`}>
+                          <td
+                            className={`py-2 text-center font-semibold ${i === 0 ? colors.text : "text-slate-700"}`}
+                          >
                             {isBodyweight ? "—" : `${s.weight} ק״ג`}
                           </td>
-                          <td className={`py-2 text-center font-semibold ${i === 0 ? colors.text : "text-slate-700"}`}>
+                          <td
+                            className={`py-2 text-center font-semibold ${i === 0 ? colors.text : "text-slate-700"}`}
+                          >
                             {s.reps}
                             {isBodyweight && s.reps > 30 && " שנ׳"}
                           </td>
@@ -3819,10 +5040,7 @@ function StrengthProgress() {
       </div>
 
       {detailExercise && (
-        <ExerciseDetailModal
-          exercise={detailExercise}
-          onClose={() => setDetailExercise(null)}
-        />
+        <ExerciseDetailModal exercise={detailExercise} onClose={() => setDetailExercise(null)} />
       )}
 
       {noteOpen && <ProgressNoteCreator onClose={() => setNoteOpen(false)} />}
@@ -3913,9 +5131,7 @@ function ProgressNoteCreator({ onClose }: { onClose: () => void }) {
             </div>
             <div>
               <h2 className="text-xl font-bold text-slate-900">צור פתק התקדמות</h2>
-              <p className="text-xs text-slate-500">
-                בחר טווח תאריכים ותרגילים ליצירת פתק אוטומטי
-              </p>
+              <p className="text-xs text-slate-500">בחר טווח תאריכים ותרגילים ליצירת פתק אוטומטי</p>
             </div>
           </div>
           <button
@@ -4099,9 +5315,7 @@ function ProgressNoteCreator({ onClose }: { onClose: () => void }) {
               {selectedExercises.length === 0 ? (
                 <div className="flex h-full min-h-[300px] flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-200 bg-slate-50/30 text-center">
                   <FaNoteSticky size={28} className="text-slate-300" />
-                  <p className="text-sm text-slate-400">
-                    בחר תרגילים כדי ליצור פתק התקדמות.
-                  </p>
+                  <p className="text-sm text-slate-400">בחר תרגילים כדי ליצור פתק התקדמות.</p>
                 </div>
               ) : (
                 <textarea
@@ -4135,7 +5349,9 @@ function ExerciseDetailModal({
   onClose: () => void;
 }) {
   const detailed = exercise.detailed || [];
-  const [openDate, setOpenDate] = useState<string | null>(detailed[detailed.length - 1]?.date || null);
+  const [openDate, setOpenDate] = useState<string | null>(
+    detailed[detailed.length - 1]?.date || null
+  );
 
   // Find max set count for chart lines
   const maxSets = detailed.reduce((m, s) => Math.max(m, s.sets.length), 0);
@@ -4180,7 +5396,21 @@ function ExerciseDetailModal({
             {[...detailed].reverse().map((session) => {
               const isOpen = openDate === session.date;
               const [day, month, year] = session.date.split("/");
-              const monthName = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"][Number(month) - 1] || "";
+              const monthName =
+                [
+                  "ינואר",
+                  "פברואר",
+                  "מרץ",
+                  "אפריל",
+                  "מאי",
+                  "יוני",
+                  "יולי",
+                  "אוגוסט",
+                  "ספטמבר",
+                  "אוקטובר",
+                  "נובמבר",
+                  "דצמבר",
+                ][Number(month) - 1] || "";
               return (
                 <div
                   key={session.date}
@@ -4207,7 +5437,9 @@ function ExerciseDetailModal({
                         >
                           {monthName}
                         </span>
-                        <span className={`text-2xl font-bold ${isOpen ? "text-white" : "text-slate-900"}`}>
+                        <span
+                          className={`text-2xl font-bold ${isOpen ? "text-white" : "text-slate-900"}`}
+                        >
                           {day}
                         </span>
                         <span
@@ -4241,10 +5473,14 @@ function ExerciseDetailModal({
                           className="rounded-xl border border-slate-200 bg-white p-3"
                         >
                           <div className="mb-2 flex items-center justify-between">
-                            <span className="text-sm font-bold text-slate-900">סט {s.setNumber}</span>
+                            <span className="text-sm font-bold text-slate-900">
+                              סט {s.setNumber}
+                            </span>
                             <span
                               className="h-2.5 w-2.5 rounded-full"
-                              style={{ backgroundColor: setColors[(s.setNumber - 1) % setColors.length] }}
+                              style={{
+                                backgroundColor: setColors[(s.setNumber - 1) % setColors.length],
+                              }}
                             />
                           </div>
                           <p className="text-xs text-slate-500">
@@ -4279,7 +5515,8 @@ function ExerciseDetailModal({
                   <p className="text-xs text-slate-500">המשקל הכבד ביותר בכל אימון</p>
                 </div>
                 <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-bold text-emerald-700">
-                  ↑ +{(
+                  ↑ +
+                  {(
                     Math.max(...detailed[detailed.length - 1].sets.map((s) => s.weight)) -
                     Math.max(...detailed[0].sets.map((s) => s.weight))
                   ).toFixed(1)}{" "}
@@ -4333,7 +5570,9 @@ function PRTrendChart({ sessions }: { sessions: ExerciseSession[] }) {
     reps: p.reps,
   }));
 
-  const linePath = coords.map((c, i) => `${i === 0 ? "M" : "L"} ${c.x.toFixed(1)} ${c.y.toFixed(1)}`).join(" ");
+  const linePath = coords
+    .map((c, i) => `${i === 0 ? "M" : "L"} ${c.x.toFixed(1)} ${c.y.toFixed(1)}`)
+    .join(" ");
   const areaPath =
     linePath +
     ` L ${coords[coords.length - 1].x.toFixed(1)} ${H - padBottom} L ${coords[0].x.toFixed(1)} ${H - padBottom} Z`;
@@ -4394,7 +5633,15 @@ function PRTrendChart({ sessions }: { sessions: ExerciseSession[] }) {
       />
       {coords.map((c, i) => (
         <g key={i}>
-          <circle cx={c.x} cy={c.y} r="3" fill="#fff" stroke="#10b981" strokeWidth="1.25" vectorEffect="non-scaling-stroke" />
+          <circle
+            cx={c.x}
+            cy={c.y}
+            r="3"
+            fill="#fff"
+            stroke="#10b981"
+            strokeWidth="1.25"
+            vectorEffect="non-scaling-stroke"
+          />
           {/* Value label with subtle pill background */}
           <rect
             x={c.x - 14}
@@ -4574,11 +5821,17 @@ function ExerciseGoals({
 
 function MonthlyPRs({ sessions }: { sessions: ExerciseSession[] }) {
   // Group by month → find heaviest set per month
-  const byMonth = new Map<string, { date: string; weight: number; reps: number; setNumber: number }>();
+  const byMonth = new Map<
+    string,
+    { date: string; weight: number; reps: number; setNumber: number }
+  >();
   sessions.forEach((session) => {
     const [, month, year] = session.date.split("/");
     const key = `${month}/${year}`;
-    const topSet = session.sets.reduce((max, s) => (s.weight > max.weight ? s : max), session.sets[0]);
+    const topSet = session.sets.reduce(
+      (max, s) => (s.weight > max.weight ? s : max),
+      session.sets[0]
+    );
     const existing = byMonth.get(key);
     if (!existing || topSet.weight > existing.weight) {
       byMonth.set(key, {
@@ -4601,8 +5854,18 @@ function MonthlyPRs({ sessions }: { sessions: ExerciseSession[] }) {
     });
 
   const monthNames = [
-    "ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני",
-    "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר",
+    "ינואר",
+    "פברואר",
+    "מרץ",
+    "אפריל",
+    "מאי",
+    "יוני",
+    "יולי",
+    "אוגוסט",
+    "ספטמבר",
+    "אוקטובר",
+    "נובמבר",
+    "דצמבר",
   ];
 
   return (
@@ -4643,8 +5906,8 @@ function MonthlyPRs({ sessions }: { sessions: ExerciseSession[] }) {
                     delta > 0
                       ? "bg-emerald-100 text-emerald-700"
                       : delta < 0
-                      ? "bg-rose-100 text-rose-700"
-                      : "bg-slate-100 text-slate-600"
+                        ? "bg-rose-100 text-rose-700"
+                        : "bg-slate-100 text-slate-600"
                   }`}
                 >
                   <span>{delta > 0 ? "↑" : delta < 0 ? "↓" : "→"}</span>
@@ -4709,7 +5972,14 @@ function MultiSetChart({
     <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="h-72 w-full">
       <defs>
         {series.map((s) => (
-          <linearGradient key={s.setIndex} id={`grad-set-${s.setIndex}`} x1="0" y1="0" x2="0" y2="1">
+          <linearGradient
+            key={s.setIndex}
+            id={`grad-set-${s.setIndex}`}
+            x1="0"
+            y1="0"
+            x2="0"
+            y2="1"
+          >
             <stop offset="0%" stopColor={colors[s.setIndex % colors.length]} stopOpacity="0.2" />
             <stop offset="100%" stopColor={colors[s.setIndex % colors.length]} stopOpacity="0" />
           </linearGradient>
@@ -4812,7 +6082,9 @@ function MiniSparkline({ values, gradient }: { values: number[]; gradient: strin
     y: H - ((v - min) / range) * (H - 8) - 4,
   }));
 
-  const linePath = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(" ");
+  const linePath = points
+    .map((p, i) => `${i === 0 ? "M" : "L"} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`)
+    .join(" ");
   const areaPath = `${linePath} L ${W} ${H} L 0 ${H} Z`;
 
   // Pull color from gradient class
@@ -4836,9 +6108,26 @@ function MiniSparkline({ values, gradient }: { values: number[]; gradient: strin
         </linearGradient>
       </defs>
       <path d={areaPath} fill={`url(#${id})`} />
-      <path d={linePath} fill="none" stroke={stroke} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+      <path
+        d={linePath}
+        fill="none"
+        stroke={stroke}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
+      />
       {points.map((p, i) => (
-        <circle key={i} cx={p.x} cy={p.y} r="2" fill="#fff" stroke={stroke} strokeWidth="1.25" vectorEffect="non-scaling-stroke" />
+        <circle
+          key={i}
+          cx={p.x}
+          cy={p.y}
+          r="2"
+          fill="#fff"
+          stroke={stroke}
+          strokeWidth="1.25"
+          vectorEffect="non-scaling-stroke"
+        />
       ))}
     </svg>
   );
@@ -4868,9 +6157,7 @@ function MeasurementsTable() {
   };
   const saveEdit = () => {
     if (!draft || !editingDate) return;
-    setRows((prev) =>
-      prev.map((r) => (r.date === editingDate ? draft : r))
-    );
+    setRows((prev) => prev.map((r) => (r.date === editingDate ? draft : r)));
     setEditingDate(null);
     setDraft(null);
   };
@@ -4882,7 +6169,12 @@ function MeasurementsTable() {
     const today = new Date().toLocaleDateString("he-IL");
     const newRow: Measurement = {
       date: today,
-      chest: 0, arm: 0, waist: 0, buttocks: 0, thigh: 0, calves: 0,
+      chest: 0,
+      arm: 0,
+      waist: 0,
+      buttocks: 0,
+      thigh: 0,
+      calves: 0,
     };
     if (rows.some((r) => r.date === today)) {
       alert("כבר קיימת מדידה לתאריך הזה");
@@ -4916,7 +6208,10 @@ function MeasurementsTable() {
               className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm"
             >
               <p className="text-xs text-slate-500">{c.label}</p>
-              <p className={`mt-1 text-2xl font-bold ${c.color}`}>{latest[c.key]}<span className="text-xs text-slate-400 mr-1">ס״מ</span></p>
+              <p className={`mt-1 text-2xl font-bold ${c.color}`}>
+                {latest[c.key]}
+                <span className="text-xs text-slate-400 mr-1">ס״מ</span>
+              </p>
               <p className={`mt-0.5 text-xs font-semibold ${delta.color}`}>
                 {delta.arrow} {delta.text} מהתחלה
               </p>
@@ -4972,8 +6267,8 @@ function MeasurementsTable() {
                       isEditing
                         ? "bg-blue-50/60"
                         : i === 0
-                        ? "bg-blue-50/30 hover:bg-blue-50/50"
-                        : "hover:bg-slate-50/60"
+                          ? "bg-blue-50/30 hover:bg-blue-50/50"
+                          : "hover:bg-slate-50/60"
                     }`}
                   >
                     <td className="px-5 py-4 text-right font-semibold text-slate-700">

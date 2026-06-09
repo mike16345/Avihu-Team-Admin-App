@@ -97,7 +97,7 @@ const UserFormPage = () => {
       setRemindIn(existingUser.remindIn || 604800);
       setDateFinished(toDateInput(existingUser.dateFinished));
       setDietaryType(existingUser.dietaryType || []);
-      setSubTrainerId(((existingUser as { subTrainerId?: string }).subTrainerId) || "");
+      setSubTrainerId((existingUser as { subTrainerId?: string }).subTrainerId || "");
     }
   }, [existingUser]);
 
@@ -327,10 +327,7 @@ const UserFormPage = () => {
               (Avihu) handles them directly. The dropdown is hidden
               entirely when the trainer has no sub-trainers, so single-
               trainer accounts don't see a confusing empty field. */}
-          <TrainerAssignmentField
-            value={subTrainerId}
-            onChange={setSubTrainerId}
-          />
+          <TrainerAssignmentField value={subTrainerId} onChange={setSubTrainerId} />
         </div>
 
         {/* Dietary restrictions card */}

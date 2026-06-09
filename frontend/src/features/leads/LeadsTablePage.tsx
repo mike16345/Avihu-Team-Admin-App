@@ -100,7 +100,10 @@ const LeadsTablePage = () => {
     const totalPages = data.total ? Math.max(1, Math.ceil(data.total / limit)) : 1;
     setTotal(totalPages);
     if (data.items) {
-      const normalized = data.items.map((lead) => ({ ...lead, isContacted: Boolean(lead.isContacted) }));
+      const normalized = data.items.map((lead) => ({
+        ...lead,
+        isContacted: Boolean(lead.isContacted),
+      }));
       setLeads(sortLeads(normalized));
     }
   }, [data, limit, sortLeads]);
@@ -110,12 +113,18 @@ const LeadsTablePage = () => {
       const previousLeads = leads.map((item) => ({ ...item }));
       setPendingContactIds((prev) => (prev.includes(lead._id) ? prev : [...prev, lead._id]));
       setLeads((current) =>
-        sortLeads(current.map((item) => (item._id === lead._id ? { ...item, isContacted: nextValue } : item)))
+        sortLeads(
+          current.map((item) =>
+            item._id === lead._id ? { ...item, isContacted: nextValue } : item
+          )
+        )
       );
       try {
         const updatedLead = await updateLead({ id: lead._id, body: { isContacted: nextValue } });
         setLeads((current) =>
-          sortLeads(current.map((item) => (item._id === lead._id ? { ...item, ...updatedLead } : item)))
+          sortLeads(
+            current.map((item) => (item._id === lead._id ? { ...item, ...updatedLead } : item))
+          )
         );
       } catch {
         setLeads(previousLeads);
@@ -262,16 +271,19 @@ const LeadsTablePage = () => {
               const isPending = pendingContactIds.includes(lead._id);
               const dateIso = lead.registeredAt ?? lead.createdAt;
               const date = dateIso ? new Date(dateIso) : null;
-              const dateStr = date && !Number.isNaN(date.getTime())
-                ? DateUtils.formatDate(date, "DD/MM/YYYY")
-                : "-";
+              const dateStr =
+                date && !Number.isNaN(date.getTime())
+                  ? DateUtils.formatDate(date, "DD/MM/YYYY")
+                  : "-";
               const name = lead.fullName || lead.email || "ללא שם";
 
               return (
                 <li
                   key={lead._id}
                   className={`flex flex-wrap items-center gap-3 border-b border-slate-100 dark:border-slate-800/60 px-4 py-3 transition-colors last:border-b-0 ${
-                    lead.isContacted ? "bg-slate-50/40 dark:bg-slate-800/20" : "hover:bg-blue-50/30 dark:hover:bg-blue-950/20"
+                    lead.isContacted
+                      ? "bg-slate-50/40 dark:bg-slate-800/20"
+                      : "hover:bg-blue-50/30 dark:hover:bg-blue-950/20"
                   }`}
                 >
                   {/* Avatar + name */}
@@ -460,7 +472,10 @@ const LeadsTablePage = () => {
 
 /* -------------------------------------------------------------------- */
 
-const TONE: Record<string, { bg: string; text: string; ring: string; activeBg: string; activeText: string }> = {
+const TONE: Record<
+  string,
+  { bg: string; text: string; ring: string; activeBg: string; activeText: string }
+> = {
   blue: {
     bg: "bg-blue-50 dark:bg-blue-950/40",
     text: "text-blue-600 dark:text-blue-300",
@@ -519,7 +534,9 @@ const StatCard = ({
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-xs font-medium text-slate-500 dark:text-slate-400">{label}</p>
-        <p className="mt-0.5 text-2xl font-bold leading-none text-slate-900 dark:text-slate-100">{value}</p>
+        <p className="mt-0.5 text-2xl font-bold leading-none text-slate-900 dark:text-slate-100">
+          {value}
+        </p>
       </div>
     </button>
   );

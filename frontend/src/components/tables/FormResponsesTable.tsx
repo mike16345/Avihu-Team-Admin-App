@@ -228,7 +228,7 @@ const FormResponsesTable = ({ userId }: FormResponsesTableProps) => {
             const userName = resolveUserName(r.userId) ?? "משתמש לא ידוע";
             const formName = r.formTitle ?? r.formId?.name ?? "שאלון ללא שם";
             const typeKey = (r.formType ?? r.formId?.type) as string | undefined;
-            const typeLabel = typeKey ? FormTypesInHebrew[typeKey as FormTypes] ?? typeKey : "—";
+            const typeLabel = typeKey ? (FormTypesInHebrew[typeKey as FormTypes] ?? typeKey) : "—";
             const accent = accentOf(typeKey);
             const viewed = Boolean(r.isChecked);
             const togglePending = pendingToggleId === r._id;
@@ -248,10 +248,7 @@ const FormResponsesTable = ({ userId }: FormResponsesTableProps) => {
                     </div>
                     <div className="min-w-0">
                       <p className="truncate text-sm font-bold text-slate-900">{userName}</p>
-                      <p
-                        className="mt-0.5 truncate text-xs text-slate-500"
-                        title={formName}
-                      >
+                      <p className="mt-0.5 truncate text-xs text-slate-500" title={formName}>
                         {formName}
                       </p>
                     </div>
