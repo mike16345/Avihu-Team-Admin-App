@@ -171,7 +171,10 @@ const ExtraItems: FC<ExtraItemsProps> = ({
           </SheetHeader>
 
           <Form {...formControl}>
-            <form onSubmit={formControl.handleSubmit(onSubmit)} className="space-y-3 text-right pt-4">
+            <form
+              onSubmit={formControl.handleSubmit(onSubmit)}
+              className="space-y-3 text-right pt-4"
+            >
               <FormField
                 control={formControl.control}
                 name="name"
@@ -236,9 +239,7 @@ const ExtraItems: FC<ExtraItemsProps> = ({
                   <FaClockRotateLeft size={9} />
                   פריטים שהשתמשת בהם בעבר
                 </h3>
-                <span className="text-[10px] text-slate-400">
-                  לחץ להוספה מהירה
-                </span>
+                <span className="text-[10px] text-slate-400">לחץ להוספה מהירה</span>
               </div>
               <div className="max-h-44 overflow-y-auto rounded-xl border border-blue-100/60 bg-blue-50/30 dark:border-blue-900/40 dark:bg-blue-950/20 p-2">
                 <div className="flex flex-wrap gap-1.5">
@@ -293,7 +294,11 @@ const ExtraItems: FC<ExtraItemsProps> = ({
                       }`}
                     >
                       <span>{item}</span>
-                      {isEditing ? <FaXmark size={9} /> : <FaPenToSquare size={9} className="opacity-50 group-hover:opacity-100" />}
+                      {isEditing ? (
+                        <FaXmark size={9} />
+                      ) : (
+                        <FaPenToSquare size={9} className="opacity-50 group-hover:opacity-100" />
+                      )}
                     </button>
                   );
                 })

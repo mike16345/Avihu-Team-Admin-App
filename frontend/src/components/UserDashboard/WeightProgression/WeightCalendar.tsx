@@ -11,12 +11,15 @@ type WeighCalendarProps = {
 };
 
 export const WeightCalendar: FC<WeighCalendarProps> = ({ weighIns }) => {
-  const weighInLookup: Record<string, number> = weighIns.reduce((acc, weighIn) => {
-    const date = new Date(weighIn.date);
-    acc[DateUtils.formatDate(date, "DD/MM/YYYY")] = weighIn.weight;
+  const weighInLookup: Record<string, number> = weighIns.reduce(
+    (acc, weighIn) => {
+      const date = new Date(weighIn.date);
+      acc[DateUtils.formatDate(date, "DD/MM/YYYY")] = weighIn.weight;
 
-    return acc;
-  }, {} as Record<string, number>);
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 
   function CustomDayContent({ date }: DayContentProps) {
     const dateString = DateUtils.formatDate(date, "DD/MM/YYYY");

@@ -20,13 +20,7 @@ import Loader from "@/components/ui/Loader";
 
 const MINIMUM_WARNING_DAYS = 3;
 
-type StatusFilter =
-  | "הכל"
-  | "פעיל"
-  | "משתמשים"
-  | "הקפאה"
-  | "מסתיים בקרוב"
-  | "ללא תאריך סיום";
+type StatusFilter = "הכל" | "פעיל" | "משתמשים" | "הקפאה" | "מסתיים בקרוב" | "ללא תאריך סיום";
 
 export const UsersPage = () => {
   const navigate = useNavigate();
@@ -151,28 +145,21 @@ export const UsersPage = () => {
           />
         </div>
         <div className="flex items-center gap-1 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-1 shadow-sm">
-          {(
-            [
-              "הכל",
-              "פעיל",
-              "משתמשים",
-              "הקפאה",
-              "מסתיים בקרוב",
-              "ללא תאריך סיום",
-            ] as const
-          ).map((s) => (
-            <button
-              key={s}
-              onClick={() => setStatusFilter(s)}
-              className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
-                statusFilter === s
-                  ? "bg-blue-600 text-white shadow-sm"
-                  : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
-              }`}
-            >
-              {s}
-            </button>
-          ))}
+          {(["הכל", "פעיל", "משתמשים", "הקפאה", "מסתיים בקרוב", "ללא תאריך סיום"] as const).map(
+            (s) => (
+              <button
+                key={s}
+                onClick={() => setStatusFilter(s)}
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+                  statusFilter === s
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+                }`}
+              >
+                {s}
+              </button>
+            )
+          )}
         </div>
       </div>
 
@@ -255,11 +242,23 @@ function UserCard({ user, onView }: { user: IUser; onView: () => void }) {
           : "כבוי";
   const statusColors =
     derived === "disabled"
-      ? { dot: "bg-rose-500", bg: "bg-rose-50 dark:bg-rose-950/40", text: "text-rose-700 dark:text-rose-300" }
+      ? {
+          dot: "bg-rose-500",
+          bg: "bg-rose-50 dark:bg-rose-950/40",
+          text: "text-rose-700 dark:text-rose-300",
+        }
       : derived === "user"
-        ? { dot: "bg-blue-500", bg: "bg-blue-50 dark:bg-blue-950/40", text: "text-blue-700 dark:text-blue-300" }
+        ? {
+            dot: "bg-blue-500",
+            bg: "bg-blue-50 dark:bg-blue-950/40",
+            text: "text-blue-700 dark:text-blue-300",
+          }
         : derived === "frozen"
-          ? { dot: "bg-cyan-500", bg: "bg-cyan-50 dark:bg-cyan-950/40", text: "text-cyan-700 dark:text-cyan-300" }
+          ? {
+              dot: "bg-cyan-500",
+              bg: "bg-cyan-50 dark:bg-cyan-950/40",
+              text: "text-cyan-700 dark:text-cyan-300",
+            }
           : {
               dot: "bg-emerald-500",
               bg: "bg-emerald-50 dark:bg-emerald-950/40",

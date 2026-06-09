@@ -102,8 +102,7 @@ const DietPlanPresetPicker: React.FC<DietPlanPresetPickerProps> = ({
     restrictions: false,
     builder: false,
   });
-  const toggleSection = (id: string) =>
-    setOpenSections((s) => ({ ...s, [id]: !s[id] }));
+  const toggleSection = (id: string) => setOpenSections((s) => ({ ...s, [id]: !s[id] }));
 
   const currentUser = useUsersStore((s) => s.currentUser);
   const { data: subTrainers = [] } = useSubTrainersQuery();
@@ -206,20 +205,14 @@ const DietPlanPresetPicker: React.FC<DietPlanPresetPickerProps> = ({
   };
 
   // Quick lookups for the active-chip row
-  const goalLabelOf = (v: DietGoal) =>
-    dietGoalOptions.find((o) => o.value === v)?.label ?? v;
+  const goalLabelOf = (v: DietGoal) => dietGoalOptions.find((o) => o.value === v)?.label ?? v;
   const bucketLabelOf = (v: CalorieBucket) =>
     CALORIE_BUCKETS.find((b) => b.value === v)?.label ?? v;
-  const proteinLabelOf = (v: string) =>
-    PROTEIN_OPTIONS.find((o) => o.value === v)?.label ?? v;
-  const carbLabelOf = (v: string) =>
-    CARB_OPTIONS.find((o) => o.value === v)?.label ?? v;
-  const fatLabelOf = (v: string) =>
-    FAT_OPTIONS.find((o) => o.value === v)?.label ?? v;
-  const freeCalLabelOf = (v: string) =>
-    FREE_CAL_OPTIONS.find((o) => o.value === v)?.label ?? v;
-  const restrictionLabelOf = (v: DietaryRestriction) =>
-    dietaryRestrictionLabel(v);
+  const proteinLabelOf = (v: string) => PROTEIN_OPTIONS.find((o) => o.value === v)?.label ?? v;
+  const carbLabelOf = (v: string) => CARB_OPTIONS.find((o) => o.value === v)?.label ?? v;
+  const fatLabelOf = (v: string) => FAT_OPTIONS.find((o) => o.value === v)?.label ?? v;
+  const freeCalLabelOf = (v: string) => FREE_CAL_OPTIONS.find((o) => o.value === v)?.label ?? v;
+  const restrictionLabelOf = (v: DietaryRestriction) => dietaryRestrictionLabel(v);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -249,7 +242,6 @@ const DietPlanPresetPicker: React.FC<DietPlanPresetPickerProps> = ({
             aside) on the RIGHT side of the dialog. Per Avihu's
             preference: filters where the eye starts reading. */}
         <div className="flex flex-1 overflow-hidden">
-
           {/* ===== SIDE FILTER PANEL ===== */}
           {filtersOpen && (
             <aside className="w-[320px] shrink-0 border-l border-slate-200 dark:border-slate-800 bg-gradient-to-b from-slate-200/70 via-slate-100/80 to-slate-200/50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 flex flex-col">
@@ -332,7 +324,9 @@ const DietPlanPresetPicker: React.FC<DietPlanPresetPickerProps> = ({
                 >
                   <div className="space-y-3">
                     <div>
-                      <p className="mb-1.5 text-[10px] font-bold text-slate-500 dark:text-slate-400">חלבון</p>
+                      <p className="mb-1.5 text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                        חלבון
+                      </p>
                       <ChipGrid
                         options={PROTEIN_OPTIONS}
                         selected={proteinB}
@@ -340,7 +334,9 @@ const DietPlanPresetPicker: React.FC<DietPlanPresetPickerProps> = ({
                       />
                     </div>
                     <div>
-                      <p className="mb-1.5 text-[10px] font-bold text-slate-500 dark:text-slate-400">פחמ׳</p>
+                      <p className="mb-1.5 text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                        פחמ׳
+                      </p>
                       <ChipGrid
                         options={CARB_OPTIONS}
                         selected={carbB}
@@ -348,7 +344,9 @@ const DietPlanPresetPicker: React.FC<DietPlanPresetPickerProps> = ({
                       />
                     </div>
                     <div>
-                      <p className="mb-1.5 text-[10px] font-bold text-slate-500 dark:text-slate-400">שומן</p>
+                      <p className="mb-1.5 text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                        שומן
+                      </p>
                       <ChipGrid
                         options={FAT_OPTIONS}
                         selected={fatB}
@@ -638,9 +636,7 @@ const DietPlanPresetPicker: React.FC<DietPlanPresetPickerProps> = ({
                         </div>
 
                         {/* Macros mini-row */}
-                        {(preset.proteinServings ||
-                          preset.carbServings ||
-                          preset.fatServings) && (
+                        {(preset.proteinServings || preset.carbServings || preset.fatServings) && (
                           <div className="flex items-center gap-2 text-[11px] text-slate-600 dark:text-slate-300">
                             {typeof preset.proteinServings === "number" && (
                               <span className="inline-flex items-center gap-1">

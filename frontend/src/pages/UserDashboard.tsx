@@ -546,12 +546,11 @@ export const UserDashboard = () => {
             {/* Freeze snapshot — surfaces the captured days remaining
                 so the trainer always sees what was preserved when
                 they paused this trainee. Shown only when relevant. */}
-            {status === "frozen" &&
-              typeof currentUser?.frozenDaysRemaining === "number" && (
-                <span className="ms-auto inline-flex items-center gap-1.5 rounded-lg border border-cyan-200 dark:border-cyan-900/40 bg-white dark:bg-slate-900 px-2.5 py-1 text-[11px] font-bold text-cyan-700 dark:text-cyan-300">
-                  ❄️ נשארו {currentUser.frozenDaysRemaining} ימי ליווי בעת ההקפאה
-                </span>
-              )}
+            {status === "frozen" && typeof currentUser?.frozenDaysRemaining === "number" && (
+              <span className="ms-auto inline-flex items-center gap-1.5 rounded-lg border border-cyan-200 dark:border-cyan-900/40 bg-white dark:bg-slate-900 px-2.5 py-1 text-[11px] font-bold text-cyan-700 dark:text-cyan-300">
+                ❄️ נשארו {currentUser.frozenDaysRemaining} ימי ליווי בעת ההקפאה
+              </span>
+            )}
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <ProfileField label="שם פרטי" value={currentUser?.firstName} />

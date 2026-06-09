@@ -92,9 +92,7 @@ const ProgressNoteForm = () => {
             name="date"
             render={({ field }) => (
               <FormItem className="space-y-1">
-                <FormLabel className="text-[11px] font-semibold text-slate-600">
-                  תאריך
-                </FormLabel>
+                <FormLabel className="text-[11px] font-semibold text-slate-600">תאריך</FormLabel>
                 <FormControl>
                   <DatePicker
                     selectedDate={field.value}
@@ -110,9 +108,7 @@ const ProgressNoteForm = () => {
             name="trainer"
             render={({ field }) => (
               <FormItem className="space-y-1">
-                <FormLabel className="text-[11px] font-semibold text-slate-600">
-                  שם המאמן
-                </FormLabel>
+                <FormLabel className="text-[11px] font-semibold text-slate-600">שם המאמן</FormLabel>
                 <FormControl>
                   <Input placeholder="שם המאמן..." className="h-9 text-sm" {...field} />
                 </FormControl>
@@ -125,9 +121,7 @@ const ProgressNoteForm = () => {
             name="diet"
             render={({ field }) => (
               <FormItem className="space-y-1">
-                <FormLabel className="text-[11px] font-semibold text-slate-600">
-                  🥗 תזונה
-                </FormLabel>
+                <FormLabel className="text-[11px] font-semibold text-slate-600">🥗 תזונה</FormLabel>
                 <FormControl>
                   <CustomSelect
                     items={progressOptions}

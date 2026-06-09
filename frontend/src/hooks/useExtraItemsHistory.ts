@@ -68,10 +68,7 @@ export function useExtraItemsHistory(section: string) {
       const all = readStore();
       const existing = all[section] ?? [];
       // Bump used items to the top (most-recent-first), de-duped.
-      const next = [clean, ...existing.filter((n) => n !== clean)].slice(
-        0,
-        MAX_PER_SECTION
-      );
+      const next = [clean, ...existing.filter((n) => n !== clean)].slice(0, MAX_PER_SECTION);
       writeStore({ ...all, [section]: next });
     },
     [section]

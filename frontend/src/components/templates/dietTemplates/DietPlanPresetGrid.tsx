@@ -367,29 +367,29 @@ const DietPlanPresetGrid: React.FC<DietPlanPresetGridProps> = ({
                         same UX rule as the workout card. */}
                     <DietFavoriteStar presetId={preset._id} />
                     <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        preset._id && onOpen(preset._id);
-                      }}
-                      aria-label="עריכה"
-                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 text-slate-400 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950/40"
-                    >
-                      <FaPenToSquare size={11} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (preset._id && confirm(`למחוק את "${preset.name}"?`))
-                          onDelete(preset._id);
-                      }}
-                      aria-label="מחיקה"
-                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 text-slate-400 transition-colors hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/40"
-                    >
-                      <FaTrash size={11} />
-                    </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          preset._id && onOpen(preset._id);
+                        }}
+                        aria-label="עריכה"
+                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 text-slate-400 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950/40"
+                      >
+                        <FaPenToSquare size={11} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (preset._id && confirm(`למחוק את "${preset.name}"?`))
+                            onDelete(preset._id);
+                        }}
+                        aria-label="מחיקה"
+                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 text-slate-400 transition-colors hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/40"
+                      >
+                        <FaTrash size={11} />
+                      </button>
                     </div>
                   </div>
                 </div>
