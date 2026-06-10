@@ -265,15 +265,20 @@ export const UserDashboard = () => {
       updated.frozenDaysRemaining = daysRemaining;
       historyEntry.frozenDaysRemaining = daysRemaining;
     } else if (fromStatus === "frozen") {
-      // LEAVING freeze — restore the days that were preserved. We
-      // extend dateFinished by frozenDaysRemaining so the trainee
-      // gets back exactly the coaching time they paused with.
+      // LEAVING freeze — restore the saved coaching days from the
+      // moment of freeze. The new dateFinished is `now + savedDays`,
+      // so the trainee gets back EXACTLY the same time-remaining
+      // they had when paused, no matter how long the pause lasted.
+      //
+      // (We don't extend the original dateFinished by savedDays,
+      //  because that would over-credit: the original date kept
+      //  ticking down during freeze, and adding savedDays on top
+      //  would give the trainee both the days that passed during
+      //  freeze AND the saved days. The correct math is reset-from-
+      //  today using the snapshot.)
       const savedDays = currentUser.frozenDaysRemaining || 0;
       if (savedDays > 0) {
-        const base = currentUser.dateFinished
-          ? new Date(currentUser.dateFinished).getTime()
-          : now.getTime();
-        const newFinished = new Date(base + savedDays * 24 * 60 * 60 * 1000);
+        const newFinished = new Date(now.getTime() + savedDays * 24 * 60 * 60 * 1000);
         updated.dateFinished = newFinished;
         historyEntry.daysAdded = savedDays;
       }
@@ -526,9 +531,14 @@ export const UserDashboard = () => {
         </div>
       </div>
 
-      {/* Content */}
+      {/* Content — profile tab uses a 2-column grid on wide screens:
+          - Right column (visually right in RTL): "פרטי משתמש" card.
+          - Left column: freeze documentation (when frozen) + the
+            ever-present status-history audit log.
+          On narrow screens it stacks vertically. */}
       {mainTab === "profile" && (
-        <div className="w-full max-w-3xl rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className="w-full rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-6 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <FaUser size={16} className="text-blue-600" />
@@ -616,20 +626,17 @@ export const UserDashboard = () => {
             </div>
           )}
         </div>
-      )}
 
-      {/* Freeze documentation — shown only when the trainee is
-          currently frozen. Displays months+days remaining (calculated
-          from frozenDaysRemaining) so the trainer can plan around it. */}
-      {mainTab === "profile" && status === "frozen" && currentUser && (
-        <FreezeDocumentationCard user={currentUser} />
-      )}
-
-      {/* Status history — full audit log of every status change.
-          Newest first. Always shown on the profile tab (even when
-          empty) so the trainer knows where to look. */}
-      {mainTab === "profile" && currentUser && (
-        <StatusHistoryCard history={currentUser.statusHistory} />
+        {/* Left column — freeze documentation (conditional) +
+            status history (always shown). Stacks vertically inside
+            the column. */}
+        <div className="flex w-full flex-col gap-4">
+          {status === "frozen" && currentUser && (
+            <FreezeDocumentationCard user={currentUser} />
+          )}
+          {currentUser && <StatusHistoryCard history={currentUser.statusHistory} />}
+        </div>
+        </div>
       )}
 
       {mainTab === "progress" && (
