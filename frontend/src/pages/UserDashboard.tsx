@@ -13,7 +13,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import useUpdateUser from "@/hooks/mutations/User/useUpdateUser";
-import type { AccountStatus, IUser } from "@/interfaces/IUser";
+import type { AccountStatus, IUser, IStatusHistoryEntry } from "@/interfaces/IUser";
+import { useUsersStore } from "@/store/userStore";
 import {
   FaUser,
   FaArrowTrendUp,
@@ -164,6 +165,11 @@ export const UserDashboard = () => {
   // outside the editor's form context.
   const [swapModalOpen, setSwapModalOpen] = useState(false);
 
+  // The currently-logged-in trainer (whoever is using the app right
+  // now) — captured into status-history entries so the trainer
+  // later sees "who changed this trainee's status, when".
+  const currentUserAuth = useUsersStore((s) => s.currentUser);
+
   // Seed local state from either the fetched `data` OR the navigation
   // `state` payload — when the trainer clicks into a user from the
   // list, `useUserQuery` is disabled (the row already has the user
@@ -222,38 +228,74 @@ export const UserDashboard = () => {
   const confirmStatusChange = async () => {
     if (!pendingStatus || !currentUser) return;
 
+    const fromStatus = status;
+    const toStatus = pendingStatus;
+    const now = new Date();
+
     // Build the payload. Freeze captures a snapshot of how many
     // days were left until dateFinished at the moment of pause,
     // so the trainer can later honour that remaining time even if
     // the calendar moves on while the trainee is paused.
     const updated: IUser = {
       ...currentUser,
-      accountStatus: pendingStatus,
+      accountStatus: toStatus,
       // Frozen users keep app access — only "disabled" blocks it.
-      hasAccess: pendingStatus !== "disabled",
+      hasAccess: toStatus !== "disabled",
     };
 
-    if (pendingStatus === "frozen") {
+    // Audit-log entry for this status change. Populated below with
+    // freeze-specific extras when applicable. Tagged "system" so
+    // the UI can distinguish auto-records from manual trainer notes.
+    const historyEntry: IStatusHistoryEntry = {
+      at: now,
+      kind: "system",
+      fromStatus,
+      toStatus,
+      changedBy: (currentUserAuth as { _id?: string } | null)?._id || undefined,
+    };
+
+    if (toStatus === "frozen") {
+      // ENTERING freeze — snapshot the days remaining.
       const finished = currentUser?.dateFinished
         ? new Date(currentUser.dateFinished).getTime()
         : null;
       const daysRemaining =
         finished !== null && !Number.isNaN(finished)
-          ? Math.max(0, Math.ceil((finished - Date.now()) / (1000 * 60 * 60 * 24)))
+          ? Math.max(0, Math.ceil((finished - now.getTime()) / (1000 * 60 * 60 * 24)))
           : 0;
-      updated.frozenAt = new Date();
+      updated.frozenAt = now;
       updated.frozenDaysRemaining = daysRemaining;
-    } else if (currentUser.accountStatus === "frozen") {
-      // Moving OUT of frozen — clear the snapshot so it doesn't
-      // mislead the trainer later. The previous freeze info has
-      // served its purpose.
+      historyEntry.frozenDaysRemaining = daysRemaining;
+    } else if (fromStatus === "frozen") {
+      // LEAVING freeze — restore the saved coaching days from the
+      // moment of freeze. The new dateFinished is `now + savedDays`,
+      // so the trainee gets back EXACTLY the same time-remaining
+      // they had when paused, no matter how long the pause lasted.
+      //
+      // (We don't extend the original dateFinished by savedDays,
+      //  because that would over-credit: the original date kept
+      //  ticking down during freeze, and adding savedDays on top
+      //  would give the trainee both the days that passed during
+      //  freeze AND the saved days. The correct math is reset-from-
+      //  today using the snapshot.)
+      const savedDays = currentUser.frozenDaysRemaining || 0;
+      if (savedDays > 0) {
+        const newFinished = new Date(now.getTime() + savedDays * 24 * 60 * 60 * 1000);
+        updated.dateFinished = newFinished;
+        historyEntry.daysAdded = savedDays;
+      }
+      // Clear the snapshot now that it's been honoured.
       updated.frozenAt = undefined;
       updated.frozenDaysRemaining = undefined;
     }
 
+    // Append to the status history log. Keep history immutable —
+    // we only push new entries, never edit old ones.
+    updated.statusHistory = [...(currentUser.statusHistory || []), historyEntry];
+
     try {
       await updateUser.mutateAsync({ id: currentUser._id!, user: updated });
-      setStatus(pendingStatus);
+      setStatus(toStatus);
     } catch (e: any) {
       console.error("Status update failed:", {
         status: e?.status || e?.response?.status,
@@ -491,95 +533,133 @@ export const UserDashboard = () => {
         </div>
       </div>
 
-      {/* Content */}
+      {/* Content — profile tab uses a 2-column grid on wide screens:
+          - Right column (visually right in RTL): "פרטי משתמש" card.
+          - Left column: freeze documentation (when frozen) + the
+            ever-present status-history audit log.
+          On narrow screens it stacks vertically. */}
       {mainTab === "profile" && (
-        <div className="w-full max-w-3xl rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-6 shadow-sm">
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <FaUser size={16} className="text-blue-600" />
-              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">פרטי משתמש</h2>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div className="w-full rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-6 shadow-sm">
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <FaUser size={16} className="text-blue-600" />
+                <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">פרטי משתמש</h2>
+              </div>
+              <button
+                onClick={() => navigate(`/users/edit/${currentUser?._id}`)}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
+              >
+                <FaPenToSquare size={11} />
+                <span>עריכה</span>
+              </button>
             </div>
-            <button
-              onClick={() => navigate(`/users/edit/${currentUser?._id}`)}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
-            >
-              <FaPenToSquare size={11} />
-              <span>עריכה</span>
-            </button>
-          </div>
-          {/* Status badge — mirrors the header status dropdown so the
+            {/* Status badge — mirrors the header status dropdown so the
               trainer sees the trainee's account state without scrolling
               up. Single source of truth: the `status` state, which is
               derived from `data.accountStatus` (or hasAccess fallback)
               and updated optimistically by the dropdown change handler. */}
-          <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-slate-50/60 dark:bg-slate-800/40 px-4 py-3">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
-              סטטוס במערכת:
-            </span>
-            <span
-              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold ${
-                status === "active"
-                  ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
-                  : status === "user"
-                    ? "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300"
-                    : status === "frozen"
-                      ? "bg-cyan-50 text-cyan-700 dark:bg-cyan-950/40 dark:text-cyan-300"
-                      : "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300"
-              }`}
-            >
+            <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-slate-50/60 dark:bg-slate-800/40 px-4 py-3">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                סטטוס במערכת:
+              </span>
               <span
-                className={`h-1.5 w-1.5 rounded-full ${
+                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold ${
                   status === "active"
-                    ? "bg-emerald-500"
+                    ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
                     : status === "user"
-                      ? "bg-blue-500"
+                      ? "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300"
                       : status === "frozen"
-                        ? "bg-cyan-500"
-                        : "bg-rose-500"
+                        ? "bg-cyan-50 text-cyan-700 dark:bg-cyan-950/40 dark:text-cyan-300"
+                        : "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300"
                 }`}
-              />
-              {STATUS_LABEL[status]}
-            </span>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400">
-              {STATUS_DESCRIPTION[status]}
-            </span>
-            {/* Freeze snapshot — surfaces the captured days remaining
+              >
+                <span
+                  className={`h-1.5 w-1.5 rounded-full ${
+                    status === "active"
+                      ? "bg-emerald-500"
+                      : status === "user"
+                        ? "bg-blue-500"
+                        : status === "frozen"
+                          ? "bg-cyan-500"
+                          : "bg-rose-500"
+                  }`}
+                />
+                {STATUS_LABEL[status]}
+              </span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                {STATUS_DESCRIPTION[status]}
+              </span>
+              {/* Freeze snapshot — surfaces the captured days remaining
                 so the trainer always sees what was preserved when
                 they paused this trainee. Shown only when relevant. */}
-            {status === "frozen" && typeof currentUser?.frozenDaysRemaining === "number" && (
-              <span className="ms-auto inline-flex items-center gap-1.5 rounded-lg border border-cyan-200 dark:border-cyan-900/40 bg-white dark:bg-slate-900 px-2.5 py-1 text-[11px] font-bold text-cyan-700 dark:text-cyan-300">
-                ❄️ נשארו {currentUser.frozenDaysRemaining} ימי ליווי בעת ההקפאה
-              </span>
+              {status === "frozen" && typeof currentUser?.frozenDaysRemaining === "number" && (
+                <span className="ms-auto inline-flex items-center gap-1.5 rounded-lg border border-cyan-200 dark:border-cyan-900/40 bg-white dark:bg-slate-900 px-2.5 py-1 text-[11px] font-bold text-cyan-700 dark:text-cyan-300">
+                  ❄️ נשארו {currentUser.frozenDaysRemaining} ימי ליווי בעת ההקפאה
+                </span>
+              )}
+            </div>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <ProfileField label="שם פרטי" value={currentUser?.firstName} />
+              <ProfileField label="שם משפחה" value={currentUser?.lastName} />
+              <ProfileField label="טלפון" value={currentUser?.phone} dir="ltr" />
+              <ProfileField label="אימייל" value={currentUser?.email} dir="ltr" />
+              <ProfileField label="סוג תוכנית" value={currentUser?.planType} />
+              <ProfileField
+                label="תאריך תחילת הליווי"
+                value={
+                  currentUser?.dateJoined
+                    ? DateUtils.formatDate(currentUser.dateJoined, "DD/MM/YYYY")
+                    : "—"
+                }
+              />
+              <ProfileField
+                label="תאריך סיום הליווי"
+                value={
+                  currentUser?.dateFinished
+                    ? DateUtils.formatDate(currentUser.dateFinished, "DD/MM/YYYY")
+                    : "—"
+                }
+              />
+            </div>
+            {currentUser?.dietaryType && currentUser.dietaryType.length > 0 && (
+              <div className="mt-4 border-t border-slate-100 dark:border-slate-800 pt-4">
+                <ProfileField label="הגבלות תזונה" value={currentUser.dietaryType.join(", ")} />
+              </div>
             )}
           </div>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <ProfileField label="שם פרטי" value={currentUser?.firstName} />
-            <ProfileField label="שם משפחה" value={currentUser?.lastName} />
-            <ProfileField label="טלפון" value={currentUser?.phone} dir="ltr" />
-            <ProfileField label="אימייל" value={currentUser?.email} dir="ltr" />
-            <ProfileField label="סוג תוכנית" value={currentUser?.planType} />
-            <ProfileField
-              label="תאריך תחילת הליווי"
-              value={
-                currentUser?.dateJoined
-                  ? DateUtils.formatDate(currentUser.dateJoined, "DD/MM/YYYY")
-                  : "—"
-              }
-            />
-            <ProfileField
-              label="תאריך סיום הליווי"
-              value={
-                currentUser?.dateFinished
-                  ? DateUtils.formatDate(currentUser.dateFinished, "DD/MM/YYYY")
-                  : "—"
-              }
-            />
+
+          {/* Left column — freeze documentation (conditional) +
+            status history (always shown). Stacks vertically inside
+            the column. */}
+          <div className="flex w-full flex-col gap-4">
+            {status === "frozen" && currentUser && <FreezeDocumentationCard user={currentUser} />}
+            {currentUser && (
+              <StatusHistoryCard
+                user={currentUser}
+                currentStatus={status}
+                onAddNote={async (note) => {
+                  const entry: IStatusHistoryEntry = {
+                    at: new Date(),
+                    kind: "manual",
+                    // Manual notes don't change status — log the
+                    // *current* status on both sides so downstream
+                    // readers (filters, exports) still see a valid
+                    // entry shape.
+                    fromStatus: status,
+                    toStatus: status,
+                    changedBy: (currentUserAuth as { _id?: string } | null)?._id || undefined,
+                    note: note.trim(),
+                  };
+                  const updated: IUser = {
+                    ...currentUser,
+                    statusHistory: [...(currentUser.statusHistory || []), entry],
+                  };
+                  await updateUser.mutateAsync({ id: currentUser._id!, user: updated });
+                }}
+              />
+            )}
           </div>
-          {currentUser?.dietaryType && currentUser.dietaryType.length > 0 && (
-            <div className="mt-4 border-t border-slate-100 dark:border-slate-800 pt-4">
-              <ProfileField label="הגבלות תזונה" value={currentUser.dietaryType.join(", ")} />
-            </div>
-          )}
         </div>
       )}
 
@@ -889,6 +969,295 @@ function StatusConfirmationModal({
         </div>
       </div>
     </div>
+  );
+}
+
+/* ===================================================================
+   FreezeDocumentationCard — surfaces the freeze snapshot in a clean
+   card on the profile tab. Shows months+days breakdown so the
+   trainer can immediately see how much coaching time was preserved.
+=================================================================== */
+function FreezeDocumentationCard({ user }: { user: IUser }) {
+  const totalDays = user.frozenDaysRemaining ?? 0;
+  const months = Math.floor(totalDays / 30);
+  const days = totalDays % 30;
+  const frozenAt = user.frozenAt
+    ? DateUtils.formatDate(new Date(user.frozenAt), "DD/MM/YYYY")
+    : null;
+
+  return (
+    <section
+      dir="rtl"
+      className="rounded-2xl border border-cyan-200 dark:border-cyan-900/40 bg-cyan-50/40 dark:bg-cyan-950/20 p-5 shadow-sm"
+    >
+      <div className="flex items-center gap-2.5 mb-3">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-100 dark:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300">
+          ❄️
+        </div>
+        <div>
+          <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">תיעוד הקפאה</h3>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400">
+            המתאמן הוקפא ב-{frozenAt || "—"} · הזמן שנשמר יוחזר לתום הליווי כשתחזיר אותו לפעיל
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-3">
+        <FreezeStat
+          label="חודשים שנותרו"
+          value={months}
+          suffix={months === 1 ? "חודש" : "חודשים"}
+        />
+        <FreezeStat label="ימים שנותרו" value={days} suffix={days === 1 ? "יום" : "ימים"} />
+        <FreezeStat
+          label="סה״כ ימי ליווי"
+          value={totalDays}
+          suffix={totalDays === 1 ? "יום" : "ימים"}
+        />
+      </div>
+    </section>
+  );
+}
+
+function FreezeStat({ label, value, suffix }: { label: string; value: number; suffix: string }) {
+  return (
+    <div className="rounded-xl border border-cyan-200/60 dark:border-cyan-900/30 bg-white dark:bg-slate-900 p-3 text-center">
+      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+        {label}
+      </p>
+      <p className="mt-1 text-2xl font-extrabold text-cyan-700 dark:text-cyan-300">{value}</p>
+      <p className="text-[10px] text-slate-500 dark:text-slate-400">{suffix}</p>
+    </div>
+  );
+}
+
+/* ===================================================================
+   StatusHistoryCard — append-only audit log of every status change.
+   Shows newest first; each row records who/when/from/to + any
+   freeze-specific metadata (days preserved, days restored).
+=================================================================== */
+/** Hebrew-ize a count of days as "X חודשים ו-Y ימים" / "X ימים". */
+function formatMonthsAndDays(totalDays?: number): string {
+  if (typeof totalDays !== "number" || totalDays <= 0) return "";
+  if (totalDays < 30) return `${totalDays} ${totalDays === 1 ? "יום" : "ימים"}`;
+  const months = Math.floor(totalDays / 30);
+  const days = totalDays % 30;
+  const monthsText = `${months} ${months === 1 ? "חודש" : "חודשים"}`;
+  if (days === 0) return monthsText;
+  const daysText = `${days} ${days === 1 ? "יום" : "ימים"}`;
+  return `${monthsText} ו-${daysText}`;
+}
+
+/** Generate the human description for a system-logged event. */
+function describeSystemEntry(entry: IStatusHistoryEntry): string {
+  const dateLabel = DateUtils.formatDate(new Date(entry.at), "DD/MM/YYYY");
+  // Freeze entry: "הוקפא בתאריך X — נשארו 5 חודשים ו-14 ימים לליווי"
+  if (entry.toStatus === "frozen") {
+    const remainText = formatMonthsAndDays(entry.frozenDaysRemaining);
+    return `הוקפא בתאריך ${dateLabel}${remainText ? ` — נשארו ${remainText} לליווי` : ""}`;
+  }
+  // Unfreeze entry: "שוחרר מהקפאה — X חודשים ו-Y ימים נוספו לתום הליווי"
+  if (entry.fromStatus === "frozen") {
+    const addedText = formatMonthsAndDays(entry.daysAdded);
+    const fromLabel = STATUS_LABEL[entry.fromStatus];
+    const toLabel = STATUS_LABEL[entry.toStatus];
+    return `שוחרר מ${fromLabel} ל${toLabel} בתאריך ${dateLabel}${addedText ? ` — נוספו ${addedText} לתום הליווי` : ""}`;
+  }
+  // Generic transition: "סטטוס שונה מ-X ל-Y בתאריך D"
+  return `סטטוס שונה מ-${STATUS_LABEL[entry.fromStatus]} ל-${STATUS_LABEL[entry.toStatus]} בתאריך ${dateLabel}`;
+}
+
+function StatusHistoryCard({
+  user,
+  currentStatus,
+  onAddNote,
+}: {
+  user: IUser;
+  currentStatus: AccountStatus;
+  onAddNote: (note: string) => Promise<void>;
+}) {
+  const [draftNote, setDraftNote] = useState("");
+  const [isSavingNote, setIsSavingNote] = useState(false);
+  const [showNoteInput, setShowNoteInput] = useState(false);
+
+  const sorted = [...(user.statusHistory || [])].sort(
+    (a, b) => new Date(b.at).getTime() - new Date(a.at).getTime()
+  );
+
+  const handleSaveNote = async () => {
+    const text = draftNote.trim();
+    if (!text || isSavingNote) return;
+    setIsSavingNote(true);
+    try {
+      await onAddNote(text);
+      setDraftNote("");
+      setShowNoteInput(false);
+    } finally {
+      setIsSavingNote(false);
+    }
+  };
+
+  return (
+    <section
+      dir="rtl"
+      className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-5 shadow-sm"
+    >
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl brand-gradient text-white shadow-sm">
+            🕒
+          </div>
+          <div>
+            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+              היסטוריית סטטוסים
+            </h3>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+              שינויי סטטוס אוטומטיים + הערות שאתה מוסיף ידנית
+            </p>
+          </div>
+        </div>
+        {!showNoteInput && (
+          <button
+            type="button"
+            onClick={() => setShowNoteInput(true)}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 dark:border-blue-900/40 bg-blue-50/60 dark:bg-blue-950/30 px-3 py-1.5 text-[11px] font-bold text-blue-700 dark:text-blue-300 transition-all hover:-translate-y-0.5 hover:bg-blue-100"
+          >
+            <FaPenToSquare size={9} />
+            הוסף הערה ידנית
+          </button>
+        )}
+      </div>
+
+      {/* Manual note composer — appears when the trainer clicks
+          "Add note". Saves a "manual" entry into statusHistory with
+          the current status snapshotted on both from/to. */}
+      {showNoteInput && (
+        <div className="mb-3 rounded-xl border border-blue-200 dark:border-blue-900/40 bg-blue-50/40 dark:bg-blue-950/20 p-3">
+          <p className="mb-1.5 text-[11px] font-bold text-blue-700 dark:text-blue-300">
+            הערה ידנית — תיווסף ליומן עם תאריך והסטטוס הנוכחי
+          </p>
+          <textarea
+            value={draftNote}
+            onChange={(e) => setDraftNote(e.target.value)}
+            placeholder="לדוגמה: דיברתי עם המתאמן לגבי המשך התוכנית…"
+            maxLength={500}
+            rows={2}
+            className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200 resize-none"
+          />
+          <div className="mt-2 flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setShowNoteInput(false);
+                setDraftNote("");
+              }}
+              disabled={isSavingNote}
+              className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50"
+            >
+              ביטול
+            </button>
+            <button
+              type="button"
+              onClick={handleSaveNote}
+              disabled={!draftNote.trim() || isSavingNote}
+              className="rounded-lg brand-gradient brand-gradient-hover px-4 py-1.5 text-[11px] font-bold text-white shadow-md shadow-blue-500/25 transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
+            >
+              {isSavingNote ? "שומר…" : "שמור הערה"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {sorted.length === 0 && !showNoteInput ? (
+        <div className="flex flex-col items-center gap-1 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-800/30 py-8 text-center">
+          <p className="text-xs font-bold text-slate-600 dark:text-slate-300">אין עדיין רשומות</p>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400">
+            שינוי סטטוס או הערה ידנית יופיעו כאן
+          </p>
+        </div>
+      ) : (
+        <ul className="flex flex-col gap-2">
+          {sorted.map((entry, idx) => {
+            const isManual = entry.kind === "manual";
+            return (
+              <li
+                key={idx}
+                className={`flex flex-col gap-2 rounded-xl border px-4 py-3 ${
+                  isManual
+                    ? "border-amber-200 dark:border-amber-900/40 bg-amber-50/40 dark:bg-amber-950/20"
+                    : "border-slate-100 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-800/30"
+                }`}
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                        isManual
+                          ? "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300"
+                          : "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300"
+                      }`}
+                    >
+                      {isManual ? "✏️ ידני" : "🤖 מערכת"}
+                    </span>
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                      {DateUtils.formatDate(new Date(entry.at), "DD/MM/YYYY")}
+                    </span>
+                  </div>
+                  {!isManual && entry.fromStatus !== entry.toStatus && (
+                    <div className="flex items-center gap-1">
+                      <StatusPill status={entry.fromStatus} />
+                      <span className="text-slate-400 text-xs">→</span>
+                      <StatusPill status={entry.toStatus} />
+                    </div>
+                  )}
+                </div>
+
+                {/* Description — auto-generated human Hebrew for
+                    system entries, free-form text for manual notes. */}
+                {!isManual && (
+                  <p className="text-sm text-slate-700 dark:text-slate-200">
+                    {describeSystemEntry(entry)}
+                  </p>
+                )}
+                {entry.note && (
+                  <p
+                    className={`text-sm ${
+                      isManual
+                        ? "text-amber-900 dark:text-amber-200"
+                        : "text-slate-700 dark:text-slate-200"
+                    }`}
+                  >
+                    {isManual ? entry.note : `📝 ${entry.note}`}
+                  </p>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      {/* Suppress unused param warning — currentStatus reserved for
+          future per-entry context (e.g. "since the status is now X,
+          this note carries that flag in the audit log"). */}
+      <span className="hidden">{currentStatus}</span>
+    </section>
+  );
+}
+
+function StatusPill({ status }: { status: AccountStatus }) {
+  const styles =
+    status === "active"
+      ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
+      : status === "user"
+        ? "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300"
+        : status === "frozen"
+          ? "bg-cyan-50 text-cyan-700 dark:bg-cyan-950/40 dark:text-cyan-300"
+          : "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300";
+  return (
+    <span
+      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-bold ${styles}`}
+    >
+      {STATUS_LABEL[status]}
+    </span>
   );
 }
 
