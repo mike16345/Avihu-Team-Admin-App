@@ -244,9 +244,11 @@ export const UserDashboard = () => {
     };
 
     // Audit-log entry for this status change. Populated below with
-    // freeze-specific extras when applicable.
+    // freeze-specific extras when applicable. Tagged "system" so
+    // the UI can distinguish auto-records from manual trainer notes.
     const historyEntry: IStatusHistoryEntry = {
       at: now,
+      kind: "system",
       fromStatus,
       toStatus,
       changedBy: (currentUserAuth as { _id?: string } | null)?._id || undefined,
@@ -632,7 +634,31 @@ export const UserDashboard = () => {
             the column. */}
           <div className="flex w-full flex-col gap-4">
             {status === "frozen" && currentUser && <FreezeDocumentationCard user={currentUser} />}
-            {currentUser && <StatusHistoryCard history={currentUser.statusHistory} />}
+            {currentUser && (
+              <StatusHistoryCard
+                user={currentUser}
+                currentStatus={status}
+                onAddNote={async (note) => {
+                  const entry: IStatusHistoryEntry = {
+                    at: new Date(),
+                    kind: "manual",
+                    // Manual notes don't change status — log the
+                    // *current* status on both sides so downstream
+                    // readers (filters, exports) still see a valid
+                    // entry shape.
+                    fromStatus: status,
+                    toStatus: status,
+                    changedBy: (currentUserAuth as { _id?: string } | null)?._id || undefined,
+                    note: note.trim(),
+                  };
+                  const updated: IUser = {
+                    ...currentUser,
+                    statusHistory: [...(currentUser.statusHistory || []), entry],
+                  };
+                  await updateUser.mutateAsync({ id: currentUser._id!, user: updated });
+                }}
+              />
+            )}
           </div>
         </div>
       )}
@@ -1010,68 +1036,211 @@ function FreezeStat({ label, value, suffix }: { label: string; value: number; su
    Shows newest first; each row records who/when/from/to + any
    freeze-specific metadata (days preserved, days restored).
 =================================================================== */
-function StatusHistoryCard({ history }: { history?: IStatusHistoryEntry[] }) {
-  const sorted = [...(history || [])].sort(
+/** Hebrew-ize a count of days as "X חודשים ו-Y ימים" / "X ימים". */
+function formatMonthsAndDays(totalDays?: number): string {
+  if (typeof totalDays !== "number" || totalDays <= 0) return "";
+  if (totalDays < 30) return `${totalDays} ${totalDays === 1 ? "יום" : "ימים"}`;
+  const months = Math.floor(totalDays / 30);
+  const days = totalDays % 30;
+  const monthsText = `${months} ${months === 1 ? "חודש" : "חודשים"}`;
+  if (days === 0) return monthsText;
+  const daysText = `${days} ${days === 1 ? "יום" : "ימים"}`;
+  return `${monthsText} ו-${daysText}`;
+}
+
+/** Generate the human description for a system-logged event. */
+function describeSystemEntry(entry: IStatusHistoryEntry): string {
+  const dateLabel = DateUtils.formatDate(new Date(entry.at), "DD/MM/YYYY");
+  // Freeze entry: "הוקפא בתאריך X — נשארו 5 חודשים ו-14 ימים לליווי"
+  if (entry.toStatus === "frozen") {
+    const remainText = formatMonthsAndDays(entry.frozenDaysRemaining);
+    return `הוקפא בתאריך ${dateLabel}${remainText ? ` — נשארו ${remainText} לליווי` : ""}`;
+  }
+  // Unfreeze entry: "שוחרר מהקפאה — X חודשים ו-Y ימים נוספו לתום הליווי"
+  if (entry.fromStatus === "frozen") {
+    const addedText = formatMonthsAndDays(entry.daysAdded);
+    const fromLabel = STATUS_LABEL[entry.fromStatus];
+    const toLabel = STATUS_LABEL[entry.toStatus];
+    return `שוחרר מ${fromLabel} ל${toLabel} בתאריך ${dateLabel}${addedText ? ` — נוספו ${addedText} לתום הליווי` : ""}`;
+  }
+  // Generic transition: "סטטוס שונה מ-X ל-Y בתאריך D"
+  return `סטטוס שונה מ-${STATUS_LABEL[entry.fromStatus]} ל-${STATUS_LABEL[entry.toStatus]} בתאריך ${dateLabel}`;
+}
+
+function StatusHistoryCard({
+  user,
+  currentStatus,
+  onAddNote,
+}: {
+  user: IUser;
+  currentStatus: AccountStatus;
+  onAddNote: (note: string) => Promise<void>;
+}) {
+  const [draftNote, setDraftNote] = useState("");
+  const [isSavingNote, setIsSavingNote] = useState(false);
+  const [showNoteInput, setShowNoteInput] = useState(false);
+
+  const sorted = [...(user.statusHistory || [])].sort(
     (a, b) => new Date(b.at).getTime() - new Date(a.at).getTime()
   );
+
+  const handleSaveNote = async () => {
+    const text = draftNote.trim();
+    if (!text || isSavingNote) return;
+    setIsSavingNote(true);
+    try {
+      await onAddNote(text);
+      setDraftNote("");
+      setShowNoteInput(false);
+    } finally {
+      setIsSavingNote(false);
+    }
+  };
 
   return (
     <section
       dir="rtl"
       className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-5 shadow-sm"
     >
-      <div className="flex items-center gap-2.5 mb-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl brand-gradient text-white shadow-sm">
-          🕒
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl brand-gradient text-white shadow-sm">
+            🕒
+          </div>
+          <div>
+            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+              היסטוריית סטטוסים
+            </h3>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+              שינויי סטטוס אוטומטיים + הערות שאתה מוסיף ידנית
+            </p>
+          </div>
         </div>
-        <div>
-          <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-            היסטוריית סטטוסים
-          </h3>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400">
-            כל שינוי סטטוס שנעשה למתאמן — מי, מתי, ומה נשמר
-          </p>
-        </div>
+        {!showNoteInput && (
+          <button
+            type="button"
+            onClick={() => setShowNoteInput(true)}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 dark:border-blue-900/40 bg-blue-50/60 dark:bg-blue-950/30 px-3 py-1.5 text-[11px] font-bold text-blue-700 dark:text-blue-300 transition-all hover:-translate-y-0.5 hover:bg-blue-100"
+          >
+            <FaPenToSquare size={9} />
+            הוסף הערה ידנית
+          </button>
+        )}
       </div>
 
-      {sorted.length === 0 ? (
+      {/* Manual note composer — appears when the trainer clicks
+          "Add note". Saves a "manual" entry into statusHistory with
+          the current status snapshotted on both from/to. */}
+      {showNoteInput && (
+        <div className="mb-3 rounded-xl border border-blue-200 dark:border-blue-900/40 bg-blue-50/40 dark:bg-blue-950/20 p-3">
+          <p className="mb-1.5 text-[11px] font-bold text-blue-700 dark:text-blue-300">
+            הערה ידנית — תיווסף ליומן עם תאריך והסטטוס הנוכחי
+          </p>
+          <textarea
+            value={draftNote}
+            onChange={(e) => setDraftNote(e.target.value)}
+            placeholder="לדוגמה: דיברתי עם המתאמן לגבי המשך התוכנית…"
+            maxLength={500}
+            rows={2}
+            className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200 resize-none"
+          />
+          <div className="mt-2 flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setShowNoteInput(false);
+                setDraftNote("");
+              }}
+              disabled={isSavingNote}
+              className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50"
+            >
+              ביטול
+            </button>
+            <button
+              type="button"
+              onClick={handleSaveNote}
+              disabled={!draftNote.trim() || isSavingNote}
+              className="rounded-lg brand-gradient brand-gradient-hover px-4 py-1.5 text-[11px] font-bold text-white shadow-md shadow-blue-500/25 transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
+            >
+              {isSavingNote ? "שומר…" : "שמור הערה"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {sorted.length === 0 && !showNoteInput ? (
         <div className="flex flex-col items-center gap-1 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-800/30 py-8 text-center">
           <p className="text-xs font-bold text-slate-600 dark:text-slate-300">
-            אין עדיין שינויי סטטוס
+            אין עדיין רשומות
           </p>
           <p className="text-[11px] text-slate-500 dark:text-slate-400">
-            כל פעולת סטטוס שתעשה תופיע כאן
+            שינוי סטטוס או הערה ידנית יופיעו כאן
           </p>
         </div>
       ) : (
         <ul className="flex flex-col gap-2">
-          {sorted.map((entry, idx) => (
-            <li
-              key={idx}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-800/30 px-4 py-2.5"
-            >
-              <div className="flex flex-wrap items-center gap-2 text-xs">
-                <StatusPill status={entry.fromStatus} />
-                <span className="text-slate-400">→</span>
-                <StatusPill status={entry.toStatus} />
-                {entry.frozenDaysRemaining !== undefined && (
-                  <span className="rounded-md bg-cyan-50 dark:bg-cyan-950/40 px-2 py-0.5 text-[10px] font-bold text-cyan-700 dark:text-cyan-300">
-                    ❄️ נשמרו {entry.frozenDaysRemaining} ימים
-                  </span>
+          {sorted.map((entry, idx) => {
+            const isManual = entry.kind === "manual";
+            return (
+              <li
+                key={idx}
+                className={`flex flex-col gap-2 rounded-xl border px-4 py-3 ${
+                  isManual
+                    ? "border-amber-200 dark:border-amber-900/40 bg-amber-50/40 dark:bg-amber-950/20"
+                    : "border-slate-100 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-800/30"
+                }`}
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                        isManual
+                          ? "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300"
+                          : "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300"
+                      }`}
+                    >
+                      {isManual ? "✏️ ידני" : "🤖 מערכת"}
+                    </span>
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                      {DateUtils.formatDate(new Date(entry.at), "DD/MM/YYYY")}
+                    </span>
+                  </div>
+                  {!isManual && entry.fromStatus !== entry.toStatus && (
+                    <div className="flex items-center gap-1">
+                      <StatusPill status={entry.fromStatus} />
+                      <span className="text-slate-400 text-xs">→</span>
+                      <StatusPill status={entry.toStatus} />
+                    </div>
+                  )}
+                </div>
+
+                {/* Description — auto-generated human Hebrew for
+                    system entries, free-form text for manual notes. */}
+                {!isManual && (
+                  <p className="text-sm text-slate-700 dark:text-slate-200">
+                    {describeSystemEntry(entry)}
+                  </p>
                 )}
-                {entry.daysAdded !== undefined && entry.daysAdded > 0 && (
-                  <span className="rounded-md bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-300">
-                    + {entry.daysAdded} ימים נוספו לתום ליווי
-                  </span>
+                {entry.note && (
+                  <p
+                    className={`text-sm ${
+                      isManual
+                        ? "text-amber-900 dark:text-amber-200"
+                        : "text-slate-700 dark:text-slate-200"
+                    }`}
+                  >
+                    {isManual ? entry.note : `📝 ${entry.note}`}
+                  </p>
                 )}
-              </div>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                {DateUtils.formatDate(new Date(entry.at), "DD/MM/YYYY")}
-              </span>
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
       )}
+      {/* Suppress unused param warning — currentStatus reserved for
+          future per-entry context (e.g. "since the status is now X,
+          this note carries that flag in the audit log"). */}
+      <span className="hidden">{currentStatus}</span>
     </section>
   );
 }
