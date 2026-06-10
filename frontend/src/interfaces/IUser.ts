@@ -40,6 +40,34 @@ export interface IUser extends IBaseUser {
   frozenAt?: Date | string;
   /** Days between dateFinished and frozenAt at the moment of freeze. */
   frozenDaysRemaining?: number;
+  /**
+   * Full chronological log of every account-status change. Each
+   * entry records WHO changed it, WHEN, FROM what status, TO what
+   * status, and (for freeze events) the days that were preserved.
+   * The trainer sees this in the "היסטוריית סטטוסים" section of
+   * the profile.
+   */
+  statusHistory?: IStatusHistoryEntry[];
+}
+
+export interface IStatusHistoryEntry {
+  /** ISO timestamp of the change. */
+  at: Date | string;
+  fromStatus: AccountStatus;
+  toStatus: AccountStatus;
+  /** Trainer who made the change (sub-trainer id or main trainer id). */
+  changedBy?: string;
+  /**
+   * Days remaining at the moment of freeze (captured when
+   * transitioning *into* frozen). Empty for non-freeze events.
+   */
+  frozenDaysRemaining?: number;
+  /**
+   * When *leaving* frozen, the number of days we extended
+   * dateFinished by (= frozenDaysRemaining of the matching freeze).
+   * Lets the trainer see "we added 42 days back to the contract".
+   */
+  daysAdded?: number;
 }
 
 export interface IUserPost extends IBaseUser {}

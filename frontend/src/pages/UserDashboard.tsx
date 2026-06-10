@@ -13,7 +13,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import useUpdateUser from "@/hooks/mutations/User/useUpdateUser";
-import type { AccountStatus, IUser } from "@/interfaces/IUser";
+import type { AccountStatus, IUser, IStatusHistoryEntry } from "@/interfaces/IUser";
+import { useUsersStore } from "@/store/userStore";
 import {
   FaUser,
   FaArrowTrendUp,
@@ -164,6 +165,11 @@ export const UserDashboard = () => {
   // outside the editor's form context.
   const [swapModalOpen, setSwapModalOpen] = useState(false);
 
+  // The currently-logged-in trainer (whoever is using the app right
+  // now) — captured into status-history entries so the trainer
+  // later sees "who changed this trainee's status, when".
+  const currentUserAuth = useUsersStore((s) => s.currentUser);
+
   // Seed local state from either the fetched `data` OR the navigation
   // `state` payload — when the trainer clicks into a user from the
   // list, `useUserQuery` is disabled (the row already has the user
@@ -222,38 +228,67 @@ export const UserDashboard = () => {
   const confirmStatusChange = async () => {
     if (!pendingStatus || !currentUser) return;
 
+    const fromStatus = status;
+    const toStatus = pendingStatus;
+    const now = new Date();
+
     // Build the payload. Freeze captures a snapshot of how many
     // days were left until dateFinished at the moment of pause,
     // so the trainer can later honour that remaining time even if
     // the calendar moves on while the trainee is paused.
     const updated: IUser = {
       ...currentUser,
-      accountStatus: pendingStatus,
+      accountStatus: toStatus,
       // Frozen users keep app access — only "disabled" blocks it.
-      hasAccess: pendingStatus !== "disabled",
+      hasAccess: toStatus !== "disabled",
     };
 
-    if (pendingStatus === "frozen") {
+    // Audit-log entry for this status change. Populated below with
+    // freeze-specific extras when applicable.
+    const historyEntry: IStatusHistoryEntry = {
+      at: now,
+      fromStatus,
+      toStatus,
+      changedBy: ((currentUserAuth as { _id?: string } | null)?._id) || undefined,
+    };
+
+    if (toStatus === "frozen") {
+      // ENTERING freeze — snapshot the days remaining.
       const finished = currentUser?.dateFinished
         ? new Date(currentUser.dateFinished).getTime()
         : null;
       const daysRemaining =
         finished !== null && !Number.isNaN(finished)
-          ? Math.max(0, Math.ceil((finished - Date.now()) / (1000 * 60 * 60 * 24)))
+          ? Math.max(0, Math.ceil((finished - now.getTime()) / (1000 * 60 * 60 * 24)))
           : 0;
-      updated.frozenAt = new Date();
+      updated.frozenAt = now;
       updated.frozenDaysRemaining = daysRemaining;
-    } else if (currentUser.accountStatus === "frozen") {
-      // Moving OUT of frozen — clear the snapshot so it doesn't
-      // mislead the trainer later. The previous freeze info has
-      // served its purpose.
+      historyEntry.frozenDaysRemaining = daysRemaining;
+    } else if (fromStatus === "frozen") {
+      // LEAVING freeze — restore the days that were preserved. We
+      // extend dateFinished by frozenDaysRemaining so the trainee
+      // gets back exactly the coaching time they paused with.
+      const savedDays = currentUser.frozenDaysRemaining || 0;
+      if (savedDays > 0) {
+        const base = currentUser.dateFinished
+          ? new Date(currentUser.dateFinished).getTime()
+          : now.getTime();
+        const newFinished = new Date(base + savedDays * 24 * 60 * 60 * 1000);
+        updated.dateFinished = newFinished;
+        historyEntry.daysAdded = savedDays;
+      }
+      // Clear the snapshot now that it's been honoured.
       updated.frozenAt = undefined;
       updated.frozenDaysRemaining = undefined;
     }
 
+    // Append to the status history log. Keep history immutable —
+    // we only push new entries, never edit old ones.
+    updated.statusHistory = [...(currentUser.statusHistory || []), historyEntry];
+
     try {
       await updateUser.mutateAsync({ id: currentUser._id!, user: updated });
-      setStatus(pendingStatus);
+      setStatus(toStatus);
     } catch (e: any) {
       console.error("Status update failed:", {
         status: e?.status || e?.response?.status,
@@ -583,6 +618,20 @@ export const UserDashboard = () => {
         </div>
       )}
 
+      {/* Freeze documentation — shown only when the trainee is
+          currently frozen. Displays months+days remaining (calculated
+          from frozenDaysRemaining) so the trainer can plan around it. */}
+      {mainTab === "profile" && status === "frozen" && currentUser && (
+        <FreezeDocumentationCard user={currentUser} />
+      )}
+
+      {/* Status history — full audit log of every status change.
+          Newest first. Always shown on the profile tab (even when
+          empty) so the trainer knows where to look. */}
+      {mainTab === "profile" && currentUser && (
+        <StatusHistoryCard history={currentUser.statusHistory} />
+      )}
+
       {mainTab === "progress" && (
         <div className="flex flex-col gap-4">
           {/* Sub-tabs */}
@@ -889,6 +938,171 @@ function StatusConfirmationModal({
         </div>
       </div>
     </div>
+  );
+}
+
+/* ===================================================================
+   FreezeDocumentationCard — surfaces the freeze snapshot in a clean
+   card on the profile tab. Shows months+days breakdown so the
+   trainer can immediately see how much coaching time was preserved.
+=================================================================== */
+function FreezeDocumentationCard({ user }: { user: IUser }) {
+  const totalDays = user.frozenDaysRemaining ?? 0;
+  const months = Math.floor(totalDays / 30);
+  const days = totalDays % 30;
+  const frozenAt = user.frozenAt
+    ? DateUtils.formatDate(new Date(user.frozenAt), "DD/MM/YYYY")
+    : null;
+
+  return (
+    <section
+      dir="rtl"
+      className="rounded-2xl border border-cyan-200 dark:border-cyan-900/40 bg-cyan-50/40 dark:bg-cyan-950/20 p-5 shadow-sm"
+    >
+      <div className="flex items-center gap-2.5 mb-3">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-100 dark:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300">
+          ❄️
+        </div>
+        <div>
+          <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+            תיעוד הקפאה
+          </h3>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400">
+            המתאמן הוקפא ב-{frozenAt || "—"} · הזמן שנשמר יוחזר לתום הליווי
+            כשתחזיר אותו לפעיל
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-3">
+        <FreezeStat
+          label="חודשים שנותרו"
+          value={months}
+          suffix={months === 1 ? "חודש" : "חודשים"}
+        />
+        <FreezeStat
+          label="ימים שנותרו"
+          value={days}
+          suffix={days === 1 ? "יום" : "ימים"}
+        />
+        <FreezeStat
+          label="סה״כ ימי ליווי"
+          value={totalDays}
+          suffix={totalDays === 1 ? "יום" : "ימים"}
+        />
+      </div>
+    </section>
+  );
+}
+
+function FreezeStat({
+  label,
+  value,
+  suffix,
+}: {
+  label: string;
+  value: number;
+  suffix: string;
+}) {
+  return (
+    <div className="rounded-xl border border-cyan-200/60 dark:border-cyan-900/30 bg-white dark:bg-slate-900 p-3 text-center">
+      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+        {label}
+      </p>
+      <p className="mt-1 text-2xl font-extrabold text-cyan-700 dark:text-cyan-300">
+        {value}
+      </p>
+      <p className="text-[10px] text-slate-500 dark:text-slate-400">{suffix}</p>
+    </div>
+  );
+}
+
+/* ===================================================================
+   StatusHistoryCard — append-only audit log of every status change.
+   Shows newest first; each row records who/when/from/to + any
+   freeze-specific metadata (days preserved, days restored).
+=================================================================== */
+function StatusHistoryCard({ history }: { history?: IStatusHistoryEntry[] }) {
+  const sorted = [...(history || [])].sort(
+    (a, b) => new Date(b.at).getTime() - new Date(a.at).getTime()
+  );
+
+  return (
+    <section
+      dir="rtl"
+      className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-5 shadow-sm"
+    >
+      <div className="flex items-center gap-2.5 mb-3">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl brand-gradient text-white shadow-sm">
+          🕒
+        </div>
+        <div>
+          <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+            היסטוריית סטטוסים
+          </h3>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400">
+            כל שינוי סטטוס שנעשה למתאמן — מי, מתי, ומה נשמר
+          </p>
+        </div>
+      </div>
+
+      {sorted.length === 0 ? (
+        <div className="flex flex-col items-center gap-1 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-800/30 py-8 text-center">
+          <p className="text-xs font-bold text-slate-600 dark:text-slate-300">
+            אין עדיין שינויי סטטוס
+          </p>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400">
+            כל פעולת סטטוס שתעשה תופיע כאן
+          </p>
+        </div>
+      ) : (
+        <ul className="flex flex-col gap-2">
+          {sorted.map((entry, idx) => (
+            <li
+              key={idx}
+              className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-800/30 px-4 py-2.5"
+            >
+              <div className="flex flex-wrap items-center gap-2 text-xs">
+                <StatusPill status={entry.fromStatus} />
+                <span className="text-slate-400">→</span>
+                <StatusPill status={entry.toStatus} />
+                {entry.frozenDaysRemaining !== undefined && (
+                  <span className="rounded-md bg-cyan-50 dark:bg-cyan-950/40 px-2 py-0.5 text-[10px] font-bold text-cyan-700 dark:text-cyan-300">
+                    ❄️ נשמרו {entry.frozenDaysRemaining} ימים
+                  </span>
+                )}
+                {entry.daysAdded !== undefined && entry.daysAdded > 0 && (
+                  <span className="rounded-md bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-300">
+                    + {entry.daysAdded} ימים נוספו לתום ליווי
+                  </span>
+                )}
+              </div>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                {DateUtils.formatDate(new Date(entry.at), "DD/MM/YYYY")}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+function StatusPill({ status }: { status: AccountStatus }) {
+  const styles =
+    status === "active"
+      ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
+      : status === "user"
+        ? "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300"
+        : status === "frozen"
+          ? "bg-cyan-50 text-cyan-700 dark:bg-cyan-950/40 dark:text-cyan-300"
+          : "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300";
+  return (
+    <span
+      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-bold ${styles}`}
+    >
+      {STATUS_LABEL[status]}
+    </span>
   );
 }
 
