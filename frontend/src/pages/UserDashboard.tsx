@@ -249,7 +249,7 @@ export const UserDashboard = () => {
       at: now,
       fromStatus,
       toStatus,
-      changedBy: ((currentUserAuth as { _id?: string } | null)?._id) || undefined,
+      changedBy: (currentUserAuth as { _id?: string } | null)?._id || undefined,
     };
 
     if (toStatus === "frozen") {
@@ -964,12 +964,9 @@ function FreezeDocumentationCard({ user }: { user: IUser }) {
           ❄️
         </div>
         <div>
-          <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-            תיעוד הקפאה
-          </h3>
+          <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">תיעוד הקפאה</h3>
           <p className="text-[11px] text-slate-500 dark:text-slate-400">
-            המתאמן הוקפא ב-{frozenAt || "—"} · הזמן שנשמר יוחזר לתום הליווי
-            כשתחזיר אותו לפעיל
+            המתאמן הוקפא ב-{frozenAt || "—"} · הזמן שנשמר יוחזר לתום הליווי כשתחזיר אותו לפעיל
           </p>
         </div>
       </div>
@@ -980,11 +977,7 @@ function FreezeDocumentationCard({ user }: { user: IUser }) {
           value={months}
           suffix={months === 1 ? "חודש" : "חודשים"}
         />
-        <FreezeStat
-          label="ימים שנותרו"
-          value={days}
-          suffix={days === 1 ? "יום" : "ימים"}
-        />
+        <FreezeStat label="ימים שנותרו" value={days} suffix={days === 1 ? "יום" : "ימים"} />
         <FreezeStat
           label="סה״כ ימי ליווי"
           value={totalDays}
@@ -995,23 +988,13 @@ function FreezeDocumentationCard({ user }: { user: IUser }) {
   );
 }
 
-function FreezeStat({
-  label,
-  value,
-  suffix,
-}: {
-  label: string;
-  value: number;
-  suffix: string;
-}) {
+function FreezeStat({ label, value, suffix }: { label: string; value: number; suffix: string }) {
   return (
     <div className="rounded-xl border border-cyan-200/60 dark:border-cyan-900/30 bg-white dark:bg-slate-900 p-3 text-center">
       <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
         {label}
       </p>
-      <p className="mt-1 text-2xl font-extrabold text-cyan-700 dark:text-cyan-300">
-        {value}
-      </p>
+      <p className="mt-1 text-2xl font-extrabold text-cyan-700 dark:text-cyan-300">{value}</p>
       <p className="text-[10px] text-slate-500 dark:text-slate-400">{suffix}</p>
     </div>
   );
