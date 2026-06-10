@@ -538,104 +538,102 @@ export const UserDashboard = () => {
           On narrow screens it stacks vertically. */}
       {mainTab === "profile" && (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className="w-full rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-6 shadow-sm">
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <FaUser size={16} className="text-blue-600" />
-              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">פרטי משתמש</h2>
+          <div className="w-full rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-6 shadow-sm">
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <FaUser size={16} className="text-blue-600" />
+                <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">פרטי משתמש</h2>
+              </div>
+              <button
+                onClick={() => navigate(`/users/edit/${currentUser?._id}`)}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
+              >
+                <FaPenToSquare size={11} />
+                <span>עריכה</span>
+              </button>
             </div>
-            <button
-              onClick={() => navigate(`/users/edit/${currentUser?._id}`)}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
-            >
-              <FaPenToSquare size={11} />
-              <span>עריכה</span>
-            </button>
-          </div>
-          {/* Status badge — mirrors the header status dropdown so the
+            {/* Status badge — mirrors the header status dropdown so the
               trainer sees the trainee's account state without scrolling
               up. Single source of truth: the `status` state, which is
               derived from `data.accountStatus` (or hasAccess fallback)
               and updated optimistically by the dropdown change handler. */}
-          <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-slate-50/60 dark:bg-slate-800/40 px-4 py-3">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
-              סטטוס במערכת:
-            </span>
-            <span
-              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold ${
-                status === "active"
-                  ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
-                  : status === "user"
-                    ? "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300"
-                    : status === "frozen"
-                      ? "bg-cyan-50 text-cyan-700 dark:bg-cyan-950/40 dark:text-cyan-300"
-                      : "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300"
-              }`}
-            >
+            <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-slate-50/60 dark:bg-slate-800/40 px-4 py-3">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                סטטוס במערכת:
+              </span>
               <span
-                className={`h-1.5 w-1.5 rounded-full ${
+                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold ${
                   status === "active"
-                    ? "bg-emerald-500"
+                    ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
                     : status === "user"
-                      ? "bg-blue-500"
+                      ? "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300"
                       : status === "frozen"
-                        ? "bg-cyan-500"
-                        : "bg-rose-500"
+                        ? "bg-cyan-50 text-cyan-700 dark:bg-cyan-950/40 dark:text-cyan-300"
+                        : "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300"
                 }`}
-              />
-              {STATUS_LABEL[status]}
-            </span>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400">
-              {STATUS_DESCRIPTION[status]}
-            </span>
-            {/* Freeze snapshot — surfaces the captured days remaining
+              >
+                <span
+                  className={`h-1.5 w-1.5 rounded-full ${
+                    status === "active"
+                      ? "bg-emerald-500"
+                      : status === "user"
+                        ? "bg-blue-500"
+                        : status === "frozen"
+                          ? "bg-cyan-500"
+                          : "bg-rose-500"
+                  }`}
+                />
+                {STATUS_LABEL[status]}
+              </span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                {STATUS_DESCRIPTION[status]}
+              </span>
+              {/* Freeze snapshot — surfaces the captured days remaining
                 so the trainer always sees what was preserved when
                 they paused this trainee. Shown only when relevant. */}
-            {status === "frozen" && typeof currentUser?.frozenDaysRemaining === "number" && (
-              <span className="ms-auto inline-flex items-center gap-1.5 rounded-lg border border-cyan-200 dark:border-cyan-900/40 bg-white dark:bg-slate-900 px-2.5 py-1 text-[11px] font-bold text-cyan-700 dark:text-cyan-300">
-                ❄️ נשארו {currentUser.frozenDaysRemaining} ימי ליווי בעת ההקפאה
-              </span>
+              {status === "frozen" && typeof currentUser?.frozenDaysRemaining === "number" && (
+                <span className="ms-auto inline-flex items-center gap-1.5 rounded-lg border border-cyan-200 dark:border-cyan-900/40 bg-white dark:bg-slate-900 px-2.5 py-1 text-[11px] font-bold text-cyan-700 dark:text-cyan-300">
+                  ❄️ נשארו {currentUser.frozenDaysRemaining} ימי ליווי בעת ההקפאה
+                </span>
+              )}
+            </div>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <ProfileField label="שם פרטי" value={currentUser?.firstName} />
+              <ProfileField label="שם משפחה" value={currentUser?.lastName} />
+              <ProfileField label="טלפון" value={currentUser?.phone} dir="ltr" />
+              <ProfileField label="אימייל" value={currentUser?.email} dir="ltr" />
+              <ProfileField label="סוג תוכנית" value={currentUser?.planType} />
+              <ProfileField
+                label="תאריך תחילת הליווי"
+                value={
+                  currentUser?.dateJoined
+                    ? DateUtils.formatDate(currentUser.dateJoined, "DD/MM/YYYY")
+                    : "—"
+                }
+              />
+              <ProfileField
+                label="תאריך סיום הליווי"
+                value={
+                  currentUser?.dateFinished
+                    ? DateUtils.formatDate(currentUser.dateFinished, "DD/MM/YYYY")
+                    : "—"
+                }
+              />
+            </div>
+            {currentUser?.dietaryType && currentUser.dietaryType.length > 0 && (
+              <div className="mt-4 border-t border-slate-100 dark:border-slate-800 pt-4">
+                <ProfileField label="הגבלות תזונה" value={currentUser.dietaryType.join(", ")} />
+              </div>
             )}
           </div>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <ProfileField label="שם פרטי" value={currentUser?.firstName} />
-            <ProfileField label="שם משפחה" value={currentUser?.lastName} />
-            <ProfileField label="טלפון" value={currentUser?.phone} dir="ltr" />
-            <ProfileField label="אימייל" value={currentUser?.email} dir="ltr" />
-            <ProfileField label="סוג תוכנית" value={currentUser?.planType} />
-            <ProfileField
-              label="תאריך תחילת הליווי"
-              value={
-                currentUser?.dateJoined
-                  ? DateUtils.formatDate(currentUser.dateJoined, "DD/MM/YYYY")
-                  : "—"
-              }
-            />
-            <ProfileField
-              label="תאריך סיום הליווי"
-              value={
-                currentUser?.dateFinished
-                  ? DateUtils.formatDate(currentUser.dateFinished, "DD/MM/YYYY")
-                  : "—"
-              }
-            />
-          </div>
-          {currentUser?.dietaryType && currentUser.dietaryType.length > 0 && (
-            <div className="mt-4 border-t border-slate-100 dark:border-slate-800 pt-4">
-              <ProfileField label="הגבלות תזונה" value={currentUser.dietaryType.join(", ")} />
-            </div>
-          )}
-        </div>
 
-        {/* Left column — freeze documentation (conditional) +
+          {/* Left column — freeze documentation (conditional) +
             status history (always shown). Stacks vertically inside
             the column. */}
-        <div className="flex w-full flex-col gap-4">
-          {status === "frozen" && currentUser && (
-            <FreezeDocumentationCard user={currentUser} />
-          )}
-          {currentUser && <StatusHistoryCard history={currentUser.statusHistory} />}
-        </div>
+          <div className="flex w-full flex-col gap-4">
+            {status === "frozen" && currentUser && <FreezeDocumentationCard user={currentUser} />}
+            {currentUser && <StatusHistoryCard history={currentUser.statusHistory} />}
+          </div>
         </div>
       )}
 
