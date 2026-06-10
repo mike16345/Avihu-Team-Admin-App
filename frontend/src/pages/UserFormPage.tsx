@@ -177,7 +177,7 @@ const UserFormPage = () => {
     <div
       data-testid="user-form-page"
       dir="rtl"
-      className="mx-auto flex max-w-3xl flex-col gap-3 px-6 py-4 md:px-12 lg:px-20"
+      className="mx-auto flex max-w-2xl flex-col gap-2.5 px-4 py-4"
       style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
     >
       {/* Back button — context-aware:
@@ -190,217 +190,237 @@ const UserFormPage = () => {
             from — never lose context. */}
       <button
         onClick={() => (isEdit ? navigate(-1) : navigate("/"))}
-        className="inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-blue-600"
+        className="inline-flex w-fit items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-blue-600"
       >
-        <FaArrowRight size={11} />
+        <FaArrowRight size={10} />
         <span>{isEdit ? "חזרה" : "חזרה לבית"}</span>
       </button>
 
-      {/* Header — compact */}
-      <div className="relative overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-3 shadow-sm">
-        <div className="absolute inset-y-0 right-0 w-1 bg-blue-400" />
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-blue-400 text-base font-bold text-white ring-2 ring-white">
-            {initials}
+      {/* Outer "frame" — a single elegant container wraps the whole
+          form. Replaces the previous 4 separate cards (header + 3
+          sections) which read as a tower of boxes. Now: a soft
+          brand-tinted gradient ring with hairline dividers between
+          sections — feels like one page, not four. */}
+      <div className="relative rounded-2xl bg-gradient-to-bl from-blue-100/70 via-white to-indigo-100/70 dark:from-blue-950/40 dark:via-slate-900 dark:to-indigo-950/40 p-[1px] shadow-md shadow-blue-500/10">
+        <div className="rounded-[15px] bg-white dark:bg-slate-900">
+          {/* Compact header strip — avatar + name + role tag inline */}
+          <div className="relative flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 px-4 py-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full brand-gradient text-sm font-bold text-white shadow-sm shadow-blue-500/30">
+              {initials || <FaUser size={12} />}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-blue-500 dark:text-blue-400">
+                {isEdit ? "עריכת מתאמן" : "מתאמן חדש"}
+              </p>
+              <h2 className="truncate text-sm font-bold leading-tight text-slate-900 dark:text-slate-100">
+                {firstName || lastName ? `${firstName} ${lastName}`.trim() : "ללא שם"}
+              </h2>
+            </div>
           </div>
-          <div>
-            <p className="text-[10px] uppercase tracking-widest text-slate-400 dark:text-slate-500">
-              {isEdit ? "עריכת מתאמן" : "מתאמן חדש"}
-            </p>
-            <h2 className="text-base font-bold leading-tight text-slate-900 dark:text-slate-100">
-              {firstName || lastName ? `${firstName} ${lastName}`.trim() : "ללא שם"}
-            </h2>
-          </div>
-        </div>
-      </div>
 
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3" data-testid="user-form">
-        {/* Personal details card */}
-        <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-4 shadow-sm">
-          <div className="mb-3 flex items-center gap-2">
-            <FaUser size={13} className="text-blue-600" />
-            <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">פרטים אישיים</h2>
-          </div>
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <Field label="שם פרטי" error={errors.firstName} required>
-              <input
-                data-testid="user-form-first-name"
-                type="text"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                placeholder="שם פרטי..."
-                className={inputCls(!!errors.firstName)}
-              />
-            </Field>
-            <Field label="שם משפחה" error={errors.lastName} required>
-              <input
-                data-testid="user-form-last-name"
-                type="text"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                placeholder="שם משפחה..."
-                className={inputCls(!!errors.lastName)}
-              />
-            </Field>
-            <Field label="טלפון" error={errors.phone} required>
-              <input
-                data-testid="user-form-phone"
-                type="tel"
-                dir="ltr"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="0501234567"
-                className={inputCls(!!errors.phone) + " text-center"}
-              />
-            </Field>
-            <Field label="אימייל" error={errors.email} required>
-              <input
-                data-testid="user-form-email"
-                type="email"
-                dir="ltr"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="israel@example.com"
-                className={inputCls(!!errors.email) + " text-center"}
-              />
-            </Field>
-          </div>
-        </div>
-
-        {/* Plan card */}
-        <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-4 shadow-sm">
-          <div className="mb-3 flex items-center gap-2">
-            <FaCalendarDays size={13} className="text-indigo-600" />
-            <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">תוכנית וליווי</h2>
-          </div>
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <Field label="סוג תוכנית" error={errors.planType} required>
-              <SelectInput
-                value={planType}
-                onChange={setPlanType}
-                placeholder="בחר סוג תוכנית"
-                error={!!errors.planType}
-                testId="user-form-plan-type"
-                options={[
-                  { value: UserPlanTypes.CUT, label: UserPlanTypes.CUT },
-                  { value: UserPlanTypes.BULK, label: UserPlanTypes.BULK },
-                ]}
-              />
-            </Field>
-            <Field label="בדיקה תקופתית">
-              <SelectInput
-                value={String(remindIn)}
-                onChange={(v) => setRemindIn(Number(v))}
-                placeholder="כל כמה זמן..."
-                testId="user-form-remind-in"
-                options={REMIND_IN_OPTIONS.map((r) => ({ value: String(r.value), label: r.label }))}
-              />
-            </Field>
-            <Field label="תאריך סיום הליווי" error={errors.dateFinished} required>
-              <div className="flex flex-col gap-2">
-                <div className="relative">
-                  <FaCalendarCheck
-                    size={12}
-                    className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
-                  />
-                  <input
-                    data-testid="user-form-date-finished"
-                    type="date"
-                    value={dateFinished}
-                    onChange={(e) => setDateFinished(e.target.value)}
-                    className={inputCls(!!errors.dateFinished) + " ps-9"}
-                  />
-                </div>
-                <div className="flex flex-wrap gap-1">
-                  {DATE_PRESETS.map((p) => (
-                    <button
-                      key={p.days}
-                      type="button"
-                      onClick={() => applyDatePreset(p.days)}
-                      data-testid="user-form-date-preset"
-                      className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-slate-600 dark:text-slate-300 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
-                    >
-                      {p.label}
-                    </button>
-                  ))}
-                </div>
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="flex flex-col" data-testid="user-form">
+            {/* Personal details */}
+            <div className="border-b border-slate-100 dark:border-slate-800 px-4 py-3">
+              <div className="mb-2.5 flex items-center gap-1.5">
+                <FaUser size={11} className="text-blue-600" />
+                <h2 className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                  פרטים אישיים
+                </h2>
               </div>
-            </Field>
-          </div>
+              <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2">
+                <Field label="שם פרטי" error={errors.firstName} required>
+                  <input
+                    data-testid="user-form-first-name"
+                    type="text"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="שם פרטי..."
+                    className={inputCls(!!errors.firstName)}
+                  />
+                </Field>
+                <Field label="שם משפחה" error={errors.lastName} required>
+                  <input
+                    data-testid="user-form-last-name"
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="שם משפחה..."
+                    className={inputCls(!!errors.lastName)}
+                  />
+                </Field>
+                <Field label="טלפון" error={errors.phone} required>
+                  <input
+                    data-testid="user-form-phone"
+                    type="tel"
+                    dir="ltr"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="0501234567"
+                    className={inputCls(!!errors.phone) + " text-center"}
+                  />
+                </Field>
+                <Field label="אימייל" error={errors.email} required>
+                  <input
+                    data-testid="user-form-email"
+                    type="email"
+                    dir="ltr"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="israel@example.com"
+                    className={inputCls(!!errors.email) + " text-center"}
+                  />
+                </Field>
+              </div>
+            </div>
 
-          {/* Responsible trainer — links the trainee to a sub-trainer
+            {/* Plan & coaching */}
+            <div className="border-b border-slate-100 dark:border-slate-800 px-4 py-3">
+              <div className="mb-2.5 flex items-center gap-1.5">
+                <FaCalendarDays size={11} className="text-indigo-600" />
+                <h2 className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                  תוכנית וליווי
+                </h2>
+              </div>
+              <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2">
+                <Field label="סוג תוכנית" error={errors.planType} required>
+                  <SelectInput
+                    value={planType}
+                    onChange={setPlanType}
+                    placeholder="בחר סוג תוכנית"
+                    error={!!errors.planType}
+                    testId="user-form-plan-type"
+                    options={[
+                      { value: UserPlanTypes.CUT, label: UserPlanTypes.CUT },
+                      { value: UserPlanTypes.BULK, label: UserPlanTypes.BULK },
+                    ]}
+                  />
+                </Field>
+                <Field label="בדיקה תקופתית">
+                  <SelectInput
+                    value={String(remindIn)}
+                    onChange={(v) => setRemindIn(Number(v))}
+                    placeholder="כל כמה זמן..."
+                    testId="user-form-remind-in"
+                    options={REMIND_IN_OPTIONS.map((r) => ({
+                      value: String(r.value),
+                      label: r.label,
+                    }))}
+                  />
+                </Field>
+                <Field label="תאריך סיום הליווי" error={errors.dateFinished} required>
+                  <div className="flex flex-col gap-2">
+                    <div className="relative">
+                      <FaCalendarCheck
+                        size={12}
+                        className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
+                      />
+                      <input
+                        data-testid="user-form-date-finished"
+                        type="date"
+                        value={dateFinished}
+                        onChange={(e) => setDateFinished(e.target.value)}
+                        className={inputCls(!!errors.dateFinished) + " ps-9"}
+                      />
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {DATE_PRESETS.map((p) => (
+                        <button
+                          key={p.days}
+                          type="button"
+                          onClick={() => applyDatePreset(p.days)}
+                          data-testid="user-form-date-preset"
+                          className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-slate-600 dark:text-slate-300 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
+                        >
+                          {p.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </Field>
+              </div>
+
+              {/* Responsible trainer — links the trainee to a sub-trainer
               under the head coach. Empty selection = the main trainer
               (Avihu) handles them directly. The dropdown is hidden
               entirely when the trainer has no sub-trainers, so single-
               trainer accounts don't see a confusing empty field. */}
-          <TrainerAssignmentField value={subTrainerId} onChange={setSubTrainerId} />
-        </div>
+              <TrainerAssignmentField value={subTrainerId} onChange={setSubTrainerId} />
+            </div>
 
-        {/* Dietary restrictions card */}
-        <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-4 shadow-sm">
-          <div className="mb-3 flex items-center gap-2">
-            <FaCheck size={13} className="text-emerald-600" />
-            <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">הגבלות תזונה</h2>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {DIETARY_OPTIONS.map((opt) => {
-              const selected = dietaryType.includes(opt);
-              return (
+            {/* Dietary restrictions */}
+            <div className="px-4 py-3">
+              <div className="mb-2.5 flex items-center gap-1.5">
+                <FaCheck size={11} className="text-emerald-600" />
+                <h2 className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                  הגבלות תזונה
+                </h2>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {DIETARY_OPTIONS.map((opt) => {
+                  const selected = dietaryType.includes(opt);
+                  return (
+                    <button
+                      key={opt}
+                      type="button"
+                      onClick={() => toggleDietary(opt)}
+                      className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs font-semibold transition-all ${
+                        selected
+                          ? "border-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300"
+                          : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700"
+                      }`}
+                    >
+                      {selected ? (
+                        <FaCheck size={9} />
+                      ) : (
+                        <FaXmark size={9} className="opacity-30" />
+                      )}
+                      <span>{opt}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Action bar — lives inside the frame as its footer, with a
+            soft slate wash to read as a tray below the form sections. */}
+            <div className="flex items-center justify-between gap-2 rounded-b-[15px] border-t border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/60 px-4 py-2.5">
+              {/* Delete (only in edit mode) */}
+              {isEdit ? (
                 <button
-                  key={opt}
                   type="button"
-                  onClick={() => toggleDietary(opt)}
-                  className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-sm font-semibold transition-all ${
-                    selected
-                      ? "border-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300"
-                      : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700"
-                  }`}
+                  onClick={() => setShowDeleteConfirm(true)}
+                  disabled={deleteUserMutation.isPending}
+                  className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-white dark:bg-slate-900 px-2.5 py-1.5 text-xs font-semibold text-red-600 transition-all hover:border-red-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {selected ? <FaCheck size={10} /> : <FaXmark size={10} className="opacity-30" />}
-                  <span>{opt}</span>
+                  <FaTrash size={10} />
+                  <span>מחיקת מתאמן</span>
                 </button>
-              );
-            })}
-          </div>
-        </div>
+              ) : (
+                <div />
+              )}
 
-        {/* Action bar */}
-        <div className="sticky bottom-0 z-10 -mx-4 flex items-center justify-between gap-2 border-t border-slate-200/80 dark:border-slate-800/80 bg-white/95 px-4 py-3 backdrop-blur-sm">
-          {/* Delete (only in edit mode) */}
-          {isEdit ? (
-            <button
-              type="button"
-              onClick={() => setShowDeleteConfirm(true)}
-              disabled={deleteUserMutation.isPending}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-semibold text-red-600 transition-all hover:border-red-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <FaTrash size={11} />
-              <span>מחיקת מתאמן</span>
-            </button>
-          ) : (
-            <div />
-          )}
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => (isEdit ? navigate(-1) : navigate("/"))}
-              className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-5 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
-            >
-              ביטול
-            </button>
-            <button
-              data-testid="user-form-submit"
-              type="submit"
-              disabled={isPending}
-              className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {isPending ? "שומר..." : isEdit ? "שמירת שינויים" : "הוספת מתאמן"}
-            </button>
-          </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => (isEdit ? navigate(-1) : navigate("/"))}
+                  className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+                >
+                  ביטול
+                </button>
+                <button
+                  data-testid="user-form-submit"
+                  type="submit"
+                  disabled={isPending}
+                  className="inline-flex items-center gap-1.5 rounded-lg brand-gradient brand-gradient-hover px-4 py-1.5 text-xs font-bold text-white shadow-md shadow-blue-500/25 transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+                >
+                  {isPending ? "שומר..." : isEdit ? "שמירת שינויים" : "הוספת מתאמן"}
+                </button>
+              </div>
+            </div>
+          </form>
         </div>
-      </form>
+      </div>
 
       {/* Delete confirmation popup */}
       {showDeleteConfirm && (

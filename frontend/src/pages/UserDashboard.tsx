@@ -587,15 +587,21 @@ export const UserDashboard = () => {
                 />
                 {STATUS_LABEL[status]}
               </span>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                {STATUS_DESCRIPTION[status]}
-              </span>
-              {/* Freeze snapshot — surfaces the captured days remaining
-                so the trainer always sees what was preserved when
-                they paused this trainee. Shown only when relevant. */}
-              {status === "frozen" && typeof currentUser?.frozenDaysRemaining === "number" && (
-                <span className="ms-auto inline-flex items-center gap-1.5 rounded-lg border border-cyan-200 dark:border-cyan-900/40 bg-white dark:bg-slate-900 px-2.5 py-1 text-[11px] font-bold text-cyan-700 dark:text-cyan-300">
-                  ❄️ נשארו {currentUser.frozenDaysRemaining} ימי ליווי בעת ההקפאה
+              {/* In frozen state the freeze chip carries the full
+                story — date + remaining time — so skip the generic
+                description to avoid stacking redundant text rows. */}
+              {status === "frozen" && typeof currentUser?.frozenDaysRemaining === "number" ? (
+                <span className="ms-auto inline-flex items-center gap-1.5 rounded-md bg-cyan-50 dark:bg-cyan-950/40 px-2 py-0.5 text-[11px] font-bold text-cyan-700 dark:text-cyan-300">
+                  ❄️
+                  {currentUser.frozenAt
+                    ? ` הוקפא ${DateUtils.formatDate(new Date(currentUser.frozenAt), "DD/MM/YYYY")}`
+                    : ""}
+                  {" · נשארו "}
+                  {formatMonthsAndDays(currentUser.frozenDaysRemaining)}
+                </span>
+              ) : (
+                <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                  {STATUS_DESCRIPTION[status]}
                 </span>
               )}
             </div>
@@ -979,55 +985,37 @@ function StatusConfirmationModal({
 =================================================================== */
 function FreezeDocumentationCard({ user }: { user: IUser }) {
   const totalDays = user.frozenDaysRemaining ?? 0;
-  const months = Math.floor(totalDays / 30);
-  const days = totalDays % 30;
   const frozenAt = user.frozenAt
     ? DateUtils.formatDate(new Date(user.frozenAt), "DD/MM/YYYY")
-    : null;
+    : "—";
 
+  // Compact one-row card: icon + title + key facts inline + helper
+  // copy stacked on its own row. Replaces the previous 3-tile grid
+  // which felt overweight for what is essentially 2 numbers + a date.
   return (
     <section
       dir="rtl"
-      className="rounded-2xl border border-cyan-200 dark:border-cyan-900/40 bg-cyan-50/40 dark:bg-cyan-950/20 p-5 shadow-sm"
+      className="rounded-2xl border border-cyan-200 dark:border-cyan-900/40 bg-cyan-50/40 dark:bg-cyan-950/20 p-4 shadow-sm"
     >
-      <div className="flex items-center gap-2.5 mb-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-100 dark:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-cyan-100 dark:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300">
           ❄️
         </div>
-        <div>
-          <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">תיעוד הקפאה</h3>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400">
-            המתאמן הוקפא ב-{frozenAt || "—"} · הזמן שנשמר יוחזר לתום הליווי כשתחזיר אותו לפעיל
-          </p>
-        </div>
+        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">תיעוד הקפאה</h3>
+        <span className="text-slate-300 dark:text-slate-700">·</span>
+        <span className="text-xs text-slate-600 dark:text-slate-300">
+          הוקפא ב-<span className="font-bold text-slate-800 dark:text-slate-100">{frozenAt}</span>
+        </span>
+        <span className="text-slate-300 dark:text-slate-700">·</span>
+        <span className="inline-flex items-baseline gap-1 rounded-md bg-white dark:bg-slate-900 px-2 py-0.5 text-xs font-bold text-cyan-700 dark:text-cyan-300">
+          נשארו {formatMonthsAndDays(totalDays)}
+          <span className="text-[10px] font-normal text-slate-400">({totalDays} ימים)</span>
+        </span>
       </div>
-
-      <div className="grid grid-cols-3 gap-3">
-        <FreezeStat
-          label="חודשים שנותרו"
-          value={months}
-          suffix={months === 1 ? "חודש" : "חודשים"}
-        />
-        <FreezeStat label="ימים שנותרו" value={days} suffix={days === 1 ? "יום" : "ימים"} />
-        <FreezeStat
-          label="סה״כ ימי ליווי"
-          value={totalDays}
-          suffix={totalDays === 1 ? "יום" : "ימים"}
-        />
-      </div>
-    </section>
-  );
-}
-
-function FreezeStat({ label, value, suffix }: { label: string; value: number; suffix: string }) {
-  return (
-    <div className="rounded-xl border border-cyan-200/60 dark:border-cyan-900/30 bg-white dark:bg-slate-900 p-3 text-center">
-      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-        {label}
+      <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
+        הזמן שנשמר יוחזר לתום הליווי כשתחזיר את המתאמן לפעיל
       </p>
-      <p className="mt-1 text-2xl font-extrabold text-cyan-700 dark:text-cyan-300">{value}</p>
-      <p className="text-[10px] text-slate-500 dark:text-slate-400">{suffix}</p>
-    </div>
+    </section>
   );
 }
 

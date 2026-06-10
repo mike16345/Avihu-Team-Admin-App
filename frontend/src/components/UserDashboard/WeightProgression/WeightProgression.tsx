@@ -11,7 +11,7 @@
  *   attach a NATIVE 'dblclick' listener via a ref — that bubbles past Recharts
  *   reliably whether the user double-clicks empty space, the line, or a dot.
  */
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { FaArrowTrendDown, FaArrowTrendUp, FaScaleBalanced, FaCalendarDay } from "react-icons/fa6";
@@ -33,39 +33,74 @@ export const WeightProgression = () => {
   const { id } = useParams();
   const { getWeighInsByUserId } = useWeighInsApi();
   const [notesOpen, setNotesOpen] = useState(false);
-  const cardRef = useRef<HTMLDivElement | null>(null);
+  // Counter state in refs so it survives across re-renders.
+  const lastClickAtRef = useRef(0);
+  const lastToggleAtRef = useRef(0);
+  // Bag of listener-detach functions; populated when callback ref
+  // attaches, drained when it detaches (React calls cb(null) on unmount).
+  const cleanupRef = useRef<(() => void) | null>(null);
 
-  // Manual double-click detection. Native `dblclick` requires both clicks on
-  // the same target, but Recharts swaps target between clicks (tooltip overlay),
-  // so we count clicks ourselves within a 350ms window.
-  useEffect(() => {
-    const card = cardRef.current;
+  // Callback ref instead of useRef+useEffect: useEffect with [] deps
+  // ran during isLoading when the chart div didn't exist yet, so the
+  // listeners never attached. A callback ref runs the instant the div
+  // mounts (and again with null on unmount), regardless of when in
+  // the render lifecycle that happens.
+  //
+  // Two detection paths attached together:
+  //   • Native `dblclick` — fires reliably on plain DOM (notes view,
+  //     empty-state chart placeholder).
+  //   • Manual click-counter (350ms window) — needed because Recharts
+  //     swaps the click target between the two clicks, so the browser
+  //     never emits `dblclick` over the chart line/tooltip layer.
+  // 250ms toggle cooldown prevents both paths from firing twice.
+  const setCardRef = useCallback((card: HTMLDivElement | null) => {
+    // Detach prior listeners (React calls this with null on unmount, or
+    // with a new node if the rendered element changes).
+    cleanupRef.current?.();
+    cleanupRef.current = null;
     if (!card) return;
-    let lastClickAt = 0;
+
+    const isIgnoredTarget = (target: HTMLElement | null) => {
+      if (!target) return false;
+      if (target.closest?.("[data-notes-close]")) return true;
+      const tag = target.tagName;
+      if (tag && ["INPUT", "TEXTAREA", "SELECT", "BUTTON", "A", "LABEL"].includes(tag)) return true;
+      if (target.closest?.(".ql-editor, .ql-toolbar")) return true;
+      return false;
+    };
+
+    const toggle = () => {
+      const now = Date.now();
+      if (now - lastToggleAtRef.current < 250) return;
+      lastToggleAtRef.current = now;
+      setNotesOpen((v) => !v);
+    };
+
     const onClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement | null;
-      // Ignore clicks on form controls / close button — only toggle on clicks
-      // in the "non-interactive" surface of the card.
-      if (target?.closest?.("[data-notes-close]")) return;
-      const tag = target?.tagName;
-      if (tag && ["INPUT", "TEXTAREA", "SELECT", "BUTTON", "A", "LABEL"].includes(tag)) {
-        lastClickAt = 0;
-        return;
-      }
-      if (target?.closest?.(".ql-editor, .ql-toolbar")) {
-        lastClickAt = 0;
+      if (isIgnoredTarget(e.target as HTMLElement | null)) {
+        lastClickAtRef.current = 0;
         return;
       }
       const now = Date.now();
-      if (now - lastClickAt < 350) {
-        lastClickAt = 0;
-        setNotesOpen((v) => !v);
+      if (now - lastClickAtRef.current < 350) {
+        lastClickAtRef.current = 0;
+        toggle();
       } else {
-        lastClickAt = now;
+        lastClickAtRef.current = now;
       }
     };
+
+    const onDblClick = (e: MouseEvent) => {
+      if (isIgnoredTarget(e.target as HTMLElement | null)) return;
+      toggle();
+    };
+
     card.addEventListener("click", onClick);
-    return () => card.removeEventListener("click", onClick);
+    card.addEventListener("dblclick", onDblClick);
+    cleanupRef.current = () => {
+      card.removeEventListener("click", onClick);
+      card.removeEventListener("dblclick", onDblClick);
+    };
   }, []);
 
   const { data, error, isLoading } = useQuery({
@@ -99,19 +134,11 @@ export const WeightProgression = () => {
   if (isLoading) return <Loader size="large" />;
   if (error && (error as any)?.status !== 404) return <ErrorPage message={error as any} />;
 
-  if (!weighIns.length) {
-    return (
-      <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-10 text-center">
-        <FaScaleBalanced size={28} className="mx-auto mb-2 text-slate-300" />
-        <h3 className="text-base font-bold text-slate-700 dark:text-slate-200">
-          אין מעקב שקילה עדיין
-        </h3>
-        <p className="mt-1 text-sm text-slate-400 dark:text-slate-500">
-          כאשר המתאמן יקליט שקילה ראשונה, נתוני המעקב יופיעו כאן.
-        </p>
-      </div>
-    );
-  }
+  // Empty state — render the SAME layout (stats row + calendar + chart card)
+  // so the trainer sees the structure of the tracker waiting to be filled,
+  // not a generic "no data" panel. The stats show "—" and the chart card
+  // surfaces an inline empty message inside the plotting area.
+  const isEmpty = !weighIns.length;
 
   const isLoss = (stats?.change || 0) < 0;
   const changeColor = isLoss
@@ -136,13 +163,13 @@ export const WeightProgression = () => {
         <StatCard
           icon={<FaScaleBalanced size={14} className="text-blue-600" />}
           label="משקל נוכחי"
-          value={`${stats?.current} ק״ג`}
+          value={stats ? `${stats.current} ק״ג` : "—"}
           accent="text-blue-600"
         />
         <StatCard
           icon={<FaScaleBalanced size={14} className="text-slate-400 dark:text-slate-500" />}
           label="משקל התחלתי"
-          value={`${stats?.starting} ק״ג`}
+          value={stats ? `${stats.starting} ק״ג` : "—"}
           accent="text-slate-700 dark:text-slate-200"
         />
         <StatCard
@@ -154,9 +181,9 @@ export const WeightProgression = () => {
             )
           }
           label="שינוי"
-          value={`${stats && stats.change > 0 ? "+" : ""}${stats?.change} ק״ג`}
-          accent={changeColor}
-          bg={changeBg}
+          value={stats ? `${stats.change > 0 ? "+" : ""}${stats.change} ק״ג` : "—"}
+          accent={stats ? changeColor : "text-slate-400"}
+          bg={stats ? changeBg : "bg-white dark:bg-slate-900"}
         />
         <StatCard
           icon={<FaCalendarDay size={14} className="text-indigo-600" />}
@@ -175,7 +202,7 @@ export const WeightProgression = () => {
 
         {/* Chart card — double-click flips to notes view */}
         <div
-          ref={cardRef}
+          ref={setCardRef}
           className="relative overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-4 shadow-sm select-none"
           title={notesOpen ? "לחץ פעמיים לחזרה לגרף" : "לחץ פעמיים לפתקי התקדמות"}
         >
@@ -191,11 +218,16 @@ export const WeightProgression = () => {
               </span>
             </div>
             <div className="flex items-center gap-2">
-              {!notesOpen && (
-                <span className="rounded-full bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 text-[10px] font-semibold text-blue-700 dark:text-blue-300">
-                  {stats?.totalRecords} שקילות
-                </span>
-              )}
+              {!notesOpen &&
+                (isEmpty ? (
+                  <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+                    אין נתונים עדיין
+                  </span>
+                ) : (
+                  <span className="rounded-full bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 text-[10px] font-semibold text-blue-700 dark:text-blue-300">
+                    {stats?.totalRecords} שקילות
+                  </span>
+                ))}
               {notesOpen && (
                 <button
                   type="button"
