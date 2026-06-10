@@ -68,8 +68,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
           // toast type. Sonner colours its built-in icons via the SVG
           // fill/stroke = currentColor, so colouring the wrapper
           // cascades down.
-          icon:
-            "!ms-0 !me-1 !text-blue-600 [&_svg]:!h-4 [&_svg]:!w-4 [&_svg]:!text-blue-600",
+          icon: "!ms-0 !me-1 !text-blue-600 [&_svg]:!h-4 [&_svg]:!w-4 [&_svg]:!text-blue-600",
           actionButton:
             "!rounded-md brand-gradient !text-white !text-[11px] !font-bold !px-2.5 !py-1 hover:!brightness-110",
           cancelButton:
