@@ -1170,9 +1170,7 @@ function StatusHistoryCard({
 
       {sorted.length === 0 && !showNoteInput ? (
         <div className="flex flex-col items-center gap-1 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-800/30 py-8 text-center">
-          <p className="text-xs font-bold text-slate-600 dark:text-slate-300">
-            אין עדיין רשומות
-          </p>
+          <p className="text-xs font-bold text-slate-600 dark:text-slate-300">אין עדיין רשומות</p>
           <p className="text-[11px] text-slate-500 dark:text-slate-400">
             שינוי סטטוס או הערה ידנית יופיעו כאן
           </p>
