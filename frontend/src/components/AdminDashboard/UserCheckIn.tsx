@@ -24,11 +24,11 @@ import { FULL_DAY_STALE_TIME, HOUR_STALE_TIME } from "@/constants/constants";
 import { weightTab } from "@/pages/UserDashboard";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { userFullName } from "@/lib/utils";
-import { useUsersStore } from "@/store/userStore";
 import useUsersQuery from "@/hooks/queries/user/useUsersQuery";
 import { deriveAccountStatus } from "@/lib/userStatus";
 
 type ActiveView = "checkin" | "noWorkout" | "noDiet" | "expiring";
+type UserListItem = { _id: string; firstName?: string; lastName?: string; navUrl: string };
 
 const getInitials = (firstName?: string, lastName?: string) => {
   const f = firstName?.[0] || "";
@@ -70,16 +70,19 @@ const UserCheckIn = () => {
   // We additionally normalise IDs to strings (Mongo can return
   // ObjectId wrappers depending on the serializer) to avoid Set
   // misses between the analytics response and the users store.
-  const { isLoading: isUsersLoading } = useUsersQuery();
-  const allUsers = useUsersStore((s) => s.users);
+  const { isLoading: isUsersLoading, data: users } = useUsersQuery();
+
   const activeIdSet = useMemo(() => {
     const s = new Set<string>();
-    for (const u of allUsers ?? []) {
+
+    for (const u of users ?? []) {
       if (!u._id) continue;
       if (deriveAccountStatus(u) === "active") s.add(String(u._id));
     }
+
     return s;
-  }, [allUsers]);
+  }, [users]);
+
   const onlyActive = useCallback(
     <T extends { _id: string }>(list: T[]) => list.filter((u) => activeIdSet.has(String(u._id))),
     [activeIdSet]
@@ -170,21 +173,24 @@ const UserCheckIn = () => {
     (activeView === "noDiet" && loadingD) ||
     (activeView === "expiring" && loadingE);
 
-  const rawList: { _id: string; firstName?: string; lastName?: string; navUrl: string }[] =
-    activeView === "checkin"
-      ? (checkinActive as any[]).map((u) => ({ ...u, navUrl: `/users/${u._id}?tab=${weightTab}` }))
-      : activeView === "noWorkout"
-        ? (noWorkoutActive as any[]).map((u) => ({ ...u, navUrl: `/workout-plans/${u._id}` }))
-        : activeView === "noDiet"
-          ? (noDietActive as any[]).map((u) => ({ ...u, navUrl: `/diet-plans/${u._id}` }))
-          : (expiringActive as any[]).map((u) => ({
-              ...u,
-              navUrl: `/users/${u._id}?tab=${weightTab}`,
-            }));
+  const rawList: UserListItem[] = useMemo(() => {
+    switch (activeView) {
+      case "checkin":
+        return checkinActive.map((u) => ({ ...u, navUrl: `/users/${u._id}?tab=${weightTab}` }));
+      case "noWorkout":
+        return noWorkoutActive.map((u) => ({ ...u, navUrl: `/workout-plans/${u._id}` }));
+      case "noDiet":
+        return noDietActive.map((u) => ({ ...u, navUrl: `/diet-plans/${u._id}` }));
+      case "expiring":
+        return expiringActive.map((u) => ({ ...u, navUrl: `/users/${u._id}?tab=${weightTab}` }));
+    }
+  }, [activeView, checkinActive, noWorkoutActive, noDietActive, expiringActive]);
 
   const activeList = useMemo(() => {
     const q = search.trim().toLowerCase();
+
     if (!q) return rawList;
+
     return rawList.filter(
       (u) => u.firstName?.toLowerCase().includes(q) || u.lastName?.toLowerCase().includes(q)
     );

@@ -16,7 +16,6 @@ import { HOUR_STALE_TIME } from "@/constants/constants";
 import { userFullName } from "@/lib/utils";
 import Loader from "../ui/Loader";
 import { FaUserPlus, FaDumbbell, FaAppleWhole, FaCheck } from "react-icons/fa6";
-import { useUsersStore } from "@/store/userStore";
 import useUsersQuery from "@/hooks/queries/user/useUsersQuery";
 import { deriveAccountStatus, hasContractEnded } from "@/lib/userStatus";
 
@@ -47,8 +46,7 @@ const NewClientsCard: React.FC = () => {
   // We also need the users store so we can gate the cross-reference
   // by accountStatus + dateFinished. Trigger the query — it's react-
   // query-cached so this is a no-op if another page already fetched.
-  useUsersQuery();
-  const allUsers = useUsersStore((s) => s.users);
+  const { data: allUsers } = useUsersQuery();
 
   /**
    * Cross-reference: clients who appear in BOTH "no workout" AND
