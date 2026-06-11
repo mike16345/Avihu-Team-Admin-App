@@ -86,6 +86,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onClick }) => {
 
   const previewText = stripHtml(blog.content || "");
 
+
   return (
     <article
       onClick={onClick}

@@ -85,11 +85,14 @@ export const UsersPage = () => {
     const active = sortedUsers.filter((u) => deriveAccountStatus(u) === "active").length;
     const asUser = sortedUsers.filter((u) => deriveAccountStatus(u) === "user").length;
     const frozen = sortedUsers.filter((u) => deriveAccountStatus(u) === "frozen").length;
+
     const endingSoon = sortedUsers.filter((u) => {
       if (!u.dateFinished) return false;
       const d = DateUtils.getDaysDifference(new Date(), u.dateFinished);
+
       return d <= 7 && d >= 0;
     }).length;
+
     return { total, active, inOnboarding: asUser, frozen, endingSoon };
   }, [sortedUsers]);
 
@@ -240,6 +243,7 @@ function UserCard({ user, onView }: { user: IUser; onView: () => void }) {
         : derived === "frozen"
           ? "הקפאה"
           : "כבוי";
+
   const statusColors =
     derived === "disabled"
       ? {

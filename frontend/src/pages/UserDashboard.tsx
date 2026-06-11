@@ -1164,7 +1164,7 @@ function StatusHistoryCard({
           </p>
         </div>
       ) : (
-        <ul className="flex flex-col gap-2">
+        <ul className="flex flex-col gap-2 max-h-[400px] custom-scrollbar p-2 overflow-y-auto">
           {sorted.map((entry, idx) => {
             const isManual = entry.kind === "manual";
             return (

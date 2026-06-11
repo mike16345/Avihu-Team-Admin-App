@@ -33,6 +33,7 @@ const BlogPreviewPage = () => {
     return blog.imageUrl ? buildPhotoUrl(blog.imageUrl) : fallbackImage;
   }, [blog]);
 
+
   const youtubeVideoId = useMemo(
     () => (blog?.link ? extractVideoId(blog.link) : null),
     [blog?.link]
