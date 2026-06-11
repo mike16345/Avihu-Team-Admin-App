@@ -29,26 +29,27 @@ Data-heavy UI favors cached server state through TanStack Query, with only small
 
 ## 3. Coding Conventions
 
-* TypeScript runs in `strict` mode. New code should keep explicit types where the codebase already models them.
-* The repo uses Prettier with 2-space indentation, semicolons, double quotes, trailing commas (`es5`), and a 100-column print width.
-* Use the `@/` path alias for imports from `src` when the import is not local to the current folder.
-* Name custom hooks with a `use` prefix. This applies both to React hooks and to the existing repo convention of hook-shaped API factories such as `useUsersApi`.
-* Shared interfaces commonly use `I` prefixes in `src/interfaces` (for example `IUser`, `ISession`). Newer feature-local DTOs may use `type` aliases without the prefix (for example `Lead`, `LeadsListDTO`). Follow the local convention of the area you are editing.
-* Keep component files in PascalCase when the file exports a component. Utility files, schema files, and feature-local key files commonly use camelCase.
-* Prefer enums/constants for repeated identifiers such as query keys, routes, and shared error messages.
-* Use `className` + Tailwind utilities for styling. Shared class composition should go through `cn()` from `src/lib/utils.ts`.
-* Do not use inline styles except for rare cases where Tailwind cannot express the behavior cleanly. Any inline style must be justified by the surrounding implementation.
-* Comments are sparse. Add comments only when logic is genuinely non-obvious; do not annotate routine React or TypeScript code.
-* `@typescript-eslint/no-explicit-any` is disabled, but existing typed interfaces and DTOs show a preference for real types when available. Treat `any` as a last resort, not the default.
-* Prefer guard clauses over deeply nested `if` blocks.
-* Do not use multi-level nested ternary expressions. This is especially important in JSX. Extract the logic into a named variable, helper function, or switch statement instead.
-* Keep control blocks and function declarations visually separated with blank lines where it improves readability.
-* Leave a blank line before meaningful `return` statements unless the function is a very small one-liner.
-* Keep files modular and easy to scan. Component, hook, and utility files should generally stay under 350-400 lines.
-* If a file is growing past 350-400 lines, extract focused helpers, hooks, constants, or child components before adding more logic.
-* Repeated helper logic should not be copied across files. Move broadly reusable helpers into a general utility file.
-* If helpers are only relevant to one feature or page, create a feature-specific utility file instead, such as `dietPlanUtils.ts`, `userCheckInUtils.ts`, or another clearly named helper module.
-* Do not create generic utility files for logic that is only used by one feature unless the feature already has several related helpers.
+- TypeScript runs in `strict` mode. New code should keep explicit types where the codebase already models them.
+- The repo uses Prettier with 2-space indentation, semicolons, double quotes, trailing commas (`es5`), and a 100-column print width.
+- Use the `@/` path alias for imports from `src` when the import is not local to the current folder.
+- Name custom hooks with a `use` prefix. This applies both to React hooks and to the existing repo convention of hook-shaped API factories such as `useUsersApi`.
+- Shared interfaces commonly use `I` prefixes in `src/interfaces` (for example `IUser`, `ISession`). Newer feature-local DTOs may use `type` aliases without the prefix (for example `Lead`, `LeadsListDTO`). Follow the local convention of the area you are editing.
+- Keep component files in PascalCase when the file exports a component. Utility files, schema files, and feature-local key files commonly use camelCase.
+- Prefer enums/constants for repeated identifiers such as query keys, routes, and shared error messages.
+- Use `className` + Tailwind utilities for styling. Shared class composition should go through `cn()` from `src/lib/utils.ts`.
+- Do not use inline styles except for rare cases where Tailwind cannot express the behavior cleanly. Any inline style must be justified by the surrounding implementation.
+- Comments are sparse. Add comments only when logic is genuinely non-obvious; do not annotate routine React or TypeScript code.
+- `@typescript-eslint/no-explicit-any` is disabled, but existing typed interfaces and DTOs show a preference for real types when available. Treat `any` as a last resort, not the default.
+- Prefer guard clauses over deeply nested `if` blocks.
+- Do not use multi-level nested ternary expressions. This is especially important in JSX. Extract the logic into a named variable, helper function, or switch statement instead.
+- Keep control blocks and function declarations visually separated with blank lines where it improves readability.
+- Leave a blank line before meaningful `return` statements unless the function is a very small one-liner.
+- Keep files modular and easy to scan. Component, hook, and utility files should generally stay under 350-400 lines.
+- If a file is growing past 350-400 lines, extract focused helpers, hooks, constants, or child components before adding more logic.
+- Repeated helper logic should not be copied across files. Move broadly reusable helpers into a general utility file.
+- If helpers are only relevant to one feature or page, create a feature-specific utility file instead, such as `dietPlanUtils.ts`, `userCheckInUtils.ts`, or another clearly named helper module.
+- Do not create generic utility files for logic that is only used by one feature unless the feature already has several related helpers.
+
 4. React File Structure
 
 React files should be organized in a predictable order so components are easy to scan and refactor.

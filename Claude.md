@@ -4,14 +4,14 @@ Claude must read and follow `Agents.md` before making any code changes in this r
 
 `Agents.md` is the canonical source for:
 
-* Project architecture
-* React and TypeScript conventions
-* File organization
-* API/data-flow patterns
-* UI/UX rules
-* Testing expectations
-* Refactor limits
-* Agent operating rules
+- Project architecture
+- React and TypeScript conventions
+- File organization
+- API/data-flow patterns
+- UI/UX rules
+- Testing expectations
+- Refactor limits
+- Agent operating rules
 
 Before editing code, Claude must:
 
