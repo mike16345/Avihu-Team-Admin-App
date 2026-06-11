@@ -411,3 +411,8 @@ FodyWeavers.xsd
 # playwright test results
 playwright-report/
 test-results/
+
+# temp
+Claude-cleanup.md
+claude-cleanup.md
+codex-cleanup-instructions.md

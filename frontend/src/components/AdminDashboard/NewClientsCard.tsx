@@ -1,12 +1,3 @@
-/**
- * NewClientsCard — shows active clients who are missing BOTH a workout
- * plan AND a diet plan. These are typically newly onboarded clients
- * that still need their programmes built.
- *
- * Data is derived by cross-referencing the two already-cached analytics
- * queries (no extra API call). The card matches the UserCheckIn height
- * so they sit side-by-side on the home dashboard.
- */
 import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -20,9 +11,10 @@ import useUsersQuery from "@/hooks/queries/user/useUsersQuery";
 import { deriveAccountStatus, hasContractEnded } from "@/lib/userStatus";
 
 const getInitials = (firstName?: string, lastName?: string) => {
-  const f = firstName?.[0] || "";
-  const l = lastName?.[0] || "";
-  return (f + l).toUpperCase() || "?";
+  const firstInitial = firstName?.[0] || "";
+  const lastInitial = lastName?.[0] || "";
+
+  return (firstInitial + lastInitial).toUpperCase() || "?";
 };
 
 const NewClientsCard: React.FC = () => {
@@ -43,39 +35,20 @@ const NewClientsCard: React.FC = () => {
 
   const isLoading = loadingW || loadingD;
 
-  // We also need the users store so we can gate the cross-reference
-  // by accountStatus + dateFinished. Trigger the query — it's react-
-  // query-cached so this is a no-op if another page already fetched.
   const { data: allUsers } = useUsersQuery();
 
-  /**
-   * Cross-reference: clients who appear in BOTH "no workout" AND
-   * "no diet" lists → they're new and need full programme setup.
-   *
-   * Per Avihu's directive: surface ONLY those whose status is
-   * "active" AND whose dateFinished is still in the future (their
-   * coaching contract hasn't ended). Past-dateFinished users —
-   * even if technically lacking plans — aren't actionable: the
-   * trainer isn't coaching them anymore.
-   *
-   * We build a Set of eligible userIds from the users store; if the
-   * store hasn't loaded yet, we render nothing rather than flash
-   * the unfiltered list.
-   */
-  // STRICT allow-list: only surface users we can confirm are
-  // `deriveAccountStatus === "active"` AND whose contract hasn't
-  // ended. Per Avihu: anyone who can't be confirmed active is
-  // hidden — "if in doubt, hide it". IDs are normalised to strings
-  // to handle Mongo ObjectId vs string mismatches.
+  // Strict allow-list: only users confirmed active with an unexpired contract are actionable.
   const eligibleIds = useMemo(() => {
-    const s = new Set<string>();
+    const eligibleUserIds = new Set<string>();
+
     for (const u of allUsers ?? []) {
       if (!u._id) continue;
       if (deriveAccountStatus(u) !== "active") continue;
       if (hasContractEnded(u)) continue;
-      s.add(String(u._id));
+      eligibleUserIds.add(String(u._id));
     }
-    return s;
+
+    return eligibleUserIds;
   }, [allUsers]);
 
   const newClients = useMemo(() => {
@@ -91,7 +64,6 @@ const NewClientsCard: React.FC = () => {
       dir="rtl"
       className="flex h-full max-h-[75vh] flex-col overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
     >
-      {/* Header — neutral, brand-aligned */}
       <header className="flex items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 px-5 py-4">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-300 ring-1 ring-blue-200/60">
@@ -113,7 +85,6 @@ const NewClientsCard: React.FC = () => {
         )}
       </header>
 
-      {/* Body */}
       <div className="flex-1 overflow-y-auto p-3">
         {isLoading && (
           <div className="flex justify-center py-6">
