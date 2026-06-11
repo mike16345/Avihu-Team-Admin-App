@@ -4,7 +4,7 @@
  * All inputs (date, trainer, diet/workouts/cardio %) live on ONE horizontal
  * row as compact dropdowns/inputs. Content editor + save sit beneath.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Form,
   FormControl,
@@ -17,7 +17,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { progressNoteSchema } from "@/schemas/progressNoteSchema";
-import { Input } from "@/components/ui/input";
 import CustomSelect from "@/components/ui/CustomSelect";
 import DatePicker from "@/components/ui/DatePicker";
 import { useProgressNoteContext } from "@/context/useProgressNoteContext";
@@ -25,6 +24,7 @@ import useAddProgressNote from "@/hooks/mutations/progressNotes/useAddProgressNo
 import useUpdateProgressNote from "@/hooks/mutations/progressNotes/useUpdateProgressNote";
 import { useParams } from "react-router-dom";
 import { useUsersStore } from "@/store/userStore";
+import { useSubTrainersQuery } from "@/hooks/queries/subTrainers/useSubTrainersQuery";
 import TextEditor from "@/components/ui/TextEditor";
 
 const progressOptions = [
@@ -46,6 +46,27 @@ const ProgressNoteForm = () => {
   const initalTrainerName = currentUser
     ? `${currentUser.firstName} ${currentUser.lastName}`
     : undefined;
+
+  // Trainer dropdown options — the logged-in trainer + every
+  // sub-trainer they manage. Stored as the *name* (string) so the
+  // note's `trainer` field stays human-readable for mobile + future
+  // reads, even if a sub-trainer is later removed from the team.
+  const { data: subTrainers = [] } = useSubTrainersQuery();
+  const trainerOptions = useMemo(() => {
+    const list: { name: string; value: string }[] = [];
+    if (currentUser) {
+      const name = `${currentUser.firstName || ""} ${currentUser.lastName || ""}`.trim();
+      if (name) list.push({ name: `${name} (אני)`, value: name });
+    }
+    subTrainers.forEach((t) => {
+      const tname = t.fullName?.trim();
+      if (!tname) return;
+      // Skip the current user if they also appear as a sub-trainer.
+      if (list.some((o) => o.value === tname)) return;
+      list.push({ name: tname, value: tname });
+    });
+    return list;
+  }, [currentUser, subTrainers]);
 
   const progressNoteForm = useForm<z.infer<typeof progressNoteSchema>>({
     resolver: zodResolver(progressNoteSchema),
@@ -110,7 +131,14 @@ const ProgressNoteForm = () => {
               <FormItem className="space-y-1">
                 <FormLabel className="text-[11px] font-semibold text-slate-600">שם המאמן</FormLabel>
                 <FormControl>
-                  <Input placeholder="שם המאמן..." className="h-9 text-sm" {...field} />
+                  {/* Restricted to trainers with access (main trainer
+                      + every sub-trainer on the team). Free-text was
+                      a footgun — typos broke filtering and reporting. */}
+                  <CustomSelect
+                    items={trainerOptions}
+                    selectedValue={field.value || ""}
+                    onValueChange={(val) => field.onChange(val)}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
