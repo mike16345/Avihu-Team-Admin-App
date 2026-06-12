@@ -199,10 +199,7 @@ export const ViewDietPlanPage = ({ embedded = false }: ViewDietPlanPageProps) =>
       {!embedded && (
         <>
           {user && <BasicUserDetails user={user} />}
-          <FormResponseBubbleWrapper
-            userId={id}
-            query={{ formType: user?.onboardingCompleted ? "monthly" : "onboarding", userId: id }}
-          />
+          <FormResponseBubbleWrapper userId={id} />
           <BackLink to={MainRoutes.USERS + `/${id}?tab=${weightTab}`} label="חזרה לפרופיל המתאמן" />
         </>
       )}

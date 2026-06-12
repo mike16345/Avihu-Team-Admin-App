@@ -122,7 +122,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
   }, [exerciseMethodResponse]);
 
   return (
-    <div dir="rtl" style={{ fontFamily: "Heebo, system-ui, sans-serif" }} className="w-full">
+    <div dir="rtl" className="w-full font-heebo">
       <div className="grid gap-4 lg:grid-cols-2">
         <DragDropWrapper items={exercises || []} setItems={handleMoveExercise} idKey="_id">
           {({ item, index }) => (

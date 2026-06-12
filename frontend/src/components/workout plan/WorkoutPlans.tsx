@@ -61,11 +61,7 @@ const WorkoutPlans = () => {
 
   return (
     <>
-      <div
-        dir="rtl"
-        className="flex w-full flex-col gap-4"
-        style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
-      >
+      <div dir="rtl" className="flex w-full flex-col gap-4 font-heebo">
         <WorkoutTabs
           tips={
             <TextEditor

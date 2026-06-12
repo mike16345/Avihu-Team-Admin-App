@@ -77,8 +77,7 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({ parentPath, onD
       dir="rtl"
       className={`overflow-hidden rounded-2xl border bg-white dark:bg-slate-900 shadow-sm transition-all ${
         isOpen ? "border-blue-200 shadow-md" : "border-slate-200 dark:border-slate-800"
-      }`}
-      style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
+      } font-heebo`}
     >
       {/* Clicking anywhere on the header row toggles the workout open/closed,
           EXCEPT on the interactive children (name input, delete button) —

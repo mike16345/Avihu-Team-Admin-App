@@ -159,8 +159,7 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1 text-xs font-semibold text-slate-600 dark:text-slate-300 transition-colors hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50/60 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300"
-          style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1 font-heebo text-xs font-semibold text-slate-600 dark:text-slate-300 transition-colors hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50/60 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300"
         >
           {hasSelection ? <FaPenToSquare size={11} /> : <FaPlus size={11} />}
           {hasSelection ? "ערוך" : "בחר קבוצה"}
@@ -169,8 +168,7 @@ const MuscleGroupSelector: React.FC<MuscleGroupSelectorProps> = ({
       <DialogContent
         dir="rtl"
         onClick={(e) => e.stopPropagation()}
-        className="overflow-hidden rounded-2xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-0 sm:max-w-md"
-        style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
+        className="overflow-hidden rounded-2xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-0 font-heebo sm:max-w-md"
       >
         <DialogHeader className="border-b border-slate-100 dark:border-slate-800 px-6 py-4 sm:text-right">
           <DialogTitle className="text-right text-lg font-bold text-slate-900 dark:text-slate-100">

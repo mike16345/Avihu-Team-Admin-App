@@ -30,8 +30,7 @@ const FixedCardioContainer: React.FC = () => {
   return (
     <div
       dir="rtl"
-      style={{ fontFamily: "Assistant, Heebo, system-ui, sans-serif" }}
-      className="flex w-full max-w-3xl flex-col gap-5 rounded-2xl border border-blue-100/60 bg-white p-5 shadow-sm dark:border-blue-900/40 dark:bg-slate-900"
+      className="flex w-full max-w-3xl flex-col gap-5 rounded-2xl border border-blue-100/60 bg-white p-5 font-['Assistant','Heebo',system-ui,sans-serif] shadow-sm dark:border-blue-900/40 dark:bg-slate-900"
     >
       {/* Two compact number inputs side by side — narrow widths so
           they don't read as text fields when they're really tiny

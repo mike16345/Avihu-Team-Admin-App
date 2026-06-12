@@ -26,11 +26,7 @@ const WorkoutTabs: React.FC<WorkoutTabsProps> = ({ workoutPlan, cardioPlan, tips
   const [tab, setTab] = useState<TabKey>("workout");
 
   return (
-    <div
-      dir="rtl"
-      className="flex flex-col gap-4"
-      style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
-    >
+    <div dir="rtl" className="flex flex-col gap-4 font-heebo">
       <div className="flex items-center gap-1 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-1.5 shadow-sm w-fit">
         {TABS.map((t) => {
           const active = tab === t.id;

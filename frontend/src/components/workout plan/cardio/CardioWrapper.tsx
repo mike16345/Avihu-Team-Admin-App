@@ -72,11 +72,7 @@ const CardioWrapper: React.FC = () => {
   };
 
   return (
-    <div
-      dir="rtl"
-      style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
-      className="flex flex-col gap-5 pb-5"
-    >
+    <div dir="rtl" className="flex flex-col gap-5 pb-5 font-heebo">
       {/* Type segmented control */}
       <div className="inline-flex w-fit items-center gap-1 rounded-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-1 shadow-sm">
         {TYPE_OPTIONS.map((opt) => {

@@ -51,11 +51,7 @@ const WorkoutRowSkeleton: React.FC = () => (
 
 const WorkoutPlanSkeleton: React.FC = () => {
   return (
-    <div
-      dir="rtl"
-      className="flex w-full flex-col gap-4"
-      style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
-    >
+    <div dir="rtl" className="flex w-full flex-col gap-4 font-heebo">
       {/* Stats strip */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <StatCardSkeleton />
