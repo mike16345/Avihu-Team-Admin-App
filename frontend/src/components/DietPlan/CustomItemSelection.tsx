@@ -1,10 +1,3 @@
-/**
- * CustomItemSelection — chip grid for picking food items inside a meal.
- *
- * Visual refresh: outlined pills with a soft slate look by default, that
- * fill in emerald when selected (matching the diet-plan accent set).
- * Hover lifts the chip slightly. Replaces the old blue/green Badge.
- */
 import { FC, useEffect, useState } from "react";
 import { FaCheck, FaPlus } from "react-icons/fa6";
 
@@ -36,8 +29,7 @@ export const CustomItemSelection: FC<CustomItemSelectionProps> = ({
   return (
     <div
       dir="rtl"
-      className="flex max-h-48 flex-wrap items-center gap-1.5 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 p-2 custom-scrollbar"
-      style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
+      className="flex max-h-48 flex-wrap items-center gap-1.5 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 p-2 font-heebo custom-scrollbar"
     >
       {(!items || items.length === 0) && (
         <div className="text-xs text-slate-400 dark:text-slate-500">אין פריטים</div>

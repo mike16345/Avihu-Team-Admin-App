@@ -1,15 +1,3 @@
-/**
- * MealDropDown — one meal card in the diet-plan editor.
- *
- * Visual refresh:
- *  - Wrapped in a rounded-2xl white card with slate border + shadow.
- *  - Collapsed header shows macro chips (חלבון/פחמ׳/שומן/ירק × N) so the
- *    trainer can see at a glance what's inside each meal without expanding.
- *  - Clicking anywhere on the header row toggles open/close (except on
- *    interactive controls — delete button + chevron stop propagation).
- *  - Body uses the rest of the editor's design language (Heebo font,
- *    emerald accents, soft slate dividers).
- */
 import { FC, useEffect, useMemo, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { FaChevronDown, FaChevronUp, FaTrash } from "react-icons/fa6";
@@ -160,21 +148,20 @@ export const MealDropDown: FC<MealDropDownProps> = ({
   const getSectionItems = (source: SectionSource) => customItems?.[source] || [];
 
   useEffect(() => {
-    if (!meal) return;
-    setStoredCustomItems(initialCustomValues);
-    setStoredExtraItems(initialExtraValues);
-    setShowCustomSelection(initialShowState);
-  }, [mealIndex]);
+    const currentMeal = getValues(mealPath);
+    if (!currentMeal) return;
+    setStoredCustomItems(extractCustomValues(currentMeal, "customItems"));
+    setStoredExtraItems(extractCustomValues(currentMeal, "extraItems"));
+    setShowCustomSelection(extractShowCustomSelection(currentMeal));
+  }, [getValues, mealIndex, mealPath]);
 
   return (
     <Collapsible
       dir="rtl"
       open={isOpen}
       onOpenChange={setIsOpen}
-      className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-shadow hover:shadow-md"
-      style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
+      className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 font-heebo shadow-sm transition-shadow hover:shadow-md"
     >
-      {/* Header — clickable; chevron + delete stop propagation */}
       <div
         role="button"
         tabIndex={0}
@@ -208,7 +195,6 @@ export const MealDropDown: FC<MealDropDownProps> = ({
           ארוחה {mealNumber}
         </span>
 
-        {/* Macro chips — always visible so the trainer sees what's inside */}
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
           {mealSections.map((section) => {
             const block = meal?.[section.key] as DietItemQuantityBlock | undefined;
@@ -295,10 +281,6 @@ export const MealDropDown: FC<MealDropDownProps> = ({
                           }
                         />
                         <ExtraItems
-                          // Pass the macro section so the history hook
-                          // shows trainer-relevant suggestions only
-                          // (e.g. previously-typed protein items when
-                          // editing the protein section, etc.).
                           section={section.key}
                           existingItems={
                             (getValues(

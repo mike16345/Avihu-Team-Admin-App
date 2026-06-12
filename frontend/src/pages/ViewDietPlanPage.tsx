@@ -8,12 +8,9 @@ import Loader from "@/components/ui/Loader";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { dietPlanSchema } from "@/components/DietPlan/DietPlanSchema";
 import { useQueryClient } from "@tanstack/react-query";
-import CustomButton from "@/components/ui/CustomButton";
 import { useNavigate } from "react-router-dom";
 import { MainRoutes } from "@/enums/Routes";
 import { QueryKeys } from "@/enums/QueryKeys";
-import BackLink from "@/components/ui/BackLink";
-import BasicUserDetails from "@/components/UserDashboard/UserInfo/BasicUserDetails";
 import { useUsersStore } from "@/store/userStore";
 import { weightTab } from "./UserDashboard";
 import useAddDietPlanPreset from "@/hooks/mutations/DietPlans/useAddDietPlanPreset";
@@ -33,20 +30,15 @@ import { Form } from "@/components/ui/form";
 import { useDirtyFormContext } from "@/context/useFormContext";
 import useGetDietPlan from "@/hooks/queries/dietPlans/useGetDietPlan";
 import DietPlanPresetPicker from "@/components/templates/dietTemplates/DietPlanPresetPicker";
-import { FaUtensils, FaChevronDown } from "react-icons/fa6";
-import FormResponseBubbleWrapper from "@/components/formResponses/FormResponseBubbleWrapper";
 import DietPlanStatsStrip from "@/components/DietPlan/DietPlanStatsStrip";
 import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
 import UnsavedChangesDialog from "@/components/Alerts/UnsavedChangesDialog";
 import { summariseDietDirty } from "@/utils/dirtyFieldsSummary";
+import { DietPlanPageHeader } from "@/components/DietPlan/DietPlanPageHeader";
+import { DietPlanPresetLoadBar } from "@/components/DietPlan/DietPlanPresetLoadBar";
+import { DietPlanSaveActions } from "@/components/DietPlan/DietPlanSaveActions";
 
 interface ViewDietPlanPageProps {
-  /**
-   * When true the page renders without its standalone header (back button,
-   * user details, form-response bubble) — used when embedded inside the
-   * user-dashboard "תפריט תזונה" tab. A clean stats strip is shown
-   * instead, and the save flow stays on the same page.
-   */
   embedded?: boolean;
 }
 
@@ -56,6 +48,7 @@ export const ViewDietPlanPage = ({ embedded = false }: ViewDietPlanPageProps) =>
   const { users } = useUsersStore();
   const { data: fetchedUser } = useUserQuery(id);
   const user = users.find((user) => user._id === id) || fetchedUser;
+  const userProfileDietTab = MainRoutes.USERS + `/${id}?tab=${weightTab}`;
 
   const queryClient = useQueryClient();
 
@@ -75,12 +68,6 @@ export const ViewDietPlanPage = ({ embedded = false }: ViewDietPlanPageProps) =>
   const meals = watch("meals");
   const isDirty = formState.isDirty;
 
-  /**
-   * Unsaved-changes guard: if the trainer tries to leave the page (tab
-   * switch, sidebar link, back button) with dirty form state, intercept
-   * and show a dialog. They can then save-and-continue, discard, or stay.
-   * The `pendingNav` callback runs the deferred navigation once confirmed.
-   */
   const [pendingNav, setPendingNav] = useState<(() => void) | null>(null);
   const [savingToProceed, setSavingToProceed] = useState(false);
 
@@ -93,12 +80,9 @@ export const ViewDietPlanPage = ({ embedded = false }: ViewDietPlanPageProps) =>
   const onSuccess = () => {
     toast.success("תפריט נשמר בהצלחה!");
     invalidateQueryKeys([`${QueryKeys.USER_DIET_PLAN}${id}`]);
-    if (!embedded) navigation(MainRoutes.USERS + `/${id}?tab=${weightTab}`);
+    if (!embedded) navigation(userProfileDietTab);
   };
 
-  // After a successful save (data refetches → form resets → isDirty
-  // becomes false), if the user clicked "Save and continue" in the
-  // unsaved-changes dialog, honour the pending navigation.
   useEffect(() => {
     if (!savingToProceed) return;
     if (isDirty) return;
@@ -188,112 +172,38 @@ export const ViewDietPlanPage = ({ embedded = false }: ViewDietPlanPageProps) =>
     }
   }, [error, reset, setIsDirty]);
 
+  const isPlanSaving = createDietPlan.isPending || editDietPlan.isPending;
+  const isSaveDisabled = addDietPlanPreset.isPending || isPlanSaving;
+  const hasMeals = (meals?.length || 0) > 0;
+  const saveDietPlan = form.handleSubmit(handleValidSubmit, handleInvalidSubmit);
+
   if (isLoading) return <Loader size="large" />;
 
   return (
-    <div
-      dir="rtl"
-      className="flex flex-col gap-4 size-full"
-      style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
-    >
+    <div dir="rtl" className="flex flex-col gap-4 size-full font-heebo">
       {!embedded && (
-        <>
-          {user && <BasicUserDetails user={user} />}
-          <FormResponseBubbleWrapper userId={id} />
-          <BackLink to={MainRoutes.USERS + `/${id}?tab=${weightTab}`} label="חזרה לפרופיל המתאמן" />
-        </>
+        <DietPlanPageHeader backLink={userProfileDietTab} user={user} userId={id} />
       )}
 
       <Form {...form}>
         {embedded && <DietPlanStatsStrip />}
 
-        {/* Preset picker — opens DietPlanPresetPicker modal with full
-            search + filter capabilities (matches the templates page). */}
-        {embedded ? (
-          <div className="flex flex-col gap-2 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-col">
-              <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                טען תבנית קיימת
-              </span>
-              <span className="text-xs text-slate-500 dark:text-slate-400">
-                סנן לפי סוג תפריט, קלוריות והגבלות ובחר את המתאים למתאמן
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setOpenPickerModal(true)}
-              className="inline-flex items-center justify-between gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 px-3 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 transition-colors hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 sm:min-w-[260px]"
-            >
-              <span className="inline-flex items-center gap-2">
-                <FaUtensils size={11} className="text-emerald-600" />
-                בחר תפריט מתבנית
-              </span>
-              <FaChevronDown size={9} className="text-slate-400" />
-            </button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setOpenPickerModal(true)}
-            className="mr-1 inline-flex w-full items-center justify-between gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition-colors hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 sm:w-[350px]"
-          >
-            <span className="inline-flex items-center gap-2">
-              <FaUtensils size={11} className="text-emerald-600" />
-              בחר תפריט מתבנית
-            </span>
-            <FaChevronDown size={9} className="text-slate-400" />
-          </button>
-        )}
+        <DietPlanPresetLoadBar
+          embedded={embedded}
+          onOpenPresetPicker={() => setOpenPickerModal(true)}
+        />
 
         <DietPlanForm>
-          {(meals?.length || 0) > 0 &&
-            (embedded ? (
-              <div className="sticky bottom-0 z-10 mt-3 flex flex-col gap-2 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 p-3 shadow-lg backdrop-blur sm:flex-row sm:items-center sm:justify-end">
-                <button
-                  type="button"
-                  onClick={() => setOpenPresetModal(true)}
-                  disabled={createDietPlan.isPending || editDietPlan.isPending}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 transition-colors hover:border-emerald-300 dark:hover:border-emerald-700 hover:bg-emerald-50/40 dark:hover:bg-emerald-900/20 hover:text-emerald-700 dark:hover:text-emerald-300 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {addDietPlanPreset.isPending ? "שומר תבנית…" : "שמור כתבנית"}
-                </button>
-                <button
-                  type="button"
-                  onClick={form.handleSubmit(handleValidSubmit, handleInvalidSubmit)}
-                  disabled={
-                    addDietPlanPreset.isPending ||
-                    createDietPlan.isPending ||
-                    editDietPlan.isPending
-                  }
-                  className="inline-flex items-center justify-center gap-2 rounded-xl brand-gradient brand-gradient-hover px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-blue-500/25 transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
-                >
-                  {createDietPlan.isPending || editDietPlan.isPending ? "שומר…" : "שמור תפריט"}
-                </button>
-              </div>
-            ) : (
-              <div className="flex gap-3 flex-row fixed bottom-10 end-16">
-                <CustomButton
-                  className="font-bold sm:w-fit"
-                  variant="default"
-                  onClick={() => setOpenPresetModal(true)}
-                  title="שמור תפריט כתבנית"
-                  disabled={createDietPlan.isPending || editDietPlan.isPending}
-                  isLoading={addDietPlanPreset.isPending}
-                />
-                <button
-                  type="button"
-                  onClick={form.handleSubmit(handleValidSubmit, handleInvalidSubmit)}
-                  disabled={
-                    addDietPlanPreset.isPending ||
-                    createDietPlan.isPending ||
-                    editDietPlan.isPending
-                  }
-                  className="inline-flex w-full sm:w-32 items-center justify-center gap-2 rounded-xl brand-gradient brand-gradient-hover px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-blue-500/25 transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
-                >
-                  {createDietPlan.isPending || editDietPlan.isPending ? "שומר…" : "שמור תפריט"}
-                </button>
-              </div>
-            ))}
+          {hasMeals && (
+            <DietPlanSaveActions
+              embedded={embedded}
+              isPlanSaving={isPlanSaving}
+              isPresetSaving={addDietPlanPreset.isPending}
+              isSaveDisabled={isSaveDisabled}
+              onOpenPresetModal={() => setOpenPresetModal(true)}
+              onSavePlan={saveDietPlan}
+            />
+          )}
         </DietPlanForm>
       </Form>
       <InputModal
@@ -319,8 +229,6 @@ export const ViewDietPlanPage = ({ embedded = false }: ViewDietPlanPageProps) =>
           form.handleSubmit(handleValidSubmit, handleInvalidSubmit)();
         }}
         onDiscard={() => {
-          // Drop dirty state by resetting to the server snapshot, then
-          // honour the pending navigation.
           const snapshot = (data as any)?.dietplan;
           if (snapshot) reset(snapshot);
           else reset();

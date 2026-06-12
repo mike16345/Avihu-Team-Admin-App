@@ -1,9 +1,3 @@
-/**
- * DietPlanTabs — section switcher (תפריט / דגשים / תוספים).
- *
- * Visual refresh: pill-style segmented tabs inside a rounded white card,
- * mirroring the workout-plan editor's WorkoutTabs.
- */
 import React, { useState } from "react";
 import { FaAppleWhole, FaClipboardCheck, FaPlus } from "react-icons/fa6";
 
@@ -25,11 +19,7 @@ const DietplanTabs: React.FC<DietplanTabsProps> = ({ dietplan, tips, supplements
   const [active, setActive] = useState<TabKey>("dietplan");
 
   return (
-    <div
-      dir="rtl"
-      style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
-      className="flex flex-col gap-4"
-    >
+    <div dir="rtl" className="flex flex-col gap-4 font-heebo">
       <div className="inline-flex w-fit items-center gap-1 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-1 shadow-sm">
         {TABS.map((t) => {
           const isActive = active === t.id;

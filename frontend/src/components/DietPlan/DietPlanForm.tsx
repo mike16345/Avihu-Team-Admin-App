@@ -87,8 +87,7 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ children }) => {
           <div className="w-full flex flex-col  gap-5">
             <div
               dir="rtl"
-              className="flex items-center gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 shadow-sm w-fit"
-              style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
+              className="flex items-center gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 font-heebo shadow-sm w-fit"
             >
               <div className="flex flex-col">
                 <Label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
