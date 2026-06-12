@@ -105,6 +105,20 @@ const defaultColor = {
   gradient: "from-slate-500 to-slate-600",
 };
 
+const FALLBACK_GROUPS = [
+  "חזה",
+  "גב",
+  "טרפזים",
+  "כתפיים",
+  "יד קדמית",
+  "יד אחורית",
+  "רגליים",
+  "ישבן",
+  "תאומים",
+  "אמות",
+  "בטן",
+];
+
 export const WorkoutProgression = () => {
   const { id } = useParams();
   const userFirstName = useUserQuery(id).data?.firstName;
@@ -151,21 +165,6 @@ export const WorkoutProgression = () => {
     return out;
   }, [recordedWorkouts]);
 
-  // Muscle groups — fetch from server (matches WorkoutPlans system).
-  // Falls back to a standard list if the API hasn't loaded.
-  const FALLBACK_GROUPS = [
-    "חזה",
-    "גב",
-    "טרפזים",
-    "כתפיים",
-    "יד קדמית",
-    "יד אחורית",
-    "רגליים",
-    "ישבן",
-    "תאומים",
-    "אמות",
-    "בטן",
-  ];
   const availableGroups = useMemo(() => {
     // The API hook returns { data: IMuscleGroupItem[] }
     const rawData: any = muscleGroupsFromServer;
@@ -198,10 +197,10 @@ export const WorkoutProgression = () => {
     [filter, flatExercises]
   );
 
-  // Sync selected muscle group + exercise to URL for chart panel
-  const handleSetSearchParams = () => {
-    if (!recordedWorkouts || (searchParams.get("muscleGroup") && searchParams.get("exercise")))
-      return;
+  useEffect(() => {
+    if (searchParams.get("tab") !== workoutTab || !recordedWorkouts) return;
+    if (searchParams.get("muscleGroup") && searchParams.get("exercise")) return;
+
     const initialMuscleGroup = recordedWorkouts[0]?.muscleGroup || "";
     const initialExercise = extractExercises(recordedWorkouts[0]?.recordedSets)[0] || "";
     setSearchParams((s) => ({
@@ -211,19 +210,7 @@ export const WorkoutProgression = () => {
     }));
     setSelectedMuscleGroup(initialMuscleGroup);
     setSelectedExercise(initialExercise);
-  };
-
-  useEffect(() => {
-    if (searchParams.get("tab") !== workoutTab || !recordedWorkouts) return;
-    handleSetSearchParams();
-  }, [searchParams]);
-
-  // For chart panel: get recorded sets for selected exercise
-  const recordedMuscleGroup = useMemo(() => {
-    if (!recordedWorkouts) return undefined;
-    return (recordedWorkouts as any[]).find((mg) => mg.muscleGroup == selectedMuscleGroup);
-  }, [selectedMuscleGroup, recordedWorkouts]);
-  const recordedSets = recordedMuscleGroup?.recordedSets[selectedExercise] || [];
+  }, [recordedWorkouts, searchParams, setSearchParams]);
 
   const openExerciseDetails = (exercise: FlatExercise) => {
     setSelectedMuscleGroup(exercise.group);
@@ -254,11 +241,7 @@ export const WorkoutProgression = () => {
   if (error && !isExpectedEmpty) return <ErrorPage message={(error as any).data?.message} />;
 
   return (
-    <div
-      dir="rtl"
-      className="flex flex-col gap-4"
-      style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
-    >
+    <div dir="rtl" className="flex flex-col gap-4 font-heebo">
       {/* Filter bar + Note creator — ALWAYS VISIBLE */}
       <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 px-3 py-2 shadow-sm">
         <div className="flex flex-wrap items-center gap-1">
@@ -599,9 +582,8 @@ function ExerciseDetailModal({
       onClick={onClose}
     >
       <div
-        className="relative flex h-full max-h-[90vh] w-full max-w-7xl flex-col gap-4 overflow-hidden rounded-3xl bg-white dark:bg-slate-900 p-6 shadow-2xl"
+        className="relative flex h-full max-h-[90vh] w-full max-w-7xl flex-col gap-4 overflow-hidden rounded-3xl bg-white dark:bg-slate-900 p-6 font-heebo shadow-2xl"
         onClick={(e) => e.stopPropagation()}
-        style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
       >
         {/* Header */}
         <div className="flex items-start justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
@@ -1011,6 +993,14 @@ function ExerciseGoals({
       </div>
     );
   }
+  return <ExerciseGoalsEditor allSets={allSets} />;
+}
+
+function ExerciseGoalsEditor({
+  allSets,
+}: {
+  allSets: { weight: number; reps: number; setNumber: number }[];
+}) {
   const heaviestSet = allSets.reduce((max, s) => (s.weight > max.weight ? s : max), allSets[0]);
   const currentPR = heaviestSet.weight;
   const currentReps = heaviestSet.reps;
@@ -1331,9 +1321,8 @@ function ProgressNoteCreator({
   return (
     <div
       dir="rtl"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 p-4 font-heebo backdrop-blur-sm"
       onClick={onClose}
-      style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
     >
       <div
         className="relative flex h-full max-h-[90vh] w-full max-w-6xl flex-col gap-4 overflow-hidden rounded-3xl bg-white dark:bg-slate-900 p-6 shadow-2xl"

@@ -163,11 +163,7 @@ const MeasurementsProgression = () => {
     return <ErrorPage message={(error as any)?.message} />;
 
   return (
-    <div
-      dir="rtl"
-      className="flex flex-col gap-4"
-      style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
-    >
+    <div dir="rtl" className="flex flex-col gap-4 font-heebo">
       {/* Summary stat cards */}
       {measurements.length > 0 && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">

@@ -327,7 +327,7 @@ export const WeightProgressionPhotos: FC = () => {
   if (isLoading) return <Loader size="large" />;
 
   return (
-    <div dir="rtl" style={{ fontFamily: "Heebo, system-ui, sans-serif" }}>
+    <div dir="rtl" className="font-heebo">
       {/* hidden input for the per-photo replace flow */}
       <input
         ref={replaceInputRef}
@@ -509,9 +509,8 @@ export const WeightProgressionPhotos: FC = () => {
           dir="rtl"
         >
           <div
-            className="relative flex h-full max-h-[90vh] w-full max-w-6xl flex-col gap-3 rounded-3xl bg-white dark:bg-slate-900 p-5 shadow-2xl"
+            className="relative flex h-full max-h-[90vh] w-full max-w-6xl flex-col gap-3 rounded-3xl bg-white dark:bg-slate-900 p-5 font-heebo shadow-2xl"
             onClick={(e) => e.stopPropagation()}
-            style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
           >
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
               <div className="flex items-center gap-2">

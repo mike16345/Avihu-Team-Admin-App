@@ -111,7 +111,7 @@ export const WeightProgression = () => {
     retry: createRetryFunction(404),
   });
 
-  const weighIns = (data || []) as IWeighIn[];
+  const weighIns = useMemo(() => (data || []) as IWeighIn[], [data]);
 
   const stats = useMemo(() => {
     if (!weighIns.length) return null;
@@ -153,11 +153,7 @@ export const WeightProgression = () => {
       : "bg-rose-50 dark:bg-rose-950/40";
 
   return (
-    <div
-      dir="rtl"
-      className="flex flex-col gap-4"
-      style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
-    >
+    <div dir="rtl" className="flex flex-col gap-4 font-heebo">
       {/* Stats row */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <StatCard

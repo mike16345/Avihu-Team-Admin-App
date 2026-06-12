@@ -107,11 +107,7 @@ const SwapTemporaryPlanModal: FC<Props> = ({ open, onClose, userId, currentPlanI
   return (
     <>
       <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-        <DialogContent
-          dir="rtl"
-          className="max-w-lg p-0 bg-white dark:bg-slate-900"
-          style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
-        >
+        <DialogContent dir="rtl" className="max-w-lg bg-white p-0 font-heebo dark:bg-slate-900">
           <DialogHeader className="p-6 pb-3">
             <div className="flex items-center gap-2.5">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl brand-gradient text-white shadow-sm">
