@@ -30,6 +30,7 @@ export interface IUser extends IBaseUser {
   checkInAt: number;
   hasAccess: boolean;
   onboardingCompleted: boolean;
+  onboardingStep?: "form" | "agreement" | "completed";
   accountStatus?: AccountStatus;
   /**
    * Freeze snapshot — captured when the trainer marks the trainee

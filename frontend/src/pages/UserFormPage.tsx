@@ -7,10 +7,18 @@ import useUserQuery from "@/hooks/queries/user/useUserQuery";
 import useAddUser from "@/hooks/mutations/User/useAddUser";
 import useUpdateUser from "@/hooks/mutations/User/useUpdateUser";
 import useDeleteUser from "@/hooks/mutations/User/useDeleteUser";
-import { IUserPost } from "@/interfaces/IUser";
+import type { IUser, IUserPost } from "@/interfaces/IUser";
 import { weightTab } from "./UserDashboard";
 
 const DEFAULT_REMIND_IN = 604800;
+
+type UserFormPayload = IUserPost & { checkInAt?: number; subTrainerId?: string };
+
+type AddUserResponse = {
+  data?: {
+    _id?: string;
+  };
+};
 
 const getInitials = (firstName: string, lastName: string) => {
   const firstInitial = firstName?.[0] || "";
@@ -28,6 +36,18 @@ const toDateInput = (dateValue?: Date | string) => {
 
   return date.toISOString().split("T")[0];
 };
+
+const buildUserPayload = (values: UserFormValues): UserFormPayload => ({
+  firstName: values.firstName.trim(),
+  lastName: values.lastName.trim(),
+  phone: values.phone.trim(),
+  email: values.email.trim().toLowerCase(),
+  planType: values.planType,
+  remindIn: values.remindIn,
+  dateFinished: new Date(values.dateFinished),
+  dietaryType: values.dietaryType,
+  ...(values.subTrainerId ? { subTrainerId: values.subTrainerId } : {}),
+});
 
 const UserFormPage = () => {
   const { id } = useParams();
@@ -75,10 +95,7 @@ const UserFormPage = () => {
   );
   const isPending = editUser.isPending || addNewUser.isPending;
 
-  const updateValue = <Key extends keyof UserFormValues>(
-    key: Key,
-    value: UserFormValues[Key]
-  ) => {
+  const updateValue = <Key extends keyof UserFormValues>(key: Key, value: UserFormValues[Key]) => {
     setValues((currentValues) => ({
       ...currentValues,
       [key]: value,
@@ -142,29 +159,20 @@ const UserFormPage = () => {
 
     if (!validate()) return;
 
-    const user: IUserPost & { checkInAt?: number; subTrainerId?: string } = {
-      firstName: values.firstName.trim(),
-      lastName: values.lastName.trim(),
-      phone: values.phone.trim(),
-      email: values.email.trim().toLowerCase(),
-      planType: values.planType,
-      remindIn: values.remindIn,
-      dateFinished: new Date(values.dateFinished),
-      dietaryType: values.dietaryType,
-      ...(values.subTrainerId ? { subTrainerId: values.subTrainerId } : {}),
-    };
+    const user = buildUserPayload(values);
 
     try {
-      let response: any;
+      let createdUserId: string | undefined;
 
       if (id) {
-        await editUser.mutateAsync({ id, user: user as any });
+        await editUser.mutateAsync({ id, user: user as unknown as IUser });
       } else {
         user.checkInAt = Date.now() + user.remindIn;
-        response = await addNewUser.mutateAsync(user);
+        const response = (await addNewUser.mutateAsync(user)) as AddUserResponse;
+        createdUserId = response?.data?._id;
       }
 
-      navigate(`/users/${response?.data?._id || id || ""}?tab=${weightTab}`);
+      navigate(`/users/${createdUserId || id || ""}?tab=${weightTab}`);
     } catch (err) {
       console.error(err);
     }

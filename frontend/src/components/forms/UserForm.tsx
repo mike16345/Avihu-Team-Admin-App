@@ -47,8 +47,7 @@ const UserForm = ({
     <div
       data-testid="user-form-page"
       dir="rtl"
-      className="mx-auto flex max-w-2xl flex-col gap-2.5 px-4 py-4"
-      style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
+      className="mx-auto flex max-w-2xl flex-col gap-2.5 px-4 py-4 font-heebo"
     >
       <BackButton isEdit={isEdit} onBack={onBack} />
 
