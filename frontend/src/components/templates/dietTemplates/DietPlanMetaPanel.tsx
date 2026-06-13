@@ -1,8 +1,3 @@
-/**
- * DietPlanMetaPanel — compact, 2-column meta tagging panel for diet
- * presets. Mirrors PresetMetaPanel's design language so the workout +
- * diet preset editors feel like one product.
- */
 import React, { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import { IDietPlan, DietGoal, DietaryRestriction, IMeal } from "@/interfaces/IDietPlan";
@@ -32,6 +27,34 @@ type MetaForm = IDietPlan & {
   builtByTrainerId?: string;
 };
 
+const CALORIES_PER_SERVING = {
+  protein: 150,
+  carbs: 120,
+  fats: 100,
+  veggies: 30,
+} as const;
+
+const calculateTotalCalories = ({
+  protein,
+  carbs,
+  fats,
+  veggies,
+  freeCalories,
+}: {
+  protein: number;
+  carbs: number;
+  fats: number;
+  veggies: number;
+  freeCalories: number;
+}) =>
+  Math.round(
+    protein * CALORIES_PER_SERVING.protein +
+      carbs * CALORIES_PER_SERVING.carbs +
+      fats * CALORIES_PER_SERVING.fats +
+      veggies * CALORIES_PER_SERVING.veggies +
+      freeCalories
+  );
+
 const DietPlanMetaPanel: React.FC = () => {
   const form = useFormContext<MetaForm>();
   const { watch, setValue } = form;
@@ -42,9 +65,6 @@ const DietPlanMetaPanel: React.FC = () => {
   const restrictions = watch("dietaryRestrictions") ?? [];
   const builtBy = watch("builtByTrainerId");
 
-  // Macros + veggies are derived — summed from all meals. The trainer
-  // can't edit these directly; they reflect whatever is built in the
-  // meals below so the tag stays in sync with reality.
   const sumServings = (key: "totalProtein" | "totalCarbs" | "totalFats" | "totalVeggies") =>
     meals.reduce((acc, m) => acc + Number(m?.[key]?.quantity ?? 0), 0);
   const protein = sumServings("totalProtein");
@@ -52,15 +72,14 @@ const DietPlanMetaPanel: React.FC = () => {
   const fats = sumServings("totalFats");
   const veggies = sumServings("totalVeggies");
 
-  // Total calories — auto-computed from the macros, veggies and the
-  // trainer-set free-calorie allowance, using the simple house rules:
-  //   protein × 150 + carbs × 120 + fats × 100 + veggies × 30 + free.
-  const totalCalories = Math.round(
-    protein * 150 + carbs * 120 + fats * 100 + veggies * 30 + Number(freeCalories || 0)
-  );
+  const totalCalories = calculateTotalCalories({
+    protein,
+    carbs,
+    fats,
+    veggies,
+    freeCalories: Number(freeCalories || 0),
+  });
 
-  // Push derived numbers back into the form so they're persisted with
-  // the preset for filtering on the listing page.
   useEffect(() => {
     setValue("proteinServings", protein || undefined, { shouldDirty: true });
     setValue("carbServings", carbs || undefined, { shouldDirty: true });
@@ -105,8 +124,7 @@ const DietPlanMetaPanel: React.FC = () => {
   return (
     <div
       dir="rtl"
-      className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm"
-      style={{ fontFamily: "Rubik, Heebo, system-ui, sans-serif" }}
+      className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 font-['Rubik','Heebo',system-ui,sans-serif] shadow-sm"
     >
       <div className="mb-3 flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
         <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-300">
@@ -121,7 +139,6 @@ const DietPlanMetaPanel: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-x-5 gap-y-3 md:grid-cols-2 md:divide-x md:divide-slate-100 md:dark:divide-slate-800 md:rtl:divide-x-reverse">
-        {/* RIGHT col: meal-count + goal + calories + builder */}
         <div className="flex flex-col gap-3 md:pl-5">
           <Field label="מספר ארוחות" icon={<FaUtensils size={9} />} hint="מחושב אוטומטית">
             <div className="flex h-9 w-fit min-w-[3rem] items-center justify-center rounded-xl bg-emerald-50 px-3 text-base font-bold tabular-nums text-emerald-700 ring-1 ring-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:ring-emerald-900/60">
@@ -211,7 +228,6 @@ const DietPlanMetaPanel: React.FC = () => {
           )}
         </div>
 
-        {/* LEFT col: macros + restrictions */}
         <div className="flex flex-col gap-3 md:pr-5">
           <Field
             label="מנות מאקרו"

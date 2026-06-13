@@ -1,3 +1,4 @@
+import type React from "react";
 import UserFormResponses from "@/components/UserDashboard/FormResponses/UserFormResponses";
 import MeasurementsProgression from "@/components/UserDashboard/MeasurementProgression/MeasurementsProgression";
 import { WeightProgression } from "@/components/UserDashboard/WeightProgression/WeightProgression";
@@ -30,12 +31,12 @@ export function ProgressTabPanel({ activeSubTab, onSubTabChange }: ProgressTabPa
     <div className="flex flex-col gap-4">
       <ProgressSubTabs activeSubTab={activeSubTab} onSubTabChange={onSubTabChange} />
 
-      <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-5 shadow-sm">
+      <DashboardTabCard>
         {activeSubTab === "weight" && <WeightProgression />}
         {activeSubTab === "measurements" && <MeasurementsProgression />}
         {activeSubTab === "strength" && <WorkoutProgression />}
         {activeSubTab === "photos" && <WeightProgressionPhotos />}
-      </div>
+      </DashboardTabCard>
     </div>
   );
 }
@@ -60,11 +61,11 @@ export function WorkoutTabPanel({
         </button>
       </div>
 
-      <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-5 shadow-sm">
+      <DashboardTabCard>
         <CreateWorkoutPlanWrapper embedded>
           <WorkoutPlans />
         </CreateWorkoutPlanWrapper>
-      </div>
+      </DashboardTabCard>
 
       {userId && <WorkoutPlanHistorySection userId={userId} activePlan={undefined} hideWhenEmpty />}
 
@@ -82,18 +83,26 @@ export function WorkoutTabPanel({
 
 export function DietTabPanel() {
   return (
-    <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-5 shadow-sm">
+    <DashboardTabCard>
       <DietPlanWrapper>
         <ViewDietPlanPage embedded />
       </DietPlanWrapper>
-    </div>
+    </DashboardTabCard>
   );
 }
 
 export function FormsTabPanel() {
   return (
-    <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-5 shadow-sm">
+    <DashboardTabCard>
       <UserFormResponses />
+    </DashboardTabCard>
+  );
+}
+
+function DashboardTabCard({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-5 shadow-sm">
+      {children}
     </div>
   );
 }

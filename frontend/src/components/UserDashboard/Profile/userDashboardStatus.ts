@@ -1,4 +1,4 @@
-import type { AccountStatus, IStatusHistoryEntry } from "@/interfaces/IUser";
+import type { AccountStatus, IStatusHistoryEntry, IUser } from "@/interfaces/IUser";
 import DateUtils from "@/lib/dateUtils";
 
 export const STATUS_LABEL: Record<AccountStatus, string> = {
@@ -51,6 +51,21 @@ export const getInitials = (firstName?: string, lastName?: string) => {
   return (firstInitial + lastInitial).toUpperCase() || "?";
 };
 
+export const getStoredBaseStatus = (user: IUser): AccountStatus => {
+  if (user.accountStatus) return user.accountStatus;
+
+  return user.hasAccess === false ? "disabled" : "active";
+};
+
+export const getDaysRemaining = (dateFinished?: Date | string | null) => {
+  if (!dateFinished) return null;
+
+  return Math.max(
+    0,
+    Math.ceil((new Date(dateFinished).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+  );
+};
+
 export const getStatusPillClassName = (status: AccountStatus) => {
   if (status === "active") {
     return "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300";
@@ -66,7 +81,7 @@ export const getStatusPillClassName = (status: AccountStatus) => {
 
 export const getStatusModalTitle = (fromStatus: AccountStatus, toStatus: AccountStatus) => {
   if (toStatus === "disabled") return "⚠️ אישור חסימת מתאמן";
-  if (fromStatus === "disabled" && toStatus !== "disabled") return "✅ הפעלת מתאמן";
+  if (fromStatus === "disabled") return "✅ הפעלת מתאמן";
   if (toStatus === "frozen") return "❄️ אישור הקפאת מתאמן";
 
   return "שינוי סטטוס";
@@ -112,7 +127,7 @@ export const describeSystemEntry = (entry: IStatusHistoryEntry): string => {
     const addedText = formatMonthsAndDays(entry.daysAdded);
     const fromLabel = STATUS_LABEL[entry.fromStatus];
     const toLabel = STATUS_LABEL[entry.toStatus];
-    
+
     return `שוחרר מ${fromLabel} ל${toLabel} בתאריך ${dateLabel}${addedText ? ` — נוספו ${addedText} לתום הליווי` : ""}`;
   }
 

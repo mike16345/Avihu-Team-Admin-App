@@ -1,16 +1,3 @@
-/**
- * WeightProgression — מעקב משקל
- *
- * Notes UX:
- *   Notes panel sits "behind" the weight chart, in the same card. Default view:
- *   chart. Double-clicking anywhere on the chart card flips the card to reveal
- *   a clean notes view (entry form + past notes). Close button or another
- *   double-click flips it back.
- *
- *   Because Recharts captures synthetic mouse events on chart elements, we
- *   attach a NATIVE 'dblclick' listener via a ref — that bubbles past Recharts
- *   reliably whether the user double-clicks empty space, the line, or a dot.
- */
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
@@ -33,11 +20,8 @@ export const WeightProgression = () => {
   const { id } = useParams();
   const { getWeighInsByUserId } = useWeighInsApi();
   const [notesOpen, setNotesOpen] = useState(false);
-  // Counter state in refs so it survives across re-renders.
   const lastClickAtRef = useRef(0);
   const lastToggleAtRef = useRef(0);
-  // Bag of listener-detach functions; populated when callback ref
-  // attaches, drained when it detaches (React calls cb(null) on unmount).
   const cleanupRef = useRef<(() => void) | null>(null);
 
   // Callback ref instead of useRef+useEffect: useEffect with [] deps
@@ -54,8 +38,6 @@ export const WeightProgression = () => {
   //     never emits `dblclick` over the chart line/tooltip layer.
   // 250ms toggle cooldown prevents both paths from firing twice.
   const setCardRef = useCallback((card: HTMLDivElement | null) => {
-    // Detach prior listeners (React calls this with null on unmount, or
-    // with a new node if the rendered element changes).
     cleanupRef.current?.();
     cleanupRef.current = null;
     if (!card) return;
@@ -134,10 +116,6 @@ export const WeightProgression = () => {
   if (isLoading) return <Loader size="large" />;
   if (error && (error as any)?.status !== 404) return <ErrorPage message={error as any} />;
 
-  // Empty state — render the SAME layout (stats row + calendar + chart card)
-  // so the trainer sees the structure of the tracker waiting to be filled,
-  // not a generic "no data" panel. The stats show "—" and the chart card
-  // surfaces an inline empty message inside the plotting area.
   const isEmpty = !weighIns.length;
 
   const isLoss = (stats?.change || 0) < 0;
@@ -154,7 +132,6 @@ export const WeightProgression = () => {
 
   return (
     <div dir="rtl" className="flex flex-col gap-4 font-heebo">
-      {/* Stats row */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <StatCard
           icon={<FaScaleBalanced size={14} className="text-blue-600" />}
@@ -189,20 +166,17 @@ export const WeightProgression = () => {
         />
       </div>
 
-      {/* Chart (right) + Calendar (left) */}
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-[320px_1fr]">
         <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-4 shadow-sm">
           <h3 className="mb-2 text-sm font-bold text-slate-800 dark:text-slate-100">לוח שנה</h3>
           <WeightCalendar weighIns={weighIns} />
         </div>
 
-        {/* Chart card — double-click flips to notes view */}
         <div
           ref={setCardRef}
           className="relative overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-4 shadow-sm select-none"
           title={notesOpen ? "לחץ פעמיים לחזרה לגרף" : "לחץ פעמיים לפתקי התקדמות"}
         >
-          {/* Header */}
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">
@@ -238,9 +212,7 @@ export const WeightProgression = () => {
             </div>
           </div>
 
-          {/* Stacked layers — chart in front, notes behind */}
-          <div className="relative" style={{ minHeight: 500 }}>
-            {/* Chart layer */}
+          <div className="relative min-h-[500px]">
             <div
               className={`h-[500px] w-full transition-all duration-300 ${
                 notesOpen ? "pointer-events-none opacity-0" : "opacity-100"
@@ -249,7 +221,6 @@ export const WeightProgression = () => {
               <WeightChart weighIns={weighIns} />
             </div>
 
-            {/* Notes layer */}
             <div
               className={`absolute inset-0 transition-all duration-300 ${
                 notesOpen

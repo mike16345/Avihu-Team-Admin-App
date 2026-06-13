@@ -18,7 +18,11 @@ import type {
   MainTab,
   ProgressSubTab,
 } from "@/components/UserDashboard/Profile/userDashboardTypes";
-import { getInitials } from "@/components/UserDashboard/Profile/userDashboardStatus";
+import {
+  getDaysRemaining,
+  getInitials,
+  getStoredBaseStatus,
+} from "@/components/UserDashboard/Profile/userDashboardStatus";
 import useUpdateUser from "@/hooks/mutations/User/useUpdateUser";
 import useUserQuery from "@/hooks/queries/user/useUserQuery";
 import { tryGuardedNav } from "@/hooks/useNavigationBlocker";
@@ -41,20 +45,6 @@ const isMainTab = (value: string | null): value is MainTab =>
 
 const isProgressSub = (value: string | null): value is ProgressSubTab =>
   value === "weight" || value === "measurements" || value === "strength" || value === "photos";
-
-const getStoredBaseStatus = (user: IUser): AccountStatus => {
-  if (user.accountStatus) return user.accountStatus;
-  return user.hasAccess === false ? "disabled" : "active";
-};
-
-const getDaysRemaining = (dateFinished?: Date | string | null) => {
-  if (!dateFinished) return null;
-
-  return Math.max(
-    0,
-    Math.ceil((new Date(dateFinished).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-  );
-};
 
 export const UserDashboard = () => {
   const stateUser = useLocation().state as IUser | undefined;

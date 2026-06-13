@@ -1,15 +1,3 @@
-/**
- * ProgressNoteContainer
- *
- * Two views inside the flip-overlay of the weight chart:
- *
- *  - LIST view (default): a prominent "+ פתק חדש" CTA at the top, then a
- *    scrollable list of past notes grouped visually as cards. Empty state
- *    has its own design.
- *
- *  - FORM view (after clicking the CTA, or the pencil on an existing note):
- *    the form replaces the list; "← חזרה לרשימה" returns.
- */
 import { useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { HiArrowRight } from "react-icons/hi2";
@@ -24,64 +12,85 @@ import ErrorPage from "@/pages/ErrorPage";
 
 const ProgressNoteContainer = () => {
   const { id } = useParams();
-  const {
-    setOpenProgressSheet,
-    openProgressSheet,
-    handleCloseProgressSheet,
-    progressNote,
-  } = useProgressNoteContext();
+  const { setOpenProgressSheet, openProgressSheet, handleCloseProgressSheet, progressNote } =
+    useProgressNoteContext();
   const { data: progressNoteRes, isError, isLoading, error } = useProgressNoteQuery(id);
 
-  const noteCount = progressNoteRes?.data?.progressNotes?.length ?? 0;
+  const progressNotes = useMemo(
+    () => progressNoteRes?.data?.progressNotes ?? [],
+    [progressNoteRes?.data?.progressNotes]
+  );
+  const noteCount = progressNotes.length;
 
   const notes = useMemo(() => {
     if (!noteCount) return [];
-    return progressNoteRes!.data!.progressNotes!.map((note) => (
+    return progressNotes.map((note) => (
       <Note key={note._id} progressNote={note} className="bg-white" />
     ));
-  }, [progressNoteRes?.data, noteCount]);
+  }, [progressNotes, noteCount]);
 
   if (isLoading) return <Loader size="medium" />;
   if (isError && error?.status !== 404) return <ErrorPage />;
 
-  // FORM view (add / edit)
   if (openProgressSheet) {
     return (
-      <div dir="rtl" className="flex h-full flex-col">
-        <div className="mb-3 flex items-start justify-between gap-3">
-          <button
-            type="button"
-            onClick={handleCloseProgressSheet}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-          >
-            <HiArrowRight size={14} />
-            <span>חזרה לרשימה</span>
-          </button>
-          <div className="text-right">
-            <h4 className="text-base font-bold text-slate-900">
-              {progressNote ? "עריכת פתק" : "פתק חדש"}
-            </h4>
-            <p className="text-[11px] text-slate-400">
-              {progressNote
-                ? "ערוך את הנתונים ולחץ שמור."
-                : "תאריך, אחוזי ביצוע ותוכן חופשי. כל השדות אופציונליים."}
-            </p>
-          </div>
-        </div>
-        <div className="min-h-0 flex-1 overflow-y-auto rounded-xl border border-slate-100 bg-slate-50/40 p-3">
-          <ProgressNoteForm />
-        </div>
-      </div>
+      <ProgressNoteEditorView isEditing={Boolean(progressNote)} onBack={handleCloseProgressSheet} />
     );
   }
 
-  // LIST view (default)
+  return (
+    <ProgressNoteListView
+      noteCount={noteCount}
+      notes={notes}
+      onAddNote={() => setOpenProgressSheet(true)}
+    />
+  );
+};
+
+function ProgressNoteEditorView({ isEditing, onBack }: { isEditing: boolean; onBack: () => void }) {
+  return (
+    <div dir="rtl" className="flex h-full flex-col">
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <button
+          type="button"
+          onClick={onBack}
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+        >
+          <HiArrowRight size={14} />
+          <span>חזרה לרשימה</span>
+        </button>
+        <div className="text-right">
+          <h4 className="text-base font-bold text-slate-900">
+            {isEditing ? "עריכת פתק" : "פתק חדש"}
+          </h4>
+          <p className="text-[11px] text-slate-400">
+            {isEditing
+              ? "ערוך את הנתונים ולחץ שמור."
+              : "תאריך, אחוזי ביצוע ותוכן חופשי. כל השדות אופציונליים."}
+          </p>
+        </div>
+      </div>
+      <div className="min-h-0 flex-1 overflow-y-auto rounded-xl border border-slate-100 bg-slate-50/40 p-3">
+        <ProgressNoteForm />
+      </div>
+    </div>
+  );
+}
+
+function ProgressNoteListView({
+  noteCount,
+  notes,
+  onAddNote,
+}: {
+  noteCount: number;
+  notes: JSX.Element[];
+  onAddNote: () => void;
+}) {
   return (
     <div dir="rtl" className="flex h-full flex-col gap-3">
-      {/* Top CTA — primary action */}
       <button
         type="button"
-        onClick={() => setOpenProgressSheet(true)}
+        onClick={onAddNote}
         className="group flex items-center justify-between gap-3 rounded-xl border border-blue-200 bg-gradient-to-l from-blue-50 to-white px-4 py-3 text-right shadow-sm transition-all hover:border-blue-400 hover:shadow-md"
       >
         <div className="flex items-center gap-3">
@@ -96,7 +105,6 @@ const ProgressNoteContainer = () => {
         <FaStickyNote size={20} className="text-amber-400/80" />
       </button>
 
-      {/* Past notes */}
       <div className="flex min-h-0 flex-1 flex-col">
         <div className="mb-2 flex items-center justify-between">
           <div className="flex items-center gap-1.5">
@@ -124,6 +132,6 @@ const ProgressNoteContainer = () => {
       </div>
     </div>
   );
-};
+}
 
 export default ProgressNoteContainer;

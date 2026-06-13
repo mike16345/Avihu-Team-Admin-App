@@ -1,9 +1,3 @@
-/**
- * MeasurementsProgression — מעקב היקפים (עיצוב חדש)
- *
- * 6 כרטיסי סטטיסטיקה (חזה/זרוע/מותן/ישבן/ירך/תאומים) + טבלה עורכת.
- * חיבור לשרת: useMeasurementApi → GET/POST/PUT/DELETE /measurements
- */
 import { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
@@ -28,8 +22,6 @@ const COLUMNS: { key: MeasurementKey; label: string; color: string }[] = [
   { key: "calf", label: "תאומים", color: "text-indigo-600" },
 ];
 
-// We use NaN to represent "empty / not measured" in the draft.
-// On save we convert NaN → 0 (server requires numbers).
 const blankMeasurement = (): IMuscleMeasurement =>
   ({
     date: moment().format("DD/MM/YYYY"),
@@ -40,6 +32,34 @@ const blankMeasurement = (): IMuscleMeasurement =>
     thigh: NaN,
     calf: NaN,
   }) as IMuscleMeasurement;
+
+const cleanMeasurementNumber = (value: unknown) =>
+  typeof value === "number" && !isNaN(value) ? value : 0;
+
+const toMeasurementPayload = (draft: IMuscleMeasurement): IMuscleMeasurement => ({
+  ...draft,
+  date: moment(draft.date, "DD/MM/YYYY").toISOString(),
+  chest: cleanMeasurementNumber(draft.chest),
+  arm: cleanMeasurementNumber(draft.arm),
+  waist: cleanMeasurementNumber(draft.waist),
+  glutes: cleanMeasurementNumber(draft.glutes),
+  thigh: cleanMeasurementNumber(draft.thigh),
+  calf: cleanMeasurementNumber(draft.calf),
+});
+
+const getMeasurementValueClassName = ({
+  color,
+  isEmpty,
+  isLatest,
+}: {
+  color: string;
+  isEmpty: boolean;
+  isLatest: boolean;
+}) => {
+  if (isEmpty) return "text-slate-300";
+  if (isLatest) return color;
+  return "text-slate-700 dark:text-slate-200";
+};
 
 const MeasurementsProgression = () => {
   const { id } = useParams();
@@ -104,32 +124,19 @@ const MeasurementsProgression = () => {
     if (!draft || !id) return;
     setSaving(true);
     try {
-      // Convert NaN (empty) → 0 for server compatibility (fields are required on server)
-      const cleanNum = (v: any) => (typeof v === "number" && !isNaN(v) ? v : 0);
-      const payload: IMuscleMeasurement = {
-        ...draft,
-        date: moment(draft.date, "DD/MM/YYYY").toISOString(),
-        chest: cleanNum(draft.chest),
-        arm: cleanNum(draft.arm),
-        waist: cleanNum(draft.waist),
-        glutes: cleanNum(draft.glutes),
-        thigh: cleanNum(draft.thigh),
-        calf: cleanNum(draft.calf),
-      };
-      // The server returns the full updated document (with all measurements)
-      // in the POST response. We use that to update the react-query cache
-      // directly — works around a server-side issue where GET /measurements/one
-      // returns 404 due to trainer-scope filtering even when the doc exists.
+      const payload = toMeasurementPayload(draft);
       const res: any =
         editingId === "__new__"
           ? await addMeasurement(id, payload)
           : await updateMeasurement(id, payload);
       toast.success(editingId === "__new__" ? "המדידה נוספה בהצלחה!" : "המדידה עודכנה בהצלחה!");
+
       if (res?.data) {
         queryClient.setQueryData([QueryKeys.USER_MEASUREMENTS + id], res.data);
       } else {
         refresh();
       }
+
       setEditingId(null);
       setDraft(null);
     } catch (err) {
@@ -140,12 +147,12 @@ const MeasurementsProgression = () => {
     }
   };
 
-  const handleDelete = async (m: IMuscleMeasurement) => {
-    if (!id || !m.date) return;
-    if (!window.confirm(`למחוק את המדידה מ-${m.date}?`)) return;
+  const handleDelete = async (measurement: IMuscleMeasurement) => {
+    if (!id || !measurement.date) return;
+    if (!window.confirm(`למחוק את המדידה מ-${measurement.date}?`)) return;
     try {
-      // Server deletes per (date, muscle) — pass ISO date, helper fans out across muscles
-      const iso = moment(m.date, "DD/MM/YYYY").toISOString();
+      const iso = moment(measurement.date, "DD/MM/YYYY").toISOString();
+
       await deleteMeasurement(id, iso);
       toast.success("המדידה נמחקה");
       refresh();
@@ -156,7 +163,7 @@ const MeasurementsProgression = () => {
   };
 
   if (isLoading) return <Loader size="large" />;
-  // 404 = no measurements yet, 401/403 = no permission (still show empty UI)
+
   const errorStatus = (error as any)?.status;
   const isPermissionError = errorStatus === 401 || errorStatus === 403;
   if (isError && errorStatus !== 404 && !isPermissionError)
@@ -164,33 +171,10 @@ const MeasurementsProgression = () => {
 
   return (
     <div dir="rtl" className="flex flex-col gap-4 font-heebo">
-      {/* Summary stat cards */}
       {measurements.length > 0 && (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {COLUMNS.map((c) => {
-            const delta = getDelta(c.key);
-            return (
-              <div
-                key={c.key}
-                className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-3 shadow-sm"
-              >
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  {c.label}
-                </p>
-                <p className={`mt-1 text-2xl font-bold ${c.color}`}>
-                  {latest?.[c.key] ?? "—"}
-                  <span className="text-xs text-slate-400 dark:text-slate-500 me-1">ס״מ</span>
-                </p>
-                <p className={`mt-0.5 text-xs font-semibold ${delta.color}`}>
-                  {delta.arrow} {delta.text} מהתחלה
-                </p>
-              </div>
-            );
-          })}
-        </div>
+        <MeasurementSummaryCards columns={COLUMNS} latest={latest} getDelta={getDelta} />
       )}
 
-      {/* Table card */}
       <div className="overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 shadow-sm">
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 px-4 py-3">
           <div className="flex items-center gap-2">
@@ -266,59 +250,15 @@ const MeasurementsProgression = () => {
                     );
                   }
                   return (
-                    <tr
+                    <MeasurementDisplayRow
                       key={rowId}
-                      className={`border-t border-slate-100 dark:border-slate-800 transition-colors ${
-                        i === 0 ? "bg-blue-50/30 hover:bg-blue-50/50" : "hover:bg-slate-50/60"
-                      }`}
-                    >
-                      <td className="px-4 py-3 text-right font-semibold text-slate-700 dark:text-slate-200">
-                        {m.date}
-                        {i === 0 && (
-                          <span className="ms-2 inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:text-blue-300">
-                            אחרונה
-                          </span>
-                        )}
-                      </td>
-                      {COLUMNS.map((c) => {
-                        const val = m[c.key] as number;
-                        const isEmpty = !val || val === 0;
-                        return (
-                          <td
-                            key={c.key}
-                            className={`px-4 py-3 text-center font-semibold ${
-                              isEmpty
-                                ? "text-slate-300"
-                                : i === 0
-                                  ? c.color
-                                  : "text-slate-700 dark:text-slate-200"
-                            }`}
-                          >
-                            {isEmpty ? "—" : val}
-                          </td>
-                        );
-                      })}
-                      <td className="px-4 py-3">
-                        <div className="flex items-center justify-center gap-1">
-                          <button
-                            onClick={() => startEdit(m)}
-                            disabled={editingId !== null}
-                            className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 transition-colors hover:border-blue-300 hover:text-blue-600 disabled:opacity-40"
-                            aria-label="ערוך"
-                          >
-                            <FaPencil size={10} />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(m)}
-                            disabled={editingId !== null}
-                            className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 transition-colors hover:border-red-300 hover:text-red-600 disabled:opacity-40"
-                            aria-label="מחק"
-                          >
-                            <FaTrash size={10} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
+                      columns={COLUMNS}
+                      measurement={m}
+                      isLatest={i === 0}
+                      actionsDisabled={editingId !== null}
+                      onEdit={() => startEdit(m)}
+                      onDelete={() => handleDelete(m)}
+                    />
                   );
                 })}
               </tbody>
@@ -329,6 +269,108 @@ const MeasurementsProgression = () => {
     </div>
   );
 };
+
+function MeasurementSummaryCards({
+  columns,
+  latest,
+  getDelta,
+}: {
+  columns: { key: MeasurementKey; label: string; color: string }[];
+  latest?: IMuscleMeasurement;
+  getDelta: (key: MeasurementKey) => { text: string; color: string; arrow: string };
+}) {
+  return (
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      {columns.map((column) => {
+        const delta = getDelta(column.key);
+        return (
+          <div
+            key={column.key}
+            className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-3 shadow-sm"
+          >
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              {column.label}
+            </p>
+            <p className={`mt-1 text-2xl font-bold ${column.color}`}>
+              {latest?.[column.key] ?? "—"}
+              <span className="text-xs text-slate-400 dark:text-slate-500 me-1">ס״מ</span>
+            </p>
+            <p className={`mt-0.5 text-xs font-semibold ${delta.color}`}>
+              {delta.arrow} {delta.text} מהתחלה
+            </p>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function MeasurementDisplayRow({
+  columns,
+  measurement,
+  isLatest,
+  actionsDisabled,
+  onEdit,
+  onDelete,
+}: {
+  columns: { key: MeasurementKey; label: string; color: string }[];
+  measurement: IMuscleMeasurement;
+  isLatest: boolean;
+  actionsDisabled: boolean;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  return (
+    <tr
+      className={`border-t border-slate-100 dark:border-slate-800 transition-colors ${
+        isLatest ? "bg-blue-50/30 hover:bg-blue-50/50" : "hover:bg-slate-50/60"
+      }`}
+    >
+      <td className="px-4 py-3 text-right font-semibold text-slate-700 dark:text-slate-200">
+        {measurement.date}
+        {isLatest && (
+          <span className="ms-2 inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:text-blue-300">
+            אחרונה
+          </span>
+        )}
+      </td>
+      {columns.map((column) => {
+        const value = measurement[column.key] as number;
+        const isEmpty = !value || value === 0;
+        const valueClassName = getMeasurementValueClassName({
+          color: column.color,
+          isEmpty,
+          isLatest,
+        });
+        return (
+          <td key={column.key} className={`px-4 py-3 text-center font-semibold ${valueClassName}`}>
+            {isEmpty ? "—" : value}
+          </td>
+        );
+      })}
+      <td className="px-4 py-3">
+        <div className="flex items-center justify-center gap-1">
+          <button
+            onClick={onEdit}
+            disabled={actionsDisabled}
+            className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 transition-colors hover:border-blue-300 hover:text-blue-600 disabled:opacity-40"
+            aria-label="ערוך"
+          >
+            <FaPencil size={10} />
+          </button>
+          <button
+            onClick={onDelete}
+            disabled={actionsDisabled}
+            className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 transition-colors hover:border-red-300 hover:text-red-600 disabled:opacity-40"
+            aria-label="מחק"
+          >
+            <FaTrash size={10} />
+          </button>
+        </div>
+      </td>
+    </tr>
+  );
+}
 
 function EditRow({
   columns,

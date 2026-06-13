@@ -135,7 +135,6 @@ export const WorkoutProgression = () => {
   const [detailExercise, setDetailExercise] = useState<FlatExercise | null>(null);
   const [noteOpen, setNoteOpen] = useState(false);
 
-  // Flatten recordedWorkouts into a list of exercises with sessions
   const flatExercises: FlatExercise[] = useMemo(() => {
     if (!recordedWorkouts?.length) return [];
     const out: FlatExercise[] = [];
@@ -143,7 +142,6 @@ export const WorkoutProgression = () => {
       const exercises = Object.keys(mg.recordedSets || {});
       exercises.forEach((exName) => {
         const sets: RecordedSet[] = mg.recordedSets[exName] || [];
-        // Group sets by date and pick the heaviest (PR) per session
         const sessionsByDate: Record<string, { weight: number; reps: number; date: Date }> = {};
         sets.forEach((s) => {
           const d = new Date(s.date || new Date());
@@ -166,7 +164,6 @@ export const WorkoutProgression = () => {
   }, [recordedWorkouts]);
 
   const availableGroups = useMemo(() => {
-    // The API hook returns { data: IMuscleGroupItem[] }
     const rawData: any = muscleGroupsFromServer;
     const serverArr: any[] = Array.isArray(rawData)
       ? rawData
@@ -177,15 +174,12 @@ export const WorkoutProgression = () => {
     const fromData = new Set<string>(flatExercises.map((e) => e.group));
 
     const merged: string[] = ["הכל"];
-    // Always include the standard fallback list (covers all common groups)
     FALLBACK_GROUPS.forEach((g) => {
       if (!merged.includes(g)) merged.push(g);
     });
-    // Add any custom groups from the server (in case user defined extras)
     fromServer.forEach((g) => {
       if (!merged.includes(g)) merged.push(g);
     });
-    // Add any groups present in the actual data (safety)
     fromData.forEach((g) => {
       if (!merged.includes(g)) merged.push(g);
     });
@@ -223,7 +217,6 @@ export const WorkoutProgression = () => {
     setDetailExercise(exercise);
   };
 
-  // Get raw recordedSets for the currently opened detail exercise (used by modal)
   const detailRawSets: any[] = useMemo(() => {
     if (!detailExercise) return [];
     const mg = (recordedWorkouts as any[])?.find((x) => x.muscleGroup === detailExercise.group);
@@ -231,7 +224,6 @@ export const WorkoutProgression = () => {
   }, [detailExercise, recordedWorkouts]);
 
   if (isLoading) return <Loader />;
-  // Treat 401/403/404 as "no data yet" — show empty state instead of error
   const errorStatus = (error as any)?.status;
   const isExpectedEmpty =
     errorStatus === 401 ||
@@ -242,7 +234,6 @@ export const WorkoutProgression = () => {
 
   return (
     <div dir="rtl" className="flex flex-col gap-4 font-heebo">
-      {/* Filter bar + Note creator — ALWAYS VISIBLE */}
       <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 px-3 py-2 shadow-sm">
         <div className="flex flex-wrap items-center gap-1">
           {availableGroups.map((g) => (
@@ -268,7 +259,6 @@ export const WorkoutProgression = () => {
         </a>
       </div>
 
-      {/* Empty state */}
       {!flatExercises.length && (
         <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-10 text-center">
           <FaDumbbell size={28} className="mx-auto mb-2 text-slate-300" />
@@ -283,8 +273,7 @@ export const WorkoutProgression = () => {
 
       {flatExercises.length > 0 && (
         <>
-          {/* Exercise cards grid — scrollable with subtle scrollbar */}
-          <div className="workout-cards-scroll max-h-[calc(100vh-280px)] overflow-y-auto pe-2 -me-2">
+          <div className="max-h-[calc(100vh-280px)] overflow-y-auto pe-2 -me-2 [scrollbar-color:rgba(148,163,184,0.3)_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-slate-400/30 [&::-webkit-scrollbar-thumb:hover]:bg-slate-400/50 [&::-webkit-scrollbar-track]:bg-transparent">
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
               {filteredExercises.map((exercise) => {
                 const first = exercise.sessions[0];
@@ -372,13 +361,11 @@ export const WorkoutProgression = () => {
                         </div>
                       </div>
 
-                      {/* Mini sparkline */}
                       <div className="mt-3">
                         <MiniSparkline values={sparklineValues} gradient={colors.gradient} />
                       </div>
                     </button>
 
-                    {/* Expand button */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -390,7 +377,6 @@ export const WorkoutProgression = () => {
                       <span>{isExpanded ? "הסתר היסטוריה" : "ראה היסטוריה מלאה"}</span>
                     </button>
 
-                    {/* Expanded history */}
                     {isExpanded &&
                       (() => {
                         // PR-broken sessions: each session where weight (or reps for bodyweight)
@@ -473,18 +459,9 @@ export const WorkoutProgression = () => {
               })}
             </div>
           </div>
-
-          <style>{`
-            .workout-cards-scroll::-webkit-scrollbar { width: 6px; }
-            .workout-cards-scroll::-webkit-scrollbar-track { background: transparent; }
-            .workout-cards-scroll::-webkit-scrollbar-thumb { background-color: rgba(148, 163, 184, 0.3); border-radius: 3px; }
-            .workout-cards-scroll::-webkit-scrollbar-thumb:hover { background-color: rgba(148, 163, 184, 0.5); }
-            .workout-cards-scroll { scrollbar-width: thin; scrollbar-color: rgba(148, 163, 184, 0.3) transparent; }
-          `}</style>
         </>
       )}
 
-      {/* Exercise Detail Modal */}
       {detailExercise && (
         <ExerciseDetailModal
           exercise={detailExercise}
@@ -493,7 +470,6 @@ export const WorkoutProgression = () => {
         />
       )}
 
-      {/* Progress note — clickable card */}
       <button
         id="progress-note"
         onClick={() => setNoteOpen(true)}
@@ -585,7 +561,6 @@ function ExerciseDetailModal({
         className="relative flex h-full max-h-[90vh] w-full max-w-7xl flex-col gap-4 overflow-hidden rounded-3xl bg-white dark:bg-slate-900 p-6 font-heebo shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="flex items-start justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
           <div>
             <span
@@ -607,16 +582,8 @@ function ExerciseDetailModal({
           </button>
         </div>
 
-        {/* Two-column body — explicit height to ensure scrolling */}
-        <div
-          className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[1fr_360px]"
-          style={{ height: "calc(90vh - 140px)" }}
-        >
-          {/* Right column = sets log */}
-          <div
-            className="modal-sets-scroll flex h-full min-h-0 flex-col gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/30 p-3 pe-2 lg:order-2"
-            style={{ overflowY: "scroll" }}
-          >
+        <div className="grid h-[calc(90vh-140px)] min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[1fr_360px]">
+          <div className="modal-sets-scroll flex h-full min-h-0 flex-col gap-3 overflow-y-scroll rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/30 p-3 pe-2 lg:order-2">
             {sessions.length === 0 && (
               <p className="px-2 py-6 text-center text-sm text-slate-400 dark:text-slate-500">
                 אין סטים מתועדים לתרגיל זה
@@ -703,7 +670,6 @@ function ExerciseDetailModal({
                   {isOpen && (
                     <div className="flex flex-col gap-1.5 border-t border-slate-100 dark:border-slate-800 p-2.5">
                       {session.sets.map((s, idx) => {
-                        // Compute if this set is the PR within the session
                         const sessionMaxWeight = Math.max(...session.sets.map((x) => x.weight));
                         const isSessionPR = s.weight === sessionMaxWeight && s.weight > 0;
                         return (
@@ -755,12 +721,7 @@ function ExerciseDetailModal({
             })}
           </div>
 
-          {/* Left column = chart + goals + monthly PRs */}
-          <div
-            className="modal-sets-scroll flex h-full min-h-0 flex-col gap-3 pe-2 lg:order-1"
-            style={{ overflowY: "scroll" }}
-          >
-            {/* PR Chart */}
+          <div className="modal-sets-scroll flex h-full min-h-0 flex-col gap-3 overflow-y-scroll pe-2 lg:order-1">
             <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-0 pb-3 pt-5">
               <div className="mb-3 flex items-center justify-between px-5">
                 <div>
@@ -787,36 +748,11 @@ function ExerciseDetailModal({
               <PRTrendChart sessions={sessions} />
             </div>
 
-            {/* Goals */}
             <ExerciseGoals sessions={sessions} />
 
-            {/* Monthly PRs */}
             <MonthlyPRs sessions={sessions} />
           </div>
         </div>
-
-        <style>{`
-          .modal-sets-scroll::-webkit-scrollbar {
-            width: 12px;
-            -webkit-appearance: none;
-          }
-          .modal-sets-scroll::-webkit-scrollbar-track {
-            background: #e2e8f0;
-            border-radius: 6px;
-          }
-          .modal-sets-scroll::-webkit-scrollbar-thumb {
-            background-color: #94a3b8;
-            border-radius: 6px;
-            border: 2px solid #e2e8f0;
-          }
-          .modal-sets-scroll::-webkit-scrollbar-thumb:hover {
-            background-color: #64748b;
-          }
-          .modal-sets-scroll {
-            scrollbar-width: auto;
-            scrollbar-color: #94a3b8 #e2e8f0;
-          }
-        `}</style>
       </div>
     </div>
   );
