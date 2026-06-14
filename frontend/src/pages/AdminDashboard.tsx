@@ -48,10 +48,12 @@ const shortcuts: {
 
 const getGreeting = () => {
   const h = new Date().getHours();
+
   if (h < 6) return "לילה טוב";
   if (h < 12) return "בוקר טוב";
   if (h < 17) return "צהריים טובים";
   if (h < 21) return "ערב טוב";
+
   return "לילה טוב";
 };
 
