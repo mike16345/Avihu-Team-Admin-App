@@ -1,15 +1,6 @@
-/**
- * LessonGroupForm — create / edit a lesson group.
- *
- * Visual refresh: matches the rest of the redesigned admin panel —
- * uppercase tracking labels, rounded-xl inputs, blue accent for the
- * save button, validation message styling consistent with other forms.
- *
- * Hooks and mutations untouched — purely visual.
- */
 import lessonGroupSchema, { LessonGroupSchemaType } from "@/schemas/lessonGroupSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FC, useEffect } from "react";
+import { type FC, type ReactNode, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Form, FormMessage, FormField, FormItem, FormControl } from "../ui/form";
 import { Input } from "../ui/input";
@@ -23,33 +14,45 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Textarea } from "../ui/textarea";
 import { FaCheck, FaPenToSquare } from "react-icons/fa6";
+import { ApiResponse } from "@/types/types";
+import { ILessonGroup } from "@/interfaces/IBlog";
 
-interface LessonGroupFormProps extends IPresetFormProps {}
+type LessonGroupFormProps = IPresetFormProps;
 
-const FieldLabel: React.FC<{ children: React.ReactNode; required?: boolean }> = ({
-  children,
-  required,
-}) => (
+const FieldLabel: FC<{ children: ReactNode; required?: boolean }> = ({ children, required }) => (
   <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
     {children}
     {required && <span className="ms-1 text-rose-500">*</span>}
   </label>
 );
 
+const getSubmitIcon = (isEdit: boolean) => {
+  if (isEdit) return <FaPenToSquare size={11} />;
+  return <FaCheck size={11} />;
+};
+
+const getSubmitLabel = (isPending: boolean, isEdit: boolean) => {
+  if (isPending) return "שומר…";
+  if (isEdit) return "שמור שינויים";
+  return "צור קבוצה";
+};
+
 const LessonGroupForm: FC<LessonGroupFormProps> = ({ objectId, closeSheet }) => {
   const queryClient = useQueryClient();
   const { data, isLoading } = useLessonGroupQuery(objectId);
 
-  const onUpdateSuccess = (lessonGroup: any) => {
+  const onUpdateSuccess = (lessonGroup: ApiResponse<ILessonGroup>) => {
     queryClient.invalidateQueries({ queryKey: [QueryKeys.BLOGS] });
     queryClient.invalidateQueries({ queryKey: [QueryKeys.BLOGS, objectId] });
     onSuccess(lessonGroup);
   };
 
-  const onSuccess = (lessonGroup: any) => {
+  const onSuccess = (lessonGroup: ApiResponse<ILessonGroup>) => {
     toast.success(objectId ? "הקבוצה עודכנה" : "הקבוצה נוצרה");
     queryClient.invalidateQueries({ queryKey: [QueryKeys.LESSON_GROUPS] });
-    queryClient.invalidateQueries({ queryKey: [QueryKeys.LESSON_GROUPS, lessonGroup?._id] });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKeys.LESSON_GROUPS, (lessonGroup as Partial<ILessonGroup>)?._id],
+    });
     closeSheet();
   };
 
@@ -76,7 +79,7 @@ const LessonGroupForm: FC<LessonGroupFormProps> = ({ objectId, closeSheet }) => 
   useEffect(() => {
     if (!data) return;
     reset(data.data);
-  }, [data]);
+  }, [data, reset]);
 
   if (isLoading) return <Loader />;
 
@@ -84,8 +87,7 @@ const LessonGroupForm: FC<LessonGroupFormProps> = ({ objectId, closeSheet }) => 
     <Form {...form}>
       <form
         dir="rtl"
-        className="flex flex-col gap-4 text-right"
-        style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
+        className="flex flex-col gap-4 text-right font-heebo"
         onSubmit={handleSubmit(onSubmit)}
       >
         <FormField
@@ -124,8 +126,8 @@ const LessonGroupForm: FC<LessonGroupFormProps> = ({ objectId, closeSheet }) => 
           disabled={isPending}
           className="mt-1 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-blue-700 hover:shadow disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isEdit ? <FaPenToSquare size={11} /> : <FaCheck size={11} />}
-          {isPending ? "שומר…" : isEdit ? "שמור שינויים" : "צור קבוצה"}
+          {getSubmitIcon(isEdit)}
+          {getSubmitLabel(isPending, isEdit)}
         </button>
       </form>
     </Form>

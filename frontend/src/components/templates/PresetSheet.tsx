@@ -1,12 +1,3 @@
-/**
- * PresetSheet — centred modal used to add or edit a preset item
- * (exercise, muscle group, cardio workout, exercise method, food
- * group, or lesson group).
- *
- * Despite the legacy "Sheet" name we now render a centred `<Dialog>`
- * — the original side-drawer was distracting on wide screens. Header
- * adapts per form type so the user always sees what they're editing.
- */
 import React from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import ExerciseForm from "@/components/forms/ExerciseForm";
@@ -32,10 +23,13 @@ interface PresetSheetProps {
   onCloseSheet: () => void;
 }
 
-const FORM_META: Record<
-  string,
-  { icon: React.ReactNode; title: (isEdit: boolean) => string; description: string }
-> = {
+type PresetFormMeta = {
+  icon: React.ReactNode;
+  title: (isEdit: boolean) => string;
+  description: string;
+};
+
+const FORM_META: Record<string, PresetFormMeta> = {
   Exercise: {
     icon: <FaDumbbell size={16} />,
     title: (isEdit) => (isEdit ? "עריכת תרגיל" : "הוספת תרגיל"),
@@ -68,50 +62,79 @@ const FORM_META: Record<
   },
 };
 
-const PresetSheet: React.FC<PresetSheetProps> = ({ form, id, isOpen, onCloseSheet }) => {
-  const isFoodGroup =
-    form === "fats" || form === "vegetables" || form === "carbs" || form === "protein";
+const isFoodGroupForm = (form?: string) =>
+  form === "fats" || form === "vegetables" || form === "carbs" || form === "protein";
 
-  const metaKey = isFoodGroup ? "foodGroup" : (form ?? "");
-  const meta = FORM_META[metaKey];
+const getPresetFormMeta = (form: string | undefined) => {
+  const metaKey = isFoodGroupForm(form) ? "foodGroup" : (form ?? "");
+  return FORM_META[metaKey];
+};
+
+const getPresetSheetTitle = (meta: PresetFormMeta | undefined, isEdit: boolean) => {
+  if (meta) return meta.title(isEdit);
+  if (isEdit) return "עריכת פריט";
+  return "הוסף פריט";
+};
+
+const getPresetSheetDescription = (meta: PresetFormMeta | undefined) => {
+  if (meta) return meta.description;
+  return "כאן ניתן להוסיף פריטים לרשימה הקיימת במערכת";
+};
+
+const getPresetSheetIcon = (meta: PresetFormMeta | undefined) => {
+  if (meta) return meta.icon;
+  return <FaPlus size={14} />;
+};
+
+const renderPresetForm = (
+  form: string | undefined,
+  id: string | undefined,
+  onCloseSheet: () => void
+) => {
+  const foodGroup = isFoodGroupForm(form) ? form : undefined;
+
+  return (
+    <>
+      {form === "Exercise" && <ExerciseForm objectId={id} closeSheet={onCloseSheet} />}
+      {form === "muscleGroup" && <MuscleGroupForm objectId={id} closeSheet={onCloseSheet} />}
+      {form === "cardioWorkouts" && <CardioWorkoutForm objectId={id} closeSheet={onCloseSheet} />}
+      {form === "exercisesMethods" && (
+        <ExerciseMethodsForm objectId={id} closeSheet={onCloseSheet} />
+      )}
+      {foodGroup && <MenuItemForm objectId={id} closeSheet={onCloseSheet} foodGroup={foodGroup} />}
+      {form === "lessonGroups" && <LessonGroupForm objectId={id} closeSheet={onCloseSheet} />}
+    </>
+  );
+};
+
+const PresetSheet: React.FC<PresetSheetProps> = ({ form, id, isOpen, onCloseSheet }) => {
+  const meta = getPresetFormMeta(form);
   const isEdit = !!id;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onCloseSheet()}>
       <DialogContent
         dir="rtl"
-        className="max-w-xl max-h-[90vh] overflow-hidden p-0 gap-0 rounded-2xl flex flex-col"
-        style={{ fontFamily: "Rubik, Heebo, system-ui, sans-serif" }}
+        className="flex max-h-[90vh] max-w-xl flex-col gap-0 overflow-hidden rounded-2xl p-0 font-['Rubik','Heebo',system-ui,sans-serif]"
       >
-        {/* Branded header */}
         <header className="border-b border-slate-100 dark:border-slate-800 bg-gradient-to-bl from-blue-50/60 to-transparent dark:from-blue-950/30 px-6 py-4">
           <div className="flex items-start gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-300 ring-1 ring-blue-200/60">
-              {meta ? meta.icon : <FaPlus size={14} />}
+              {getPresetSheetIcon(meta)}
             </div>
             <div className="flex-1 min-w-0">
               <h2 className="text-right text-lg font-bold text-slate-900 dark:text-slate-100">
-                {meta ? meta.title(isEdit) : isEdit ? "עריכת פריט" : "הוסף פריט"}
+                {getPresetSheetTitle(meta, isEdit)}
               </h2>
               <p className="mt-0.5 text-right text-xs text-slate-500 dark:text-slate-400">
-                {meta ? meta.description : "כאן ניתן להוסיף פריטים לרשימה הקיימת במערכת"}
+                {getPresetSheetDescription(meta)}
               </p>
             </div>
           </div>
         </header>
 
-        {/* Body */}
         <div className="flex-1 overflow-y-auto px-6 py-5">
-          {form === "Exercise" && <ExerciseForm objectId={id} closeSheet={onCloseSheet} />}
-          {form === "muscleGroup" && <MuscleGroupForm objectId={id} closeSheet={onCloseSheet} />}
-          {form === "cardioWorkouts" && (
-            <CardioWorkoutForm objectId={id} closeSheet={onCloseSheet} />
-          )}
-          {form === "exercisesMethods" && (
-            <ExerciseMethodsForm objectId={id} closeSheet={onCloseSheet} />
-          )}
-          {isFoodGroup && <MenuItemForm objectId={id} closeSheet={onCloseSheet} foodGroup={form} />}
-          {form === "lessonGroups" && <LessonGroupForm objectId={id} closeSheet={onCloseSheet} />}
+          {renderPresetForm(form, id, onCloseSheet)}
         </div>
       </DialogContent>
     </Dialog>
