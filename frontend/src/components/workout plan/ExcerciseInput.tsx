@@ -1,24 +1,8 @@
-/**
- * ExcerciseInput — exercise cards inside a muscle group.
- *
- * Renders a 2-column grid of exercise cards (drag-sortable) plus an
- * AddWorkoutPlanCard at the end. Each card has:
- *   - Exercise name combobox
- *   - Optional video / thumbnail preview
- *   - Training method combobox + clear
- *   - Rest time input (seconds)
- *   - Sets editor (SetsContainer)
- *   - Video link input
- *   - Delete button (top-left)
- *
- * Form-state hooks are kept exactly as before — only the visuals were
- * refreshed to match the rest of the redesigned admin panel.
- */
 import React, { useMemo, useRef, useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { IExercisePresetItem, IExercise } from "@/interfaces/IWorkoutPlan";
 import { WorkoutSchemaType } from "@/schemas/workoutPlanSchema";
-import SetsContainer, { defaultSet } from "./SetsContainer";
+import SetsContainer from "./SetsContainer";
 import { AddWorkoutPlanCard } from "./AddWorkoutPlanCard";
 import DeleteModal from "../Alerts/DeleteModal";
 import ComboBox from "../ui/combo-box";
@@ -36,6 +20,7 @@ import {
   getYouTubeThumbnail,
 } from "@/lib/utils";
 import { FaXmark } from "react-icons/fa6";
+import { defaultSet } from "./workoutPlanDefaults";
 
 interface ExcerciseInputProps {
   muscleGroup?: string;
@@ -47,6 +32,25 @@ const SectionLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     {children}
   </span>
 );
+
+type ExerciseReference = Partial<IExercisePresetItem & IExercise> & {
+  imageUrl?: string;
+};
+
+const getExerciseTip = (selectedTip: string | undefined, existingTip: string | undefined) => {
+  if (selectedTip) return selectedTip;
+  return existingTip || undefined;
+};
+
+const getExerciseReference = (exercise: IExercise): ExerciseReference => {
+  if (typeof exercise.exerciseId === "object") return exercise.exerciseId || {};
+  return exercise;
+};
+
+const getExercisePreviewImageUrl = (imageUrl: string | undefined, linkToVideo: string) => {
+  if (imageUrl) return buildPhotoUrl(imageUrl);
+  return getYouTubeThumbnail(linkToVideo);
+};
 
 const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath }) => {
   const { watch, getValues, resetField, control } = useFormContext<WorkoutSchemaType>();
@@ -76,7 +80,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
       name,
       linkToVideo,
       exerciseMethod,
-      tipFromTrainer: tipFromTrainer ? tipFromTrainer : exercise.tipFromTrainer || undefined,
+      tipFromTrainer: getExerciseTip(tipFromTrainer, exercise.tipFromTrainer),
     };
     resetField(`${parentPath}.exercises.${index}`, { defaultValue: newExercise });
   };
@@ -128,14 +132,13 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
           {({ item, index }) => (
             <SortableItem item={item} idKey="_id">
               {() => {
-                const exerciseRef =
-                  typeof item.exerciseId == "object" ? item.exerciseId || {} : item;
-                const { name, linkToVideo } = exerciseRef;
-                const imageUrl = (exerciseRef as { imageUrl?: string }).imageUrl;
+                const exerciseRef = getExerciseReference(item);
+                const name = exerciseRef.name || "";
+                const linkToVideo = exerciseRef.linkToVideo || "";
+                const { imageUrl } = exerciseRef;
 
                 return (
                   <div className="flex h-full flex-col gap-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm transition-shadow hover:shadow-md">
-                    {/* Top row: exercise name + delete */}
                     <div className="flex items-start justify-between gap-3">
                       <FormField
                         name={`${parentPath}.exercises.${index}.name`}
@@ -164,29 +167,17 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                       </button>
                     </div>
 
-                    {/* Video thumbnail (optional) */}
                     {linkToVideo && (
                       <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800">
                         <img
                           className="aspect-video w-full object-cover"
-                          src={
-                            imageUrl ? buildPhotoUrl(imageUrl) : getYouTubeThumbnail(linkToVideo)
-                          }
+                          src={getExercisePreviewImageUrl(imageUrl, linkToVideo)}
                           alt={name}
                           loading="lazy"
                         />
                       </div>
                     )}
 
-                    {/*
-                     * Method + rest time.
-                     * Each FormItem gets `min-w-0` so the ComboBox text
-                     * (which can be long, e.g. "Pyramid Training") can
-                     * truncate inside the grid column instead of pushing
-                     * into the neighbouring "rest time" cell.
-                     * The rest-time number input is capped at w-24 so the
-                     * 60-second value never wraps and stays compact.
-                     */}
                     <div className="grid grid-cols-[1fr_auto] gap-3 items-start">
                       <FormItem className="space-y-1 min-w-0">
                         <SectionLabel>שיטת אימון</SectionLabel>
@@ -233,7 +224,6 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                       />
                     </div>
 
-                    {/* Sets */}
                     <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-800/40 p-3">
                       <div className="mb-2">
                         <SectionLabel>סטים</SectionLabel>
@@ -244,7 +234,6 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
                       />
                     </div>
 
-                    {/* Video link */}
                     <FormField
                       control={control}
                       name={`${parentPath}.exercises.${index}.linkToVideo`}

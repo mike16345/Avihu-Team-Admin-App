@@ -1,11 +1,3 @@
-/**
- * WorkoutPlans — matches the original DesignPreview layout:
- *  - One sticky pill-tab bar at the top with the three sections, no
- *    separate "page header" card.
- *  - Workouts: drag-sortable list of WorkoutPlanContainer cards + a
- *    dashed "הוסף אימון" CTA at the bottom.
- *  - Cardio + Tips: rendered as in the original.
- */
 import { useRef, useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { toast } from "sonner";
@@ -54,7 +46,7 @@ const WorkoutPlans = () => {
 
   const onConfirmDeleteWorkout = () => {
     if (workoutIndex.current == null) return;
-    removeWorkoutPlan(workoutIndex.current!);
+    removeWorkoutPlan(workoutIndex.current);
     workoutIndex.current = null;
     toast.success("אימון נמחק בהצלחה!");
   };

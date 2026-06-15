@@ -1,9 +1,3 @@
-/**
- * CardioWeekWrapper — one week (out of up to 4) of complex cardio plans.
- *
- * Visual refresh: collapsible card with a sky-pill header for the week, list
- * of workouts as nested rounded-xl cards, and a dashed "הוסף אימון" CTA.
- */
 import React, { useState } from "react";
 import CardioExercise from "./CardioExercise";
 import { toast } from "sonner";
@@ -17,6 +11,26 @@ interface CardioWeekWrapperProps {
   onDeleteWeek: () => void;
   weekName: string;
 }
+
+const getToggleButtonClassName = (isOpen: boolean) => {
+  if (isOpen) return "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300";
+  return "border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800";
+};
+
+const getToggleAriaLabel = (isOpen: boolean) => {
+  if (isOpen) return "סגור";
+  return "פתח";
+};
+
+const getNextOpenWorkout = (isOpen: boolean, workoutId: string) => {
+  if (isOpen) return null;
+  return workoutId;
+};
+
+const getToggleIcon = (isOpen: boolean) => {
+  if (isOpen) return FaChevronUp;
+  return FaChevronDown;
+};
 
 const CardioWeekWrapper: React.FC<CardioWeekWrapperProps> = ({
   parentPath,
@@ -33,6 +47,7 @@ const CardioWeekWrapper: React.FC<CardioWeekWrapperProps> = ({
 
   const [isOpen, setIsOpen] = useState(false);
   const [openWorkout, setOpenWorkout] = useState<string | null>(null);
+  const WeekToggleIcon = getToggleIcon(isOpen);
 
   const addExercise = () => {
     const previous = workouts[workouts.length - 1] as unknown as
@@ -64,7 +79,6 @@ const CardioWeekWrapper: React.FC<CardioWeekWrapperProps> = ({
       onOpenChange={setIsOpen}
       className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 font-heebo shadow-sm"
     >
-      {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 px-4 py-3">
         <span className="inline-flex items-center rounded-full bg-sky-50 dark:bg-sky-950/40 px-3 py-1 text-xs font-bold text-sky-700 dark:text-sky-300">
           {weekName}
@@ -73,14 +87,12 @@ const CardioWeekWrapper: React.FC<CardioWeekWrapperProps> = ({
           <button
             type="button"
             onClick={() => setIsOpen((s) => !s)}
-            className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
+            className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${getToggleButtonClassName(
               isOpen
-                ? "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300"
-                : "border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
-            }`}
-            aria-label={isOpen ? "סגור" : "פתח"}
+            )}`}
+            aria-label={getToggleAriaLabel(isOpen)}
           >
-            {isOpen ? <FaChevronUp size={10} /> : <FaChevronDown size={10} />}
+            <WeekToggleIcon size={10} />
           </button>
           <button
             type="button"
@@ -96,6 +108,8 @@ const CardioWeekWrapper: React.FC<CardioWeekWrapperProps> = ({
       <CollapsibleContent className="space-y-3 p-4">
         {workouts.map((workout, i) => {
           const open = openWorkout === workout.id;
+          const WorkoutToggleIcon = getToggleIcon(open);
+
           return (
             <div
               key={workout.id}
@@ -108,15 +122,13 @@ const CardioWeekWrapper: React.FC<CardioWeekWrapperProps> = ({
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => setOpenWorkout(open ? null : workout.id)}
-                    className={`flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${
+                    onClick={() => setOpenWorkout(getNextOpenWorkout(open, workout.id))}
+                    className={`flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${getToggleButtonClassName(
                       open
-                        ? "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300"
-                        : "border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
-                    }`}
-                    aria-label={open ? "סגור" : "פתח"}
+                    )}`}
+                    aria-label={getToggleAriaLabel(open)}
                   >
-                    {open ? <FaChevronUp size={9} /> : <FaChevronDown size={9} />}
+                    <WorkoutToggleIcon size={9} />
                   </button>
                   <button
                     type="button"

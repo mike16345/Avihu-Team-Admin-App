@@ -1,12 +1,3 @@
-/**
- * WorkoutPlanContainer — matches the DesignPreview WorkoutCard:
- *  - rounded-2xl card with blue-200 border + shadow when open
- *  - 9×9 chevron toggle (blue-100 active background)
- *  - rounded input for the workout name
- *  - inline meta count
- *  - delete button on the far left
- *  - body has slate-50/30 wash + dashed "הוסף קבוצת שריר" CTA
- */
 import React, { useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { FaChevronDown, FaChevronUp, FaTrash, FaPlus } from "react-icons/fa6";
@@ -23,6 +14,53 @@ interface WorkoutContainerProps {
   onDeleteWorkout: (index: number) => void;
 }
 
+const MUSCLE_DOT_COLOR: Record<string, string> = {
+  חזה: "bg-rose-500",
+  גב: "bg-emerald-500",
+  כתפיים: "bg-amber-500",
+  "יד קדמית": "bg-blue-500",
+  "יד אחורית": "bg-indigo-500",
+  ביצפס: "bg-blue-500",
+  טריצפס: "bg-indigo-500",
+  רגליים: "bg-violet-500",
+  ישבן: "bg-fuchsia-500",
+  תאומים: "bg-teal-500",
+  טרפזים: "bg-cyan-500",
+  אמות: "bg-sky-500",
+  בטן: "bg-orange-500",
+};
+
+const getMuscleDotClassName = (group?: string) => {
+  if (group && MUSCLE_DOT_COLOR[group]) return MUSCLE_DOT_COLOR[group];
+  return "bg-slate-400";
+};
+
+const getWorkoutCardClassName = (isOpen: boolean) => {
+  if (isOpen) return "border-blue-200 shadow-md";
+  return "border-slate-200 dark:border-slate-800";
+};
+
+const getToggleButtonClassName = (isOpen: boolean) => {
+  if (isOpen) return "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300";
+  return "border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800";
+};
+
+const getToggleAriaLabel = (isOpen: boolean) => {
+  if (isOpen) return "סגור אימון";
+  return "פתח אימון";
+};
+
+const getWorkoutNameInputSize = (value: string) => {
+  const minChars = 14;
+  const maxChars = 28;
+  return Math.min(maxChars, Math.max(minChars, value.length + 1));
+};
+
+const getToggleIcon = (isOpen: boolean) => {
+  if (isOpen) return FaChevronUp;
+  return FaChevronDown;
+};
+
 const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({ parentPath, onDeleteWorkout }) => {
   const { control, watch } = useFormContext<WorkoutSchemaType>();
   const workoutIndex = Number(parentPath.split(".")[1]);
@@ -35,33 +73,8 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({ parentPath, onD
   const [isOpen, setIsOpen] = useState(false);
   const muscleGroups = (watch(`${parentPath}.muscleGroups`) as IMuscleGroupWorkouts[]) ?? [];
   const totalExercises = muscleGroups.reduce((s, g) => s + (g.exercises?.length ?? 0), 0);
-
-  /**
-   * Muscle-group dot palette — used as a SMALL color cue inside an
-   * otherwise uniform chip. The previous design painted each chip in
-   * a different background color (rose / emerald / amber / blue / …)
-   * which read like a rainbow on the workout list. Per Avihu:
-   * keep the muscle identification, drop the visual noise.
-   *
-   * Now every chip is the same neutral slate pill; only a 6px dot
-   * carries the per-muscle hue.
-   */
-  const MUSCLE_DOT_COLOR: Record<string, string> = {
-    חזה: "bg-rose-500",
-    גב: "bg-emerald-500",
-    כתפיים: "bg-amber-500",
-    "יד קדמית": "bg-blue-500",
-    "יד אחורית": "bg-indigo-500",
-    ביצפס: "bg-blue-500",
-    טריצפס: "bg-indigo-500",
-    רגליים: "bg-violet-500",
-    ישבן: "bg-fuchsia-500",
-    תאומים: "bg-teal-500",
-    טרפזים: "bg-cyan-500",
-    אמות: "bg-sky-500",
-    בטן: "bg-orange-500",
-  };
-  const dotFor = (g?: string) => (g && MUSCLE_DOT_COLOR[g]) || "bg-slate-400";
+  const hasMuscleGroups = muscleGroups.length > 0;
+  const ToggleIcon = getToggleIcon(isOpen);
 
   const handleAddMuscleGroup = () => {
     const newMuscleGroup: IMuscleGroupWorkouts = {
@@ -75,13 +88,10 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({ parentPath, onD
   return (
     <div
       dir="rtl"
-      className={`overflow-hidden rounded-2xl border bg-white dark:bg-slate-900 shadow-sm transition-all ${
-        isOpen ? "border-blue-200 shadow-md" : "border-slate-200 dark:border-slate-800"
-      } font-heebo`}
+      className={`overflow-hidden rounded-2xl border bg-white dark:bg-slate-900 shadow-sm transition-all ${getWorkoutCardClassName(
+        isOpen
+      )} font-heebo`}
     >
-      {/* Clicking anywhere on the header row toggles the workout open/closed,
-          EXCEPT on the interactive children (name input, delete button) —
-          they stop propagation so they keep their own behaviour. */}
       <div
         role="button"
         tabIndex={0}
@@ -101,28 +111,20 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({ parentPath, onD
             e.stopPropagation();
             setIsOpen((s) => !s);
           }}
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-colors ${
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-colors ${getToggleButtonClassName(
             isOpen
-              ? "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300"
-              : "border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
-          }`}
-          aria-label={isOpen ? "סגור אימון" : "פתח אימון"}
+          )}`}
+          aria-label={getToggleAriaLabel(isOpen)}
         >
-          {isOpen ? <FaChevronUp size={11} /> : <FaChevronDown size={11} />}
+          <ToggleIcon size={11} />
         </button>
 
         <FormField
           name={`${parentPath}.planName`}
           control={control}
           render={({ field }) => {
-            // Auto-size: input grows leftwards as the user types more. The
-            // `size` attribute controls the rendered width in characters;
-            // we clamp it to [minChars, maxChars] so it never collapses
-            // away or eats the whole row.
             const v = (field.value as string) || "";
-            const minChars = 14;
-            const maxChars = 28;
-            const size = Math.min(maxChars, Math.max(minChars, v.length + 1));
+            const size = getWorkoutNameInputSize(v);
             return (
               <FormItem className="shrink-0">
                 <input
@@ -139,38 +141,34 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({ parentPath, onD
           }}
         />
 
-        {/* Muscle group chips — uniform neutral pills with a small
-            color dot per muscle. Quiet, professional, scannable. */}
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
-          {muscleGroups.length === 0 ? (
+          {!hasMuscleGroups && (
             <span className="text-xs text-slate-400 dark:text-slate-500">
               אין קבוצות שריר עדיין
             </span>
-          ) : (
+          )}
+          {hasMuscleGroups &&
             muscleGroups.map((mg, i) => (
               <span
                 key={mg._id || i}
                 className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-slate-700 dark:text-slate-200"
               >
                 <span
-                  className={`inline-block h-1.5 w-1.5 shrink-0 rounded-full ${dotFor(
+                  className={`inline-block h-1.5 w-1.5 shrink-0 rounded-full ${getMuscleDotClassName(
                     mg.muscleGroup
                   )}`}
                   aria-hidden
                 />
                 <span>{mg.muscleGroup || "קבוצה"}</span>
-                {mg.exercises?.length ? (
+                {Boolean(mg.exercises?.length) && (
                   <span className="rounded-md bg-slate-100 dark:bg-slate-800 px-1 text-[10px] font-bold text-slate-500 dark:text-slate-400">
                     {mg.exercises.length}
                   </span>
-                ) : null}
+                )}
               </span>
-            ))
-          )}
+            ))}
         </div>
 
-        {/* Unified count badge — single brand-tinted pill, replaces
-            the "3 קבוצות · 8 תרגילים" plain-text duplication. */}
         <span className="hidden shrink-0 items-center gap-1.5 rounded-full border border-blue-100/60 dark:border-blue-900/40 bg-blue-50/60 dark:bg-blue-950/30 px-2.5 py-1 text-[11px] font-bold text-blue-700 dark:text-blue-300 md:inline-flex">
           <span>{muscleGroups.length}</span>
           <span className="opacity-60">·</span>

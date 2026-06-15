@@ -1,10 +1,3 @@
-/**
- * WorkoutTabs — redesigned pill-style tabs for the workout plan editor.
- *
- * Three sections: אימונים (workouts), אירובי (cardio), דגשים (tips).
- * Matches the rest of the admin redesign — Heebo, slate-200/80 borders,
- * blue-600 active pill, rounded-2xl card wrapping the tab list.
- */
 import { useState } from "react";
 import { FaDumbbell, FaPersonRunning, FaClipboardCheck } from "react-icons/fa6";
 
@@ -22,6 +15,16 @@ const TABS: { id: TabKey; label: string; icon: React.ReactNode }[] = [
   { id: "tips", label: "דגשים", icon: <FaClipboardCheck size={13} /> },
 ];
 
+const getTabButtonClassName = (active: boolean) => {
+  if (active) return "bg-blue-600 text-white shadow-sm";
+  return "text-slate-600 dark:text-slate-300 hover:bg-slate-100";
+};
+
+const getTabIconClassName = (active: boolean) => {
+  if (active) return "text-white";
+  return "text-slate-500 dark:text-slate-400";
+};
+
 const WorkoutTabs: React.FC<WorkoutTabsProps> = ({ workoutPlan, cardioPlan, tips }) => {
   const [tab, setTab] = useState<TabKey>("workout");
 
@@ -35,15 +38,11 @@ const WorkoutTabs: React.FC<WorkoutTabsProps> = ({ workoutPlan, cardioPlan, tips
               key={t.id}
               type="button"
               onClick={() => setTab(t.id)}
-              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all ${
+              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all ${getTabButtonClassName(
                 active
-                  ? "bg-blue-600 text-white shadow-sm"
-                  : "text-slate-600 dark:text-slate-300 hover:bg-slate-100"
-              }`}
+              )}`}
             >
-              <span className={active ? "text-white" : "text-slate-500 dark:text-slate-400"}>
-                {t.icon}
-              </span>
+              <span className={getTabIconClassName(active)}>{t.icon}</span>
               <span>{t.label}</span>
             </button>
           );
