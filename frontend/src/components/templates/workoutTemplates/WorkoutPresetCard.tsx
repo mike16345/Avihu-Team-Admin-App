@@ -1,12 +1,3 @@
-/**
- * WorkoutPresetCard — single card in the WorkoutPresetGrid.
- *
- * Displays the trainer-tagged meta-data (level, goal, workouts/week,
- * duration) plus an optional note preview. Falls back gracefully when
- * a preset has no meta tagged yet (older records before this feature).
- *
- * Pure presentation — does not mutate the preset data.
- */
 import React from "react";
 import { IWorkoutPlanPreset } from "@/interfaces/IWorkoutPlan";
 import {
@@ -38,11 +29,24 @@ interface WorkoutPresetCardProps {
   onDelete: (id: string) => void;
 }
 
+const getWorkoutsPerWeek = (preset: IWorkoutPlanPreset) => {
+  if (typeof preset.workoutsPerWeek === "number") return preset.workoutsPerWeek;
+  return 0;
+};
+
+const getMuscleFocusClassName = (muscle: string) => {
+  if (muscle === "full-body") {
+    return "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-300";
+  }
+
+  return "border-indigo-200 bg-indigo-50 text-indigo-700 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-300";
+};
+
+const getPresetSubtitle = (level: string | undefined, goal: string | undefined) =>
+  [level, goal].filter(Boolean).join(" · ");
+
 const WorkoutPresetCard: React.FC<WorkoutPresetCardProps> = ({ preset, onOpen, onDelete }) => {
-  // Only show the trainer-tagged value — no fallback to the implicit
-  // count of workoutPlans. If the trainer didn't tag the frequency,
-  // the badge is omitted entirely (filters treat it as un-tagged too).
-  const workoutsPerWeek = typeof preset.workoutsPerWeek === "number" ? preset.workoutsPerWeek : 0;
+  const workoutsPerWeek = getWorkoutsPerWeek(preset);
   const duration = preset.durationMinutes;
   const lvlTone = levelTone(preset.level);
   const lvlLabel = levelLabel(preset.level);
@@ -54,15 +58,16 @@ const WorkoutPresetCard: React.FC<WorkoutPresetCardProps> = ({ preset, onOpen, o
   const muscleFocus = preset.muscleFocus ?? [];
   const eqLabel = equipmentLabel(preset.equipment);
   const eqTone = equipmentTone(preset.equipment);
+  const presetSubtitle = getPresetSubtitle(lvlLabel, goLabel);
+  const hasPresetSubtitle = Boolean(presetSubtitle);
+  const hasEmptyMeta = workoutsPerWeek === 0 && !duration && !lvlLabel && !goLabel;
 
   return (
     <div
       dir="rtl"
       onClick={() => preset._id && onOpen(preset._id)}
-      className="group relative flex cursor-pointer flex-col gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-md"
-      style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
+      className="group relative flex cursor-pointer flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-5 font-heebo shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-700"
     >
-      {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-start gap-3 min-w-0 flex-1">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-300 ring-1 ring-blue-200/60 dark:ring-blue-900/40">
@@ -72,16 +77,12 @@ const WorkoutPresetCard: React.FC<WorkoutPresetCardProps> = ({ preset, onOpen, o
             <h3 className="truncate text-base font-bold text-slate-900 dark:text-slate-100">
               {preset.name || "ללא שם"}
             </h3>
-            {(lvlLabel || goLabel) && (
-              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                {[lvlLabel, goLabel].filter(Boolean).join(" · ")}
-              </p>
+            {hasPresetSubtitle && (
+              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{presetSubtitle}</p>
             )}
           </div>
         </div>
         <div className="flex items-center gap-1">
-          {/* Star is always visible — primary surfacing affordance,
-              shouldn't hide on hover like the destructive actions. */}
           <FavoriteStar presetId={preset._id} />
           <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
             <button
@@ -110,7 +111,6 @@ const WorkoutPresetCard: React.FC<WorkoutPresetCardProps> = ({ preset, onOpen, o
         </div>
       </div>
 
-      {/* Stat chips row — only show what was tagged */}
       <div className="flex flex-wrap gap-1.5">
         {workoutsPerWeek > 0 && (
           <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-2.5 py-1 text-[11px] font-bold text-slate-700 dark:text-slate-200">
@@ -150,20 +150,16 @@ const WorkoutPresetCard: React.FC<WorkoutPresetCardProps> = ({ preset, onOpen, o
         )}
       </div>
 
-      {/* Muscle focus chips */}
       {muscleFocus.length > 0 && (
         <div className="flex flex-wrap items-center gap-1.5">
           <FaPersonRays size={10} className="text-slate-400" />
           {muscleFocus.map((m) => {
-            const isFullBody = m === "full-body";
             return (
               <span
                 key={m}
-                className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold ${
-                  isFullBody
-                    ? "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-300"
-                    : "border-indigo-200 bg-indigo-50 text-indigo-700 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-300"
-                }`}
+                className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold ${getMuscleFocusClassName(
+                  m
+                )}`}
               >
                 {muscleFocusLabel(m)}
               </span>
@@ -172,7 +168,6 @@ const WorkoutPresetCard: React.FC<WorkoutPresetCardProps> = ({ preset, onOpen, o
         </div>
       )}
 
-      {/* Note preview */}
       {hasNote && (
         <div className="flex gap-2 rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 p-2.5">
           <FaNoteSticky size={11} className="mt-0.5 shrink-0 text-amber-500" />
@@ -180,7 +175,6 @@ const WorkoutPresetCard: React.FC<WorkoutPresetCardProps> = ({ preset, onOpen, o
         </div>
       )}
 
-      {/* Limitations preview */}
       {hasLimitations && (
         <div className="flex gap-2 rounded-lg border border-rose-100 dark:border-rose-900/40 bg-rose-50/40 dark:bg-rose-950/20 p-2.5">
           <span className="mt-0.5 shrink-0 text-rose-500 text-xs font-bold">⚠</span>
@@ -190,14 +184,12 @@ const WorkoutPresetCard: React.FC<WorkoutPresetCardProps> = ({ preset, onOpen, o
         </div>
       )}
 
-      {/* Empty-meta hint — encourages tagging */}
-      {workoutsPerWeek === 0 && !duration && !lvlLabel && !goLabel && (
+      {hasEmptyMeta && (
         <p className="text-[11px] text-slate-400 italic">
           לא הוגדרו מאפיינים — פתח לעריכה והוסף תדירות, רמה, ודגש
         </p>
       )}
 
-      {/* Footer hint */}
       <div className="mt-auto flex items-center justify-end gap-1 pt-1 text-[10px] font-semibold text-slate-300 dark:text-slate-600 transition-colors group-hover:text-blue-500">
         <span>פתח לעריכה</span>
         <FaArrowLeft size={9} className="transition-transform group-hover:-translate-x-0.5" />

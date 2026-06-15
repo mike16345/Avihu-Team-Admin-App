@@ -1,14 +1,3 @@
-/**
- * ExerciseDetailDialog — in-modal exercise preview.
- *
- * Opened from the ExercisePresetGrid card. Shows:
- *   - Embedded YouTube player (or uploaded image fallback)
- *   - Exercise name
- *   - Muscle group + training method badges
- *   - Trainer tip / emphasis (`tipFromTrainer`)
- *
- * Keeps the user inside the app — no external tabs.
- */
 import React, { useMemo } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { IExercisePresetItem } from "@/interfaces/IWorkoutPlan";
@@ -22,21 +11,15 @@ interface ExerciseDetailDialogProps {
   onEdit?: (id: string) => void;
 }
 
-/**
- * Convert any YouTube URL (watch, shortened, or embed) to a clean
- * embed URL we can drop into an <iframe>. Returns null if we can't
- * recognise the format.
- */
 const toYouTubeEmbed = (url: string): string | null => {
   if (!url) return null;
   try {
     const parsed = new URL(url);
-    // youtu.be/<id>
     if (parsed.hostname.includes("youtu.be")) {
       const id = parsed.pathname.slice(1).split("/")[0];
       if (id) return `https://www.youtube.com/embed/${id}`;
     }
-    // youtube.com/watch?v=<id>
+
     if (parsed.hostname.includes("youtube.com")) {
       if (parsed.pathname === "/watch") {
         const id = parsed.searchParams.get("v");
@@ -49,9 +32,48 @@ const toYouTubeEmbed = (url: string): string | null => {
       }
     }
   } catch {
-    /* fall through */
+    return null;
   }
   return null;
+};
+
+const renderExerciseMedia = ({
+  embedUrl,
+  fallbackImage,
+  exerciseName,
+}: {
+  embedUrl: string | null;
+  fallbackImage: string | null;
+  exerciseName: string;
+}) => {
+  if (embedUrl) {
+    return (
+      <div className="relative aspect-video w-full">
+        <iframe
+          src={embedUrl}
+          title={exerciseName}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          className="absolute inset-0 h-full w-full"
+        />
+      </div>
+    );
+  }
+
+  if (fallbackImage) {
+    return (
+      <img src={fallbackImage} alt={exerciseName} className="aspect-video w-full object-cover" />
+    );
+  }
+
+  return (
+    <div className="flex aspect-video w-full items-center justify-center text-slate-500">
+      <div className="flex flex-col items-center gap-2">
+        <FaDumbbell size={36} />
+        <span className="text-xs">אין סרטון זמין</span>
+      </div>
+    </div>
+  );
 };
 
 const ExerciseDetailDialog: React.FC<ExerciseDetailDialogProps> = ({
@@ -73,10 +95,8 @@ const ExerciseDetailDialog: React.FC<ExerciseDetailDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         dir="rtl"
-        className="max-w-3xl max-h-[90vh] overflow-hidden p-0 gap-0 rounded-2xl flex flex-col"
-        style={{ fontFamily: "Rubik, Heebo, system-ui, sans-serif" }}
+        className="flex max-h-[90vh] max-w-3xl flex-col overflow-hidden rounded-2xl p-0 gap-0 font-heebo"
       >
-        {/* Header */}
         <header className="flex items-start gap-3 border-b border-slate-100 dark:border-slate-800 px-6 py-4">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-300 ring-1 ring-blue-200/60">
             <FaDumbbell size={15} />
@@ -100,44 +120,17 @@ const ExerciseDetailDialog: React.FC<ExerciseDetailDialogProps> = ({
           </div>
         </header>
 
-        {/* Body */}
         <div className="flex-1 overflow-y-auto">
-          {/* Video / image */}
           <div className="bg-slate-900">
-            {embedUrl ? (
-              <div className="relative w-full aspect-video">
-                <iframe
-                  src={embedUrl}
-                  title={exercise.name}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="absolute inset-0 h-full w-full"
-                />
-              </div>
-            ) : fallbackImage ? (
-              <img
-                src={fallbackImage}
-                alt={exercise.name}
-                className="aspect-video w-full object-cover"
-              />
-            ) : (
-              <div className="flex aspect-video w-full items-center justify-center text-slate-500">
-                <div className="flex flex-col items-center gap-2">
-                  <FaDumbbell size={36} />
-                  <span className="text-xs">אין סרטון זמין</span>
-                </div>
-              </div>
-            )}
+            {renderExerciseMedia({
+              embedUrl,
+              fallbackImage,
+              exerciseName: exercise.name,
+            })}
           </div>
 
-          {/* Details */}
           <div className="flex flex-col gap-4 p-6">
-            {/* Trainer tip — stored as HTML by the rich-text editor, so
-                we render it via dangerouslySetInnerHTML inside a styled
-                `prose` container. The content is internal (trainer-owned),
-                not user-submitted, so XSS exposure is limited to what the
-                trainer types themselves. */}
-            {exercise.tipFromTrainer ? (
+            {exercise.tipFromTrainer && (
               <section className="rounded-xl border border-amber-200 dark:border-amber-900/40 bg-amber-50/60 dark:bg-amber-950/20 p-4">
                 <h3 className="mb-2 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300">
                   <FaCircleInfo size={11} />
@@ -148,7 +141,8 @@ const ExerciseDetailDialog: React.FC<ExerciseDetailDialogProps> = ({
                   dangerouslySetInnerHTML={{ __html: exercise.tipFromTrainer }}
                 />
               </section>
-            ) : (
+            )}
+            {!exercise.tipFromTrainer && (
               <p className="text-center text-xs text-slate-400">
                 אין דגשים מיוחדים מהמאמן עבור התרגיל הזה.
               </p>
@@ -156,7 +150,6 @@ const ExerciseDetailDialog: React.FC<ExerciseDetailDialogProps> = ({
           </div>
         </div>
 
-        {/* Footer actions */}
         <footer className="flex items-center justify-end gap-2 border-t border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/60 px-6 py-3">
           {exercise.linkToVideo && (
             <a

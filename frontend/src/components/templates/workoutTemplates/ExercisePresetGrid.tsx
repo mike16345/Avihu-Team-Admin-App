@@ -1,13 +1,3 @@
-/**
- * ExercisePresetGrid — card-based replacement for the old
- * ExercisePresetsTable. Each exercise becomes a card with:
- *   - Video thumbnail on the right (RTL) — clickable to play in a new tab
- *   - Exercise name + muscle-group badge + method badge
- *   - Hover action buttons: edit + delete
- *
- * Data is read-only — same `IExercisePresetItem` shape coming out of
- * the existing API. No schema changes.
- */
 import React, { ReactNode, useMemo, useState } from "react";
 import { IExercisePresetItem } from "@/interfaces/IWorkoutPlan";
 import { buildPhotoUrl, getYouTubeThumbnail } from "@/lib/utils";
@@ -29,6 +19,11 @@ interface ExercisePresetGridProps {
   actionButton?: ReactNode;
 }
 
+const getExerciseCountLabel = (count: number) => {
+  if (count === 1) return "תרגיל";
+  return "תרגילים";
+};
+
 const ExercisePresetGrid: React.FC<ExercisePresetGridProps> = ({
   data,
   onView,
@@ -37,7 +32,6 @@ const ExercisePresetGrid: React.FC<ExercisePresetGridProps> = ({
 }) => {
   const [search, setSearch] = useState("");
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
-  // Modal preview state — opens when the card or play button is clicked
   const [previewExercise, setPreviewExercise] = useState<IExercisePresetItem | null>(null);
 
   const muscleGroupOptions = useMemo(() => {
@@ -57,12 +51,6 @@ const ExercisePresetGrid: React.FC<ExercisePresetGridProps> = ({
     });
   }, [data, search, selectedGroups]);
 
-  /**
-   * Choose the best thumbnail for an exercise card:
-   *   1. Explicit `imageUrl` uploaded by the trainer
-   *   2. YouTube auto-thumbnail derived from `linkToVideo`
-   *   3. Nothing (we'll render a placeholder)
-   */
   const getThumbnail = (item: IExercisePresetItem): string | null => {
     if (item.imageUrl) return buildPhotoUrl(item.imageUrl);
     if (item.linkToVideo) {
@@ -71,14 +59,11 @@ const ExercisePresetGrid: React.FC<ExercisePresetGridProps> = ({
     }
     return null;
   };
+  const hasNoResults = filtered.length === 0;
+  const exerciseCountLabel = getExerciseCountLabel(filtered.length);
 
   return (
-    <div
-      dir="rtl"
-      className="flex flex-col gap-4"
-      style={{ fontFamily: "Rubik, Heebo, system-ui, sans-serif" }}
-    >
-      {/* Toolbar */}
+    <div dir="rtl" className="flex flex-col gap-4 font-heebo">
       <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 shadow-sm">
         <div className="relative min-w-[220px] flex-1 max-w-[360px]">
           <FaMagnifyingGlass
@@ -106,22 +91,22 @@ const ExercisePresetGrid: React.FC<ExercisePresetGridProps> = ({
         )}
 
         <span className="text-xs text-slate-500 dark:text-slate-400">
-          {filtered.length} {filtered.length === 1 ? "תרגיל" : "תרגילים"}
+          {filtered.length} {exerciseCountLabel}
           {filtered.length !== data.length && ` מתוך ${data.length}`}
         </span>
 
         <div className="ms-auto">{actionButton}</div>
       </div>
 
-      {/* Grid */}
-      {filtered.length === 0 ? (
+      {hasNoResults && (
         <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/40 py-16 text-center">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white dark:bg-slate-800 text-slate-400 shadow-sm">
             <FaDumbbell size={20} />
           </div>
           <p className="text-base font-bold text-slate-700 dark:text-slate-200">לא נמצאו תרגילים</p>
         </div>
-      ) : (
+      )}
+      {!hasNoResults && (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filtered.map((item) => {
             const thumb = getThumbnail(item);
@@ -131,7 +116,6 @@ const ExercisePresetGrid: React.FC<ExercisePresetGridProps> = ({
                 onClick={() => setPreviewExercise(item)}
                 className="group flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-400 hover:shadow-md"
               >
-                {/* Thumbnail strip — clicking it opens the in-app preview */}
                 <div className="relative aspect-video w-full overflow-hidden bg-slate-900">
                   {thumb ? (
                     <img
@@ -145,7 +129,6 @@ const ExercisePresetGrid: React.FC<ExercisePresetGridProps> = ({
                       <FaDumbbell size={36} />
                     </div>
                   )}
-                  {/* Play button overlay — opens the in-app modal */}
                   <div
                     aria-hidden
                     className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity group-hover:opacity-100"
@@ -156,7 +139,6 @@ const ExercisePresetGrid: React.FC<ExercisePresetGridProps> = ({
                   </div>
                 </div>
 
-                {/* Body */}
                 <div className="flex flex-1 flex-col gap-2 p-3.5">
                   <h3 className="line-clamp-2 text-sm font-bold leading-tight text-slate-900 dark:text-slate-100">
                     {item.name}
@@ -174,9 +156,8 @@ const ExercisePresetGrid: React.FC<ExercisePresetGridProps> = ({
                     )}
                   </div>
 
-                  {/* Actions — stopPropagation so the card click doesn't fire too */}
                   <div className="mt-auto flex items-center justify-between gap-2 border-t border-slate-100 dark:border-slate-800 pt-2.5">
-                    {item.linkToVideo ? (
+                    {item.linkToVideo && (
                       <button
                         type="button"
                         onClick={(e) => {
@@ -188,9 +169,8 @@ const ExercisePresetGrid: React.FC<ExercisePresetGridProps> = ({
                         <FaVideo size={11} />
                         סרטון
                       </button>
-                    ) : (
-                      <span className="text-xs text-slate-400">ללא סרטון</span>
                     )}
+                    {!item.linkToVideo && <span className="text-xs text-slate-400">ללא סרטון</span>}
                     <div className="flex items-center gap-1">
                       <button
                         type="button"
@@ -223,7 +203,6 @@ const ExercisePresetGrid: React.FC<ExercisePresetGridProps> = ({
         </div>
       )}
 
-      {/* In-app preview modal — opens when a card / סרטון link is clicked */}
       <ExerciseDetailDialog
         open={!!previewExercise}
         onOpenChange={(open) => !open && setPreviewExercise(null)}

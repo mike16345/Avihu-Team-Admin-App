@@ -1,17 +1,3 @@
-/**
- * TemplateTabs — root tab navigation for the "תבניות אימון" page.
- *
- * Visual refresh ONLY. The data layer is unchanged:
- *  - QueryKey lookups (apiHooks map) keep the same QueryKeys enum
- *  - sheetForm values ("workoutPlan" / "Exercise" / "exercisesMethods" /
- *    "cardioWorkouts") are forwarded verbatim to PresetSheet
- *  - Navigation paths /presets/workoutPlans/:id stay identical
- *
- * For the "תבניות אימונים" tab we use a richer card grid
- * (WorkoutPresetGrid) instead of the plain PresetTable, so trainers
- * can scan workouts-per-week and duration at a glance. The other
- * three tabs use the existing PresetTable (slightly restyled).
- */
 import React, { useEffect, useState } from "react";
 import ExercisePresetGrid from "./workoutTemplates/ExercisePresetGrid";
 import SimplePresetGrid from "./workoutTemplates/SimplePresetGrid";
@@ -44,6 +30,54 @@ interface TemplateTabsProps {
   tabs: ITabs;
 }
 
+const createTemplateTabsTestId = (value?: string) =>
+  (value ?? "tab")
+    .replace(/[^a-z0-9]+/gi, "-")
+    .replace(/^-|-$/g, "")
+    .toLowerCase();
+
+const getTabButtonClassName = (active: boolean) => {
+  if (active) return "brand-gradient brand-gradient-hover text-white shadow-md shadow-blue-500/25";
+
+  return "text-slate-500 dark:text-slate-400 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-950/40 dark:hover:text-blue-300";
+};
+
+const getSimpleGridCopy = (activeTab: string) => {
+  if (activeTab === "cardioWorkouts") {
+    return {
+      variant: "cardio" as const,
+      searchPlaceholder: "חיפוש לפי שם תרגיל אירובי…",
+      emptyLabel: "לא נמצאו תרגילי אירובי",
+    };
+  }
+
+  return {
+    variant: "method" as const,
+    searchPlaceholder: "חיפוש לפי שם שיטה…",
+    emptyLabel: "לא נמצאו שיטות אימון",
+  };
+};
+
+const TemplateAddButton = ({
+  testId,
+  label,
+  onClick,
+}: {
+  testId: string;
+  label: string;
+  onClick: () => void;
+}) => (
+  <button
+    type="button"
+    data-testid={testId}
+    onClick={onClick}
+    className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-sm transition-all hover:bg-blue-700 hover:shadow"
+  >
+    <FaPlus size={11} />
+    {label}
+  </button>
+);
+
 const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
   const navigate = useNavigate();
   const { getMenuItems } = useMenuItemApi();
@@ -54,18 +88,11 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
   const { getAllExerciseMethods } = useExerciseMethodApi();
   const { getAllCardioWrkouts } = useCardioWorkoutApi();
 
-  // Active tab — defaults to the first one in the headers list
   const [activeTab, setActiveTab] = useState<string>(tabs.tabHeaders[0].value);
   const [selectedForm, setSelectedForm] = useState<string | undefined>();
   const [selectedObjectId, setSelectedObjectId] = useState<string>();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [queryKey, setQueryKey] = useState<string>(tabs.tabHeaders[0].queryKey);
-
-  const createTemplateTabsTestId = (value?: string) =>
-    (value ?? "tab")
-      .replace(/[^a-z0-9]+/gi, "-")
-      .replace(/^-|-$/g, "")
-      .toLowerCase();
 
   const getTabQueryKey = (tabValue: string) =>
     tabs.tabHeaders.find((tabHeader) => tabHeader.value === tabValue)?.queryKey ?? tabValue;
@@ -74,7 +101,6 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
     [key: string]: (params: any) => Promise<ApiResponse<any[]>>;
   };
 
-  // Data contract — same shape as before, do not modify.
   const apiHooks: ApiHooks = {
     [`carbs`]: getMenuItems,
     [`protein`]: getMenuItems,
@@ -153,21 +179,72 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
   if (apiData.isError && apiData?.error?.status !== 404)
     return <ErrorPage message={apiData.error.message} />;
 
-  // Current active tab's content config
   const activeContent = tabs.tabContent.find((t) => t.value === activeTab);
+
+  const renderActiveContent = () => {
+    if (!activeContent) return null;
+
+    const actionButton = (
+      <TemplateAddButton
+        testId={`template-add-${createTemplateTabsTestId(activeContent.value)}`}
+        label={activeContent.btnPrompt}
+        onClick={() => handleAddNew(activeContent.sheetForm)}
+      />
+    );
+
+    if (activeTab === "WorkoutPlans") {
+      return (
+        <WorkoutPresetGrid
+          data={(apiData.data?.data as (IWorkoutPlanPreset & { _id?: string })[]) || []}
+          onOpen={(id) => startEdit(id, activeContent.sheetForm)}
+          onDelete={(id) => deleteItem(id, activeContent.deleteFunc)}
+          onAddNew={() => handleAddNew(activeContent.sheetForm)}
+          addLabel={activeContent.btnPrompt}
+        />
+      );
+    }
+
+    if (activeTab === "dietPlanPresets") {
+      return (
+        <DietPlanPresetGrid
+          data={(apiData.data?.data as (IDietPlanPreset & { _id?: string })[]) || []}
+          onOpen={(id) => startEdit(id, activeContent.sheetForm)}
+          onDelete={(id) => deleteItem(id, activeContent.deleteFunc)}
+          onAddNew={() => handleAddNew(activeContent.sheetForm)}
+          addLabel={activeContent.btnPrompt}
+        />
+      );
+    }
+
+    if (activeTab === "exercises") {
+      return (
+        <ExercisePresetGrid
+          data={(apiData.data?.data as IExercisePresetItem[]) || []}
+          onView={(id) => startEdit(id, activeContent.sheetForm)}
+          onDelete={(id) => deleteItem(id, activeContent.deleteFunc)}
+          actionButton={actionButton}
+        />
+      );
+    }
+
+    const simpleGridCopy = getSimpleGridCopy(activeTab);
+
+    return (
+      <SimplePresetGrid
+        data={apiData.data?.data || []}
+        variant={simpleGridCopy.variant}
+        onView={(id) => startEdit(id, activeContent.sheetForm)}
+        onDelete={(id) => deleteItem(id, activeContent.deleteFunc)}
+        searchPlaceholder={simpleGridCopy.searchPlaceholder}
+        emptyLabel={simpleGridCopy.emptyLabel}
+        actionButton={actionButton}
+      />
+    );
+  };
 
   return (
     <>
-      <div
-        data-testid="template-tabs"
-        dir="rtl"
-        className="flex flex-col gap-4"
-        style={{ fontFamily: "Assistant, Heebo, system-ui, sans-serif" }}
-      >
-        {/* Tab strip — matches FormPresetsPage style: pill segmented
-            bar with the active tab in solid brand blue (white text +
-            shadow) and inactive tabs as quiet text that lights up on
-            hover. Same alternating-color pattern Avihu liked. */}
+      <div data-testid="template-tabs" dir="rtl" className="flex flex-col gap-4 font-heebo">
         <div className="inline-flex w-fit items-center gap-1 rounded-2xl border border-blue-100/60 dark:border-blue-900/40 bg-white dark:bg-slate-900 p-1 shadow-sm">
           {tabs.tabHeaders.map((tab) => {
             const active = activeTab === tab.value;
@@ -177,11 +254,9 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
                 type="button"
                 data-testid={`template-tab-${createTemplateTabsTestId(tab.queryKey)}`}
                 onClick={() => handleTabChange(tab.value)}
-                className={`rounded-xl px-4 py-2 text-sm font-bold transition-all duration-150 ${
+                className={`rounded-xl px-4 py-2 text-sm font-bold transition-all duration-150 ${getTabButtonClassName(
                   active
-                    ? "brand-gradient brand-gradient-hover text-white shadow-md shadow-blue-500/25"
-                    : "text-slate-500 dark:text-slate-400 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-950/40 dark:hover:text-blue-300"
-                }`}
+                )}`}
               >
                 {tab.name}
               </button>
@@ -189,77 +264,9 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
           })}
         </div>
 
-        {/* Content */}
         {apiData.isLoading && <TemplateTabsSkeleton />}
 
-        {!apiData.isLoading && activeContent && (
-          <div>
-            {activeTab === "WorkoutPlans" ? (
-              // Smart card grid for workout-plan presets
-              <WorkoutPresetGrid
-                data={(apiData.data?.data as (IWorkoutPlanPreset & { _id?: string })[]) || []}
-                onOpen={(id) => startEdit(id, activeContent.sheetForm)}
-                onDelete={(id) => deleteItem(id, activeContent.deleteFunc)}
-                onAddNew={() => handleAddNew(activeContent.sheetForm)}
-                addLabel={activeContent.btnPrompt}
-              />
-            ) : activeTab === "dietPlanPresets" ? (
-              // Card grid for diet-plan presets with meta tagging
-              <DietPlanPresetGrid
-                data={(apiData.data?.data as (IDietPlanPreset & { _id?: string })[]) || []}
-                onOpen={(id) => startEdit(id, activeContent.sheetForm)}
-                onDelete={(id) => deleteItem(id, activeContent.deleteFunc)}
-                onAddNew={() => handleAddNew(activeContent.sheetForm)}
-                addLabel={activeContent.btnPrompt}
-              />
-            ) : activeTab === "exercises" ? (
-              <ExercisePresetGrid
-                data={(apiData.data?.data as IExercisePresetItem[]) || []}
-                onView={(id) => startEdit(id, activeContent.sheetForm)}
-                onDelete={(id) => deleteItem(id, activeContent.deleteFunc)}
-                actionButton={
-                  <button
-                    type="button"
-                    data-testid={`template-add-${createTemplateTabsTestId(activeContent.value)}`}
-                    onClick={() => handleAddNew(activeContent.sheetForm)}
-                    className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-sm transition-all hover:bg-blue-700 hover:shadow"
-                  >
-                    <FaPlus size={11} />
-                    {activeContent.btnPrompt}
-                  </button>
-                }
-              />
-            ) : (
-              // Methods + cardio — both name-only collections.
-              // Card grid in the same visual language as the rest of the panel.
-              <SimplePresetGrid
-                data={apiData.data?.data || []}
-                variant={activeTab === "cardioWorkouts" ? "cardio" : "method"}
-                onView={(id) => startEdit(id, activeContent.sheetForm)}
-                onDelete={(id) => deleteItem(id, activeContent.deleteFunc)}
-                searchPlaceholder={
-                  activeTab === "cardioWorkouts"
-                    ? "חיפוש לפי שם תרגיל אירובי…"
-                    : "חיפוש לפי שם שיטה…"
-                }
-                emptyLabel={
-                  activeTab === "cardioWorkouts" ? "לא נמצאו תרגילי אירובי" : "לא נמצאו שיטות אימון"
-                }
-                actionButton={
-                  <button
-                    type="button"
-                    data-testid={`template-add-${createTemplateTabsTestId(activeContent.value)}`}
-                    onClick={() => handleAddNew(activeContent.sheetForm)}
-                    className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-sm transition-all hover:bg-blue-700 hover:shadow"
-                  >
-                    <FaPlus size={11} />
-                    {activeContent.btnPrompt}
-                  </button>
-                }
-              />
-            )}
-          </div>
-        )}
+        {!apiData.isLoading && activeContent && <div>{renderActiveContent()}</div>}
       </div>
 
       <PresetSheet
