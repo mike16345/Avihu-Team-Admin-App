@@ -39,13 +39,70 @@ Data-heavy UI favors cached server state through TanStack Query, with only small
 - Keep component files in PascalCase when the file exports a component. Utility files, schema files, and feature-local key files commonly use camelCase.
 - Prefer enums/constants for repeated identifiers such as query keys, routes, and shared error messages.
 - Use `className` + Tailwind utilities for styling. Shared class composition should go through `cn()` from `src/lib/utils.ts`.
+- Do not use inline styles except for rare cases where Tailwind cannot express the behavior cleanly. Any inline style must be justified by the surrounding implementation.
 - Comments are sparse. Add comments only when logic is genuinely non-obvious; do not annotate routine React or TypeScript code.
 - `@typescript-eslint/no-explicit-any` is disabled, but existing typed interfaces and DTOs show a preference for real types when available. Treat `any` as a last resort, not the default.
-- Keep JSX declarative and easy to scan. Avoid nested ternaries in JSX; use explicit boolean renders for conditional sections and move label, icon, message, status, and class-name decisions into named helpers such as `getSaveLabel`, `getStatusTone`, or `getCardClassName`.
-- Use strict equality and explicit branches in new or edited code. Avoid boolean/object expressions such as `condition && object` when a named branch is clearer.
-- During refactors, preserve external behavior unless the task explicitly asks for a behavior change. Route paths, navigation targets, query keys, mutation invalidation keys, API endpoints/params, form field names, validation schemas, Hebrew copy, and RTL attributes should remain unchanged.
+- Prefer guard clauses over deeply nested `if` blocks.
+- Do not use multi-level nested ternary expressions. This is especially important in JSX. Extract the logic into a named variable, helper function, or switch statement instead.
+- Keep control blocks and function declarations visually separated with blank lines where it improves readability.
+- Leave a blank line before meaningful `return` statements unless the function is a very small one-liner.
+- Keep files modular and easy to scan. Component, hook, and utility files should generally stay under 350-400 lines.
+- If a file is growing past 350-400 lines, extract focused helpers, hooks, constants, or child components before adding more logic.
+- Repeated helper logic should not be copied across files. Move broadly reusable helpers into a general utility file.
+- If helpers are only relevant to one feature or page, create a feature-specific utility file instead, such as `dietPlanUtils.ts`, `userCheckInUtils.ts`, or another clearly named helper module.
+- Do not create generic utility files for logic that is only used by one feature unless the feature already has several related helpers.
 
-## 4. State & Data Flow
+4. React File Structure
+
+React files should be organized in a predictable order so components are easy to scan and refactor.
+
+Preferred order:
+
+Imports
+Interfaces and types
+Only define interfaces/types in the component file when they are local to that file.
+Prefer dedicated files under src/interfaces, src/types, or a feature-local types file for shared contracts.
+File-level constants
+File-level helper functions
+Component declaration
+Export
+
+Inside a React component, use this order:
+
+Global hooks, routing hooks, store hooks, theme/style hooks, and other independent constants
+useState hooks
+useRef hooks
+Derived values and memoized values
+Callback handlers
+useEffect hooks
+Empty-dependency mount effects should come first.
+Other effects should follow in dependency/behavior order.
+Guard-clause returns for loading, error, or missing state
+Main JSX return
+
+Group related hooks together with blank lines. For example:
+
+const navigate = useNavigate();
+const queryClient = useQueryClient();
+
+const [isOpen, setIsOpen] = useState(false);
+const [search, setSearch] = useState("");
+const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+
+const containerRef = useRef<HTMLDivElement | null>(null);
+const inputRef = useRef<HTMLInputElement | null>(null);
+
+React readability rules:
+
+Avoid large JSX blocks with embedded business logic.
+Avoid nested ternaries in JSX. Use named helpers, early returns, lookup maps, or switch statements.
+Avoid building complex arrays or objects directly inside JSX.
+Prefer clear local names such as isLoading, isEmpty, filteredUsers, and handleSubmit.
+Prefer guard clauses before the main JSX return for loading, error, permission, or missing-data states.
+Keep component render logic focused on presentation. Move repeated transformation logic into helpers, hooks, or feature utilities.
+Do not split components only for the sake of splitting. Extract a child component when it has a clear responsibility, repeated usage, or makes the parent materially easier to read.
+
+## 5. State & Data Flow
 
 - Treat TanStack Query as the default source of truth for server state. The app bootstraps a persisted query client in `src/main.tsx`.
 - Query cache is intentionally long-lived.
@@ -59,7 +116,7 @@ Data-heavy UI favors cached server state through TanStack Query, with only small
 - Use Zustand only for small shared client state that is not naturally server-cached. Do not move server collections into Zustand when TanStack Query already owns them.
 - For forms, the existing pattern is `react-hook-form` + `zodResolver` + schema modules in `src/schemas`.
 
-## 5. Testing Standards
+## 6. Testing Standards
 
 - There is no established unit/integration test suite pattern in this repository yet.
 - Validate frontend changes with the available local project checks before opening or updating a PR.
@@ -73,7 +130,7 @@ Data-heavy UI favors cached server state through TanStack Query, with only small
 - For Playwright JSON fixtures, keep endpoint variants together in `tests/e2e/mocks/fixtures/<name>.json` and select them with `jsonFixtureRoute({ fixture, variant })` instead of creating one JSON file per test case.
 - For repeated Playwright setup actions such as admin login, extract a shared helper under `tests/e2e/utils` and reuse it across specs instead of redefining the same flow in each file.
 
-## 6. API & Backend Conventions
+## 7. API & Backend Conventions
 
 - All HTTP transport goes through the shared axios wrapper in `src/API/api.ts`, which adds the `X-Api-Key` header and routes errors through `handleAxiosError`.
 - Use the shared helpers `fetchData`, `sendData`, `updateItem`, `patchItem`, and `deleteItem` instead of creating ad hoc axios calls.
@@ -83,7 +140,7 @@ Data-heavy UI favors cached server state through TanStack Query, with only small
 - Normalize API results as close to the resource wrapper as possible so UI hooks consume domain data, not transport details.
 - Surface user-facing request failures through toasts and shared error messages rather than silent failures.
 
-## 7. UI/UX Conventions
+## 8. UI/UX Conventions
 
 - UI is built primarily with Tailwind utility classes and `src/components/ui` primitives configured through `components.json` (shadcn-style structure).
 - Global styling is minimal and centralized in `src/index.css` and `src/App.css`. Prefer local Tailwind classes over adding new global CSS.
@@ -98,7 +155,7 @@ Data-heavy UI favors cached server state through TanStack Query, with only small
 - Match the surrounding language and text direction in any edited screen. Do not introduce English UI copy into a Hebrew admin flow unless the surrounding feature already uses English.
 - Use shared date helpers (`DateUtils`, `date-fns`, existing locale usage) instead of inventing inconsistent date formatting in each component.
 
-## 8. Performance & Optimization Patterns
+## 9. Performance & Optimization Patterns
 
 - Prefer cache tuning over repeated refetching. Existing hooks use shared stale-time constants and a persisted query cache.
 - Invalidate the smallest practical query scope after writes, but follow the existing key structure of the feature you are editing.
@@ -108,7 +165,7 @@ Data-heavy UI favors cached server state through TanStack Query, with only small
 - Avoid redundant network calls by centralizing retry rules.
 - Avoid redundant network calls by reusing query keys instead of creating one-off cache entries.
 
-## 9. Anti-Patterns Observed
+## 10. Anti-Patterns Observed
 
 - Do not introduce direct axios usage in pages or domain components when the request can live in the shared API layer.
 - Do not use large global stores for server-owned data. The codebase intentionally relies on TanStack Query for that responsibility.
@@ -118,7 +175,7 @@ Data-heavy UI favors cached server state through TanStack Query, with only small
 - Do not add new global CSS for styling that can be expressed with existing Tailwind utilities and theme variables.
 - Do not refactor legacy query-key patterns (`QueryKeys` enum vs feature-local key factories) unless the change is scoped enough to keep the entire touched feature internally consistent.
 
-## 10. Agent Operating Rules
+## 11. Agent Operating Rules
 
 - Treat this file as the canonical operating guide for repository conventions.
 - Treat this file as a living document.
@@ -137,3 +194,4 @@ Data-heavy UI favors cached server state through TanStack Query, with only small
 - When patching a feature that already has an established query-key scheme, error-handling pattern, or localization style, keep the patch consistent with that feature even if another part of the repo uses a newer variant.
 - If you introduce a new reusable pattern, apply it consistently within the touched feature and then update `Agents.md` once the pattern is repeated broadly enough to count as repository guidance.
 - When a route-level task requires touching shared files, keep the shared-file edits limited to the behavior needed by that route and avoid opportunistic broad refactors. Record or explain the reason for touching shared files in the relevant task summary or tracker.
+- Claude, Codex, and any other coding agent must read `Agents.md` before changing code. If a separate agent-specific file exists, such as `Claude.md`, it must defer to `Agents.md` rather than replacing it.
