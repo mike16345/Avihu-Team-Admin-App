@@ -30,10 +30,9 @@ const getWorkoutPresetErrorMessage = (error: any) =>
   error?.data?.message || parseErrorFromObject(error?.data || "");
 
 const normalizeSimpleCardioPlan = (values: WorkoutPresetSchemaType) => {
-  const simpleCardioPlan =
-    values.cardio.type == "simple" && (values.cardio.plan as ISimpleCardioType);
+  if (values.cardio.type !== "simple") return values;
 
-  if (!simpleCardioPlan) return values;
+  const simpleCardioPlan = values.cardio.plan as ISimpleCardioType;
 
   return {
     ...values,
@@ -69,8 +68,25 @@ export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ childr
   const { data: workoutPlanPresets } = useWorkoutPlanPresetsQuery();
   const { data } = useWorkoutPlanPresetQuery(id);
 
+  const [selectedPreset, setSelectedPreset] = useState("");
+  const [openPresetPicker, setOpenPresetPicker] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<ValidationErrorEntry[]>([]);
+
   const onMutateSuccess = () => {
     navigation(MainRoutes.WORKOUT_PLANS_PRESETS);
+  };
+
+  const openWorkoutPresetPicker = () => {
+    setOpenPresetPicker(true);
+  };
+
+  const clearValidationErrors = () => {
+    setValidationErrors([]);
+  };
+
+  const handleValidationDialogOpenChange = (open: boolean) => {
+    if (open) return;
+    clearValidationErrors();
   };
 
   const onError = (error: any) => {
@@ -95,10 +111,6 @@ export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ childr
     },
     onError,
   });
-
-  const [selectedPreset, setSelectedPreset] = useState("");
-  const [openPresetPicker, setOpenPresetPicker] = useState(false);
-  const [validationErrors, setValidationErrors] = useState<ValidationErrorEntry[]>([]);
 
   const presetList = useMemo(() => workoutPlanPresets?.data || [], [workoutPlanPresets?.data]);
 
@@ -156,7 +168,7 @@ export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ childr
             <WorkoutPresetIdentityCard
               control={form.control}
               selectedPreset={selectedPreset}
-              onOpenPresetPicker={() => setOpenPresetPicker(true)}
+              onOpenPresetPicker={openWorkoutPresetPicker}
             />
 
             <PresetMetaPanel />
@@ -176,7 +188,7 @@ export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ childr
 
       <ValidationErrorsDialog
         open={validationErrors.length > 0}
-        onOpenChange={(open) => !open && setValidationErrors([])}
+        onOpenChange={handleValidationDialogOpenChange}
         errors={validationErrors}
         intro="יש לתקן את השדות הבאים לפני שמירת התבנית"
       />
