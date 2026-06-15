@@ -1,9 +1,7 @@
 import { DirtyFormProvider } from "@/context/useFormContext";
 import { FC, PropsWithChildren } from "react";
 
-interface DietPlanWrapperProps extends PropsWithChildren {}
-
-const DietPlanWrapper: FC<DietPlanWrapperProps> = ({ children }) => {
+const DietPlanWrapper: FC<PropsWithChildren> = ({ children }) => {
   return <DirtyFormProvider>{children}</DirtyFormProvider>;
 };
 

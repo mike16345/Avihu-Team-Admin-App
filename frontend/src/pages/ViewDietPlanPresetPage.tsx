@@ -33,7 +33,7 @@ export const ViewDietPlanPresetPage = () => {
   const { id } = useParams();
   const queryClient = useQueryClient();
 
-  const [isCreateMode, setIsCreateMode] = useState(true);
+  const [isEditingPreset, setIsEditingPreset] = useState(false);
 
   const presetNameForm = useForm<PresetNameSchemaType>({
     resolver: zodResolver(presetNameSchema),
@@ -73,7 +73,7 @@ export const ViewDietPlanPresetPage = () => {
 
   const handleSavePreset = (values: PresetNameSchemaType) => {
     const dietPlan = getPlanValues();
-    const dietPlanToAdd = {
+    const dietPlanPreset = {
       ...dietPlan,
       name: values.name,
     };
@@ -85,13 +85,13 @@ export const ViewDietPlanPresetPage = () => {
       return;
     }
 
-    if (!isCreateMode && !!id) {
-      const cleanedDietPlan = removeIdsAndVersions(dietPlanToAdd);
-
+    if (isEditingPreset && id) {
+      const cleanedDietPlan = removeIdsAndVersions(dietPlanPreset);
       updatePreset.mutate({ id, cleanedDietPlan });
-    } else {
-      createPreset.mutate(dietPlanToAdd);
+      return;
     }
+
+    createPreset.mutate(dietPlanPreset);
   };
 
   useEffect(() => {
@@ -100,7 +100,7 @@ export const ViewDietPlanPresetPage = () => {
     const normalized = normalizeDietPlan(data.data);
     reset(normalized);
     resetPlanForm(normalized);
-    setIsCreateMode(false);
+    setIsEditingPreset(true);
     setIsDirty(false);
   }, [data, reset, resetPlanForm, setIsDirty]);
 

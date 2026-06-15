@@ -15,6 +15,15 @@ const TABS: { id: TabKey; label: string; icon: React.ReactNode }[] = [
   { id: "supplements", label: "תוספים", icon: <FaPlus size={13} /> },
 ];
 
+const getTabButtonClassName = (isActive: boolean) => {
+  const baseClassName =
+    "inline-flex items-center gap-2 rounded-xl px-4 py-1.5 text-sm font-semibold transition-colors";
+
+  if (isActive) return `${baseClassName} bg-emerald-600 text-white shadow-sm`;
+
+  return `${baseClassName} text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800`;
+};
+
 const DietplanTabs: React.FC<DietplanTabsProps> = ({ dietplan, tips, supplements }) => {
   const [active, setActive] = useState<TabKey>("dietplan");
 
@@ -28,11 +37,7 @@ const DietplanTabs: React.FC<DietplanTabsProps> = ({ dietplan, tips, supplements
               key={t.id}
               type="button"
               onClick={() => setActive(t.id)}
-              className={`inline-flex items-center gap-2 rounded-xl px-4 py-1.5 text-sm font-semibold transition-colors ${
-                isActive
-                  ? "bg-emerald-600 text-white shadow-sm"
-                  : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
-              }`}
+              className={getTabButtonClassName(isActive)}
             >
               {t.icon}
               <span>{t.label}</span>

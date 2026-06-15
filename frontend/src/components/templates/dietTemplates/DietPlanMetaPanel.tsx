@@ -55,6 +55,76 @@ const calculateTotalCalories = ({
       freeCalories
   );
 
+const getBuilderOptionLabel = ({
+  firstName,
+  lastName,
+  email,
+}: {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+}) => {
+  const name = `${firstName || ""} ${lastName || ""}`.trim();
+  const fallback = email || "אני";
+  if (name) return `${name} (אני)`;
+  return `${fallback} (אני)`;
+};
+
+const getToggledValue = <T,>(active: boolean, value: T) => {
+  if (active) return undefined;
+  return value;
+};
+
+const getGoalButtonClassName = (active: boolean, value: DietGoal) => {
+  const tone = dietGoalTone(value);
+
+  if (active) {
+    return `rounded-full border px-2.5 py-1 text-[11px] font-bold transition ${tone?.bg} ${tone?.text} ${tone?.border}`;
+  }
+
+  return "rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-bold text-slate-600 transition hover:border-blue-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300";
+};
+
+const getBuilderButtonClassName = (active: boolean) => {
+  if (active) {
+    return "rounded-full border border-transparent bg-blue-600 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm transition";
+  }
+
+  return "rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-bold text-slate-600 transition hover:border-blue-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300";
+};
+
+const getRestrictionButtonClassName = (active: boolean) => {
+  if (active) {
+    return "rounded-full border border-rose-200 bg-rose-50 px-2.5 py-1 text-[11px] font-bold text-rose-700 transition dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-300";
+  }
+
+  return "rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-bold text-slate-600 transition hover:border-rose-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300";
+};
+
+const getRestrictionValues = (
+  restrictions: DietaryRestriction[],
+  restriction: DietaryRestriction
+) => {
+  if (restrictions.includes(restriction)) {
+    return restrictions.filter((item) => item !== restriction);
+  }
+
+  return [...restrictions, restriction];
+};
+
+const getFreeCaloriesValue = (value: string) => {
+  if (value.trim() === "") return 0;
+
+  const parsedValue = Number(value);
+  if (Number.isFinite(parsedValue)) return parsedValue;
+  return 0;
+};
+
+const getFreeCaloriesFormulaSuffix = (freeCalories: number) => {
+  if (!freeCalories) return "";
+  return ` + ${freeCalories}`;
+};
+
 const DietPlanMetaPanel: React.FC = () => {
   const form = useFormContext<MetaForm>();
   const { watch, setValue } = form;
@@ -94,11 +164,9 @@ const DietPlanMetaPanel: React.FC = () => {
   const builderOptions = React.useMemo(() => {
     const list: { value: string; label: string }[] = [];
     if (currentUser?._id) {
-      const name = `${currentUser.firstName || ""} ${currentUser.lastName || ""}`.trim();
-      const fallback = currentUser.email || "אני";
       list.push({
         value: currentUser._id,
-        label: name ? `${name} (אני)` : `${fallback} (אני)`,
+        label: getBuilderOptionLabel(currentUser),
       });
     }
     subTrainers.forEach((t) => {
@@ -110,15 +178,11 @@ const DietPlanMetaPanel: React.FC = () => {
   }, [currentUser, subTrainers]);
 
   const setFreeCalories = (v: string) => {
-    const n = v.trim() === "" ? 0 : Number(v);
-    setValue("freeCalories", Number.isFinite(n) ? (n as number) : 0, { shouldDirty: true });
+    setValue("freeCalories", getFreeCaloriesValue(v), { shouldDirty: true });
   };
 
   const toggleRestriction = (r: DietaryRestriction) => {
-    const next = restrictions.includes(r)
-      ? restrictions.filter((x) => x !== r)
-      : [...restrictions, r];
-    setValue("dietaryRestrictions", next, { shouldDirty: true });
+    setValue("dietaryRestrictions", getRestrictionValues(restrictions, r), { shouldDirty: true });
   };
 
   return (
@@ -149,20 +213,15 @@ const DietPlanMetaPanel: React.FC = () => {
           <Field label="מטרה" icon={<FaBullseye size={9} />}>
             <div className="flex flex-wrap gap-1.5">
               {dietGoalOptions.map((o) => {
-                const t = dietGoalTone(o.value);
                 const active = goal === o.value;
                 return (
                   <button
                     key={o.value}
                     type="button"
                     onClick={() =>
-                      setValue("goal", active ? undefined : o.value, { shouldDirty: true })
+                      setValue("goal", getToggledValue(active, o.value), { shouldDirty: true })
                     }
-                    className={`rounded-full border px-2.5 py-1 text-[11px] font-bold transition ${
-                      active
-                        ? `${t?.bg} ${t?.text} ${t?.border}`
-                        : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-blue-300"
-                    }`}
+                    className={getGoalButtonClassName(active, o.value)}
                   >
                     {o.label}
                   </button>
@@ -195,7 +254,7 @@ const DietPlanMetaPanel: React.FC = () => {
             </div>
             <div className="mt-1 text-[10px] text-slate-400 dark:text-slate-500" dir="ltr">
               {protein}×150 + {carbs}×120 + {fats}×100 + {veggies}×30
-              {freeCalories ? ` + ${freeCalories}` : ""}
+              {getFreeCaloriesFormulaSuffix(Number(freeCalories || 0))}
             </div>
           </Field>
 
@@ -209,15 +268,11 @@ const DietPlanMetaPanel: React.FC = () => {
                       key={b.value}
                       type="button"
                       onClick={() =>
-                        setValue("builtByTrainerId", active ? undefined : b.value, {
+                        setValue("builtByTrainerId", getToggledValue(active, b.value), {
                           shouldDirty: true,
                         })
                       }
-                      className={`rounded-full border px-2.5 py-1 text-[11px] font-bold transition ${
-                        active
-                          ? "border-transparent bg-blue-600 text-white shadow-sm"
-                          : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-blue-300"
-                      }`}
+                      className={getBuilderButtonClassName(active)}
                     >
                       {b.label}
                     </button>
@@ -266,11 +321,7 @@ const DietPlanMetaPanel: React.FC = () => {
                     key={o.value}
                     type="button"
                     onClick={() => toggleRestriction(o.value)}
-                    className={`rounded-full border px-2.5 py-1 text-[11px] font-bold transition ${
-                      active
-                        ? "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-300"
-                        : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-rose-300"
-                    }`}
+                    className={getRestrictionButtonClassName(active)}
                   >
                     {o.label}
                   </button>
