@@ -1,8 +1,3 @@
-/**
- * DietPlanMetaPanel — compact, 2-column meta tagging panel for diet
- * presets. Mirrors PresetMetaPanel's design language so the workout +
- * diet preset editors feel like one product.
- */
 import React, { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import { IDietPlan, DietGoal, DietaryRestriction, IMeal } from "@/interfaces/IDietPlan";
@@ -32,6 +27,104 @@ type MetaForm = IDietPlan & {
   builtByTrainerId?: string;
 };
 
+const CALORIES_PER_SERVING = {
+  protein: 150,
+  carbs: 120,
+  fats: 100,
+  veggies: 30,
+} as const;
+
+const calculateTotalCalories = ({
+  protein,
+  carbs,
+  fats,
+  veggies,
+  freeCalories,
+}: {
+  protein: number;
+  carbs: number;
+  fats: number;
+  veggies: number;
+  freeCalories: number;
+}) =>
+  Math.round(
+    protein * CALORIES_PER_SERVING.protein +
+      carbs * CALORIES_PER_SERVING.carbs +
+      fats * CALORIES_PER_SERVING.fats +
+      veggies * CALORIES_PER_SERVING.veggies +
+      freeCalories
+  );
+
+const getBuilderOptionLabel = ({
+  firstName,
+  lastName,
+  email,
+}: {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+}) => {
+  const name = `${firstName || ""} ${lastName || ""}`.trim();
+  const fallback = email || "אני";
+  if (name) return `${name} (אני)`;
+  return `${fallback} (אני)`;
+};
+
+const getToggledValue = <T,>(active: boolean, value: T) => {
+  if (active) return undefined;
+  return value;
+};
+
+const getGoalButtonClassName = (active: boolean, value: DietGoal) => {
+  const tone = dietGoalTone(value);
+
+  if (active) {
+    return `rounded-full border px-2.5 py-1 text-[11px] font-bold transition ${tone?.bg} ${tone?.text} ${tone?.border}`;
+  }
+
+  return "rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-bold text-slate-600 transition hover:border-blue-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300";
+};
+
+const getBuilderButtonClassName = (active: boolean) => {
+  if (active) {
+    return "rounded-full border border-transparent bg-blue-600 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm transition";
+  }
+
+  return "rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-bold text-slate-600 transition hover:border-blue-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300";
+};
+
+const getRestrictionButtonClassName = (active: boolean) => {
+  if (active) {
+    return "rounded-full border border-rose-200 bg-rose-50 px-2.5 py-1 text-[11px] font-bold text-rose-700 transition dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-300";
+  }
+
+  return "rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-bold text-slate-600 transition hover:border-rose-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300";
+};
+
+const getRestrictionValues = (
+  restrictions: DietaryRestriction[],
+  restriction: DietaryRestriction
+) => {
+  if (restrictions.includes(restriction)) {
+    return restrictions.filter((item) => item !== restriction);
+  }
+
+  return [...restrictions, restriction];
+};
+
+const getFreeCaloriesValue = (value: string) => {
+  if (value.trim() === "") return 0;
+
+  const parsedValue = Number(value);
+  if (Number.isFinite(parsedValue)) return parsedValue;
+  return 0;
+};
+
+const getFreeCaloriesFormulaSuffix = (freeCalories: number) => {
+  if (!freeCalories) return "";
+  return ` + ${freeCalories}`;
+};
+
 const DietPlanMetaPanel: React.FC = () => {
   const form = useFormContext<MetaForm>();
   const { watch, setValue } = form;
@@ -42,9 +135,6 @@ const DietPlanMetaPanel: React.FC = () => {
   const restrictions = watch("dietaryRestrictions") ?? [];
   const builtBy = watch("builtByTrainerId");
 
-  // Macros + veggies are derived — summed from all meals. The trainer
-  // can't edit these directly; they reflect whatever is built in the
-  // meals below so the tag stays in sync with reality.
   const sumServings = (key: "totalProtein" | "totalCarbs" | "totalFats" | "totalVeggies") =>
     meals.reduce((acc, m) => acc + Number(m?.[key]?.quantity ?? 0), 0);
   const protein = sumServings("totalProtein");
@@ -52,15 +142,14 @@ const DietPlanMetaPanel: React.FC = () => {
   const fats = sumServings("totalFats");
   const veggies = sumServings("totalVeggies");
 
-  // Total calories — auto-computed from the macros, veggies and the
-  // trainer-set free-calorie allowance, using the simple house rules:
-  //   protein × 150 + carbs × 120 + fats × 100 + veggies × 30 + free.
-  const totalCalories = Math.round(
-    protein * 150 + carbs * 120 + fats * 100 + veggies * 30 + Number(freeCalories || 0)
-  );
+  const totalCalories = calculateTotalCalories({
+    protein,
+    carbs,
+    fats,
+    veggies,
+    freeCalories: Number(freeCalories || 0),
+  });
 
-  // Push derived numbers back into the form so they're persisted with
-  // the preset for filtering on the listing page.
   useEffect(() => {
     setValue("proteinServings", protein || undefined, { shouldDirty: true });
     setValue("carbServings", carbs || undefined, { shouldDirty: true });
@@ -75,11 +164,9 @@ const DietPlanMetaPanel: React.FC = () => {
   const builderOptions = React.useMemo(() => {
     const list: { value: string; label: string }[] = [];
     if (currentUser?._id) {
-      const name = `${currentUser.firstName || ""} ${currentUser.lastName || ""}`.trim();
-      const fallback = currentUser.email || "אני";
       list.push({
         value: currentUser._id,
-        label: name ? `${name} (אני)` : `${fallback} (אני)`,
+        label: getBuilderOptionLabel(currentUser),
       });
     }
     subTrainers.forEach((t) => {
@@ -91,22 +178,17 @@ const DietPlanMetaPanel: React.FC = () => {
   }, [currentUser, subTrainers]);
 
   const setFreeCalories = (v: string) => {
-    const n = v.trim() === "" ? 0 : Number(v);
-    setValue("freeCalories", Number.isFinite(n) ? (n as number) : 0, { shouldDirty: true });
+    setValue("freeCalories", getFreeCaloriesValue(v), { shouldDirty: true });
   };
 
   const toggleRestriction = (r: DietaryRestriction) => {
-    const next = restrictions.includes(r)
-      ? restrictions.filter((x) => x !== r)
-      : [...restrictions, r];
-    setValue("dietaryRestrictions", next, { shouldDirty: true });
+    setValue("dietaryRestrictions", getRestrictionValues(restrictions, r), { shouldDirty: true });
   };
 
   return (
     <div
       dir="rtl"
-      className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm"
-      style={{ fontFamily: "Rubik, Heebo, system-ui, sans-serif" }}
+      className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 font-['Rubik','Heebo',system-ui,sans-serif] shadow-sm"
     >
       <div className="mb-3 flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
         <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-300">
@@ -121,7 +203,6 @@ const DietPlanMetaPanel: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-x-5 gap-y-3 md:grid-cols-2 md:divide-x md:divide-slate-100 md:dark:divide-slate-800 md:rtl:divide-x-reverse">
-        {/* RIGHT col: meal-count + goal + calories + builder */}
         <div className="flex flex-col gap-3 md:pl-5">
           <Field label="מספר ארוחות" icon={<FaUtensils size={9} />} hint="מחושב אוטומטית">
             <div className="flex h-9 w-fit min-w-[3rem] items-center justify-center rounded-xl bg-emerald-50 px-3 text-base font-bold tabular-nums text-emerald-700 ring-1 ring-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:ring-emerald-900/60">
@@ -132,20 +213,15 @@ const DietPlanMetaPanel: React.FC = () => {
           <Field label="מטרה" icon={<FaBullseye size={9} />}>
             <div className="flex flex-wrap gap-1.5">
               {dietGoalOptions.map((o) => {
-                const t = dietGoalTone(o.value);
                 const active = goal === o.value;
                 return (
                   <button
                     key={o.value}
                     type="button"
                     onClick={() =>
-                      setValue("goal", active ? undefined : o.value, { shouldDirty: true })
+                      setValue("goal", getToggledValue(active, o.value), { shouldDirty: true })
                     }
-                    className={`rounded-full border px-2.5 py-1 text-[11px] font-bold transition ${
-                      active
-                        ? `${t?.bg} ${t?.text} ${t?.border}`
-                        : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-blue-300"
-                    }`}
+                    className={getGoalButtonClassName(active, o.value)}
                   >
                     {o.label}
                   </button>
@@ -178,7 +254,7 @@ const DietPlanMetaPanel: React.FC = () => {
             </div>
             <div className="mt-1 text-[10px] text-slate-400 dark:text-slate-500" dir="ltr">
               {protein}×150 + {carbs}×120 + {fats}×100 + {veggies}×30
-              {freeCalories ? ` + ${freeCalories}` : ""}
+              {getFreeCaloriesFormulaSuffix(Number(freeCalories || 0))}
             </div>
           </Field>
 
@@ -192,15 +268,11 @@ const DietPlanMetaPanel: React.FC = () => {
                       key={b.value}
                       type="button"
                       onClick={() =>
-                        setValue("builtByTrainerId", active ? undefined : b.value, {
+                        setValue("builtByTrainerId", getToggledValue(active, b.value), {
                           shouldDirty: true,
                         })
                       }
-                      className={`rounded-full border px-2.5 py-1 text-[11px] font-bold transition ${
-                        active
-                          ? "border-transparent bg-blue-600 text-white shadow-sm"
-                          : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-blue-300"
-                      }`}
+                      className={getBuilderButtonClassName(active)}
                     >
                       {b.label}
                     </button>
@@ -211,7 +283,6 @@ const DietPlanMetaPanel: React.FC = () => {
           )}
         </div>
 
-        {/* LEFT col: macros + restrictions */}
         <div className="flex flex-col gap-3 md:pr-5">
           <Field
             label="מנות מאקרו"
@@ -250,11 +321,7 @@ const DietPlanMetaPanel: React.FC = () => {
                     key={o.value}
                     type="button"
                     onClick={() => toggleRestriction(o.value)}
-                    className={`rounded-full border px-2.5 py-1 text-[11px] font-bold transition ${
-                      active
-                        ? "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-300"
-                        : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-rose-300"
-                    }`}
+                    className={getRestrictionButtonClassName(active)}
                   >
                     {o.label}
                   </button>

@@ -105,11 +105,7 @@ const WorkoutPlanStatsStrip: React.FC = () => {
   })();
 
   return (
-    <div
-      dir="rtl"
-      style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
-      className="grid grid-cols-2 gap-3 md:grid-cols-4"
-    >
+    <div dir="rtl" className="grid grid-cols-2 gap-3 font-heebo md:grid-cols-4">
       <StatCard
         tone="purple"
         icon={<FaDumbbell size={16} />}

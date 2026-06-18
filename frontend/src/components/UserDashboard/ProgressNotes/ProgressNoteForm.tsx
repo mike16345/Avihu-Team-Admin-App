@@ -1,9 +1,3 @@
-/**
- * ProgressNoteForm — single-row layout
- *
- * All inputs (date, trainer, diet/workouts/cardio %) live on ONE horizontal
- * row as compact dropdowns/inputs. Content editor + save sit beneath.
- */
 import { useEffect, useMemo, useState } from "react";
 import {
   Form,
@@ -34,6 +28,12 @@ const progressOptions = [
   { name: "100%", value: "100" },
 ];
 
+const percentageFields = [
+  { name: "diet", label: "🥗 תזונה" },
+  { name: "workouts", label: "💪 אימונים" },
+  { name: "cardio", label: "🏃 אירובי" },
+] as const;
+
 const ProgressNoteForm = () => {
   const { id } = useParams();
   const { currentUser } = useUsersStore();
@@ -47,10 +47,6 @@ const ProgressNoteForm = () => {
     ? `${currentUser.firstName} ${currentUser.lastName}`
     : undefined;
 
-  // Trainer dropdown options — the logged-in trainer + every
-  // sub-trainer they manage. Stored as the *name* (string) so the
-  // note's `trainer` field stays human-readable for mobile + future
-  // reads, even if a sub-trainer is later removed from the team.
   const { data: subTrainers = [] } = useSubTrainersQuery();
   const trainerOptions = useMemo(() => {
     const list: { name: string; value: string }[] = [];
@@ -97,7 +93,10 @@ const ProgressNoteForm = () => {
     if (!progressNote) return setIsEdit(false);
     setIsEdit(true);
     reset(progressNote);
-  }, [progressNote]);
+  }, [progressNote, reset]);
+
+  const isSaving = addNote.isPending || updateNote.isPending;
+  const saveButtonLabel = isSaving ? "שומר…" : isEdit ? "שמור שינויים" : "שמור פתק";
 
   return (
     <Form {...progressNoteForm}>
@@ -106,7 +105,6 @@ const ProgressNoteForm = () => {
         className="flex w-full flex-col gap-3"
         dir="rtl"
       >
-        {/* All meta fields in one row */}
         <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
           <FormField
             control={progressNoteForm.control}
@@ -131,9 +129,6 @@ const ProgressNoteForm = () => {
               <FormItem className="space-y-1">
                 <FormLabel className="text-[11px] font-semibold text-slate-600">שם המאמן</FormLabel>
                 <FormControl>
-                  {/* Restricted to trainers with access (main trainer
-                      + every sub-trainer on the team). Free-text was
-                      a footgun — typos broke filtering and reporting. */}
                   <CustomSelect
                     items={trainerOptions}
                     selectedValue={field.value || ""}
@@ -144,64 +139,30 @@ const ProgressNoteForm = () => {
               </FormItem>
             )}
           />
-          <FormField
-            control={progressNoteForm.control}
-            name="diet"
-            render={({ field }) => (
-              <FormItem className="space-y-1">
-                <FormLabel className="text-[11px] font-semibold text-slate-600">🥗 תזונה</FormLabel>
-                <FormControl>
-                  <CustomSelect
-                    items={progressOptions}
-                    selectedValue={field.value?.toString()}
-                    onValueChange={(val) => field.onChange(+val)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={progressNoteForm.control}
-            name="workouts"
-            render={({ field }) => (
-              <FormItem className="space-y-1">
-                <FormLabel className="text-[11px] font-semibold text-slate-600">
-                  💪 אימונים
-                </FormLabel>
-                <FormControl>
-                  <CustomSelect
-                    items={progressOptions}
-                    selectedValue={field.value?.toString()}
-                    onValueChange={(val) => field.onChange(+val)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={progressNoteForm.control}
-            name="cardio"
-            render={({ field }) => (
-              <FormItem className="space-y-1">
-                <FormLabel className="text-[11px] font-semibold text-slate-600">
-                  🏃 אירובי
-                </FormLabel>
-                <FormControl>
-                  <CustomSelect
-                    items={progressOptions}
-                    selectedValue={field.value?.toString()}
-                    onValueChange={(val) => field.onChange(+val)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {percentageFields.map((percentageField) => (
+            <FormField
+              key={percentageField.name}
+              control={progressNoteForm.control}
+              name={percentageField.name}
+              render={({ field }) => (
+                <FormItem className="space-y-1">
+                  <FormLabel className="text-[11px] font-semibold text-slate-600">
+                    {percentageField.label}
+                  </FormLabel>
+                  <FormControl>
+                    <CustomSelect
+                      items={progressOptions}
+                      selectedValue={field.value?.toString()}
+                      onValueChange={(val) => field.onChange(+val)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ))}
         </div>
 
-        {/* Content */}
         <FormField
           control={progressNoteForm.control}
           name="content"
@@ -218,21 +179,16 @@ const ProgressNoteForm = () => {
           )}
         />
 
-        {/* Footer */}
         <div className="flex items-center justify-between gap-2 pt-1">
           <p className="text-[11px] text-slate-400">
             {isEdit ? "שינויים יישמרו רק אחרי לחיצה על שמור." : ""}
           </p>
           <button
             type="submit"
-            disabled={!isDirty || addNote.isPending || updateNote.isPending}
+            disabled={!isDirty || isSaving}
             className="inline-flex min-w-[140px] items-center justify-center gap-2 rounded-xl brand-gradient brand-gradient-hover px-5 py-2 text-sm font-bold text-white shadow-md shadow-blue-500/25 transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
           >
-            {addNote.isPending || updateNote.isPending
-              ? "שומר…"
-              : isEdit
-                ? "שמור שינויים"
-                : "שמור פתק"}
+            {saveButtonLabel}
           </button>
         </div>
       </form>

@@ -1,9 +1,3 @@
-/**
- * CardioWrapper — wraps the simple / complex cardio editor switcher.
- *
- * Visual refresh: segmented pill control instead of the radio group,
- * dashed "הוסף שבוע" CTA matching the rest of the editor.
- */
 import React, { useState } from "react";
 import FixedCardioContainer from "./FixedCardioContainer";
 import CardioWeekWrapper from "./CardioWeekWrapper";
@@ -19,6 +13,16 @@ const TYPE_OPTIONS: { id: CardioType; label: string }[] = [
   { id: "simple", label: "קבוע" },
   { id: "complex", label: "בחירה" },
 ];
+
+const getTypeButtonClassName = (active: boolean) => {
+  if (active) return "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300";
+  return "text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800";
+};
+
+const getDefaultCardioPlan = (type: CardioType) => {
+  if (type == "complex") return defaultComplexCardioOption;
+  return defaultSimpleCardioOption;
+};
 
 const CardioWrapper: React.FC = () => {
   const {
@@ -64,7 +68,7 @@ const CardioWrapper: React.FC = () => {
 
   const onCardioTypeChange = (type: CardioType) => {
     const isComplex = type == "complex";
-    const plan = isComplex ? defaultComplexCardioOption : defaultSimpleCardioOption;
+    const plan = getDefaultCardioPlan(type);
     if (isComplex) replace((plan as IComplexCardioType).weeks);
     setOpenModal(false);
     setValue("cardio.plan", plan, { shouldDirty: true });
@@ -72,12 +76,7 @@ const CardioWrapper: React.FC = () => {
   };
 
   return (
-    <div
-      dir="rtl"
-      style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
-      className="flex flex-col gap-5 pb-5"
-    >
-      {/* Type segmented control */}
+    <div dir="rtl" className="flex flex-col gap-5 pb-5 font-heebo">
       <div className="inline-flex w-fit items-center gap-1 rounded-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-1 shadow-sm">
         {TYPE_OPTIONS.map((opt) => {
           const active = cardioPlan.type === opt.id;
@@ -86,11 +85,9 @@ const CardioWrapper: React.FC = () => {
               key={opt.id}
               type="button"
               onClick={() => handleCardioTypeChange(opt.id)}
-              className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-colors ${
+              className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-colors ${getTypeButtonClassName(
                 active
-                  ? "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300"
-                  : "text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
-              }`}
+              )}`}
             >
               {opt.label}
             </button>

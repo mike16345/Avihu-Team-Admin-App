@@ -2,14 +2,14 @@ import useGetOneFormResponseQuery from "@/hooks/queries/formResponses/useGetOneF
 import { FormResponse } from "@/interfaces/IFormResponse";
 import { FC } from "react";
 import FormResponseBubble from "./FormResponseBubble";
+import { useGetUsersLatestResponse } from "@/hooks/queries/formResponses/useGetUsersLatestResponse";
 
 interface FormResponseBubbleWrapperProps {
   userId: string | undefined;
-  query: Partial<FormResponse>;
 }
 
-const FormResponseBubbleWrapper: FC<FormResponseBubbleWrapperProps> = ({ userId, query }) => {
-  const { data } = useGetOneFormResponseQuery({ userId, ...query });
+const FormResponseBubbleWrapper: FC<FormResponseBubbleWrapperProps> = ({ userId }) => {
+  const { data } = useGetUsersLatestResponse(userId);
   const responseId = data?.data?._id;
 
   return <FormResponseBubble responseId={responseId} formResponse={data?.data} />;

@@ -1,8 +1,3 @@
-/**
- * BlogList — grid of BlogCards with empty state + "load more" pagination.
- *
- * Pure presentation; consumes the same props it did before.
- */
 import React from "react";
 import { BlogCard } from "./BlogCard";
 import { IBlogResponse } from "@/interfaces/IBlog";
@@ -20,6 +15,11 @@ interface BlogListProps {
   fetchNextPage?: () => void | Promise<unknown>;
   isFetchingNextPage?: boolean;
 }
+
+const getLoadMoreLabel = (isFetchingNextPage: boolean | undefined) => {
+  if (isFetchingNextPage) return "טוען…";
+  return "טען עוד מאמרים";
+};
 
 const BlogList: React.FC<BlogListProps> = ({
   blogs,
@@ -46,10 +46,9 @@ const BlogList: React.FC<BlogListProps> = ({
     return (
       <div
         dir="rtl"
-        className="mt-6 flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 px-6 py-20 text-center"
-        style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
+        className="mt-6 flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-20 text-center font-heebo dark:border-slate-800 dark:bg-slate-800/40"
       >
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-slate-900 shadow-sm">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm dark:bg-slate-900">
           <FaNewspaper size={28} className="text-slate-300 dark:text-slate-600" />
         </div>
         <h3 className="text-base font-bold text-slate-700 dark:text-slate-200">אין מאמרים עדיין</h3>
@@ -63,8 +62,7 @@ const BlogList: React.FC<BlogListProps> = ({
   return (
     <div
       dir="rtl"
-      className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-      style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
+      className="grid grid-cols-1 gap-5 font-heebo sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
     >
       {blogs.map((blog) => (
         <BlogCard key={blog._id} blog={blog} onClick={() => handleBlogClick(blog)} />
@@ -77,7 +75,7 @@ const BlogList: React.FC<BlogListProps> = ({
             disabled={isFetchingNextPage}
             className="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition-all hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50/40 dark:hover:bg-blue-950/30 hover:text-blue-700 dark:hover:text-blue-300 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isFetchingNextPage ? "טוען…" : "טען עוד מאמרים"}
+            {getLoadMoreLabel(isFetchingNextPage)}
           </button>
         </div>
       )}

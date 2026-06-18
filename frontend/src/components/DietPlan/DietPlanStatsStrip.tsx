@@ -1,12 +1,3 @@
-/**
- * DietPlanStatsStrip — clean live summary shown above the diet-plan editor.
- *
- * Mirrors the workout-plan stats strip but with a green/emerald accent set,
- * since the diet section uses an emerald visual language across the app.
- *
- * Reads live form values via `useFormContext` so the numbers update as the
- * trainer edits — same pattern as WorkoutPlanStatsStrip.
- */
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { FaBowlFood, FaWeightScale, FaFire, FaClipboardCheck } from "react-icons/fa6";
@@ -59,12 +50,8 @@ const StatCard: React.FC<StatProps> = ({ icon, label, value, tone }) => {
   );
 };
 
-/**
- * Per-unit kcal values mirror DesignPreview's macrosPerUnit table — kept
- * here so the editor doesn't depend on the preview page.
- */
 const KCAL_PER_UNIT = {
-  protein: 100, // 1 serving ≈ 25g protein → ~100 kcal
+  protein: 100,
   carbs: 120,
   fats: 90,
   veggies: 25,
@@ -77,7 +64,6 @@ const DietPlanStatsStrip: React.FC = () => {
   const instructions = watch("customInstructions") || [];
   const supplements = watch("supplements") || [];
 
-  // Sum macro "servings" (quantity) across all meals.
   const totals = meals.reduce(
     (acc, m) => ({
       protein: acc.protein + (Number(m?.totalProtein?.quantity) || 0),
@@ -97,21 +83,18 @@ const DietPlanStatsStrip: React.FC = () => {
 
   const macroSummary = `${totals.protein} · ${totals.carbs} · ${totals.fats}`;
 
-  const hasInstructions = (() => {
-    const text = (instructions.join(" ") || "").replace(/<[^>]+>/g, "").trim();
+  const hasTextContent = (values: string[]) => {
+    const text = (values.join(" ") || "").replace(/<[^>]+>/g, "").trim();
     return text.length > 0;
-  })();
+  };
 
-  const hasSupplements = (() => {
-    const text = (supplements.join(" ") || "").replace(/<[^>]+>/g, "").trim();
-    return text.length > 0;
-  })();
+  const instructionMark = hasTextContent(instructions) ? "✓" : "—";
+  const supplementMark = hasTextContent(supplements) ? "✓" : "—";
 
   return (
     <div
       dir="rtl"
-      style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
-      className="grid grid-cols-2 gap-3 md:grid-cols-4"
+      className="grid grid-cols-2 gap-3 font-heebo md:grid-cols-4"
     >
       <StatCard
         tone="emerald"
@@ -135,7 +118,7 @@ const DietPlanStatsStrip: React.FC = () => {
         tone="sky"
         icon={<FaClipboardCheck size={16} />}
         label="דגשים · תוספים"
-        value={`${hasInstructions ? "✓" : "—"} · ${hasSupplements ? "✓" : "—"}`}
+        value={`${instructionMark} · ${supplementMark}`}
       />
     </div>
   );

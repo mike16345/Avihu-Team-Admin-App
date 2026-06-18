@@ -25,6 +25,8 @@ Data-heavy UI favors cached server state through TanStack Query, with only small
 - `src/components/<Domain>` contains business-facing UI.
 - `src/schemas` holds Zod schemas.
 - `src/interfaces` and `src/types` hold shared contracts.
+- Keep route/page components as orchestration layers. Pages should compose hooks, route params, navigation, and domain components; large headers, toolbars, filter rows, cards, empty states, sticky action bars, modal bodies, and other substantial JSX sections should move into domain components when they obscure the route flow.
+- Prefer feature-local components/helpers first when an extraction only serves one route or domain. Promote to `src/components/ui` or another shared location only after reuse is real and the API is stable.
 - This is a frontend-only repository. There are no backend controllers, services, or database layers here; backend interaction happens through the HTTP client layer.
 
 ## 3. Coding Conventions
@@ -142,7 +144,9 @@ Do not split components only for the sake of splitting. Extract a child componen
 
 - UI is built primarily with Tailwind utility classes and `src/components/ui` primitives configured through `components.json` (shadcn-style structure).
 - Global styling is minimal and centralized in `src/index.css` and `src/App.css`. Prefer local Tailwind classes over adding new global CSS.
+- Do not use inline `style` for routine layout, spacing, typography, or font-family choices. Prefer Tailwind utilities, including arbitrary utilities when needed for one-off CSS properties.
 - Reuse existing UI wrappers such as `CustomButton`, `DeleteModal`, `Loader`, and table primitives before introducing new one-off controls.
+- When button, card, chip, empty-state, or toolbar styles repeat inside a feature, extract a small feature-local component or class helper. If the pattern repeats across domains, formalize it as a shared component.
 - Route screens and admin tables commonly use early returns for loading/error states (`Loader`, `ErrorPage`) before rendering the main layout.
 - The interface is heavily localized for Hebrew and right-to-left presentation.
 - Many labels, headings, and toasts are Hebrew strings.
@@ -189,4 +193,5 @@ Do not split components only for the sake of splitting. Extract a child componen
 - Preserve the style of the file you are editing. This codebase contains both hand-written feature code and generated/shadcn-style UI primitives; edits should blend into the local file, not force a global rewrite.
 - When patching a feature that already has an established query-key scheme, error-handling pattern, or localization style, keep the patch consistent with that feature even if another part of the repo uses a newer variant.
 - If you introduce a new reusable pattern, apply it consistently within the touched feature and then update `Agents.md` once the pattern is repeated broadly enough to count as repository guidance.
+- When a route-level task requires touching shared files, keep the shared-file edits limited to the behavior needed by that route and avoid opportunistic broad refactors. Record or explain the reason for touching shared files in the relevant task summary or tracker.
 - Claude, Codex, and any other coding agent must read `Agents.md` before changing code. If a separate agent-specific file exists, such as `Claude.md`, it must defer to `Agents.md` rather than replacing it.

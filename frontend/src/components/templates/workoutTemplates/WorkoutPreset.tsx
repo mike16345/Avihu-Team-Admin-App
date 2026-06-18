@@ -3,24 +3,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import useWorkoutPlanPresetQuery from "@/hooks/queries/workoutPlans/useWorkoutPlanPresetQuery";
 import { useNavigate, useParams } from "react-router-dom";
 import { MainRoutes } from "@/enums/Routes";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import BackLink from "@/components/ui/BackLink";
 import useAddWorkoutPreset from "@/hooks/mutations/workouts/useAddWorkoutPreset";
-import { Input } from "@/components/ui/input";
 import { collectAllErrors, ValidationErrorEntry } from "@/lib/utils";
 import WorkoutPresetPicker from "./WorkoutPresetPicker";
 import ValidationErrorsDialog from "../../Alerts/ValidationErrorsDialog";
-import { FaFolderOpen, FaDumbbell, FaTag, FaCheck } from "react-icons/fa6";
 import useWorkoutPlanPresetsQuery from "@/hooks/queries/workoutPlans/useWorkoutPlanPresetsQuery";
 import { ISimpleCardioType, IWorkoutPlanPreset } from "@/interfaces/IWorkoutPlan";
-import { cleanWorkoutObject, parseErrorFromObject } from "@/utils/workoutPlanUtils";
+import { parseErrorFromObject } from "@/utils/workoutPlanUtils";
 import useUpdateWorkoutPlanPreset from "@/hooks/mutations/workouts/useUpdateWorkoutPlanPreset";
 import { defaultSimpleCardioOption } from "@/constants/cardioOptions";
 import { WorkoutPresetSchemaType, workoutPresetSchema } from "@/schemas/workoutPlanSchema";
@@ -31,6 +22,29 @@ import { QueryKeys } from "@/enums/QueryKeys";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import PresetMetaPanel from "./PresetMetaPanel";
+import { WorkoutPresetEditorHeader } from "./WorkoutPresetEditorHeader";
+import { WorkoutPresetIdentityCard } from "./WorkoutPresetIdentityCard";
+import { WorkoutPresetSaveAction } from "./WorkoutPresetSaveAction";
+
+const getWorkoutPresetErrorMessage = (error: any) =>
+  error?.data?.message || parseErrorFromObject(error?.data || "");
+
+const normalizeSimpleCardioPlan = (values: WorkoutPresetSchemaType) => {
+  if (values.cardio.type !== "simple") return values;
+
+  const simpleCardioPlan = values.cardio.plan as ISimpleCardioType;
+
+  return {
+    ...values,
+    cardio: {
+      type: values.cardio.type,
+      plan: {
+        ...simpleCardioPlan,
+        minsPerWorkout: simpleCardioPlan.minsPerWeek / simpleCardioPlan.timesPerWeek,
+      },
+    },
+  };
+};
 
 export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ children }) => {
   const { id = "" } = useParams();
@@ -54,12 +68,29 @@ export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ childr
   const { data: workoutPlanPresets } = useWorkoutPlanPresetsQuery();
   const { data } = useWorkoutPlanPresetQuery(id);
 
+  const [selectedPreset, setSelectedPreset] = useState("");
+  const [openPresetPicker, setOpenPresetPicker] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<ValidationErrorEntry[]>([]);
+
   const onMutateSuccess = () => {
     navigation(MainRoutes.WORKOUT_PLANS_PRESETS);
   };
 
+  const openWorkoutPresetPicker = () => {
+    setOpenPresetPicker(true);
+  };
+
+  const clearValidationErrors = () => {
+    setValidationErrors([]);
+  };
+
+  const handleValidationDialogOpenChange = (open: boolean) => {
+    if (open) return;
+    clearValidationErrors();
+  };
+
   const onError = (error: any) => {
-    const message = error?.data?.message || parseErrorFromObject(error?.data || "");
+    const message = getWorkoutPresetErrorMessage(error);
 
     toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
       description: message,
@@ -81,10 +112,6 @@ export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ childr
     onError,
   });
 
-  const [selectedPreset, setSelectedPreset] = useState("");
-  const [openPresetPicker, setOpenPresetPicker] = useState(false);
-  const [validationErrors, setValidationErrors] = useState<ValidationErrorEntry[]>([]);
-
   const presetList = useMemo(() => workoutPlanPresets?.data || [], [workoutPlanPresets?.data]);
 
   const handleSelectPreset = (preset: IWorkoutPlanPreset) => {
@@ -92,7 +119,6 @@ export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ childr
       name: getValues("name"),
       workoutPlans: preset.workoutPlans,
       cardio: preset.cardio || { type: "simple", plan: defaultSimpleCardioOption },
-      // Carry meta fields over from the selected preset (optional, harmless)
       workoutsPerWeek: preset.workoutsPerWeek,
       durationMinutes: preset.durationMinutes,
       level: preset.level,
@@ -106,23 +132,7 @@ export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ childr
   };
 
   const onSubmit = (values: WorkoutPresetSchemaType) => {
-    let workoutPlan = values;
-    const cardioPlan = values.cardio.type == "simple" && (values.cardio.plan as ISimpleCardioType);
-
-    if (cardioPlan) {
-      const minsPerWorkout = cardioPlan.minsPerWeek / cardioPlan.timesPerWeek;
-
-      workoutPlan = {
-        ...values,
-        cardio: {
-          type: values.cardio.type,
-          plan: {
-            ...cardioPlan,
-            minsPerWorkout,
-          },
-        },
-      };
-    }
+    const workoutPlan = normalizeSimpleCardioPlan(values);
 
     if (id) {
       updateWorkoutPlanPreset.mutate({ presetId: id, updatedPreset: workoutPlan });
@@ -141,131 +151,34 @@ export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ childr
     if (!data) return;
 
     reset(data);
-  }, [data]);
+  }, [data, reset]);
 
   useUnsavedChangesWarning(isDirty);
+  const isSaving = addWorkoutPreset.isPending || updateWorkoutPlanPreset.isPending;
 
   return (
     <>
-      <div
-        dir="rtl"
-        className="flex flex-col gap-5 p-4 h-full"
-        style={{ fontFamily: "Assistant, Heebo, system-ui, sans-serif" }}
-      >
-        {/* Context-aware back link: navigate(-1) if there's history,
-            else fall back to home. Preserves entry-point context
-            regardless of whether the trainer came from the home
-            shortcut or the templates list. */}
+      <div dir="rtl" className="flex h-full flex-col gap-5 p-4 font-heebo">
         <BackLink label="חזרה" />
 
-        {/* Hero header — matches the libraries (forms / templates /
-            menus / leads) so the editor reads as part of the same
-            family. Blue blob backdrop + brand-gradient icon + title
-            with subtitle. */}
-        <div className="relative overflow-hidden rounded-2xl border border-blue-100/60 bg-white shadow-sm dark:border-blue-900/40 dark:bg-slate-900">
-          <div className="pointer-events-none absolute -top-16 -left-16 h-40 w-40 rounded-full bg-blue-100/60 dark:bg-blue-950/30 blur-3xl" />
-          <div className="relative flex items-center gap-4 p-5">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl brand-gradient text-white shadow-md shadow-blue-500/25">
-              <FaDumbbell size={18} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">תבנית אימון</h1>
-              <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
-                בנה תבנית חוזרת לשימוש למתאמנים שלך — שם, מאפיינים, אימונים ואירובי
-              </p>
-            </div>
-          </div>
-        </div>
+        <WorkoutPresetEditorHeader />
+
         <Form {...form}>
           <form className="flex flex-col gap-5" onSubmit={handleSubmit(onSubmit, onInvalidSubmit)}>
-            {/* Identity card — name + "copy from preset" in one tidy
-                surface so the editor doesn't open with a lone naked
-                input above everything else. */}
-            <div className="rounded-2xl border border-blue-100/60 bg-white p-5 shadow-sm dark:border-blue-900/40 dark:bg-slate-900">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_auto] md:items-end">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem className="min-w-0">
-                      <FormLabel className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                        <FaTag size={10} />
-                        שם התבנית
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="לדוגמה: דחיפה־משיכה־רגליים · ABC · 4 ימים"
-                          className="h-11 w-full rounded-xl border-blue-100/60 bg-blue-50/30 text-base font-semibold text-slate-800 placeholder:text-sm placeholder:font-normal placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-200/60 dark:border-blue-900/40 dark:bg-blue-950/15 dark:text-slate-100 dark:focus:bg-slate-900"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="flex flex-col gap-1.5">
-                  <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                    <FaFolderOpen size={10} />
-                    העתק מתבנית קיימת
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setOpenPresetPicker(true)}
-                    className="inline-flex h-11 items-center gap-2 rounded-xl border border-blue-100/60 bg-blue-50/30 px-4 text-sm font-bold text-blue-700 transition-all hover:border-blue-400 hover:bg-blue-50 hover:-translate-y-px dark:border-blue-900/40 dark:bg-blue-950/20 dark:text-blue-300 dark:hover:border-blue-700"
-                  >
-                    <FaFolderOpen size={12} />
-                    {selectedPreset ? `תבנית: ${selectedPreset}` : "בחר תבנית"}
-                  </button>
-                </div>
-              </div>
-            </div>
+            <WorkoutPresetIdentityCard
+              control={form.control}
+              selectedPreset={selectedPreset}
+              onOpenPresetPicker={openWorkoutPresetPicker}
+            />
 
-            {/* Meta-data panel — workouts/week, duration, level, goal, note, limitations */}
             <PresetMetaPanel />
 
             <div className="border-b-2 rounded">{children}</div>
-            {/* Sticky save bar — brand-gradient (was flat green).
-                Lives in a thin row of slate-50 wash so it reads as
-                "form footer" even when stuck to the page bottom. */}
-            <div className="sm:sticky sm:bottom-0 -mx-1 mt-2 flex justify-end gap-2 rounded-xl bg-gradient-to-t from-white via-white to-transparent py-2">
-              <button
-                type="submit"
-                disabled={addWorkoutPreset.isPending || updateWorkoutPlanPreset.isPending}
-                className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl brand-gradient brand-gradient-hover px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-blue-500/25 transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0 disabled:cursor-not-allowed"
-              >
-                {addWorkoutPreset.isPending || updateWorkoutPlanPreset.isPending ? (
-                  <>
-                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                      <circle
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="3"
-                        strokeOpacity="0.3"
-                      />
-                      <path
-                        d="M22 12a10 10 0 0 1-10 10"
-                        stroke="currentColor"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                    שומר…
-                  </>
-                ) : (
-                  <>
-                    <FaCheck size={12} />
-                    שמור תבנית
-                  </>
-                )}
-              </button>
-            </div>
+            <WorkoutPresetSaveAction isSaving={isSaving} />
           </form>
         </Form>
       </div>
 
-      {/* Rich preset picker */}
       <WorkoutPresetPicker
         open={openPresetPicker}
         onOpenChange={setOpenPresetPicker}
@@ -273,10 +186,9 @@ export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ childr
         onSelect={handleSelectPreset}
       />
 
-      {/* Validation summary */}
       <ValidationErrorsDialog
         open={validationErrors.length > 0}
-        onOpenChange={(open) => !open && setValidationErrors([])}
+        onOpenChange={handleValidationDialogOpenChange}
         errors={validationErrors}
         intro="יש לתקן את השדות הבאים לפני שמירת התבנית"
       />

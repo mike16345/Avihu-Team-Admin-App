@@ -13,12 +13,6 @@ const FormResponseDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { users } = useUsersStore();
-
-  /**
-   * Prefer history.back so we restore the previous page's exact state
-   * (scroll position, active tab, etc.). Fall back to the form-builder
-   * route only if there's no history (e.g. deep-link).
-   */
   const handleBack = () => {
     const canGoBack =
       typeof window !== "undefined" &&
@@ -50,12 +44,7 @@ const FormResponseDetailsPage = () => {
   if (isError && !response) return <ErrorPage message={error?.message} />;
 
   return (
-    <div
-      dir="rtl"
-      className="size-full flex flex-col gap-4"
-      style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
-    >
-      {/* In-flow back button — restores the previous page's scroll/tab state. */}
+    <div dir="rtl" className="size-full flex flex-col gap-4 font-heebo">
       <button
         type="button"
         onClick={handleBack}

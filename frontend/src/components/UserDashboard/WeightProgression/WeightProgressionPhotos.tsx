@@ -1,19 +1,3 @@
-/**
- * WeightProgressionPhotos — תמונות התקדמות
- *
- *  - Bulk upload via header button
- *  - Per-slot upload for missing angles (placeholder card)
- *  - Per-photo delete + replace (hover overlay).
- *    Delete strategy:
- *      • Server: call DELETE /s3/photos/one with `photoId: "images/<key>"` and
- *        `userId`. This endpoint is already deployed and removes the file
- *        from S3. The newer version of the handler (not yet deployed) also
- *        pulls the URL from MongoDB.
- *      • Client: until the server-side MongoDB cleanup ships, we maintain a
- *        local "hidden keys" list in localStorage so the gallery doesn't
- *        show broken images after a delete + refresh.
- *  - Click a photo to open the compare modal
- */
 import { FC, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
@@ -26,7 +10,6 @@ import { sendData, deleteItem } from "@/API/api";
 import { determineServerUrl } from "@/config/apiConfig";
 import { ApiResponse } from "@/types/types";
 
-// Kept for backward compatibility with useWeighInPhotosApi (and any imports)
 export type Photo = { url?: string; _id?: string; date?: string };
 
 const ANGLE_LABELS = ["מלפנים", "מאחור", "מהצד ימין", "מהצד שמאל"];
@@ -34,7 +17,7 @@ const ANGLE_LABELS = ["מלפנים", "מאחור", "מהצד ימין", "מהצ
 type PhotoSlot = { label: string; url?: string; storageKey?: string };
 type PhotoGroup = {
   cycleNumber: number;
-  uploadDate?: string; // DD/MM/YYYY — extracted from the storage key
+  uploadDate?: string;
   photos: PhotoSlot[];
 };
 
@@ -63,28 +46,20 @@ function addHiddenKey(userId: string, key: string) {
     all[userId] = Array.from(list);
     localStorage.setItem(HIDDEN_KEYS_STORAGE, JSON.stringify(all));
   } catch {
-    /* localStorage unavailable — ignore */
+    /* localStorage unavailable */
   }
 }
 
-/** Storage keys look like `{userId}/{YYYY-MM-DD}/{filename}`. */
 function extractUploadDate(storageKey?: string): string | undefined {
   if (!storageKey) return undefined;
   const parts = storageKey.split("/");
   const datePart = parts.length >= 3 ? parts[parts.length - 2] : undefined;
   if (!datePart) return undefined;
-  // Convert YYYY-MM-DD → DD/MM/YYYY
   const m = datePart.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (!m) return datePart;
   return `${m[3]}/${m[2]}/${m[1]}`;
 }
 
-/**
- * Strip the CloudFront prefix from a full URL to get the storage key the
- * server actually stores (e.g. "{userId}/{date}/{imageName}"). If the URL
- * doesn't include `/images/`, returns it unchanged so we don't accidentally
- * try to delete something we can't identify.
- */
 function extractStorageKey(fullUrl?: string): string | undefined {
   if (!fullUrl) return undefined;
   const marker = "/images/";
@@ -93,9 +68,6 @@ function extractStorageKey(fullUrl?: string): string | undefined {
   return fullUrl.slice(idx + marker.length);
 }
 
-/**
- * Group flat photo URLs into groups of 4 (one cycle per 4 photos).
- */
 function groupPhotos(photos: string[]): PhotoGroup[] {
   if (!photos?.length) return [];
   const groups: PhotoGroup[] = [];
@@ -107,11 +79,9 @@ function groupPhotos(photos: string[]): PhotoGroup[] {
       url: batch[idx],
       storageKey: extractStorageKey(batch[idx]),
     }));
-    // Use the first available storage key in the cycle for the upload date.
     const uploadDate = slots.map((s) => extractUploadDate(s.storageKey)).find(Boolean);
     groups.push({ cycleNumber, uploadDate, photos: slots });
   }
-  // Newest cycle (highest cycleNumber) appears first.
   return groups.reverse();
 }
 
@@ -125,8 +95,7 @@ export const WeightProgressionPhotos: FC = () => {
   const [compareLeftGroup, setCompareLeftGroup] = useState<number>(0);
   const [compareRightGroup, setCompareRightGroup] = useState<number>(0);
   const [uploading, setUploading] = useState(false);
-  const [busyKey, setBusyKey] = useState<string | null>(null); // storageKey of the photo being deleted/replaced
-  // For per-photo "replace" we need an invisible file picker we can trigger programmatically.
+  const [busyKey, setBusyKey] = useState<string | null>(null);
   const replaceInputRef = useRef<HTMLInputElement | null>(null);
   const pendingReplaceKeyRef = useRef<string | null>(null);
 
@@ -163,10 +132,6 @@ export const WeightProgressionPhotos: FC = () => {
    */
   const uploadFiles = async (files: FileList): Promise<number> => {
     if (!id || !files.length) return 0;
-    // Snapshot the FileList into a plain array — the live FileList can be
-    // emptied by `input.value = ""` while we're still iterating asynchronously,
-    // which previously caused `files.length` to drop to 0 mid-upload and made
-    // the toast show "failed: -1".
     const fileArr: File[] = Array.from(files);
     const total = fileArr.length;
     setUploading(true);
@@ -312,7 +277,6 @@ export const WeightProgressionPhotos: FC = () => {
     pendingReplaceKeyRef.current = null;
     if (!key || !files || !files.length) return;
     setBusyKey(key);
-    // Upload new → delete old (only if upload succeeded)
     const uploadedCount = await uploadFiles(files);
     if (uploadedCount > 0) {
       const deleted = await deletePhoto(key);
@@ -327,8 +291,7 @@ export const WeightProgressionPhotos: FC = () => {
   if (isLoading) return <Loader size="large" />;
 
   return (
-    <div dir="rtl" style={{ fontFamily: "Heebo, system-ui, sans-serif" }}>
-      {/* hidden input for the per-photo replace flow */}
+    <div dir="rtl" className="font-heebo">
       <input
         ref={replaceInputRef}
         type="file"
@@ -341,7 +304,6 @@ export const WeightProgressionPhotos: FC = () => {
       />
 
       <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-8 shadow-sm">
-        {/* Header */}
         <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-slate-900 dark:text-slate-100">
             <FaCamera size={16} className="text-blue-600" />
@@ -371,7 +333,6 @@ export const WeightProgressionPhotos: FC = () => {
           </label>
         </div>
 
-        {/* Empty state */}
         {groups.length === 0 && (
           <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 px-4 py-12 text-center">
             <FaCamera size={28} className="mx-auto mb-2 text-slate-300" />
@@ -384,12 +345,7 @@ export const WeightProgressionPhotos: FC = () => {
           </div>
         )}
 
-        {/* Groups by date — newest cycle first, always-visible scrollbar.
-            max-h shows roughly 2 rows of photos so older cycles are scrollable. */}
-        <div
-          className="modal-sets-scroll flex flex-col gap-10 pl-2"
-          style={{ maxHeight: "min(78vh, 880px)" }}
-        >
+        <div className="modal-sets-scroll flex max-h-[min(78vh,880px)] flex-col gap-10 pl-2">
           {groups.map((group) => (
             <div key={group.cycleNumber}>
               <div className="mb-4 flex items-center justify-between gap-3">
@@ -429,7 +385,6 @@ export const WeightProgressionPhotos: FC = () => {
                           />
                         </button>
 
-                        {/* Hover action bar (top-left) */}
                         <div className="pointer-events-none absolute right-2 top-2 z-10 flex items-center gap-1 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100">
                           <button
                             type="button"
@@ -457,21 +412,18 @@ export const WeightProgressionPhotos: FC = () => {
                           </button>
                         </div>
 
-                        {/* Busy overlay during delete/replace */}
                         {isBusy && (
                           <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/70 text-xs font-semibold text-slate-700 dark:text-slate-200 backdrop-blur-sm">
                             פועל...
                           </div>
                         )}
 
-                        {/* Bottom label */}
                         <div className="pointer-events-none absolute inset-x-3 bottom-3 z-10 flex items-center justify-center rounded-lg bg-white/95 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 backdrop-blur-sm">
                           {p.label}
                         </div>
                       </div>
                     );
                   }
-                  // Missing slot — per-card upload
                   return (
                     <label
                       key={i}
@@ -501,7 +453,6 @@ export const WeightProgressionPhotos: FC = () => {
         </div>
       </div>
 
-      {/* Comparison modal */}
       {compareOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/90 p-4 backdrop-blur-sm"
@@ -509,9 +460,8 @@ export const WeightProgressionPhotos: FC = () => {
           dir="rtl"
         >
           <div
-            className="relative flex h-full max-h-[90vh] w-full max-w-6xl flex-col gap-3 rounded-3xl bg-white dark:bg-slate-900 p-5 shadow-2xl"
+            className="relative flex h-full max-h-[90vh] w-full max-w-6xl flex-col gap-3 rounded-3xl bg-white dark:bg-slate-900 p-5 font-heebo shadow-2xl"
             onClick={(e) => e.stopPropagation()}
-            style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
           >
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
               <div className="flex items-center gap-2">

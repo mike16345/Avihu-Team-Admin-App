@@ -1,9 +1,3 @@
-/**
- * DietPlanTabs — section switcher (תפריט / דגשים / תוספים).
- *
- * Visual refresh: pill-style segmented tabs inside a rounded white card,
- * mirroring the workout-plan editor's WorkoutTabs.
- */
 import React, { useState } from "react";
 import { FaAppleWhole, FaClipboardCheck, FaPlus } from "react-icons/fa6";
 
@@ -21,15 +15,20 @@ const TABS: { id: TabKey; label: string; icon: React.ReactNode }[] = [
   { id: "supplements", label: "תוספים", icon: <FaPlus size={13} /> },
 ];
 
+const getTabButtonClassName = (isActive: boolean) => {
+  const baseClassName =
+    "inline-flex items-center gap-2 rounded-xl px-4 py-1.5 text-sm font-semibold transition-colors";
+
+  if (isActive) return `${baseClassName} bg-emerald-600 text-white shadow-sm`;
+
+  return `${baseClassName} text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800`;
+};
+
 const DietplanTabs: React.FC<DietplanTabsProps> = ({ dietplan, tips, supplements }) => {
   const [active, setActive] = useState<TabKey>("dietplan");
 
   return (
-    <div
-      dir="rtl"
-      style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
-      className="flex flex-col gap-4"
-    >
+    <div dir="rtl" className="flex flex-col gap-4 font-heebo">
       <div className="inline-flex w-fit items-center gap-1 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-1 shadow-sm">
         {TABS.map((t) => {
           const isActive = active === t.id;
@@ -38,11 +37,7 @@ const DietplanTabs: React.FC<DietplanTabsProps> = ({ dietplan, tips, supplements
               key={t.id}
               type="button"
               onClick={() => setActive(t.id)}
-              className={`inline-flex items-center gap-2 rounded-xl px-4 py-1.5 text-sm font-semibold transition-colors ${
-                isActive
-                  ? "bg-emerald-600 text-white shadow-sm"
-                  : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
-              }`}
+              className={getTabButtonClassName(isActive)}
             >
               {t.icon}
               <span>{t.label}</span>

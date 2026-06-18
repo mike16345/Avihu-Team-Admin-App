@@ -1,12 +1,3 @@
-/**
- * SetsContainer — rows of sets for an exercise.
- *
- * Visuals match the rest of the redesigned workout plan editor:
- *  - thin horizontal rows separated by hairlines (no individual borders)
- *  - set number rendered as a small purple pill
- *  - small icon buttons on the right for duplicate / remove
- *  - a dashed "הוסף סט" CTA at the bottom
- */
 import React from "react";
 import SetsInput from "./SetsInput";
 import { ISet } from "@/interfaces/IWorkoutPlan";
@@ -14,15 +5,11 @@ import { WorkoutSchemaType } from "@/schemas/workoutPlanSchema";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { deepClone } from "@/lib/utils";
 import { FaPlus, FaCopy, FaTrash } from "react-icons/fa6";
+import { defaultSet } from "./workoutPlanDefaults";
 
 interface SetsContainerProps {
   parentPath: `workoutPlans.${number}.muscleGroups.${number}.exercises.${number}`;
 }
-
-export const defaultSet: ISet = {
-  minReps: 0,
-  maxReps: 0,
-};
 
 const SetsContainer: React.FC<SetsContainerProps> = ({ parentPath }) => {
   const { control, getValues } = useFormContext<WorkoutSchemaType>();

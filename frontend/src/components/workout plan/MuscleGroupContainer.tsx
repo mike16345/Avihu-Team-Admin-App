@@ -1,10 +1,3 @@
-/**
- * MuscleGroupContainer — matches the DesignPreview MuscleGroupBlock:
- *  - rounded-2xl white card with thin border + shadow
- *  - header has a colored pill for the muscle group + selector + delete
- *  - body contains the exercise cards in a 2-column grid (handled inside
- *    ExcerciseInput) and a dashed "הוסף תרגיל" CTA
- */
 import { IMuscleGroupWorkouts } from "@/interfaces/IWorkoutPlan";
 import { FC, useState } from "react";
 import { FaChevronDown, FaChevronUp, FaTrash } from "react-icons/fa6";
@@ -20,10 +13,6 @@ interface IMuscleGroupContainerProps extends CollapsibleProps {
   parentPath: `workoutPlans.${number}.muscleGroups.${number}`;
 }
 
-/**
- * Muscle-group color palette (background + text) shared with DesignPreview.
- * Unknown muscle groups fall back to a neutral slate.
- */
 const MUSCLE_COLORS: Record<string, { bg: string; text: string }> = {
   חזה: { bg: "bg-rose-50 dark:bg-rose-950/40", text: "text-rose-700 dark:text-rose-300" },
   גב: {
@@ -54,11 +43,44 @@ const MUSCLE_COLORS: Record<string, { bg: string; text: string }> = {
   אמות: { bg: "bg-sky-50 dark:bg-sky-950/40", text: "text-sky-700 dark:text-sky-300" },
   בטן: { bg: "bg-orange-50 dark:bg-orange-950/40", text: "text-orange-700 dark:text-orange-300" },
 };
-const colorsFor = (group?: string) =>
-  (group && MUSCLE_COLORS[group]) || {
+
+const colorsFor = (group?: string) => {
+  if (group && MUSCLE_COLORS[group]) return MUSCLE_COLORS[group];
+  return {
     bg: "bg-slate-100 dark:bg-slate-800",
     text: "text-slate-700 dark:text-slate-200",
   };
+};
+
+const getToggleButtonClassName = (isOpen: boolean) => {
+  if (isOpen) return "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300";
+  return "border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800";
+};
+
+const getToggleAriaLabel = (isOpen: boolean) => {
+  if (isOpen) return "סגור";
+  return "פתח";
+};
+
+const getToggleIcon = (isOpen: boolean) => {
+  if (isOpen) return FaChevronUp;
+  return FaChevronDown;
+};
+
+const getDeleteModalSetter = (
+  isChangingMuscleGroup: boolean,
+  setIsChangingMuscleGroup: React.Dispatch<React.SetStateAction<boolean>>,
+  setIsDeleteMuscleGroupModalOpen: React.Dispatch<React.SetStateAction<boolean>>
+) => {
+  if (isChangingMuscleGroup) return setIsChangingMuscleGroup;
+  return setIsDeleteMuscleGroupModalOpen;
+};
+
+const getMuscleGroupSwapAlertMessage = (isChangingMuscleGroup: boolean) => {
+  if (!isChangingMuscleGroup) return undefined;
+
+  return <>ביצוע פעולה זו ימחק את כל התרגילים שיצרת עבור קבוצת השריר הזו.</>;
+};
 
 export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
   muscleGroup,
@@ -85,14 +107,18 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
 
   const colors = colorsFor(muscleGroup.muscleGroup);
   const groupLabel = muscleGroup.muscleGroup || "בחר קבוצה";
+  const ToggleIcon = getToggleIcon(isOpen);
+  const setDeleteModalOpen = getDeleteModalSetter(
+    isChangingMuscleGroup,
+    setIsChangingMuscleGroup,
+    setIsDeleteMuscleGroupModalOpen
+  );
 
   return (
     <div
       dir="rtl"
-      className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
-      style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
+      className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 font-heebo shadow-sm"
     >
-      {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 px-4 py-3">
         <div className="flex flex-wrap items-center gap-2">
           <span
@@ -114,14 +140,12 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
           <button
             type="button"
             onClick={() => setIsOpen((s) => !s)}
-            className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
+            className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${getToggleButtonClassName(
               isOpen
-                ? "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300"
-                : "border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
-            }`}
-            aria-label={isOpen ? "סגור" : "פתח"}
+            )}`}
+            aria-label={getToggleAriaLabel(isOpen)}
           >
-            {isOpen ? <FaChevronUp size={10} /> : <FaChevronDown size={10} />}
+            <ToggleIcon size={10} />
           </button>
           <button
             type="button"
@@ -134,7 +158,6 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
         </div>
       </div>
 
-      {/* Body — exercises */}
       {isOpen && (
         <div className="p-4">
           <ExcerciseInput
@@ -147,14 +170,8 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
 
       <DeleteModal
         isModalOpen={isDeleteMuscleGroupModalOpen || isChangingMuscleGroup}
-        setIsModalOpen={
-          isChangingMuscleGroup ? setIsChangingMuscleGroup : setIsDeleteMuscleGroupModalOpen
-        }
-        alertMessage={
-          isChangingMuscleGroup ? (
-            <>ביצוע פעולה זו ימחק את כל התרגילים שיצרת עבור קבוצת השריר הזו.</>
-          ) : undefined
-        }
+        setIsModalOpen={setDeleteModalOpen}
+        alertMessage={getMuscleGroupSwapAlertMessage(isChangingMuscleGroup)}
         onConfirm={() => {
           if (isChangingMuscleGroup && muscleGroupToSwapTo !== null) {
             handleUpdateMuscleGroup(muscleGroupToSwapTo);

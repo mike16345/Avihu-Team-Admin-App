@@ -1,17 +1,3 @@
-/**
- * LessonGroupsSheet — inline side-sheet that fully replaces the
- * standalone "/presets/blogs/groups" management page.
- *
- * Two internal views inside one sheet:
- *   1. List   — every group as a row with edit + delete inline
- *      ("+ קבוצה חדשה" sits at the top).
- *   2. Form   — create / edit a single group (re-uses the existing
- *      LessonGroupForm so server validation / mutations stay identical).
- *
- * Open it from anywhere — the BlogPage chip rail or the BlogEditor's
- * group field. No separate route needed; no extra navigation; users
- * stay in the context of what they were editing.
- */
 import { useState, useEffect } from "react";
 import {
   Sheet,
@@ -33,20 +19,41 @@ import { ILessonGroup } from "@/interfaces/IBlog";
 interface LessonGroupsSheetProps {
   open: boolean;
   onClose: () => void;
-  /**
-   * Optional: when the host (e.g. BlogEditor) wants the user to land
-   * directly in the create form, pass "create". Defaults to "list".
-   */
   initialView?: "list" | "create";
-  /**
-   * Optional callback fired after a group is created — the host can use
-   * the new group's name to auto-pick it (e.g. in the blog editor's
-   * group field).
-   */
   onCreated?: (newGroupName: string) => void;
 }
 
 type View = { kind: "list" } | { kind: "form"; id?: string };
+
+const getInitialView = (initialView: LessonGroupsSheetProps["initialView"]): View => {
+  if (initialView === "create") return { kind: "form" };
+  return { kind: "list" };
+};
+
+const getSheetTitle = (view: View) => {
+  if (view.kind === "list") return "קבוצות מאמרים";
+  if (view.id) return "עריכת קבוצה";
+  return "קבוצה חדשה";
+};
+
+const getSheetDescription = (view: View) => {
+  if (view.kind === "list") {
+    return "קבוצות לסיווג המאמרים. גם מופיעות כפילטרים באפליקציית המתאמן.";
+  }
+
+  return "השם יופיע גם בצ׳יפים שעל המאמרים.";
+};
+
+const getDeleteAlertMessage = (pendingDelete: ILessonGroup | null) => {
+  if (!pendingDelete) return undefined;
+
+  return (
+    <>
+      למחוק את <strong>"{pendingDelete.name}"</strong>? המאמרים בקבוצה זו לא יימחקו — הם פשוט יישארו
+      ללא סיווג.
+    </>
+  );
+};
 
 const LessonGroupsSheet: React.FC<LessonGroupsSheetProps> = ({
   open,
@@ -56,26 +63,15 @@ const LessonGroupsSheet: React.FC<LessonGroupsSheetProps> = ({
 }) => {
   const queryClient = useQueryClient();
   const { data, isLoading } = useLessonGroupsQuery();
-  const [view, setView] = useState<View>(
-    initialView === "create" ? { kind: "form" } : { kind: "list" }
-  );
+  const [view, setView] = useState<View>(getInitialView(initialView));
   const [pendingDelete, setPendingDelete] = useState<ILessonGroup | null>(null);
   const [pendingCreatedName, setPendingCreatedName] = useState<string | null>(null);
 
-  /**
-   * Sync internal view with the host's initialView whenever the sheet
-   * is (re)opened. Keeps the component reusable across call sites.
-   */
   useEffect(() => {
     if (!open) return;
-    setView(initialView === "create" ? { kind: "form" } : { kind: "list" });
+    setView(getInitialView(initialView));
   }, [open, initialView]);
 
-  /**
-   * Watch the lesson groups list: if we just created a new group from
-   * the form (we stashed its candidate name), find the matching ID in
-   * the refreshed list and notify the host.
-   */
   useEffect(() => {
     if (!pendingCreatedName || !data?.data) return;
     const found = data.data.find((g) => g.name === pendingCreatedName);
@@ -94,18 +90,10 @@ const LessonGroupsSheet: React.FC<LessonGroupsSheetProps> = ({
   });
 
   const groups = data?.data || [];
+  const hasGroups = groups.length > 0;
 
-  /**
-   * Wraps the host onCreated callback so we can capture the created
-   * name BEFORE the form-level toast invalidates queries. The
-   * LessonGroupForm itself calls closeSheet() after success — we'll
-   * use that to switch back to the list and to fire the host's
-   * onCreated callback once the new group is visible.
-   */
   const handleFormClose = () => {
     if (view.kind === "form" && !view.id && pendingCreatedName) {
-      // Auto-close the sheet after create (host probably wants to use
-      // the new group immediately).
       onClose();
       return;
     }
@@ -117,24 +105,20 @@ const LessonGroupsSheet: React.FC<LessonGroupsSheetProps> = ({
       <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
         <SheetContent
           dir="rtl"
-          className="w-full overflow-y-auto border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 sm:max-w-md"
-          style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
+          className="w-full overflow-y-auto border-slate-200 bg-white font-heebo dark:border-slate-800 dark:bg-slate-900 sm:max-w-md"
         >
           <SheetHeader className="space-y-1 pb-4 text-right">
             <SheetTitle className="flex items-center gap-2 text-right text-xl font-bold text-slate-900 dark:text-slate-100">
               <FaLayerGroup size={16} className="text-blue-600 dark:text-blue-400" />
-              {view.kind === "list" ? "קבוצות מאמרים" : view.id ? "עריכת קבוצה" : "קבוצה חדשה"}
+              {getSheetTitle(view)}
             </SheetTitle>
             <SheetDescription className="text-right text-xs text-slate-500 dark:text-slate-400">
-              {view.kind === "list"
-                ? "קבוצות לסיווג המאמרים. גם מופיעות כפילטרים באפליקציית המתאמן."
-                : "השם יופיע גם בצ׳יפים שעל המאמרים."}
+              {getSheetDescription(view)}
             </SheetDescription>
           </SheetHeader>
 
-          {view.kind === "list" ? (
+          {view.kind === "list" && (
             <div className="flex flex-col gap-2">
-              {/* Create CTA */}
               <button
                 type="button"
                 onClick={() => setView({ kind: "form" })}
@@ -144,14 +128,15 @@ const LessonGroupsSheet: React.FC<LessonGroupsSheetProps> = ({
                 קבוצה חדשה
               </button>
 
-              {/* List */}
-              {isLoading ? (
+              {isLoading && (
                 <p className="py-6 text-center text-sm text-slate-400 dark:text-slate-500">טוען…</p>
-              ) : groups.length === 0 ? (
+              )}
+              {!isLoading && !hasGroups && (
                 <p className="py-6 text-center text-sm text-slate-400 dark:text-slate-500">
                   אין קבוצות עדיין
                 </p>
-              ) : (
+              )}
+              {!isLoading && hasGroups && (
                 <ul className="flex flex-col gap-1.5 pt-2">
                   {groups.map((g) => (
                     <li
@@ -189,7 +174,9 @@ const LessonGroupsSheet: React.FC<LessonGroupsSheetProps> = ({
                 </ul>
               )}
             </div>
-          ) : (
+          )}
+
+          {view.kind === "form" && (
             <div className="flex flex-col gap-3">
               <button
                 type="button"
@@ -202,7 +189,6 @@ const LessonGroupsSheet: React.FC<LessonGroupsSheetProps> = ({
               <FormShim
                 id={view.id}
                 onSavedName={(name) => {
-                  // Stash the name so onCreated fires when the list refreshes.
                   if (!view.id) setPendingCreatedName(name);
                 }}
                 onClose={handleFormClose}
@@ -219,25 +205,12 @@ const LessonGroupsSheet: React.FC<LessonGroupsSheetProps> = ({
           if (pendingDelete?._id) deleteGroup.mutate(pendingDelete._id);
         }}
         onCancel={() => setPendingDelete(null)}
-        alertMessage={
-          pendingDelete ? (
-            <>
-              למחוק את <strong>"{pendingDelete.name}"</strong>? המאמרים בקבוצה זו לא יימחקו — הם
-              פשוט יישארו ללא סיווג.
-            </>
-          ) : undefined
-        }
+        alertMessage={getDeleteAlertMessage(pendingDelete)}
       />
     </>
   );
 };
 
-/**
- * Thin shim around LessonGroupForm so we can capture the name the user
- * typed before the form invalidates queries and closes the sheet.
- * We do this by reading the form's name input from the DOM right before
- * close — small but reliable.
- */
 const FormShim: React.FC<{
   id?: string;
   onSavedName?: (name: string) => void;
@@ -246,8 +219,6 @@ const FormShim: React.FC<{
   return (
     <div
       onSubmitCapture={(e) => {
-        // Grab the value from the form's name input before LessonGroupForm
-        // fires its own submit handler.
         const target = e.target as HTMLFormElement;
         const nameInput = target.querySelector('input[name="name"]') as HTMLInputElement | null;
         if (nameInput?.value && onSavedName) onSavedName(nameInput.value.trim());

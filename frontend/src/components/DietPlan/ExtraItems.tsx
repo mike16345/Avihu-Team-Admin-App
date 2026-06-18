@@ -1,19 +1,3 @@
-/**
- * ExtraItems — side sheet for adding free-text "extra" items to a
- * macro section in a trainee's diet plan.
- *
- * Two big UX upgrades on this pass:
- *   1. **History** — every item the trainer has ever added (across
- *      trainees) is remembered locally and surfaced as click-to-add
- *      suggestions. Saves retyping common items like "סלמון" or
- *      "פסטה מלאה" every time. Backed by useExtraItemsHistory.
- *   2. **Brand-blue palette** — was emerald; now uses the same
- *      brand-blue accents as the rest of the redesign so the sheet
- *      reads as part of the same product surface.
- *
- * Section context (e.g. "protein") drives both the suggestions list
- * (per-section history) and the contextual sheet title.
- */
 import { FC, useEffect, useMemo, useState } from "react";
 import {
   Sheet,
@@ -117,7 +101,6 @@ const ExtraItems: FC<ExtraItemsProps> = ({
   const onSubmit = (data: NameFormData) => commitItem(data.name);
 
   const addFromSuggestion = (name: string) => {
-    // One-click add — no need to type.
     commitItem(name);
   };
 
@@ -148,10 +131,8 @@ const ExtraItems: FC<ExtraItemsProps> = ({
       <Sheet open={isSheetOpen} onOpenChange={onCloseSheet}>
         <SheetContent
           dir="rtl"
-          className="border-blue-100/60 dark:border-blue-900/40 bg-white dark:bg-slate-900 sm:max-w-md flex flex-col"
-          style={{ fontFamily: "Assistant, Heebo, system-ui, sans-serif" }}
+          className="border-blue-100/60 dark:border-blue-900/40 bg-white dark:bg-slate-900 sm:max-w-md flex flex-col font-['Assistant','Heebo',system-ui,sans-serif]"
         >
-          {/* Header */}
           <SheetHeader className="space-y-1 pb-3 border-b border-slate-100 dark:border-slate-800">
             <div className="flex items-center gap-2.5 text-right">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl brand-gradient text-white shadow-sm">
@@ -230,8 +211,6 @@ const ExtraItems: FC<ExtraItemsProps> = ({
             </form>
           </Form>
 
-          {/* Suggestions from history — one-click to add. The
-              section is per-macro so suggestions stay relevant. */}
           {suggestions.length > 0 && (
             <div className="mt-5 text-right space-y-2">
               <div className="flex items-center justify-between">
@@ -264,7 +243,6 @@ const ExtraItems: FC<ExtraItemsProps> = ({
             </div>
           )}
 
-          {/* Current trainee's added items */}
           <div className="mt-5 text-right space-y-2">
             <div className="flex items-center justify-between">
               <h3 className="text-[11px] font-bold text-slate-600 dark:text-slate-300">

@@ -1,11 +1,3 @@
-/**
- * FixedCardioContainer — the "קבוע" cardio plan layout.
- *
- * Constrained-width card so the cardio settings (a couple of small
- * numeric inputs + a free-text tips editor) don't sprawl across the
- * full editor width. Brand-aligned: blue-tinted inputs with focus
- * ring, icon labels, max-w container.
- */
 import { FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import TextEditor from "@/components/ui/TextEditor";
@@ -30,12 +22,8 @@ const FixedCardioContainer: React.FC = () => {
   return (
     <div
       dir="rtl"
-      style={{ fontFamily: "Assistant, Heebo, system-ui, sans-serif" }}
-      className="flex w-full max-w-3xl flex-col gap-5 rounded-2xl border border-blue-100/60 bg-white p-5 shadow-sm dark:border-blue-900/40 dark:bg-slate-900"
+      className="flex w-full max-w-3xl flex-col gap-5 rounded-2xl border border-blue-100/60 bg-white p-5 font-heebo shadow-sm dark:border-blue-900/40 dark:bg-slate-900"
     >
-      {/* Two compact number inputs side by side — narrow widths so
-          they don't read as text fields when they're really tiny
-          integers (minutes / count). */}
       <div className="flex flex-wrap gap-4">
         <FormField
           control={control}
@@ -79,9 +67,6 @@ const FixedCardioContainer: React.FC = () => {
         />
       </div>
 
-      {/* Tips editor — full-width inside the constrained card. Wrapped
-          in its own subtle blue surface so it visually separates from
-          the numeric inputs above. */}
       <FormField
         control={control}
         name="cardio.plan.tips"

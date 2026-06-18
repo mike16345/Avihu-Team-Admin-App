@@ -1,14 +1,4 @@
-/**
- * AdminDashboard — the home page (`/`).
- *
- * Sections:
- *   1. Hero greeting — time-aware "בוקר טוב / צהריים / ערב" + date.
- *   2. Quick actions — 4 colored shortcut cards.
- *   3. Alert pills — compact badges for "ללא אימון", "ללא תזונה",
- *      "מסיימים החודש". Each pops open a small scrollable list.
- *   4. UserCheckIn — main attention card (full width).
- *   5. Two summary charts — plan coverage + expiry timeline.
- */
+import type { ReactElement } from "react";
 import Shortcut from "@/components/AdminDashboard/Shortcut";
 import UserCheckIn from "@/components/AdminDashboard/UserCheckIn";
 import NewClientsCard from "@/components/AdminDashboard/NewClientsCard";
@@ -23,7 +13,7 @@ const shortcuts: {
   actionName: string;
   description: string;
   navLink: string;
-  icon: React.ReactElement;
+  icon: ReactElement;
   tone: "blue" | "emerald" | "purple" | "amber" | "rose";
 }[] = [
   {
@@ -58,10 +48,12 @@ const shortcuts: {
 
 const getGreeting = () => {
   const h = new Date().getHours();
+
   if (h < 6) return "לילה טוב";
   if (h < 12) return "בוקר טוב";
   if (h < 17) return "צהריים טובים";
   if (h < 21) return "ערב טוב";
+
   return "לילה טוב";
 };
 
@@ -81,7 +73,6 @@ const AdminDashboard = () => {
       className="flex flex-col gap-6"
       style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
     >
-      {/* Hero greeting */}
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="brand-gradient flex h-12 w-12 items-center justify-center rounded-2xl text-white shadow-md shadow-blue-600/20">
@@ -97,7 +88,6 @@ const AdminDashboard = () => {
         </div>
       </header>
 
-      {/* Quick actions */}
       <section>
         <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
           פעולות מהירות
@@ -116,7 +106,6 @@ const AdminDashboard = () => {
         </div>
       </section>
 
-      {/* Two-column: UserCheckIn (right) + NewClients (left) */}
       <section className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         <UserCheckIn />
         <NewClientsCard />

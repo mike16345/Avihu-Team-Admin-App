@@ -1,272 +1,154 @@
-import React from "react";
+import { FaArrowRight, FaUser } from "react-icons/fa6";
+import { ActionBar, DeleteConfirmDialog } from "./userForm/actions";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { Input } from "../ui/input";
-import DatePicker from "../ui/DatePicker";
-import DietaryTypeSelector from "../templates/dietTemplates/DietaryTypeSelector";
-import { IUser, IUserPost } from "@/interfaces/IUser";
-import userSchema from "@/schemas/userSchema";
-import UserPlanTypes from "@/enums/UserPlanTypes";
-import SubTrainerDropdown from "../ui/SubTrainerDropdown";
+  DietaryRestrictionsSection,
+  PersonalDetailsSection,
+  PlanAndCoachingSection,
+} from "./userForm/sections";
+import type { UserFormErrors, UserFormProps, UserFormValues } from "./userForm/types";
 
-const remindInOptions = [
-  { value: "604800", name: "שבוע" },
-  { value: "1209600", name: "שבועיים" },
-  { value: "1814400", name: "שלושה שבועות" },
-  { value: "2592000", name: "חודש" },
-];
+export type { UserFormErrors, UserFormValues };
 
-const datePresets = [
-  { name: "חודש", timeInDays: "30" },
-  { name: "חודשיים", timeInDays: "60" },
-  { name: "שלושה חודשים", timeInDays: "90" },
-  { name: "ארבעה חודשים", timeInDays: "120" },
-  { name: "חמישה חודשים", timeInDays: "150" },
-  { name: "שישה חודשים", timeInDays: "180" },
-  { name: "שבעה חודשים", timeInDays: "210" },
-  { name: "שמונה חודשים", timeInDays: "240" },
-  { name: "תשעה חודשים", timeInDays: "270" },
-  { name: "עשרה חודשים", timeInDays: "300" },
-  { name: "אחד עשר חודשים", timeInDays: "330" },
-  { name: "שנה", timeInDays: "360" },
-];
+const getBackLabel = (isEdit: boolean) => (isEdit ? "חזרה" : "חזרה לבית");
 
-interface UserFormProps {
-  existingUser?: IUser;
-  saveInfo: (user: IUserPost) => void;
-  pending?: boolean;
-}
+const getFormModeLabel = (isEdit: boolean) => (isEdit ? "עריכת מתאמן" : "מתאמן חדש");
 
-function getRemindInDate(remindIn: number) {
-  const result = remindInOptions.find((o) => o.value == String(remindIn));
-  return result?.name || "לא נבחר";
-}
+const getDisplayName = (firstName: string, lastName: string) => {
+  const displayName = `${firstName} ${lastName}`.trim();
 
-const UserForm: React.FC<UserFormProps> = ({ existingUser, saveInfo, pending }) => {
-  const userFinishDate = existingUser ? new Date(existingUser.dateFinished) : undefined;
-  const userForm = useForm<z.infer<typeof userSchema>>({
-    resolver: zodResolver(userSchema),
-    defaultValues: {
-      firstName: existingUser?.firstName || "",
-      lastName: existingUser?.lastName || "",
-      phone: existingUser?.phone || "",
-      email: existingUser?.email || "",
-      planType: existingUser?.planType || "",
-      dietaryType: existingUser?.dietaryType || [],
-      remindIn: existingUser?.remindIn,
-      dateFinished: userFinishDate,
-      subTrainerId: existingUser?.subTrainerId || undefined,
-    },
-  });
+  return displayName || "ללא שם";
+};
 
-  const {
-    formState: { errors },
-  } = userForm;
-
-  const onSubmit = (values: z.infer<typeof userSchema>) => {
-    const user: IUserPost = { ...values, email: values.email.toLowerCase() };
-
-    saveInfo(user);
-  };
-
+const UserForm = ({
+  errors,
+  initials,
+  isDeletePending,
+  isEdit,
+  isPending,
+  showDeleteConfirm,
+  values,
+  onApplyDatePreset,
+  onBack,
+  onCancel,
+  onDateFinishedChange,
+  onDelete,
+  onDietaryToggle,
+  onEmailChange,
+  onFirstNameChange,
+  onLastNameChange,
+  onPhoneChange,
+  onPlanTypeChange,
+  onRemindInChange,
+  onShowDeleteConfirmChange,
+  onSubmit,
+  onSubTrainerChange,
+}: UserFormProps) => {
   return (
-    <Form {...userForm}>
-      <form
-        data-testid="user-form"
-        onSubmit={userForm.handleSubmit(onSubmit)}
-        className="space-y-5"
-      >
-        <div className="flex items-center gap-4 sm:w-1/2">
-          <FormField
-            control={userForm.control}
-            name="firstName"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>שם פרטי</FormLabel>
-                <FormControl>
-                  <Input data-testid="user-form-first-name" placeholder="שם פרטי..." {...field} />
-                </FormControl>
-                <FormMessage data-testid="user-form-first-name-error" />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={userForm.control}
-            name="lastName"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>שם משפחה</FormLabel>
-                <FormControl>
-                  <Input data-testid="user-form-last-name" placeholder="שם משפחה..." {...field} />
-                </FormControl>
-                <FormMessage data-testid="user-form-last-name-error" />
-              </FormItem>
-            )}
-          />
-        </div>
-        <div className="flex items-center gap-4 sm:w-1/2">
-          <FormField
-            control={userForm.control}
-            name="phone"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>טלפון</FormLabel>
-                <FormControl>
-                  <Input
-                    data-testid="user-form-phone"
-                    dir="ltr"
-                    className="text-center"
-                    placeholder="טלפון"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage data-testid="user-form-phone-error" />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={userForm.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>אימייל</FormLabel>
-                <FormControl>
-                  <Input
-                    data-testid="user-form-email"
-                    className="text-center"
-                    placeholder="israel@example.com"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage data-testid="user-form-email-error" />
-              </FormItem>
-            )}
-          />
-        </div>
-        <FormField
-          control={userForm.control}
-          name="planType"
-          render={({ field }) => (
-            <FormItem className="sm:w-1/2">
-              <FormLabel>סוג תוכנית</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger data-testid="user-form-plan-type" dir="rtl">
-                    <SelectValue placeholder={field.value || "בחר סוג תוכנית"} />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent dir="rtl">
-                  <SelectItem value={UserPlanTypes.BULK}>{UserPlanTypes.BULK}</SelectItem>
-                  <SelectItem value={UserPlanTypes.CUT}>{UserPlanTypes.CUT}</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage data-testid="user-form-plan-type-error" />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={userForm.control}
-          name="subTrainerId"
-          render={({ field }) => (
-            <FormItem className="sm:w-1/2">
-              <FormLabel>מאמן</FormLabel>
-              <SubTrainerDropdown onSelect={field.onChange} value={field.value} />
-              <FormMessage data-testid="user-form-sub-trainer-error" />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={userForm.control}
-          name="remindIn"
-          render={({ field }) => {
-            const remindIn = getRemindInDate(field.value);
+    <div
+      data-testid="user-form-page"
+      dir="rtl"
+      className="mx-auto flex max-w-2xl flex-col gap-2.5 px-4 py-4 font-heebo"
+    >
+      <BackButton isEdit={isEdit} onBack={onBack} />
 
-            return (
-              <FormItem className="sm:w-1/2">
-                <FormLabel>בדיקה תקופתית</FormLabel>
-                <Select key={remindIn} onValueChange={field.onChange}>
-                  <FormControl>
-                    <SelectTrigger data-testid="user-form-remind-in" dir="rtl">
-                      <SelectValue placeholder={remindIn || "תבדוק אותי כל שבוע..."} />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent dir="rtl">
-                    {remindInOptions.map((option) => (
-                      <SelectItem key={option.name} value={option.value}>
-                        {option.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage data-testid="user-form-remind-in-error" />
-              </FormItem>
-            );
-          }}
+      <div className="relative rounded-2xl bg-gradient-to-bl from-blue-100/70 via-white to-indigo-100/70 dark:from-blue-950/40 dark:via-slate-900 dark:to-indigo-950/40 p-[1px] shadow-md shadow-blue-500/10">
+        <div className="rounded-[15px] bg-white dark:bg-slate-900">
+          <UserFormHeader
+            firstName={values.firstName}
+            initials={initials}
+            isEdit={isEdit}
+            lastName={values.lastName}
+          />
+
+          <form onSubmit={onSubmit} className="flex flex-col" data-testid="user-form">
+            <PersonalDetailsSection
+              email={values.email}
+              errors={errors}
+              firstName={values.firstName}
+              lastName={values.lastName}
+              phone={values.phone}
+              onEmailChange={onEmailChange}
+              onFirstNameChange={onFirstNameChange}
+              onLastNameChange={onLastNameChange}
+              onPhoneChange={onPhoneChange}
+            />
+
+            <PlanAndCoachingSection
+              dateFinished={values.dateFinished}
+              errors={errors}
+              planType={values.planType}
+              remindIn={values.remindIn}
+              subTrainerId={values.subTrainerId}
+              onApplyDatePreset={onApplyDatePreset}
+              onDateFinishedChange={onDateFinishedChange}
+              onPlanTypeChange={onPlanTypeChange}
+              onRemindInChange={onRemindInChange}
+              onSubTrainerChange={onSubTrainerChange}
+            />
+
+            <DietaryRestrictionsSection
+              dietaryType={values.dietaryType}
+              onDietaryToggle={onDietaryToggle}
+            />
+
+            <ActionBar
+              isDeletePending={isDeletePending}
+              isEdit={isEdit}
+              isPending={isPending}
+              onCancel={onCancel}
+              onShowDeleteConfirm={() => onShowDeleteConfirmChange(true)}
+            />
+          </form>
+        </div>
+      </div>
+
+      {showDeleteConfirm && (
+        <DeleteConfirmDialog
+          firstName={values.firstName}
+          isPending={isDeletePending}
+          lastName={values.lastName}
+          onClose={() => onShowDeleteConfirmChange(false)}
+          onDelete={onDelete}
         />
-        <FormField
-          control={userForm.control}
-          name="dateFinished"
-          render={({ field }) => (
-            <FormItem className="flex flex-col justify-between pt-2">
-              <FormLabel>תאריך סיום הליווי</FormLabel>
-              <FormControl>
-                <DatePicker
-                  presets
-                  noPrevDates
-                  presetValues={datePresets}
-                  selectedDate={field.value}
-                  onChangeDate={(date: Date) => field.onChange(date)}
-                  triggerTestId="user-form-date-finished"
-                  presetTriggerTestId="user-form-date-preset"
-                />
-              </FormControl>
-              <FormMessage data-testid="user-form-date-finished-error" />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={userForm.control}
-          name="dietaryType"
-          render={({ field }) => (
-            <FormItem className="sm:w-2/4">
-              <FormControl>
-                <DietaryTypeSelector
-                  existingItems={field.value}
-                  error={errors.dietaryType ? true : false}
-                  saveSelected={field.onChange}
-                />
-              </FormControl>
-              <FormMessage data-testid="user-form-dietary-type-error" />
-            </FormItem>
-          )}
-        />
-        <button
-          data-testid="user-form-submit"
-          type="submit"
-          disabled={pending}
-          className="inline-flex w-full sm:w-32 items-center justify-center gap-2 rounded-xl brand-gradient brand-gradient-hover px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-blue-500/25 transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
-        >
-          {pending ? "שומר…" : "שמור משתמש"}
-        </button>
-      </form>
-    </Form>
+      )}
+    </div>
   );
 };
+
+const BackButton = ({ isEdit, onBack }: { isEdit: boolean; onBack: () => void }) => (
+  <button
+    onClick={onBack}
+    className="inline-flex w-fit items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-blue-600"
+  >
+    <FaArrowRight size={10} />
+    <span>{getBackLabel(isEdit)}</span>
+  </button>
+);
+
+const UserFormHeader = ({
+  firstName,
+  initials,
+  isEdit,
+  lastName,
+}: {
+  firstName: string;
+  initials: string;
+  isEdit: boolean;
+  lastName: string;
+}) => (
+  <div className="relative flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 px-4 py-3">
+    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full brand-gradient text-sm font-bold text-white shadow-sm shadow-blue-500/30">
+      {initials || <FaUser size={12} />}
+    </div>
+    <div className="min-w-0 flex-1">
+      <p className="text-[10px] font-bold uppercase tracking-widest text-blue-500 dark:text-blue-400">
+        {getFormModeLabel(isEdit)}
+      </p>
+      <h2 className="truncate text-sm font-bold leading-tight text-slate-900 dark:text-slate-100">
+        {getDisplayName(firstName, lastName)}
+      </h2>
+    </div>
+  </div>
+);
 
 export default UserForm;

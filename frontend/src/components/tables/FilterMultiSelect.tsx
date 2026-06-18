@@ -1,11 +1,3 @@
-/**
- * FilterMultiSelect — compact filter dropdown for table headers.
- *
- * Visual refresh: pill-style trigger that matches the rest of the
- * redesigned admin panel (Heebo, rounded-xl, slate borders, blue active
- * state, chevron + clear button). Replaces the bulky default outline
- * button.
- */
 import { useMemo } from "react";
 import {
   DropdownMenu,
@@ -52,14 +44,6 @@ const FilterMultiSelect = ({
   };
 
   const active = selected.length > 0;
-  /**
-   * Summary mirrors the original behaviour the rest of the app expects:
-   *   none      → placeholder
-   *   1 picked  → "<name>"
-   *   many      → "<first name> ועוד N"
-   * Some surfaces (e.g. ExerciseProgressNotePanel) rely on the summary
-   * to show *which* item is picked at a glance, not just the count.
-   */
   const summary = useMemo(() => {
     if (!selected.length) return placeholder;
     if (selected.length === 1) return optionMap[selected[0]] ?? selected[0];
