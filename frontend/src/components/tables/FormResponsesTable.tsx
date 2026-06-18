@@ -86,7 +86,7 @@ const FormResponsesTable = ({ userId }: FormResponsesTableProps) => {
   const [confirmDelete, setConfirmDelete] = useState<FormResponse | null>(null);
   const [pendingToggleId, setPendingToggleId] = useState<string | null>(null);
 
-  const all: FormResponse[] = data?.data || [];
+  const all = useMemo<FormResponse[]>(() => data?.data ?? [], [data?.data]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -101,7 +101,7 @@ const FormResponsesTable = ({ userId }: FormResponsesTableProps) => {
       const form = (r.formTitle ?? r.formId?.name ?? "").toLowerCase();
       return user.includes(q) || form.includes(q);
     });
-  }, [all, selectedTypes, query]);
+  }, [all, selectedTypes, statusFilter, query]);
 
   const stats = useMemo(() => {
     const total = all.length;

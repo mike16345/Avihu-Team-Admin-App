@@ -1,7 +1,9 @@
 import { QueryClient, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import TemplateTabs from "@/components/templates/TemplateTabs";
 import DietPlanTemplatesHeader from "@/components/templates/dietTemplates/DietPlanTemplatesHeader";
 import { QueryKeys } from "@/enums/QueryKeys";
+import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { useDietPlanPresetApi } from "@/hooks/api/useDietPlanPresetsApi";
 import useMenuItemApi from "@/hooks/api/useMenuItemApi";
 import { ITabs } from "@/interfaces/interfaces";
@@ -27,7 +29,13 @@ const createDeleteMenuItemOptions = (
   queryKey: string
 ) => ({
   mutationFn: deleteMenuItem,
-  onSuccess: () => invalidateMenuItemQueries(queryClient, queryKey),
+  onSuccess: () => {
+    invalidateMenuItemQueries(queryClient, queryKey);
+    toast.success("פריט נמחק בהצלחה!");
+  },
+  onError: () => {
+    toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE);
+  },
 });
 
 const getDietPlanTabs = (deleteMutations: {
@@ -107,6 +115,10 @@ const DietPlanTemplatePage = () => {
     mutationFn: deleteDietPlanPreset,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QueryKeys.DIET_PLAN_PRESETS] });
+      toast.success("תפריט נמחק בהצלחה!");
+    },
+    onError: () => {
+      toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE);
     },
   });
   const deleteCarbs = useMutation(

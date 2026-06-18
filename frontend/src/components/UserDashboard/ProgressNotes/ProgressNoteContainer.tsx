@@ -12,7 +12,7 @@ import ErrorPage from "@/pages/ErrorPage";
 
 const ProgressNoteContainer = () => {
   const { id } = useParams();
-  const { setOpenProgressSheet, openProgressSheet, handleCloseProgressSheet, progressNote } =
+  const { openProgressSheet, handleCloseProgressSheet, handleOpenNewProgressSheet, progressNote } =
     useProgressNoteContext();
   const { data: progressNoteRes, isError, isLoading, error } = useProgressNoteQuery(id);
 
@@ -24,6 +24,7 @@ const ProgressNoteContainer = () => {
 
   const notes = useMemo(() => {
     if (!noteCount) return [];
+
     return progressNotes.map((note) => (
       <Note key={note._id} progressNote={note} className="bg-white" />
     ));
@@ -42,7 +43,7 @@ const ProgressNoteContainer = () => {
     <ProgressNoteListView
       noteCount={noteCount}
       notes={notes}
-      onAddNote={() => setOpenProgressSheet(true)}
+      onAddNote={handleOpenNewProgressSheet}
     />
   );
 };
