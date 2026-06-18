@@ -43,6 +43,7 @@ export const useTrainersApi = () => {
 
   const getTrainer = async (id: TrainerId): Promise<TrainerGetOneDTO> => {
     const response = await fetchData<TrainerGetOneResponse>(`${TRAINERS_ENDPOINT}/one`, { id });
+
     return response.data;
   };
 
@@ -52,9 +53,14 @@ export const useTrainersApi = () => {
   };
 
   const updateTrainer = async (id: TrainerId, body: UpdateTrainerBody): Promise<Trainer> => {
-    const response = await updateItem<TrainerResponse>(`${TRAINERS_ENDPOINT}/one`, body, undefined, {
-      id,
-    });
+    const response = await updateItem<TrainerResponse>(
+      `${TRAINERS_ENDPOINT}/one`,
+      body,
+      undefined,
+      {
+        id,
+      }
+    );
 
     return response.data;
   };

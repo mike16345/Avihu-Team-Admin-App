@@ -36,7 +36,7 @@ const DietFavoriteStar: React.FC<DietFavoriteStarProps> = ({
   size = 13,
   buttonSize = "md",
 }) => {
-  const { isFavorite, toggle } = useFavoriteDietPresets();
+  const { isFavorite, toggle, canToggle, isPending } = useFavoriteDietPresets();
   const active = isFavorite(presetId);
   const label = getFavoriteLabel(active);
   const StarIcon = getFavoriteIcon(active);
@@ -48,12 +48,13 @@ const DietFavoriteStar: React.FC<DietFavoriteStarProps> = ({
         event.stopPropagation();
         toggle(presetId);
       }}
+      disabled={!canToggle || isPending}
       aria-pressed={active}
       aria-label={label}
       title={label}
       className={`${getButtonSizeClassName(
         buttonSize
-      )} flex shrink-0 items-center justify-center rounded-lg transition-all ${getFavoriteButtonClassName(
+      )} flex shrink-0 items-center justify-center rounded-lg transition-all disabled:cursor-not-allowed disabled:opacity-50 ${getFavoriteButtonClassName(
         active
       )}`}
     >

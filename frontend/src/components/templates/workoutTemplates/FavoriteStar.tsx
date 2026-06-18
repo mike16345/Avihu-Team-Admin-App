@@ -32,7 +32,7 @@ const getFavoriteIcon = (active: boolean) => {
 };
 
 const FavoriteStar: React.FC<FavoriteStarProps> = ({ presetId, size = 13, buttonSize = "md" }) => {
-  const { isFavorite, toggle } = useFavoriteWorkoutPresets();
+  const { isFavorite, toggle, canToggle, isPending } = useFavoriteWorkoutPresets();
   const active = isFavorite(presetId);
   const label = getFavoriteLabel(active);
   const StarIcon = getFavoriteIcon(active);
@@ -44,12 +44,13 @@ const FavoriteStar: React.FC<FavoriteStarProps> = ({ presetId, size = 13, button
         e.stopPropagation();
         toggle(presetId);
       }}
+      disabled={!canToggle || isPending}
       aria-pressed={active}
       aria-label={label}
       title={label}
       className={`${getButtonSizeClassName(
         buttonSize
-      )} flex shrink-0 items-center justify-center rounded-lg transition-all ${getFavoriteButtonClassName(
+      )} flex shrink-0 items-center justify-center rounded-lg transition-all disabled:cursor-not-allowed disabled:opacity-50 ${getFavoriteButtonClassName(
         active
       )}`}
     >
