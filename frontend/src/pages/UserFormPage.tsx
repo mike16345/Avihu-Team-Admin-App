@@ -9,6 +9,7 @@ import useUpdateUser from "@/hooks/mutations/User/useUpdateUser";
 import useDeleteUser from "@/hooks/mutations/User/useDeleteUser";
 import type { IUser, IUserPost } from "@/interfaces/IUser";
 import { weightTab } from "./UserDashboard";
+import { isValidEmail } from "@/utils/utils";
 
 const DEFAULT_REMIND_IN = 604800;
 
@@ -117,7 +118,7 @@ const UserFormPage = () => {
       nextErrors.phone = "חובה למלא טלפון";
     }
 
-    if (!values.email.trim() || !values.email.includes("@")) {
+    if (!isValidEmail(values.email)) {
       nextErrors.email = "אימייל לא תקין";
     }
 

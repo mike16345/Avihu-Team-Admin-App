@@ -16,3 +16,12 @@ export const duplicateItem = (index: number, array: any[]) => {
 
   return newArray;
 };
+
+
+
+export const isValidEmail = (email:string)=>{
+  const normalized = email.trim();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  
+  return emailRegex.test(normalized)
+}

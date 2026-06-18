@@ -1,13 +1,20 @@
-import { IMuscleGroupWorkouts } from "@/interfaces/IWorkoutPlan";
 import { FC, useState } from "react";
-import { FaChevronDown, FaChevronUp, FaTrash } from "react-icons/fa6";
+import { CollapsibleProps } from "@radix-ui/react-collapsible";
+import { FaChevronDown, FaChevronUp, FaCopy, FaTrash } from "react-icons/fa6";
+import { IMuscleGroupWorkouts, IWorkoutPlan } from "@/interfaces/IWorkoutPlan";
+
+import DeleteModal from "../Alerts/DeleteModal";
+import CopyMuscleGroupModal from "./CopyMuscleGroupModal";
 import ExcerciseInput from "./ExcerciseInput";
 import MuscleGroupSelector from "./MuscleGroupSelector";
-import DeleteModal from "../Alerts/DeleteModal";
-import { CollapsibleProps } from "@radix-ui/react-collapsible";
+import { CopyMuscleGroupRequest } from "./workoutPlanCopyUtils";
 
 interface IMuscleGroupContainerProps extends CollapsibleProps {
   muscleGroup: IMuscleGroupWorkouts;
+  muscleGroupIndex: number;
+  sourceWorkoutIndex: number;
+  workoutPlans: IWorkoutPlan[];
+  onCopyMuscleGroup: (request: CopyMuscleGroupRequest) => void;
   handleUpdateMuscleGroup: (value: string) => void;
   handleDeleteMuscleGroup: () => void;
   parentPath: `workoutPlans.${number}.muscleGroups.${number}`;
@@ -46,6 +53,7 @@ const MUSCLE_COLORS: Record<string, { bg: string; text: string }> = {
 
 const colorsFor = (group?: string) => {
   if (group && MUSCLE_COLORS[group]) return MUSCLE_COLORS[group];
+
   return {
     bg: "bg-slate-100 dark:bg-slate-800",
     text: "text-slate-700 dark:text-slate-200",
@@ -53,17 +61,20 @@ const colorsFor = (group?: string) => {
 };
 
 const getToggleButtonClassName = (isOpen: boolean) => {
-  if (isOpen) return "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300";
-  return "border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800";
+  if (isOpen) return "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300";
+
+  return "border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800";
 };
 
 const getToggleAriaLabel = (isOpen: boolean) => {
   if (isOpen) return "סגור";
+
   return "פתח";
 };
 
 const getToggleIcon = (isOpen: boolean) => {
   if (isOpen) return FaChevronUp;
+
   return FaChevronDown;
 };
 
@@ -73,6 +84,7 @@ const getDeleteModalSetter = (
   setIsDeleteMuscleGroupModalOpen: React.Dispatch<React.SetStateAction<boolean>>
 ) => {
   if (isChangingMuscleGroup) return setIsChangingMuscleGroup;
+
   return setIsDeleteMuscleGroupModalOpen;
 };
 
@@ -84,11 +96,16 @@ const getMuscleGroupSwapAlertMessage = (isChangingMuscleGroup: boolean) => {
 
 export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
   muscleGroup,
+  muscleGroupIndex,
+  sourceWorkoutIndex,
+  workoutPlans,
+  onCopyMuscleGroup,
   handleUpdateMuscleGroup,
   parentPath,
   handleDeleteMuscleGroup,
 }) => {
   const [isDeleteMuscleGroupModalOpen, setIsDeleteMuscleGroupModalOpen] = useState(false);
+  const [isCopyMuscleGroupModalOpen, setIsCopyMuscleGroupModalOpen] = useState(false);
   const [isChangingMuscleGroup, setIsChangingMuscleGroup] = useState(false);
   const [muscleGroupToSwapTo, setMuscleGroupToSwapTo] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(muscleGroup.exercises.length === 0);
@@ -100,7 +117,8 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
     ".muscleGroups") as `workoutPlans.${number}.muscleGroups`;
 
   const handleSwapMuscleGroup = (newMuscleGroup: string) => {
-    if (muscleGroup.exercises.length == 0) return handleUpdateMuscleGroup(newMuscleGroup);
+    if (muscleGroup.exercises.length === 0) return handleUpdateMuscleGroup(newMuscleGroup);
+
     setIsChangingMuscleGroup(true);
     setMuscleGroupToSwapTo(newMuscleGroup);
   };
@@ -113,13 +131,14 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
     setIsChangingMuscleGroup,
     setIsDeleteMuscleGroupModalOpen
   );
+  const canCopyMuscleGroup = workoutPlans.length > 1 && Boolean(muscleGroup.muscleGroup);
 
   return (
     <div
       dir="rtl"
-      className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 font-heebo shadow-sm"
+      className="rounded-2xl border border-slate-200 bg-white font-heebo shadow-sm dark:border-slate-800 dark:bg-slate-900"
     >
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-4 py-3 dark:border-slate-800">
         <div className="flex flex-wrap items-center gap-2">
           <span
             className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ${colors.bg} ${colors.text}`}
@@ -127,8 +146,8 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
             קבוצת שריר: {groupLabel}
           </span>
           <MuscleGroupSelector
-            handleDismiss={(val) => {
-              if (!val) handleDeleteMuscleGroup();
+            handleDismiss={(value) => {
+              if (!value) handleDeleteMuscleGroup();
             }}
             pathToMuscleGroups={muscleGroupsPath}
             handleChange={handleSwapMuscleGroup}
@@ -139,7 +158,17 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setIsOpen((s) => !s)}
+            onClick={() => setIsCopyMuscleGroupModalOpen(true)}
+            disabled={!canCopyMuscleGroup}
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-colors hover:border-blue-300 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-slate-200 disabled:hover:text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:hover:border-blue-700 dark:hover:text-blue-300"
+            aria-label="העתק קבוצת שריר"
+            title="העתק קבוצת שריר לאימון אחר"
+          >
+            <FaCopy size={10} />
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsOpen((state) => !state)}
             className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${getToggleButtonClassName(
               isOpen
             )}`}
@@ -150,7 +179,7 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
           <button
             type="button"
             onClick={() => setIsDeleteMuscleGroupModalOpen(true)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 transition-colors hover:border-rose-300 dark:hover:border-rose-700 hover:text-rose-600 dark:hover:text-rose-400"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-colors hover:border-rose-300 hover:text-rose-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:hover:border-rose-700 dark:hover:text-rose-400"
             aria-label="מחק קבוצת שריר"
           >
             <FaTrash size={10} />
@@ -163,7 +192,7 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
           <ExcerciseInput
             key={muscleGroup.muscleGroup}
             parentPath={parentPath}
-            muscleGroup={muscleGroup?.muscleGroup}
+            muscleGroup={muscleGroup.muscleGroup}
           />
         </div>
       )}
@@ -175,9 +204,25 @@ export const MuscleGroupContainer: FC<IMuscleGroupContainerProps> = ({
         onConfirm={() => {
           if (isChangingMuscleGroup && muscleGroupToSwapTo !== null) {
             handleUpdateMuscleGroup(muscleGroupToSwapTo);
-          } else {
-            handleDeleteMuscleGroup();
+            return;
           }
+
+          handleDeleteMuscleGroup();
+        }}
+      />
+
+      <CopyMuscleGroupModal
+        open={isCopyMuscleGroupModalOpen}
+        onOpenChange={setIsCopyMuscleGroupModalOpen}
+        workouts={workoutPlans}
+        sourceWorkoutIndex={sourceWorkoutIndex}
+        sourceMuscleGroupName={muscleGroup.muscleGroup}
+        onConfirm={(targetWorkoutIndex) => {
+          onCopyMuscleGroup({
+            sourceWorkoutIndex,
+            sourceMuscleGroupIndex: muscleGroupIndex,
+            targetWorkoutIndex,
+          });
         }}
       />
     </div>

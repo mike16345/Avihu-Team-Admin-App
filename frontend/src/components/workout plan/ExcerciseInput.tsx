@@ -54,7 +54,7 @@ const getExercisePreviewImageUrl = (imageUrl: string | undefined, linkToVideo: s
 
 const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath }) => {
   const { watch, getValues, resetField, control } = useFormContext<WorkoutSchemaType>();
-  const { append, remove, update, replace } = useFieldArray<
+  const { append, move, remove, update } = useFieldArray<
     WorkoutSchemaType,
     `${typeof parentPath}.exercises`
   >({
@@ -82,6 +82,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
       exerciseMethod,
       tipFromTrainer: getExerciseTip(tipFromTrainer, exercise.tipFromTrainer),
     };
+
     resetField(`${parentPath}.exercises.${index}`, { defaultValue: newExercise });
   };
 
@@ -100,11 +101,6 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
       restTime: 60,
     };
     append(newExercise);
-  };
-
-  const handleMoveExercise = (exercises: IExercise[]) => {
-    const cloned = exercises.map((e) => ({ ...e, sets: e.sets.map((s) => ({ ...s })) }));
-    replace(cloned);
   };
 
   const handleDeleteExcercise = () => {
@@ -128,7 +124,7 @@ const ExcerciseInput: React.FC<ExcerciseInputProps> = ({ muscleGroup, parentPath
   return (
     <div dir="rtl" className="w-full font-heebo">
       <div className="grid gap-4 lg:grid-cols-2">
-        <DragDropWrapper items={exercises || []} setItems={handleMoveExercise} idKey="_id">
+        <DragDropWrapper items={exercises || []} onMove={move} idKey="_id">
           {({ item, index }) => (
             <SortableItem item={item} idKey="_id">
               {() => {

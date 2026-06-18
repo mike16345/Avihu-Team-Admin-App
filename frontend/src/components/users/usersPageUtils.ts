@@ -25,7 +25,7 @@ export const sortUsersByFinishedDate = (users: IUser[] | undefined) => {
 };
 
 export const filterUsers = (users: IUser[], search: string, statusFilter: StatusFilter) => {
-  const normalizedSearch = search.toLowerCase();
+  const normalizedSearch = search.toLowerCase().trim();
 
   return users.filter((user) => {
     const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
@@ -33,7 +33,7 @@ export const filterUsers = (users: IUser[], search: string, statusFilter: Status
       fullName.includes(normalizedSearch) ||
       user.planType?.toLowerCase().includes(normalizedSearch) ||
       user.email?.toLowerCase().includes(normalizedSearch) ||
-      user.phone?.includes(search);
+      user.phone?.toLowerCase().includes(normalizedSearch);
 
     if (!matchesSearch) return false;
 
