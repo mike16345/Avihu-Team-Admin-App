@@ -2,6 +2,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { MdOutlineChevronLeft } from "react-icons/md";
 import { Link, useParams } from "react-router-dom";
+import { TrainerAccessDialog } from "@/components/trainers/TrainerAccessDialog";
 import { EditTrainerDialog } from "@/components/trainers/EditTrainerDialog";
 import { TrainerInformationCard } from "@/components/trainers/TrainerInformationCard";
 import { TrainerOverviewCard } from "@/components/trainers/TrainerOverviewCard";
@@ -14,20 +15,12 @@ import { useTrainerQuery } from "@/hooks/queries/trainers/useTrainerQuery";
 import ErrorPage from "@/pages/ErrorPage";
 
 const TrainerDetailsPage = () => {
+  const [isAccessDialogOpen, setIsAccessDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isSubTrainersDialogOpen, setIsSubTrainersDialogOpen] = useState(false);
   const { id } = useParams();
   const { data, isLoading, isError, error } = useTrainerQuery(id);
-  const updateTrainerMutation = useUpdateTrainer({
-    onSuccess: () => {
-      toast.success("המאמן נחסם בהצלחה");
-    },
-    onError: (mutationError: any) => {
-      toast.error("חסימת המאמן נכשלה", {
-        description: mutationError?.data?.message ?? mutationError?.message,
-      });
-    },
-  });
+  const updateTrainerMutation = useUpdateTrainer();
 
   if (isLoading) {
     return <Loader size="large" />;
@@ -37,23 +30,45 @@ const TrainerDetailsPage = () => {
     return <ErrorPage message={error?.message ?? "שגיאה בטעינת פרטי המאמן"} />;
   }
 
-  const handleBlockTrainer = () => {
-    updateTrainerMutation.mutate({
-      id: data.trainer._id,
-      body: {
-        fullName: data.trainer.fullName,
-        email: data.trainer.email,
-        phone: data.trainer.phone,
-        subscriptionPlan: data.trainer.subscriptionPlan,
-        clientLimit: data.trainer.clientLimit,
-        subTrainerLimit: data.trainer.subTrainerLimit,
-        status: "blocked",
-        source: data.trainer.source,
-        videoLibraryAccess: data.trainer.videoLibraryAccess,
-        userId: data.trainer.userId,
-        isDeleted: data.trainer.isDeleted,
+  const isBlocked = data.trainer.status === "blocked";
+
+  const handleConfirmAccessChange = () => {
+    const nextStatus = isBlocked ? "active" : "blocked";
+
+    updateTrainerMutation.mutate(
+      {
+        id: data.trainer._id,
+        body: {
+          fullName: data.trainer.fullName,
+          email: data.trainer.email.toLowerCase(),
+          phone: data.trainer.phone,
+          subscriptionPlan: data.trainer.subscriptionPlan,
+          clientLimit: data.trainer.clientLimit,
+          subTrainerLimit: data.trainer.subTrainerLimit,
+          status: nextStatus,
+          source: data.trainer.source,
+          videoLibraryAccess: data.trainer.videoLibraryAccess,
+          userId: data.trainer.userId,
+          isDeleted: data.trainer.isDeleted,
+        },
       },
-    });
+      {
+        onSuccess: () => {
+          toast.success(
+            nextStatus === "blocked" ? "המאמן נחסם בהצלחה" : "הגישה למאמן הוחזרה בהצלחה"
+          );
+          setIsAccessDialogOpen(false);
+        },
+        onError: (mutationError: any) => {
+          toast.error(
+            nextStatus === "blocked" ? "חסימת המאמן נכשלה" : "הענקת הגישה למאמן נכשלה",
+            {
+              description: mutationError?.data?.message ?? mutationError?.message,
+            }
+          );
+        },
+      }
+    );
   };
 
   return (
@@ -77,12 +92,21 @@ const TrainerDetailsPage = () => {
         <TrainerInformationCard data={data} />
         <TrainerQuickActionsCard
           onEdit={() => setIsEditDialogOpen(true)}
-          onBlock={handleBlockTrainer}
+          onToggleAccess={() => setIsAccessDialogOpen(true)}
           onViewSubTrainers={() => setIsSubTrainersDialogOpen(true)}
-          isBlocking={updateTrainerMutation.isPending}
-          isBlocked={data.trainer.status === "blocked"}
+          isAccessUpdating={updateTrainerMutation.isPending}
+          isBlocked={isBlocked}
         />
       </div>
+
+      <TrainerAccessDialog
+        open={isAccessDialogOpen}
+        onOpenChange={setIsAccessDialogOpen}
+        trainerName={data.trainer.fullName}
+        isBlocked={isBlocked}
+        isPending={updateTrainerMutation.isPending}
+        onConfirm={handleConfirmAccessChange}
+      />
 
       <EditTrainerDialog
         open={isEditDialogOpen}

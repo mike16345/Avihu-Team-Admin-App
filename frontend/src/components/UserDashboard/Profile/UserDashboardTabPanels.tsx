@@ -8,6 +8,7 @@ import SwapTemporaryPlanModal from "@/components/UserDashboard/WorkoutPlanHistor
 import WorkoutPlanHistorySection from "@/components/UserDashboard/WorkoutPlanHistory/WorkoutPlanHistorySection";
 import CreateWorkoutPlanWrapper from "@/components/Wrappers/CreateWorkoutPlanWrapper";
 import DietPlanWrapper from "@/components/DietPlan/DietPlanWrapper";
+import FormResponseBubbleWrapper from "@/components/formResponses/FormResponseBubbleWrapper";
 import WorkoutPlans from "@/components/workout plan/WorkoutPlans";
 import { ViewDietPlanPage } from "@/pages/ViewDietPlanPage";
 import { FaArrowsRotate } from "react-icons/fa6";
@@ -49,6 +50,8 @@ export function WorkoutTabPanel({
 }: WorkoutTabPanelProps) {
   return (
     <div className="flex flex-col gap-4">
+      {userId && <FormResponseBubbleWrapper userId={userId} />}
+
       <div className="flex items-center justify-end">
         <button
           type="button"
@@ -81,13 +84,21 @@ export function WorkoutTabPanel({
   );
 }
 
-export function DietTabPanel() {
+interface DietTabPanelProps {
+  userId?: string;
+}
+
+export function DietTabPanel({ userId }: DietTabPanelProps) {
   return (
-    <DashboardTabCard>
-      <DietPlanWrapper>
-        <ViewDietPlanPage embedded />
-      </DietPlanWrapper>
-    </DashboardTabCard>
+    <div className="flex flex-col gap-4">
+      {userId && <FormResponseBubbleWrapper userId={userId} />}
+
+      <DashboardTabCard>
+        <DietPlanWrapper>
+          <ViewDietPlanPage embedded />
+        </DietPlanWrapper>
+      </DashboardTabCard>
+    </div>
   );
 }
 
