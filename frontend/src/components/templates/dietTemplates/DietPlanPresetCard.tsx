@@ -2,6 +2,7 @@ import React from "react";
 import {
   FaArrowLeft,
   FaBreadSlice,
+  FaCircleInfo,
   FaDroplet,
   FaDrumstickBite,
   FaFire,
@@ -15,6 +16,9 @@ import {
   dietaryRestrictionTone,
   dietGoalLabel,
   dietGoalTone,
+  formatDietNumber,
+  parseDietNumber,
+  resolveDietPresetMeta,
 } from "@/lib/dietMeta";
 import DietFavoriteStar from "./DietFavoriteStar";
 import { DietPresetItem } from "./dietPlanPresetGridUtils";
@@ -41,18 +45,26 @@ const MACRO_TONE: Record<"rose" | "amber" | "sky", { bg: string; text: string }>
   },
 };
 
-const getPresetSubtitle = (goalLabel?: string, calories?: number) =>
-  [goalLabel, calories ? `${calories} קל׳` : null].filter(Boolean).join(" · ");
+const getPresetSubtitle = (goalLabel?: string, calories?: unknown) => {
+  const formattedCalories = formatDietNumber(calories);
+
+  return [goalLabel, formattedCalories ? `${formattedCalories} קל׳` : null]
+    .filter(Boolean)
+    .join(" · ");
+};
 
 const hasMacroStats = (preset: DietPresetItem) =>
-  Boolean(preset.proteinServings || preset.carbServings || preset.fatServings);
+  [preset.proteinServings, preset.carbServings, preset.fatServings].some(
+    (value) => parseDietNumber(value) !== undefined
+  );
 
 const hasEmptyMeta = (preset: DietPresetItem, goalLabel?: string) =>
   !goalLabel &&
-  typeof preset.calories !== "number" &&
-  !preset.proteinServings &&
-  !preset.carbServings &&
-  !preset.fatServings &&
+  parseDietNumber(preset.calories) === undefined &&
+  parseDietNumber(preset.freeCalories) === undefined &&
+  parseDietNumber(preset.proteinServings) === undefined &&
+  parseDietNumber(preset.carbServings) === undefined &&
+  parseDietNumber(preset.fatServings) === undefined &&
   (preset.dietaryRestrictions ?? []).length === 0;
 
 const MacroStat: React.FC<{
@@ -62,7 +74,7 @@ const MacroStat: React.FC<{
   tone: "rose" | "amber" | "sky";
 }> = ({ icon, label, value, tone }) => {
   const toneStyle = MACRO_TONE[tone];
-  const displayValue = typeof value === "number" ? value : "—";
+  const displayValue = formatDietNumber(value) ?? "—";
 
   return (
     <div className={`flex flex-col items-center gap-0.5 rounded-lg ${toneStyle.bg} p-2`}>
@@ -83,13 +95,17 @@ const DietPlanPresetCard: React.FC<DietPlanPresetCardProps> = ({
   onOpen,
   onDelete,
 }) => {
+  const resolvedMeta = resolveDietPresetMeta(preset);
   const goalTone = dietGoalTone(preset.goal);
   const goalLabel = dietGoalLabel(preset.goal);
   const restrictions = preset.dietaryRestrictions ?? [];
-  const presetSubtitle = getPresetSubtitle(goalLabel, preset.calories);
+  const resolvedPreset = { ...preset, ...resolvedMeta };
+  const presetSubtitle = getPresetSubtitle(goalLabel, resolvedMeta.calories);
   const shouldShowSubtitle = Boolean(presetSubtitle);
-  const shouldShowMacroStats = hasMacroStats(preset);
-  const shouldShowEmptyMeta = hasEmptyMeta(preset, goalLabel);
+  const shouldShowMacroStats = hasMacroStats(resolvedPreset);
+  const shouldShowEmptyMeta = hasEmptyMeta(resolvedPreset, goalLabel);
+  const caloriesLabel = formatDietNumber(resolvedMeta.calories);
+  const freeCaloriesLabel = formatDietNumber(resolvedMeta.freeCalories);
 
   const handleOpen = () => {
     if (preset._id) onOpen(preset._id);
@@ -155,10 +171,16 @@ const DietPlanPresetCard: React.FC<DietPlanPresetCardProps> = ({
             {goalLabel}
           </span>
         )}
-        {typeof preset.calories === "number" && (
+        {freeCaloriesLabel && (
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-[11px] font-bold text-sky-700 dark:border-sky-900/60 dark:bg-sky-950/40 dark:text-sky-300">
+            <FaCircleInfo size={9} />
+            {freeCaloriesLabel} חופשי
+          </span>
+        )}
+        {caloriesLabel && (
           <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-bold text-amber-700 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-300">
             <FaFire size={9} />
-            {preset.calories} קל׳
+            {caloriesLabel} קל׳
           </span>
         )}
       </div>
@@ -168,19 +190,19 @@ const DietPlanPresetCard: React.FC<DietPlanPresetCardProps> = ({
           <MacroStat
             icon={<FaDrumstickBite size={9} />}
             label="חלבון"
-            value={preset.proteinServings}
+            value={resolvedMeta.proteinServings}
             tone="rose"
           />
           <MacroStat
             icon={<FaBreadSlice size={9} />}
-            label="פחמ׳"
-            value={preset.carbServings}
+            label="פחמ״ג"
+            value={resolvedMeta.carbServings}
             tone="amber"
           />
           <MacroStat
             icon={<FaDroplet size={9} />}
             label="שומן"
-            value={preset.fatServings}
+            value={resolvedMeta.fatServings}
             tone="sky"
           />
         </div>
