@@ -239,9 +239,7 @@ const UserCheckIn = () => {
               className={getTabButtonClassName(active)}
             >
               <span>{tab.label}</span>
-              <span className={getCountBadgeClassName(active)}>
-                {count}
-              </span>
+              <span className={getCountBadgeClassName(active)}>{count}</span>
             </button>
           );
         })}

@@ -17,7 +17,7 @@ const useFormResponsesApi = () => {
 
   const getUsersLatestResponse = (userId: string) => {
     return fetchData<ApiResponse<FormResponse>>(FORM_RESPONSES_API + "/user/latest", { userId });
-  }
+  };
 
   const updateFormResponse = (id: string, updatedResponse: Partial<FormResponse>) => {
     return updateItem<ApiResponse<FormResponse>>(
@@ -46,7 +46,7 @@ const useFormResponsesApi = () => {
     deleteFormById,
     updateFormResponse,
     toggleIsCheckedResponse,
-    getUsersLatestResponse
+    getUsersLatestResponse,
   };
 };
 

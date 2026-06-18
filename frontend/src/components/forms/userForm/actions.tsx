@@ -6,8 +6,7 @@ const getSubmitLabel = (isPending: boolean, isEdit: boolean) => {
   return isEdit ? "שמירת שינויים" : "הוספת מתאמן";
 };
 
-const getDeleteConfirmLabel = (isPending: boolean) =>
-  isPending ? "מוחק..." : "כן, מחק לצמיתות";
+const getDeleteConfirmLabel = (isPending: boolean) => (isPending ? "מוחק..." : "כן, מחק לצמיתות");
 
 export const ActionBar = ({
   isDeletePending,

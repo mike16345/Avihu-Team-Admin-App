@@ -218,11 +218,7 @@ export const DietaryRestrictionsSection = ({
             onClick={() => onDietaryToggle(option)}
             className={getDietaryOptionClassName(selected)}
           >
-            {selected ? (
-              <FaCheck size={9} />
-            ) : (
-              <FaXmark size={9} className="opacity-30" />
-            )}
+            {selected ? <FaCheck size={9} /> : <FaXmark size={9} className="opacity-30" />}
             <span>{option}</span>
           </button>
         );

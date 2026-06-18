@@ -181,9 +181,7 @@ export const ViewDietPlanPage = ({ embedded = false }: ViewDietPlanPageProps) =>
 
   return (
     <div dir="rtl" className="flex flex-col gap-4 size-full font-heebo">
-      {!embedded && (
-        <DietPlanPageHeader backLink={userProfileDietTab} user={user} userId={id} />
-      )}
+      {!embedded && <DietPlanPageHeader backLink={userProfileDietTab} user={user} userId={id} />}
 
       <Form {...form}>
         {embedded && <DietPlanStatsStrip />}

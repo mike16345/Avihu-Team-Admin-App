@@ -10,7 +10,11 @@ import UsersEmptyState from "@/components/users/UsersEmptyState";
 import UsersPageHeader from "@/components/users/UsersPageHeader";
 import UsersStatsSummary from "@/components/users/UsersStatsSummary";
 import UsersToolbar from "@/components/users/UsersToolbar";
-import { filterUsers, getUsersStats, sortUsersByFinishedDate } from "@/components/users/usersPageUtils";
+import {
+  filterUsers,
+  getUsersStats,
+  sortUsersByFinishedDate,
+} from "@/components/users/usersPageUtils";
 import type { StatusFilter } from "@/components/users/usersPageTypes";
 
 export const UsersPage = () => {

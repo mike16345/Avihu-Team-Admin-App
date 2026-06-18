@@ -92,10 +92,7 @@ const DietPlanStatsStrip: React.FC = () => {
   const supplementMark = hasTextContent(supplements) ? "✓" : "—";
 
   return (
-    <div
-      dir="rtl"
-      className="grid grid-cols-2 gap-3 font-heebo md:grid-cols-4"
-    >
+    <div dir="rtl" className="grid grid-cols-2 gap-3 font-heebo md:grid-cols-4">
       <StatCard
         tone="emerald"
         icon={<FaBowlFood size={16} />}

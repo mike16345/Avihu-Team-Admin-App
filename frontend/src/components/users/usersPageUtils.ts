@@ -16,8 +16,7 @@ export const sortUsersByFinishedDate = (users: IUser[] | undefined) => {
 
     if (firstHasDate && secondHasDate) {
       return (
-        new Date(secondUser.dateFinished!).getTime() -
-        new Date(firstUser.dateFinished!).getTime()
+        new Date(secondUser.dateFinished!).getTime() - new Date(firstUser.dateFinished!).getTime()
       );
     }
 
