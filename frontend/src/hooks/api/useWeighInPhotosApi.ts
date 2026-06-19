@@ -1,4 +1,4 @@
-import { deleteItem, fetchData } from "@/API/api";
+import { deleteItem, fetchData, sendData, updateItem } from "@/API/api";
 import { Photo } from "@/components/UserDashboard/WeightProgression/WeightProgressionPhotos";
 import axiosInstance from "@/config/apiConfig";
 import { ApiResponse } from "@/types/types";
@@ -27,11 +27,40 @@ export const useWeighInPhotosApi = () => {
     });
   };
 
+  const addUserImageUrl = (userId: string, imageUrl: string) =>
+    sendData<ApiResponse<string[]>>(USER_IMAGE_URLS_ENDPOINT, {
+      userId,
+      imageUrl,
+    });
+
+  const replaceUserImageUrl = (userId: string, oldImageUrl: string, newImageUrl: string) =>
+    updateItem<ApiResponse<string[]>>(USER_IMAGE_URLS_ENDPOINT + "/one", {
+      userId,
+      oldImageUrl,
+      newImageUrl,
+    });
+
+  const deleteUserImage = (userId: string, photoId: string, imageUrl: string) =>
+    deleteItem<ApiResponse<string[]>>("s3/photos/one", undefined, undefined, {
+      userId,
+      photoId,
+      imageUrl,
+    });
+
+  const deletePhotoObject = (photoId: string) =>
+    deleteItem<ApiResponse<string>>("s3/photos/one", undefined, undefined, {
+      photoId,
+    });
+
   return {
+    addUserImageUrl,
+    deletePhotoObject,
+    deleteUserImage,
     getWeighInPhotosByUserId,
     deleteWeighInPhotos,
     getUserImageUrls,
     deleteWeighInPhotosByUserId,
     getWeighInPhotosById,
+    replaceUserImageUrl,
   };
 };

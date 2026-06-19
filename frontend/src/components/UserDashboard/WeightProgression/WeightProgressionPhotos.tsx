@@ -5,18 +5,17 @@ import { toast } from "sonner";
 import { FaCamera, FaXmark, FaShare, FaArrowsRotate, FaTrash } from "react-icons/fa6";
 import { FaUpload } from "react-icons/fa";
 
-import { deleteItem, sendData } from "@/API/api";
 import DeleteModal from "@/components/Alerts/DeleteModal";
 import CustomSelect from "@/components/ui/CustomSelect";
 import Loader from "@/components/ui/Loader";
 import { determineServerUrl } from "@/config/apiConfig";
+import { useWeighInPhotosApi } from "@/hooks/api/useWeighInPhotosApi";
 import useUserWeighInPhotosQuery from "@/hooks/queries/weighInPhotos/useUserWeighInPhotosQuery";
-import { ApiResponse } from "@/types/types";
+import { buildPhotoUrls } from "@/lib/utils";
 
 export type Photo = { url?: string; _id?: string; date?: string };
 
 const ANGLE_LABELS = ["מלפנים", "מאחור", "מהצד ימין", "מהצד שמאל"];
-const HIDDEN_KEYS_STORAGE = "avihu_hidden_photo_keys";
 
 type PhotoSlot = { label: string; url?: string; storageKey?: string };
 type PhotoGroup = {
@@ -24,29 +23,6 @@ type PhotoGroup = {
   uploadDate?: string;
   photos: PhotoSlot[];
 };
-
-function readHiddenKeys(userId: string): Set<string> {
-  try {
-    const raw = localStorage.getItem(HIDDEN_KEYS_STORAGE);
-    const all = raw ? (JSON.parse(raw) as Record<string, string[]>) : {};
-    return new Set(all[userId] || []);
-  } catch {
-    return new Set();
-  }
-}
-
-function addHiddenKey(userId: string, key: string) {
-  try {
-    const raw = localStorage.getItem(HIDDEN_KEYS_STORAGE);
-    const all = raw ? (JSON.parse(raw) as Record<string, string[]>) : {};
-    const list = new Set(all[userId] || []);
-    list.add(key);
-    all[userId] = Array.from(list);
-    localStorage.setItem(HIDDEN_KEYS_STORAGE, JSON.stringify(all));
-  } catch {
-    /* localStorage unavailable */
-  }
-}
 
 function extractUploadDate(storageKey?: string): string | undefined {
   if (!storageKey) return undefined;
@@ -92,6 +68,8 @@ function groupPhotos(photos: string[]): PhotoGroup[] {
 export const WeightProgressionPhotos: FC = () => {
   const { id } = useParams();
   const queryClient = useQueryClient();
+  const { addUserImageUrl, deletePhotoObject, deleteUserImage, replaceUserImageUrl } =
+    useWeighInPhotosApi();
   const { data: photos = [], isLoading } = useUserWeighInPhotosQuery(id);
 
   const [compareOpen, setCompareOpen] = useState(false);
@@ -105,18 +83,7 @@ export const WeightProgressionPhotos: FC = () => {
   const replaceInputRef = useRef<HTMLInputElement | null>(null);
   const pendingReplaceKeyRef = useRef<string | null>(null);
 
-  const visiblePhotos = useMemo(() => {
-    if (!id) return photos as string[];
-    const hidden = readHiddenKeys(id);
-    if (hidden.size === 0) return photos as string[];
-
-    return (photos as string[]).filter((url) => {
-      const key = extractStorageKey(url);
-      return !key || !hidden.has(key);
-    });
-  }, [photos, id]);
-
-  const groups = useMemo(() => groupPhotos(visiblePhotos), [visiblePhotos]);
+  const groups = useMemo(() => groupPhotos(photos as string[]), [photos]);
 
   const openCompareAtAngle = (angleIndex: number) => {
     if (groups.length < 2) return;
@@ -126,18 +93,25 @@ export const WeightProgressionPhotos: FC = () => {
     setCompareOpen(true);
   };
 
-  const refresh = () => {
-    queryClient.invalidateQueries({ queryKey: [id + "-photos"] });
+  const setPhotosFromStoredUrls = (imageUrls: string[]) => {
+    if (!id) return;
+
+    queryClient.setQueryData([id + "-photos"], buildPhotoUrls(imageUrls));
   };
 
-  const uploadFiles = async (files: FileList): Promise<number> => {
-    if (!id || !files.length) return 0;
+  const uploadFiles = async (
+    files: FileList,
+    options?: { persistToUserImages?: boolean; showCompletionToast?: boolean }
+  ): Promise<string[]> => {
+    if (!id || !files.length) return [];
 
     const fileArr = Array.from(files);
     const total = fileArr.length;
     const today = new Date().toISOString().split("T")[0];
     const apiBase = determineServerUrl();
-    let uploaded = 0;
+    const persistToUserImages = options?.persistToUserImages !== false;
+    const showCompletionToast = options?.showCompletionToast !== false;
+    const uploadedStorageKeys: string[] = [];
     let lastError: string | null = null;
     let authExpired = false;
 
@@ -171,11 +145,12 @@ export const WeightProgressionPhotos: FC = () => {
 
         const urlToStore = `${id}/${today}/${imageName}`;
         try {
-          await sendData<ApiResponse<string[]>>("userImageUrls", {
-            userId: id,
-            imageUrl: urlToStore,
-          });
-          uploaded += 1;
+          if (persistToUserImages) {
+            const response = await addUserImageUrl(id, urlToStore);
+            setPhotosFromStoredUrls(response.data);
+          }
+
+          uploadedStorageKeys.push(urlToStore);
         } catch (error: any) {
           const status = error?.status || error?.response?.status;
           if (status === 401) {
@@ -192,11 +167,11 @@ export const WeightProgressionPhotos: FC = () => {
 
     setUploading(false);
 
+    const uploaded = uploadedStorageKeys.length;
     const failed = total - uploaded;
     const photosWord = (count: number) => (count === 1 ? "תמונה אחת" : `${count} תמונות`);
 
-    if (uploaded > 0) {
-      refresh();
+    if (uploaded > 0 && showCompletionToast) {
       if (failed === 0) {
         toast.success(uploaded === 1 ? "התמונה הועלתה בהצלחה!" : `${uploaded} תמונות הועלו בהצלחה!`);
       } else {
@@ -204,40 +179,36 @@ export const WeightProgressionPhotos: FC = () => {
           `הועלו ${photosWord(uploaded)} · נכשלו ${photosWord(failed)}${lastError ? ` — ${lastError}` : ""}`
         );
       }
-    } else if (authExpired) {
+    } else if (authExpired && showCompletionToast) {
       toast.error("ההתחברות פגה — התנתק והתחבר מחדש כדי להעלות תמונות");
-    } else if (total === 1) {
+    } else if (total === 1 && showCompletionToast) {
       toast.error(lastError || "ההעלאה נכשלה");
-    } else {
+    } else if (showCompletionToast) {
       toast.error(`כל ההעלאות נכשלו (${total} תמונות)${lastError ? ` — ${lastError}` : ""}`);
     }
 
-    return uploaded;
+    return uploadedStorageKeys;
   };
 
   const deletePhoto = async (storageKey: string) => {
-    if (!id || !storageKey) return false;
+    if (!id || !storageKey) return null;
 
     const s3Key = `images/${storageKey}`;
     try {
-      await deleteItem<ApiResponse<string>>("s3/photos/one", undefined, undefined, {
-        photoId: s3Key,
-        userId: id,
-      });
-      addHiddenKey(id, storageKey);
-      return true;
+      const response = await deleteUserImage(id, s3Key, storageKey);
+      return response.data;
     } catch (error: any) {
       const status = error?.status || error?.response?.status;
       if (status === 401) {
         toast.error("ההתחברות פגה — התנתק והתחבר מחדש");
-        return false;
+        return null;
       }
       if (status === 404 || status === 405) {
         toast.error("מחיקת תמונה אינה זמינה כרגע — צריך פריסת שרת");
-        return false;
+        return null;
       }
       toast.error(`שגיאה במחיקת התמונה (${status || "?"})`);
-      return false;
+      return null;
     }
   };
 
@@ -252,11 +223,11 @@ export const WeightProgressionPhotos: FC = () => {
     const storageKey = pendingDeleteSlot.storageKey;
     setPendingDeleteSlot(null);
     setBusyKey(storageKey);
-    const success = await deletePhoto(storageKey);
+    const updatedImageUrls = await deletePhoto(storageKey);
     setBusyKey(null);
 
-    if (success) {
-      refresh();
+    if (updatedImageUrls) {
+      setPhotosFromStoredUrls(updatedImageUrls);
       toast.success("התמונה נמחקה");
     }
   };
@@ -273,14 +244,41 @@ export const WeightProgressionPhotos: FC = () => {
     if (!key || !files || !files.length) return;
 
     setBusyKey(key);
-    const uploadedCount = await uploadFiles(files);
-    if (uploadedCount > 0) {
-      const deleted = await deletePhoto(key);
-      if (deleted) {
-        refresh();
+    const uploadedKeys = await uploadFiles(files, {
+      persistToUserImages: false,
+      showCompletionToast: false,
+    });
+
+    if (uploadedKeys.length > 0 && id) {
+      const newStorageKey = uploadedKeys[0];
+
+      try {
+        const replaceResponse = await replaceUserImageUrl(id, key, newStorageKey);
+        setPhotosFromStoredUrls(replaceResponse.data);
+
+        try {
+          await deletePhotoObject(`images/${key}`);
+        } catch {
+          console.error("Failed to delete replaced photo object from S3:", key);
+        }
+
         toast.success("התמונה הוחלפה");
+      } catch (error: any) {
+        try {
+          await deletePhotoObject(`images/${newStorageKey}`);
+        } catch {
+          console.error("Failed to clean up newly uploaded replacement image:", newStorageKey);
+        }
+
+        const status = error?.status || error?.response?.status;
+        if (status === 401) {
+          toast.error("ההתחברות פגה — התנתק והתחבר מחדש");
+        } else {
+          toast.error(`שגיאה בהחלפת התמונה (${status || "?"})`);
+        }
       }
     }
+
     setBusyKey(null);
   };
 
