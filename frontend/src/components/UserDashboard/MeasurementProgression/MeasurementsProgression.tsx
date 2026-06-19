@@ -3,14 +3,7 @@ import { useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import moment from "moment-timezone";
 import { toast } from "sonner";
-import {
-  FaFloppyDisk,
-  FaHeartPulse,
-  FaPencil,
-  FaPlus,
-  FaTrash,
-  FaXmark,
-} from "react-icons/fa6";
+import { FaFloppyDisk, FaHeartPulse, FaPencil, FaPlus, FaTrash, FaXmark } from "react-icons/fa6";
 
 import DeleteModal from "@/components/Alerts/DeleteModal";
 import { QueryKeys } from "@/enums/QueryKeys";
@@ -74,14 +67,13 @@ const MeasurementsProgression = () => {
   const { id } = useParams();
   const queryClient = useQueryClient();
   const { data, isLoading, isError, error } = useMeasurementQuery(id);
-  const { addMeasurement, updateMeasurement, deleteMeasurement } = useMeasurementApi();
+  const { addMeasurement, updateMeasurement, deleteMeasurementRow } = useMeasurementApi();
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<IMuscleMeasurement | null>(null);
   const [saving, setSaving] = useState(false);
-  const [pendingDeleteMeasurement, setPendingDeleteMeasurement] = useState<IMuscleMeasurement | null>(
-    null
-  );
+  const [pendingDeleteMeasurement, setPendingDeleteMeasurement] =
+    useState<IMuscleMeasurement | null>(null);
 
   const measurements: IMuscleMeasurement[] = useMemo(() => {
     if (!data?.measurements) return [];
@@ -169,11 +161,10 @@ const MeasurementsProgression = () => {
   };
 
   const confirmDelete = async () => {
-    if (!id || !pendingDeleteMeasurement?.date) return;
+    if (!pendingDeleteMeasurement || !pendingDeleteMeasurement._id) return;
 
     try {
-      const iso = moment(pendingDeleteMeasurement.date, "DD/MM/YYYY").toISOString();
-      await deleteMeasurement(id, iso);
+      await deleteMeasurementRow(pendingDeleteMeasurement._id);
       toast.success("המדידה נמחקה");
       refresh();
       setPendingDeleteMeasurement(null);
@@ -453,7 +444,8 @@ function EditRow({
       </td>
       {columns.map((column) => {
         const value = draft[column.key] as number;
-        const display = typeof value === "number" && !Number.isNaN(value) && value !== 0 ? value : "";
+        const display =
+          typeof value === "number" && !Number.isNaN(value) && value !== 0 ? value : "";
 
         return (
           <td key={column.key} className="px-4 py-3 text-center">
