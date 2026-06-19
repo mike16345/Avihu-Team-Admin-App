@@ -1,15 +1,24 @@
 import { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { FaHeartPulse, FaPencil, FaPlus, FaFloppyDisk, FaXmark, FaTrash } from "react-icons/fa6";
 import moment from "moment-timezone";
 import { toast } from "sonner";
+import {
+  FaFloppyDisk,
+  FaHeartPulse,
+  FaPencil,
+  FaPlus,
+  FaTrash,
+  FaXmark,
+} from "react-icons/fa6";
+
+import DeleteModal from "@/components/Alerts/DeleteModal";
+import { QueryKeys } from "@/enums/QueryKeys";
+import { IMuscleMeasurement } from "@/interfaces/measurements";
 import { useMeasurementApi } from "@/hooks/api/useMeasurementsApi";
 import useMeasurementQuery from "@/hooks/queries/measurements/useMeasurementQuery";
-import { QueryKeys } from "@/enums/QueryKeys";
 import Loader from "@/components/ui/Loader";
 import ErrorPage from "@/pages/ErrorPage";
-import { IMuscleMeasurement } from "@/interfaces/measurements";
 
 type MeasurementKey = "chest" | "arm" | "waist" | "glutes" | "thigh" | "calf";
 
@@ -34,7 +43,7 @@ const blankMeasurement = (): IMuscleMeasurement =>
   }) as IMuscleMeasurement;
 
 const cleanMeasurementNumber = (value: unknown) =>
-  typeof value === "number" && !isNaN(value) ? value : 0;
+  typeof value === "number" && !Number.isNaN(value) ? value : 0;
 
 const toMeasurementPayload = (draft: IMuscleMeasurement): IMuscleMeasurement => ({
   ...draft,
@@ -70,12 +79,15 @@ const MeasurementsProgression = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<IMuscleMeasurement | null>(null);
   const [saving, setSaving] = useState(false);
+  const [pendingDeleteMeasurement, setPendingDeleteMeasurement] = useState<IMuscleMeasurement | null>(
+    null
+  );
 
   const measurements: IMuscleMeasurement[] = useMemo(() => {
     if (!data?.measurements) return [];
-    return data.measurements.map((m: IMuscleMeasurement) => ({
-      ...m,
-      date: m.date ? moment(m.date).format("DD/MM/YYYY") : "",
+    return data.measurements.map((measurement: IMuscleMeasurement) => ({
+      ...measurement,
+      date: measurement.date ? moment(measurement.date).format("DD/MM/YYYY") : "",
     }));
   }, [data]);
 
@@ -93,17 +105,19 @@ const MeasurementsProgression = () => {
   const earliest = sorted[sorted.length - 1];
 
   const getDelta = (key: MeasurementKey) => {
-    if (!latest || !earliest)
+    if (!latest || !earliest) {
       return { text: "0", color: "text-slate-400 dark:text-slate-500", arrow: "" };
+    }
+
     const diff = (latest[key] as number) - (earliest[key] as number);
     if (diff === 0) return { text: "0", color: "text-slate-400 dark:text-slate-500", arrow: "" };
     if (diff < 0) return { text: `${diff}`, color: "text-emerald-600", arrow: "↓" };
     return { text: `+${diff}`, color: "text-rose-600", arrow: "↑" };
   };
 
-  const startEdit = (m: IMuscleMeasurement) => {
-    setEditingId(m._id || m.date);
-    setDraft({ ...m });
+  const startEdit = (measurement: IMuscleMeasurement) => {
+    setEditingId(measurement._id || measurement.date);
+    setDraft({ ...measurement });
   };
 
   const startNew = () => {
@@ -122,17 +136,19 @@ const MeasurementsProgression = () => {
 
   const saveEdit = async () => {
     if (!draft || !id) return;
+
     setSaving(true);
     try {
       const payload = toMeasurementPayload(draft);
-      const res: any =
+      const response: any =
         editingId === "__new__"
           ? await addMeasurement(id, payload)
           : await updateMeasurement(id, payload);
+
       toast.success(editingId === "__new__" ? "המדידה נוספה בהצלחה!" : "המדידה עודכנה בהצלחה!");
 
-      if (res?.data) {
-        queryClient.setQueryData([QueryKeys.USER_MEASUREMENTS + id], res.data);
+      if (response?.data) {
+        queryClient.setQueryData([QueryKeys.USER_MEASUREMENTS + id], response.data);
       } else {
         refresh();
       }
@@ -147,15 +163,20 @@ const MeasurementsProgression = () => {
     }
   };
 
-  const handleDelete = async (measurement: IMuscleMeasurement) => {
+  const requestDelete = (measurement: IMuscleMeasurement) => {
     if (!id || !measurement.date) return;
-    if (!window.confirm(`למחוק את המדידה מ-${measurement.date}?`)) return;
-    try {
-      const iso = moment(measurement.date, "DD/MM/YYYY").toISOString();
+    setPendingDeleteMeasurement(measurement);
+  };
 
+  const confirmDelete = async () => {
+    if (!id || !pendingDeleteMeasurement?.date) return;
+
+    try {
+      const iso = moment(pendingDeleteMeasurement.date, "DD/MM/YYYY").toISOString();
       await deleteMeasurement(id, iso);
       toast.success("המדידה נמחקה");
       refresh();
+      setPendingDeleteMeasurement(null);
     } catch (err) {
       console.error(err);
       toast.error("שגיאה במחיקת המדידה");
@@ -166,8 +187,9 @@ const MeasurementsProgression = () => {
 
   const errorStatus = (error as any)?.status;
   const isPermissionError = errorStatus === 401 || errorStatus === 403;
-  if (isError && errorStatus !== 404 && !isPermissionError)
+  if (isError && errorStatus !== 404 && !isPermissionError) {
     return <ErrorPage message={(error as any)?.message} />;
+  }
 
   return (
     <div dir="rtl" className="flex flex-col gap-4 font-heebo">
@@ -175,8 +197,8 @@ const MeasurementsProgression = () => {
         <MeasurementSummaryCards columns={COLUMNS} latest={latest} getDelta={getDelta} />
       )}
 
-      <div className="overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 shadow-sm">
-        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 px-4 py-3">
+      <div className="overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-800/80 dark:bg-slate-900">
+        <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-slate-800">
           <div className="flex items-center gap-2">
             <FaHeartPulse size={15} className="text-purple-600" />
             <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">מעקב היקפים</h3>
@@ -204,16 +226,16 @@ const MeasurementsProgression = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-slate-50/60 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400">
+                <tr className="bg-slate-50/60 text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
                   <th className="px-4 py-2 text-right text-xs font-semibold uppercase tracking-wider">
                     תאריך
                   </th>
-                  {COLUMNS.map((c) => (
+                  {COLUMNS.map((column) => (
                     <th
-                      key={c.key}
+                      key={column.key}
                       className="px-4 py-2 text-center text-xs font-semibold uppercase tracking-wider"
                     >
-                      {c.label}
+                      {column.label}
                     </th>
                   ))}
                   <th className="px-4 py-2 text-center text-xs font-semibold uppercase tracking-wider">
@@ -233,8 +255,9 @@ const MeasurementsProgression = () => {
                     highlight
                   />
                 )}
-                {sorted.map((m, i) => {
-                  const rowId = m._id || m.date;
+
+                {sorted.map((measurement, index) => {
+                  const rowId = measurement._id || measurement.date;
                   const isEditingThis = editingId === rowId;
                   if (isEditingThis && draft) {
                     return (
@@ -249,15 +272,16 @@ const MeasurementsProgression = () => {
                       />
                     );
                   }
+
                   return (
                     <MeasurementDisplayRow
                       key={rowId}
                       columns={COLUMNS}
-                      measurement={m}
-                      isLatest={i === 0}
+                      measurement={measurement}
+                      isLatest={index === 0}
                       actionsDisabled={editingId !== null}
-                      onEdit={() => startEdit(m)}
-                      onDelete={() => handleDelete(m)}
+                      onEdit={() => startEdit(measurement)}
+                      onDelete={() => requestDelete(measurement)}
                     />
                   );
                 })}
@@ -266,6 +290,27 @@ const MeasurementsProgression = () => {
           </div>
         )}
       </div>
+
+      <DeleteModal
+        isModalOpen={!!pendingDeleteMeasurement}
+        setIsModalOpen={(open) => {
+          if (!open) setPendingDeleteMeasurement(null);
+        }}
+        onCancel={() => setPendingDeleteMeasurement(null)}
+        onConfirm={confirmDelete}
+        title={
+          pendingDeleteMeasurement
+            ? `למחוק את המדידה מ-${pendingDeleteMeasurement.date}?`
+            : "למחוק מדידה?"
+        }
+        alertMessage={
+          <>
+            המדידה תוסר מהיסטוריית ההתקדמות של המתאמן.
+            <br />
+            פעולה זו אינה ניתנת לביטול.
+          </>
+        }
+      />
     </div>
   );
 };
@@ -286,14 +331,14 @@ function MeasurementSummaryCards({
         return (
           <div
             key={column.key}
-            className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-3 shadow-sm"
+            className="rounded-xl border border-slate-200/80 bg-white p-3 shadow-sm dark:border-slate-800/80 dark:bg-slate-900"
           >
             <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               {column.label}
             </p>
             <p className={`mt-1 text-2xl font-bold ${column.color}`}>
               {latest?.[column.key] ?? "—"}
-              <span className="text-xs text-slate-400 dark:text-slate-500 me-1">ס״מ</span>
+              <span className="me-1 text-xs text-slate-400 dark:text-slate-500">ס״מ</span>
             </p>
             <p className={`mt-0.5 text-xs font-semibold ${delta.color}`}>
               {delta.arrow} {delta.text} מהתחלה
@@ -322,7 +367,7 @@ function MeasurementDisplayRow({
 }) {
   return (
     <tr
-      className={`border-t border-slate-100 dark:border-slate-800 transition-colors ${
+      className={`border-t border-slate-100 transition-colors dark:border-slate-800 ${
         isLatest ? "bg-blue-50/30 hover:bg-blue-50/50" : "hover:bg-slate-50/60"
       }`}
     >
@@ -342,6 +387,7 @@ function MeasurementDisplayRow({
           isEmpty,
           isLatest,
         });
+
         return (
           <td key={column.key} className={`px-4 py-3 text-center font-semibold ${valueClassName}`}>
             {isEmpty ? "—" : value}
@@ -353,7 +399,7 @@ function MeasurementDisplayRow({
           <button
             onClick={onEdit}
             disabled={actionsDisabled}
-            className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 transition-colors hover:border-blue-300 hover:text-blue-600 disabled:opacity-40"
+            className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-colors hover:border-blue-300 hover:text-blue-600 disabled:opacity-40 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400"
             aria-label="ערוך"
           >
             <FaPencil size={10} />
@@ -361,7 +407,7 @@ function MeasurementDisplayRow({
           <button
             onClick={onDelete}
             disabled={actionsDisabled}
-            className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 transition-colors hover:border-red-300 hover:text-red-600 disabled:opacity-40"
+            className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-colors hover:border-red-300 hover:text-red-600 disabled:opacity-40 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400"
             aria-label="מחק"
           >
             <FaTrash size={10} />
@@ -383,7 +429,7 @@ function EditRow({
 }: {
   columns: { key: MeasurementKey; label: string; color: string }[];
   draft: IMuscleMeasurement;
-  setDraft: (m: IMuscleMeasurement) => void;
+  setDraft: (measurement: IMuscleMeasurement) => void;
   onSave: () => void;
   onCancel: () => void;
   saving: boolean;
@@ -391,33 +437,36 @@ function EditRow({
 }) {
   return (
     <tr
-      className={`border-t border-slate-100 dark:border-slate-800 ${highlight ? "bg-emerald-50/50" : "bg-blue-50/60"}`}
+      className={`border-t border-slate-100 dark:border-slate-800 ${
+        highlight ? "bg-emerald-50/50" : "bg-blue-50/60"
+      }`}
     >
       <td className="px-4 py-3 text-right">
         <input
           type="text"
           value={draft.date}
-          onChange={(e) => setDraft({ ...draft, date: e.target.value })}
-          className="w-28 rounded-lg border border-slate-300 dark:border-slate-700 px-2 py-1 text-center text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-200"
+          onChange={(event) => setDraft({ ...draft, date: event.target.value })}
+          className="w-28 rounded-lg border border-slate-300 px-2 py-1 text-center text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-200 dark:border-slate-700"
           dir="ltr"
           placeholder="DD/MM/YYYY"
         />
       </td>
-      {columns.map((c) => {
-        const v = draft[c.key] as number;
-        const display = typeof v === "number" && !isNaN(v) && v !== 0 ? v : "";
+      {columns.map((column) => {
+        const value = draft[column.key] as number;
+        const display = typeof value === "number" && !Number.isNaN(value) && value !== 0 ? value : "";
+
         return (
-          <td key={c.key} className="px-4 py-3 text-center">
+          <td key={column.key} className="px-4 py-3 text-center">
             <input
               type="number"
               value={display}
-              onChange={(e) => {
-                const raw = e.target.value;
+              onChange={(event) => {
+                const raw = event.target.value;
                 const num = raw === "" ? NaN : Number(raw);
-                setDraft({ ...draft, [c.key]: num } as IMuscleMeasurement);
+                setDraft({ ...draft, [column.key]: num } as IMuscleMeasurement);
               }}
               placeholder="—"
-              className="w-16 rounded-lg border border-slate-300 dark:border-slate-700 px-2 py-1 text-center text-sm placeholder:text-slate-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-200"
+              className="w-16 rounded-lg border border-slate-300 px-2 py-1 text-center text-sm placeholder:text-slate-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-200 dark:border-slate-700"
             />
           </td>
         );
@@ -427,7 +476,7 @@ function EditRow({
           <button
             onClick={onSave}
             disabled={saving}
-            className="inline-flex h-7 items-center gap-1 rounded-lg brand-gradient brand-gradient-hover px-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 disabled:opacity-60 disabled:hover:translate-y-0"
+            className="inline-flex h-7 items-center gap-1 rounded-lg bg-blue-600 px-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-blue-700 disabled:opacity-60 disabled:hover:translate-y-0"
           >
             <FaFloppyDisk size={9} />
             <span>{saving ? "שומר..." : "שמור"}</span>
@@ -435,7 +484,7 @@ function EditRow({
           <button
             onClick={onCancel}
             disabled={saving}
-            className="inline-flex h-7 items-center gap-1 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-2.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100"
+            className="inline-flex h-7 items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
           >
             <FaXmark size={9} />
             <span>בטל</span>

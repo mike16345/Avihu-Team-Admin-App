@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   FaArrowLeft,
   FaBreadSlice,
@@ -11,6 +11,8 @@ import {
   FaUser,
   FaUtensils,
 } from "react-icons/fa6";
+
+import DeleteModal from "@/components/Alerts/DeleteModal";
 import {
   dietaryRestrictionLabel,
   dietaryRestrictionTone,
@@ -20,6 +22,7 @@ import {
   parseDietNumber,
   resolveDietPresetMeta,
 } from "@/lib/dietMeta";
+
 import DietFavoriteStar from "./DietFavoriteStar";
 import { DietPresetItem } from "./dietPlanPresetGridUtils";
 
@@ -47,7 +50,6 @@ const MACRO_TONE: Record<"rose" | "amber" | "sky", { bg: string; text: string }>
 
 const getPresetSubtitle = (goalLabel?: string, calories?: unknown) => {
   const formattedCalories = formatDietNumber(calories);
-
   return [goalLabel, formattedCalories ? `${formattedCalories} קל׳` : null]
     .filter(Boolean)
     .join(" · ");
@@ -95,6 +97,8 @@ const DietPlanPresetCard: React.FC<DietPlanPresetCardProps> = ({
   onOpen,
   onDelete,
 }) => {
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
   const resolvedMeta = resolveDietPresetMeta(preset);
   const goalTone = dietGoalTone(preset.goal);
   const goalLabel = dietGoalLabel(preset.goal);
@@ -113,8 +117,7 @@ const DietPlanPresetCard: React.FC<DietPlanPresetCardProps> = ({
 
   const handleDelete = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
-
-    if (preset._id && confirm(`למחוק את "${preset.name}"?`)) onDelete(preset._id);
+    if (preset._id) setIsDeleteOpen(true);
   };
 
   return (
@@ -139,7 +142,7 @@ const DietPlanPresetCard: React.FC<DietPlanPresetCardProps> = ({
 
         <div className="flex items-center gap-1">
           <DietFavoriteStar presetId={preset._id} />
-          <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+          <div className="flex items-center gap-1 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
             <button
               type="button"
               onClick={(event) => {
@@ -195,7 +198,7 @@ const DietPlanPresetCard: React.FC<DietPlanPresetCardProps> = ({
           />
           <MacroStat
             icon={<FaBreadSlice size={9} />}
-            label="פחמ״ג"
+            label='פחמ"ג'
             value={resolvedMeta.carbServings}
             tone="amber"
           />
@@ -241,6 +244,24 @@ const DietPlanPresetCard: React.FC<DietPlanPresetCardProps> = ({
           <FaArrowLeft size={8} />
         </span>
       </div>
+
+      <DeleteModal
+        isModalOpen={isDeleteOpen}
+        setIsModalOpen={setIsDeleteOpen}
+        onCancel={() => setIsDeleteOpen(false)}
+        onConfirm={() => {
+          if (preset._id) onDelete(preset._id);
+          setIsDeleteOpen(false);
+        }}
+        title={preset.name ? `למחוק את "${preset.name}"?` : "למחוק את התבנית?"}
+        alertMessage={
+          <>
+            תבנית התזונה תוסר מספריית התבניות.
+            <br />
+            לא ניתן לשחזר את הפעולה הזו.
+          </>
+        }
+      />
     </article>
   );
 };
