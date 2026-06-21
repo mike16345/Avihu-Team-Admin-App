@@ -116,17 +116,20 @@ export function WorkoutTabPanel({
           renders when there's an active temporary plan. */}
       {userId && (
         <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
-          <DialogContent dir="rtl" className="max-w-xl bg-white p-0 font-heebo dark:bg-slate-900">
-            <DialogHeader className="border-b border-slate-100 dark:border-slate-800 p-5 pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl brand-gradient text-white shadow-sm">
-                  <FaClockRotateLeft size={14} />
+          <DialogContent
+            dir="rtl"
+            className="max-w-3xl overflow-hidden bg-white p-0 font-heebo shadow-xl shadow-blue-500/10 dark:bg-slate-900"
+          >
+            <DialogHeader className="border-b border-slate-100 dark:border-slate-800 p-6 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl brand-gradient text-white shadow-md shadow-blue-500/25">
+                  <FaClockRotateLeft size={16} />
                 </div>
                 <div className="text-right">
-                  <DialogTitle className="text-base font-bold text-slate-900 dark:text-slate-100">
+                  <DialogTitle className="text-lg font-bold text-slate-900 dark:text-slate-100">
                     היסטוריית תוכניות אימון
                   </DialogTitle>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     {historyCount > 0
                       ? `${historyCount} תוכניות מארכבות — לצפייה ולשחזור`
                       : "אין עדיין תוכניות בארכיון"}
@@ -134,8 +137,18 @@ export function WorkoutTabPanel({
                 </div>
               </div>
             </DialogHeader>
-            <div className="max-h-[70vh] overflow-y-auto p-5">
-              <WorkoutPlanHistorySection userId={userId} activePlan={undefined} />
+            {/* Body has a generous fixed height for a symmetrical
+                dialog regardless of item count — feels substantial
+                whether the trainer has 2 or 20 archived plans.
+                Scroller is LTR so the scrollbar sits on the right;
+                inner wrapper flips back to RTL for the content. */}
+            <div
+              className="h-[520px] overflow-y-auto bg-slate-50/40 dark:bg-slate-900/40 p-6"
+              dir="ltr"
+            >
+              <div dir="rtl">
+                <WorkoutPlanHistorySection userId={userId} activePlan={undefined} embedded />
+              </div>
             </div>
           </DialogContent>
         </Dialog>

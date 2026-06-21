@@ -20,12 +20,21 @@ interface Props {
   userId: string;
   activePlan?: ICompleteWorkoutPlan | null;
   hideWhenEmpty?: boolean;
+  /** When true (used inside the history Dialog), the section drops
+   *  its own collapsible header and renders the list expanded by
+   *  default — the surrounding Dialog already carries the title. */
+  embedded?: boolean;
 }
 
-const WorkoutPlanHistorySection: FC<Props> = ({ userId, activePlan, hideWhenEmpty = false }) => {
+const WorkoutPlanHistorySection: FC<Props> = ({
+  userId,
+  activePlan,
+  hideWhenEmpty = false,
+  embedded = false,
+}) => {
   const { data, isLoading } = useWorkoutPlanHistoryQuery(userId);
   const [restoringId, setRestoringId] = useState<string | null>(null);
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(embedded);
   const [pendingRestoreId, setPendingRestoreId] = useState<string | null>(null);
 
 
@@ -67,13 +76,21 @@ const WorkoutPlanHistorySection: FC<Props> = ({ userId, activePlan, hideWhenEmpt
   return (
     <section
       dir="rtl"
-      className="flex flex-col gap-3 rounded-2xl border border-blue-100/60 bg-white px-5 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+      className={
+        embedded
+          ? "flex flex-col gap-3"
+          : "flex flex-col gap-3 rounded-2xl border border-blue-100/60 bg-white px-5 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+      }
     >
-      <WorkoutPlanHistoryHeader
-        historyCount={history.length}
-        expanded={expanded}
-        onToggleExpanded={() => setExpanded((currentExpanded) => !currentExpanded)}
-      />
+      {/* Hide the collapsible header in embedded mode — the Dialog
+          already carries the title + count + close. */}
+      {!embedded && (
+        <WorkoutPlanHistoryHeader
+          historyCount={history.length}
+          expanded={expanded}
+          onToggleExpanded={() => setExpanded((currentExpanded) => !currentExpanded)}
+        />
+      )}
 
       {showTempBanner && activePlan && (
         <TemporaryWorkoutPlanBanner
