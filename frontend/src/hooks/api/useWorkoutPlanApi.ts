@@ -38,7 +38,7 @@ export const useWorkoutPlanApi = () => {
   ) => sendData<ICompleteWorkoutPlan>(`${WORKOUT_PLAN_ENDPOINT}/swap`, payload, null, { userId });
 
   const restoreWorkoutPlan = (userId: string, archivedPlanId: string) =>
-    sendData<ICompleteWorkoutPlan>(`${WORKOUT_PLAN_ENDPOINT}/restore`, {}, null, {
+    sendData<ICompleteWorkoutPlan>(`${WORKOUT_PLAN_ENDPOINT}/restore`, { assignedBy: userId }, null, {
       userId,
       archivedPlanId,
     });
