@@ -30,6 +30,7 @@ export interface IUser extends IBaseUser {
   checkInAt: number;
   hasAccess: boolean;
   onboardingCompleted: boolean;
+  profileImage?: string;
   onboardingStep?: "form" | "agreement" | "completed";
   accountStatus?: AccountStatus;
   /**

@@ -7,6 +7,7 @@ import {
   getUserStatusColors,
   getUserStatusLabel,
 } from "./usersPageUtils";
+import { UserAvatar } from "./UserAvatar";
 
 type UsersCardsGridProps = {
   users: IUser[];
@@ -53,9 +54,7 @@ function UserCard({ user, onView }: { user: IUser; onView: () => void }) {
 
       <div className="relative z-10 flex items-start justify-between gap-3 pointer-events-none">
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-400 text-base font-bold text-white">
-            {initials}
-          </div>
+          <UserAvatar user={user} />
           <div>
             <p className="text-base font-bold text-slate-900 dark:text-slate-100">
               {user.firstName} {user.lastName}

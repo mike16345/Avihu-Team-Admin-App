@@ -6,6 +6,8 @@ import { FaCamera, FaXmark, FaShare, FaArrowsRotate, FaTrash } from "react-icons
 import { FaUpload } from "react-icons/fa";
 
 import DeleteModal from "@/components/Alerts/DeleteModal";
+import { SortableItem } from "@/components/DragAndDrop/SortableItem";
+import { DragDropWrapper } from "@/components/Wrappers/DragDropWrapper";
 import CustomSelect from "@/components/ui/CustomSelect";
 import Loader from "@/components/ui/Loader";
 import { determineServerUrl } from "@/config/apiConfig";
@@ -17,7 +19,7 @@ export type Photo = { url?: string; _id?: string; date?: string };
 
 const ANGLE_LABELS = ["מלפנים", "מאחור", "מהצד ימין", "מהצד שמאל"];
 
-type PhotoSlot = { label: string; url?: string; storageKey?: string };
+type PhotoSlot = { id: string; label: string; url?: string; storageKey?: string };
 type PhotoGroup = {
   cycleNumber: number;
   uploadDate?: string;
@@ -50,6 +52,7 @@ function groupPhotos(photos: string[]): PhotoGroup[] {
     const batch = photos.slice(index, index + 4);
     const cycleNumber = Math.floor(index / 4) + 1;
     const slots: PhotoSlot[] = ANGLE_LABELS.map((label, slotIndex) => ({
+      id: extractStorageKey(batch[slotIndex]) || `empty-${cycleNumber}-${slotIndex}`,
       label,
       url: batch[slotIndex],
       storageKey: extractStorageKey(batch[slotIndex]),
@@ -68,8 +71,13 @@ function groupPhotos(photos: string[]): PhotoGroup[] {
 export const WeightProgressionPhotos: FC = () => {
   const { id } = useParams();
   const queryClient = useQueryClient();
-  const { addUserImageUrl, deletePhotoObject, deleteUserImage, replaceUserImageUrl } =
-    useWeighInPhotosApi();
+  const {
+    addUserImageUrl,
+    deletePhotoObject,
+    deleteUserImage,
+    replaceUserImageUrl,
+    swapUserImageUrls,
+  } = useWeighInPhotosApi();
   const { data: photos = [], isLoading } = useUserWeighInPhotosQuery(id);
 
   const [compareOpen, setCompareOpen] = useState(false);
@@ -78,12 +86,14 @@ export const WeightProgressionPhotos: FC = () => {
   const [compareRightGroup, setCompareRightGroup] = useState(0);
   const [uploading, setUploading] = useState(false);
   const [busyKey, setBusyKey] = useState<string | null>(null);
+  const [swappingGroupKey, setSwappingGroupKey] = useState<number | null>(null);
   const [pendingDeleteSlot, setPendingDeleteSlot] = useState<PhotoSlot | null>(null);
 
   const replaceInputRef = useRef<HTMLInputElement | null>(null);
   const pendingReplaceKeyRef = useRef<string | null>(null);
 
   const groups = useMemo(() => groupPhotos(photos as string[]), [photos]);
+  const isSwapPending = swappingGroupKey !== null;
 
   const openCompareAtAngle = (angleIndex: number) => {
     if (groups.length < 2) return;
@@ -155,7 +165,7 @@ export const WeightProgressionPhotos: FC = () => {
           const status = error?.status || error?.response?.status;
           if (status === 401) {
             authExpired = true;
-            lastError = "ההתחברות פגה — צריך להתחבר מחדש";
+            lastError = "ההתחברות פגה - צריך להתחבר מחדש";
             break;
           }
           lastError = `שגיאה ברישום ה-URL (${status || "?"})`;
@@ -176,15 +186,15 @@ export const WeightProgressionPhotos: FC = () => {
         toast.success(uploaded === 1 ? "התמונה הועלתה בהצלחה!" : `${uploaded} תמונות הועלו בהצלחה!`);
       } else {
         toast.warning(
-          `הועלו ${photosWord(uploaded)} · נכשלו ${photosWord(failed)}${lastError ? ` — ${lastError}` : ""}`
+          `הועלו ${photosWord(uploaded)} · נכשלו ${photosWord(failed)}${lastError ? ` - ${lastError}` : ""}`
         );
       }
     } else if (authExpired && showCompletionToast) {
-      toast.error("ההתחברות פגה — התנתק והתחבר מחדש כדי להעלות תמונות");
+      toast.error("ההתחברות פגה - התנתק והתחבר מחדש כדי להעלות תמונות");
     } else if (total === 1 && showCompletionToast) {
       toast.error(lastError || "ההעלאה נכשלה");
     } else if (showCompletionToast) {
-      toast.error(`כל ההעלאות נכשלו (${total} תמונות)${lastError ? ` — ${lastError}` : ""}`);
+      toast.error(`כל ההעלאות נכשלו (${total} תמונות)${lastError ? ` - ${lastError}` : ""}`);
     }
 
     return uploadedStorageKeys;
@@ -200,11 +210,11 @@ export const WeightProgressionPhotos: FC = () => {
     } catch (error: any) {
       const status = error?.status || error?.response?.status;
       if (status === 401) {
-        toast.error("ההתחברות פגה — התנתק והתחבר מחדש");
+        toast.error("ההתחברות פגה - התנתק והתחבר מחדש");
         return null;
       }
       if (status === 404 || status === 405) {
-        toast.error("מחיקת תמונה אינה זמינה כרגע — צריך פריסת שרת");
+        toast.error("מחיקת תמונה אינה זמינה כרגע - צריך פריסת שרת");
         return null;
       }
       toast.error(`שגיאה במחיקת התמונה (${status || "?"})`);
@@ -272,7 +282,7 @@ export const WeightProgressionPhotos: FC = () => {
 
         const status = error?.status || error?.response?.status;
         if (status === 401) {
-          toast.error("ההתחברות פגה — התנתק והתחבר מחדש");
+          toast.error("ההתחברות פגה - התנתק והתחבר מחדש");
         } else {
           toast.error(`שגיאה בהחלפת התמונה (${status || "?"})`);
         }
@@ -280,6 +290,31 @@ export const WeightProgressionPhotos: FC = () => {
     }
 
     setBusyKey(null);
+  };
+
+  const handleSwapPhotos = async (group: PhotoGroup, oldIndex: number, newIndex: number) => {
+    if (!id || oldIndex === newIndex || isSwapPending) return;
+
+    const oldPhoto = group.photos[oldIndex];
+    const newPhoto = group.photos[newIndex];
+    if (!oldPhoto?.storageKey || !newPhoto?.storageKey) return;
+
+    setSwappingGroupKey(group.cycleNumber);
+
+    try {
+      const response = await swapUserImageUrls(id, oldPhoto.storageKey, newPhoto.storageKey);
+      setPhotosFromStoredUrls(response.data);
+      toast.success("סדר התמונות עודכן");
+    } catch (error: any) {
+      const status = error?.status || error?.response?.status;
+      if (status === 401) {
+        toast.error("ההתחברות פגה - התחבר מחדש ונסה שוב");
+      } else {
+        toast.error(`החלפת מיקום התמונות נכשלה (${status || "?"})`);
+      }
+    } finally {
+      setSwappingGroupKey(null);
+    }
   };
 
   if (isLoading) return <Loader size="large" />;
@@ -338,114 +373,144 @@ export const WeightProgressionPhotos: FC = () => {
           </div>
         )}
 
-        <div className="modal-sets-scroll flex max-h-[min(78vh,880px)] flex-col gap-10 pl-2">
-          {groups.map((group) => (
-            <div key={group.cycleNumber}>
-              <div className="mb-4 flex items-center justify-between gap-3">
-                <div className="h-px flex-1 bg-slate-100 dark:bg-slate-800" />
-                <div className="flex items-baseline gap-2 px-4">
-                  <span className="text-sm font-bold text-slate-800 dark:text-slate-100">
-                    מחזור {group.cycleNumber}
-                  </span>
-                  {group.uploadDate && (
-                    <span className="text-xs font-medium text-slate-400 dark:text-slate-500">
-                      · {group.uploadDate}
+        <div className="relative">
+          <div
+            className={`modal-sets-scroll flex max-h-[min(78vh,880px)] flex-col gap-10 pl-2 ${
+              isSwapPending ? "pointer-events-none opacity-70" : ""
+            }`}
+          >
+            {groups.map((group) => (
+              <div key={group.cycleNumber}>
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <div className="h-px flex-1 bg-slate-100 dark:bg-slate-800" />
+                  <div className="flex items-baseline gap-2 px-4">
+                    <span className="text-sm font-bold text-slate-800 dark:text-slate-100">
+                      מחזור {group.cycleNumber}
                     </span>
-                  )}
+                    {group.uploadDate && (
+                      <span className="text-xs font-medium text-slate-400 dark:text-slate-500">
+                        · {group.uploadDate}
+                      </span>
+                    )}
+                  </div>
+                  <div className="h-px flex-1 bg-slate-100 dark:bg-slate-800" />
                 </div>
-                <div className="h-px flex-1 bg-slate-100 dark:bg-slate-800" />
-              </div>
 
-              <div className="grid grid-cols-1 gap-5 min-[420px]:grid-cols-2 sm:grid-cols-4">
-                {group.photos.map((photo, angleIndex) => {
-                  const isBusy = !!photo.storageKey && busyKey === photo.storageKey;
-
-                  if (photo.url) {
-                    return (
-                      <div
-                        key={angleIndex}
-                        className="group relative aspect-[3/4] overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition-all hover:border-blue-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-800"
-                      >
-                        <button
-                          type="button"
-                          onClick={() => openCompareAtAngle(angleIndex)}
-                          className="absolute inset-0 z-0"
-                          aria-label={`פתח השוואה — ${photo.label}`}
-                        >
-                          <img
-                            src={photo.url}
-                            alt={photo.label}
-                            className="h-full w-full object-cover"
-                            loading="lazy"
-                          />
-                        </button>
-
-                        <div className="absolute right-2 top-2 z-10 flex items-center gap-1 opacity-100 transition-opacity md:pointer-events-none md:opacity-0 md:group-hover:pointer-events-auto md:group-hover:opacity-100">
-                          <button
-                            type="button"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              handleReplaceClick(photo);
-                            }}
-                            disabled={isBusy}
-                            title="החלף תמונה"
-                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/95 text-slate-700 shadow-sm transition-all hover:bg-blue-50 hover:text-blue-700 disabled:opacity-50 dark:text-slate-200"
-                          >
-                            <FaArrowsRotate size={12} />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              handleDelete(photo);
-                            }}
-                            disabled={isBusy}
-                            title="מחק תמונה"
-                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/95 text-rose-600 shadow-sm transition-all hover:bg-rose-50 disabled:opacity-50"
-                          >
-                            <FaTrash size={11} />
-                          </button>
-                        </div>
-
-                        {isBusy && (
-                          <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/70 text-xs font-semibold text-slate-700 backdrop-blur-sm dark:text-slate-200">
-                            פועל...
-                          </div>
-                        )}
-
-                        <div className="pointer-events-none absolute inset-x-3 bottom-3 z-10 flex items-center justify-center rounded-lg bg-white/95 py-1.5 text-xs font-semibold text-slate-700 backdrop-blur-sm dark:text-slate-200">
-                          {photo.label}
-                        </div>
-                      </div>
-                    );
-                  }
-
-                  return (
-                    <label
-                      key={angleIndex}
-                      className="group relative aspect-[3/4] cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition-all hover:border-blue-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-800"
+                <div className="overflow-x-auto pb-2">
+                  <div className="min-w-[880px]">
+                    <DragDropWrapper
+                      items={group.photos}
+                      idKey="id"
+                      strategy="horizontal"
+                      onMove={(oldIndex, newIndex) => handleSwapPhotos(group, oldIndex, newIndex)}
                     >
-                      <input
-                        type="file"
-                        accept="image/*"
-                        disabled={uploading}
-                        className="hidden"
-                        onChange={(event) => {
-                          const files = event.target.files;
-                          if (files && files.length) uploadFiles(files);
-                          event.target.value = "";
-                        }}
-                      />
-                      <div className="flex h-full w-full flex-col items-center justify-center gap-3 text-slate-400 transition-colors group-hover:text-blue-500 dark:text-slate-500">
-                        <FaCamera size={32} />
-                        <span className="text-sm font-medium">{photo.label}</span>
-                      </div>
-                    </label>
-                  );
-                })}
+                      {({ item: photo, index: angleIndex }) => {
+                        const isBusy = !!photo.storageKey && busyKey === photo.storageKey;
+                        const isDragDisabled =
+                          !photo.storageKey || uploading || !!busyKey || isSwapPending;
+
+                        return (
+                          <SortableItem
+                            item={photo}
+                            idKey="id"
+                            disabled={isDragDisabled}
+                            className="inline-block w-1/4 px-2 align-top first:pr-0 last:pl-0"
+                          >
+                            {() => {
+                              if (photo.url) {
+                                return (
+                                  <div className="group relative aspect-[3/4] overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition-all hover:border-blue-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-800">
+                                    <button
+                                      type="button"
+                                      onClick={() => openCompareAtAngle(angleIndex)}
+                                      className="absolute inset-0 z-0"
+                                      aria-label={`פתח השוואה - ${photo.label}`}
+                                    >
+                                      <img
+                                        src={photo.url}
+                                        alt={photo.label}
+                                        className="h-full w-full object-cover"
+                                        loading="lazy"
+                                      />
+                                    </button>
+
+                                    <div className="absolute right-2 top-2 z-10 flex items-center gap-1 opacity-100 transition-opacity md:pointer-events-none md:opacity-0 md:group-hover:pointer-events-auto md:group-hover:opacity-100">
+                                      <button
+                                        type="button"
+                                        onClick={(event) => {
+                                          event.stopPropagation();
+                                          handleReplaceClick(photo);
+                                        }}
+                                        disabled={isBusy || isSwapPending}
+                                        title="החלף תמונה"
+                                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/95 text-slate-700 shadow-sm transition-all hover:bg-blue-50 hover:text-blue-700 disabled:opacity-50 dark:text-slate-200"
+                                      >
+                                        <FaArrowsRotate size={12} />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={(event) => {
+                                          event.stopPropagation();
+                                          handleDelete(photo);
+                                        }}
+                                        disabled={isBusy || isSwapPending}
+                                        title="מחק תמונה"
+                                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/95 text-rose-600 shadow-sm transition-all hover:bg-rose-50 disabled:opacity-50"
+                                      >
+                                        <FaTrash size={11} />
+                                      </button>
+                                    </div>
+
+                                    {(isBusy ||
+                                      (isSwapPending && swappingGroupKey === group.cycleNumber)) && (
+                                      <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/70 text-xs font-semibold text-slate-700 backdrop-blur-sm dark:text-slate-200">
+                                        {isBusy ? "פועל..." : "מעדכן סדר..."}
+                                      </div>
+                                    )}
+
+                                    <div className="pointer-events-none absolute inset-x-3 bottom-3 z-10 flex items-center justify-center rounded-lg bg-white/95 py-1.5 text-xs font-semibold text-slate-700 backdrop-blur-sm dark:text-slate-200">
+                                      {photo.label}
+                                    </div>
+                                  </div>
+                                );
+                              }
+
+                              return (
+                                <label className="group relative block aspect-[3/4] cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition-all hover:border-blue-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-800">
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    disabled={uploading || isSwapPending}
+                                    className="hidden"
+                                    onChange={(event) => {
+                                      const files = event.target.files;
+                                      if (files && files.length) uploadFiles(files);
+                                      event.target.value = "";
+                                    }}
+                                  />
+                                  <div className="flex h-full w-full flex-col items-center justify-center gap-3 text-slate-400 transition-colors group-hover:text-blue-500 dark:text-slate-500">
+                                    <FaCamera size={32} />
+                                    <span className="text-sm font-medium">{photo.label}</span>
+                                  </div>
+                                </label>
+                              );
+                            }}
+                          </SortableItem>
+                        );
+                      }}
+                    </DragDropWrapper>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          {isSwapPending && (
+            <div className="absolute inset-0 z-30 flex items-center justify-center rounded-2xl bg-white/40 backdrop-blur-[1px] dark:bg-slate-900/40">
+              <div className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-lg">
+                מעדכן סדר תמונות...
               </div>
             </div>
-          ))}
+          )}
         </div>
       </div>
 

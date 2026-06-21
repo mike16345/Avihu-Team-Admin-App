@@ -33,6 +33,13 @@ export const useWeighInPhotosApi = () => {
       imageUrl,
     });
 
+  const swapUserImageUrls = (userId: string, oldImageUrl: string, newImageUrl: string) =>
+    sendData<ApiResponse<string[]>>(`${USER_IMAGE_URLS_ENDPOINT}/swap`, {
+      userId,
+      oldImageUrl,
+      newImageUrl,
+    });
+
   const replaceUserImageUrl = (userId: string, oldImageUrl: string, newImageUrl: string) =>
     updateItem<ApiResponse<string[]>>(USER_IMAGE_URLS_ENDPOINT + "/one", {
       userId,
@@ -62,5 +69,6 @@ export const useWeighInPhotosApi = () => {
     deleteWeighInPhotosByUserId,
     getWeighInPhotosById,
     replaceUserImageUrl,
+    swapUserImageUrls,
   };
 };

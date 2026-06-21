@@ -6,6 +6,7 @@ import { FaArrowRight, FaCalendarCheck, FaCalendarDays } from "react-icons/fa6";
 import { FaWhatsapp } from "react-icons/fa6";
 
 import { STATUS_COLORS } from "./userDashboardStatus";
+import { UserAvatar } from "@/components/users/UserAvatar";
 
 interface UserDashboardHeaderProps {
   user?: IUser;
@@ -61,9 +62,23 @@ export function UserDashboardHeader({
         <div className="absolute inset-y-0 right-0 w-1.5 bg-blue-400" />
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-blue-400 text-2xl font-bold text-white ring-4 ring-white">
-              {initials}
-            </div>
+            <UserAvatar
+              user={user}
+              showImage
+              className="flex
+              h-16
+              w-16
+              shrink-0
+              items-center
+              justify-center
+              rounded-full
+              bg-blue-400
+              text-2xl
+              font-bold
+              text-white
+              ring-4
+              ring-white"
+            />
             <div className="flex flex-col gap-1">
               <div>
                 <p className="text-xs uppercase tracking-widest text-slate-400 dark:text-slate-500">

@@ -31,6 +31,7 @@ import LogoutButton from "../Navbar/LogoutButton";
 import { ModeToggle } from "../theme/mode-toggle";
 import { type AppRouteAccessKey, canAccessRoute, normalizeAppRole } from "@/routes/routeAccess";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { UserAvatar } from "../users/UserAvatar";
 
 type NavItem = {
   accessKey: AppRouteAccessKey;
@@ -159,8 +160,6 @@ export function AppSidebar() {
   const visibleGroups = sidebarGroups
     .map((group) => group.filter((item) => canAccessRoute(role, item.accessKey)))
     .filter((group) => group.length > 0);
-  const getInitials = () =>
-    ((user.firstName?.[0] || "") + (user.lastName?.[0] || "")).toUpperCase() || "?";
 
   return (
     <>
@@ -264,10 +263,12 @@ export function AppSidebar() {
                 aria-label="חשבון משתמש"
                 className="flex h-12 items-center gap-3 overflow-hidden rounded-2xl px-1.5 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
               >
-                <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full brand-gradient text-sm font-bold text-white shadow-md shadow-blue-600/30 ring-2 ring-white dark:ring-slate-900">
-                  {getInitials()}
-                  <span className="absolute -bottom-0.5 -left-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-950" />
-                </span>
+                <UserAvatar
+                  showImage
+                  user={user}
+                  className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full brand-gradient text-sm font-bold text-white shadow-md shadow-blue-600/30 ring-2 ring-white dark:ring-slate-900"
+                />
+
                 <span
                   className={`flex min-w-0 flex-col text-right whitespace-nowrap transition-opacity duration-200 ${
                     expanded ? "opacity-100" : "opacity-0 pointer-events-none"
@@ -291,9 +292,7 @@ export function AppSidebar() {
               style={{ fontFamily: "Heebo, system-ui, sans-serif" }}
             >
               <div className="mb-2 flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full brand-gradient text-sm font-bold text-white">
-                  {getInitials()}
-                </div>
+                <UserAvatar user={user} showImage />
                 <div className="min-w-0">
                   <p className="truncate text-sm font-bold text-slate-900 dark:text-slate-100">
                     {user.firstName} {user.lastName}
