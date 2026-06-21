@@ -315,45 +315,6 @@ export const SubTrainerDialog = ({
                 )}
               />
 
-              {lockTrainerId ? (
-                <div className="space-y-2">
-                  <FormLabel>מאמן ראשי</FormLabel>
-                  <Input
-                    value={trainerName || "מאמן נבחר"}
-                    disabled
-                    className="border-none bg-muted text-muted-foreground"
-                  />
-                  <input type="hidden" {...form.register("trainerId")} />
-                </div>
-              ) : (
-                <FormField
-                  control={form.control}
-                  name="trainerId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>מאמן ראשי</FormLabel>
-                      <Select dir="rtl" onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="border-none bg-muted">
-                            <SelectValue
-                              placeholder={isLoadingTrainers ? "טוען מאמנים..." : "בחר מאמן ראשי"}
-                            />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent dir="rtl" className="border-none bg-muted">
-                          {trainers.map((trainer) => (
-                            <SelectItem key={trainer._id} value={trainer._id}>
-                              {trainer.fullName}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-
               <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-xs text-primary">
                 מאמן יוכל להעניק את כל כמות האימונים שתאפשר לו
               </div>
