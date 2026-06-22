@@ -1,8 +1,4 @@
 import React, { ReactNode, useMemo, useState } from "react";
-import { IExercisePresetItem } from "@/interfaces/IWorkoutPlan";
-import { buildPhotoUrl, getYouTubeThumbnail } from "@/lib/utils";
-import FilterMultiSelect from "../../tables/FilterMultiSelect";
-import ExerciseDetailDialog from "./ExerciseDetailDialog";
 import {
   FaMagnifyingGlass,
   FaPlay,
@@ -11,6 +7,13 @@ import {
   FaDumbbell,
   FaVideo,
 } from "react-icons/fa6";
+
+import DeleteModal from "@/components/Alerts/DeleteModal";
+import { IExercisePresetItem } from "@/interfaces/IWorkoutPlan";
+import { buildPhotoUrl, getYouTubeThumbnail } from "@/lib/utils";
+
+import FilterMultiSelect from "../../tables/FilterMultiSelect";
+import ExerciseDetailDialog from "./ExerciseDetailDialog";
 
 interface ExercisePresetGridProps {
   data: IExercisePresetItem[];
@@ -33,19 +36,22 @@ const ExercisePresetGrid: React.FC<ExercisePresetGridProps> = ({
   const [search, setSearch] = useState("");
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [previewExercise, setPreviewExercise] = useState<IExercisePresetItem | null>(null);
+  const [pendingDeleteExercise, setPendingDeleteExercise] = useState<IExercisePresetItem | null>(
+    null
+  );
 
   const muscleGroupOptions = useMemo(() => {
     const groups = new Set<string>();
     data.forEach((item) => {
       if (item.muscleGroup) groups.add(item.muscleGroup);
     });
-    return Array.from(groups).map((g) => ({ name: g, value: g }));
+    return Array.from(groups).map((group) => ({ name: group, value: group }));
   }, [data]);
 
   const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
+    const query = search.trim().toLowerCase();
     return data.filter((item) => {
-      if (q && !item.name?.toLowerCase().includes(q)) return false;
+      if (query && !item.name?.toLowerCase().includes(query)) return false;
       if (selectedGroups.length && !selectedGroups.includes(item.muscleGroup)) return false;
       return true;
     });
@@ -53,19 +59,21 @@ const ExercisePresetGrid: React.FC<ExercisePresetGridProps> = ({
 
   const getThumbnail = (item: IExercisePresetItem): string | null => {
     if (item.imageUrl) return buildPhotoUrl(item.imageUrl);
+
     if (item.linkToVideo) {
-      const yt = getYouTubeThumbnail(item.linkToVideo);
-      if (yt) return yt;
+      return getYouTubeThumbnail(item.linkToVideo);
     }
+
     return null;
   };
+
   const hasNoResults = filtered.length === 0;
   const exerciseCountLabel = getExerciseCountLabel(filtered.length);
 
   return (
     <div dir="rtl" className="flex flex-col gap-4 font-heebo">
-      <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 shadow-sm">
-        <div className="relative min-w-[220px] flex-1 max-w-[360px]">
+      <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="relative min-w-[220px] max-w-[360px] flex-1">
           <FaMagnifyingGlass
             size={11}
             className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
@@ -73,9 +81,9 @@ const ExercisePresetGrid: React.FC<ExercisePresetGridProps> = ({
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(event) => setSearch(event.target.value)}
             placeholder="חיפוש לפי שם תרגיל…"
-            className="h-9 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 pr-8 pl-3 text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400 focus:border-blue-400 focus:outline-none focus:bg-white dark:focus:bg-slate-900"
+            className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 pr-8 pl-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-200 dark:focus:bg-slate-900"
           />
         </div>
 
@@ -99,22 +107,24 @@ const ExercisePresetGrid: React.FC<ExercisePresetGridProps> = ({
       </div>
 
       {hasNoResults && (
-        <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/40 py-16 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white dark:bg-slate-800 text-slate-400 shadow-sm">
+        <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 py-16 text-center dark:border-slate-700 dark:bg-slate-900/40">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white text-slate-400 shadow-sm dark:bg-slate-800">
             <FaDumbbell size={20} />
           </div>
           <p className="text-base font-bold text-slate-700 dark:text-slate-200">לא נמצאו תרגילים</p>
         </div>
       )}
+
       {!hasNoResults && (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filtered.map((item) => {
             const thumb = getThumbnail(item);
+
             return (
               <article
                 key={item._id}
                 onClick={() => setPreviewExercise(item)}
-                className="group flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-400 hover:shadow-md"
+                className="group flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-400 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
               >
                 <div className="relative aspect-video w-full overflow-hidden bg-slate-900">
                   {thumb ? (
@@ -143,25 +153,26 @@ const ExercisePresetGrid: React.FC<ExercisePresetGridProps> = ({
                   <h3 className="line-clamp-2 text-sm font-bold leading-tight text-slate-900 dark:text-slate-100">
                     {item.name}
                   </h3>
+
                   <div className="flex flex-wrap gap-1.5">
                     {item.muscleGroup && (
-                      <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:text-slate-300">
+                      <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
                         {item.muscleGroup}
                       </span>
                     )}
                     {item.exerciseMethod && (
-                      <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 dark:border-blue-900/60 bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:text-blue-300">
+                      <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-300">
                         {item.exerciseMethod}
                       </span>
                     )}
                   </div>
 
-                  <div className="mt-auto flex items-center justify-between gap-2 border-t border-slate-100 dark:border-slate-800 pt-2.5">
-                    {item.linkToVideo && (
+                  <div className="mt-auto flex items-center justify-between gap-2 border-t border-slate-100 pt-2.5 dark:border-slate-800">
+                    {item.linkToVideo ? (
                       <button
                         type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
+                        onClick={(event) => {
+                          event.stopPropagation();
                           setPreviewExercise(item);
                         }}
                         className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
@@ -169,28 +180,30 @@ const ExercisePresetGrid: React.FC<ExercisePresetGridProps> = ({
                         <FaVideo size={11} />
                         סרטון
                       </button>
+                    ) : (
+                      <span className="text-xs text-slate-400">ללא סרטון</span>
                     )}
-                    {!item.linkToVideo && <span className="text-xs text-slate-400">ללא סרטון</span>}
-                    <div className="flex items-center gap-1">
+
+                    <div className="flex items-center gap-1 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
                       <button
                         type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
+                        onClick={(event) => {
+                          event.stopPropagation();
                           if (item._id) onView(item._id);
                         }}
                         aria-label="עריכה"
-                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950/40"
+                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 dark:border-slate-700 dark:hover:bg-blue-950/40"
                       >
                         <FaPenToSquare size={10} />
                       </button>
                       <button
                         type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (item._id && confirm(`למחוק את "${item.name}"?`)) onDelete(item._id);
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          if (item._id) setPendingDeleteExercise(item);
                         }}
                         aria-label="מחיקה"
-                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 transition-colors hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/40"
+                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition-colors hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600 dark:border-slate-700 dark:hover:bg-rose-950/40"
                       >
                         <FaTrash size={10} />
                       </button>
@@ -208,6 +221,28 @@ const ExercisePresetGrid: React.FC<ExercisePresetGridProps> = ({
         onOpenChange={(open) => !open && setPreviewExercise(null)}
         exercise={previewExercise}
         onEdit={(id) => onView(id)}
+      />
+
+      <DeleteModal
+        isModalOpen={!!pendingDeleteExercise}
+        setIsModalOpen={(open) => {
+          if (!open) setPendingDeleteExercise(null);
+        }}
+        onCancel={() => setPendingDeleteExercise(null)}
+        onConfirm={() => {
+          if (pendingDeleteExercise?._id) onDelete(pendingDeleteExercise._id);
+          setPendingDeleteExercise(null);
+        }}
+        title={
+          pendingDeleteExercise ? `למחוק את "${pendingDeleteExercise.name}"?` : "למחוק את התרגיל?"
+        }
+        alertMessage={
+          <>
+            תבנית התרגיל תוסר מספריית התרגילים.
+            <br />
+            פעולה זו אינה ניתנת לביטול.
+          </>
+        }
       />
     </div>
   );

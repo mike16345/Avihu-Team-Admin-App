@@ -92,6 +92,16 @@ const LessonGroupsSheet: React.FC<LessonGroupsSheetProps> = ({
   const groups = data?.data || [];
   const hasGroups = groups.length > 0;
 
+  const handleSheetOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen && pendingDelete) {
+      return;
+    }
+
+    if (!nextOpen) {
+      onClose();
+    }
+  };
+
   const handleFormClose = () => {
     if (view.kind === "form" && !view.id && pendingCreatedName) {
       onClose();
@@ -102,9 +112,19 @@ const LessonGroupsSheet: React.FC<LessonGroupsSheetProps> = ({
 
   return (
     <>
-      <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
+      <Sheet open={open} onOpenChange={handleSheetOpenChange}>
         <SheetContent
           dir="rtl"
+          onInteractOutside={(event) => {
+            if (pendingDelete) {
+              event.preventDefault();
+            }
+          }}
+          onEscapeKeyDown={(event) => {
+            if (pendingDelete) {
+              event.preventDefault();
+            }
+          }}
           className="w-full overflow-y-auto border-slate-200 bg-white font-heebo dark:border-slate-800 dark:bg-slate-900 sm:max-w-md"
         >
           <SheetHeader className="space-y-1 pb-4 text-right">

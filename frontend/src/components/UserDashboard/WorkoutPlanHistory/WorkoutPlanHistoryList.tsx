@@ -1,4 +1,4 @@
-import { FaArrowsRotate, FaCalendarDays, FaUser } from "react-icons/fa6";
+import { FaArrowsRotate, FaCalendarDays } from "react-icons/fa6";
 
 import { ICompleteWorkoutPlan } from "@/interfaces/IWorkoutPlan";
 
@@ -37,23 +37,17 @@ export function WorkoutPlanHistoryList({
         return (
           <li
             key={plan._id}
-            className="group flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-800/30 px-4 py-3 transition-all hover:border-blue-200 dark:hover:border-blue-900/40 hover:bg-blue-50/40 dark:hover:bg-blue-950/20"
+            className="group flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200/70 dark:border-slate-800/70 bg-white dark:bg-slate-900 px-5 py-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md hover:shadow-blue-500/10 dark:hover:border-blue-900/40"
           >
-            <div className="flex min-w-0 flex-1 flex-col gap-1">
-              <p className="truncate text-sm font-bold text-slate-900 dark:text-slate-100">
+            <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+              <p className="truncate text-base font-bold text-slate-900 dark:text-slate-100">
                 {label}
               </p>
-              <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-500 dark:text-slate-400">
+              <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
                 <span className="inline-flex items-center gap-1">
-                  <FaCalendarDays size={9} />
+                  <FaCalendarDays size={11} />
                   {dateRange}
                 </span>
-                {plan.assignedBy && (
-                  <span className="inline-flex items-center gap-1">
-                    <FaUser size={9} />
-                    {plan.assignedBy}
-                  </span>
-                )}
               </div>
             </div>
 

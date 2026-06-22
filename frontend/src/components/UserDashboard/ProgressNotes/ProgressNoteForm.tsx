@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import {
   Form,
   FormControl,
@@ -34,6 +34,15 @@ const percentageFields = [
   { name: "cardio", label: "🏃 אירובי" },
 ] as const;
 
+const buildProgressNoteDefaults = (trainer?: string): z.infer<typeof progressNoteSchema> => ({
+  date: new Date(),
+  content: "",
+  trainer: trainer ?? "",
+  diet: undefined,
+  workouts: undefined,
+  cardio: undefined,
+});
+
 const ProgressNoteForm = () => {
   const { id } = useParams();
   const { currentUser } = useUsersStore();
@@ -41,9 +50,7 @@ const ProgressNoteForm = () => {
   const addNote = useAddProgressNote(id || "");
   const updateNote = useUpdateProgressNote(id || "");
 
-  const [isEdit, setIsEdit] = useState(false);
-
-  const initalTrainerName = currentUser
+  const initialTrainerName = currentUser
     ? `${currentUser.firstName} ${currentUser.lastName}`
     : undefined;
 
@@ -54,23 +61,23 @@ const ProgressNoteForm = () => {
       const name = `${currentUser.firstName || ""} ${currentUser.lastName || ""}`.trim();
       if (name) list.push({ name: `${name} (אני)`, value: name });
     }
-    subTrainers.forEach((t) => {
-      const tname = t.fullName?.trim();
-      if (!tname) return;
-      // Skip the current user if they also appear as a sub-trainer.
-      if (list.some((o) => o.value === tname)) return;
-      list.push({ name: tname, value: tname });
+    subTrainers.forEach((trainer) => {
+      const trainerName = trainer.fullName?.trim();
+      if (!trainerName) return;
+      if (list.some((option) => option.value === trainerName)) return;
+      list.push({ name: trainerName, value: trainerName });
     });
     return list;
   }, [currentUser, subTrainers]);
 
+  const defaultValues = useMemo(
+    () => buildProgressNoteDefaults(initialTrainerName),
+    [initialTrainerName]
+  );
+
   const progressNoteForm = useForm<z.infer<typeof progressNoteSchema>>({
     resolver: zodResolver(progressNoteSchema),
-    defaultValues: {
-      date: new Date(),
-      content: undefined,
-      trainer: initalTrainerName,
-    },
+    defaultValues,
   });
 
   const {
@@ -80,23 +87,29 @@ const ProgressNoteForm = () => {
 
   const onSubmit = (values: z.infer<typeof progressNoteSchema>) => {
     if (!id) return;
+
     const note = { ...values, userId: id };
-    if (isEdit) {
-      if (!progressNote?._id) return;
-      updateNote.mutate({ ...note, noteId: progressNote?._id });
-    } else {
-      addNote.mutate(note);
+
+    if (progressNote?._id) {
+      updateNote.mutate({ ...note, noteId: progressNote._id });
+      return;
     }
+
+    addNote.mutate(note);
   };
 
   useEffect(() => {
-    if (!progressNote) return setIsEdit(false);
-    setIsEdit(true);
-    reset(progressNote);
-  }, [progressNote, reset]);
+    if (progressNote) {
+      reset(progressNote as z.infer<typeof progressNoteSchema>);
+      return;
+    }
+
+    reset(buildProgressNoteDefaults(initialTrainerName));
+  }, [progressNote, reset, initialTrainerName]);
 
   const isSaving = addNote.isPending || updateNote.isPending;
-  const saveButtonLabel = isSaving ? "שומר…" : isEdit ? "שמור שינויים" : "שמור פתק";
+  const isEditing = Boolean(progressNote?._id);
+  const saveButtonLabel = isSaving ? "שומר…" : isEditing ? "שמור שינויים" : "שמור פתק";
 
   return (
     <Form {...progressNoteForm}>
@@ -132,7 +145,7 @@ const ProgressNoteForm = () => {
                   <CustomSelect
                     items={trainerOptions}
                     selectedValue={field.value || ""}
-                    onValueChange={(val) => field.onChange(val)}
+                    onValueChange={(value) => field.onChange(value)}
                   />
                 </FormControl>
                 <FormMessage />
@@ -153,7 +166,7 @@ const ProgressNoteForm = () => {
                     <CustomSelect
                       items={progressOptions}
                       selectedValue={field.value?.toString()}
-                      onValueChange={(val) => field.onChange(+val)}
+                      onValueChange={(value) => field.onChange(+value)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -172,7 +185,7 @@ const ProgressNoteForm = () => {
                 תוכן (אופציונלי)
               </FormLabel>
               <FormControl>
-                <TextEditor value={field.value} onChange={(val) => field.onChange(val)} />
+                <TextEditor value={field.value} onChange={(value) => field.onChange(value)} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -181,7 +194,7 @@ const ProgressNoteForm = () => {
 
         <div className="flex items-center justify-between gap-2 pt-1">
           <p className="text-[11px] text-slate-400">
-            {isEdit ? "שינויים יישמרו רק אחרי לחיצה על שמור." : ""}
+            {isEditing ? "שינויים יישמרו רק אחרי לחיצה על שמור." : ""}
           </p>
           <button
             type="submit"

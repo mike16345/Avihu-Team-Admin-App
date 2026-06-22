@@ -1,6 +1,7 @@
 import {
   FaBreadSlice,
   FaCheck,
+  FaCircleInfo,
   FaDroplet,
   FaDrumstickBite,
   FaFire,
@@ -12,6 +13,9 @@ import {
   dietaryRestrictionTone,
   dietGoalLabel,
   dietGoalTone,
+  formatDietNumber,
+  parseDietNumber,
+  resolveDietPresetMeta,
 } from "@/lib/dietMeta";
 import { DietPickerPreset } from "./dietPlanPresetPickerUtils";
 
@@ -66,14 +70,20 @@ const DietPlanPresetPickerCard = ({
   onSelectPreset: (preset: DietPickerPreset) => void;
   getBuilderLabel: (id?: string) => string | undefined;
 }) => {
+  const resolvedMeta = resolveDietPresetMeta(preset);
   const goalStyle = dietGoalTone(preset.goal);
   const goalText = dietGoalLabel(preset.goal);
   const restrictions = preset.dietaryRestrictions ?? [];
   const mealCount = preset.meals?.length ?? 0;
   const builderLabel = getBuilderLabel(preset.builtByTrainerId);
-  const summaryParts = [goalText, preset.calories ? `${preset.calories} קל׳` : null].filter(
-    Boolean
-  );
+  const caloriesLabel = formatDietNumber(resolvedMeta.calories);
+  const freeCaloriesLabel = formatDietNumber(resolvedMeta.freeCalories);
+  const summaryParts = [goalText, caloriesLabel ? `${caloriesLabel} קל׳` : null].filter(Boolean);
+  const hasMacros = [
+    resolvedMeta.proteinServings,
+    resolvedMeta.carbServings,
+    resolvedMeta.fatServings,
+  ].some((value) => parseDietNumber(value) !== undefined);
 
   return (
     <button
@@ -116,10 +126,16 @@ const DietPlanPresetPickerCard = ({
             {goalText}
           </span>
         )}
-        {typeof preset.calories === "number" && (
+        {freeCaloriesLabel && (
+          <span className="inline-flex items-center gap-1 rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 text-[10px] font-bold text-sky-700 dark:border-sky-900/60 dark:bg-sky-950/40 dark:text-sky-300">
+            <FaCircleInfo size={8} />
+            {freeCaloriesLabel} חופשי
+          </span>
+        )}
+        {caloriesLabel && (
           <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-300">
             <FaFire size={8} />
-            {preset.calories} קל׳
+            {caloriesLabel} קל׳
           </span>
         )}
         {restrictions.map((restriction) => (
@@ -132,26 +148,26 @@ const DietPlanPresetPickerCard = ({
         ))}
       </div>
 
-      {(preset.proteinServings || preset.carbServings || preset.fatServings) && (
+      {hasMacros && (
         <div className="flex items-center gap-2 text-[11px] text-slate-600 dark:text-slate-300">
-          {typeof preset.proteinServings === "number" && (
+          {formatDietNumber(resolvedMeta.proteinServings) && (
             <span className="inline-flex items-center gap-1">
               <FaDrumstickBite size={9} className="text-rose-500" />
-              <span className="font-bold">{preset.proteinServings}</span>
+              <span className="font-bold">{formatDietNumber(resolvedMeta.proteinServings)}</span>
               חלבון
             </span>
           )}
-          {typeof preset.carbServings === "number" && (
+          {formatDietNumber(resolvedMeta.carbServings) && (
             <span className="inline-flex items-center gap-1">
               <FaBreadSlice size={9} className="text-amber-500" />
-              <span className="font-bold">{preset.carbServings}</span>
-              פחמ׳
+              <span className="font-bold">{formatDietNumber(resolvedMeta.carbServings)}</span>
+              פחמ״ג
             </span>
           )}
-          {typeof preset.fatServings === "number" && (
+          {formatDietNumber(resolvedMeta.fatServings) && (
             <span className="inline-flex items-center gap-1">
               <FaDroplet size={9} className="text-sky-500" />
-              <span className="font-bold">{preset.fatServings}</span>
+              <span className="font-bold">{formatDietNumber(resolvedMeta.fatServings)}</span>
               שומן
             </span>
           )}

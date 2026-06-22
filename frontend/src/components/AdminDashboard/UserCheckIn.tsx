@@ -14,16 +14,10 @@ import { QueryKeys } from "@/enums/QueryKeys";
 import { userFullName } from "@/lib/utils";
 import useUsersQuery from "@/hooks/queries/user/useUsersQuery";
 import { deriveAccountStatus } from "@/lib/userStatus";
+import { UserAvatar } from "../users/UserAvatar";
 
 type ActiveView = "checkin" | "noWorkout" | "noDiet" | "expiring";
 type UserListItem = { _id: string; firstName?: string; lastName?: string; navUrl: string };
-
-const getInitials = (firstName?: string, lastName?: string) => {
-  const firstInitial = firstName?.[0] || "";
-  const lastInitial = lastName?.[0] || "";
-
-  return (firstInitial + lastInitial).toUpperCase() || "?";
-};
 
 const TABS: { view: ActiveView; label: string }[] = [
   { view: "checkin", label: "לבדיקה" },
@@ -268,9 +262,10 @@ const UserCheckIn = () => {
               onClick={() => navigate(user.navUrl)}
               className="group flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/60"
             >
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-700 text-[11px] font-bold text-slate-600 dark:text-slate-200">
-                {getInitials(user.firstName, user.lastName)}
-              </div>
+              <UserAvatar
+                user={user}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-700 text-[11px] font-bold text-slate-600 dark:text-slate-200"
+              />
               <span className="flex-1 truncate text-sm font-medium text-slate-800 dark:text-slate-100">
                 {getUserDisplayName(user, activeView)}
               </span>

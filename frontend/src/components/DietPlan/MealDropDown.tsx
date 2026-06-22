@@ -254,7 +254,7 @@ export const MealDropDown: FC<MealDropDownProps> = ({
                       </span>
                     </div>
                     <FormControl>
-                      <Input dir="rtl" type="number" {...field} className="h-9 text-sm" />
+                      <Input dir="rtl" type="number" step="0.1" {...field} className="h-9 text-sm" />
                     </FormControl>
                     <FormMessage />
 

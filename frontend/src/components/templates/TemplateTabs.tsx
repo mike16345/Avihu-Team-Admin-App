@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
 import ExercisePresetGrid from "./workoutTemplates/ExercisePresetGrid";
 import SimplePresetGrid from "./workoutTemplates/SimplePresetGrid";
-import { toast } from "sonner";
 import PresetSheet from "./PresetSheet";
 import { useNavigate } from "react-router-dom";
 import { UseMutationResult, useQuery } from "@tanstack/react-query";
-import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { ITabs } from "@/interfaces/interfaces";
 import { IExercisePresetItem, IWorkoutPlanPreset } from "@/interfaces/IWorkoutPlan";
 import useMenuItemApi from "@/hooks/api/useMenuItemApi";
@@ -129,13 +127,6 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
     deleteFunc: UseMutationResult<unknown, Error, string, unknown>
   ) => {
     deleteFunc.mutate(id);
-    if (deleteFunc.isError) {
-      toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-        description: deleteFunc.error.message,
-      });
-      return;
-    }
-    toast.success(`פריט נמחק בהצלחה!`);
   };
 
   const startEdit = (id: string, formToUse: string) => {

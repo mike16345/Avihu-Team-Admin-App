@@ -1,10 +1,11 @@
 import { FC, useMemo, useState } from "react";
-
-import Loader from "@/components/ui/Loader";
-import useWorkoutPlanHistoryQuery from "@/hooks/queries/workoutPlans/useWorkoutPlanHistoryQuery";
-import useRestoreWorkoutPlan from "@/hooks/mutations/workouts/useRestoreWorkoutPlan";
-import { ICompleteWorkoutPlan } from "@/interfaces/IWorkoutPlan";
 import { toast } from "sonner";
+
+import ConfirmationDialog from "@/components/Alerts/ConfirmationDialog";
+import Loader from "@/components/ui/Loader";
+import useRestoreWorkoutPlan from "@/hooks/mutations/workouts/useRestoreWorkoutPlan";
+import useWorkoutPlanHistoryQuery from "@/hooks/queries/workoutPlans/useWorkoutPlanHistoryQuery";
+import { ICompleteWorkoutPlan } from "@/interfaces/IWorkoutPlan";
 
 import { TemporaryWorkoutPlanBanner } from "./TemporaryWorkoutPlanBanner";
 import { WorkoutPlanHistoryHeader } from "./WorkoutPlanHistoryHeader";
@@ -19,12 +20,23 @@ interface Props {
   userId: string;
   activePlan?: ICompleteWorkoutPlan | null;
   hideWhenEmpty?: boolean;
+  /** When true (used inside the history Dialog), the section drops
+   *  its own collapsible header and renders the list expanded by
+   *  default — the surrounding Dialog already carries the title. */
+  embedded?: boolean;
 }
 
-const WorkoutPlanHistorySection: FC<Props> = ({ userId, activePlan, hideWhenEmpty = false }) => {
+const WorkoutPlanHistorySection: FC<Props> = ({
+  userId,
+  activePlan,
+  hideWhenEmpty = false,
+  embedded = false,
+}) => {
   const { data, isLoading } = useWorkoutPlanHistoryQuery(userId);
   const [restoringId, setRestoringId] = useState<string | null>(null);
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(embedded);
+  const [pendingRestoreId, setPendingRestoreId] = useState<string | null>(null);
+
 
   const restoreMutation = useRestoreWorkoutPlan({
     onSuccess: () => {
@@ -47,9 +59,14 @@ const WorkoutPlanHistorySection: FC<Props> = ({ userId, activePlan, hideWhenEmpt
 
   const handleRestore = (archivedPlanId?: string) => {
     if (!archivedPlanId) return;
-    if (!confirm("לשחזר את התוכנית הזו? התוכנית הפעילה תועבר להיסטוריה.")) return;
-    setRestoringId(archivedPlanId);
-    restoreMutation.mutate({ userId, archivedPlanId });
+    setPendingRestoreId(archivedPlanId);
+  };
+
+  const confirmRestore = () => {
+    if (!pendingRestoreId) return;
+    setRestoringId(pendingRestoreId);
+    restoreMutation.mutate({ userId, archivedPlanId: pendingRestoreId });
+    setPendingRestoreId(null);
   };
 
   if (hideWhenEmpty && !showTempBanner && !isLoading && history.length === 0) {
@@ -59,13 +76,21 @@ const WorkoutPlanHistorySection: FC<Props> = ({ userId, activePlan, hideWhenEmpt
   return (
     <section
       dir="rtl"
-      className="flex flex-col gap-3 rounded-2xl border border-blue-100/60 dark:border-slate-800 bg-white dark:bg-slate-900 px-5 py-3 shadow-sm"
+      className={
+        embedded
+          ? "flex flex-col gap-3"
+          : "flex flex-col gap-3 rounded-2xl border border-blue-100/60 bg-white px-5 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+      }
     >
-      <WorkoutPlanHistoryHeader
-        historyCount={history.length}
-        expanded={expanded}
-        onToggleExpanded={() => setExpanded((currentExpanded) => !currentExpanded)}
-      />
+      {/* Hide the collapsible header in embedded mode — the Dialog
+          already carries the title + count + close. */}
+      {!embedded && (
+        <WorkoutPlanHistoryHeader
+          historyCount={history.length}
+          expanded={expanded}
+          onToggleExpanded={() => setExpanded((currentExpanded) => !currentExpanded)}
+        />
+      )}
 
       {showTempBanner && activePlan && (
         <TemporaryWorkoutPlanBanner
@@ -90,6 +115,24 @@ const WorkoutPlanHistorySection: FC<Props> = ({ userId, activePlan, hideWhenEmpt
           onRestore={handleRestore}
         />
       )}
+
+      <ConfirmationDialog
+        open={!!pendingRestoreId}
+        onOpenChange={(open) => {
+          if (!open) setPendingRestoreId(null);
+        }}
+        onCancel={() => setPendingRestoreId(null)}
+        onConfirm={confirmRestore}
+        title="לשחזר את התוכנית הזו?"
+        description={
+          <>
+            התוכנית הפעילה תועבר להיסטוריה והתוכנית שבחרת תחזור להיות פעילה.
+            <br />
+            ודא שזו התוכנית שברצונך להחזיר למתאמן.
+          </>
+        }
+        confirmLabel="שחזר תוכנית"
+      />
     </section>
   );
 };

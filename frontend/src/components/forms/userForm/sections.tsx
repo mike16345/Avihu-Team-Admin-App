@@ -1,4 +1,5 @@
 import { FaCalendarCheck, FaCalendarDays, FaCheck, FaXmark, FaUser } from "react-icons/fa6";
+import DatePicker from "@/components/ui/DatePicker";
 import UserPlanTypes from "@/enums/UserPlanTypes";
 import { DATE_PRESETS, DIETARY_OPTIONS, REMIND_IN_OPTIONS } from "./options";
 import { Field, SectionTitle, SelectInput, TrainerAssignmentField } from "./controls";
@@ -15,6 +16,14 @@ const getDietaryOptionClassName = (selected: boolean) => {
 
   return `${baseClassName} border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700`;
 };
+
+const parseIsoDate = (value: string) => {
+  if (!value) return undefined;
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed;
+};
+
+const formatIsoDate = (date: Date) => date.toISOString().split("T")[0];
 
 export const PersonalDetailsSection = ({
   email,
@@ -172,12 +181,11 @@ const DateFinishedField = ({
           size={12}
           className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
         />
-        <input
-          data-testid="user-form-date-finished"
-          type="date"
-          value={dateFinished}
-          onChange={(e) => onDateFinishedChange(e.target.value)}
-          className={inputCls(!!error) + " ps-9"}
+        <DatePicker
+          triggerTestId="user-form-date-finished"
+          selectedDate={parseIsoDate(dateFinished)}
+          onChangeDate={(date) => onDateFinishedChange(formatIsoDate(date))}
+          placeholder="בחר תאריך סיום"
         />
       </div>
       <div className="flex flex-wrap gap-1">

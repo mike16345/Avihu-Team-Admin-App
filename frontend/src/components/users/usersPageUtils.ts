@@ -25,7 +25,7 @@ export const sortUsersByFinishedDate = (users: IUser[] | undefined) => {
 };
 
 export const filterUsers = (users: IUser[], search: string, statusFilter: StatusFilter) => {
-  const normalizedSearch = search.toLowerCase();
+  const normalizedSearch = search.toLowerCase().trim();
 
   return users.filter((user) => {
     const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
@@ -33,7 +33,7 @@ export const filterUsers = (users: IUser[], search: string, statusFilter: Status
       fullName.includes(normalizedSearch) ||
       user.planType?.toLowerCase().includes(normalizedSearch) ||
       user.email?.toLowerCase().includes(normalizedSearch) ||
-      user.phone?.includes(search);
+      user.phone?.toLowerCase().includes(normalizedSearch);
 
     if (!matchesSearch) return false;
 
@@ -75,8 +75,16 @@ export const getUsersStats = (users: IUser[]): UsersStats => {
   return { total, active, inOnboarding, frozen, endingSoon };
 };
 
-export const getUserInitials = (user: IUser) =>
-  ((user.firstName?.[0] || "") + (user.lastName?.[0] || "")).toUpperCase() || "?";
+export const getUserInitials = (user: Pick<IUser, "firstName" | "lastName"> | null) => {
+  if (!user) return "?";
+
+  const firstInitial = user.firstName?.trim()[0] || "";
+  const lastInitial = user.lastName?.trim()[0] || "";
+
+  const initials = (firstInitial + lastInitial).toUpperCase();
+
+  return initials || "?";
+};
 
 export const getUserDaysLeft = (user: IUser) => {
   if (!user.dateFinished) return null;

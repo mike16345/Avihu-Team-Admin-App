@@ -8,6 +8,7 @@ interface SortableItemProps<T> {
   idKey: keyof T;
   className?: string;
   dragHandleOnly?: boolean;
+  disabled?: boolean;
   children: (props: { dragHandleProps: any }) => React.ReactNode;
 }
 
@@ -17,12 +18,16 @@ export function SortableItem<T>({
   className,
   children,
   dragHandleOnly = false,
+  disabled = false,
 }: SortableItemProps<T>) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: item[idKey] as UniqueIdentifier,
+    disabled,
     animateLayoutChanges: () => false,
   });
   const dragHandleProps = { ...attributes, ...listeners };
+  const itemAttributes = disabled || dragHandleOnly ? {} : attributes;
+  const itemListeners = disabled || dragHandleOnly ? {} : listeners;
 
   return (
     <div
@@ -33,10 +38,10 @@ export function SortableItem<T>({
       }}
       className={twMerge(
         className,
-        ` ${isDragging ? "cursor-grabbing" : dragHandleOnly ? "" : "cursor-grab"}`
+        ` ${disabled ? "" : isDragging ? "cursor-grabbing" : dragHandleOnly ? "" : "cursor-grab"}`
       )}
-      {...(dragHandleOnly ? {} : attributes)}
-      {...(dragHandleOnly ? {} : listeners)}
+      {...itemAttributes}
+      {...itemListeners}
     >
       {children({ dragHandleProps })}
     </div>

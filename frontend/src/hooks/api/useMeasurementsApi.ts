@@ -47,6 +47,7 @@ export const useMeasurementApi = () => {
   /** Both add + update use the same upsert endpoint per-muscle. */
   const addMeasurement = (userId: string, measurement: IMuscleMeasurement) =>
     saveMeasurementRow(userId, measurement);
+
   const updateMeasurement = (userId: string, measurement: IMuscleMeasurement) =>
     saveMeasurementRow(userId, measurement);
 
@@ -68,5 +69,15 @@ export const useMeasurementApi = () => {
     return lastRes;
   };
 
-  return { getMeasurements, addMeasurement, updateMeasurement, deleteMeasurement };
+  const deleteMeasurementRow = async (measurementId: string) => {
+    return deleteItem<ApiResponse<any>>(MEASUREMENT_ENDPOINT + "/one", { id: measurementId });
+  };
+
+  return {
+    getMeasurements,
+    addMeasurement,
+    updateMeasurement,
+    deleteMeasurement,
+    deleteMeasurementRow,
+  };
 };

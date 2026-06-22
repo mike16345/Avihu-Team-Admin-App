@@ -7,6 +7,7 @@ import {
   getUserStatusColors,
   getUserStatusLabel,
 } from "./usersPageUtils";
+import { UserAvatar } from "./UserAvatar";
 
 type UsersCardsGridProps = {
   users: IUser[];
@@ -26,7 +27,7 @@ const getCardClassName = (isExpiringSoon: boolean) => {
 
 const UsersCardsGrid = ({ users, onViewUser }: UsersCardsGridProps) => {
   return (
-    <div className="max-h-[calc(100vh-360px)] overflow-y-auto pe-2 -me-2 [scrollbar-color:rgba(148,163,184,0.3)_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-slate-400/30 [&::-webkit-scrollbar-thumb:hover]:bg-slate-400/50 [&::-webkit-scrollbar-track]:bg-transparent">
+    <div className="max-h-[calc(100vh-360px)] overflow-y-auto p-2 -me-2 [scrollbar-color:rgba(148,163,184,0.3)_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-slate-400/30 [&::-webkit-scrollbar-thumb:hover]:bg-slate-400/50 [&::-webkit-scrollbar-track]:bg-transparent">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {users.map((user) => (
           <UserCard key={user._id} user={user} onView={() => onViewUser(user)} />
@@ -53,9 +54,7 @@ function UserCard({ user, onView }: { user: IUser; onView: () => void }) {
 
       <div className="relative z-10 flex items-start justify-between gap-3 pointer-events-none">
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-400 text-base font-bold text-white">
-            {initials}
-          </div>
+          <UserAvatar user={user} />
           <div>
             <p className="text-base font-bold text-slate-900 dark:text-slate-100">
               {user.firstName} {user.lastName}

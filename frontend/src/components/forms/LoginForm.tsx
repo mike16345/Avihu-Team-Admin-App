@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import useAuth from "@/hooks/Authentication/useAuth";
 import { loginWithPassword } from "@/services/authApi";
 import ForgotPasswordForm from "./ForgotPasswordForm";
-import { FaEye, FaEyeSlash, FaEnvelope, FaLock, FaCircleExclamation } from "react-icons/fa6";
+import { FaEye, FaEyeSlash, FaEnvelope, FaCircleExclamation } from "react-icons/fa6";
 
 const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -100,9 +100,13 @@ export default function LoginForm() {
             כתובת מייל
           </label>
           <div className="relative">
+            {/* Icon sits on the LEFT, address right-aligned on the RIGHT.
+                Input keeps dir="ltr" so the email itself reads
+                left-to-right correctly; text-right just pushes the
+                whole string flush to the right edge. */}
             <FaEnvelope
               size={13}
-              className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
             />
             <input
               name="email"
@@ -115,7 +119,7 @@ export default function LoginForm() {
               autoComplete="email"
               required
               dir="ltr"
-              className={`h-11 w-full rounded-xl border bg-slate-50/60 dark:bg-slate-800/60 pr-9 pl-3 text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400 transition-colors focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/50 ${
+              className={`h-11 w-full rounded-xl border bg-slate-50/60 dark:bg-slate-800/60 pl-9 pr-3 text-right text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400 transition-colors focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/50 ${
                 errors.email
                   ? "border-rose-300 dark:border-rose-800"
                   : "border-slate-200 dark:border-slate-700 focus:border-blue-400"
@@ -149,10 +153,8 @@ export default function LoginForm() {
             </button>
           </div>
           <div className="relative">
-            <FaLock
-              size={13}
-              className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
-            />
+            {/* Lock icon removed per Avihu — the only icon on this
+                field is the show/hide eye toggle. */}
             <input
               name="password"
               id="password"
@@ -163,7 +165,7 @@ export default function LoginForm() {
               placeholder="••••••••"
               autoComplete="current-password"
               required
-              className={`h-11 w-full rounded-xl border bg-slate-50/60 dark:bg-slate-800/60 pr-9 pl-10 text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400 transition-colors focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/50 ${
+              className={`h-11 w-full rounded-xl border bg-slate-50/60 dark:bg-slate-800/60 pr-3 pl-10 text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400 transition-colors focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/50 ${
                 errors.password
                   ? "border-rose-300 dark:border-rose-800"
                   : "border-slate-200 dark:border-slate-700 focus:border-blue-400"

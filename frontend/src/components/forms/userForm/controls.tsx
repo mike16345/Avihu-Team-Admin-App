@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { FaChevronDown, FaUserTie } from "react-icons/fa6";
+import { FaUserTie } from "react-icons/fa6";
+import CustomSelect from "@/components/ui/CustomSelect";
 import { useSubTrainersQuery } from "@/hooks/queries/subTrainers/useSubTrainersQuery";
 import { inputCls } from "./styles";
 
@@ -53,27 +54,14 @@ export function SelectInput({
   testId?: string;
 }) {
   return (
-    <div className="relative">
-      <select
-        data-testid={testId}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`${inputCls(!!error)} cursor-pointer appearance-none pe-9`}
-      >
-        <option value="" disabled>
-          {placeholder}
-        </option>
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-      <FaChevronDown
-        size={10}
-        className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
-      />
-    </div>
+    <CustomSelect
+      testId={testId}
+      items={options.map((option) => ({ name: option.label, value: option.value }))}
+      selectedValue={value}
+      onValueChange={onChange}
+      placeholder={placeholder}
+      className={`${inputCls(!!error)} h-9 cursor-pointer`}
+    />
   );
 }
 
@@ -99,29 +87,15 @@ export function TrainerAssignmentField({
   return (
     <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
       <Field label="מאמן אחראי">
-        <div className="relative">
-          <FaUserTie
-            size={12}
-            className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
-          />
-          <select
-            data-testid="user-form-sub-trainer"
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            disabled={isLoading}
-            className={`${inputCls(false)} cursor-pointer appearance-none ps-9 pe-9`}
-          >
-            {options.map((option) => (
-              <option key={option.value || "main"} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          <FaChevronDown
-            size={10}
-            className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
-          />
-        </div>
+        <CustomSelect
+          testId="user-form-sub-trainer"
+          items={options.map((option) => ({ name: option.label, value: option.value }))}
+          selectedValue={value}
+          onValueChange={onChange}
+          disabled={isLoading}
+          startAdornment={<FaUserTie size={12} />}
+          className={`${inputCls(false)} h-9 cursor-pointer`}
+        />
       </Field>
     </div>
   );

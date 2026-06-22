@@ -104,18 +104,22 @@ const FormResponseViewer = ({
     if (!sections.length) return undefined;
     return sections.find((s) => s._id === activeSectionId) ?? sections[0];
   }, [sections, activeSectionId]);
+
   const activeSectionIndex = useMemo(() => {
     if (!activeSection) return -1;
     return sections.findIndex((s) => s._id === activeSection._id);
   }, [activeSection, sections]);
+
   const totalQuestions = useMemo(
     () => sections.reduce((acc, s) => acc + (s.questions?.length ?? 0), 0),
     [sections]
   );
+
   useEffect(() => {
     setActiveSectionId(sections[0]?._id ?? "");
     setFullscreenState(null);
   }, [response._id, sections]);
+
   return (
     <div dir="rtl" className="flex flex-col gap-6 p-2 font-heebo">
       <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-8 shadow-sm">

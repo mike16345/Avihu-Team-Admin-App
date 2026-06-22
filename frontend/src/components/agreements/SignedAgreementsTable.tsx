@@ -1,11 +1,3 @@
-/**
- * SignedAgreementsTable — branded list of signed user agreements.
- *
- * Each row shows the trainee (avatar with initials + full name), the
- * signing date+time, the agreement version, a colored status pill and
- * a "הצג PDF" action. Same shell+row visual language as the other
- * pages in the Elevate Coach redesign.
- */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useUrlPagination } from "@/hooks/useUrlPagination";
 import { toast } from "sonner";
@@ -27,6 +19,7 @@ import {
   FaChevronRight,
   FaFilePdf,
 } from "react-icons/fa6";
+import { UserAvatar } from "../users/UserAvatar";
 
 export const getFullUserName = (user: Partial<IUser> | undefined) => {
   return `${user?.firstName || ""} ${user?.lastName || ""}`.trim();
@@ -38,13 +31,6 @@ export const resolveUserName = (user: string | SignedAgreementUser | undefined) 
 
 export const isUserIdObject = (user: string | SignedAgreementUser | undefined) => {
   return typeof user == "object" && typeof user !== "string";
-};
-
-const initials = (name: string) => {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (!parts.length) return "?";
-  if (parts.length === 1) return parts[0][0];
-  return parts[0][0] + parts[parts.length - 1][0];
 };
 
 type SignedAgreementsTableProps = {
@@ -209,9 +195,10 @@ const SignedAgreementsTable = ({ paginationKey }: SignedAgreementsTableProps) =>
                   >
                     {/* User */}
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full brand-gradient text-white text-xs font-bold shadow-sm">
-                        {initials(display)}
-                      </div>
+                      <UserAvatar
+                        user={typeof agreement.userId == "object" ? agreement.userId : null}
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full brand-gradient text-white text-xs font-bold shadow-sm"
+                      />
                       <span className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">
                         {display}
                       </span>

@@ -34,7 +34,7 @@ interface DatePickerProps {
   presets?: boolean;
   noPrevDates?: boolean;
   presetValues?: PresetValues[];
-  selectedDate: Date;
+  selectedDate?: Date;
   onChangeDate: (date: Date) => void;
   triggerTestId?: string;
   presetTriggerTestId?: string;

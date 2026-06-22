@@ -8,7 +8,7 @@ import { Form } from "../ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import useWorkoutPlanQuery from "@/hooks/queries/workoutPlans/useWorkoutPlanQuery";
 import { useNavigate, useParams } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from "react";
 import { useUsersStore } from "@/store/userStore";
 import useUserQuery from "@/hooks/queries/user/useUserQuery";
 import { MainRoutes } from "@/enums/Routes";
@@ -63,12 +63,21 @@ const calculateMinPerWorkout = (workout: WorkoutSchemaType) => {
 interface CreateWorkoutPlanWrapperProps {
   children: React.ReactNode;
   embedded?: boolean;
+  /** Skip the built-in "טען תבנית קיימת" card. Caller will trigger
+   *  the preset picker imperatively via the forwarded ref. */
+  hideLoadBar?: boolean;
 }
 
-const CreateWorkoutPlanWrapper = ({
-  children,
-  embedded = false,
-}: CreateWorkoutPlanWrapperProps) => {
+/** Imperative handle the parent uses to open the preset picker
+ *  from somewhere else in the layout (e.g. a header button). */
+export interface CreateWorkoutPlanHandle {
+  openPresetPicker: () => void;
+}
+
+const CreateWorkoutPlanWrapper = forwardRef<
+  CreateWorkoutPlanHandle,
+  CreateWorkoutPlanWrapperProps
+>(({ children, embedded = false, hideLoadBar = false }, ref) => {
   const form = useForm<WorkoutSchemaType>({
     resolver: zodResolver(fullWorkoutPlanSchema),
     defaultValues: {
@@ -93,6 +102,13 @@ const CreateWorkoutPlanWrapper = ({
   const [pendingNav, setPendingNav] = useState<(() => void) | null>(null);
   const [savingToProceed, setSavingToProceed] = useState(false);
   useNavigationBlocker(isDirty, (next) => setPendingNav(() => next));
+
+  // Expose the preset-picker opener so the parent can trigger it
+  // from outside (used when the load bar is hidden and the trigger
+  // lives in the page header instead).
+  useImperativeHandle(ref, () => ({
+    openPresetPicker: () => setOpenPresetPicker(true),
+  }));
 
   const onSuccess = () => {
     toast.success(`תכנית אימון נשמרה בהצלחה!`);
@@ -206,11 +222,13 @@ const CreateWorkoutPlanWrapper = ({
 
         {embedded && <WorkoutPlanStatsStrip />}
 
-        <WorkoutPresetLoadBar
-          embedded={embedded}
-          selectedPreset={selectedPreset}
-          onOpenPresetPicker={() => setOpenPresetPicker(true)}
-        />
+        {!hideLoadBar && (
+          <WorkoutPresetLoadBar
+            embedded={embedded}
+            selectedPreset={selectedPreset}
+            onOpenPresetPicker={() => setOpenPresetPicker(true)}
+          />
+        )}
 
         <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit, onInvalidSubmit)}>
           <PresetMetaPanel />
@@ -268,6 +286,8 @@ const CreateWorkoutPlanWrapper = ({
       />
     </Form>
   );
-};
+});
+
+CreateWorkoutPlanWrapper.displayName = "CreateWorkoutPlanWrapper";
 
 export default CreateWorkoutPlanWrapper;

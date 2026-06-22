@@ -9,6 +9,7 @@ import Loader from "../ui/Loader";
 import { FaUserPlus, FaDumbbell, FaAppleWhole, FaCheck } from "react-icons/fa6";
 import useUsersQuery from "@/hooks/queries/user/useUsersQuery";
 import { deriveAccountStatus, hasContractEnded } from "@/lib/userStatus";
+import { UserAvatar } from "../users/UserAvatar";
 
 const getInitials = (firstName?: string, lastName?: string) => {
   const firstInitial = firstName?.[0] || "";
@@ -111,9 +112,7 @@ const NewClientsCard: React.FC = () => {
               onClick={() => navigate(`/users/${user._id}`)}
               className="group flex cursor-pointer items-center gap-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-800/30 px-3 py-3 transition-all hover:border-blue-300 hover:bg-blue-50/40 dark:hover:border-blue-700 dark:hover:bg-blue-950/20 hover:shadow-sm"
             >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full brand-gradient text-xs font-bold text-white shadow-sm ring-2 ring-white dark:ring-slate-900">
-                {getInitials(user.firstName, user.lastName)}
-              </div>
+              <UserAvatar user={user} />
               <div className="flex-1 min-w-0">
                 <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">
                   {userFullName(user)}

@@ -1,4 +1,10 @@
-import { CalorieBucket, calorieBucketFor, matchesFreeCal, matchesServings } from "@/lib/dietMeta";
+import {
+  CalorieBucket,
+  calorieBucketFor,
+  matchesFreeCal,
+  matchesServings,
+  resolveDietPresetMeta,
+} from "@/lib/dietMeta";
 import { DietaryRestriction, DietGoal, IDietPlanPreset } from "@/interfaces/IDietPlan";
 
 export type DietPresetItem = IDietPlanPreset & { _id?: string };
@@ -69,7 +75,7 @@ const matchesGoals = (preset: DietPresetItem, goals: DietGoal[]) => {
 const matchesCalories = (preset: DietPresetItem, buckets: CalorieBucket[]) => {
   if (!buckets.length) return true;
 
-  const bucket = calorieBucketFor(preset.calories);
+  const bucket = calorieBucketFor(resolveDietPresetMeta(preset).calories);
   return Boolean(bucket && buckets.includes(bucket));
 };
 
@@ -92,14 +98,16 @@ export const matchesDietPreset = (
   filters: DietPresetFilters,
   isFavorite: (presetId?: string) => boolean
 ) => {
+  const resolvedMeta = resolveDietPresetMeta(preset);
+
   if (filters.favoritesOnly && !isFavorite(preset._id)) return false;
   if (!matchesSearch(preset, filters.search)) return false;
   if (!matchesGoals(preset, filters.goals)) return false;
   if (!matchesCalories(preset, filters.buckets)) return false;
-  if (!matchesServings(preset.proteinServings, filters.proteinServings)) return false;
-  if (!matchesServings(preset.carbServings, filters.carbServings)) return false;
-  if (!matchesServings(preset.fatServings, filters.fatServings)) return false;
-  if (!matchesFreeCal(preset.freeCalories, filters.freeCalories)) return false;
+  if (!matchesServings(resolvedMeta.proteinServings, filters.proteinServings)) return false;
+  if (!matchesServings(resolvedMeta.carbServings, filters.carbServings)) return false;
+  if (!matchesServings(resolvedMeta.fatServings, filters.fatServings)) return false;
+  if (!matchesFreeCal(resolvedMeta.freeCalories, filters.freeCalories)) return false;
   if (!matchesRestrictions(preset, filters.restrictions)) return false;
   if (!matchesMealCount(preset, filters.mealCounts)) return false;
 

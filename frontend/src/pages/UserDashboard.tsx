@@ -262,7 +262,7 @@ export const UserDashboard = () => {
         />
       )}
 
-      {mainTab === "diet" && <DietTabPanel />}
+      {mainTab === "diet" && <DietTabPanel userId={currentUser?._id} />}
 
       {mainTab === "forms" && <FormsTabPanel />}
 
