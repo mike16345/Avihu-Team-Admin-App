@@ -155,7 +155,9 @@ const SimplePresetGrid: React.FC<SimplePresetGridProps> = ({
           setPendingDeleteItem(null);
         }}
         title={
-          pendingDeleteItem ? `למחוק את "${getSimpleItemName(pendingDeleteItem)}"?` : "למחוק את הפריט?"
+          pendingDeleteItem
+            ? `למחוק את "${getSimpleItemName(pendingDeleteItem)}"?`
+            : "למחוק את הפריט?"
         }
         alertMessage={
           <>

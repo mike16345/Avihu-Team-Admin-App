@@ -74,219 +74,221 @@ export interface CreateWorkoutPlanHandle {
   openPresetPicker: () => void;
 }
 
-const CreateWorkoutPlanWrapper = forwardRef<
-  CreateWorkoutPlanHandle,
-  CreateWorkoutPlanWrapperProps
->(({ children, embedded = false, hideLoadBar = false }, ref) => {
-  const form = useForm<WorkoutSchemaType>({
-    resolver: zodResolver(fullWorkoutPlanSchema),
-    defaultValues: {
-      tips: [],
-      cardio: { type: "simple", plan: defaultSimpleCardioOption },
-      workoutPlans: [],
-    },
-  });
-  const {
-    formState: { isDirty, dirtyFields },
-    reset,
-  } = form;
-  const { id = "" } = useParams();
-  const navigation = useNavigate();
-  const users = useUsersStore((state) => state.users);
-
-  const [isNoUserWithId, setIsNoUserWithId] = useState(false);
-  const [selectedPreset, setSelectedPreset] = useState("");
-  const [openPresetModal, setOpenPresetModal] = useState(false);
-  const [openPresetPicker, setOpenPresetPicker] = useState(false);
-  const [validationErrors, setValidationErrors] = useState<ValidationErrorEntry[]>([]);
-  const [pendingNav, setPendingNav] = useState<(() => void) | null>(null);
-  const [savingToProceed, setSavingToProceed] = useState(false);
-  useNavigationBlocker(isDirty, (next) => setPendingNav(() => next));
-
-  // Expose the preset-picker opener so the parent can trigger it
-  // from outside (used when the load bar is hidden and the trigger
-  // lives in the page header instead).
-  useImperativeHandle(ref, () => ({
-    openPresetPicker: () => setOpenPresetPicker(true),
-  }));
-
-  const onSuccess = () => {
-    toast.success(`תכנית אימון נשמרה בהצלחה!`);
-    if (!embedded) navigation(MainRoutes.USERS + `/${id}?tab=${weightTab}`);
-    invalidateQueryKeys([`${QueryKeys.USER_WORKOUT_PLAN}${id}`, QueryKeys.NO_WORKOUT_PLAN]);
-  };
-
-  const presetSuccess = () => {
-    toast.success("תבנית נשמרה בהצלחה!");
-    invalidateQueryKeys([QueryKeys.WORKOUT_PRESETS]);
-  };
-
-  const onError = (error: any) => {
-    const message = parseErrorFromObject(error.data || "");
-
-    toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-      description: message,
+const CreateWorkoutPlanWrapper = forwardRef<CreateWorkoutPlanHandle, CreateWorkoutPlanWrapperProps>(
+  ({ children, embedded = false, hideLoadBar = false }, ref) => {
+    const form = useForm<WorkoutSchemaType>({
+      resolver: zodResolver(fullWorkoutPlanSchema),
+      defaultValues: {
+        tips: [],
+        cardio: { type: "simple", plan: defaultSimpleCardioOption },
+        workoutPlans: [],
+      },
     });
-  };
+    const {
+      formState: { isDirty, dirtyFields },
+      reset,
+    } = form;
+    const { id = "" } = useParams();
+    const navigation = useNavigate();
+    const users = useUsersStore((state) => state.users);
 
-  const { data, isLoading: isLoadingPlan, isFetching: isFetchingPlan } = useWorkoutPlanQuery(id);
-  const userQuery = useUserQuery(id, isNoUserWithId);
-  const workoutPlanPresets = useWorkoutPlanPresetsQuery();
+    const [isNoUserWithId, setIsNoUserWithId] = useState(false);
+    const [selectedPreset, setSelectedPreset] = useState("");
+    const [openPresetModal, setOpenPresetModal] = useState(false);
+    const [openPresetPicker, setOpenPresetPicker] = useState(false);
+    const [validationErrors, setValidationErrors] = useState<ValidationErrorEntry[]>([]);
+    const [pendingNav, setPendingNav] = useState<(() => void) | null>(null);
+    const [savingToProceed, setSavingToProceed] = useState(false);
+    useNavigationBlocker(isDirty, (next) => setPendingNav(() => next));
 
-  const addWorkoutPlan = useAddWorkoutPlan({ onError, onSuccess });
-  const updateWorkoutPlan = useUpdateWorkoutPlan({ onError, onSuccess });
-  const addWorkoutPlanPreset = useAddWorkoutPreset({ onError, onSuccess: presetSuccess });
+    // Expose the preset-picker opener so the parent can trigger it
+    // from outside (used when the load bar is hidden and the trigger
+    // lives in the page header instead).
+    useImperativeHandle(ref, () => ({
+      openPresetPicker: () => setOpenPresetPicker(true),
+    }));
 
-  const presetList = useMemo(() => workoutPlanPresets.data?.data || [], [workoutPlanPresets.data]);
+    const onSuccess = () => {
+      toast.success(`תכנית אימון נשמרה בהצלחה!`);
+      if (!embedded) navigation(MainRoutes.USERS + `/${id}?tab=${weightTab}`);
+      invalidateQueryKeys([`${QueryKeys.USER_WORKOUT_PLAN}${id}`, QueryKeys.NO_WORKOUT_PLAN]);
+    };
 
-  const applyPreset = (preset: (typeof presetList)[number]) => {
-    reset({
-      ...preset,
-      cardio: preset.cardio || { type: "simple", plan: defaultSimpleCardioOption },
-    });
-    setSelectedPreset(preset.name);
-  };
+    const presetSuccess = () => {
+      toast.success("תבנית נשמרה בהצלחה!");
+      invalidateQueryKeys([QueryKeys.WORKOUT_PRESETS]);
+    };
 
-  const onSubmit = (values: WorkoutSchemaType) => {
-    if (!id) return Promise.reject("User ID is required!");
-    const workoutPlan = calculateMinPerWorkout(values) as ICompleteWorkoutPlan;
+    const onError = (error: any) => {
+      const message = parseErrorFromObject(error.data || "");
 
-    if (!data) {
-      return addWorkoutPlan.mutate({ id, workoutPlan: workoutPlan });
-    } else {
-      return updateWorkoutPlan.mutate({ id, cleanedWorkoutPlan: workoutPlan });
+      toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
+        description: message,
+      });
+    };
+
+    const { data, isLoading: isLoadingPlan, isFetching: isFetchingPlan } = useWorkoutPlanQuery(id);
+    const userQuery = useUserQuery(id, isNoUserWithId);
+    const workoutPlanPresets = useWorkoutPlanPresetsQuery();
+
+    const addWorkoutPlan = useAddWorkoutPlan({ onError, onSuccess });
+    const updateWorkoutPlan = useUpdateWorkoutPlan({ onError, onSuccess });
+    const addWorkoutPlanPreset = useAddWorkoutPreset({ onError, onSuccess: presetSuccess });
+
+    const presetList = useMemo(
+      () => workoutPlanPresets.data?.data || [],
+      [workoutPlanPresets.data]
+    );
+
+    const applyPreset = (preset: (typeof presetList)[number]) => {
+      reset({
+        ...preset,
+        cardio: preset.cardio || { type: "simple", plan: defaultSimpleCardioOption },
+      });
+      setSelectedPreset(preset.name);
+    };
+
+    const onSubmit = (values: WorkoutSchemaType) => {
+      if (!id) return Promise.reject("User ID is required!");
+      const workoutPlan = calculateMinPerWorkout(values) as ICompleteWorkoutPlan;
+
+      if (!data) {
+        return addWorkoutPlan.mutate({ id, workoutPlan: workoutPlan });
+      } else {
+        return updateWorkoutPlan.mutate({ id, cleanedWorkoutPlan: workoutPlan });
+      }
+    };
+
+    const handleAddPreset = (name: string) => {
+      const workoutPlan = calculateMinPerWorkout(form.getValues());
+      const preset = { name, ...(workoutPlan as ICompleteWorkoutPlan) };
+      delete (preset as Partial<ICompleteWorkoutPlan>).userId;
+
+      const { error } = workoutPresetSchema.safeParse(preset);
+      const nestedError = error ? getZodErrorIssues(error?.issues)[0] : null;
+      if (nestedError)
+        return toast.error(nestedError?.title, { description: nestedError?.description });
+
+      addWorkoutPlanPreset.mutate(preset);
+    };
+
+    const user = useMemo(() => users.find((storedUser) => storedUser._id === id), [id, users]);
+
+    const onInvalidSubmit = (errors: any) => {
+      const all = collectAllErrors(errors);
+      if (all.length === 0) return;
+      setValidationErrors(all);
+    };
+
+    const displayedUser = user || userQuery.data;
+
+    useEffect(() => {
+      if (!user) setIsNoUserWithId(true);
+    }, [user]);
+
+    useEffect(() => {
+      if (!data) return;
+
+      reset(data.data);
+    }, [data, reset]);
+
+    useUnsavedChangesWarning(isDirty);
+
+    useEffect(() => {
+      if (!savingToProceed) return;
+      if (isDirty) return;
+      if (pendingNav) {
+        const next = pendingNav;
+        setPendingNav(null);
+        next();
+      }
+      setSavingToProceed(false);
+    }, [savingToProceed, isDirty, pendingNav]);
+
+    const showSkeleton = isLoadingPlan && isFetchingPlan && !data;
+    if (embedded && showSkeleton) {
+      return <WorkoutPlanSkeleton />;
     }
-  };
 
-  const handleAddPreset = (name: string) => {
-    const workoutPlan = calculateMinPerWorkout(form.getValues());
-    const preset = { name, ...(workoutPlan as ICompleteWorkoutPlan) };
-    delete (preset as Partial<ICompleteWorkoutPlan>).userId;
+    const isPlanSaving = updateWorkoutPlan.isPending || addWorkoutPlan.isPending;
+    const isSaveDisabled = addWorkoutPlanPreset.isPending || isPlanSaving;
+    const backLink = MainRoutes.USERS + `/${id}?tab=${weightTab}`;
 
-    const { error } = workoutPresetSchema.safeParse(preset);
-    const nestedError = error ? getZodErrorIssues(error?.issues)[0] : null;
-    if (nestedError)
-      return toast.error(nestedError?.title, { description: nestedError?.description });
+    return (
+      <Form {...form}>
+        <div className="flex flex-col gap-4 w-full">
+          {!embedded && (
+            <WorkoutPlanPageHeader backLink={backLink} user={displayedUser} userId={id} />
+          )}
 
-    addWorkoutPlanPreset.mutate(preset);
-  };
+          {embedded && <WorkoutPlanStatsStrip />}
 
-  const user = useMemo(() => users.find((storedUser) => storedUser._id === id), [id, users]);
+          {!hideLoadBar && (
+            <WorkoutPresetLoadBar
+              embedded={embedded}
+              selectedPreset={selectedPreset}
+              onOpenPresetPicker={() => setOpenPresetPicker(true)}
+            />
+          )}
 
-  const onInvalidSubmit = (errors: any) => {
-    const all = collectAllErrors(errors);
-    if (all.length === 0) return;
-    setValidationErrors(all);
-  };
+          <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit, onInvalidSubmit)}>
+            <PresetMetaPanel />
 
-  const displayedUser = user || userQuery.data;
+            {children}
 
-  useEffect(() => {
-    if (!user) setIsNoUserWithId(true);
-  }, [user]);
+            <WorkoutPlanSaveActions
+              embedded={embedded}
+              isPresetSaving={addWorkoutPlanPreset.isPending}
+              isPlanSaving={isPlanSaving}
+              isSaveDisabled={isSaveDisabled}
+              onOpenPresetModal={() => setOpenPresetModal(true)}
+            />
+          </form>
+        </div>
+        <InputModal
+          onClose={() => setOpenPresetModal(false)}
+          open={openPresetModal}
+          onSubmit={(val) => handleAddPreset(val)}
+        />
 
-  useEffect(() => {
-    if (!data) return;
+        <WorkoutPresetPicker
+          open={openPresetPicker}
+          onOpenChange={setOpenPresetPicker}
+          presets={presetList}
+          onSelect={applyPreset}
+        />
 
-    reset(data.data);
-  }, [data, reset]);
+        <ValidationErrorsDialog
+          open={validationErrors.length > 0}
+          onOpenChange={(open) => !open && setValidationErrors([])}
+          errors={validationErrors}
+          intro="יש לתקן את השדות הבאים לפני שמירת התוכנית"
+        />
 
-  useUnsavedChangesWarning(isDirty);
-
-  useEffect(() => {
-    if (!savingToProceed) return;
-    if (isDirty) return;
-    if (pendingNav) {
-      const next = pendingNav;
-      setPendingNav(null);
-      next();
-    }
-    setSavingToProceed(false);
-  }, [savingToProceed, isDirty, pendingNav]);
-
-  const showSkeleton = isLoadingPlan && isFetchingPlan && !data;
-  if (embedded && showSkeleton) {
-    return <WorkoutPlanSkeleton />;
+        <UnsavedChangesDialog
+          open={pendingNav !== null}
+          isSaving={updateWorkoutPlan.isPending || addWorkoutPlan.isPending}
+          subject="תוכנית האימונים"
+          changes={summariseWorkoutDirty(dirtyFields)}
+          onSaveAndContinue={() => {
+            setSavingToProceed(true);
+            form.handleSubmit(onSubmit, onInvalidSubmit)();
+          }}
+          onDiscard={() => {
+            if (data?.data) reset(data.data);
+            else reset();
+            const next = pendingNav;
+            setPendingNav(null);
+            if (next) next();
+          }}
+          onCancel={() => {
+            setPendingNav(null);
+          }}
+        />
+      </Form>
+    );
   }
-
-  const isPlanSaving = updateWorkoutPlan.isPending || addWorkoutPlan.isPending;
-  const isSaveDisabled = addWorkoutPlanPreset.isPending || isPlanSaving;
-  const backLink = MainRoutes.USERS + `/${id}?tab=${weightTab}`;
-
-  return (
-    <Form {...form}>
-      <div className="flex flex-col gap-4 w-full">
-        {!embedded && (
-          <WorkoutPlanPageHeader backLink={backLink} user={displayedUser} userId={id} />
-        )}
-
-        {embedded && <WorkoutPlanStatsStrip />}
-
-        {!hideLoadBar && (
-          <WorkoutPresetLoadBar
-            embedded={embedded}
-            selectedPreset={selectedPreset}
-            onOpenPresetPicker={() => setOpenPresetPicker(true)}
-          />
-        )}
-
-        <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit, onInvalidSubmit)}>
-          <PresetMetaPanel />
-
-          {children}
-
-          <WorkoutPlanSaveActions
-            embedded={embedded}
-            isPresetSaving={addWorkoutPlanPreset.isPending}
-            isPlanSaving={isPlanSaving}
-            isSaveDisabled={isSaveDisabled}
-            onOpenPresetModal={() => setOpenPresetModal(true)}
-          />
-        </form>
-      </div>
-      <InputModal
-        onClose={() => setOpenPresetModal(false)}
-        open={openPresetModal}
-        onSubmit={(val) => handleAddPreset(val)}
-      />
-
-      <WorkoutPresetPicker
-        open={openPresetPicker}
-        onOpenChange={setOpenPresetPicker}
-        presets={presetList}
-        onSelect={applyPreset}
-      />
-
-      <ValidationErrorsDialog
-        open={validationErrors.length > 0}
-        onOpenChange={(open) => !open && setValidationErrors([])}
-        errors={validationErrors}
-        intro="יש לתקן את השדות הבאים לפני שמירת התוכנית"
-      />
-
-      <UnsavedChangesDialog
-        open={pendingNav !== null}
-        isSaving={updateWorkoutPlan.isPending || addWorkoutPlan.isPending}
-        subject="תוכנית האימונים"
-        changes={summariseWorkoutDirty(dirtyFields)}
-        onSaveAndContinue={() => {
-          setSavingToProceed(true);
-          form.handleSubmit(onSubmit, onInvalidSubmit)();
-        }}
-        onDiscard={() => {
-          if (data?.data) reset(data.data);
-          else reset();
-          const next = pendingNav;
-          setPendingNav(null);
-          if (next) next();
-        }}
-        onCancel={() => {
-          setPendingNav(null);
-        }}
-      />
-    </Form>
-  );
-});
+);
 
 CreateWorkoutPlanWrapper.displayName = "CreateWorkoutPlanWrapper";
 

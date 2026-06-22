@@ -60,12 +60,9 @@ const TrainerDetailsPage = () => {
           setIsAccessDialogOpen(false);
         },
         onError: (mutationError: any) => {
-          toast.error(
-            nextStatus === "blocked" ? "חסימת המאמן נכשלה" : "הענקת הגישה למאמן נכשלה",
-            {
-              description: mutationError?.data?.message ?? mutationError?.message,
-            }
-          );
+          toast.error(nextStatus === "blocked" ? "חסימת המאמן נכשלה" : "הענקת הגישה למאמן נכשלה", {
+            description: mutationError?.data?.message ?? mutationError?.message,
+          });
         },
       }
     );
@@ -108,11 +105,7 @@ const TrainerDetailsPage = () => {
         onConfirm={handleConfirmAccessChange}
       />
 
-      <EditTrainerDialog
-        open={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
-        data={data}
-      />
+      <EditTrainerDialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} data={data} />
 
       <TrainerSubTrainersDialog
         open={isSubTrainersDialogOpen}

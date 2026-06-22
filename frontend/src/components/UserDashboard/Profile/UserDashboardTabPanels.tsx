@@ -82,18 +82,24 @@ export function WorkoutTabPanel({
           rightmost on screen. */}
       <div className="flex items-center justify-end">
         <div className="flex items-center gap-2">
-          <ActionButton onClick={() => wrapperRef.current?.openPresetPicker()}
-            title="טען תבנית קיימת לתוכנית האימונים">
+          <ActionButton
+            onClick={() => wrapperRef.current?.openPresetPicker()}
+            title="טען תבנית קיימת לתוכנית האימונים"
+          >
             <FaFolderOpen size={11} />
             <span>בחר תבנית</span>
           </ActionButton>
-          <ActionButton onClick={onOpenSwapModal}
-            title="להחליף את התוכנית הפעילה לתקופה מוגבלת. התוכנית הקודמת תישמר בהיסטוריה ותהיה ניתנת לשחזור.">
+          <ActionButton
+            onClick={onOpenSwapModal}
+            title="להחליף את התוכנית הפעילה לתקופה מוגבלת. התוכנית הקודמת תישמר בהיסטוריה ותהיה ניתנת לשחזור."
+          >
             <FaArrowsRotate size={11} />
             <span>החלפה זמנית</span>
           </ActionButton>
-          <ActionButton onClick={() => setHistoryOpen(true)}
-            title="היסטוריית תוכניות אימון של המתאמן">
+          <ActionButton
+            onClick={() => setHistoryOpen(true)}
+            title="היסטוריית תוכניות אימון של המתאמן"
+          >
             <FaClockRotateLeft size={11} />
             <span>היסטוריה</span>
             {historyCount > 0 && (

@@ -37,7 +37,6 @@ const WorkoutPlanHistorySection: FC<Props> = ({
   const [expanded, setExpanded] = useState(embedded);
   const [pendingRestoreId, setPendingRestoreId] = useState<string | null>(null);
 
-
   const restoreMutation = useRestoreWorkoutPlan({
     onSuccess: () => {
       toast.success("התוכנית שוחזרה בהצלחה");
