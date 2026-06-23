@@ -68,7 +68,7 @@ const FormBuilder = ({ disableOnboarding = false }: FormBuilderProps) => {
 
   return (
     <>
-      <div className="p-5 space-y-5">
+      <div className="space-y-5">
         <FormBuilderHeader disableOnboarding={disableOnboarding} />
 
         <DragDropWrapper items={sections} strategy="vertical" idKey="_id" setItems={replace}>

@@ -1,198 +1,45 @@
 import { useEffect, useMemo, useState } from "react";
-import { FormResponse } from "@/interfaces/IFormResponse";
-import { FormTypesInHebrew } from "@/constants/form";
-import DateUtils from "@/lib/dateUtils";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { FormResponseAnswer } from "./FormResponseAnswer";
+import type { FullscreenState, FormResponseViewerProps } from "./formResponseViewerTypes";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+  accentOf,
+  extractAllPhotoKeys,
+  formatSubmittedAt,
+  getFormTypeLabel,
+  getSectionLabel,
+  initialsOf,
+} from "./formResponseViewerUtils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { FullscreenImage } from "@/components/UserDashboard/WeightProgression/FullscreenImage";
 import CustomSelect from "../ui/CustomSelect";
-import { buildPhotoUrl, convertItemsToOptions } from "@/lib/utils";
-import { FormTypes } from "@/interfaces/IForm";
-
-type FormResponseSection = FormResponse["sections"][number];
-type FormResponseQuestion = FormResponseSection["questions"][number];
-
-type FullscreenState = {
-  images: string[];
-  index: number;
+import { convertItemsToOptions } from "@/lib/utils";
+import { sendData } from "@/API/api";
+import { ApiResponse } from "@/types/types";
+import { FaClipboardList, FaCalendarDay, FaImages, FaCheck } from "react-icons/fa6";
+const getPhotoImportButtonStateClassName = (imported: boolean, importing: boolean) => {
+  if (imported) return "cursor-default bg-emerald-600";
+  if (importing) return "cursor-not-allowed bg-blue-400";
+  return "bg-blue-600 hover:bg-blue-700";
 };
-
-type FormResponseViewerProps = {
-  response: FormResponse;
-  respondentName?: string;
-  navigationMode?: "auto" | "tabs" | "select";
-};
-
-const formatSubmittedAt = (submittedAt?: string) => {
-  if (!submittedAt) return "-";
-  const parsedDate = new Date(submittedAt);
-  if (Number.isNaN(parsedDate.getTime())) {
-    return submittedAt;
-  }
-  return DateUtils.formatDate(parsedDate, "DD/MM/YYYY");
-};
-
-const isPrimitive = (value: unknown) => {
-  return ["string", "number", "boolean"].includes(typeof value);
-};
-
-const normalizeFileUrls = (answer: unknown): string[] => {
-  if (!answer) return [];
-  const urls: string[] = [];
-
-  if (typeof answer === "string") {
-    urls.push(buildPhotoUrl(answer));
-  }
-
-  if (Array.isArray(answer)) {
-    answer.forEach((entry) => urls.push(buildPhotoUrl(entry)));
-  }
-
-  return urls.filter((url) => typeof url === "string" && url.trim().length > 0);
-};
-
-const renderPrimitive = (value: unknown) => {
-  if (value === null || value === undefined) {
-    return <span>-</span>;
-  }
-
-  const stringValue = String(value);
-  return <span className="whitespace-pre-wrap break-words">{stringValue || "-"}</span>;
-};
-
-const renderObjectDetails = (value: Record<string, unknown>) => {
-  const entries = Object.entries(value);
-  if (!entries.length) {
-    return <span className="text-muted-foreground">-</span>;
-  }
-
-  const hasOnlyPrimitives = entries.every(([, entryValue]) => {
-    return entryValue === null || entryValue === undefined || isPrimitive(entryValue);
-  });
-
-  if (hasOnlyPrimitives) {
+const getPhotoImportButtonContent = (imported: boolean, importing: boolean) => {
+  if (imported) {
     return (
-      <dl className="grid gap-2 text-sm sm:grid-cols-2">
-        {entries.map(([key, entryValue]) => (
-          <div key={key} className="rounded-md border border-muted/50 p-2">
-            <dt className="text-xs text-muted-foreground">{key}</dt>
-            <dd className="mt-1 font-medium">{renderPrimitive(entryValue)}</dd>
-          </div>
-        ))}
-      </dl>
+      <>
+        <FaCheck size={11} />
+        {"\u05e0\u05d5\u05e1\u05e4\u05d5 \u05dc\u05d2\u05dc\u05e8\u05d9\u05d4"}
+      </>
     );
   }
-
+  if (importing) return "\u05de\u05d5\u05e1\u05d9\u05e3...";
   return (
-    <Accordion type="single" collapsible>
-      <AccordionItem value="details">
-        <AccordionTrigger className="text-sm">צפה בפרטים</AccordionTrigger>
-        <AccordionContent>
-          <pre className="max-w-full whitespace-pre-wrap break-words rounded-md bg-muted p-3 text-xs sm:text-sm overflow-x-auto">
-            {JSON.stringify(value, null, 2)}
-          </pre>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
-  );
-};
-
-const renderQuestionAnswer = (
-  question: FormResponseQuestion,
-  onImageSelect: (images: string[], index: number) => void
-) => {
-  const { answer, type } = question;
-
-  if (type === "file-upload") {
-    const urls = normalizeFileUrls(answer);
-
-    if (!urls.length) {
-      return <span className="text-muted-foreground">קובץ לא זמין</span>;
-    }
-
-    return (
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-        {urls.map((url, index) => (
-          <button
-            key={`${url}-${index}`}
-            type="button"
-            onClick={() => onImageSelect(urls, index)}
-            className="group relative overflow-hidden rounded-lg border border-muted/60 bg-muted/30 focus:outline-none focus:ring-2 focus:ring-ring"
-          >
-            <img
-              src={url}
-              alt={`העלאת קובץ: ${question.question}`}
-              className="h-28 w-full object-cover transition-transform duration-200 group-hover:scale-105 sm:h-32"
-              loading="lazy"
-            />
-          </button>
-        ))}
-      </div>
-    );
-  }
-
-  if (isPrimitive(answer)) {
-    return renderPrimitive(answer);
-  }
-
-  if (Array.isArray(answer)) {
-    if (!answer.length) {
-      return <span className="text-muted-foreground">-</span>;
-    }
-
-    const allPrimitive = answer.every(
-      (item) => item === null || item === undefined || isPrimitive(item)
-    );
-
-    if (allPrimitive) {
-      return (
-        <ul className="list-disc space-y-1 pr-5 text-sm">
-          {answer.map((item, index) => (
-            <li key={`${String(item)}-${index}`}>{renderPrimitive(item)}</li>
-          ))}
-        </ul>
-      );
-    }
-
-    return (
-      <Accordion type="single" collapsible>
-        <AccordionItem value="details">
-          <AccordionTrigger className="text-sm">צפה בפרטים</AccordionTrigger>
-          <AccordionContent>
-            <pre className="max-w-full whitespace-pre-wrap break-words rounded-md bg-muted p-3 text-xs sm:text-sm overflow-x-auto">
-              {JSON.stringify(answer, null, 2)}
-            </pre>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-    );
-  }
-
-  if (answer && typeof answer === "object") {
-    return renderObjectDetails(answer as Record<string, unknown>);
-  }
-
-  return renderPrimitive(answer);
-};
-
-const getSectionLabel = (title: string | undefined, index: number) => {
-  const trimmed = title?.trim();
-  return trimmed ? trimmed : `סעיף ${index + 1}`;
-};
-
-const Metadata = ({ label, value }: { label: string; value: string }) => {
-  return (
-    <div className="space-y-1 text-right">
-      <p className="text-muted-foreground">{label}</p>
-      <p className="font-semibold">{value}</p>
-    </div>
+    <>
+      <FaImages size={12} />
+      {
+        "\u05d4\u05d5\u05e1\u05e3 \u05dc\u05d2\u05dc\u05e8\u05d9\u05d9\u05ea \u05d4\u05ea\u05de\u05d5\u05e0\u05d5\u05ea"
+      }
+    </>
   );
 };
 const FormResponseViewer = ({
@@ -200,116 +47,241 @@ const FormResponseViewer = ({
   respondentName,
   navigationMode = "auto",
 }: FormResponseViewerProps) => {
-  const sections = response.sections ?? [];
+  const sections = useMemo(() => response.sections ?? [], [response.sections]);
   const isMobile = useIsMobile();
-
+  const queryClient = useQueryClient();
   const [activeSectionId, setActiveSectionId] = useState(sections[0]?._id ?? "");
   const [fullscreenState, setFullscreenState] = useState<FullscreenState | null>(null);
-
-  const formName = response.formTitle ?? response.formId?.name ?? "-";
+  const [importingPhotos, setImportingPhotos] = useState(false);
+  const [importedThisSession, setImportedThisSession] = useState(false);
+  const photoKeys = useMemo(() => extractAllPhotoKeys(response), [response]);
+  const handleAddPhotosToGallery = async () => {
+    const userIdValue =
+      typeof response.userId === "string" ? response.userId : (response.userId as any)?._id;
+    if (!userIdValue || photoKeys.length === 0) {
+      toast.error("אין תמונות לייבא או חסר מזהה משתמש");
+      return;
+    }
+    setImportingPhotos(true);
+    let added = 0;
+    let lastError: string | null = null;
+    for (const key of photoKeys) {
+      try {
+        await sendData<ApiResponse<string[]>>("userImageUrls", {
+          userId: userIdValue,
+          imageUrl: key,
+        });
+        added++;
+      } catch (e: any) {
+        lastError = e?.message || "שגיאה לא ידועה";
+      }
+    }
+    setImportingPhotos(false);
+    if (added > 0) {
+      queryClient.invalidateQueries({ queryKey: [userIdValue + "-photos"] });
+      setImportedThisSession(true);
+      toast.success(
+        added === photoKeys.length
+          ? `${added} תמונות נוספו לגלריית התמונות של המתאמן`
+          : `${added} מתוך ${photoKeys.length} תמונות נוספו · ${lastError || ""}`
+      );
+    } else {
+      toast.error(lastError || "לא הצלחנו להוסיף את התמונות לגלריה");
+    }
+  };
+  const formName = response.formTitle ?? response.formId?.name ?? "—";
   const rawFormType = response.formType ?? response.formId?.type;
-  const formType = rawFormType ? (FormTypesInHebrew[rawFormType as FormTypes] ?? rawFormType) : "-";
+  const typeLabel = getFormTypeLabel(rawFormType);
+  const accent = accentOf(rawFormType as string | undefined);
   const submittedAt = formatSubmittedAt(response.submittedAt);
-  const displayRespondent = respondentName?.trim() || response.userId || "משתמש לא ידוע";
+  const displayRespondent =
+    respondentName?.trim() ||
+    (typeof response.userId === "string" ? response.userId : "משתמש לא ידוע");
   const showSelect = navigationMode === "select" || (navigationMode === "auto" && isMobile);
   const showTabs = navigationMode === "tabs" || (navigationMode === "auto" && !isMobile);
-
-  const sectionOptions = useMemo(() => {
-    return convertItemsToOptions(sections, "title", "_id");
-  }, [sections]);
-
+  const sectionOptions = useMemo(() => convertItemsToOptions(sections, "title", "_id"), [sections]);
   const activeSection = useMemo(() => {
     if (!sections.length) return undefined;
-    return sections.find((section) => section._id === activeSectionId) ?? sections[0];
+    return sections.find((s) => s._id === activeSectionId) ?? sections[0];
   }, [sections, activeSectionId]);
 
   const activeSectionIndex = useMemo(() => {
     if (!activeSection) return -1;
-    return sections.findIndex((section) => section._id === activeSection._id);
+    return sections.findIndex((s) => s._id === activeSection._id);
   }, [activeSection, sections]);
+
+  const totalQuestions = useMemo(
+    () => sections.reduce((acc, s) => acc + (s.questions?.length ?? 0), 0),
+    [sections]
+  );
 
   useEffect(() => {
     setActiveSectionId(sections[0]?._id ?? "");
     setFullscreenState(null);
-  }, [response._id, sections.length]);
+  }, [response._id, sections]);
 
   return (
-    <div className="flex flex-col gap-4 p-4" dir="rtl">
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg sm:text-xl">פרטי תשובה</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
-          <Metadata label="שם הטופס" value={formName} />
-          <Metadata label="סוג הטופס" value={formType} />
-          <Metadata label="משיב" value={displayRespondent} />
-          <Metadata label="נשלח בתאריך" value={submittedAt} />
-        </CardContent>
-      </Card>
-
-      {sections.length ? (
-        <div className="flex flex-col gap-3">
-          {sections.length > 1 && showSelect && (
-            <CustomSelect
-              items={sectionOptions}
-              selectedValue={activeSectionId}
-              onValueChange={setActiveSectionId}
-              placeholder="בחר סעיף"
-              className="w-full sm:max-w-xs"
-            />
-          )}
-
-          {sections.length > 1 && showTabs && (
-            <Tabs
-              value={activeSectionId}
-              onValueChange={setActiveSectionId}
-              dir="rtl"
-              className="w-fit"
+    <div dir="rtl" className="flex flex-col gap-6 p-2 font-heebo">
+      <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-8 shadow-sm">
+        <div className="flex flex-wrap items-start justify-between gap-5">
+          <div className="flex items-center gap-4">
+            <div className="brand-gradient flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-lg font-bold text-white shadow-sm">
+              {initialsOf(displayRespondent)}
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                <FaClipboardList size={11} />
+                פרטי תשובה
+              </div>
+              <h1 className="mt-0.5 truncate text-xl font-bold text-slate-900 dark:text-slate-100">
+                {displayRespondent}
+              </h1>
+              <p className="truncate text-sm text-slate-500 dark:text-slate-400">{formName}</p>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${accent.bg} ${accent.text} ${accent.ring}`}
             >
-              <TabsList className="flex h-auto w-full flex-wrap justify-start gap-2 overflow-x-auto">
-                {sections.map((section, index) => (
-                  <TabsTrigger key={section._id} value={section._id}>
-                    {getSectionLabel(section.title, index)}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
+              {typeLabel}
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 dark:bg-slate-800 px-3 py-1 text-xs font-medium text-slate-600 dark:text-slate-300">
+              <FaCalendarDay size={10} className="text-slate-400 dark:text-slate-500" />
+              {submittedAt}
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-50 dark:bg-slate-800 px-3 py-1 text-xs font-medium text-slate-500 dark:text-slate-400 ring-1 ring-inset ring-slate-200">
+              {totalQuestions} שאלות · {sections.length} סעיפים
+            </span>
+          </div>
+        </div>
+        {photoKeys.length > 0 && (
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-blue-200 bg-blue-50/60 px-4 py-3">
+            <div className="flex items-start gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm">
+                <FaImages size={14} />
+              </span>
+              <div className="text-right">
+                <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                  {photoKeys.length} תמונות הועלו בשאלון
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  אפשר להוסיף אותן לגלריית תמונות ההתקדמות של המתאמן בלחיצה אחת
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleAddPhotosToGallery}
+              disabled={importingPhotos || importedThisSession}
+              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all ${getPhotoImportButtonStateClassName(
+                importedThisSession,
+                importingPhotos
+              )}`}
+            >
+              {getPhotoImportButtonContent(importedThisSession, importingPhotos)}
+            </button>
+          </div>
+        )}
+      </div>
+      {sections.length ? (
+        <>
+          {sections.length > 1 && showSelect && (
+            <div className="sticky top-2 z-10 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white/95 p-3 shadow-sm backdrop-blur-sm">
+              <CustomSelect
+                items={sectionOptions}
+                selectedValue={activeSectionId}
+                onValueChange={setActiveSectionId}
+                placeholder="בחר סעיף"
+                className="w-full"
+              />
+            </div>
           )}
-
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg">
+          {sections.length > 1 && showTabs && (
+            <div className="sticky top-2 z-10 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white/95 p-1.5 shadow-sm backdrop-blur-sm">
+              <div className="flex flex-wrap gap-1.5">
+                {sections.map((section, index) => {
+                  const isActive = section._id === (activeSection?._id ?? "");
+                  return (
+                    <button
+                      key={section._id}
+                      type="button"
+                      onClick={() => setActiveSectionId(section._id)}
+                      className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-all ${
+                        isActive
+                          ? "bg-blue-600 text-white shadow-sm"
+                          : "text-slate-600 dark:text-slate-300 hover:bg-slate-100"
+                      }`}
+                    >
+                      {getSectionLabel(section.title, index)}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-8 shadow-sm">
+            <div className="mb-6 flex items-center justify-between gap-2">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
                 {activeSection
                   ? getSectionLabel(
                       activeSection.title,
                       activeSectionIndex > -1 ? activeSectionIndex : 0
                     )
                   : "פרטי סעיף"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+              </h2>
               {activeSection?.questions?.length ? (
-                activeSection.questions.map((question, index) => (
-                  <div
+                <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500">
+                  {activeSection.questions.length}{" "}
+                  {activeSection.questions.length === 1 ? "שאלה" : "שאלות"}
+                </span>
+              ) : null}
+            </div>
+            {activeSection?.questions?.length ? (
+              <div className="space-y-4">
+                {activeSection.questions.map((question, index) => (
+                  <article
                     key={question._id || `${question.question}-${index}`}
-                    className="rounded-lg border border-muted/60 bg-background/60 p-4 text-right shadow"
+                    className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-slate-50/40 dark:bg-slate-800/40 p-5 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
                   >
-                    <p className="text-base font-semibold">{question.question}</p>
-                    <div className="text-sm text-muted-foreground leading-6">
-                      {renderQuestionAnswer(question, (images, selectedIndex) =>
-                        setFullscreenState({ images, index: selectedIndex })
-                      )}
+                    <div className="mb-3 flex items-start gap-3">
+                      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 text-[11px] font-bold text-blue-700 dark:text-blue-300">
+                        {index + 1}
+                      </span>
+                      <p className="text-sm font-bold leading-snug text-slate-900 dark:text-slate-100">
+                        {question.question}
+                      </p>
                     </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-sm text-muted-foreground">אין שאלות זמינות בסעיף זה.</div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                    <div className="pr-9 leading-6">
+                      <FormResponseAnswer
+                        question={question}
+                        onImageSelect={(images, selectedIndex) =>
+                          setFullscreenState({ images, index: selectedIndex })
+                        }
+                      />
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 p-8 text-center">
+                <FaClipboardList size={24} className="text-slate-300" />
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  אין שאלות זמינות בסעיף זה.
+                </p>
+              </div>
+            )}
+          </div>
+        </>
       ) : (
-        <div className="text-center text-sm text-muted-foreground">אין סעיפים בתשובה זו.</div>
+        <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-10 text-center shadow-sm">
+          <FaClipboardList size={28} className="text-slate-300" />
+          <p className="text-base font-bold text-slate-700 dark:text-slate-200">
+            אין סעיפים בתשובה זו
+          </p>
+          <p className="max-w-sm text-sm text-slate-400 dark:text-slate-500">
+            ייתכן שהשאלון נשלח אבל לא הוגדרו עבורו סעיפים, או שהתשובה נשמרה ריקה.
+          </p>
+        </div>
       )}
       {fullscreenState && (
         <FullscreenImage
@@ -328,5 +300,5 @@ const FormResponseViewer = ({
     </div>
   );
 };
-
 export default FormResponseViewer;
+export type { FormResponseViewerProps };

@@ -56,6 +56,12 @@ export interface Trainer extends IBaseTrainer {
   isDeleted?: boolean;
   createdAt?: string;
   updatedAt?: string;
+  /** Workout-preset IDs starred as favourites by this trainer. */
+  favoriteWorkoutPresetIds?: string[];
+  /** Diet-preset IDs starred as favourites by this trainer. */
+  favoriteDietPresetIds?: string[];
+  /** When true, sub-trainers inherit this trainer's favourites read-only. */
+  sharesFavorites?: boolean;
 }
 
 export interface SubTrainer extends IBaseTrainer {
@@ -130,6 +136,9 @@ export type UpdateTrainerBody = {
   videoLibraryAccess: boolean;
   userId?: string;
   isDeleted?: boolean;
+  favoriteWorkoutPresetIds?: string[];
+  favoriteDietPresetIds?: string[];
+  sharesFavorites?: boolean;
 };
 
 export type CreateSubTrainerBody = {

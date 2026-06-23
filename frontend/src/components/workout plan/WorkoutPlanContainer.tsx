@@ -1,40 +1,80 @@
 import React, { useState } from "react";
-import { IMuscleGroupWorkouts } from "@/interfaces/IWorkoutPlan";
-import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
-import { Button } from "../ui/button";
-import DeleteButton from "../ui/buttons/DeleteButton";
-import { Input } from "../ui/input";
-import { FaChevronDown } from "react-icons/fa";
-import { MuscleGroupContainer } from "./MuscleGroupContainer";
-import AddButton from "../ui/buttons/AddButton";
-import { SortableItem } from "../DragAndDrop/SortableItem";
-import { DragDropWrapper } from "../Wrappers/DragDropWrapper";
 import { useFieldArray, useFormContext } from "react-hook-form";
+import { FaChevronDown, FaChevronUp, FaPlus, FaTrash } from "react-icons/fa6";
+import { IMuscleGroupWorkouts, IWorkoutPlan } from "@/interfaces/IWorkoutPlan";
 import { WorkoutSchemaType } from "@/schemas/workoutPlanSchema";
+import { DragDropWrapper } from "../Wrappers/DragDropWrapper";
+import { SortableItem } from "../DragAndDrop/SortableItem";
 import { FormField, FormItem, FormMessage } from "../ui/form";
 import { generateUUID } from "@/lib/utils";
+
+import { MuscleGroupContainer } from "./MuscleGroupContainer";
+import WorkoutMuscleGroupPills from "./WorkoutMuscleGroupPills";
+import { CopyMuscleGroupRequest, getWorkoutExerciseCount } from "./workoutPlanCopyUtils";
 
 interface WorkoutContainerProps {
   parentPath: `workoutPlans.${number}`;
   onDeleteWorkout: (index: number) => void;
+  workoutPlans: IWorkoutPlan[];
+  onCopyMuscleGroup: (request: CopyMuscleGroupRequest) => void;
 }
 
-const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({ parentPath, onDeleteWorkout }) => {
-  const { control, watch } = useFormContext<WorkoutSchemaType>();
-  const workoutIndex = parentPath.split(".")[1];
+const getWorkoutCardClassName = (isOpen: boolean) => {
+  if (isOpen) return "border-blue-200 shadow-md";
 
-  const { replace, append, remove, update } = useFieldArray({
+  return "border-slate-200 dark:border-slate-800";
+};
+
+const getToggleButtonClassName = (isOpen: boolean) => {
+  if (isOpen) return "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300";
+
+  return "border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800";
+};
+
+const getToggleAriaLabel = (isOpen: boolean) => {
+  if (isOpen) return "סגור אימון";
+
+  return "פתח אימון";
+};
+
+const getWorkoutNameInputSize = (value: string) => {
+  const minChars = 14;
+  const maxChars = 28;
+
+  return Math.min(maxChars, Math.max(minChars, value.length + 1));
+};
+
+const getToggleIcon = (isOpen: boolean) => {
+  if (isOpen) return FaChevronUp;
+
+  return FaChevronDown;
+};
+
+const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
+  parentPath,
+  onDeleteWorkout,
+  workoutPlans,
+  onCopyMuscleGroup,
+}) => {
+  const { control, watch } = useFormContext<WorkoutSchemaType>();
+  const workoutIndex = Number(parentPath.split(".")[1]);
+
+  const { append, move, remove, update } = useFieldArray({
     control,
     name: `${parentPath}.muscleGroups`,
   });
 
   const [isOpen, setIsOpen] = useState(false);
-  const muscleGroups = watch(`${parentPath}.muscleGroups`) as IMuscleGroupWorkouts[];
-  const planName = watch(`${parentPath}.planName`);
+  const muscleGroups = (watch(`${parentPath}.muscleGroups`) as IMuscleGroupWorkouts[]) ?? [];
+  const totalExercises = getWorkoutExerciseCount({
+    planName: "",
+    muscleGroups,
+  });
+  const ToggleIcon = getToggleIcon(isOpen);
 
   const handleAddMuscleGroup = () => {
     const newMuscleGroup: IMuscleGroupWorkouts = {
-      muscleGroup: ``,
+      muscleGroup: "",
       exercises: [],
       _id: generateUUID(),
     };
@@ -43,67 +83,119 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({ parentPath, onD
   };
 
   return (
-    <>
-      <div className={`w-full border-b-2 last:border-b-0  rounded py-2 `}>
-        <Collapsible defaultOpen={isOpen} open={isOpen} onOpenChange={setIsOpen}>
-          <div className="flex items-center justify-between gap-4 w-full font-bold text-lg  py-3 ">
-            <FormField
-              name={`${parentPath}.planName`}
-              control={control}
-              render={({ field }) => {
-                return (
-                  <FormItem>
-                    <Input {...field} value={planName} className="w-full sm:w-64" />
-                    <FormMessage />
-                  </FormItem>
-                );
-              }}
-            />
+    <div
+      dir="rtl"
+      className={`overflow-hidden rounded-2xl border bg-white font-heebo shadow-sm transition-all dark:bg-slate-900 ${getWorkoutCardClassName(
+        isOpen
+      )}`}
+    >
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={() => setIsOpen((state) => !state)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            setIsOpen((state) => !state);
+          }
+        }}
+        className="flex cursor-pointer select-none items-center gap-3 px-5 py-4 transition-colors hover:bg-slate-50/60 dark:hover:bg-slate-800/40"
+        aria-expanded={isOpen}
+      >
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            setIsOpen((state) => !state);
+          }}
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-colors ${getToggleButtonClassName(
+            isOpen
+          )}`}
+          aria-label={getToggleAriaLabel(isOpen)}
+        >
+          <ToggleIcon size={11} />
+        </button>
 
-            <div className="flex items-center gap-4">
-              <DeleteButton tip="הסר אימון" onClick={() => onDeleteWorkout(Number(workoutIndex))} />
-              <Button
-                onClick={() => setIsOpen((state) => !state)}
-                variant="ghost"
-                type="button"
-                size="sm"
-                className={`w-9 p-0 transition ${isOpen ? "rotate-180" : "rotate-0"}`}
-              >
-                <FaChevronDown className="h-4 w-4" />
-                <span className="sr-only">Toggle</span>
-              </Button>
-            </div>
-          </div>
-          <CollapsibleContent className="flex flex-col gap-4 ">
-            <DragDropWrapper
-              strategy="vertical"
-              items={muscleGroups}
-              setItems={(items) => {
-                replace(items);
-              }}
-              idKey="_id"
-            >
-              {({ item, index }) => (
-                <SortableItem className="border-b-2 last:border-b-0" item={item} idKey="_id">
-                  {() => (
-                    <MuscleGroupContainer
-                      key={item._id}
-                      muscleGroup={item}
-                      handleUpdateMuscleGroup={(muscleGroup) => {
-                        update(index, { ...item, muscleGroup: muscleGroup, exercises: [] });
-                      }}
-                      handleDeleteMuscleGroup={() => remove(index)}
-                      parentPath={`${parentPath}.muscleGroups.${index}`}
-                    />
-                  )}
-                </SortableItem>
-              )}
-            </DragDropWrapper>
-            <AddButton tip="הוסף קבוצת שריר" onClick={() => handleAddMuscleGroup()} />
-          </CollapsibleContent>
-        </Collapsible>
+        <FormField
+          name={`${parentPath}.planName`}
+          control={control}
+          render={({ field }) => {
+            const value = (field.value as string) || "";
+            const size = getWorkoutNameInputSize(value);
+
+            return (
+              <FormItem className="shrink-0">
+                <input
+                  {...field}
+                  size={size}
+                  onClick={(event) => event.stopPropagation()}
+                  onKeyDown={(event) => event.stopPropagation()}
+                  className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 shadow-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
+                  placeholder="שם האימון"
+                />
+                <FormMessage />
+              </FormItem>
+            );
+          }}
+        />
+
+        <WorkoutMuscleGroupPills muscleGroups={muscleGroups} />
+
+        <span className="hidden shrink-0 items-center gap-1.5 rounded-full border border-blue-100/60 bg-blue-50/60 px-2.5 py-1 text-[11px] font-bold text-blue-700 dark:border-blue-900/40 dark:bg-blue-950/30 dark:text-blue-300 md:inline-flex">
+          <span>{muscleGroups.length}</span>
+          <span className="opacity-60">•</span>
+          <span>{totalExercises}</span>
+          <span className="text-[10px] opacity-70">תרגילים</span>
+        </span>
+
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            onDeleteWorkout(workoutIndex);
+          }}
+          className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-colors hover:border-rose-300 hover:text-rose-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:hover:border-rose-700 dark:hover:text-rose-400"
+          aria-label="מחק אימון"
+        >
+          <FaTrash size={11} />
+        </button>
       </div>
-    </>
+
+      {isOpen && (
+        <div className="flex flex-col gap-3 border-t border-slate-100 bg-slate-50/30 px-5 py-4 dark:border-slate-800">
+          <DragDropWrapper strategy="vertical" items={muscleGroups} onMove={move} idKey="_id">
+            {({ item, index }) => (
+              <SortableItem key={item._id} item={item} idKey="_id">
+                {() => (
+                  <MuscleGroupContainer
+                    key={item._id}
+                    muscleGroup={item}
+                    muscleGroupIndex={index}
+                    sourceWorkoutIndex={workoutIndex}
+                    workoutPlans={workoutPlans}
+                    onCopyMuscleGroup={onCopyMuscleGroup}
+                    handleUpdateMuscleGroup={(muscleGroup) => {
+                      update(index, { ...item, muscleGroup, exercises: [] });
+                    }}
+                    handleDeleteMuscleGroup={() => remove(index)}
+                    parentPath={`${parentPath}.muscleGroups.${index}`}
+                  />
+                )}
+              </SortableItem>
+            )}
+          </DragDropWrapper>
+
+          <button
+            type="button"
+            onClick={handleAddMuscleGroup}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-white px-4 py-3 text-xs font-semibold text-slate-500 transition-all hover:border-blue-300 hover:bg-blue-50/40 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:border-blue-700 dark:hover:bg-blue-900/20 dark:hover:text-blue-300"
+          >
+            <FaPlus size={11} />
+            <span>הוסף קבוצת שריר</span>
+          </button>
+        </div>
+      )}
+    </div>
   );
 };
 

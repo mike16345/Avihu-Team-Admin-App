@@ -1,13 +1,16 @@
-import React, { Dispatch, SetStateAction } from "react";
+import React from "react";
 
-import CustomAlertDialog from "./DialogAlert/CustomAlertDialog";
+import ConfirmationDialog from "./ConfirmationDialog";
 
 interface IDeleteModalProps {
   isModalOpen: boolean;
-  setIsModalOpen: Dispatch<SetStateAction<boolean>>;
+  setIsModalOpen: (open: boolean) => void;
   onConfirm: () => void;
   onCancel?: () => void;
-  alertMessage?: any;
+  title?: React.ReactNode;
+  confirmLabel?: React.ReactNode;
+  cancelLabel?: React.ReactNode;
+  alertMessage?: React.ReactNode;
 }
 
 const DeleteModal: React.FC<IDeleteModalProps> = ({
@@ -15,37 +18,28 @@ const DeleteModal: React.FC<IDeleteModalProps> = ({
   onCancel = () => {},
   isModalOpen,
   setIsModalOpen,
+  title = "למחוק את הפריט?",
+  confirmLabel = "מחק",
+  cancelLabel = "בטל",
   alertMessage = (
     <>
-      פעולה זו אינה ניתנת לביטול.<br></br> פעולה זו תמחק את המוצר לצמיתות ותסיר את נתוניו מהשרתים
-      שלנו.<br></br>האם אתה בטוח שאתה רוצה להמשיך?
+      פעולה זו אינה ניתנת לביטול.
+      <br />
+      הפריט יימחק לצמיתות ויוסר מהמערכת.
     </>
   ),
 }) => {
   return (
-    <CustomAlertDialog
-      alertDialogProps={{ open: isModalOpen, onOpenChange: setIsModalOpen }}
-      alertDialogContentProps={{
-        children: alertMessage,
-      }}
-      alertDialogCancelProps={{
-        "data-testid": "delete-modal-cancel",
-        onClick: (e) => {
-          e.stopPropagation();
-          onCancel();
-          setIsModalOpen(false);
-        },
-        children: "בטל",
-      }}
-      alertDialogActionProps={{
-        "data-testid": "delete-modal-confirm",
-        onClick: (e) => {
-          e.stopPropagation();
-          onConfirm();
-          setIsModalOpen(false);
-        },
-        children: "אשר",
-      }}
+    <ConfirmationDialog
+      open={isModalOpen}
+      onOpenChange={setIsModalOpen}
+      onConfirm={onConfirm}
+      onCancel={onCancel}
+      title={title}
+      description={alertMessage}
+      confirmLabel={confirmLabel}
+      cancelLabel={cancelLabel}
+      variant="destructive"
     />
   );
 };

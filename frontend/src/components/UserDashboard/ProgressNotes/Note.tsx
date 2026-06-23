@@ -4,18 +4,65 @@ import { IProgressNote } from "@/interfaces/IProgress";
 import moment from "moment-timezone";
 import React, { useMemo, useState } from "react";
 import { HiOutlinePencilSquare } from "react-icons/hi2";
-import ProgressTracker from "./ProgressTracker";
+import { FaCalendarDay, FaUserTie } from "react-icons/fa6";
 import { useProgressNoteContext } from "@/context/useProgressNoteContext";
 import DeleteModal from "@/components/Alerts/DeleteModal";
 import useDeleteProgressNote from "@/hooks/mutations/progressNotes/useDeleteProgressNote";
 import { useParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
 
 interface NoteProps {
   progressNote: IProgressNote;
   className?: string;
 }
+
+type MetricKey = "diet" | "workouts" | "cardio";
+const METRIC_META: Record<
+  MetricKey,
+  { label: string; emoji: string; bg: string; ring: string; text: string }
+> = {
+  diet: {
+    label: "תזונה",
+    emoji: "🥗",
+    bg: "bg-emerald-50",
+    ring: "ring-emerald-200",
+    text: "text-emerald-700",
+  },
+  workouts: {
+    label: "אימונים",
+    emoji: "💪",
+    bg: "bg-blue-50",
+    ring: "ring-blue-200",
+    text: "text-blue-700",
+  },
+  cardio: {
+    label: "אירובי",
+    emoji: "🏃",
+    bg: "bg-amber-50",
+    ring: "ring-amber-200",
+    text: "text-amber-700",
+  },
+};
+
+const MetricPill = ({ kind, value }: { kind: MetricKey; value: number }) => {
+  const metric = METRIC_META[kind];
+  const intensity = value >= 75 ? "opacity-100" : value >= 50 ? "opacity-90" : "opacity-75";
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ring-1 ring-inset",
+        metric.bg,
+        metric.ring,
+        metric.text,
+        intensity
+      )}
+    >
+      <span className="text-sm leading-none">{metric.emoji}</span>
+      <span className="font-medium text-slate-600">{metric.label}</span>
+      <span className="font-bold">{value}%</span>
+    </span>
+  );
+};
 
 const Note: React.FC<NoteProps> = ({
   progressNote: { content, date, trainer, cardio, diet, workouts, _id },
@@ -27,13 +74,11 @@ const Note: React.FC<NoteProps> = ({
 
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
-  const progressTrackers = useMemo(() => {
-    const items = [];
-
-    if (diet) items.push({ label: "תזונה", value: diet });
-    if (workouts) items.push({ label: "אימונים", value: workouts });
-    if (cardio) items.push({ label: "אירובי", value: cardio });
-
+  const metrics = useMemo(() => {
+    const items: { kind: MetricKey; value: number }[] = [];
+    if (diet) items.push({ kind: "diet", value: diet });
+    if (workouts) items.push({ kind: "workouts", value: workouts });
+    if (cardio) items.push({ kind: "cardio", value: cardio });
     return items;
   }, [cardio, workouts, diet]);
 
@@ -43,47 +88,73 @@ const Note: React.FC<NoteProps> = ({
 
   const handleDelete = () => {
     if (!id || !_id) return;
-
     deleteNote.mutate(_id);
   };
 
+  const dateObj = moment(date).locale("he");
+  const dayMonth = dateObj.format("DD/MM");
+  const year = dateObj.format("YY");
+  const dayName = dateObj.format("dddd").replace(/^יום\s*/, "יום ");
+
   return (
     <>
-      <div className={cn("border shadow rounded-lg p-2 ", className)}>
-        <div className="flex items-center justify-between ">
-          <span className="font-bold text-lg">{moment(date).format("DD/MM/YY")}</span>
+      <div
+        className={cn(
+          "group relative overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm transition-all hover:border-blue-200 hover:shadow-md",
+          className
+        )}
+      >
+        <div className="absolute right-0 top-0 h-full w-1 bg-gradient-to-b from-blue-400 to-blue-600" />
 
-          <div className="flex gap-3 items-center ">
-            <span className="text-xs block"> {trainer}</span>
+        <div className="flex flex-col gap-3 p-4 pr-5">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex shrink-0 items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5">
+              <FaCalendarDay size={12} className="text-blue-600" />
+              <div className="flex flex-col leading-tight">
+                <span className="text-sm font-bold text-slate-900">
+                  {dayMonth}/{year}
+                </span>
+                <span className="text-[10px] font-medium text-slate-500">{dayName}</span>
+              </div>
+            </div>
 
-            {!!progressTrackers.length && (
-              <Separator orientation="vertical" className="h-3 w-0.5" />
+            {trainer && (
+              <div className="flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+                <FaUserTie size={10} className="text-slate-400" />
+                <span>{trainer}</span>
+              </div>
             )}
 
-            <div className="flex gap-2 items-start flex-wrap ">
-              {progressTrackers.map(({ label, value }, i) => (
-                <ProgressTracker key={i} label={label} value={value} />
-              ))}
+            {metrics.length > 0 && (
+              <div className="flex flex-1 flex-wrap items-center justify-center gap-1.5">
+                {metrics.map((m) => (
+                  <MetricPill key={m.kind} kind={m.kind} value={m.value} />
+                ))}
+              </div>
+            )}
+
+            <div className="flex items-center gap-1 opacity-70 transition-opacity group-hover:opacity-100">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 rounded-lg p-0 text-slate-500 hover:bg-blue-50 hover:text-blue-700"
+                onClick={handleEdit}
+                title="ערוך פתק"
+              >
+                <HiOutlinePencilSquare size={15} />
+              </Button>
+              <DeleteButton onClick={() => setOpenDeleteDialog(true)} tip="מחק פתק" />
             </div>
           </div>
 
-          <div className="flex items-center">
-            <Button
-              type="button"
-              variant={"ghost"}
-              className="flex rounded items-center justify-center size-full p-3"
-              onClick={handleEdit}
-            >
-              <HiOutlinePencilSquare />
-            </Button>
-
-            <DeleteButton onClick={() => setOpenDeleteDialog(true)} tip="מחק פתק" />
-          </div>
+          {!!content?.length && (
+            <div
+              className="rounded-lg bg-slate-50/60 px-3 py-2 text-sm leading-relaxed text-slate-700 [&_a]:text-blue-600 [&_a]:underline [&_p]:m-0 [&_strong]:text-slate-900"
+              dangerouslySetInnerHTML={{ __html: content }}
+            />
+          )}
         </div>
-
-        <Separator />
-
-        {!!content.length && <p className="p-3" dangerouslySetInnerHTML={{ __html: content }}></p>}
       </div>
 
       <DeleteModal

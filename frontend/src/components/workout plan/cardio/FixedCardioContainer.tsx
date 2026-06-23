@@ -1,72 +1,90 @@
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import TextEditor from "@/components/ui/TextEditor";
 import { WorkoutSchemaType } from "@/schemas/workoutPlanSchema";
 import React from "react";
 import { useFormContext } from "react-hook-form";
+import { FaClock, FaCalendarWeek, FaNoteSticky } from "react-icons/fa6";
 
-interface FixedCardioContainerProps {}
+const Label: React.FC<{ icon: React.ReactNode; children: React.ReactNode }> = ({
+  icon,
+  children,
+}) => (
+  <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+    <span className="text-blue-600 dark:text-blue-300">{icon}</span>
+    {children}
+  </span>
+);
 
-const FixedCardioContainer: React.FC<FixedCardioContainerProps> = () => {
+const FixedCardioContainer: React.FC = () => {
   const { control } = useFormContext<WorkoutSchemaType>();
 
   return (
-    <div className="flex flex-col gap-5 bg-accent p-5 rounded-lg mb-2 w-full sm:w-[65%] ">
-      <FormField
-        control={control}
-        name="cardio.plan.minsPerWeek"
-        render={({ field }) => {
-          return (
-            <FormItem>
-              <FormLabel htmlFor="minsPerWeek" className="font-bold underline">
-                כמות אירובי לשבוע (דק'):
-              </FormLabel>
+    <div
+      dir="rtl"
+      className="flex w-full max-w-3xl flex-col gap-5 rounded-2xl border border-blue-100/60 bg-white p-5 font-heebo shadow-sm dark:border-blue-900/40 dark:bg-slate-900"
+    >
+      <div className="flex flex-wrap gap-4">
+        <FormField
+          control={control}
+          name="cardio.plan.minsPerWeek"
+          render={({ field }) => (
+            <FormItem className="space-y-1.5">
+              <Label icon={<FaClock size={10} />}>כמות אירובי לשבוע (דק׳)</Label>
               <FormControl>
-                <Input {...field} type="number" placeholder="הכנס זמן בדקות.." />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          );
-        }}
-      />
-
-      <FormField
-        control={control}
-        name="cardio.plan.timesPerWeek"
-        render={({ field }) => {
-          return (
-            <FormItem>
-              <FormLabel htmlFor="timesPerWeek" className="font-bold underline">
-                כמות פעמים לשבוע:
-              </FormLabel>
-              <FormControl>
-                <Input {...field} type="number" placeholder="כמה אימונים בשבוע.." />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          );
-        }}
-      />
-      <FormField
-        control={control}
-        name="cardio.plan.tips"
-        render={({ field }) => {
-          return (
-            <FormItem>
-              <FormLabel htmlFor="tips" className="font-bold underline">
-                דגשים:
-              </FormLabel>
-              <FormControl>
-                <TextEditor
-                  className="bg-background"
-                  value={field.value || ""}
-                  onChange={field.onChange}
+                <Input
+                  {...field}
+                  type="number"
+                  min={0}
+                  placeholder="60"
+                  className="h-11 w-32 rounded-xl border-blue-100/60 bg-blue-50/30 text-center text-base font-bold tabular-nums text-slate-800 placeholder:font-normal placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-200/60 dark:border-blue-900/40 dark:bg-blue-950/15 dark:text-slate-100 dark:focus:bg-slate-900"
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
-          );
-        }}
+          )}
+        />
+
+        <FormField
+          control={control}
+          name="cardio.plan.timesPerWeek"
+          render={({ field }) => (
+            <FormItem className="space-y-1.5">
+              <Label icon={<FaCalendarWeek size={10} />}>כמות פעמים לשבוע</Label>
+              <FormControl>
+                <Input
+                  {...field}
+                  type="number"
+                  min={0}
+                  max={7}
+                  placeholder="3"
+                  className="h-11 w-32 rounded-xl border-blue-100/60 bg-blue-50/30 text-center text-base font-bold tabular-nums text-slate-800 placeholder:font-normal placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-200/60 dark:border-blue-900/40 dark:bg-blue-950/15 dark:text-slate-100 dark:focus:bg-slate-900"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      <FormField
+        control={control}
+        name="cardio.plan.tips"
+        render={({ field }) => (
+          <FormItem className="space-y-1.5">
+            <Label icon={<FaNoteSticky size={10} />}>דגשים</Label>
+            <FormControl>
+              <div className="rounded-xl border border-blue-100/60 bg-blue-50/20 dark:border-blue-900/40 dark:bg-blue-950/10">
+                <TextEditor
+                  className="bg-transparent"
+                  value={field.value || ""}
+                  onChange={field.onChange}
+                />
+              </div>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
       />
     </div>
   );

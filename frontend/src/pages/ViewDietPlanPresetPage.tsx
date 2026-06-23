@@ -6,31 +6,25 @@ import { defaultDietPlan } from "@/constants/DietPlanConsts";
 import DietPlanForm from "@/components/DietPlan/DietPlanForm";
 import Loader from "@/components/ui/Loader";
 import ErrorPage from "./ErrorPage";
-import { Input } from "@/components/ui/input";
 import { normalizeDietPlan, removeIdsAndVersions } from "@/utils/dietPlanUtils";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import CustomButton from "@/components/ui/CustomButton";
+import { Form } from "@/components/ui/form";
 import { useQueryClient } from "@tanstack/react-query";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { useNavigate } from "react-router-dom";
 import { MainRoutes } from "@/enums/Routes";
-import BackButton from "@/components/ui/BackButton";
 import { useDirtyFormContext } from "@/context/useFormContext";
 import { dietPlanSchema, validateDietPlan } from "@/components/DietPlan/DietPlanSchema";
 import useDietPlanPresetQuery from "@/hooks/queries/dietPlans/useDietPlanPresetQuery";
 import useAddDietPlanPreset from "@/hooks/mutations/DietPlans/useAddDietPlanPreset";
 import useUpdateDietPlanPreset from "@/hooks/mutations/DietPlans/useUpdateDietPlanPreset";
 import { presetNameSchema, PresetNameSchemaType } from "@/schemas/dietPlanPresetSchema";
+import DietPlanMetaPanel from "@/components/templates/dietTemplates/DietPlanMetaPanel";
+import { DietPlanPresetHeader } from "@/components/templates/dietTemplates/DietPlanPresetHeader";
+import { DietPlanPresetNameCard } from "@/components/templates/dietTemplates/DietPlanPresetNameCard";
+import { DietPlanPresetSaveAction } from "@/components/templates/dietTemplates/DietPlanPresetSaveAction";
 
 export const ViewDietPlanPresetPage = () => {
   const { setErrors, setIsDirty } = useDirtyFormContext();
@@ -39,7 +33,7 @@ export const ViewDietPlanPresetPage = () => {
   const { id } = useParams();
   const queryClient = useQueryClient();
 
-  const [isNewPlan, setIsNewPlan] = useState(true);
+  const [isEditingPreset, setIsEditingPreset] = useState(false);
 
   const presetNameForm = useForm<PresetNameSchemaType>({
     resolver: zodResolver(presetNameSchema),
@@ -77,9 +71,9 @@ export const ViewDietPlanPresetPage = () => {
   const createPreset = useAddDietPlanPreset({ onSuccess, onError });
   const updatePreset = useUpdateDietPlanPreset({ onSuccess, onError });
 
-  const handleSubmit = (values: PresetNameSchemaType) => {
+  const handleSavePreset = (values: PresetNameSchemaType) => {
     const dietPlan = getPlanValues();
-    const dietPlanToAdd = {
+    const dietPlanPreset = {
       ...dietPlan,
       name: values.name,
     };
@@ -91,13 +85,13 @@ export const ViewDietPlanPresetPage = () => {
       return;
     }
 
-    if (!isNewPlan && !!id) {
-      const cleanedDietPlan = removeIdsAndVersions(dietPlanToAdd);
-
+    if (isEditingPreset && id) {
+      const cleanedDietPlan = removeIdsAndVersions(dietPlanPreset);
       updatePreset.mutate({ id, cleanedDietPlan });
-    } else {
-      createPreset.mutate(dietPlanToAdd);
+      return;
     }
+
+    createPreset.mutate(dietPlanPreset);
   };
 
   useEffect(() => {
@@ -106,46 +100,34 @@ export const ViewDietPlanPresetPage = () => {
     const normalized = normalizeDietPlan(data.data);
     reset(normalized);
     resetPlanForm(normalized);
-    setIsNewPlan(false);
+    setIsEditingPreset(true);
     setIsDirty(false);
   }, [data, reset, resetPlanForm, setIsDirty]);
+
+  const hasMeals = (meals?.length || 0) > 0;
+  const isSavingPreset = createPreset.isPending || updatePreset.isPending;
+  const savePreset = presetNameForm.handleSubmit(handleSavePreset);
 
   if (isLoading) return <Loader size="large" />;
   if (error) return <ErrorPage message={error.message} />;
 
   return (
-    <div data-testid="diet-plan-preset-page" className=" flex flex-col gap-4 size-full ">
-      <BackButton navLink={MainRoutes.DIET_PLANS} />
-      <div className="w-1/3 ">
-        <Form {...presetNameForm}>
-          <form>
-            <FormField
-              control={presetNameForm.control}
-              name="name"
-              render={({ field }) => {
-                return (
-                  <FormItem>
-                    <FormLabel className="font-bold underline pb-3">שם התפריט:</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="שם לתפריט..." />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                );
-              }}
-            />
-          </form>
-        </Form>
-      </div>
+    <div
+      data-testid="diet-plan-preset-page"
+      dir="rtl"
+      className="flex flex-col gap-5 size-full font-['Assistant','Heebo',system-ui,sans-serif]"
+    >
+      <DietPlanPresetHeader />
+      <DietPlanPresetNameCard form={presetNameForm} />
+
       <Form {...planForm}>
+        <DietPlanMetaPanel />
         <DietPlanForm>
-          {(meals?.length || 0) > 0 && (
-            <CustomButton
-              className="font-bold sm:w-32 w-full md:fixed md:bottom-10 md:end-10"
-              variant="success"
-              title="שמור תפריט"
-              isLoading={createPreset.isPending || updatePreset.isPending}
-              onClick={presetNameForm.handleSubmit(handleSubmit)}
+          {hasMeals && (
+            <DietPlanPresetSaveAction
+              disabled={isSavingPreset}
+              isSaving={isSavingPreset}
+              onSave={savePreset}
             />
           )}
         </DietPlanForm>

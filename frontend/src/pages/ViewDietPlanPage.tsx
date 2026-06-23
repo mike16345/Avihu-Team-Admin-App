@@ -8,12 +8,9 @@ import Loader from "@/components/ui/Loader";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { dietPlanSchema } from "@/components/DietPlan/DietPlanSchema";
 import { useQueryClient } from "@tanstack/react-query";
-import CustomButton from "@/components/ui/CustomButton";
 import { useNavigate } from "react-router-dom";
 import { MainRoutes } from "@/enums/Routes";
 import { QueryKeys } from "@/enums/QueryKeys";
-import BackButton from "@/components/ui/BackButton";
-import BasicUserDetails from "@/components/UserDashboard/UserInfo/BasicUserDetails";
 import { useUsersStore } from "@/store/userStore";
 import { weightTab } from "./UserDashboard";
 import useAddDietPlanPreset from "@/hooks/mutations/DietPlans/useAddDietPlanPreset";
@@ -23,7 +20,7 @@ import useUpdateDietPlan from "@/hooks/mutations/DietPlans/useUpdateDietPlan";
 import useAddDietPlan from "@/hooks/mutations/DietPlans/useAddDietPlan";
 import useUserQuery from "@/hooks/queries/user/useUserQuery";
 import { presetNameSchema } from "@/schemas/dietPlanPresetSchema";
-import { convertItemsToOptions, getNestedZodError } from "@/lib/utils";
+import { getNestedZodError } from "@/lib/utils";
 import useDietPlanPresetsQuery from "@/hooks/queries/dietPlans/useDietPlanPresetsQuery";
 import { cleanWorkoutObject } from "@/utils/workoutPlanUtils";
 import { normalizeDietPlan } from "@/utils/dietPlanUtils";
@@ -32,20 +29,32 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@/components/ui/form";
 import { useDirtyFormContext } from "@/context/useFormContext";
 import useGetDietPlan from "@/hooks/queries/dietPlans/useGetDietPlan";
-import CustomSelect from "@/components/ui/CustomSelect";
-import FormResponseBubbleWrapper from "@/components/formResponses/FormResponseBubbleWrapper";
+import DietPlanPresetPicker from "@/components/templates/dietTemplates/DietPlanPresetPicker";
+import DietPlanStatsStrip from "@/components/DietPlan/DietPlanStatsStrip";
+import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
+import UnsavedChangesDialog from "@/components/Alerts/UnsavedChangesDialog";
+import { summariseDietDirty } from "@/utils/dirtyFieldsSummary";
+import { DietPlanPageHeader } from "@/components/DietPlan/DietPlanPageHeader";
+import { DietPlanPresetLoadBar } from "@/components/DietPlan/DietPlanPresetLoadBar";
+import { DietPlanSaveActions } from "@/components/DietPlan/DietPlanSaveActions";
 
-export const ViewDietPlanPage = () => {
+interface ViewDietPlanPageProps {
+  embedded?: boolean;
+}
+
+export const ViewDietPlanPage = ({ embedded = false }: ViewDietPlanPageProps) => {
   const navigation = useNavigate();
   const { id } = useParams();
   const { users } = useUsersStore();
   const { data: fetchedUser } = useUserQuery(id);
   const user = users.find((user) => user._id === id) || fetchedUser;
+  const userProfileDietTab = MainRoutes.USERS + `/${id}?tab=${weightTab}`;
 
   const queryClient = useQueryClient();
 
   const [isNewPlan, setIsNewPlan] = useState(false);
   const [openPresetModal, setOpenPresetModal] = useState(false);
+  const [openPickerModal, setOpenPickerModal] = useState(false);
 
   const { setIsDirty } = useDirtyFormContext();
 
@@ -55,8 +64,14 @@ export const ViewDietPlanPage = () => {
     mode: "onBlur",
   });
 
-  const { reset, getValues, watch } = form;
+  const { reset, getValues, watch, formState } = form;
   const meals = watch("meals");
+  const isDirty = formState.isDirty;
+
+  const [pendingNav, setPendingNav] = useState<(() => void) | null>(null);
+  const [savingToProceed, setSavingToProceed] = useState(false);
+
+  useNavigationBlocker(isDirty, (next) => setPendingNav(() => next));
 
   const { isLoading, data, error } = useGetDietPlan(id || "");
 
@@ -65,8 +80,19 @@ export const ViewDietPlanPage = () => {
   const onSuccess = () => {
     toast.success("תפריט נשמר בהצלחה!");
     invalidateQueryKeys([`${QueryKeys.USER_DIET_PLAN}${id}`]);
-    navigation(MainRoutes.USERS + `/${id}?tab=${weightTab}`);
+    if (!embedded) navigation(userProfileDietTab);
   };
+
+  useEffect(() => {
+    if (!savingToProceed) return;
+    if (isDirty) return;
+    if (pendingNav) {
+      const next = pendingNav;
+      setPendingNav(null);
+      next();
+    }
+    setSavingToProceed(false);
+  }, [savingToProceed, isDirty, pendingNav]);
 
   const presetSuccess = () => {
     toast.success("תבנית נשמרה בהצלחה!");
@@ -84,77 +110,52 @@ export const ViewDietPlanPage = () => {
   const addDietPlanPreset = useAddDietPlanPreset({ onSuccess: presetSuccess, onError });
 
   const handleValidSubmit = (values: IDietPlan) => {
-    const dietPlanToAdd = {
-      ...values,
-      userId: id,
-    };
-
+    const dietPlanToAdd = { ...values, userId: id };
     const result = dietPlanSchema.safeParse(dietPlanToAdd);
-
     if (!result.success) {
       const { title, description } = getNestedZodError(result.error);
-
       return toast.error(title, { description });
     }
-
     const cleanedDietPlan = cleanWorkoutObject(dietPlanToAdd);
-
     if (isNewPlan) {
       createDietPlan.mutate(cleanedDietPlan);
     } else {
       if (!id) return;
-
       editDietPlan.mutate({ id, cleanedDietPlan });
       queryClient.invalidateQueries({ queryKey: [QueryKeys.NO_DIET_PLAN] });
     }
   };
 
   const handleInvalidSubmit = () => {
-    const result = dietPlanSchema.safeParse({
-      ...getValues(),
-      userId: id,
-    });
-
+    const result = dietPlanSchema.safeParse({ ...getValues(), userId: id });
     if (!result.success) {
       const { title, description } = getNestedZodError(result.error);
-
       toast.error(title, { description });
     }
   };
 
-  const handleSelect = (presetName: string) => {
-    const selectedPreset = dietPlanPresets.data?.data.find((preset) => preset.name === presetName);
-
-    if (!selectedPreset) return;
-    const { name: _presetName, ...presetData } = selectedPreset;
+  const handleSelectPreset = (preset: any) => {
+    const { name: _presetName, ...presetData } = preset;
     void _presetName;
-
     reset(normalizeDietPlan(presetData as IDietPlan));
   };
 
   const handleAddPreset = (name: string) => {
     const dietPlan = getValues();
     const { error } = presetNameSchema.safeParse({ name: name });
-
     if (error) {
       const { title, description } = getNestedZodError(error);
-
       return toast.error(title, { description });
     }
-
     const preset: any = { ...dietPlan, name };
-
     delete preset.userId;
     delete preset._id;
-
     addDietPlanPreset.mutate(preset);
   };
 
   useEffect(() => {
     if (!id || !data) return;
-
     const { dietplan, failed } = data;
-
     reset(normalizeDietPlan(dietplan));
     if (failed) {
       setIsNewPlan(true);
@@ -164,7 +165,6 @@ export const ViewDietPlanPage = () => {
 
   useEffect(() => {
     if (!error) return;
-
     if ((error as any)?.status === 404) {
       reset(normalizeDietPlan(defaultDietPlan));
       setIsNewPlan(true);
@@ -172,49 +172,35 @@ export const ViewDietPlanPage = () => {
     }
   }, [error, reset, setIsDirty]);
 
+  const isPlanSaving = createDietPlan.isPending || editDietPlan.isPending;
+  const isSaveDisabled = addDietPlanPreset.isPending || isPlanSaving;
+  const hasMeals = (meals?.length || 0) > 0;
+  const saveDietPlan = form.handleSubmit(handleValidSubmit, handleInvalidSubmit);
+
   if (isLoading) return <Loader size="large" />;
 
   return (
-    <div className=" flex flex-col gap-4 size-full">
-      {user && <BasicUserDetails user={user} />}
-      <FormResponseBubbleWrapper
-        userId={id}
-        query={{ formType: user?.onboardingCompleted ? "monthly" : "onboarding", userId: id }}
-      />
-
-      <BackButton navLink={MainRoutes.USERS + `/${id}?tab=${weightTab}`} />
-      <CustomSelect
-        className="sm:w-[350px] mr-1"
-        placeholder="בחר תפריט"
-        onValueChange={handleSelect}
-        items={
-          dietPlanPresets.data?.data
-            ? convertItemsToOptions(dietPlanPresets.data?.data, "name", "name")
-            : []
-        }
-      />
+    <div dir="rtl" className="flex flex-col gap-4 size-full font-heebo">
+      {!embedded && <DietPlanPageHeader backLink={userProfileDietTab} user={user} userId={id} />}
 
       <Form {...form}>
+        {embedded && <DietPlanStatsStrip />}
+
+        <DietPlanPresetLoadBar
+          embedded={embedded}
+          onOpenPresetPicker={() => setOpenPickerModal(true)}
+        />
+
         <DietPlanForm>
-          {(meals?.length || 0) > 0 && (
-            <div className="flex gap-3 flex-row  fixed bottom-10 end-16">
-              <CustomButton
-                className="font-bold  sm:w-fit "
-                variant="default"
-                onClick={() => setOpenPresetModal(true)}
-                title="שמור תפריט כתבנית"
-                disabled={createDietPlan.isPending || editDietPlan.isPending}
-                isLoading={addDietPlanPreset.isPending}
-              />
-              <CustomButton
-                className="font-bold w-full sm:w-32"
-                variant="success"
-                onClick={form.handleSubmit(handleValidSubmit, handleInvalidSubmit)}
-                title="שמור תפריט"
-                disabled={addDietPlanPreset.isPending}
-                isLoading={createDietPlan.isPending || editDietPlan.isPending}
-              />
-            </div>
+          {hasMeals && (
+            <DietPlanSaveActions
+              embedded={embedded}
+              isPlanSaving={isPlanSaving}
+              isPresetSaving={addDietPlanPreset.isPending}
+              isSaveDisabled={isSaveDisabled}
+              onOpenPresetModal={() => setOpenPresetModal(true)}
+              onSavePlan={saveDietPlan}
+            />
           )}
         </DietPlanForm>
       </Form>
@@ -222,6 +208,35 @@ export const ViewDietPlanPage = () => {
         onClose={() => setOpenPresetModal(false)}
         open={openPresetModal}
         onSubmit={(val) => handleAddPreset(val)}
+      />
+
+      <DietPlanPresetPicker
+        open={openPickerModal}
+        onOpenChange={setOpenPickerModal}
+        presets={(dietPlanPresets.data?.data as any[]) ?? []}
+        onSelect={handleSelectPreset}
+      />
+
+      <UnsavedChangesDialog
+        open={pendingNav !== null}
+        isSaving={createDietPlan.isPending || editDietPlan.isPending}
+        subject="תפריט התזונה"
+        changes={summariseDietDirty(formState.dirtyFields)}
+        onSaveAndContinue={() => {
+          setSavingToProceed(true);
+          form.handleSubmit(handleValidSubmit, handleInvalidSubmit)();
+        }}
+        onDiscard={() => {
+          const snapshot = (data as any)?.dietplan;
+          if (snapshot) reset(snapshot);
+          else reset();
+          const next = pendingNav;
+          setPendingNav(null);
+          if (next) next();
+        }}
+        onCancel={() => {
+          setPendingNav(null);
+        }}
       />
     </div>
   );

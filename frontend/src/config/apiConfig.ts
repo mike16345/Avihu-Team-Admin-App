@@ -3,7 +3,7 @@ import { clearAuthSession, getAccessToken } from "@/services/authSession";
 import { API_KEY_HEADER, getApiKey } from "@/services/apiKey";
 import { shouldClearPersistedAuth } from "@/services/authErrors";
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "axios";
-import { useUsersStore } from "@/store/userStore";
+import { attachAuthErrorInterceptor } from "./authInterceptor";
 
 export const determineServerUrl = (): string => {
   return import.meta.env.VITE_SERVER_PREVIEW_URL || import.meta.env.VITE_SERVER;
@@ -19,6 +19,8 @@ const axiosInstance: AxiosInstance = axios.create({
 type RetriableRequestConfig = InternalAxiosRequestConfig & {
   _retry?: boolean;
 };
+
+attachAuthErrorInterceptor(axiosInstance);
 
 axiosInstance.interceptors.request.use((config) => {
   const apiKey = getApiKey();

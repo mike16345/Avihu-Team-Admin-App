@@ -11,12 +11,15 @@ type WeighCalendarProps = {
 };
 
 export const WeightCalendar: FC<WeighCalendarProps> = ({ weighIns }) => {
-  const weighInLookup: Record<string, number> = weighIns.reduce((acc, weighIn) => {
-    const date = new Date(weighIn.date);
-    acc[DateUtils.formatDate(date, "DD/MM/YYYY")] = weighIn.weight;
+  const weighInLookup: Record<string, number> = weighIns.reduce(
+    (acc, weighIn) => {
+      const date = new Date(weighIn.date);
+      acc[DateUtils.formatDate(date, "DD/MM/YYYY")] = weighIn.weight;
 
-    return acc;
-  }, {} as Record<string, number>);
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 
   function CustomDayContent({ date }: DayContentProps) {
     const dateString = DateUtils.formatDate(date, "DD/MM/YYYY");
@@ -27,7 +30,11 @@ export const WeightCalendar: FC<WeighCalendarProps> = ({ weighIns }) => {
     return (
       <span>
         {date.getDate()}
-        <p className="flex items-center justify-center text-[0.60rem] leading-3  text-primary">
+        {/* Per Avihu: weights need to feel a touch more prominent
+            so they read at a glance — bumped from text-[0.60rem] to
+            text-[0.7rem] and from default weight to extrabold so
+            they stand out from the date number above. */}
+        <p className="flex items-center justify-center text-[0.7rem] leading-3 font-extrabold text-primary">
           {weight
             ? weight
             : isDateEarlierThanToday && <IoClose className=" text-destructive" size={12} />}

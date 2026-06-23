@@ -1,5 +1,7 @@
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "../ui/tabs";
-import React from "react";
+import React, { useState } from "react";
+import { FaAppleWhole, FaClipboardCheck, FaPlus } from "react-icons/fa6";
+
+type TabKey = "dietplan" | "tips" | "supplements";
 
 interface DietplanTabsProps {
   dietplan: React.ReactNode;
@@ -7,18 +9,49 @@ interface DietplanTabsProps {
   supplements: React.ReactNode;
 }
 
+const TABS: { id: TabKey; label: string; icon: React.ReactNode }[] = [
+  { id: "dietplan", label: "תפריט", icon: <FaAppleWhole size={13} /> },
+  { id: "tips", label: "דגשים", icon: <FaClipboardCheck size={13} /> },
+  { id: "supplements", label: "תוספים", icon: <FaPlus size={13} /> },
+];
+
+const getTabButtonClassName = (isActive: boolean) => {
+  const baseClassName =
+    "inline-flex items-center gap-2 rounded-xl px-4 py-1.5 text-sm font-semibold transition-colors";
+
+  if (isActive) return `${baseClassName} bg-emerald-600 text-white shadow-sm`;
+
+  return `${baseClassName} text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800`;
+};
+
 const DietplanTabs: React.FC<DietplanTabsProps> = ({ dietplan, tips, supplements }) => {
+  const [active, setActive] = useState<TabKey>("dietplan");
+
   return (
-    <Tabs defaultValue="dietplan" dir="rtl">
-      <TabsList>
-        <TabsTrigger value="dietplan">תפריט תזונה</TabsTrigger>
-        <TabsTrigger value="tips">דגשים</TabsTrigger>
-        <TabsTrigger value="supplements">תוספים</TabsTrigger>
-      </TabsList>
-      <TabsContent value="dietplan">{dietplan}</TabsContent>
-      <TabsContent value="tips">{tips}</TabsContent>
-      <TabsContent value="supplements">{supplements}</TabsContent>
-    </Tabs>
+    <div dir="rtl" className="flex flex-col gap-4 font-heebo">
+      <div className="inline-flex w-fit items-center gap-1 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-1 shadow-sm">
+        {TABS.map((t) => {
+          const isActive = active === t.id;
+          return (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setActive(t.id)}
+              className={getTabButtonClassName(isActive)}
+            >
+              {t.icon}
+              <span>{t.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div>
+        {active === "dietplan" && dietplan}
+        {active === "tips" && tips}
+        {active === "supplements" && supplements}
+      </div>
+    </div>
   );
 };
 

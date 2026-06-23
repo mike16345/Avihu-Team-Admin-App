@@ -1,6 +1,5 @@
 import { FC, useEffect, useState } from "react";
-import { Badge } from "../ui/badge";
-import { FaCheck, FaPlus } from "react-icons/fa";
+import { FaCheck, FaPlus } from "react-icons/fa6";
 
 type CustomItemSelectionProps = {
   onItemToggle: (selectedItems: string[]) => void;
@@ -20,38 +19,39 @@ export const CustomItemSelection: FC<CustomItemSelectionProps> = ({
   }, [selectedItems]);
 
   const toggleSelect = (item: string) => {
-    setSelectedItems((prevSelectedItems) => {
-      const selected = prevSelectedItems.includes(item)
-        ? prevSelectedItems.filter((i) => i !== item)
-        : [...prevSelectedItems, item];
-
-      onItemToggle(selected);
-
-      return selected;
+    setSelectedItems((prev) => {
+      const next = prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item];
+      onItemToggle(next);
+      return next;
     });
   };
 
   return (
-    <div className="space-y-2">
-      <div className="flex flex-wrap items-center p-2 max-h-48 custom-scrollbar overflow-y-scroll gap-4">
-        {(!items || items?.length == 0) && <div className="text-destructive">אין פריטים</div>}
-        {items?.map((item, index) => (
-          <Badge
+    <div
+      dir="rtl"
+      className="flex max-h-48 flex-wrap items-center gap-1.5 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 p-2 font-heebo custom-scrollbar"
+    >
+      {(!items || items.length === 0) && (
+        <div className="text-xs text-slate-400 dark:text-slate-500">אין פריטים</div>
+      )}
+      {items?.map((item, index) => {
+        const isSelected = selected.includes(item._id);
+        return (
+          <button
             key={item._id || index}
+            type="button"
             onClick={() => toggleSelect(item._id)}
-            className={`cursor-pointer  flex item-center justify-center ${
-              selected.includes(item._id) ? "bg-success  text-white" : ""
+            className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition-all ${
+              isSelected
+                ? "border-emerald-300 dark:border-emerald-700 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 shadow-sm"
+                : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-emerald-300 dark:hover:border-emerald-700 hover:text-emerald-700 dark:hover:text-emerald-300"
             }`}
           >
-            {item.name}
-            {selected.includes(item._id) ? (
-              <FaCheck size={12} className="inline mr-1" />
-            ) : (
-              <FaPlus size={12} className="inline mr-1" />
-            )}
-          </Badge>
-        ))}
-      </div>
+            <span>{item.name}</span>
+            {isSelected ? <FaCheck size={9} /> : <FaPlus size={9} />}
+          </button>
+        );
+      })}
     </div>
   );
 };

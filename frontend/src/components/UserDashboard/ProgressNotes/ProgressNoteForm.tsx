@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo } from "react";
 import {
   Form,
   FormControl,
@@ -11,8 +11,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { progressNoteSchema } from "@/schemas/progressNoteSchema";
-import { Input } from "@/components/ui/input";
-import CustomButton from "@/components/ui/CustomButton";
 import CustomSelect from "@/components/ui/CustomSelect";
 import DatePicker from "@/components/ui/DatePicker";
 import { useProgressNoteContext } from "@/context/useProgressNoteContext";
@@ -20,6 +18,7 @@ import useAddProgressNote from "@/hooks/mutations/progressNotes/useAddProgressNo
 import useUpdateProgressNote from "@/hooks/mutations/progressNotes/useUpdateProgressNote";
 import { useParams } from "react-router-dom";
 import { useUsersStore } from "@/store/userStore";
+import { useSubTrainersQuery } from "@/hooks/queries/subTrainers/useSubTrainersQuery";
 import TextEditor from "@/components/ui/TextEditor";
 
 const progressOptions = [
@@ -29,6 +28,21 @@ const progressOptions = [
   { name: "100%", value: "100" },
 ];
 
+const percentageFields = [
+  { name: "diet", label: "🥗 תזונה" },
+  { name: "workouts", label: "💪 אימונים" },
+  { name: "cardio", label: "🏃 אירובי" },
+] as const;
+
+const buildProgressNoteDefaults = (trainer?: string): z.infer<typeof progressNoteSchema> => ({
+  date: new Date(),
+  content: "",
+  trainer: trainer ?? "",
+  diet: undefined,
+  workouts: undefined,
+  cardio: undefined,
+});
+
 const ProgressNoteForm = () => {
   const { id } = useParams();
   const { currentUser } = useUsersStore();
@@ -36,19 +50,34 @@ const ProgressNoteForm = () => {
   const addNote = useAddProgressNote(id || "");
   const updateNote = useUpdateProgressNote(id || "");
 
-  const [isEdit, setIsEdit] = useState(false);
-
-  const initalTrainerName = currentUser
+  const initialTrainerName = currentUser
     ? `${currentUser.firstName} ${currentUser.lastName}`
     : undefined;
 
+  const { data: subTrainers = [] } = useSubTrainersQuery();
+  const trainerOptions = useMemo(() => {
+    const list: { name: string; value: string }[] = [];
+    if (currentUser) {
+      const name = `${currentUser.firstName || ""} ${currentUser.lastName || ""}`.trim();
+      if (name) list.push({ name: `${name} (אני)`, value: name });
+    }
+    subTrainers.forEach((trainer) => {
+      const trainerName = trainer.fullName?.trim();
+      if (!trainerName) return;
+      if (list.some((option) => option.value === trainerName)) return;
+      list.push({ name: trainerName, value: trainerName });
+    });
+    return list;
+  }, [currentUser, subTrainers]);
+
+  const defaultValues = useMemo(
+    () => buildProgressNoteDefaults(initialTrainerName),
+    [initialTrainerName]
+  );
+
   const progressNoteForm = useForm<z.infer<typeof progressNoteSchema>>({
     resolver: zodResolver(progressNoteSchema),
-    defaultValues: {
-      date: new Date(),
-      content: undefined,
-      trainer: initalTrainerName,
-    },
+    defaultValues,
   });
 
   const {
@@ -61,70 +90,45 @@ const ProgressNoteForm = () => {
 
     const note = { ...values, userId: id };
 
-    if (isEdit) {
-      if (!progressNote?._id) return;
-
-      updateNote.mutate({ ...note, noteId: progressNote?._id });
-    } else {
-      addNote.mutate(note);
+    if (progressNote?._id) {
+      updateNote.mutate({ ...note, noteId: progressNote._id });
+      return;
     }
+
+    addNote.mutate(note);
   };
 
   useEffect(() => {
-    if (!progressNote) return setIsEdit(false);
+    if (progressNote) {
+      reset(progressNote as z.infer<typeof progressNoteSchema>);
+      return;
+    }
 
-    setIsEdit(true);
-    reset(progressNote);
-  }, [progressNote]);
+    reset(buildProgressNoteDefaults(initialTrainerName));
+  }, [progressNote, reset, initialTrainerName]);
+
+  const isSaving = addNote.isPending || updateNote.isPending;
+  const isEditing = Boolean(progressNote?._id);
+  const saveButtonLabel = isSaving ? "שומר…" : isEditing ? "שמור שינויים" : "שמור פתק";
 
   return (
     <Form {...progressNoteForm}>
       <form
         onSubmit={progressNoteForm.handleSubmit(onSubmit)}
-        className="space-y-4 w-full"
+        className="flex w-full flex-col gap-3"
         dir="rtl"
       >
-        <FormField
-          control={progressNoteForm.control}
-          name="date"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="block">תאריך</FormLabel>
-              <FormControl>
-                <DatePicker
-                  selectedDate={field.value}
-                  onChangeDate={(date: Date) => field.onChange(date)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={progressNoteForm.control}
-          name="trainer"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>שם המאמן</FormLabel>
-              <FormControl>
-                <Input placeholder="הכנס פריט כאן..." {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className="flex gap-5 w-full flex-wrap justify-around">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
           <FormField
             control={progressNoteForm.control}
-            name="diet"
+            name="date"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>תזונה</FormLabel>
+              <FormItem className="space-y-1">
+                <FormLabel className="text-[11px] font-semibold text-slate-600">תאריך</FormLabel>
                 <FormControl>
-                  <CustomSelect
-                    items={progressOptions}
-                    selectedValue={field.value?.toString()}
-                    onValueChange={(val) => field.onChange(+val)}
+                  <DatePicker
+                    selectedDate={field.value}
+                    onChangeDate={(date: Date) => field.onChange(date)}
                   />
                 </FormControl>
                 <FormMessage />
@@ -133,61 +137,73 @@ const ProgressNoteForm = () => {
           />
           <FormField
             control={progressNoteForm.control}
-            name="workouts"
+            name="trainer"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>אימונים</FormLabel>
+              <FormItem className="space-y-1">
+                <FormLabel className="text-[11px] font-semibold text-slate-600">שם המאמן</FormLabel>
                 <FormControl>
                   <CustomSelect
-                    items={progressOptions}
-                    selectedValue={field.value?.toString()}
-                    onValueChange={(val) => field.onChange(+val)}
+                    items={trainerOptions}
+                    selectedValue={field.value || ""}
+                    onValueChange={(value) => field.onChange(value)}
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-
-          <FormField
-            control={progressNoteForm.control}
-            name="cardio"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>אירובי</FormLabel>
-                <FormControl>
-                  <CustomSelect
-                    items={progressOptions}
-                    selectedValue={field.value?.toString()}
-                    onValueChange={(val) => field.onChange(+val)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {percentageFields.map((percentageField) => (
+            <FormField
+              key={percentageField.name}
+              control={progressNoteForm.control}
+              name={percentageField.name}
+              render={({ field }) => (
+                <FormItem className="space-y-1">
+                  <FormLabel className="text-[11px] font-semibold text-slate-600">
+                    {percentageField.label}
+                  </FormLabel>
+                  <FormControl>
+                    <CustomSelect
+                      items={progressOptions}
+                      selectedValue={field.value?.toString()}
+                      onValueChange={(value) => field.onChange(+value)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ))}
         </div>
+
         <FormField
           control={progressNoteForm.control}
           name="content"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>תוכן</FormLabel>
+            <FormItem className="space-y-1">
+              <FormLabel className="text-[11px] font-semibold text-slate-600">
+                תוכן (אופציונלי)
+              </FormLabel>
               <FormControl>
-                <TextEditor value={field.value} onChange={(val) => field.onChange(val)} />
+                <TextEditor value={field.value} onChange={(value) => field.onChange(value)} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <CustomButton
-          variant="success"
-          className="w-full"
-          type="submit"
-          title="שמור"
-          disabled={!isDirty}
-          isLoading={addNote.isPending || updateNote.isPending}
-        />
+
+        <div className="flex items-center justify-between gap-2 pt-1">
+          <p className="text-[11px] text-slate-400">
+            {isEditing ? "שינויים יישמרו רק אחרי לחיצה על שמור." : ""}
+          </p>
+          <button
+            type="submit"
+            disabled={!isDirty || isSaving}
+            className="inline-flex min-w-[140px] items-center justify-center gap-2 rounded-xl brand-gradient brand-gradient-hover px-5 py-2 text-sm font-bold text-white shadow-md shadow-blue-500/25 transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+          >
+            {saveButtonLabel}
+          </button>
+        </div>
       </form>
     </Form>
   );

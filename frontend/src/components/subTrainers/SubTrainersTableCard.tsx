@@ -81,7 +81,7 @@ export const SubTrainersTableCard = ({
     <div
       dir="rtl"
       className={cn(
-        "overflow-hidden rounded-2xl border border-border bg-background shadow-[0_18px_50px_rgba(15,23,42,0.06)]",
+        "overflow-hidden rounded-2xl border border-blue-100/60 dark:border-blue-900/40 bg-background shadow-sm",
         className
       )}
     >
@@ -99,7 +99,7 @@ export const SubTrainersTableCard = ({
         <Button
           type="button"
           onClick={onAddSubTrainer}
-          className="rounded-lg px-4 font-bold bg-foreground"
+          className="rounded-xl px-4 font-bold brand-gradient brand-gradient-hover text-white shadow-md shadow-blue-500/25 hover:shadow-lg hover:-translate-y-px transition-all"
         >
           <Plus className="ml-2 h-4 w-4" />
           {addButtonLabel}
@@ -207,7 +207,7 @@ export const SubTrainersTableCard = ({
             <ChevronRight className="h-3.5 w-3.5" />
           </Button>
 
-          <div className="flex h-7 min-w-7 items-center justify-center rounded-md bg-foreground px-2 text-xs font-medium text-background">
+          <div className="flex h-7 min-w-7 items-center justify-center rounded-md brand-gradient px-2 text-xs font-bold text-white shadow-sm">
             {page}
           </div>
 

@@ -2,24 +2,16 @@ import { PropsWithChildren, useEffect, useMemo, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import useWorkoutPlanPresetQuery from "@/hooks/queries/workoutPlans/useWorkoutPlanPresetQuery";
 import { useNavigate, useParams } from "react-router-dom";
-import BackButton from "@/components/ui/BackButton";
 import { MainRoutes } from "@/enums/Routes";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import CustomButton from "@/components/ui/CustomButton";
+import { Form } from "@/components/ui/form";
+import BackLink from "@/components/ui/BackLink";
 import useAddWorkoutPreset from "@/hooks/mutations/workouts/useAddWorkoutPreset";
-import { Input } from "@/components/ui/input";
-import ComboBox from "@/components/ui/combo-box";
-import { convertItemsToOptions, getNestedError } from "@/lib/utils";
+import { collectAllErrors, ValidationErrorEntry } from "@/lib/utils";
+import WorkoutPresetPicker from "./WorkoutPresetPicker";
+import ValidationErrorsDialog from "../../Alerts/ValidationErrorsDialog";
 import useWorkoutPlanPresetsQuery from "@/hooks/queries/workoutPlans/useWorkoutPlanPresetsQuery";
 import { ISimpleCardioType, IWorkoutPlanPreset } from "@/interfaces/IWorkoutPlan";
-import { cleanWorkoutObject, parseErrorFromObject } from "@/utils/workoutPlanUtils";
+import { parseErrorFromObject } from "@/utils/workoutPlanUtils";
 import useUpdateWorkoutPlanPreset from "@/hooks/mutations/workouts/useUpdateWorkoutPlanPreset";
 import { defaultSimpleCardioOption } from "@/constants/cardioOptions";
 import { WorkoutPresetSchemaType, workoutPresetSchema } from "@/schemas/workoutPlanSchema";
@@ -29,6 +21,30 @@ import { onSuccess } from "@/lib/query";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
+import PresetMetaPanel from "./PresetMetaPanel";
+import { WorkoutPresetEditorHeader } from "./WorkoutPresetEditorHeader";
+import { WorkoutPresetIdentityCard } from "./WorkoutPresetIdentityCard";
+import { WorkoutPresetSaveAction } from "./WorkoutPresetSaveAction";
+
+const getWorkoutPresetErrorMessage = (error: any) =>
+  error?.data?.message || parseErrorFromObject(error?.data || "");
+
+const normalizeSimpleCardioPlan = (values: WorkoutPresetSchemaType) => {
+  if (values.cardio.type !== "simple") return values;
+
+  const simpleCardioPlan = values.cardio.plan as ISimpleCardioType;
+
+  return {
+    ...values,
+    cardio: {
+      type: values.cardio.type,
+      plan: {
+        ...simpleCardioPlan,
+        minsPerWorkout: simpleCardioPlan.minsPerWeek / simpleCardioPlan.timesPerWeek,
+      },
+    },
+  };
+};
 
 export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ children }) => {
   const { id = "" } = useParams();
@@ -52,12 +68,29 @@ export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ childr
   const { data: workoutPlanPresets } = useWorkoutPlanPresetsQuery();
   const { data } = useWorkoutPlanPresetQuery(id);
 
+  const [selectedPreset, setSelectedPreset] = useState("");
+  const [openPresetPicker, setOpenPresetPicker] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<ValidationErrorEntry[]>([]);
+
   const onMutateSuccess = () => {
     navigation(MainRoutes.WORKOUT_PLANS_PRESETS);
   };
 
+  const openWorkoutPresetPicker = () => {
+    setOpenPresetPicker(true);
+  };
+
+  const clearValidationErrors = () => {
+    setValidationErrors([]);
+  };
+
+  const handleValidationDialogOpenChange = (open: boolean) => {
+    if (open) return;
+    clearValidationErrors();
+  };
+
   const onError = (error: any) => {
-    const message = error?.data?.message || parseErrorFromObject(error?.data || "");
+    const message = getWorkoutPresetErrorMessage(error);
 
     toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
       description: message,
@@ -79,40 +112,27 @@ export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ childr
     onError,
   });
 
-  const [selectedPreset, setSelectedPreset] = useState("");
-
-  const workoutPresetsOptions = useMemo(
-    () => convertItemsToOptions(workoutPlanPresets?.data || [], "name"),
-    [workoutPlanPresets?.data]
-  );
+  const presetList = useMemo(() => workoutPlanPresets?.data || [], [workoutPlanPresets?.data]);
 
   const handleSelectPreset = (preset: IWorkoutPlanPreset) => {
     reset({
       name: getValues("name"),
       workoutPlans: preset.workoutPlans,
       cardio: preset.cardio || { type: "simple", plan: defaultSimpleCardioOption },
+      workoutsPerWeek: preset.workoutsPerWeek,
+      durationMinutes: preset.durationMinutes,
+      level: preset.level,
+      goal: preset.goal,
+      equipment: preset.equipment,
+      muscleFocus: preset.muscleFocus,
+      note: preset.note,
+      limitations: preset.limitations,
     });
     setSelectedPreset(preset.name);
   };
 
   const onSubmit = (values: WorkoutPresetSchemaType) => {
-    let workoutPlan = values;
-    const cardioPlan = values.cardio.type == "simple" && (values.cardio.plan as ISimpleCardioType);
-
-    if (cardioPlan) {
-      const minsPerWorkout = cardioPlan.minsPerWeek / cardioPlan.timesPerWeek;
-
-      workoutPlan = {
-        ...values,
-        cardio: {
-          type: values.cardio.type,
-          plan: {
-            ...cardioPlan,
-            minsPerWorkout,
-          },
-        },
-      };
-    }
+    const workoutPlan = normalizeSimpleCardioPlan(values);
 
     if (id) {
       updateWorkoutPlanPreset.mutate({ presetId: id, updatedPreset: workoutPlan });
@@ -121,70 +141,57 @@ export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ childr
     }
   };
 
-  const onInvalidSubmit = (e: any) => {
-    const errorMessage = getNestedError(e);
-    toast.error(errorMessage?.title, { description: errorMessage?.description });
+  const onInvalidSubmit = (errors: any) => {
+    const all = collectAllErrors(errors);
+    if (all.length === 0) return;
+    setValidationErrors(all);
   };
 
   useEffect(() => {
     if (!data) return;
 
     reset(data);
-  }, [data]);
+  }, [data, reset]);
 
   useUnsavedChangesWarning(isDirty);
+  const isSaving = addWorkoutPreset.isPending || updateWorkoutPlanPreset.isPending;
 
   return (
     <>
-      <div className="flex flex-col gap-4 p-4 h-full">
-        <h1 className="text-3xl">תבנית אימון</h1>
-        <BackButton navLink={MainRoutes.WORKOUT_PLANS_PRESETS} />
+      <div dir="rtl" className="flex h-full flex-col gap-5 p-4 font-heebo">
+        <BackLink label="חזרה" />
+
+        <WorkoutPresetEditorHeader />
+
         <Form {...form}>
-          <form className="flex flex-col gap-3" onSubmit={handleSubmit(onSubmit, onInvalidSubmit)}>
-            <div className="w-full ">
-              <div className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => {
-                    return (
-                      <FormItem>
-                        <FormLabel className="font-bold text-lg pb-3">שם התבנית</FormLabel>
-                        <FormControl>
-                          <Input className="sm:w-2/4" {...field} placeholder="שם..." />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    );
-                  }}
-                />
-                <div className="space-y-2 sm:w-fit sm:min-w-24">
-                  <span>תבניות</span>
-                  <ComboBox
-                    value={selectedPreset}
-                    options={workoutPresetsOptions}
-                    onSelect={(currentValue) => {
-                      handleSelectPreset(currentValue);
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
+          <form className="flex flex-col gap-5" onSubmit={handleSubmit(onSubmit, onInvalidSubmit)}>
+            <WorkoutPresetIdentityCard
+              control={form.control}
+              selectedPreset={selectedPreset}
+              onOpenPresetPicker={openWorkoutPresetPicker}
+            />
+
+            <PresetMetaPanel />
 
             <div className="border-b-2 rounded">{children}</div>
-            <div className="flex sm:justify-end py-1.5 sm:sticky sm:bottom-0">
-              <CustomButton
-                className="w-full sm:w-32"
-                variant="success"
-                type="submit"
-                title="שמור תוכנית אימון"
-                disabled={addWorkoutPreset.isPending || updateWorkoutPlanPreset.isPending}
-                isLoading={addWorkoutPreset.isPending || updateWorkoutPlanPreset.isPending}
-              />
-            </div>
+            <WorkoutPresetSaveAction isSaving={isSaving} />
           </form>
         </Form>
       </div>
+
+      <WorkoutPresetPicker
+        open={openPresetPicker}
+        onOpenChange={setOpenPresetPicker}
+        presets={presetList}
+        onSelect={handleSelectPreset}
+      />
+
+      <ValidationErrorsDialog
+        open={validationErrors.length > 0}
+        onOpenChange={handleValidationDialogOpenChange}
+        errors={validationErrors}
+        intro="יש לתקן את השדות הבאים לפני שמירת התבנית"
+      />
     </>
   );
 };

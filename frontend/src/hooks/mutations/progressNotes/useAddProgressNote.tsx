@@ -7,13 +7,13 @@ import { useProgressNoteContext } from "@/context/useProgressNoteContext";
 
 const useAddProgressNote = (userId: string) => {
   const { addProgressNote } = useProgressNotesApi();
-  const { setOpenProgressSheet } = useProgressNoteContext();
+  const { handleCloseProgressSheet } = useProgressNoteContext();
 
   return useMutation({
     mutationFn: (noteToPost: IPostProgressNoteObject) => addProgressNote(noteToPost),
     onSuccess: () => {
       onSuccess("פתק נשמר בהצלחה!", [QueryKeys.USER_PROGRESS_NOTES + userId]);
-      setOpenProgressSheet(false);
+      handleCloseProgressSheet();
     },
     onError: onError,
   });
