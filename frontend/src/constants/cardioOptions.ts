@@ -1,4 +1,8 @@
-import { IComplexCardioType, ISimpleCardioType } from "@/interfaces/IWorkoutPlan";
+import {
+  IComplexCardioType,
+  ISimpleCardioType,
+  IStepsCardioType,
+} from "@/interfaces/IWorkoutPlan";
 
 export const defaultSimpleCardioOption: ISimpleCardioType = {
   minsPerWeek: 60,
@@ -20,4 +24,10 @@ export const defaultComplexCardioOption: IComplexCardioType = {
       ],
     },
   ],
+};
+
+export const defaultStepsCardioOption: IStepsCardioType = {
+  mode: "uniform",
+  daily: 10000,
+  perDay: [10000, 10000, 10000, 10000, 10000, 10000, 0],
 };

@@ -41,7 +41,7 @@ import { summariseWorkoutDirty } from "@/utils/dirtyFieldsSummary";
 
 const calculateMinPerWorkout = (workout: WorkoutSchemaType) => {
   let workoutPlan = workout;
-  if (workoutPlan.cardio.type == "complex") return workoutPlan;
+  if (workoutPlan.cardio.type !== "simple") return workoutPlan;
   const cardioPlan = workoutPlan.cardio.plan as ISimpleCardioType;
 
   const minsPerWorkout = cardioPlan.minsPerWeek / cardioPlan.timesPerWeek;

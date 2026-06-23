@@ -2,6 +2,7 @@ import type React from "react";
 import { useMemo, useRef, useState } from "react";
 import UserFormResponses from "@/components/UserDashboard/FormResponses/UserFormResponses";
 import MeasurementsProgression from "@/components/UserDashboard/MeasurementProgression/MeasurementsProgression";
+import StepsProgression from "@/components/UserDashboard/StepsTracking/StepsProgression";
 import { WeightProgression } from "@/components/UserDashboard/WeightProgression/WeightProgression";
 import { WeightProgressionPhotos } from "@/components/UserDashboard/WeightProgression/WeightProgressionPhotos";
 import { WorkoutProgression } from "@/components/UserDashboard/WorkoutProgression/WorkoutProgression";
@@ -41,6 +42,7 @@ export function ProgressTabPanel({ activeSubTab, onSubTabChange }: ProgressTabPa
         {activeSubTab === "weight" && <WeightProgression />}
         {activeSubTab === "measurements" && <MeasurementsProgression />}
         {activeSubTab === "strength" && <WorkoutProgression />}
+        {activeSubTab === "steps" && <StepsProgression />}
         {activeSubTab === "photos" && <WeightProgressionPhotos />}
       </DashboardTabCard>
     </div>
@@ -199,6 +201,7 @@ function DashboardTabCard({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+
 
 /** Header action button — one chrome for all three actions in
  *  the workout-tab header (בחר תבנית / החלפה זמנית / היסטוריה).

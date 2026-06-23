@@ -1,6 +1,6 @@
 import { IBaseItem } from "./interfaces";
 
-export type CardioType = `simple` | `complex`;
+export type CardioType = `simple` | `complex` | `steps`;
 
 export interface IWorkoutPlan {
   _id?: string;
@@ -77,7 +77,7 @@ export interface ICompleteWorkoutPlan extends IWorkoutPlanMeta, IWorkoutPlanHist
 
 export interface ICardioPlan {
   type: CardioType;
-  plan: IComplexCardioType | ISimpleCardioType;
+  plan: IComplexCardioType | ISimpleCardioType | IStepsCardioType;
 }
 
 export interface ISet {
@@ -146,6 +146,15 @@ export interface ICardioWeek {
 }
 export interface IComplexCardioType {
   weeks: ICardioWeek[];
+  tips?: string;
+}
+
+export type StepsCardioMode = "uniform" | "custom";
+
+export interface IStepsCardioType {
+  mode: StepsCardioMode;
+  daily: number;
+  perDay?: number[];
   tips?: string;
 }
 
