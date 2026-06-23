@@ -1,61 +1,52 @@
 import useDeleteFormPreset from "@/hooks/mutations/formPresets/useDeleteFormPreset";
 import useFormPresetsQuery from "@/hooks/queries/formPresets/useFormPresetsQuery";
 import ErrorPage from "@/pages/ErrorPage";
-import { DataTableHebrew } from "./DataTableHebrew";
 import Loader from "../ui/Loader";
-import { columns as formColumns } from "@/components/tables/Columns/forms/FormColumns";
 import { Button } from "../ui/button";
 import { useNavigate } from "react-router-dom";
-import { IForm } from "@/interfaces/IForm";
+import FormPresetGrid from "../forms/FormPresetGrid";
+import { FaPenToSquare, FaPlus } from "react-icons/fa6";
 
 const QuestionnairesTable = () => {
   const navigate = useNavigate();
 
   const { data: formPresetsRes, isLoading, isError, error } = useFormPresetsQuery();
   const formMutation = useDeleteFormPreset();
-  const onboardingForm = formPresetsRes?.data?.find((form) => form.type === "onboarding");
+  const forms = formPresetsRes?.data || [];
+  const onboardingForm = forms.find((form) => form.type === "onboarding");
 
-  const handleViewForm = (form: IForm) => {
-    navigate(`/form-builder/${form._id}`);
-  };
+  if (isLoading) return <Loader size="large" />;
+  if (isError) return <ErrorPage message={error.message} />;
 
   return (
-    <>
-      {isLoading ? (
-        <Loader size="large" />
-      ) : isError ? (
-        <ErrorPage message={error.message} />
-      ) : (
-        <DataTableHebrew
-          data={formPresetsRes?.data || []}
-          columns={formColumns}
-          paginationKey="forms"
-          testIdPrefix="questionnaires"
-          actionButton={
-            <div className="flex flex-wrap gap-2">
-              {onboardingForm && (
-                <Button
-                  variant="outline"
-                  onClick={() => navigate(`/form-builder/${onboardingForm._id}`)}
-                >
-                  ערוך שאלון התחלה
-                </Button>
-              )}
-              <Button onClick={() => navigate(`/form-builder/add`)}>הוסף שאלון</Button>
-            </div>
-          }
-          handleSetData={() => {}}
-          handleViewData={(user) => handleViewForm(user)}
-          getRowClassName={() => ""}
-          getRowId={(row) => row._id || ""}
-          handleDeleteData={(form) => {
-            if (form._id) formMutation.mutate(form._id);
-          }}
-          handleViewNestedData={(_, formId) => navigate(`/form-builder/${formId}`)}
-          handleHoverOnRow={() => false}
-        />
-      )}
-    </>
+    <FormPresetGrid
+      data={forms}
+      onView={(id) => navigate(`/form-builder/${id}`)}
+      onDelete={(id) => formMutation.mutate(id)}
+      actionButton={
+        <div className="flex flex-wrap gap-2">
+          {onboardingForm && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate(`/form-builder/${onboardingForm._id}`)}
+              className="gap-2"
+            >
+              <FaPenToSquare size={11} />
+              ערוך שאלון התחלה
+            </Button>
+          )}
+          <Button
+            size="sm"
+            onClick={() => navigate(`/form-builder/add`)}
+            className="gap-2 brand-gradient brand-gradient-hover text-white shadow-sm"
+          >
+            <FaPlus size={11} />
+            הוסף שאלון
+          </Button>
+        </div>
+      }
+    />
   );
 };
 

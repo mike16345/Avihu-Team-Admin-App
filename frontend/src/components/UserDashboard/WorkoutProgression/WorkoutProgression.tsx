@@ -1,99 +1,142 @@
 import { useEffect, useMemo, useState } from "react";
-import { ExerciseProgressChart } from "./ExerciseProgressChart";
 import { useParams } from "react-router";
-import { RecordedSetsList } from "./RecordedSetsList";
-import { MuscleExerciseSelector } from "./MuscleExerciseSelector";
-import { extractExercises } from "@/lib/workoutUtils";
 import { useSearchParams } from "react-router-dom";
-import useUserRecordedSets from "@/hooks/queries/recordedSets/useUserRecordedSets";
+
 import Loader from "@/components/ui/Loader";
+import useMuscleGroupsQuery from "@/hooks/queries/MuscleGroups/useMuscleGroupsQuery";
+import useUserRecordedSets from "@/hooks/queries/recordedSets/useUserRecordedSets";
+import useUserQuery from "@/hooks/queries/user/useUserQuery";
 import ErrorPage from "@/pages/ErrorPage";
 import { workoutTab } from "@/pages/UserDashboard";
-import ExerciseProgressNotePanel from "./ExerciseProgressNotePanel";
-import useUserQuery from "@/hooks/queries/user/useUserQuery";
+
+import { ExerciseCardsGrid } from "./ExerciseCardsGrid";
+import { ExerciseDetailModal } from "./ExerciseDetailModal";
+import { ProgressNoteCreator } from "./ProgressNoteCreator";
+import { ProgressNoteLauncher } from "./ProgressNoteLauncher";
+import { WorkoutEmptyState } from "./WorkoutEmptyState";
+import { WorkoutFilterBar } from "./WorkoutFilterBar";
+import { ALL_GROUP_LABEL, type FlatExercise } from "./workoutProgressionModel";
+import {
+  flattenRecordedWorkouts,
+  getAvailableGroups,
+  getDetailRawSets,
+  getInitialWorkoutSelection,
+  isExpectedRecordedSetsEmptyError,
+} from "./workoutProgressionUtils";
+
+const getFilteredExercises = (flatExercises: FlatExercise[], filter: string) => {
+  if (filter === ALL_GROUP_LABEL) return flatExercises;
+  return flatExercises.filter((exercise) => exercise.group === filter);
+};
 
 export const WorkoutProgression = () => {
   const { id } = useParams();
-
   const userFirstName = useUserQuery(id).data?.firstName;
-
   const { data: recordedWorkouts, isLoading, error } = useUserRecordedSets(id);
+  const { data: muscleGroupsFromServer } = useMuscleGroupsQuery();
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState(
     searchParams.get("muscleGroup") || ""
   );
   const [selectedExercise, setSelectedExercise] = useState(searchParams.get("exercise") || "");
+  const [filter, setFilter] = useState<string>(ALL_GROUP_LABEL);
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
+  const [detailExercise, setDetailExercise] = useState<FlatExercise | null>(null);
+  const [noteOpen, setNoteOpen] = useState(false);
 
-  const handleSetSearchParams = () => {
-    if (!recordedWorkouts || (searchParams.get("muscleGroup") && searchParams.get("exercise")))
-      return;
+  const flatExercises = useMemo(
+    () => flattenRecordedWorkouts(recordedWorkouts),
+    [recordedWorkouts]
+  );
 
-    const initialMuscleGroup = recordedWorkouts[0]?.muscleGroup || "";
-    const initialExercise = extractExercises(recordedWorkouts[0]?.recordedSets)[0] || "";
+  const availableGroups = useMemo(
+    () => getAvailableGroups(flatExercises, muscleGroupsFromServer),
+    [flatExercises, muscleGroupsFromServer]
+  );
 
-    setSearchParams((s) => {
-      return {
-        ...Object.fromEntries(s.entries()),
-        muscleGroup: initialMuscleGroup,
-        exercise: initialExercise,
-      };
-    });
-    setSelectedMuscleGroup(initialMuscleGroup);
-    setSelectedExercise(initialExercise);
-  };
-
-  const recordedMuscleGroup = useMemo(() => {
-    if (!recordedWorkouts) return undefined;
-
-    return recordedWorkouts?.find(
-      (recordedMuscleGroup) => recordedMuscleGroup.muscleGroup == selectedMuscleGroup
-    );
-  }, [selectedMuscleGroup, recordedWorkouts]);
-
-  const recordedSets = recordedMuscleGroup?.recordedSets[selectedExercise] || [];
+  const filteredExercises = useMemo(
+    () => getFilteredExercises(flatExercises, filter),
+    [filter, flatExercises]
+  );
 
   useEffect(() => {
     if (searchParams.get("tab") !== workoutTab || !recordedWorkouts) return;
+    if (searchParams.get("muscleGroup") && searchParams.get("exercise")) return;
 
-    handleSetSearchParams();
-  }, [searchParams]);
+    const initialSelection = getInitialWorkoutSelection(recordedWorkouts);
+    if (!initialSelection) return;
+
+    setSearchParams((params) => ({
+      ...Object.fromEntries(params.entries()),
+      muscleGroup: initialSelection.initialMuscleGroup,
+      exercise: initialSelection.initialExercise,
+    }));
+    setSelectedMuscleGroup(initialSelection.initialMuscleGroup);
+    setSelectedExercise(initialSelection.initialExercise);
+  }, [recordedWorkouts, searchParams, setSearchParams]);
+
+  const openExerciseDetails = (exercise: FlatExercise) => {
+    setSelectedMuscleGroup(exercise.group);
+    setSelectedExercise(exercise.name);
+    setSearchParams((params) => ({
+      ...Object.fromEntries(params.entries()),
+      muscleGroup: exercise.group,
+      exercise: exercise.name,
+    }));
+    setDetailExercise(exercise);
+  };
+
+  const detailRawSets = useMemo(
+    () => getDetailRawSets(recordedWorkouts, detailExercise),
+    [detailExercise, recordedWorkouts]
+  );
 
   if (isLoading) return <Loader />;
-  if (error && error?.data?.message !== "Data could not be retrieved!")
-    return <ErrorPage message={error.data.message} />;
+  if (error && !isExpectedRecordedSetsEmptyError(error)) {
+    return <ErrorPage message={(error as any).data?.message} />;
+  }
 
   return (
-    <div className="size-full flex flex-col gap-4 p-3">
-      <ExerciseProgressNotePanel
-        recordedWorkouts={recordedWorkouts}
-        userName={userFirstName}
-        userId={id}
+    <div dir="rtl" className="flex flex-col gap-4 font-heebo">
+      <WorkoutFilterBar
+        availableGroups={availableGroups}
+        filter={filter}
+        onFilterChange={setFilter}
       />
-      {!!recordedWorkouts?.length && (
-        <>
-          <MuscleExerciseSelector
-            selectedExercise={selectedExercise}
-            recordedWorkouts={recordedWorkouts!}
-            selectedMuscleGroup={selectedMuscleGroup}
-            onSelectExercise={(exercise) => setSelectedExercise(exercise)}
-            onSelectMuscleGroup={(muscleGroup) => setSelectedMuscleGroup(muscleGroup)}
-          />
-          <div className="w-full flex flex-col sm:flex-row gap-4">
-            <div className="md:w-2/6 border rounded-lg max-h-[495px] overflow-y-auto custom-scrollbar ">
-              <RecordedSetsList recordedSets={recordedSets} />
-            </div>
-            <div className="md:w-4/6">
-              <ExerciseProgressChart
-                selectedMuscleGroup={selectedMuscleGroup}
-                selectedExercise={selectedExercise}
-                recordedSets={recordedSets}
-              />
-            </div>
-          </div>
-        </>
+
+      {!flatExercises.length && <WorkoutEmptyState userFirstName={userFirstName} />}
+
+      {flatExercises.length > 0 && (
+        <ExerciseCardsGrid
+          exercises={filteredExercises}
+          selectedExercise={selectedExercise}
+          selectedMuscleGroup={selectedMuscleGroup}
+          expandedCard={expandedCard}
+          onExpandedCardChange={setExpandedCard}
+          onOpenExerciseDetails={openExerciseDetails}
+        />
       )}
-      {!recordedWorkouts?.length && <h1 className="text-center">לא הקליטו אימונים</h1>}
+
+      {detailExercise && (
+        <ExerciseDetailModal
+          exercise={detailExercise}
+          rawSets={detailRawSets}
+          onClose={() => setDetailExercise(null)}
+        />
+      )}
+
+      <ProgressNoteLauncher userFirstName={userFirstName} onOpen={() => setNoteOpen(true)} />
+
+      {noteOpen && (
+        <ProgressNoteCreator
+          flatExercises={flatExercises}
+          availableGroups={availableGroups}
+          userName={userFirstName}
+          recordedWorkouts={recordedWorkouts}
+          onClose={() => setNoteOpen(false)}
+        />
+      )}
     </div>
   );
 };

@@ -29,7 +29,6 @@ const FormResponseBubble = ({
   responseId,
   formResponse,
   initialTop = 180,
-  rightOffset = EDGE_PADDING,
   className,
 }: FormResponseBubbleProps) => {
   const [open, setOpen] = useState(false);
@@ -57,10 +56,8 @@ const FormResponseBubble = ({
     [users, response?.userId]
   );
 
-  const { data: fetchedUser } = useUserQuery(
-    response?.userId,
-    Boolean(response?.userId) && !cachedUser && open
-  );
+  const userId = typeof response?.userId === "string" ? response.userId : response?.userId?._id;
+  const { data: fetchedUser } = useUserQuery(userId, Boolean(userId) && !cachedUser && open);
 
   const handlePointerDown = (event: PointerEvent<HTMLButtonElement>) => {
     event.preventDefault();

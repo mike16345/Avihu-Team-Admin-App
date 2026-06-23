@@ -4,6 +4,10 @@ export type SafeAuthUser = Partial<IUser> & {
   _id: string;
   email: string;
   role?: string;
+  favoriteWorkoutPresetIds?: string[];
+  favoriteDietPresetIds?: string[];
+  sharesFavorites?: boolean;
+  trainerId: string;
 };
 
 export type LoginResponse = {

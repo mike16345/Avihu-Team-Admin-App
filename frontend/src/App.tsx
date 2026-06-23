@@ -1,20 +1,26 @@
+import { useRef } from "react";
 import { Route, Routes } from "react-router-dom";
 import RequireAuth from "./hooks/Authentication/RequireAuthentication";
 import useAuth from "./hooks/Authentication/useAuth";
+import { useScrollRestoration } from "./hooks/useScrollRestoration";
 import LoginPage from "./pages/LoginPage";
 import { AppRoutes } from "./routes/AppRoutes";
 import "./App.css";
 import { AppSidebar } from "./components/Sidebar/AppSidebar";
-import { SidebarProvider, SidebarTrigger } from "./components/ui/sidebar";
 
 function App() {
   const { authed } = useAuth();
+  const mainScrollRef = useRef<HTMLDivElement | null>(null);
+  // Restore the user's exact scroll position on back/forward navigation.
+  useScrollRestoration(mainScrollRef);
 
   return (
-    <SidebarProvider className="flex size-full ">
+    <div className="flex h-full w-full" dir="rtl">
       {authed && <AppSidebar />}
-      <div className="size-full p-4 overflow-y-auto custom-scrollbar ">
-        {authed && <SidebarTrigger data-testid="sidebar-trigger" />}
+      <div
+        ref={mainScrollRef}
+        className="flex-1 min-w-0 h-full overflow-y-auto px-20 py-14 custom-scrollbar"
+      >
         <RequireAuth>
           <AppRoutes />
         </RequireAuth>
@@ -22,7 +28,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
         </Routes>
       </div>
-    </SidebarProvider>
+    </div>
   );
 }
 

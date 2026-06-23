@@ -1,4 +1,4 @@
-import { Card, CardContent } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
 import DateUtils from "@/lib/dateUtils";
 import { TrainerGetOneDTO } from "@/interfaces/trainers";
 import { cn } from "@/lib/utils";
@@ -46,9 +46,9 @@ export const TrainerOverviewCard = ({ data }: TrainerOverviewCardProps) => {
   ];
 
   return (
-    <div dir="rtl" className="rounded-2xl border border-muted bg-card shadow-lg ">
+    <div dir="rtl" className="rounded-2xl border border-muted bg-card shadow-lg">
       <CardContent className="space-y-6 p-7">
-        <div className="flex items-center justify-between flex-wrap gap-5">
+        <div className="flex flex-wrap items-center justify-between gap-5">
           <div className="flex items-center gap-4 text-right">
             <TrainerAvatar fullName={trainer.fullName} className="h-16 w-16 text-2xl font-bold" />
             <div className="space-y-2">
@@ -62,10 +62,10 @@ export const TrainerOverviewCard = ({ data }: TrainerOverviewCardProps) => {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <div className="flex items-center justify-between gap-5 w-[400px] ">
+          <div className="w-full space-y-2 lg:w-auto">
+            <div className="grid gap-4 sm:grid-cols-2 lg:w-[400px] lg:grid-cols-4">
               {metrics.map((metric) => (
-                <div key={metric.label} className="space-y-1 text-right ">
+                <div key={metric.label} className="space-y-1 text-right">
                   <div className="text-sm text-muted-foreground font-bold">{metric.label}</div>
                   <div className={cn("text-xl font-bold tracking-tight", "text-foreground")}>
                     {metric.value}

@@ -1,4 +1,5 @@
 import TemplateTabs from "@/components/templates/TemplateTabs";
+import WorkoutsTemplateHeader from "@/components/templates/workoutTemplates/WorkoutsTemplateHeader";
 import { ITabs } from "@/interfaces/interfaces";
 import { QueryKeys } from "@/enums/QueryKeys";
 import useDeleteWorkoutPreset from "@/hooks/mutations/workouts/useDeleteWorkoutPlanPreset";
@@ -14,26 +15,10 @@ const WorkoutsTemplatePage = () => {
 
   const tabs: ITabs = {
     tabHeaders: [
-      {
-        name: `תבניות אימונים`,
-        value: `WorkoutPlans`,
-        queryKey: QueryKeys.WORKOUT_PRESETS,
-      },
-      {
-        name: `תרגילים`,
-        value: `exercises`,
-        queryKey: QueryKeys.EXERCISES,
-      },
-      {
-        name: `שיטות אימון`,
-        value: `exercisesMethods`,
-        queryKey: QueryKeys.EXERCISE_METHODS,
-      },
-      {
-        name: `אירובי`,
-        value: `cardioWorkouts`,
-        queryKey: QueryKeys.CARDIO_WORKOUT_PRESET,
-      },
+      { name: `תבניות אימונים`, value: `WorkoutPlans`, queryKey: QueryKeys.WORKOUT_PRESETS },
+      { name: `תרגילים`, value: `exercises`, queryKey: QueryKeys.EXERCISES },
+      { name: `שיטות אימון`, value: `exercisesMethods`, queryKey: QueryKeys.EXERCISE_METHODS },
+      { name: `אירובי`, value: `cardioWorkouts`, queryKey: QueryKeys.CARDIO_WORKOUT_PRESET },
     ],
     tabContent: [
       {
@@ -64,8 +49,12 @@ const WorkoutsTemplatePage = () => {
   };
 
   return (
-    <div data-testid="workout-templates-page" className="flex flex-col gap-3 ">
-      <h1 className="text-2xl text-center sm:text-right ">תבניות אימון</h1>
+    <div
+      data-testid="workout-templates-page"
+      dir="rtl"
+      className="flex flex-col gap-5 px-1 font-heebo"
+    >
+      <WorkoutsTemplateHeader />
       <TemplateTabs tabs={tabs} />
     </div>
   );

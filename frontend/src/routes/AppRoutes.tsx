@@ -1,6 +1,6 @@
 import { Route, Routes, Navigate } from "react-router-dom";
 import { useUsersStore } from "@/store/userStore";
-import { UsersTable } from "@/components/tables/UsersTable";
+import { UsersPage } from "@/pages/UsersPage";
 import { UserDashboard } from "@/pages/UserDashboard";
 import { ViewDietPlanPage } from "@/pages/ViewDietPlanPage";
 import DietPlanTemplatePage from "@/pages/DietPlanTemplatePage";
@@ -66,7 +66,7 @@ const appRouteDefinitions: AppRouteDefinition[] = [
   {
     accessKey: "users",
     path: "/users/*",
-    element: <UsersTable />,
+    element: <UsersPage />,
   },
   {
     accessKey: "leads",

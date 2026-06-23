@@ -29,6 +29,25 @@ export const useWorkoutPlanApi = () => {
   const getWorkoutPlan = (id: string) =>
     fetchData<ICompleteWorkoutPlan>(WORKOUT_PLAN_ENDPOINT + id);
 
+  const getWorkoutPlanHistory = (userId: string) =>
+    fetchData<ApiResponse<ICompleteWorkoutPlan[]>>(`${WORKOUT_PLAN_ENDPOINT}/history`, { userId });
+
+  const swapWorkoutPlan = (
+    userId: string,
+    payload: ICompleteWorkoutPlan & { temporaryUntil?: Date | string; assignmentLabel?: string }
+  ) => sendData<ICompleteWorkoutPlan>(`${WORKOUT_PLAN_ENDPOINT}/swap`, payload, null, { userId });
+
+  const restoreWorkoutPlan = (userId: string, archivedPlanId: string) =>
+    sendData<ICompleteWorkoutPlan>(
+      `${WORKOUT_PLAN_ENDPOINT}/restore`,
+      { assignedBy: userId },
+      null,
+      {
+        userId,
+        archivedPlanId,
+      }
+    );
+
   return {
     getWorkoutPlan,
     getWorkoutPlanByUserId,
@@ -36,5 +55,8 @@ export const useWorkoutPlanApi = () => {
     updateWorkoutPlanByUserId,
     updateWorkoutPlan,
     addWorkoutPlan,
+    getWorkoutPlanHistory,
+    swapWorkoutPlan,
+    restoreWorkoutPlan,
   };
 };

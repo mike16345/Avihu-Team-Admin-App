@@ -1,15 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import PresetTable from "@/components/tables/PresetTable";
-import ExercisePresetsTable from "@/components/tables/ExercisePresetsTable";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import ExercisePresetGrid from "./workoutTemplates/ExercisePresetGrid";
+import SimplePresetGrid from "./workoutTemplates/SimplePresetGrid";
 import PresetSheet from "./PresetSheet";
 import { useNavigate } from "react-router-dom";
 import { UseMutationResult, useQuery } from "@tanstack/react-query";
-import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { ITabs } from "@/interfaces/interfaces";
-import { IExercisePresetItem } from "@/interfaces/IWorkoutPlan";
+import { IExercisePresetItem, IWorkoutPlanPreset } from "@/interfaces/IWorkoutPlan";
 import useMenuItemApi from "@/hooks/api/useMenuItemApi";
 import { useDietPlanPresetApi } from "@/hooks/api/useDietPlanPresetsApi";
 import { ApiResponse } from "@/types/types";
@@ -23,10 +19,62 @@ import useExerciseMethodApi from "@/hooks/api/useExerciseMethodsApi";
 import { createRetryFunction } from "@/lib/utils";
 import useCardioWorkoutApi from "@/hooks/api/useCardioWorkoutPreset";
 import { FULL_DAY_STALE_TIME } from "@/constants/constants";
+import WorkoutPresetGrid from "./workoutTemplates/WorkoutPresetGrid";
+import DietPlanPresetGrid from "./dietTemplates/DietPlanPresetGrid";
+import { IDietPlanPreset } from "@/interfaces/IDietPlan";
+import { FaPlus } from "react-icons/fa6";
 
 interface TemplateTabsProps {
   tabs: ITabs;
 }
+
+const createTemplateTabsTestId = (value?: string) =>
+  (value ?? "tab")
+    .replace(/[^a-z0-9]+/gi, "-")
+    .replace(/^-|-$/g, "")
+    .toLowerCase();
+
+const getTabButtonClassName = (active: boolean) => {
+  if (active) return "brand-gradient brand-gradient-hover text-white shadow-md shadow-blue-500/25";
+
+  return "text-slate-500 dark:text-slate-400 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-950/40 dark:hover:text-blue-300";
+};
+
+const getSimpleGridCopy = (activeTab: string) => {
+  if (activeTab === "cardioWorkouts") {
+    return {
+      variant: "cardio" as const,
+      searchPlaceholder: "חיפוש לפי שם תרגיל אירובי…",
+      emptyLabel: "לא נמצאו תרגילי אירובי",
+    };
+  }
+
+  return {
+    variant: "method" as const,
+    searchPlaceholder: "חיפוש לפי שם שיטה…",
+    emptyLabel: "לא נמצאו שיטות אימון",
+  };
+};
+
+const TemplateAddButton = ({
+  testId,
+  label,
+  onClick,
+}: {
+  testId: string;
+  label: string;
+  onClick: () => void;
+}) => (
+  <button
+    type="button"
+    data-testid={testId}
+    onClick={onClick}
+    className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-sm transition-all hover:bg-blue-700 hover:shadow"
+  >
+    <FaPlus size={11} />
+    {label}
+  </button>
+);
 
 const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
   const navigate = useNavigate();
@@ -38,15 +86,12 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
   const { getAllExerciseMethods } = useExerciseMethodApi();
   const { getAllCardioWrkouts } = useCardioWorkoutApi();
 
+  const [activeTab, setActiveTab] = useState<string>(tabs.tabHeaders[0].value);
   const [selectedForm, setSelectedForm] = useState<string | undefined>();
   const [selectedObjectId, setSelectedObjectId] = useState<string>();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [queryKey, setQueryKey] = useState<string>(tabs.tabHeaders[0].queryKey);
-  const createTemplateTabsTestId = (value?: string) =>
-    (value ?? "tab")
-      .replace(/[^a-z0-9]+/gi, "-")
-      .replace(/^-|-$/g, "")
-      .toLowerCase();
+
   const getTabQueryKey = (tabValue: string) =>
     tabs.tabHeaders.find((tabHeader) => tabHeader.value === tabValue)?.queryKey ?? tabValue;
 
@@ -82,13 +127,6 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
     deleteFunc: UseMutationResult<unknown, Error, string, unknown>
   ) => {
     deleteFunc.mutate(id);
-    if (deleteFunc.isError) {
-      toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-        description: deleteFunc.error.message,
-      });
-      return;
-    }
-    toast.success(`פריט נמחק בהצלחה!`);
   };
 
   const startEdit = (id: string, formToUse: string) => {
@@ -121,75 +159,107 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
 
   useEffect(() => {
     if (!selectedObjectId) return;
-
     setIsSheetOpen(true);
   }, [selectedObjectId]);
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    setQueryKey(getTabQueryKey(value));
+  };
 
   if (apiData.isError && apiData?.error?.status !== 404)
     return <ErrorPage message={apiData.error.message} />;
 
+  const activeContent = tabs.tabContent.find((t) => t.value === activeTab);
+
+  const renderActiveContent = () => {
+    if (!activeContent) return null;
+
+    const actionButton = (
+      <TemplateAddButton
+        testId={`template-add-${createTemplateTabsTestId(activeContent.value)}`}
+        label={activeContent.btnPrompt}
+        onClick={() => handleAddNew(activeContent.sheetForm)}
+      />
+    );
+
+    if (activeTab === "WorkoutPlans") {
+      return (
+        <WorkoutPresetGrid
+          data={(apiData.data?.data as (IWorkoutPlanPreset & { _id?: string })[]) || []}
+          onOpen={(id) => startEdit(id, activeContent.sheetForm)}
+          onDelete={(id) => deleteItem(id, activeContent.deleteFunc)}
+          onAddNew={() => handleAddNew(activeContent.sheetForm)}
+          addLabel={activeContent.btnPrompt}
+        />
+      );
+    }
+
+    if (activeTab === "dietPlanPresets") {
+      return (
+        <DietPlanPresetGrid
+          data={(apiData.data?.data as (IDietPlanPreset & { _id?: string })[]) || []}
+          onOpen={(id) => startEdit(id, activeContent.sheetForm)}
+          onDelete={(id) => deleteItem(id, activeContent.deleteFunc)}
+          onAddNew={() => handleAddNew(activeContent.sheetForm)}
+          addLabel={activeContent.btnPrompt}
+        />
+      );
+    }
+
+    if (activeTab === "exercises") {
+      return (
+        <ExercisePresetGrid
+          data={(apiData.data?.data as IExercisePresetItem[]) || []}
+          onView={(id) => startEdit(id, activeContent.sheetForm)}
+          onDelete={(id) => deleteItem(id, activeContent.deleteFunc)}
+          actionButton={actionButton}
+        />
+      );
+    }
+
+    const simpleGridCopy = getSimpleGridCopy(activeTab);
+
+    return (
+      <SimplePresetGrid
+        data={apiData.data?.data || []}
+        variant={simpleGridCopy.variant}
+        onView={(id) => startEdit(id, activeContent.sheetForm)}
+        onDelete={(id) => deleteItem(id, activeContent.deleteFunc)}
+        searchPlaceholder={simpleGridCopy.searchPlaceholder}
+        emptyLabel={simpleGridCopy.emptyLabel}
+        actionButton={actionButton}
+      />
+    );
+  };
+
   return (
     <>
-      <div data-testid="template-tabs">
-        <Tabs defaultValue={tabs.tabHeaders[0].value} dir="rtl">
-          <TabsList>
-            {tabs.tabHeaders.map((tab) => (
-              <TabsTrigger
+      <div data-testid="template-tabs" dir="rtl" className="flex flex-col gap-4 font-heebo">
+        <div className="inline-flex w-fit items-center gap-1 rounded-2xl border border-blue-100/60 dark:border-blue-900/40 bg-white dark:bg-slate-900 p-1 shadow-sm">
+          {tabs.tabHeaders.map((tab) => {
+            const active = activeTab === tab.value;
+            return (
+              <button
                 key={tab.value}
-                value={tab.value}
+                type="button"
                 data-testid={`template-tab-${createTemplateTabsTestId(tab.queryKey)}`}
-                onClick={() => setQueryKey(tab.queryKey)}
+                onClick={() => handleTabChange(tab.value)}
+                className={`rounded-xl px-4 py-2 text-sm font-bold transition-all duration-150 ${getTabButtonClassName(
+                  active
+                )}`}
               >
                 {tab.name}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          {apiData.isLoading && <TemplateTabsSkeleton />}
+              </button>
+            );
+          })}
+        </div>
 
-          {!apiData.isLoading &&
-            tabs.tabContent.map((tab) => {
-              const tableTestIdPrefix = createTemplateTabsTestId(getTabQueryKey(tab.value));
+        {apiData.isLoading && <TemplateTabsSkeleton />}
 
-              return (
-                <TabsContent key={tab.value} value={tab.value}>
-                  {tab.value === `exercises` ? (
-                    <ExercisePresetsTable
-                      data={(apiData.data?.data as IExercisePresetItem[]) || []}
-                      onView={(id) => startEdit(id, tab.sheetForm)}
-                      onDelete={(id) => deleteItem(id, tab.deleteFunc)}
-                      actionButton={
-                        <Button
-                          data-testid={`template-add-${createTemplateTabsTestId(tab.value)}`}
-                          onClick={() => handleAddNew(tab.sheetForm)}
-                          className="h-9 px-4"
-                        >
-                          {tab.btnPrompt}
-                        </Button>
-                      }
-                    />
-                  ) : (
-                    <>
-                      <Button
-                        data-testid={`template-add-${createTemplateTabsTestId(tab.value)}`}
-                        onClick={() => handleAddNew(tab.sheetForm)}
-                        className="my-4 h-9 px-4"
-                      >
-                        {tab.btnPrompt}
-                      </Button>
-
-                      <PresetTable
-                        data={apiData.data?.data || []}
-                        testIdPrefix={tableTestIdPrefix}
-                        handleDelete={(id) => deleteItem(id, tab.deleteFunc)}
-                        handleViewData={(id: string) => startEdit(id, tab.sheetForm)}
-                      />
-                    </>
-                  )}
-                </TabsContent>
-              );
-            })}
-        </Tabs>
+        {!apiData.isLoading && activeContent && <div>{renderActiveContent()}</div>}
       </div>
+
       <PresetSheet
         isOpen={isSheetOpen}
         onCloseSheet={onCloseSheet}

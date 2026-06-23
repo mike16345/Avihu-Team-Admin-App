@@ -4,7 +4,7 @@ import { IBlogResponse } from "@/interfaces/IBlog";
 import { useNavigate } from "react-router-dom";
 import Loader from "../ui/Loader";
 import ErrorPage from "@/pages/ErrorPage";
-import CustomButton from "../ui/CustomButton";
+import { FaNewspaper } from "react-icons/fa6";
 
 interface BlogListProps {
   blogs: IBlogResponse[];
@@ -15,6 +15,11 @@ interface BlogListProps {
   fetchNextPage?: () => void | Promise<unknown>;
   isFetchingNextPage?: boolean;
 }
+
+const getLoadMoreLabel = (isFetchingNextPage: boolean | undefined) => {
+  if (isFetchingNextPage) return "טוען…";
+  return "טען עוד מאמרים";
+};
 
 const BlogList: React.FC<BlogListProps> = ({
   blogs,
@@ -37,21 +42,42 @@ const BlogList: React.FC<BlogListProps> = ({
     return <ErrorPage message={message} />;
   }
 
+  if (blogs.length === 0) {
+    return (
+      <div
+        dir="rtl"
+        className="mt-6 flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-20 text-center font-heebo dark:border-slate-800 dark:bg-slate-800/40"
+      >
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm dark:bg-slate-900">
+          <FaNewspaper size={28} className="text-slate-300 dark:text-slate-600" />
+        </div>
+        <h3 className="text-base font-bold text-slate-700 dark:text-slate-200">אין מאמרים עדיין</h3>
+        <p className="max-w-sm text-sm text-slate-500 dark:text-slate-400">
+          לחץ על "מאמר חדש" כדי להוסיף את המאמר הראשון שלך לאפליקציה.
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4">
+    <div
+      dir="rtl"
+      className="grid grid-cols-1 gap-5 font-heebo sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+    >
       {blogs.map((blog) => (
         <BlogCard key={blog._id} blog={blog} onClick={() => handleBlogClick(blog)} />
       ))}
-      {blogs.length == 0 && (
-        <div className="col-span-full text-center text-xl">אין מאמרים כרגע</div>
-      )}
       {hasNextPage && fetchNextPage && (
-        <CustomButton
-          title="הצג עוד"
-          isLoading={isFetchingNextPage}
-          onClick={() => fetchNextPage()}
-          className="col-span-full mt-4 py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600"
-        />
+        <div className="col-span-full mt-2 flex justify-center">
+          <button
+            type="button"
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition-all hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50/40 dark:hover:bg-blue-950/30 hover:text-blue-700 dark:hover:text-blue-300 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {getLoadMoreLabel(isFetchingNextPage)}
+          </button>
+        </div>
       )}
     </div>
   );

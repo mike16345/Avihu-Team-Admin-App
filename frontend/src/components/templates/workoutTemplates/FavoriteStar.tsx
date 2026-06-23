@@ -1,0 +1,62 @@
+import React from "react";
+import { FaStar, FaRegStar } from "react-icons/fa6";
+import { useFavoriteWorkoutPresets } from "@/hooks/useFavoriteWorkoutPresets";
+
+interface FavoriteStarProps {
+  presetId?: string;
+  size?: number;
+  buttonSize?: "sm" | "md";
+}
+
+const getButtonSizeClassName = (buttonSize: "sm" | "md") => {
+  if (buttonSize === "sm") return "h-7 w-7";
+  return "h-8 w-8";
+};
+
+const getFavoriteLabel = (active: boolean) => {
+  if (active) return "הסר ממועדפים";
+  return "הוסף למועדפים";
+};
+
+const getFavoriteButtonClassName = (active: boolean) => {
+  if (active) {
+    return "bg-amber-50 text-amber-500 hover:bg-amber-100 dark:bg-amber-950/40 dark:text-amber-300";
+  }
+
+  return "bg-transparent text-slate-300 hover:bg-slate-100 hover:text-amber-400 dark:text-slate-600 dark:hover:bg-slate-800";
+};
+
+const getFavoriteIcon = (active: boolean) => {
+  if (active) return FaStar;
+  return FaRegStar;
+};
+
+const FavoriteStar: React.FC<FavoriteStarProps> = ({ presetId, size = 13, buttonSize = "md" }) => {
+  const { isFavorite, toggle, canToggle, isPending } = useFavoriteWorkoutPresets();
+  const active = isFavorite(presetId);
+  const label = getFavoriteLabel(active);
+  const StarIcon = getFavoriteIcon(active);
+
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        toggle(presetId);
+      }}
+      disabled={!canToggle || isPending}
+      aria-pressed={active}
+      aria-label={label}
+      title={label}
+      className={`${getButtonSizeClassName(
+        buttonSize
+      )} flex shrink-0 items-center justify-center rounded-lg transition-all disabled:cursor-not-allowed disabled:opacity-50 ${getFavoriteButtonClassName(
+        active
+      )}`}
+    >
+      <StarIcon size={size} />
+    </button>
+  );
+};
+
+export default FavoriteStar;

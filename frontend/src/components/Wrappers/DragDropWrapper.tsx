@@ -37,7 +37,8 @@ const strategyToFunc = (strategy: SortingStrategyTypes) => {
 
 interface DragDropWrapperProps<T extends Record<string, any>> {
   items: T[];
-  setItems: (items: T[]) => void;
+  setItems?: (items: T[]) => void;
+  onMove?: (oldIndex: number, newIndex: number) => void;
   idKey: keyof T;
   strategy?: SortingStrategyTypes;
   children: (props: { item: T; index: number }) => React.ReactNode;
@@ -46,6 +47,7 @@ interface DragDropWrapperProps<T extends Record<string, any>> {
 export function DragDropWrapper<T extends Record<string, any>>({
   items,
   setItems,
+  onMove,
   idKey,
   children,
   strategy = "rectSorting",
@@ -68,8 +70,16 @@ export function DragDropWrapper<T extends Record<string, any>>({
 
     const oldIndex = items.findIndex((item) => item[idKey] === active.id);
     const newIndex = items.findIndex((item) => item[idKey] === over.id);
-    
-    setItems(arrayMove(items, oldIndex, newIndex));
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    if (onMove) {
+      onMove(oldIndex, newIndex);
+      return;
+    }
+
+    if (setItems) {
+      setItems(arrayMove(items, oldIndex, newIndex));
+    }
   };
 
   return (
@@ -78,7 +88,11 @@ export function DragDropWrapper<T extends Record<string, any>>({
         strategy={strategyToFunc(strategy)}
         items={items.map((item) => item[idKey] as UniqueIdentifier)}
       >
-        {items.map((item, index) => children({ item, index }))}
+        {items.map((item, index) => (
+          <React.Fragment key={String((item[idKey] as UniqueIdentifier) ?? index)}>
+            {children({ item, index })}
+          </React.Fragment>
+        ))}
       </SortableContext>
     </DndContext>
   );

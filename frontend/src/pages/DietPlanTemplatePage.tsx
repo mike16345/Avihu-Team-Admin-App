@@ -1,124 +1,154 @@
+import { QueryClient, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import TemplateTabs from "@/components/templates/TemplateTabs";
+import DietPlanTemplatesHeader from "@/components/templates/dietTemplates/DietPlanTemplatesHeader";
+import { QueryKeys } from "@/enums/QueryKeys";
+import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { useDietPlanPresetApi } from "@/hooks/api/useDietPlanPresetsApi";
 import useMenuItemApi from "@/hooks/api/useMenuItemApi";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ITabs } from "@/interfaces/interfaces";
-import { QueryKeys } from "@/enums/QueryKeys";
+
+type DeleteMutation = ITabs["tabContent"][number]["deleteFunc"];
+type DeleteMenuItem = ReturnType<typeof useMenuItemApi>["deleteMenuItem"];
+
+const MENU_ITEM_QUERY_KEYS = {
+  protein: "protein",
+  carbs: "carbs",
+  vegetables: "vegetables",
+  fats: "fats",
+} as const;
+
+const invalidateMenuItemQueries = (queryClient: QueryClient, queryKey: string) => {
+  queryClient.invalidateQueries({ queryKey: [queryKey] });
+  queryClient.invalidateQueries({ queryKey: [QueryKeys.MENU_ITEMS] });
+};
+
+const createDeleteMenuItemOptions = (
+  deleteMenuItem: DeleteMenuItem,
+  queryClient: QueryClient,
+  queryKey: string
+) => ({
+  mutationFn: deleteMenuItem,
+  onSuccess: () => {
+    invalidateMenuItemQueries(queryClient, queryKey);
+    toast.success("פריט נמחק בהצלחה!");
+  },
+  onError: () => {
+    toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE);
+  },
+});
+
+const getDietPlanTabs = (deleteMutations: {
+  deleteDietPlan: DeleteMutation;
+  deleteProteins: DeleteMutation;
+  deleteCarbs: DeleteMutation;
+  deleteVegetables: DeleteMutation;
+  deleteFats: DeleteMutation;
+}): ITabs => ({
+  tabHeaders: [
+    {
+      name: "תפריטים",
+      value: "dietPlanPresets",
+      queryKey: QueryKeys.DIET_PLAN_PRESETS,
+    },
+    {
+      name: "חלבונים",
+      value: "proteinItems",
+      queryKey: MENU_ITEM_QUERY_KEYS.protein,
+    },
+    {
+      name: "פחמימות",
+      value: "carbItems",
+      queryKey: MENU_ITEM_QUERY_KEYS.carbs,
+    },
+    {
+      name: "ירקות",
+      value: "vegetableItems",
+      queryKey: MENU_ITEM_QUERY_KEYS.vegetables,
+    },
+    {
+      name: "שומנים",
+      value: "fatsItems",
+      queryKey: MENU_ITEM_QUERY_KEYS.fats,
+    },
+  ],
+  tabContent: [
+    {
+      value: "dietPlanPresets",
+      btnPrompt: "הוסף תפריט",
+      sheetForm: "dietPlans",
+      deleteFunc: deleteMutations.deleteDietPlan,
+    },
+    {
+      value: "proteinItems",
+      btnPrompt: "הוסף חלבון",
+      sheetForm: "protein",
+      deleteFunc: deleteMutations.deleteProteins,
+    },
+    {
+      value: "carbItems",
+      btnPrompt: "הוסף פחמימה",
+      sheetForm: "carbs",
+      deleteFunc: deleteMutations.deleteCarbs,
+    },
+    {
+      value: "vegetableItems",
+      btnPrompt: "הוסף ירקות",
+      sheetForm: "vegetables",
+      deleteFunc: deleteMutations.deleteVegetables,
+    },
+    {
+      value: "fatsItems",
+      btnPrompt: "הוסף שומנים",
+      sheetForm: "fats",
+      deleteFunc: deleteMutations.deleteFats,
+    },
+  ],
+});
 
 const DietPlanTemplatePage = () => {
   const { deleteMenuItem } = useMenuItemApi();
   const { deleteDietPlanPreset } = useDietPlanPresetApi();
-
   const queryClient = useQueryClient();
-
-  const onDeleteMenuItemSuccess = () => {
-    queryClient.invalidateQueries({ queryKey: [QueryKeys.MENU_ITEMS] });
-  };
 
   const deleteDietPlan = useMutation({
     mutationFn: deleteDietPlanPreset,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QueryKeys.DIET_PLAN_PRESETS] });
+      toast.success("תפריט נמחק בהצלחה!");
+    },
+    onError: () => {
+      toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE);
     },
   });
+  const deleteCarbs = useMutation(
+    createDeleteMenuItemOptions(deleteMenuItem, queryClient, MENU_ITEM_QUERY_KEYS.carbs)
+  );
+  const deleteFats = useMutation(
+    createDeleteMenuItemOptions(deleteMenuItem, queryClient, MENU_ITEM_QUERY_KEYS.fats)
+  );
+  const deleteVegetables = useMutation(
+    createDeleteMenuItemOptions(deleteMenuItem, queryClient, MENU_ITEM_QUERY_KEYS.vegetables)
+  );
+  const deleteProteins = useMutation(
+    createDeleteMenuItemOptions(deleteMenuItem, queryClient, MENU_ITEM_QUERY_KEYS.protein)
+  );
 
-  const deleteCarbs = useMutation({
-    mutationFn: deleteMenuItem,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`carbs`] });
-      onDeleteMenuItemSuccess();
-    },
+  const tabs = getDietPlanTabs({
+    deleteDietPlan,
+    deleteProteins,
+    deleteCarbs,
+    deleteVegetables,
+    deleteFats,
   });
-
-  const deleteFats = useMutation({
-    mutationFn: deleteMenuItem,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`fats`] });
-      onDeleteMenuItemSuccess();
-    },
-  });
-
-  const deleteVegetables = useMutation({
-    mutationFn: deleteMenuItem,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`vegetables`] });
-      onDeleteMenuItemSuccess();
-    },
-  });
-
-  const deleteProteins = useMutation({
-    mutationFn: deleteMenuItem,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`protein`] });
-      onDeleteMenuItemSuccess();
-    },
-  });
-
-  const tabs: ITabs = {
-    tabHeaders: [
-      {
-        name: `תפריטים`,
-        value: `dietPlanPresets`,
-        queryKey: QueryKeys.DIET_PLAN_PRESETS,
-      },
-      {
-        name: `חלבונים`,
-        value: `proteinItems`,
-        queryKey: `protein`,
-      },
-      {
-        name: `פחמימות`,
-        value: `carbItems`,
-        queryKey: `carbs`,
-      },
-      {
-        name: `ירקות`,
-        value: `vegetableItems`,
-        queryKey: `vegetables`,
-      },
-      {
-        name: `שומנים`,
-        value: `fatsItems`,
-        queryKey: `fats`,
-      },
-    ],
-    tabContent: [
-      {
-        value: `dietPlanPresets`,
-        btnPrompt: `הוסף תפריט`,
-        sheetForm: `dietPlans`,
-        deleteFunc: deleteDietPlan,
-      },
-      {
-        value: `proteinItems`,
-        btnPrompt: `הוסף חלבון`,
-        sheetForm: `protein`,
-        deleteFunc: deleteProteins,
-      },
-      {
-        value: `carbItems`,
-        btnPrompt: `הוסף פחמימה`,
-        sheetForm: `carbs`,
-        deleteFunc: deleteCarbs,
-      },
-      {
-        value: `vegetableItems`,
-        btnPrompt: `הוסף ירקות`,
-        sheetForm: `vegetables`,
-        deleteFunc: deleteVegetables,
-      },
-      {
-        value: `fatsItems`,
-        btnPrompt: `הוסף שומנים`,
-        sheetForm: `fats`,
-        deleteFunc: deleteFats,
-      },
-    ],
-  };
 
   return (
-    <div data-testid="diet-plan-templates-page" className="flex flex-col gap-3">
-      <h1 className="text-2xl sm:text-right text-center">תפריטים</h1>
+    <div
+      data-testid="diet-plan-templates-page"
+      dir="rtl"
+      className="flex flex-col gap-5 px-1 font-heebo"
+    >
+      <DietPlanTemplatesHeader />
       <TemplateTabs tabs={tabs} />
     </div>
   );

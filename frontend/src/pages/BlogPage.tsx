@@ -1,12 +1,48 @@
 import BlogList from "@/components/Blog/BlogList";
-import { Button } from "@/components/ui/button";
 import Loader from "@/components/ui/Loader";
-import FilterItems from "@/components/ui/FilterItems";
 import useBlogsQuery from "@/hooks/queries/blogs/useBlogsQuery";
 import useLessonGroupsQuery from "@/hooks/queries/lessonGroups/useLessonGroupsQuery";
-import { ILessonGroup } from "@/interfaces/IBlog";
+import { IBlogResponse, ILessonGroup } from "@/interfaces/IBlog";
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import LessonGroupsSheet from "@/components/Blog/LessonGroupsSheet";
+import BlogPageHeader from "@/components/Blog/BlogPageHeader";
+import BlogFilterToolbar from "@/components/Blog/BlogFilterToolbar";
+import BlogGroupFilterChips from "@/components/Blog/BlogGroupFilterChips";
+
+const getFilteredBlogs = (
+  blogs: IBlogResponse[],
+  selectedGroups: ILessonGroup[],
+  query: string
+) => {
+  let nextBlogs = blogs;
+
+  if (selectedGroups.length > 0) {
+    const selectedNames = new Set(selectedGroups.map((group) => group.name));
+    nextBlogs = nextBlogs.filter((blog) => blog.group && selectedNames.has(blog.group.name));
+  }
+
+  if (query.trim()) {
+    const normalizedQuery = query.trim().toLowerCase();
+    nextBlogs = nextBlogs.filter(
+      (blog) =>
+        blog.title?.toLowerCase().includes(normalizedQuery) ||
+        blog.subtitle?.toLowerCase().includes(normalizedQuery) ||
+        blog.content?.toLowerCase().includes(normalizedQuery)
+    );
+  }
+
+  return nextBlogs;
+};
+
+const getNextSelectedGroups = (selectedGroups: ILessonGroup[], group: ILessonGroup) => {
+  const isSelected = selectedGroups.some((selectedGroup) => selectedGroup.name === group.name);
+  if (isSelected) {
+    return selectedGroups.filter((selectedGroup) => selectedGroup.name !== group.name);
+  }
+
+  return [...selectedGroups, group];
+};
 
 const BlogPage = () => {
   const navigate = useNavigate();
@@ -23,47 +59,55 @@ const BlogPage = () => {
   const { data: lessonGroups } = useLessonGroupsQuery();
 
   const [selectedGroups, setSelectedGroups] = useState<ILessonGroup[]>([]);
+  const [query, setQuery] = useState("");
+  const [groupsSheetOpen, setGroupsSheetOpen] = useState(false);
 
   const handleCreateNewBlog = () => navigate("/blogs/create");
-  const handleViewBlogGroups = () => navigate("/presets/blogs/groups");
 
-  const allBlogs = useMemo(() => {
-    return blogPages?.pages.flatMap((page) => page.results) ?? [];
-  }, [blogPages]);
+  const allBlogs = useMemo(
+    () => blogPages?.pages.flatMap((page) => page.results) ?? [],
+    [blogPages]
+  );
 
-  const blogs = useMemo(() => {
-    if (selectedGroups.length === 0) return allBlogs;
+  const blogs = useMemo(
+    () => getFilteredBlogs(allBlogs, selectedGroups, query),
+    [selectedGroups, allBlogs, query]
+  );
 
-    const selectedGroupIds = new Set(selectedGroups.map((group) => group.name));
+  const toggleGroup = (group: ILessonGroup) => {
+    setSelectedGroups((prev) => getNextSelectedGroups(prev, group));
+  };
 
-    return allBlogs.filter((blog) => blog.group && selectedGroupIds.has(blog.group?.name));
-  }, [selectedGroups, allBlogs]);
+  const clearFilters = () => {
+    setQuery("");
+    setSelectedGroups([]);
+  };
 
   if (isLoading) return <Loader />;
 
+  const groups = lessonGroups?.data || [];
+  const hasFilter = selectedGroups.length > 0 || query.trim().length > 0;
+
   return (
-    <div data-testid="blogs-page">
-      <div className="flex items-center sm:justify-start justify-center p-4">
-        <div className="w-full flex flex-col gap-3 sm:flex-row sm:items-center justify-between">
-          <Button onClick={handleCreateNewBlog} className="w-full sm:w-32">
-            צור מאמר חדש
-          </Button>
+    <div data-testid="blogs-page" dir="rtl" className="flex flex-col gap-6 font-heebo">
+      <BlogPageHeader onCreate={handleCreateNewBlog} />
 
-          <div className="flex items-center gap-3">
-            <Button variant="outline" onClick={handleViewBlogGroups} className="w-full sm:w-32">
-              קבוצות
-            </Button>
+      <BlogFilterToolbar
+        filteredCount={blogs.length}
+        totalCount={allBlogs.length}
+        hasFilter={hasFilter}
+        query={query}
+        onQueryChange={setQuery}
+        onClearFilters={clearFilters}
+      />
 
-            <FilterItems<ILessonGroup>
-              items={lessonGroups?.data || []}
-              nameKey="name"
-              selectedItems={selectedGroups}
-              onChange={setSelectedGroups}
-              placeholder="סנן לפי קבוצות"
-            />
-          </div>
-        </div>
-      </div>
+      <BlogGroupFilterChips
+        groups={groups}
+        selectedGroups={selectedGroups}
+        onToggleGroup={toggleGroup}
+        onOpenGroups={() => setGroupsSheetOpen(true)}
+      />
+
       <BlogList
         blogs={blogs}
         hasNextPage={hasNextPage}
@@ -73,6 +117,8 @@ const BlogPage = () => {
         isError={isError}
         error={error}
       />
+
+      <LessonGroupsSheet open={groupsSheetOpen} onClose={() => setGroupsSheetOpen(false)} />
     </div>
   );
 };

@@ -17,7 +17,6 @@ import DietaryTypeSelector from "../templates/dietTemplates/DietaryTypeSelector"
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { IMenuItem, IServingItem } from "@/interfaces/IDietPlan";
-import CustomButton from "../ui/CustomButton";
 import { FULL_DAY_STALE_TIME } from "@/constants/constants";
 import MenuItemFormSkeleton from "../ui/skeletons/MenuItemFormSkeleton";
 import { menuItemSchema } from "@/schemas/menuItemSchema";
@@ -241,13 +240,13 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
           saveSelected={(selectedItems) => setDietaryTypes(selectedItems)}
           existingItems={dietaryTypes}
         />
-        <CustomButton
-          title="שמור"
+        <button
           type="submit"
-          variant={"success"}
-          className="w-full h-auto"
-          isLoading={addNewMenuItem.isPending || updateMenuItem.isPending}
-        />
+          disabled={addNewMenuItem.isPending || updateMenuItem.isPending}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl brand-gradient brand-gradient-hover px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-blue-500/25 transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+        >
+          {addNewMenuItem.isPending || updateMenuItem.isPending ? "שומר…" : "שמור"}
+        </button>
       </form>
     </Form>
   );

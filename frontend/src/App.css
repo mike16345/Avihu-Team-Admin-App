@@ -103,12 +103,31 @@ body {
     1px 1px 0 #000 !important;
 }
 
+/* Assistant is the global Hebrew font — more mature and professional
+   than Rubik (which leaned playful/rounded). Heebo stays as a fallback.
+   Forced with !important so any leftover inline styles or third-party
+   defaults don't sneak through. */
 * :not(.icon) {
-  font-family: "Google Sans" !important;
+  font-family: "Assistant", "Heebo", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Hebrew", Arial, sans-serif !important;
 }
 
 * {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+/* Elevate Coach brand gradient — used on primary CTAs and accent
+   strips. Matches the spec: linear-gradient(90deg, #0A3DCC, #1565FF). */
+.brand-gradient {
+  background-image: linear-gradient(90deg, #0a3dcc 0%, #1565ff 100%);
+}
+.brand-gradient-hover:hover {
+  background-image: linear-gradient(90deg, #082e99 0%, #0a3dcc 100%);
+}
+/* Soft glow used on primary action shadows. */
+.brand-glow {
+  box-shadow:
+    0 10px 25px -5px rgba(21, 101, 255, 0.35),
+    0 8px 10px -6px rgba(10, 61, 204, 0.25);
 }
 
 .text-shadow {
