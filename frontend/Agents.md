@@ -195,3 +195,7 @@ Do not split components only for the sake of splitting. Extract a child componen
 - If you introduce a new reusable pattern, apply it consistently within the touched feature and then update `Agents.md` once the pattern is repeated broadly enough to count as repository guidance.
 - When a route-level task requires touching shared files, keep the shared-file edits limited to the behavior needed by that route and avoid opportunistic broad refactors. Record or explain the reason for touching shared files in the relevant task summary or tracker.
 - Claude, Codex, and any other coding agent must read `Agents.md` before changing code. If a separate agent-specific file exists, such as `Claude.md`, it must defer to `Agents.md` rather than replacing it.
+
+
+## 12. FOR CLAUDE
+- STOP PUTTING COMMENTS ON EVERYTHING YOU DO!
