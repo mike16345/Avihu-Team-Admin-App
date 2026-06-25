@@ -19,7 +19,7 @@ function App() {
       {authed && <AppSidebar />}
       <div
         ref={mainScrollRef}
-        className="flex-1 min-w-0 h-full overflow-y-auto px-20 py-14 custom-scrollbar"
+        className="flex-1 min-w-0 h-full overflow-y-auto bg-slate-100/70 px-20 py-14 custom-scrollbar dark:bg-slate-950/60"
       >
         <RequireAuth>
           <AppRoutes />

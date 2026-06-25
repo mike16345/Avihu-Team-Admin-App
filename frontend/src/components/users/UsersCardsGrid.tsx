@@ -1,5 +1,7 @@
+import { forwardRef } from "react";
 import { IUser } from "@/interfaces/IUser";
 import DateUtils from "@/lib/dateUtils";
+import ScrollableArea from "@/components/ui/ScrollableArea";
 import { MINIMUM_WARNING_DAYS } from "./usersPageConstants";
 import {
   getUserDaysLeft,
@@ -25,17 +27,19 @@ const getCardClassName = (isExpiringSoon: boolean) => {
   return `${baseClassName} border-slate-200/80 dark:border-slate-800/80 hover:border-blue-300`;
 };
 
-const UsersCardsGrid = ({ users, onViewUser }: UsersCardsGridProps) => {
-  return (
-    <div className="max-h-[calc(100vh-360px)] overflow-y-auto p-2 -me-2 [scrollbar-color:rgba(148,163,184,0.3)_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-slate-400/30 [&::-webkit-scrollbar-thumb:hover]:bg-slate-400/50 [&::-webkit-scrollbar-track]:bg-transparent">
+const UsersCardsGrid = forwardRef<HTMLDivElement, UsersCardsGridProps>(
+  ({ users, onViewUser }, ref) => (
+    <ScrollableArea ref={ref}>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {users.map((user) => (
           <UserCard key={user._id} user={user} onView={() => onViewUser(user)} />
         ))}
       </div>
-    </div>
-  );
-};
+    </ScrollableArea>
+  ),
+);
+
+UsersCardsGrid.displayName = "UsersCardsGrid";
 
 function UserCard({ user, onView }: { user: IUser; onView: () => void }) {
   const initials = getUserInitials(user);

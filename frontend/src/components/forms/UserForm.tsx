@@ -9,7 +9,7 @@ import type { UserFormErrors, UserFormProps, UserFormValues } from "./userForm/t
 
 export type { UserFormErrors, UserFormValues };
 
-const getBackLabel = (isEdit: boolean) => (isEdit ? "חזרה" : "חזרה לבית");
+const getBackLabel = (isEdit: boolean) => (isEdit ? "חזרה" : "חזרה למתאמנים");
 
 const getFormModeLabel = (isEdit: boolean) => (isEdit ? "עריכת מתאמן" : "מתאמן חדש");
 
@@ -31,6 +31,7 @@ const UserForm = ({
   onBack,
   onCancel,
   onDateFinishedChange,
+  onDateStartedChange,
   onDelete,
   onDietaryToggle,
   onEmailChange,
@@ -47,11 +48,17 @@ const UserForm = ({
     <div
       data-testid="user-form-page"
       dir="rtl"
-      className="mx-auto flex max-w-2xl flex-col gap-2.5 px-4 py-4 font-heebo"
+      // Bleed across the route container's padding (App.tsx uses
+      // px-20 py-14 on the main content column) so the slate
+      // background covers the full visible main area — sidebar
+      // stays untouched. The form card inside still centers via
+      // mx-auto relative to this main area.
+      className="-mx-20 -my-14 min-h-screen bg-slate-100/70 dark:bg-slate-950/60 font-heebo"
     >
-      <BackButton isEdit={isEdit} onBack={onBack} />
+      <div className="mx-auto flex max-w-2xl flex-col gap-2.5 px-4 py-6">
+        <BackButton isEdit={isEdit} onBack={onBack} />
 
-      <div className="relative rounded-2xl bg-gradient-to-bl from-blue-100/70 via-white to-indigo-100/70 dark:from-blue-950/40 dark:via-slate-900 dark:to-indigo-950/40 p-[1px] shadow-md shadow-blue-500/10">
+      <div className="relative rounded-2xl bg-gradient-to-bl from-blue-100/70 via-white to-indigo-100/70 dark:from-blue-950/40 dark:via-slate-900 dark:to-indigo-950/40 p-[1px] shadow-lg shadow-blue-500/10">
         <div className="rounded-[15px] bg-white dark:bg-slate-900">
           <UserFormHeader
             firstName={values.firstName}
@@ -75,12 +82,14 @@ const UserForm = ({
 
             <PlanAndCoachingSection
               dateFinished={values.dateFinished}
+              dateStarted={values.dateStarted}
               errors={errors}
               planType={values.planType}
               remindIn={values.remindIn}
               subTrainerId={values.subTrainerId}
               onApplyDatePreset={onApplyDatePreset}
               onDateFinishedChange={onDateFinishedChange}
+              onDateStartedChange={onDateStartedChange}
               onPlanTypeChange={onPlanTypeChange}
               onRemindInChange={onRemindInChange}
               onSubTrainerChange={onSubTrainerChange}
@@ -102,15 +111,16 @@ const UserForm = ({
         </div>
       </div>
 
-      {showDeleteConfirm && (
-        <DeleteConfirmDialog
-          firstName={values.firstName}
-          isPending={isDeletePending}
-          lastName={values.lastName}
-          onClose={() => onShowDeleteConfirmChange(false)}
-          onDelete={onDelete}
-        />
-      )}
+        {showDeleteConfirm && (
+          <DeleteConfirmDialog
+            firstName={values.firstName}
+            isPending={isDeletePending}
+            lastName={values.lastName}
+            onClose={() => onShowDeleteConfirmChange(false)}
+            onDelete={onDelete}
+          />
+        )}
+      </div>
     </div>
   );
 };

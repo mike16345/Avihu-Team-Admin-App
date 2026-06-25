@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useScrollRestoration } from "@/hooks/useScrollRestoration";
+import { useStableSearchParams } from "@/hooks/useStableSearchParams";
 import ExercisePresetGrid from "./workoutTemplates/ExercisePresetGrid";
 import SimplePresetGrid from "./workoutTemplates/SimplePresetGrid";
 import PresetSheet from "./PresetSheet";
@@ -10,6 +12,7 @@ import useMenuItemApi from "@/hooks/api/useMenuItemApi";
 import { useDietPlanPresetApi } from "@/hooks/api/useDietPlanPresetsApi";
 import { ApiResponse } from "@/types/types";
 import TemplateTabsSkeleton from "../ui/skeletons/TemplateTabsSkeleton";
+import ScrollableArea from "../ui/ScrollableArea";
 import ErrorPage from "@/pages/ErrorPage";
 import { useWorkoutPlanPresetApi } from "@/hooks/api/useWorkoutPlanPresetsApi";
 import useMuscleGroupsApi from "@/hooks/api/useMuscleGroupsApi";
@@ -86,11 +89,26 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
   const { getAllExerciseMethods } = useExerciseMethodApi();
   const { getAllCardioWrkouts } = useCardioWorkoutApi();
 
-  const [activeTab, setActiveTab] = useState<string>(tabs.tabHeaders[0].value);
+  const { searchParams, setParam } = useStableSearchParams();
+  const validTabValues = tabs.tabHeaders.map((header) => header.value);
+  const urlTab = searchParams.get("tab");
+  const initialTab =
+    urlTab && validTabValues.includes(urlTab) ? urlTab : tabs.tabHeaders[0].value;
+  const initialQueryKey =
+    tabs.tabHeaders.find((header) => header.value === initialTab)?.queryKey ??
+    tabs.tabHeaders[0].queryKey;
+
+  const [activeTab, setActiveTab] = useState<string>(initialTab);
   const [selectedForm, setSelectedForm] = useState<string | undefined>();
   const [selectedObjectId, setSelectedObjectId] = useState<string>();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [queryKey, setQueryKey] = useState<string>(tabs.tabHeaders[0].queryKey);
+  const [queryKey, setQueryKey] = useState<string>(initialQueryKey);
+
+  // Scroll-restoration target — the ScrollableArea wrapping the
+  // active tab content. When the trainer opens an editor and comes
+  // back, the gallery jumps to the exact position they left on.
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  useScrollRestoration(scrollRef);
 
   const getTabQueryKey = (tabValue: string) =>
     tabs.tabHeaders.find((tabHeader) => tabHeader.value === tabValue)?.queryKey ?? tabValue;
@@ -165,6 +183,9 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
   const handleTabChange = (value: string) => {
     setActiveTab(value);
     setQueryKey(getTabQueryKey(value));
+    // Persist the active tab so the back button (browser or
+    // in-editor) restores the same tab the trainer was on.
+    setParam("tab", value === tabs.tabHeaders[0].value ? null : value, { replace: true });
   };
 
   if (apiData.isError && apiData?.error?.status !== 404)
@@ -255,9 +276,11 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
           })}
         </div>
 
-        {apiData.isLoading && <TemplateTabsSkeleton />}
-
-        {!apiData.isLoading && activeContent && <div>{renderActiveContent()}</div>}
+        {activeContent && (
+          <ScrollableArea ref={scrollRef} className="max-h-[calc(100vh-240px)]">
+            {apiData.isLoading ? <TemplateTabsSkeleton /> : renderActiveContent()}
+          </ScrollableArea>
+        )}
       </div>
 
       <PresetSheet
