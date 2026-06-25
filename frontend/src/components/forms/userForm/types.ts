@@ -13,6 +13,10 @@ export type UserFormValues = {
 };
 
 export type UserFormErrors = Record<string, string>;
+export type UserOnChangeCallback = <Key extends keyof UserFormValues>(
+  key: Key,
+  value: UserFormValues[Key]
+) => void;
 
 export type UserFormProps = {
   errors: UserFormErrors;
@@ -22,19 +26,12 @@ export type UserFormProps = {
   isPending: boolean;
   showDeleteConfirm: boolean;
   values: UserFormValues;
+  onChange: UserOnChangeCallback;
   onApplyDatePreset: (days: number) => void;
   onBack: () => void;
   onCancel: () => void;
-  onDateFinishedChange: (value: string) => void;
   onDelete: () => void;
   onDietaryToggle: (item: string) => void;
-  onEmailChange: (value: string) => void;
-  onFirstNameChange: (value: string) => void;
-  onLastNameChange: (value: string) => void;
-  onPhoneChange: (value: string) => void;
-  onPlanTypeChange: (value: string) => void;
-  onRemindInChange: (value: number) => void;
   onShowDeleteConfirmChange: (value: boolean) => void;
   onSubmit: (ev: FormEvent<HTMLFormElement>) => void;
-  onSubTrainerChange: (value: string) => void;
 };
