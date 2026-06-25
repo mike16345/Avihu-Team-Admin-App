@@ -4,7 +4,7 @@ import UserPlanTypes from "@/enums/UserPlanTypes";
 import { DATE_PRESETS, DIETARY_OPTIONS, REMIND_IN_OPTIONS } from "./options";
 import { Field, SectionTitle, SelectInput, TrainerAssignmentField } from "./controls";
 import { inputCls } from "./styles";
-import type { UserFormErrors } from "./types";
+import type { UserFormErrors, UserOnChangeCallback } from "./types";
 
 const getDietaryOptionClassName = (selected: boolean) => {
   const baseClassName =
@@ -31,20 +31,14 @@ export const PersonalDetailsSection = ({
   firstName,
   lastName,
   phone,
-  onEmailChange,
-  onFirstNameChange,
-  onLastNameChange,
-  onPhoneChange,
+  onChange,
 }: {
   email: string;
   errors: UserFormErrors;
   firstName: string;
   lastName: string;
   phone: string;
-  onEmailChange: (value: string) => void;
-  onFirstNameChange: (value: string) => void;
-  onLastNameChange: (value: string) => void;
-  onPhoneChange: (value: string) => void;
+  onChange: UserOnChangeCallback;
 }) => (
   <div className="border-b border-slate-100 dark:border-slate-800 px-4 py-3">
     <SectionTitle icon={<FaUser size={11} className="text-blue-600" />} title="פרטים אישיים" />
@@ -55,7 +49,7 @@ export const PersonalDetailsSection = ({
           data-testid="user-form-first-name"
           type="text"
           value={firstName}
-          onChange={(e) => onFirstNameChange(e.target.value)}
+          onChange={(e) => onChange("firstName", e.target.value)}
           placeholder="שם פרטי..."
           className={inputCls(!!errors.firstName)}
         />
@@ -65,7 +59,7 @@ export const PersonalDetailsSection = ({
           data-testid="user-form-last-name"
           type="text"
           value={lastName}
-          onChange={(e) => onLastNameChange(e.target.value)}
+          onChange={(e) => onChange("lastName", e.target.value)}
           placeholder="שם משפחה..."
           className={inputCls(!!errors.lastName)}
         />
@@ -76,7 +70,7 @@ export const PersonalDetailsSection = ({
           type="tel"
           dir="ltr"
           value={phone}
-          onChange={(e) => onPhoneChange(e.target.value)}
+          onChange={(e) => onChange("phone", e.target.value)}
           placeholder="0501234567"
           className={inputCls(!!errors.phone) + " text-center"}
         />
@@ -87,7 +81,7 @@ export const PersonalDetailsSection = ({
           type="email"
           dir="ltr"
           value={email}
-          onChange={(e) => onEmailChange(e.target.value)}
+          onChange={(e) => onChange("email", e.target.value)}
           placeholder="israel@example.com"
           className={inputCls(!!errors.email) + " text-center"}
         />
@@ -102,22 +96,16 @@ export const PlanAndCoachingSection = ({
   planType,
   remindIn,
   subTrainerId,
+  onChange,
   onApplyDatePreset,
-  onDateFinishedChange,
-  onPlanTypeChange,
-  onRemindInChange,
-  onSubTrainerChange,
 }: {
+  onChange: UserOnChangeCallback;
   dateFinished: string;
   errors: UserFormErrors;
   planType: string;
   remindIn: number;
   subTrainerId: string;
   onApplyDatePreset: (days: number) => void;
-  onDateFinishedChange: (value: string) => void;
-  onPlanTypeChange: (value: string) => void;
-  onRemindInChange: (value: number) => void;
-  onSubTrainerChange: (value: string) => void;
 }) => (
   <div className="border-b border-slate-100 dark:border-slate-800 px-4 py-3">
     <SectionTitle
@@ -129,7 +117,7 @@ export const PlanAndCoachingSection = ({
       <Field label="סוג תוכנית" error={errors.planType} required>
         <SelectInput
           value={planType}
-          onChange={onPlanTypeChange}
+          onChange={(value) => onChange("planType", value)}
           placeholder="בחר סוג תוכנית"
           error={!!errors.planType}
           testId="user-form-plan-type"
@@ -142,7 +130,7 @@ export const PlanAndCoachingSection = ({
       <Field label="בדיקה תקופתית">
         <SelectInput
           value={String(remindIn)}
-          onChange={(value) => onRemindInChange(Number(value))}
+          onChange={(value) => onChange("remindIn", Number(value))}
           placeholder="כל כמה זמן..."
           testId="user-form-remind-in"
           options={REMIND_IN_OPTIONS.map((option) => ({
@@ -155,11 +143,14 @@ export const PlanAndCoachingSection = ({
         dateFinished={dateFinished}
         error={errors.dateFinished}
         onApplyDatePreset={onApplyDatePreset}
-        onDateFinishedChange={onDateFinishedChange}
+        onDateFinishedChange={(value) => onChange("dateFinished", value)}
       />
     </div>
 
-    <TrainerAssignmentField value={subTrainerId} onChange={onSubTrainerChange} />
+    <TrainerAssignmentField
+      value={subTrainerId}
+      onChange={(value) => onChange("subTrainerId", value)}
+    />
   </div>
 );
 

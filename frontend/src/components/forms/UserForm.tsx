@@ -30,18 +30,11 @@ const UserForm = ({
   onApplyDatePreset,
   onBack,
   onCancel,
-  onDateFinishedChange,
   onDelete,
   onDietaryToggle,
-  onEmailChange,
-  onFirstNameChange,
-  onLastNameChange,
-  onPhoneChange,
-  onPlanTypeChange,
-  onRemindInChange,
   onShowDeleteConfirmChange,
+  onChange,
   onSubmit,
-  onSubTrainerChange,
 }: UserFormProps) => {
   return (
     <div
@@ -67,23 +60,17 @@ const UserForm = ({
               firstName={values.firstName}
               lastName={values.lastName}
               phone={values.phone}
-              onEmailChange={onEmailChange}
-              onFirstNameChange={onFirstNameChange}
-              onLastNameChange={onLastNameChange}
-              onPhoneChange={onPhoneChange}
+              onChange={onChange}
             />
 
             <PlanAndCoachingSection
+              onChange={onChange}
               dateFinished={values.dateFinished}
               errors={errors}
               planType={values.planType}
               remindIn={values.remindIn}
               subTrainerId={values.subTrainerId}
               onApplyDatePreset={onApplyDatePreset}
-              onDateFinishedChange={onDateFinishedChange}
-              onPlanTypeChange={onPlanTypeChange}
-              onRemindInChange={onRemindInChange}
-              onSubTrainerChange={onSubTrainerChange}
             />
 
             <DietaryRestrictionsSection
