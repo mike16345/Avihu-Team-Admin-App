@@ -6,6 +6,7 @@ import StepsProgression from "@/components/UserDashboard/StepsTracking/StepsProg
 import { WeightProgression } from "@/components/UserDashboard/WeightProgression/WeightProgression";
 import { WeightProgressionPhotos } from "@/components/UserDashboard/WeightProgression/WeightProgressionPhotos";
 import { WorkoutProgression } from "@/components/UserDashboard/WorkoutProgression/WorkoutProgression";
+import DietPlanV2Editor from "@/components/DietPlanV2/DietPlanV2Editor";
 import SwapTemporaryPlanModal from "@/components/UserDashboard/WorkoutPlanHistory/SwapTemporaryPlanModal";
 import WorkoutPlanHistorySection from "@/components/UserDashboard/WorkoutPlanHistory/WorkoutPlanHistorySection";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -172,16 +173,72 @@ interface DietTabPanelProps {
   userId?: string;
 }
 
+type DietPlanVersion = "meals" | "options";
+
+/** Trainee profiles that may preview the v2 ("options") diet editor.
+ *  Temporary feature flag while the new design is being iterated on —
+ *  scoped tight to avoid affecting any other trainee. Replaced by the
+ *  per-trainer `dietPlanVersion` field on the Trainer entity once the
+ *  design lands. */
+const DIET_V2_PREVIEW_USER_IDS = new Set<string>(["6774eb1c730c4c44354db2d0"]);
+
 export function DietTabPanel({ userId }: DietTabPanelProps) {
+  const allowV2Preview = !!userId && DIET_V2_PREVIEW_USER_IDS.has(userId);
+  const [version, setVersion] = useState<DietPlanVersion>("meals");
+  const activeVersion: DietPlanVersion = allowV2Preview ? version : "meals";
+
   return (
     <div className="flex flex-col gap-4">
       {userId && <FormResponseBubbleWrapper userId={userId} />}
 
+      {allowV2Preview && <DietVersionToggle version={version} onChange={setVersion} />}
+
       <DashboardTabCard>
-        <DietPlanWrapper>
-          <ViewDietPlanPage embedded />
-        </DietPlanWrapper>
+        {activeVersion === "options" ? (
+          <DietPlanV2Editor />
+        ) : (
+          <DietPlanWrapper>
+            <ViewDietPlanPage embedded />
+          </DietPlanWrapper>
+        )}
       </DashboardTabCard>
+    </div>
+  );
+}
+
+function DietVersionToggle({
+  version,
+  onChange,
+}: {
+  version: DietPlanVersion;
+  onChange: (next: DietPlanVersion) => void;
+}) {
+  const options: { id: DietPlanVersion; label: string }[] = [
+    { id: "meals", label: "תפריט מנות (קיים)" },
+    { id: "options", label: "תפריט אופציות (חדש)" },
+  ];
+  return (
+    <div
+      dir="rtl"
+      className="inline-flex w-fit items-center gap-1 rounded-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-1 shadow-sm"
+    >
+      {options.map((opt) => {
+        const active = opt.id === version;
+        return (
+          <button
+            key={opt.id}
+            type="button"
+            onClick={() => onChange(opt.id)}
+            className={`rounded-full px-4 py-1.5 text-xs font-bold transition-colors ${
+              active
+                ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
+                : "text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800"
+            }`}
+          >
+            {opt.label}
+          </button>
+        );
+      })}
     </div>
   );
 }
