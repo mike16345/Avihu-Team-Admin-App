@@ -44,7 +44,7 @@ const ScrollableArea = forwardRef<HTMLDivElement, ScrollableAreaProps>(
         const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
         if (distanceFromBottom <= REACH_END_THRESHOLD_PX) onReachEnd();
       },
-      [onReachEnd],
+      [onReachEnd]
     );
 
     return (
@@ -56,7 +56,7 @@ const ScrollableArea = forwardRef<HTMLDivElement, ScrollableAreaProps>(
         {children}
       </div>
     );
-  },
+  }
 );
 
 ScrollableArea.displayName = "ScrollableArea";

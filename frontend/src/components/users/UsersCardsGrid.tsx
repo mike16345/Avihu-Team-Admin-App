@@ -36,7 +36,7 @@ const UsersCardsGrid = forwardRef<HTMLDivElement, UsersCardsGridProps>(
         ))}
       </div>
     </ScrollableArea>
-  ),
+  )
 );
 
 UsersCardsGrid.displayName = "UsersCardsGrid";

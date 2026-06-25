@@ -92,8 +92,7 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
   const { searchParams, setParam } = useStableSearchParams();
   const validTabValues = tabs.tabHeaders.map((header) => header.value);
   const urlTab = searchParams.get("tab");
-  const initialTab =
-    urlTab && validTabValues.includes(urlTab) ? urlTab : tabs.tabHeaders[0].value;
+  const initialTab = urlTab && validTabValues.includes(urlTab) ? urlTab : tabs.tabHeaders[0].value;
   const initialQueryKey =
     tabs.tabHeaders.find((header) => header.value === initialTab)?.queryKey ??
     tabs.tabHeaders[0].queryKey;

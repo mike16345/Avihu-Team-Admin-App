@@ -155,10 +155,7 @@ export const PlanAndCoachingSection = ({
           }))}
         />
       </Field>
-      <DateStartedField
-        dateStarted={dateStarted}
-        onDateStartedChange={onDateStartedChange}
-      />
+      <DateStartedField dateStarted={dateStarted} onDateStartedChange={onDateStartedChange} />
       <DateFinishedField
         dateFinished={dateFinished}
         error={errors.dateFinished}
