@@ -62,6 +62,7 @@ const UserFormPage = () => {
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [values, setValues] = useState<UserFormValues>({
+    dateStarted: toDateInput(new Date()),
     dateFinished: "",
     dietaryType: [],
     email: "",
@@ -78,6 +79,7 @@ const UserFormPage = () => {
     if (!existingUser) return;
 
     setValues({
+      dateStarted: toDateInput(existingUser.dateJoined) || toDateInput(new Date()),
       dateFinished: toDateInput(existingUser.dateFinished),
       dietaryType: existingUser.dietaryType || [],
       email: existingUser.email || "",
@@ -136,12 +138,24 @@ const UserFormPage = () => {
   };
 
   const handleBack = () => {
-    if (isEdit) {
+    // Both flows (add + edit) prefer browser back so the previous
+    // URL — and its filters / scroll position — are restored. We
+    // only fall back to /users when there is no real history entry
+    // behind us (e.g. arrived here via a deep link). Going to "/"
+    // was wrong for the add-user flow because it dropped the
+    // trainer onto the home page instead of the list they came
+    // from.
+    const canGoBack =
+      typeof window !== "undefined" &&
+      typeof window.history.state?.idx === "number" &&
+      window.history.state.idx > 0;
+
+    if (canGoBack) {
       navigate(-1);
       return;
     }
 
-    navigate("/");
+    navigate("/users");
   };
 
   const handleDelete = async () => {
@@ -211,6 +225,7 @@ const UserFormPage = () => {
       onBack={handleBack}
       onCancel={handleBack}
       onDateFinishedChange={(value) => updateValue("dateFinished", value)}
+      onDateStartedChange={(value) => updateValue("dateStarted", value)}
       onDelete={handleDelete}
       onDietaryToggle={toggleDietary}
       onEmailChange={(value) => updateValue("email", value)}

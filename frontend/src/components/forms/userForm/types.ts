@@ -1,6 +1,7 @@
 import type { FormEvent } from "react";
 
 export type UserFormValues = {
+  dateStarted: string;
   dateFinished: string;
   dietaryType: string[];
   email: string;
@@ -26,6 +27,7 @@ export type UserFormProps = {
   onBack: () => void;
   onCancel: () => void;
   onDateFinishedChange: (value: string) => void;
+  onDateStartedChange: (value: string) => void;
   onDelete: () => void;
   onDietaryToggle: (item: string) => void;
   onEmailChange: (value: string) => void;

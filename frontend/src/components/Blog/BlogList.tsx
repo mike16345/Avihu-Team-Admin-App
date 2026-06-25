@@ -11,23 +11,14 @@ interface BlogListProps {
   isLoading?: boolean;
   isError?: boolean;
   error?: unknown;
-  hasNextPage?: boolean;
-  fetchNextPage?: () => void | Promise<unknown>;
   isFetchingNextPage?: boolean;
 }
-
-const getLoadMoreLabel = (isFetchingNextPage: boolean | undefined) => {
-  if (isFetchingNextPage) return "טוען…";
-  return "טען עוד מאמרים";
-};
 
 const BlogList: React.FC<BlogListProps> = ({
   blogs,
   isLoading,
   isError,
   error,
-  hasNextPage,
-  fetchNextPage,
   isFetchingNextPage,
 }) => {
   const navigate = useNavigate();
@@ -67,16 +58,9 @@ const BlogList: React.FC<BlogListProps> = ({
       {blogs.map((blog) => (
         <BlogCard key={blog._id} blog={blog} onClick={() => handleBlogClick(blog)} />
       ))}
-      {hasNextPage && fetchNextPage && (
-        <div className="col-span-full mt-2 flex justify-center">
-          <button
-            type="button"
-            onClick={() => fetchNextPage()}
-            disabled={isFetchingNextPage}
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition-all hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50/40 dark:hover:bg-blue-950/30 hover:text-blue-700 dark:hover:text-blue-300 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {getLoadMoreLabel(isFetchingNextPage)}
-          </button>
+      {isFetchingNextPage && (
+        <div className="col-span-full flex justify-center py-3 text-xs font-semibold text-slate-400">
+          טוען עוד מאמרים…
         </div>
       )}
     </div>
