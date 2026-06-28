@@ -34,6 +34,7 @@ export const weightTab = "מעקב שקילה";
 export const workoutTab = "מעקב אימון";
 export const measurementTab = "מעקב היקפים";
 export const formsTab = "שאלונים";
+export const dietPlanTab = "diet";
 
 const isMainTab = (value: string | null): value is MainTab =>
   value === "profile" ||
