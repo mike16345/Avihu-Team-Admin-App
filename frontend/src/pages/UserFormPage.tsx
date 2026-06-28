@@ -224,19 +224,12 @@ const UserFormPage = () => {
       onApplyDatePreset={applyDatePreset}
       onBack={handleBack}
       onCancel={handleBack}
-      onDateFinishedChange={(value) => updateValue("dateFinished", value)}
-      onDateStartedChange={(value) => updateValue("dateStarted", value)}
+      onChange={updateValue}
       onDelete={handleDelete}
       onDietaryToggle={toggleDietary}
-      onEmailChange={(value) => updateValue("email", value)}
-      onFirstNameChange={(value) => updateValue("firstName", value)}
-      onLastNameChange={(value) => updateValue("lastName", value)}
-      onPhoneChange={(value) => updateValue("phone", value)}
-      onPlanTypeChange={(value) => updateValue("planType", value)}
-      onRemindInChange={(value) => updateValue("remindIn", value)}
       onShowDeleteConfirmChange={setShowDeleteConfirm}
+      onDateStartedChange={(value) => updateValue("dateStarted", value)}
       onSubmit={handleSubmit}
-      onSubTrainerChange={(value) => updateValue("subTrainerId", value)}
     />
   );
 };

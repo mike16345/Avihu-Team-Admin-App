@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import Loader from "@/components/ui/Loader";
 import {
@@ -21,13 +21,12 @@ import type {
 import {
   getDaysRemaining,
   getInitials,
-  getStoredBaseStatus,
 } from "@/components/UserDashboard/Profile/userDashboardStatus";
 import useUpdateUser from "@/hooks/mutations/User/useUpdateUser";
 import useUserQuery from "@/hooks/queries/user/useUserQuery";
 import { tryGuardedNav } from "@/hooks/useNavigationBlocker";
 import type { AccountStatus, IUser, IStatusHistoryEntry } from "@/interfaces/IUser";
-import { deriveAccountStatus, hasContractEnded } from "@/lib/userStatus";
+import { deriveAccountStatus } from "@/lib/userStatus";
 import { useUsersStore } from "@/store/userStore";
 import ErrorPage from "./ErrorPage";
 
@@ -83,7 +82,6 @@ export const UserDashboard = () => {
   const [planType, setPlanType] = useState("");
   const [pendingPlanType, setPendingPlanType] = useState<string | null>(null);
   const [swapModalOpen, setSwapModalOpen] = useState(false);
-  const autoDowngradeFiredRef = useRef<string | null>(null);
 
   useEffect(() => {
     const tab = searchParams.get("tab");
@@ -98,26 +96,6 @@ export const UserDashboard = () => {
     setStatus(deriveAccountStatus(sourceUser));
     setPlanType(sourceUser?.planType || "");
   }, [data, stateUser]);
-
-  // Persist the automatic active -> user downgrade once when an active contract is already over.
-  useEffect(() => {
-    const sourceUser = data || stateUser;
-    if (!sourceUser?._id) return;
-    if (autoDowngradeFiredRef.current === sourceUser._id) return;
-    if (getStoredBaseStatus(sourceUser) !== "active") return;
-    if (!hasContractEnded(sourceUser)) return;
-    if (pendingStatus) return;
-
-    autoDowngradeFiredRef.current = sourceUser._id;
-    updateUser.mutate({
-      id: sourceUser._id,
-      user: {
-        ...sourceUser,
-        accountStatus: "user",
-        hasAccess: true,
-      } as IUser,
-    });
-  }, [data, stateUser, pendingStatus, updateUser]);
 
   if (isLoading) return <Loader size="large" />;
   if (isError && !data) return <ErrorPage message={error.message} />;

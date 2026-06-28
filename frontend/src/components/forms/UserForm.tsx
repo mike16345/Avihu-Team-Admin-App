@@ -30,19 +30,12 @@ const UserForm = ({
   onApplyDatePreset,
   onBack,
   onCancel,
-  onDateFinishedChange,
-  onDateStartedChange,
   onDelete,
   onDietaryToggle,
-  onEmailChange,
-  onFirstNameChange,
-  onLastNameChange,
-  onPhoneChange,
-  onPlanTypeChange,
-  onRemindInChange,
   onShowDeleteConfirmChange,
+  onDateStartedChange,
+  onChange,
   onSubmit,
-  onSubTrainerChange,
 }: UserFormProps) => {
   return (
     <div
@@ -79,17 +72,26 @@ const UserForm = ({
                 onLastNameChange={onLastNameChange}
                 onPhoneChange={onPhoneChange}
               />
+          <form onSubmit={onSubmit} className="flex flex-col" data-testid="user-form">
+            <PersonalDetailsSection
+              email={values.email}
+              errors={errors}
+              firstName={values.firstName}
+              lastName={values.lastName}
+              phone={values.phone}
+              onChange={onChange}
+            />
 
               <PlanAndCoachingSection
                 dateFinished={values.dateFinished}
-                dateStarted={values.dateStarted}
                 errors={errors}
                 planType={values.planType}
                 remindIn={values.remindIn}
                 subTrainerId={values.subTrainerId}
+                dateStarted={values.dateStarted}
+                onDateStartedChange={onDateStartedChange}
                 onApplyDatePreset={onApplyDatePreset}
                 onDateFinishedChange={onDateFinishedChange}
-                onDateStartedChange={onDateStartedChange}
                 onPlanTypeChange={onPlanTypeChange}
                 onRemindInChange={onRemindInChange}
                 onSubTrainerChange={onSubTrainerChange}
