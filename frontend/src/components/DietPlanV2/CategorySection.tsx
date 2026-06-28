@@ -44,7 +44,8 @@ const CategorySection: React.FC<CategorySectionProps> = ({ category, onChange, m
   const reliableCount = category.options.length - estimatedCount;
 
   const onFoodSelected = (food: FoodLibraryItem) => {
-    const quantity = food.defaultUnit === "g" ? 100 : 1;
+    const quantity =
+      food.defaultQuantity ?? (food.defaultUnit === "g" ? 100 : 1);
     const newOption: DietV2Option = {
       id: makeLocalId("option"),
       foodName: food.name,

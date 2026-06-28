@@ -26,6 +26,11 @@ export interface FoodLibraryItem {
    *  cornflakes ≈ 30g, whereas 1 cup of milk = 240g. Whatever isn't
    *  listed here falls through to GENERIC_UNIT_TO_GRAMS. */
   unitGrams?: Partial<Record<DietV2Unit, number>>;
+  /** Sensible portion to seed the row with when the trainer adds
+   *  this food without an explicit quantity — e.g. a bag of Bamba
+   *  is ~80g, a cottage container is ~200g. Falls back to 100 for
+   *  gram-based foods and 1 for unit-based ones when omitted. */
+  defaultQuantity?: number;
 }
 
 export const CATEGORY_LABELS: Record<DietV2CategoryKind, string> = {
@@ -93,9 +98,11 @@ export const MOCK_FOOD_LIBRARY: FoodLibraryItem[] = [
   { id: "f-salmon", name: "סלמון", kind: "protein", defaultUnit: "g",
     per100: { protein: 20, carbs: 0, fat: 13, calories: 208 } },
   { id: "f-cottage", name: "קוטג׳ 5%", kind: "protein", defaultUnit: "g",
-    per100: { protein: 11, carbs: 3, fat: 5, calories: 103 } },
+    per100: { protein: 11, carbs: 3, fat: 5, calories: 103 },
+    defaultQuantity: 200 },
   { id: "f-cottage-skim", name: "קוטג׳ 3%", kind: "protein", defaultUnit: "g",
-    per100: { protein: 11, carbs: 3, fat: 3, calories: 81 } },
+    per100: { protein: 11, carbs: 3, fat: 3, calories: 81 },
+    defaultQuantity: 200 },
   { id: "f-white-cheese", name: "גבינה לבנה 5%", kind: "protein", defaultUnit: "g",
     per100: { protein: 9, carbs: 4, fat: 5, calories: 95 } },
   { id: "f-yellow-cheese", name: "גבינה צהובה", kind: "protein", defaultUnit: "g",
@@ -396,7 +403,8 @@ export const MOCK_FOOD_LIBRARY: FoodLibraryItem[] = [
     unitGrams: { cups: 85 } },
   { id: "f-bamba", name: "במבה", kind: "carbs", defaultUnit: "g",
     aliases: ["במבה אסם"],
-    per100: { protein: 12, carbs: 50, fat: 33, calories: 540 } },
+    per100: { protein: 12, carbs: 50, fat: 33, calories: 540 },
+    defaultQuantity: 80 },
   { id: "f-bissli", name: "ביסלי", kind: "carbs", defaultUnit: "g",
     per100: { protein: 8, carbs: 68, fat: 22, calories: 510 } },
   { id: "f-rice-cake", name: "פריכית אורז", kind: "carbs", defaultUnit: "units",
@@ -786,7 +794,7 @@ export const parseQuickAddText = (
     const num = Number(tok);
     return Number.isFinite(num) && num > 0;
   });
-  const quantity = numericIndex === -1 ? 1 : Number(tokens[numericIndex]);
+  const typedQuantity = numericIndex === -1 ? null : Number(tokens[numericIndex]);
 
   // Step 2 — prefer an adjacent unit (right neighbour first, then
   // left). When the trainer writes "30 גרם" or "גרם 30" the unit
@@ -843,6 +851,12 @@ export const parseQuickAddText = (
   // assume the number counts WHOLE ITEMS, not grams. Falling back
   // to grams turned "2 yogurt" into "2g yogurt" → near-zero kcal.
   const resolvedUnit = unit ?? matchedFood?.defaultUnit ?? "units";
+
+  // Quantity resolution: trainer-typed wins. Otherwise pull the
+  // food's portion default (a Bamba bag = 80g, a cottage tub =
+  // 200g); fall back to 100 for gram foods and 1 for unit foods.
+  const fallbackQuantity = resolvedUnit === "g" ? 100 : 1;
+  const quantity = typedQuantity ?? matchedFood?.defaultQuantity ?? fallbackQuantity;
 
   return {
     quantity,
