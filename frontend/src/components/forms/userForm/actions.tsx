@@ -21,15 +21,15 @@ export const ActionBar = ({
   onCancel: () => void;
   onShowDeleteConfirm: () => void;
 }) => (
-  <div className="flex items-center justify-between gap-2 rounded-b-[15px] border-t border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/60 px-4 py-2.5">
+  <div className="flex items-center justify-between gap-2 rounded-b-[15px] border-t border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/60 px-4 py-3.5">
     {isEdit ? (
       <button
         type="button"
         onClick={onShowDeleteConfirm}
         disabled={isDeletePending}
-        className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-white dark:bg-slate-900 px-2.5 py-1.5 text-xs font-semibold text-red-600 transition-all hover:border-red-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-white dark:bg-slate-900 px-4 py-2 text-sm font-semibold text-red-600 transition-all hover:border-red-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        <FaTrash size={10} />
+        <FaTrash size={12} />
         <span>מחיקת מתאמן</span>
       </button>
     ) : (
@@ -40,7 +40,7 @@ export const ActionBar = ({
       <button
         type="button"
         onClick={onCancel}
-        className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+        className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-5 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
       >
         ביטול
       </button>
@@ -48,7 +48,7 @@ export const ActionBar = ({
         data-testid="user-form-submit"
         type="submit"
         disabled={isPending}
-        className="inline-flex items-center gap-1.5 rounded-lg brand-gradient brand-gradient-hover px-4 py-1.5 text-xs font-bold text-white shadow-md shadow-blue-500/25 transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+        className="inline-flex items-center gap-1.5 rounded-lg brand-gradient brand-gradient-hover px-5 py-2 text-sm font-bold text-white shadow-md shadow-blue-500/25 transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
       >
         {getSubmitLabel(isPending, isEdit)}
       </button>
