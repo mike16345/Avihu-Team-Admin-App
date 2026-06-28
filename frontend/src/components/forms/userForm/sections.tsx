@@ -1,10 +1,10 @@
 import { FaCalendarCheck, FaCalendarDays, FaCheck, FaXmark, FaUser } from "react-icons/fa6";
 import DatePicker from "@/components/ui/DatePicker";
 import UserPlanTypes from "@/enums/UserPlanTypes";
-import { DATE_PRESETS, DIETARY_OPTIONS, REMIND_IN_OPTIONS } from "./options";
+import { DIETARY_OPTIONS, MONTH_PRESETS, REMIND_IN_OPTIONS } from "./options";
 import { Field, SectionTitle, SelectInput, TrainerAssignmentField } from "./controls";
 import { inputCls } from "./styles";
-import type { UserFormErrors } from "./types";
+import type { UserFormErrors, UserOnChangeCallback } from "./types";
 
 const getDietaryOptionClassName = (selected: boolean) => {
   const baseClassName =
@@ -31,20 +31,14 @@ export const PersonalDetailsSection = ({
   firstName,
   lastName,
   phone,
-  onEmailChange,
-  onFirstNameChange,
-  onLastNameChange,
-  onPhoneChange,
+  onChange,
 }: {
   email: string;
   errors: UserFormErrors;
   firstName: string;
   lastName: string;
   phone: string;
-  onEmailChange: (value: string) => void;
-  onFirstNameChange: (value: string) => void;
-  onLastNameChange: (value: string) => void;
-  onPhoneChange: (value: string) => void;
+  onChange: UserOnChangeCallback;
 }) => (
   <div className="border-b border-slate-100 dark:border-slate-800 px-4 py-3">
     <SectionTitle icon={<FaUser size={11} className="text-blue-600" />} title="פרטים אישיים" />
@@ -55,7 +49,7 @@ export const PersonalDetailsSection = ({
           data-testid="user-form-first-name"
           type="text"
           value={firstName}
-          onChange={(e) => onFirstNameChange(e.target.value)}
+          onChange={(e) => onChange("firstName", e.target.value)}
           placeholder="שם פרטי..."
           className={inputCls(!!errors.firstName)}
         />
@@ -65,7 +59,7 @@ export const PersonalDetailsSection = ({
           data-testid="user-form-last-name"
           type="text"
           value={lastName}
-          onChange={(e) => onLastNameChange(e.target.value)}
+          onChange={(e) => onChange("lastName", e.target.value)}
           placeholder="שם משפחה..."
           className={inputCls(!!errors.lastName)}
         />
@@ -76,7 +70,7 @@ export const PersonalDetailsSection = ({
           type="tel"
           dir="ltr"
           value={phone}
-          onChange={(e) => onPhoneChange(e.target.value)}
+          onChange={(e) => onChange("phone", e.target.value)}
           placeholder="0501234567"
           className={inputCls(!!errors.phone) + " text-center"}
         />
@@ -87,7 +81,7 @@ export const PersonalDetailsSection = ({
           type="email"
           dir="ltr"
           value={email}
-          onChange={(e) => onEmailChange(e.target.value)}
+          onChange={(e) => onChange("email", e.target.value)}
           placeholder="israel@example.com"
           className={inputCls(!!errors.email) + " text-center"}
         />
@@ -98,26 +92,24 @@ export const PersonalDetailsSection = ({
 
 export const PlanAndCoachingSection = ({
   dateFinished,
+  dateStarted,
   errors,
   planType,
   remindIn,
   subTrainerId,
+  onChange,
+  onDateStartedChange,
   onApplyDatePreset,
-  onDateFinishedChange,
-  onPlanTypeChange,
-  onRemindInChange,
-  onSubTrainerChange,
 }: {
+  onChange: UserOnChangeCallback;
   dateFinished: string;
+  dateStarted: string;
   errors: UserFormErrors;
   planType: string;
   remindIn: number;
   subTrainerId: string;
   onApplyDatePreset: (days: number) => void;
-  onDateFinishedChange: (value: string) => void;
-  onPlanTypeChange: (value: string) => void;
-  onRemindInChange: (value: number) => void;
-  onSubTrainerChange: (value: string) => void;
+  onDateStartedChange: (value: string) => void;
 }) => (
   <div className="border-b border-slate-100 dark:border-slate-800 px-4 py-3">
     <SectionTitle
@@ -129,7 +121,7 @@ export const PlanAndCoachingSection = ({
       <Field label="סוג תוכנית" error={errors.planType} required>
         <SelectInput
           value={planType}
-          onChange={onPlanTypeChange}
+          onChange={(value) => onChange("planType", value)}
           placeholder="בחר סוג תוכנית"
           error={!!errors.planType}
           testId="user-form-plan-type"
@@ -142,7 +134,7 @@ export const PlanAndCoachingSection = ({
       <Field label="בדיקה תקופתית">
         <SelectInput
           value={String(remindIn)}
-          onChange={(value) => onRemindInChange(Number(value))}
+          onChange={(value) => onChange("remindIn", Number(value))}
           placeholder="כל כמה זמן..."
           testId="user-form-remind-in"
           options={REMIND_IN_OPTIONS.map((option) => ({
@@ -151,16 +143,41 @@ export const PlanAndCoachingSection = ({
           }))}
         />
       </Field>
+      <DateStartedField dateStarted={dateStarted} onDateStartedChange={onDateStartedChange} />
       <DateFinishedField
         dateFinished={dateFinished}
         error={errors.dateFinished}
         onApplyDatePreset={onApplyDatePreset}
-        onDateFinishedChange={onDateFinishedChange}
+        onDateFinishedChange={(value) => onChange("dateFinished", value)}
       />
     </div>
 
-    <TrainerAssignmentField value={subTrainerId} onChange={onSubTrainerChange} />
+    <TrainerAssignmentField
+      value={subTrainerId}
+      onChange={(value) => onChange("subTrainerId", value)}
+    />
   </div>
+);
+
+// Informational start-date field. Default value is "today" (set by
+// the page on mount / new-user flow); on edit we hydrate from the
+// user's dateJoined. Not part of the submit payload — pure display
+// for the trainer's reference.
+const DateStartedField = ({
+  dateStarted,
+  onDateStartedChange,
+}: {
+  dateStarted: string;
+  onDateStartedChange: (value: string) => void;
+}) => (
+  <Field label="תאריך התחלת הליווי">
+    <DatePicker
+      triggerTestId="user-form-date-started"
+      selectedDate={parseIsoDate(dateStarted)}
+      onChangeDate={(date) => onDateStartedChange(formatIsoDate(date))}
+      placeholder="בחר תאריך התחלה"
+    />
+  </Field>
 );
 
 const DateFinishedField = ({
@@ -176,30 +193,30 @@ const DateFinishedField = ({
 }) => (
   <Field label="תאריך סיום הליווי" error={error} required>
     <div className="flex flex-col gap-2">
-      <div className="relative">
-        <FaCalendarCheck
-          size={12}
-          className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
-        />
-        <DatePicker
-          triggerTestId="user-form-date-finished"
-          selectedDate={parseIsoDate(dateFinished)}
-          onChangeDate={(date) => onDateFinishedChange(formatIsoDate(date))}
-          placeholder="בחר תאריך סיום"
-        />
-      </div>
-      <div className="flex flex-wrap gap-1">
-        {DATE_PRESETS.map((preset) => (
-          <button
-            key={preset.days}
-            type="button"
-            onClick={() => onApplyDatePreset(preset.days)}
-            data-testid="user-form-date-preset"
-            className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-slate-600 dark:text-slate-300 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
-          >
-            {preset.label}
-          </button>
-        ))}
+      <DatePicker
+        triggerTestId="user-form-date-finished"
+        selectedDate={parseIsoDate(dateFinished)}
+        onChangeDate={(date) => onDateFinishedChange(formatIsoDate(date))}
+        placeholder="בחר תאריך סיום"
+      />
+      <div className="flex items-center gap-2">
+        <span className="shrink-0 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+          חודשים:
+        </span>
+        <div className="grid flex-1 grid-cols-6 gap-1.5">
+          {MONTH_PRESETS.map((preset) => (
+            <button
+              key={preset.months}
+              type="button"
+              onClick={() => onApplyDatePreset(preset.days)}
+              data-testid="user-form-date-preset"
+              aria-label={`${preset.months} חודשים`}
+              className="h-7 rounded-md border border-slate-200 bg-white text-[11px] font-bold text-slate-600 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
+            >
+              {preset.months}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   </Field>

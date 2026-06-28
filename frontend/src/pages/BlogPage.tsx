@@ -1,38 +1,28 @@
 import BlogList from "@/components/Blog/BlogList";
-import Loader from "@/components/ui/Loader";
+import ScrollableArea from "@/components/ui/ScrollableArea";
 import useBlogsQuery from "@/hooks/queries/blogs/useBlogsQuery";
 import useLessonGroupsQuery from "@/hooks/queries/lessonGroups/useLessonGroupsQuery";
-import { IBlogResponse, ILessonGroup } from "@/interfaces/IBlog";
-import { useState, useMemo } from "react";
+import { useStableSearchParams } from "@/hooks/useStableSearchParams";
+import { useScrollRestoration } from "@/hooks/useScrollRestoration";
+import { ILessonGroup } from "@/interfaces/IBlog";
+import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LessonGroupsSheet from "@/components/Blog/LessonGroupsSheet";
 import BlogPageHeader from "@/components/Blog/BlogPageHeader";
 import BlogFilterToolbar from "@/components/Blog/BlogFilterToolbar";
 import BlogGroupFilterChips from "@/components/Blog/BlogGroupFilterChips";
 
-const getFilteredBlogs = (
-  blogs: IBlogResponse[],
-  selectedGroups: ILessonGroup[],
-  query: string
-) => {
-  let nextBlogs = blogs;
+const GROUPS_PARAM_DELIMITER = ",";
 
-  if (selectedGroups.length > 0) {
-    const selectedNames = new Set(selectedGroups.map((group) => group.name));
-    nextBlogs = nextBlogs.filter((blog) => blog.group && selectedNames.has(blog.group.name));
-  }
+const parseSelectedGroups = (raw: string | null, available: ILessonGroup[]): ILessonGroup[] => {
+  if (!raw) return [];
+  const wanted = new Set(raw.split(GROUPS_PARAM_DELIMITER).filter(Boolean));
+  return available.filter((group) => wanted.has(group.name));
+};
 
-  if (query.trim()) {
-    const normalizedQuery = query.trim().toLowerCase();
-    nextBlogs = nextBlogs.filter(
-      (blog) =>
-        blog.title?.toLowerCase().includes(normalizedQuery) ||
-        blog.subtitle?.toLowerCase().includes(normalizedQuery) ||
-        blog.content?.toLowerCase().includes(normalizedQuery)
-    );
-  }
-
-  return nextBlogs;
+const serialiseSelectedGroups = (selected: ILessonGroup[]): string | null => {
+  if (selected.length === 0) return null;
+  return selected.map((group) => group.name).join(GROUPS_PARAM_DELIMITER);
 };
 
 const getNextSelectedGroups = (selectedGroups: ILessonGroup[], group: ILessonGroup) => {
@@ -47,6 +37,26 @@ const getNextSelectedGroups = (selectedGroups: ILessonGroup[], group: ILessonGro
 const BlogPage = () => {
   const navigate = useNavigate();
 
+  const { searchParams, setParam, setParams } = useStableSearchParams();
+  const { data: lessonGroups } = useLessonGroupsQuery();
+  const groups = useMemo(() => lessonGroups?.data ?? [], [lessonGroups]);
+  const query = searchParams.get("q") ?? "";
+
+  const selectedGroups = useMemo(
+    () => parseSelectedGroups(searchParams.get("groups"), groups),
+    [searchParams, groups]
+  );
+
+  const selectedGroupIds = useMemo(
+    () => selectedGroups.map((group) => group._id).filter((id): id is string => Boolean(id)),
+    [selectedGroups]
+  );
+
+  const blogQueryFilters = useMemo(
+    () => ({ query, groups: selectedGroupIds }),
+    [query, selectedGroupIds]
+  );
+
   const {
     data: blogPages,
     isLoading,
@@ -55,37 +65,36 @@ const BlogPage = () => {
     fetchNextPage,
     isError,
     error,
-  } = useBlogsQuery();
-  const { data: lessonGroups } = useLessonGroupsQuery();
+  } = useBlogsQuery(blogQueryFilters);
 
-  const [selectedGroups, setSelectedGroups] = useState<ILessonGroup[]>([]);
-  const [query, setQuery] = useState("");
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  useScrollRestoration(scrollRef);
+
   const [groupsSheetOpen, setGroupsSheetOpen] = useState(false);
 
   const handleCreateNewBlog = () => navigate("/blogs/create");
 
-  const allBlogs = useMemo(
-    () => blogPages?.pages.flatMap((page) => page.results) ?? [],
-    [blogPages]
-  );
+  const blogs = useMemo(() => blogPages?.pages.flatMap((page) => page.results) ?? [], [blogPages]);
+  const totalBlogs = blogPages?.pages[0]?.totalResults ?? blogs.length;
 
-  const blogs = useMemo(
-    () => getFilteredBlogs(allBlogs, selectedGroups, query),
-    [selectedGroups, allBlogs, query]
-  );
-
-  const toggleGroup = (group: ILessonGroup) => {
-    setSelectedGroups((prev) => getNextSelectedGroups(prev, group));
+  // URL-driven filters — coming back from a single article preview
+  // restores the same search + group selection the trainer left on.
+  // `replace: true` keeps every keystroke from spawning a history
+  // entry; navigating into an article still pushes one entry, so
+  // browser back and the in-page "חזרה" button behave identically.
+  const handleQueryChange = (value: string) => {
+    setParam("q", value || null, { replace: true });
   };
 
-  const clearFilters = () => {
-    setQuery("");
-    setSelectedGroups([]);
+  const handleToggleGroup = (group: ILessonGroup) => {
+    const next = getNextSelectedGroups(selectedGroups, group);
+    setParam("groups", serialiseSelectedGroups(next), { replace: true });
   };
 
-  if (isLoading) return <Loader />;
+  const handleClearFilters = () => {
+    setParams({ q: null, groups: null }, { replace: true });
+  };
 
-  const groups = lessonGroups?.data || [];
   const hasFilter = selectedGroups.length > 0 || query.trim().length > 0;
 
   return (
@@ -94,29 +103,35 @@ const BlogPage = () => {
 
       <BlogFilterToolbar
         filteredCount={blogs.length}
-        totalCount={allBlogs.length}
+        totalCount={totalBlogs}
         hasFilter={hasFilter}
         query={query}
-        onQueryChange={setQuery}
-        onClearFilters={clearFilters}
+        onQueryChange={handleQueryChange}
+        onClearFilters={handleClearFilters}
       />
 
       <BlogGroupFilterChips
         groups={groups}
         selectedGroups={selectedGroups}
-        onToggleGroup={toggleGroup}
+        onToggleGroup={handleToggleGroup}
         onOpenGroups={() => setGroupsSheetOpen(true)}
       />
 
-      <BlogList
-        blogs={blogs}
-        hasNextPage={hasNextPage}
-        fetchNextPage={fetchNextPage}
-        isFetchingNextPage={isFetchingNextPage}
-        isLoading={isLoading}
-        isError={isError}
-        error={error}
-      />
+      <ScrollableArea
+        ref={scrollRef}
+        className="max-h-[calc(100vh-240px)]"
+        onReachEnd={() => {
+          if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+        }}
+      >
+        <BlogList
+          blogs={blogs}
+          isFetchingNextPage={isFetchingNextPage}
+          isLoading={isLoading}
+          isError={isError}
+          error={error}
+        />
+      </ScrollableArea>
 
       <LessonGroupsSheet open={groupsSheetOpen} onClose={() => setGroupsSheetOpen(false)} />
     </div>

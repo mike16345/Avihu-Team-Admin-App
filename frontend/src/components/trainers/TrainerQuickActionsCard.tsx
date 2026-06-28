@@ -11,13 +11,7 @@ type ActionButtonProps = {
   disabled?: boolean;
 };
 
-const ActionButton = ({
-  icon,
-  title,
-  className,
-  onClick,
-  disabled,
-}: ActionButtonProps) => {
+const ActionButton = ({ icon, title, className, onClick, disabled }: ActionButtonProps) => {
   return (
     <Button
       type="button"
