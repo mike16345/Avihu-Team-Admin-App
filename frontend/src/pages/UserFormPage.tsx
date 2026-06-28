@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import UserForm, { type UserFormErrors, type UserFormValues } from "@/components/forms/UserForm";
 import Loader from "@/components/ui/Loader";
 import ErrorPage from "./ErrorPage";
@@ -52,6 +52,7 @@ const buildUserPayload = (values: UserFormValues): UserFormPayload => ({
 
 const UserFormPage = () => {
   const { id } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const isEdit = !!id;
 
@@ -62,6 +63,7 @@ const UserFormPage = () => {
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [values, setValues] = useState<UserFormValues>({
+    dateStarted: toDateInput(new Date()),
     dateFinished: "",
     dietaryType: [],
     email: "",
@@ -78,6 +80,7 @@ const UserFormPage = () => {
     if (!existingUser) return;
 
     setValues({
+      dateStarted: toDateInput(existingUser.dateJoined) || toDateInput(new Date()),
       dateFinished: toDateInput(existingUser.dateFinished),
       dietaryType: existingUser.dietaryType || [],
       email: existingUser.email || "",
@@ -136,12 +139,14 @@ const UserFormPage = () => {
   };
 
   const handleBack = () => {
-    if (isEdit) {
+    const canGoBack = location.key !== "default";
+
+    if (canGoBack) {
       navigate(-1);
       return;
     }
 
-    navigate("/");
+    navigate("/users");
   };
 
   const handleDelete = async () => {
@@ -214,6 +219,7 @@ const UserFormPage = () => {
       onDelete={handleDelete}
       onDietaryToggle={toggleDietary}
       onShowDeleteConfirmChange={setShowDeleteConfirm}
+      onDateStartedChange={(value) => updateValue("dateStarted", value)}
       onSubmit={handleSubmit}
     />
   );

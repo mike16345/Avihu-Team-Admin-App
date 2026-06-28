@@ -10,7 +10,7 @@ const UsersStatsSummary = ({ stats }: UsersStatsSummaryProps) => {
       <StatCard label="פעילים" value={stats.active} color="text-emerald-600" />
       <StatCard label="משתמשים" value={stats.inOnboarding} color="text-blue-600" />
       <StatCard label="בהקפאה" value={stats.frozen} color="text-cyan-600" />
-      <StatCard label="מסתיימים השבוע" value={stats.endingSoon} color="text-rose-600" />
+      <StatCard label="מסתיימים בקרוב " value={stats.endingSoon} color="text-rose-600" />
     </div>
   );
 };

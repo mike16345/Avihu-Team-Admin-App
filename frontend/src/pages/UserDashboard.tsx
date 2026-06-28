@@ -34,6 +34,7 @@ export const weightTab = "מעקב שקילה";
 export const workoutTab = "מעקב אימון";
 export const measurementTab = "מעקב היקפים";
 export const formsTab = "שאלונים";
+export const dietPlanTab = "diet";
 
 const isMainTab = (value: string | null): value is MainTab =>
   value === "profile" ||
@@ -49,6 +50,21 @@ export const UserDashboard = () => {
   const stateUser = useLocation().state as IUser | undefined;
   const navigate = useNavigate();
   const { id } = useParams();
+
+  // Mirror the browser back arrow: when we have a real history
+  // entry behind us, navigate(-1) restores the previous URL — which
+  // is what carries the users-page filter and scroll position.
+  // Falling back to /users only when the dashboard was opened
+  // directly (deep link, refresh) keeps the button useful without
+  // dropping query state when it exists.
+  const handleBackToUsersList = () => {
+    const canGoBack =
+      typeof window !== "undefined" &&
+      typeof window.history.state?.idx === "number" &&
+      window.history.state.idx > 0;
+    if (canGoBack) navigate(-1);
+    else navigate("/users");
+  };
   const { data, isLoading, isError, error } = useUserQuery(id || "oneUser", !stateUser);
   const updateUser = useUpdateUser(id || "");
   const currentUserAuth = useUsersStore((state) => state.currentUser);
@@ -209,7 +225,7 @@ export const UserDashboard = () => {
         planType={planType}
         status={status}
         isPending={updateUser.isPending}
-        onBack={() => navigate("/users")}
+        onBack={handleBackToUsersList}
         onPlanTypeChange={(newPlanType) => {
           if (newPlanType !== planType) setPendingPlanType(newPlanType);
         }}

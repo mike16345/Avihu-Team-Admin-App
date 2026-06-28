@@ -11,8 +11,7 @@ import { DataTableHebrew } from "./DataTableHebrew";
 import { Button } from "../ui/button";
 import Loader from "../ui/Loader";
 import { useTheme } from "../theme/theme-provider";
-
-const MINIMUM_WARNING_DAYS = 3;
+import { MINIMUM_WARNING_DAYS } from "../users/usersPageConstants";
 
 export const UsersTable = () => {
   const navigate = useNavigate();
@@ -47,7 +46,7 @@ export const UsersTable = () => {
   const handleGetRowClassName = (user: IUser) => {
     const daysUntilPlanIsFinished = DateUtils.getDaysDifference(new Date(), user.dateFinished);
 
-    if (daysUntilPlanIsFinished <= MINIMUM_WARNING_DAYS) {
+    if (daysUntilPlanIsFinished <= MINIMUM_WARNING_DAYS && daysUntilPlanIsFinished >= 0) {
       return theme == "dark" ? " bg-red-400/95" : "bg-red-300/50";
     }
 
@@ -79,7 +78,7 @@ export const UsersTable = () => {
             user.dateFinished
           );
 
-          return daysUntilPlanIsFinished <= MINIMUM_WARNING_DAYS;
+          return daysUntilPlanIsFinished <= MINIMUM_WARNING_DAYS && daysUntilPlanIsFinished >= 0;
         }}
         testIdPrefix="users"
       />

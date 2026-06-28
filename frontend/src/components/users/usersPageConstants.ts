@@ -1,6 +1,6 @@
 import type { StatusFilter } from "./usersPageTypes";
 
-export const MINIMUM_WARNING_DAYS = 3;
+export const MINIMUM_WARNING_DAYS = 7;
 
 export const STATUS_FILTERS: StatusFilter[] = [
   "הכל",
