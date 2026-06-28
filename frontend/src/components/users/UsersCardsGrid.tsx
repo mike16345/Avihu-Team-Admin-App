@@ -3,12 +3,7 @@ import { IUser } from "@/interfaces/IUser";
 import DateUtils from "@/lib/dateUtils";
 import ScrollableArea from "@/components/ui/ScrollableArea";
 import { MINIMUM_WARNING_DAYS } from "./usersPageConstants";
-import {
-  getUserDaysLeft,
-  getUserInitials,
-  getUserStatusColors,
-  getUserStatusLabel,
-} from "./usersPageUtils";
+import { getUserDaysLeft, getUserStatusColors, getUserStatusLabel } from "./usersPageUtils";
 import { UserAvatar } from "./UserAvatar";
 
 type UsersCardsGridProps = {
@@ -42,7 +37,6 @@ const UsersCardsGrid = forwardRef<HTMLDivElement, UsersCardsGridProps>(
 UsersCardsGrid.displayName = "UsersCardsGrid";
 
 function UserCard({ user, onView }: { user: IUser; onView: () => void }) {
-  const initials = getUserInitials(user);
   const daysLeft = getUserDaysLeft(user);
   const isExpiringSoon = daysLeft !== null && daysLeft <= MINIMUM_WARNING_DAYS && daysLeft >= 0;
   const status = getUserStatusLabel(user);
