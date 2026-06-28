@@ -6,6 +6,29 @@ import { useImageApi } from "./useImageApi";
 
 const BLOGS_API_URL = "blogs";
 
+export type BlogListFilters = {
+  query?: string;
+  groups?: string[];
+};
+
+type BlogPaginationParams = PaginationParams & BlogListFilters;
+
+const getBlogQueryParam = ({ query, groups }: BlogListFilters) => {
+  const filters: Record<string, unknown> = {};
+  const trimmedQuery = query?.trim();
+  const selectedGroups = groups?.filter(Boolean) ?? [];
+
+  if (trimmedQuery) filters.search = trimmedQuery;
+
+  if (selectedGroups.length === 1) {
+    filters.group = selectedGroups[0];
+  } else if (selectedGroups.length > 1) {
+    filters.group = { $in: selectedGroups };
+  }
+
+  return Object.keys(filters).length > 0 ? JSON.stringify(filters) : undefined;
+};
+
 export const useBlogsApi = () => {
   const { handleDeletePhoto, handleUploadImageToS3 } = useImageApi();
 
@@ -64,9 +87,14 @@ export const useBlogsApi = () => {
     }
   };
 
-  const getPaginatedPosts = async (pagination: PaginationParams) => {
+  const getPaginatedPosts = async (pagination: BlogPaginationParams) => {
     const response = await fetchData<ApiResponse<PaginationResult<IBlogResponse>>>(
-      `${BLOGS_API_URL}/paginate?_page=${pagination.page}&_limit=${pagination.limit}`
+      `${BLOGS_API_URL}/paginate`,
+      {
+        _page: pagination.page,
+        _limit: pagination.limit,
+        query: getBlogQueryParam(pagination),
+      }
     );
 
     return response.data;

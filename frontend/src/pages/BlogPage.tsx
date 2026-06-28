@@ -1,11 +1,10 @@
 import BlogList from "@/components/Blog/BlogList";
-import Loader from "@/components/ui/Loader";
 import ScrollableArea from "@/components/ui/ScrollableArea";
 import useBlogsQuery from "@/hooks/queries/blogs/useBlogsQuery";
 import useLessonGroupsQuery from "@/hooks/queries/lessonGroups/useLessonGroupsQuery";
 import { useStableSearchParams } from "@/hooks/useStableSearchParams";
 import { useScrollRestoration } from "@/hooks/useScrollRestoration";
-import { IBlogResponse, ILessonGroup } from "@/interfaces/IBlog";
+import { ILessonGroup } from "@/interfaces/IBlog";
 import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LessonGroupsSheet from "@/components/Blog/LessonGroupsSheet";
@@ -26,31 +25,6 @@ const serialiseSelectedGroups = (selected: ILessonGroup[]): string | null => {
   return selected.map((group) => group.name).join(GROUPS_PARAM_DELIMITER);
 };
 
-const getFilteredBlogs = (
-  blogs: IBlogResponse[],
-  selectedGroups: ILessonGroup[],
-  query: string
-) => {
-  let nextBlogs = blogs;
-
-  if (selectedGroups.length > 0) {
-    const selectedNames = new Set(selectedGroups.map((group) => group.name));
-    nextBlogs = nextBlogs.filter((blog) => blog.group && selectedNames.has(blog.group.name));
-  }
-
-  if (query.trim()) {
-    const normalizedQuery = query.trim().toLowerCase();
-    nextBlogs = nextBlogs.filter(
-      (blog) =>
-        blog.title?.toLowerCase().includes(normalizedQuery) ||
-        blog.subtitle?.toLowerCase().includes(normalizedQuery) ||
-        blog.content?.toLowerCase().includes(normalizedQuery)
-    );
-  }
-
-  return nextBlogs;
-};
-
 const getNextSelectedGroups = (selectedGroups: ILessonGroup[], group: ILessonGroup) => {
   const isSelected = selectedGroups.some((selectedGroup) => selectedGroup.name === group.name);
   if (isSelected) {
@@ -63,6 +37,26 @@ const getNextSelectedGroups = (selectedGroups: ILessonGroup[], group: ILessonGro
 const BlogPage = () => {
   const navigate = useNavigate();
 
+  const { searchParams, setParam } = useStableSearchParams();
+  const { data: lessonGroups } = useLessonGroupsQuery();
+  const groups = useMemo(() => lessonGroups?.data ?? [], [lessonGroups]);
+  const query = searchParams.get("q") ?? "";
+
+  const selectedGroups = useMemo(
+    () => parseSelectedGroups(searchParams.get("groups"), groups),
+    [searchParams, groups]
+  );
+
+  const selectedGroupIds = useMemo(
+    () => selectedGroups.map((group) => group._id).filter((id): id is string => Boolean(id)),
+    [selectedGroups]
+  );
+
+  const blogQueryFilters = useMemo(
+    () => ({ query, groups: selectedGroupIds }),
+    [query, selectedGroupIds]
+  );
+
   const {
     data: blogPages,
     isLoading,
@@ -71,10 +65,8 @@ const BlogPage = () => {
     fetchNextPage,
     isError,
     error,
-  } = useBlogsQuery();
-  const { data: lessonGroups } = useLessonGroupsQuery();
+  } = useBlogsQuery(blogQueryFilters);
 
-  const { searchParams, setParam } = useStableSearchParams();
   const scrollRef = useRef<HTMLDivElement | null>(null);
   useScrollRestoration(scrollRef);
 
@@ -82,23 +74,8 @@ const BlogPage = () => {
 
   const handleCreateNewBlog = () => navigate("/blogs/create");
 
-  const allBlogs = useMemo(
-    () => blogPages?.pages.flatMap((page) => page.results) ?? [],
-    [blogPages]
-  );
-
-  const groups = lessonGroups?.data || [];
-
-  const query = searchParams.get("q") ?? "";
-  const selectedGroups = useMemo(
-    () => parseSelectedGroups(searchParams.get("groups"), groups),
-    [searchParams, groups]
-  );
-
-  const blogs = useMemo(
-    () => getFilteredBlogs(allBlogs, selectedGroups, query),
-    [selectedGroups, allBlogs, query]
-  );
+  const blogs = useMemo(() => blogPages?.pages.flatMap((page) => page.results) ?? [], [blogPages]);
+  const totalBlogs = blogPages?.pages[0]?.totalResults ?? blogs.length;
 
   // URL-driven filters — coming back from a single article preview
   // restores the same search + group selection the trainer left on.
@@ -127,7 +104,7 @@ const BlogPage = () => {
 
       <BlogFilterToolbar
         filteredCount={blogs.length}
-        totalCount={allBlogs.length}
+        totalCount={totalBlogs}
         hasFilter={hasFilter}
         query={query}
         onQueryChange={handleQueryChange}
@@ -155,7 +132,6 @@ const BlogPage = () => {
           isError={isError}
           error={error}
         />
-        {isLoading && <Loader />}
       </ScrollableArea>
 
       <LessonGroupsSheet open={groupsSheetOpen} onClose={() => setGroupsSheetOpen(false)} />
