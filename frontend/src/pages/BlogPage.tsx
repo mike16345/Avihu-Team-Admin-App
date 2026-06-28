@@ -37,7 +37,7 @@ const getNextSelectedGroups = (selectedGroups: ILessonGroup[], group: ILessonGro
 const BlogPage = () => {
   const navigate = useNavigate();
 
-  const { searchParams, setParam } = useStableSearchParams();
+  const { searchParams, setParam, setParams } = useStableSearchParams();
   const { data: lessonGroups } = useLessonGroupsQuery();
   const groups = useMemo(() => lessonGroups?.data ?? [], [lessonGroups]);
   const query = searchParams.get("q") ?? "";
@@ -92,8 +92,7 @@ const BlogPage = () => {
   };
 
   const handleClearFilters = () => {
-    setParam("q", null, { replace: true });
-    setParam("groups", null, { replace: true });
+    setParams({ q: null, groups: null }, { replace: true });
   };
 
   const hasFilter = selectedGroups.length > 0 || query.trim().length > 0;

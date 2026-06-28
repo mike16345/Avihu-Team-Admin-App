@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import UserForm, { type UserFormErrors, type UserFormValues } from "@/components/forms/UserForm";
 import Loader from "@/components/ui/Loader";
 import ErrorPage from "./ErrorPage";
@@ -52,6 +52,7 @@ const buildUserPayload = (values: UserFormValues): UserFormPayload => ({
 
 const UserFormPage = () => {
   const { id } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const isEdit = !!id;
 
@@ -138,17 +139,7 @@ const UserFormPage = () => {
   };
 
   const handleBack = () => {
-    // Both flows (add + edit) prefer browser back so the previous
-    // URL — and its filters / scroll position — are restored. We
-    // only fall back to /users when there is no real history entry
-    // behind us (e.g. arrived here via a deep link). Going to "/"
-    // was wrong for the add-user flow because it dropped the
-    // trainer onto the home page instead of the list they came
-    // from.
-    const canGoBack =
-      typeof window !== "undefined" &&
-      typeof window.history.state?.idx === "number" &&
-      window.history.state.idx > 0;
+    const canGoBack = location.key !== "default";
 
     if (canGoBack) {
       navigate(-1);

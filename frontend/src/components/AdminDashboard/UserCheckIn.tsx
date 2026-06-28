@@ -12,7 +12,6 @@ import { FULL_DAY_STALE_TIME, HOUR_STALE_TIME } from "@/constants/constants";
 import { weightTab } from "@/pages/UserDashboard";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { userFullName } from "@/lib/utils";
-2;
 import useUsersQuery from "@/hooks/queries/user/useUsersQuery";
 import { deriveAccountStatus } from "@/lib/userStatus";
 import { UserAvatar } from "../users/UserAvatar";
