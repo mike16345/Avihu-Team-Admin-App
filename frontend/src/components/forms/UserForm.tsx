@@ -67,20 +67,8 @@ const UserForm = ({
                 firstName={values.firstName}
                 lastName={values.lastName}
                 phone={values.phone}
-                onEmailChange={onEmailChange}
-                onFirstNameChange={onFirstNameChange}
-                onLastNameChange={onLastNameChange}
-                onPhoneChange={onPhoneChange}
+                onChange={onChange}
               />
-          <form onSubmit={onSubmit} className="flex flex-col" data-testid="user-form">
-            <PersonalDetailsSection
-              email={values.email}
-              errors={errors}
-              firstName={values.firstName}
-              lastName={values.lastName}
-              phone={values.phone}
-              onChange={onChange}
-            />
 
               <PlanAndCoachingSection
                 dateFinished={values.dateFinished}
@@ -88,13 +76,10 @@ const UserForm = ({
                 planType={values.planType}
                 remindIn={values.remindIn}
                 subTrainerId={values.subTrainerId}
+                onChange={onChange}
                 dateStarted={values.dateStarted}
                 onDateStartedChange={onDateStartedChange}
                 onApplyDatePreset={onApplyDatePreset}
-                onDateFinishedChange={onDateFinishedChange}
-                onPlanTypeChange={onPlanTypeChange}
-                onRemindInChange={onRemindInChange}
-                onSubTrainerChange={onSubTrainerChange}
               />
 
               <DietaryRestrictionsSection
