@@ -9,21 +9,26 @@ import {
   FaMinus,
   FaRocket,
 } from "react-icons/fa6";
-
+import { useParams } from "react-router";
 import {
-  buildMockStepsDataset,
+  buildStepsDataset,
   estimateCaloriesFromSteps,
   type DailySteps,
   type StepsWeek,
   type TraineeBiometrics,
 } from "./stepsProgressionUtils";
+import useStepsProgressQuery from "@/hooks/queries/steps/useStepsProgressQuery";
 
 const DAY_LABELS = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"] as const;
 
 const formatNumber = (value: number) => value.toLocaleString("he-IL");
 
 const StepsProgression = () => {
-  const dataset = useMemo(() => buildMockStepsDataset(), []);
+  const { id: userId } = useParams();
+
+  const { data, isLoading, isError } = useStepsProgressQuery(userId);
+  const records = data?.data ?? [];
+  const dataset = useMemo(() => buildStepsDataset(records), [records]);
   const [weekIndex, setWeekIndex] = useState(dataset.weeks.length - 1);
 
   const week = dataset.weeks[weekIndex];
@@ -36,6 +41,36 @@ const StepsProgression = () => {
   const goNext = () => canGoForward && setWeekIndex((i) => i + 1);
 
   const previousWeek = weekIndex > 0 ? dataset.weeks[weekIndex - 1] : null;
+
+  if (!userId) {
+    return (
+      <StepsStateMessage
+        message={
+          "\u05d1\u05d7\u05e8 \u05de\u05ea\u05d0\u05de\u05df \u05db\u05d3\u05d9 \u05dc\u05d4\u05e6\u05d9\u05d2 \u05e6\u05e2\u05d3\u05d9\u05dd"
+        }
+      />
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <StepsStateMessage
+        message={
+          "\u05d8\u05d5\u05e2\u05df \u05e0\u05ea\u05d5\u05e0\u05d9 \u05e6\u05e2\u05d3\u05d9\u05dd..."
+        }
+      />
+    );
+  }
+
+  if (isError) {
+    return (
+      <StepsStateMessage
+        message={
+          "\u05dc\u05d0 \u05d4\u05e6\u05dc\u05d7\u05e0\u05d5 \u05dc\u05d8\u05e2\u05d5\u05df \u05d0\u05ea \u05e0\u05ea\u05d5\u05e0\u05d9 \u05d4\u05e6\u05e2\u05d3\u05d9\u05dd"
+        }
+      />
+    );
+  }
 
   return (
     <div dir="rtl" className="flex flex-col gap-5 font-heebo">
@@ -71,6 +106,17 @@ const StepsProgression = () => {
 
 export default StepsProgression;
 
+function StepsStateMessage({ message }: { message: string }) {
+  return (
+    <div
+      dir="rtl"
+      className="rounded-2xl border border-slate-200/80 bg-white p-5 text-sm font-bold text-slate-600 shadow-sm dark:border-slate-800/80 dark:bg-slate-900 dark:text-slate-300"
+    >
+      {message}
+    </div>
+  );
+}
+
 /* ===================== Weekly KPI strip ===================== */
 
 function WeeklyKpiStrip({
@@ -87,10 +133,7 @@ function WeeklyKpiStrip({
   // Pick "today" = the latest day in the week that has sync + actual
   // activity. For historical weeks the last day of the week is used.
   const todayIdx = isCurrentWeek
-    ? week.days.reduce(
-        (best, day, idx) => (day.hadSync && day.steps > 0 ? idx : best),
-        -1
-      )
+    ? week.days.reduce((best, day, idx) => (day.hadSync && day.steps > 0 ? idx : best), -1)
     : week.days.length - 1;
   const today = todayIdx >= 0 ? week.days[todayIdx] : week.days[week.days.length - 1];
   const todaySteps = today?.steps ?? 0;
@@ -101,9 +144,7 @@ function WeeklyKpiStrip({
   const overshoot = Math.max(0, weekTotal - week.weeklyGoal);
   const overshootCalories = estimateCaloriesFromSteps(overshoot, trainee);
 
-  const prevTotal = previousWeek
-    ? previousWeek.days.reduce((acc, day) => acc + day.steps, 0)
-    : 0;
+  const prevTotal = previousWeek ? previousWeek.days.reduce((acc, day) => acc + day.steps, 0) : 0;
   const deltaSteps = previousWeek ? weekTotal - prevTotal : 0;
   const deltaPct = previousWeek && prevTotal > 0 ? Math.round((deltaSteps / prevTotal) * 100) : 0;
 
@@ -139,10 +180,7 @@ function WeeklyKpiStrip({
       <KpiTile
         label="חריגה שבועית"
         icon={
-          <FaRocket
-            size={12}
-            className={overshoot > 0 ? "text-emerald-600" : "text-slate-400"}
-          />
+          <FaRocket size={12} className={overshoot > 0 ? "text-emerald-600" : "text-slate-400"} />
         }
         value={`${overshoot > 0 ? "+" : ""}${formatNumber(overshoot)}`}
         unit="צעדים"
@@ -254,12 +292,13 @@ function KpiTile({
           <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">{unit}</span>
         )}
       </div>
-      {secondary && (
-        <p className="text-[11px] text-slate-500 dark:text-slate-400">{secondary}</p>
-      )}
+      {secondary && <p className="text-[11px] text-slate-500 dark:text-slate-400">{secondary}</p>}
       {typeof progressPct === "number" && (
         <div className="mt-0.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-          <div className={`h-full rounded-full ${t.progress}`} style={{ width: `${progressPct}%` }} />
+          <div
+            className={`h-full rounded-full ${t.progress}`}
+            style={{ width: `${progressPct}%` }}
+          />
         </div>
       )}
     </div>
@@ -268,15 +307,17 @@ function KpiTile({
 
 /* ===================== Sync badge ===================== */
 
-function SyncBadge({ hoursAgo }: { hoursAgo: number }) {
-  const isFresh = hoursAgo <= 6;
-  const isStale = hoursAgo > 24;
+function SyncBadge({ hoursAgo }: { hoursAgo: number | null }) {
+  const isFresh = hoursAgo !== null && hoursAgo <= 6;
+  const isStale = hoursAgo !== null && hoursAgo > 24;
   const label =
-    hoursAgo < 1
-      ? "כעת"
-      : hoursAgo < 24
-        ? `לפני ${hoursAgo} שעות`
-        : `לפני יותר מ-${Math.floor(hoursAgo / 24)} ימים`;
+    hoursAgo === null
+      ? "\u05d8\u05e8\u05dd \u05e1\u05d5\u05e0\u05db\u05e8\u05df"
+      : hoursAgo < 1
+        ? "\u05db\u05e2\u05ea"
+        : hoursAgo < 24
+          ? `\u05dc\u05e4\u05e0\u05d9 ${hoursAgo} \u05e9\u05e2\u05d5\u05ea`
+          : `\u05dc\u05e4\u05e0\u05d9 \u05d9\u05d5\u05ea\u05e8 \u05de-${Math.floor(hoursAgo / 24)} \u05d9\u05de\u05d9\u05dd`;
   const tone = isStale
     ? "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900/40 dark:bg-rose-950/40 dark:text-rose-300"
     : isFresh
@@ -288,7 +329,7 @@ function SyncBadge({ hoursAgo }: { hoursAgo: number }) {
       className={`inline-flex w-fit items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-bold ${tone}`}
     >
       <span className="h-1.5 w-1.5 rounded-full bg-current" />
-      נסנכרן {label}
+      {hoursAgo === null ? label : `\u05e1\u05d5\u05e0\u05db\u05e8\u05df ${label}`}
     </div>
   );
 }
@@ -329,9 +370,7 @@ function WeekChartCard({
             icon={<FaChevronRight size={11} />}
           />
           <div className="text-center">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-              {week.label}
-            </h3>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">{week.label}</h3>
             <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
               {week.startDate} – {week.endDate}
             </p>
@@ -349,12 +388,7 @@ function WeekChartCard({
         </div>
       </div>
 
-      <WeekBars
-        days={week.days}
-        dailyGoal={week.dailyGoal}
-        maxBar={maxBar}
-        trainee={trainee}
-      />
+      <WeekBars days={week.days} dailyGoal={week.dailyGoal} maxBar={maxBar} trainee={trainee} />
     </section>
   );
 }
@@ -662,15 +696,16 @@ function WeeklyGoalsStrip({
                 </p>
                 <p className="mt-1 text-[12px] font-bold text-emerald-700 dark:text-emerald-300">
                   +<span className="font-extrabold">{formatNumber(overshoot)}</span> צעדים{" "}
-                  <span className="mx-1 text-emerald-400">≈</span>{" "}
-                  +<span className="font-extrabold">{formatNumber(overshootCalories)}</span>{" "}
-                  קלוריות
+                  <span className="mx-1 text-emerald-400">≈</span> +
+                  <span className="font-extrabold">{formatNumber(overshootCalories)}</span> קלוריות
                 </p>
               </div>
             )}
 
             <div className="flex items-center gap-1.5 border-t border-slate-100 dark:border-slate-800 pt-2 text-[12px] text-slate-600 dark:text-slate-300">
-              <span aria-hidden="true" className="text-sm">🔥</span>
+              <span aria-hidden="true" className="text-sm">
+                🔥
+              </span>
               <span>
                 ≈{" "}
                 <span className="text-base font-extrabold text-rose-600 dark:text-rose-400">
@@ -686,15 +721,7 @@ function WeeklyGoalsStrip({
   );
 }
 
-function GoalRow({
-  label,
-  value,
-  suffix,
-}: {
-  label: string;
-  value: string;
-  suffix?: string;
-}) {
+function GoalRow({ label, value, suffix }: { label: string; value: string; suffix?: string }) {
   return (
     <div className="flex items-baseline justify-between gap-2">
       <dt className="text-[12px] font-bold text-slate-600 dark:text-slate-300">{label}</dt>
@@ -703,12 +730,9 @@ function GoalRow({
           {value}
         </span>
         {suffix && (
-          <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500">
-            {suffix}
-          </span>
+          <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500">{suffix}</span>
         )}
       </dd>
     </div>
   );
 }
-

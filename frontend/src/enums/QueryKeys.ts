@@ -18,6 +18,7 @@ export enum QueryKeys {
   CARDIO_WORKOUT_PRESET = "cardio-workout-preset-",
   USER_PROGRESS_NOTES = "user-progress-notes-",
   USER_MEASUREMENTS = "user-measurements-",
+  USER_STEPS_PROGRESS = "user-steps-progress-",
   LESSON_GROUPS = "lesson-groups",
   FORM_PRESETS = "form-presets",
   FORM_PRESET = "form-preset-",

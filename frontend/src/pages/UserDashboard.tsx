@@ -254,7 +254,11 @@ export const UserDashboard = () => {
       )}
 
       {mainTab === "progress" && (
-        <ProgressTabPanel activeSubTab={progressSub} onSubTabChange={setProgressSub} />
+        <ProgressTabPanel
+          activeSubTab={progressSub}
+          onSubTabChange={setProgressSub}
+          userId={currentUser?._id}
+        />
       )}
 
       {mainTab === "workout" && (
