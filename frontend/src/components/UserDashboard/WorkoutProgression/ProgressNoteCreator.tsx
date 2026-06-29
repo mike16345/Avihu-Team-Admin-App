@@ -34,6 +34,9 @@ const toggleExerciseSelection = (selectedExercises: string[], name: string) => {
   return [...selectedExercises, name];
 };
 
+const getSelectedExerciseCount = (selectedByMuscleGroup: Record<string, string[]>) =>
+  Object.values(selectedByMuscleGroup).reduce((count, exercises) => count + exercises.length, 0);
+
 const getOptionalDate = (dateValue: string) => {
   if (!dateValue) return undefined;
   return new Date(dateValue);
@@ -70,7 +73,7 @@ export function ProgressNoteCreator({
   const [startDate, setStartDate] = useState(getDefaultStartDate);
   const [endDate, setEndDate] = useState(() => formatDateInput(new Date()));
   const [muscleGroup, setMuscleGroup] = useState<string>(selectableGroups[0] || "");
-  const [selectedExercises, setSelectedExercises] = useState<string[]>([]);
+  const [selectedByMuscleGroup, setSelectedByMuscleGroup] = useState<Record<string, string[]>>({});
   const [manualText, setManualText] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -78,29 +81,42 @@ export function ProgressNoteCreator({
     () => flatExercises.filter((exercise) => exercise.group === muscleGroup),
     [flatExercises, muscleGroup]
   );
+  const selectedExercises = selectedByMuscleGroup[muscleGroup] || [];
+  const selectedExerciseCount = getSelectedExerciseCount(selectedByMuscleGroup);
 
   const selectExercise = (name: string) => {
-    setSelectedExercises((previous) => toggleExerciseSelection(previous, name));
+    setSelectedByMuscleGroup((previous) => ({
+      ...previous,
+      [muscleGroup]: toggleExerciseSelection(previous[muscleGroup] || [], name),
+    }));
     setManualText(null);
   };
 
   const generatedNote = useMemo(() => {
-    if (selectedExercises.length === 0) return "";
+    if (selectedExerciseCount === 0) return "";
 
     return generateExerciseProgressNote({
       userName,
-      selectedByMuscleGroup: { [muscleGroup]: selectedExercises },
-      muscleGroupOrder: [muscleGroup],
+      selectedByMuscleGroup,
+      muscleGroupOrder: selectableGroups,
       dateRange: {
         from: getOptionalDate(startDate),
         to: getOptionalDate(endDate),
       },
       recordedWorkouts,
     });
-  }, [selectedExercises, muscleGroup, startDate, endDate, recordedWorkouts, userName]);
+  }, [
+    selectedByMuscleGroup,
+    selectedExerciseCount,
+    selectableGroups,
+    startDate,
+    endDate,
+    recordedWorkouts,
+    userName,
+  ]);
 
   const noteText = getNoteText(manualText, generatedNote);
-  const hasSelectedExercises = selectedExercises.length > 0;
+  const hasSelectedExercises = selectedExerciseCount > 0;
   const hasAvailableExercises = availableExercises.length > 0;
 
   const regenerate = () => setManualText(null);
@@ -183,11 +199,7 @@ export function ProgressNoteCreator({
               <CustomSelect
                 items={selectableGroups.map((group) => ({ name: group, value: group }))}
                 selectedValue={muscleGroup}
-                onValueChange={(nextGroup) => {
-                  setMuscleGroup(nextGroup);
-                  setSelectedExercises([]);
-                  setManualText(null);
-                }}
+                onValueChange={setMuscleGroup}
                 className="h-10 rounded-xl border-slate-200 bg-white text-sm font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
               />
             </div>
