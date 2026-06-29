@@ -12,6 +12,7 @@ export type StepsStatus = "on-track" | "slipping" | "off-track";
 export interface DailySteps {
   steps: number;
   hadSync: boolean;
+  dailyGoal: number;
 }
 
 export interface StepsWeek {
@@ -70,7 +71,7 @@ export interface WeekSummary {
 }
 
 const DAILY_GOAL = 10000;
-const WEEKS_TO_DISPLAY = 8;
+const MAX_WEEKS_TO_DISPLAY = 8;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 const getLocalDayKey = (date: Date) => {
@@ -83,6 +84,30 @@ const startOfWeek = (date: Date) => {
   copy.setHours(0, 0, 0, 0);
   copy.setDate(copy.getDate() - copy.getDay());
   return copy;
+};
+
+const parseDayKey = (date: string | Date) => {
+  if (date instanceof Date) return date;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(date)) return new Date(`${date}T00:00:00`);
+  return new Date(date);
+};
+
+const getFirstDisplayWeekStart = (records: IStepsProgress[], currentWeekStart: Date) => {
+  const earliestRecordDate = records.reduce<Date | null>((earliest, record) => {
+    const parsedDate = parseDayKey(record.date);
+    if (Number.isNaN(parsedDate.getTime())) return earliest;
+    if (!earliest || parsedDate < earliest) return parsedDate;
+    return earliest;
+  }, null);
+
+  if (!earliestRecordDate) return currentWeekStart;
+
+  const earliestWeekStart = startOfWeek(earliestRecordDate);
+  const weeksWithRecords =
+    Math.floor((currentWeekStart.getTime() - earliestWeekStart.getTime()) / (7 * DAY_MS)) + 1;
+  const weeksToDisplay = Math.max(1, Math.min(MAX_WEEKS_TO_DISPLAY, weeksWithRecords));
+
+  return new Date(currentWeekStart.getTime() - (weeksToDisplay - 1) * 7 * DAY_MS);
 };
 
 const formatDisplayDate = (date: Date) =>
@@ -121,9 +146,11 @@ export const buildStepsDataset = (
 ): StepsDataset => {
   const byDate = new Map(records.map((record) => [record.date, record]));
   const currentWeekStart = startOfWeek(new Date());
-  const firstWeekStart = new Date(currentWeekStart.getTime() - (WEEKS_TO_DISPLAY - 1) * 7 * DAY_MS);
+  const firstWeekStart = getFirstDisplayWeekStart(records, currentWeekStart);
+  const weeksToDisplay =
+    Math.floor((currentWeekStart.getTime() - firstWeekStart.getTime()) / (7 * DAY_MS)) + 1;
 
-  const weeks: StepsWeek[] = Array.from({ length: WEEKS_TO_DISPLAY }, (_, weekIndex) => {
+  const weeks: StepsWeek[] = Array.from({ length: weeksToDisplay }, (_, weekIndex) => {
     const weekStart = new Date(firstWeekStart.getTime() + weekIndex * 7 * DAY_MS);
     const dayGoals: number[] = [];
     const days: DailySteps[] = Array.from({ length: 7 }, (_, dayIndex) => {
@@ -136,13 +163,14 @@ export const buildStepsDataset = (
       return {
         steps: record?.steps ?? 0,
         hadSync: !!record,
+        dailyGoal,
       };
     });
     const weekEnd = new Date(weekStart.getTime() + 6 * DAY_MS);
     const weeklyGoal = dayGoals.reduce((sum, goal) => sum + goal, 0);
 
     return {
-      label: getWeekLabel(weekIndex, WEEKS_TO_DISPLAY),
+      label: getWeekLabel(weekIndex, weeksToDisplay),
       startDate: formatDisplayDate(weekStart),
       endDate: formatDisplayDate(weekEnd),
       dailyGoal: Math.round(weeklyGoal / 7),
@@ -166,7 +194,7 @@ export const summarizeStepsWeek = (week: StepsWeek): WeekSummary => {
   let streakDays = 0;
   for (let i = week.days.length - 1; i >= 0; i--) {
     const day = week.days[i];
-    if (day.hadSync && day.steps >= week.dailyGoal) {
+    if (day.hadSync && day.steps >= day.dailyGoal) {
       streakDays++;
       continue;
     }

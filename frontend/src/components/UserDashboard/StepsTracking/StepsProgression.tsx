@@ -23,24 +23,37 @@ const DAY_LABELS = ["ראשון", "שני", "שלישי", "רביעי", "חמי�
 
 const formatNumber = (value: number) => value.toLocaleString("he-IL");
 
+const getDefaultSelectedDay = (isCurrentWeek: boolean) =>
+  isCurrentWeek ? new Date().getDay() : DAY_LABELS.length - 1;
+
 const StepsProgression = () => {
   const { id: userId } = useParams();
 
   const { data, isLoading, isError } = useStepsProgressQuery(userId);
   const records = data?.data ?? [];
   const dataset = useMemo(() => buildStepsDataset(records), [records]);
-  const [weekIndex, setWeekIndex] = useState(dataset.weeks.length - 1);
+  const latestWeekIndex = Math.max(0, dataset.weeks.length - 1);
+  const [weekIndex, setWeekIndex] = useState(latestWeekIndex);
+  const [selectedDay, setSelectedDay] = useState(getDefaultSelectedDay(true));
 
-  const week = dataset.weeks[weekIndex];
+  const week = dataset.weeks[weekIndex] ?? dataset.weeks[latestWeekIndex];
 
-  const isCurrentWeek = weekIndex === dataset.weeks.length - 1;
+  const isCurrentWeek = weekIndex === latestWeekIndex;
   const canGoBack = weekIndex > 0;
-  const canGoForward = weekIndex < dataset.weeks.length - 1;
+  const canGoForward = weekIndex < latestWeekIndex;
 
   const goPrev = () => canGoBack && setWeekIndex((i) => i - 1);
   const goNext = () => canGoForward && setWeekIndex((i) => i + 1);
 
   const previousWeek = weekIndex > 0 ? dataset.weeks[weekIndex - 1] : null;
+
+  useEffect(() => {
+    setWeekIndex(latestWeekIndex);
+  }, [latestWeekIndex]);
+
+  useEffect(() => {
+    setSelectedDay(getDefaultSelectedDay(isCurrentWeek));
+  }, [isCurrentWeek, weekIndex]);
 
   if (!userId) {
     return (
@@ -79,6 +92,7 @@ const StepsProgression = () => {
         previousWeek={previousWeek}
         trainee={dataset.trainee}
         isCurrentWeek={isCurrentWeek}
+        selectedDayIndex={selectedDay}
       />
 
       <SyncBadge hoursAgo={dataset.lastSyncedHoursAgo} />
@@ -92,6 +106,8 @@ const StepsProgression = () => {
         onPrev={goPrev}
         onNext={goNext}
         trainee={dataset.trainee}
+        selectedDay={selectedDay}
+        onSelectDay={setSelectedDay}
       />
 
       <WeeklyGoalsStrip
@@ -124,19 +140,17 @@ function WeeklyKpiStrip({
   previousWeek,
   trainee,
   isCurrentWeek,
+  selectedDayIndex,
 }: {
   week: StepsWeek;
   previousWeek: StepsWeek | null;
   trainee: TraineeBiometrics;
   isCurrentWeek: boolean;
+  selectedDayIndex: number;
 }) {
-  // Pick "today" = the latest day in the week that has sync + actual
-  // activity. For historical weeks the last day of the week is used.
-  const todayIdx = isCurrentWeek
-    ? week.days.reduce((best, day, idx) => (day.hadSync && day.steps > 0 ? idx : best), -1)
-    : week.days.length - 1;
-  const today = todayIdx >= 0 ? week.days[todayIdx] : week.days[week.days.length - 1];
-  const todaySteps = today?.steps ?? 0;
+  const selectedDay = week.days[selectedDayIndex] ?? week.days[week.days.length - 1];
+  const selectedDaySteps = selectedDay?.steps ?? 0;
+  const selectedDailyGoal = selectedDay?.dailyGoal ?? week.dailyGoal;
 
   const weekTotal = week.days.reduce((acc, day) => acc + day.steps, 0);
   const weekPct = Math.round((weekTotal / week.weeklyGoal) * 100);
@@ -154,13 +168,15 @@ function WeeklyKpiStrip({
       <KpiTile
         label={isCurrentWeek ? "יעד צעדים יומי" : "יעד צעדים יומי · סיום שבוע"}
         icon={<FaBullseye size={12} className="text-blue-600" />}
-        value={formatNumber(todaySteps)}
+        value={formatNumber(selectedDaySteps)}
         unit="צעדים"
-        secondary={`מתוך ${formatNumber(week.dailyGoal)} · ${
-          week.dailyGoal ? Math.round((todaySteps / week.dailyGoal) * 100) : 0
+        secondary={`מתוך ${formatNumber(selectedDailyGoal)} · ${
+          selectedDailyGoal ? Math.round((selectedDaySteps / selectedDailyGoal) * 100) : 0
         }%`}
         progressPct={
-          week.dailyGoal ? Math.min(100, Math.round((todaySteps / week.dailyGoal) * 100)) : 0
+          selectedDailyGoal
+            ? Math.min(100, Math.round((selectedDaySteps / selectedDailyGoal) * 100))
+            : 0
         }
         tone="blue"
       />
@@ -345,6 +361,8 @@ function WeekChartCard({
   onPrev,
   onNext,
   trainee,
+  selectedDay,
+  onSelectDay,
 }: {
   week: StepsWeek;
   weekIndex: number;
@@ -354,8 +372,15 @@ function WeekChartCard({
   onPrev: () => void;
   onNext: () => void;
   trainee: TraineeBiometrics;
+  selectedDay: number;
+  onSelectDay: (index: number) => void;
 }) {
-  const maxBar = Math.max(week.dailyGoal * 1.2, ...week.days.map((day) => day.steps));
+  const selectedDailyGoal = week.days[selectedDay]?.dailyGoal ?? week.dailyGoal;
+  const maxBar = Math.max(
+    selectedDailyGoal * 1.2,
+    ...week.days.map((day) => day.steps),
+    ...week.days.map((day) => day.dailyGoal)
+  );
 
   return (
     <section className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-5 shadow-sm">
@@ -388,7 +413,14 @@ function WeekChartCard({
         </div>
       </div>
 
-      <WeekBars days={week.days} dailyGoal={week.dailyGoal} maxBar={maxBar} trainee={trainee} />
+      <WeekBars
+        days={week.days}
+        dailyGoal={selectedDailyGoal}
+        maxBar={maxBar}
+        trainee={trainee}
+        selectedDay={selectedDay}
+        onSelectDay={onSelectDay}
+      />
     </section>
   );
 }
@@ -422,11 +454,15 @@ function WeekBars({
   dailyGoal,
   maxBar,
   trainee,
+  selectedDay,
+  onSelectDay,
 }: {
   days: DailySteps[];
   dailyGoal: number;
   maxBar: number;
   trainee: TraineeBiometrics;
+  selectedDay: number;
+  onSelectDay: (index: number) => void;
 }) {
   const goalLinePct = Math.min(96, (dailyGoal / maxBar) * 100);
 
@@ -451,9 +487,11 @@ function WeekBars({
             <DayColumn
               key={idx}
               day={day}
-              dailyGoal={dailyGoal}
+              dailyGoal={day.dailyGoal}
               maxBar={maxBar}
               trainee={trainee}
+              isSelected={idx === selectedDay}
+              onSelect={() => onSelectDay(idx)}
             />
           ))}
         </div>
@@ -463,7 +501,13 @@ function WeekBars({
       <div className="mt-3 grid grid-cols-7 gap-4 px-1">
         {days.map((_, idx) => (
           <div key={idx} className="flex items-center justify-center">
-            <span className="text-sm font-bold text-slate-700 dark:text-slate-200">
+            <span
+              className={`text-sm font-bold ${
+                idx === selectedDay
+                  ? "rounded-full bg-blue-50 px-2 py-0.5 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300"
+                  : "text-slate-700 dark:text-slate-200"
+              }`}
+            >
               {DAY_LABELS[idx]}
             </span>
           </div>
@@ -502,11 +546,15 @@ function DayColumn({
   dailyGoal,
   maxBar,
   trainee,
+  isSelected,
+  onSelect,
 }: {
   day: DailySteps;
   dailyGoal: number;
   maxBar: number;
   trainee: TraineeBiometrics;
+  isSelected: boolean;
+  onSelect: () => void;
 }) {
   const noData = !day.hadSync;
   const heightPct = maxBar
@@ -522,7 +570,13 @@ function DayColumn({
   // from the bottom guarantees the percentage height resolves against
   // a definite parent height (the h-56 plot area).
   return (
-    <div className="relative h-full">
+    <button
+      type="button"
+      onClick={onSelect}
+      className={`relative h-full w-full appearance-none bg-transparent p-0 text-inherit transition-opacity ${
+        isSelected ? "opacity-100" : "opacity-80 hover:opacity-100"
+      }`}
+    >
       {/* number chip pinned above the bar's top */}
       <div
         className="absolute left-1/2 z-20 -translate-x-1/2 whitespace-nowrap"
@@ -583,7 +637,7 @@ function DayColumn({
           </div>
         )}
       </div>
-    </div>
+    </button>
   );
 }
 
