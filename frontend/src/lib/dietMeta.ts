@@ -4,6 +4,7 @@
  * areas feel like one design system.
  */
 import { DietGoal, DietaryRestriction, IDietPlanPreset, IMeal } from "@/interfaces/IDietPlan";
+import { DIET_CALORIES_PER_SERVING } from "@/constants/dietCalories";
 
 export type Tone = { bg: string; text: string; border: string };
 
@@ -73,13 +74,6 @@ export const formatDietNumber = (value: unknown) => {
   });
 };
 
-const CALORIES_PER_SERVING = {
-  protein: 150,
-  carbs: 120,
-  fats: 100,
-  veggies: 30,
-} as const;
-
 const sumMealQuantity = (
   meals: IMeal[] | undefined,
   key: "totalProtein" | "totalCarbs" | "totalFats" | "totalVeggies"
@@ -122,10 +116,10 @@ export const resolveDietPresetMeta = (preset: Partial<IDietPlanPreset>) => {
     (freeCalories ?? 0) > 0;
 
   const derivedCalories = hasDerivedValues
-    ? (proteinServings ?? 0) * CALORIES_PER_SERVING.protein +
-      (carbServings ?? 0) * CALORIES_PER_SERVING.carbs +
-      (fatServings ?? 0) * CALORIES_PER_SERVING.fats +
-      (veggieServings ?? 0) * CALORIES_PER_SERVING.veggies +
+    ? (proteinServings ?? 0) * DIET_CALORIES_PER_SERVING.protein +
+      (carbServings ?? 0) * DIET_CALORIES_PER_SERVING.carbs +
+      (fatServings ?? 0) * DIET_CALORIES_PER_SERVING.fats +
+      (veggieServings ?? 0) * DIET_CALORIES_PER_SERVING.veggies +
       (freeCalories ?? 0)
     : undefined;
 
