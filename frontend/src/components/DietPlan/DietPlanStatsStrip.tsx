@@ -1,6 +1,7 @@
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { FaBowlFood, FaWeightScale, FaFire, FaClipboardCheck } from "react-icons/fa6";
+import { DIET_CALORIES_PER_SERVING } from "@/constants/dietCalories";
 import type { IDietPlan } from "@/interfaces/IDietPlan";
 
 interface StatProps {
@@ -50,13 +51,6 @@ const StatCard: React.FC<StatProps> = ({ icon, label, value, tone }) => {
   );
 };
 
-const KCAL_PER_UNIT = {
-  protein: 100,
-  carbs: 120,
-  fats: 90,
-  veggies: 25,
-} as const;
-
 const DietPlanStatsStrip: React.FC = () => {
   const { watch } = useFormContext<IDietPlan>();
   const meals = watch("meals") || [];
@@ -75,10 +69,10 @@ const DietPlanStatsStrip: React.FC = () => {
   );
 
   const totalKcal =
-    totals.protein * KCAL_PER_UNIT.protein +
-    totals.carbs * KCAL_PER_UNIT.carbs +
-    totals.fats * KCAL_PER_UNIT.fats +
-    totals.veggies * KCAL_PER_UNIT.veggies +
+    totals.protein * DIET_CALORIES_PER_SERVING.protein +
+    totals.carbs * DIET_CALORIES_PER_SERVING.carbs +
+    totals.fats * DIET_CALORIES_PER_SERVING.fats +
+    totals.veggies * DIET_CALORIES_PER_SERVING.veggies +
     freeCalories;
 
   const macroSummary = `${totals.protein} · ${totals.carbs} · ${totals.fats}`;
