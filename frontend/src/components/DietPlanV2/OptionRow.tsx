@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
-import { FaCloudArrowDown, FaRobot, FaTrashCan } from "react-icons/fa6";
+import { useEffect, useRef, useState } from "react";
+import { FaTrashCan } from "react-icons/fa6";
 
 import type { DietV2MealMacroMode, DietV2Option, DietV2Unit } from "@/interfaces/IDietPlanV2";
 import { DIET_V2_UNIT_LABELS, DIET_V2_UNITS } from "@/interfaces/IDietPlanV2";
@@ -29,6 +29,7 @@ interface OptionRowProps {
 
 const OptionRow: React.FC<OptionRowProps> = ({ option, categoryKind, macroMode = "auto", onChange, onRemove }) => {
   const showAiMeta = macroMode !== "manual";
+  const [expanded, setExpanded] = useState(false);
   // Background upgrade: when a row was added via Quick-Add and no
   // local food matched (estimated=true), try Open Food Facts once
   // for its name. On a hit we swap in the real macros and drop the
@@ -93,64 +94,80 @@ const OptionRow: React.FC<OptionRowProps> = ({ option, categoryKind, macroMode =
   return (
     <div
       dir="rtl"
-      className="group flex flex-wrap items-center gap-3 rounded-2xl border border-blue-100 bg-white px-3.5 py-2.5 shadow-sm transition-all hover:border-blue-200 hover:shadow-md hover:shadow-blue-500/5 dark:border-blue-900/40 dark:bg-slate-900 dark:hover:border-blue-800/60"
+      onClick={() => setExpanded((v) => !v)}
+      className="group flex cursor-pointer flex-col gap-2 rounded-xl border border-blue-100 bg-white px-3 py-2 shadow-sm transition-all hover:border-blue-200 hover:shadow-md hover:shadow-blue-500/5 dark:border-blue-900/40 dark:bg-slate-900 dark:hover:border-blue-800/60"
     >
-      {/* Name + source badge */}
-      <div className="flex min-w-0 flex-1 items-center gap-2">
-        <span className="truncate text-sm font-bold text-slate-800 dark:text-slate-100">
+      {/* Row header: name + inline qty/unit editor + delete. The
+          quantity control lives here (not duplicated in the expanded
+          view) so the trainer edits in place. stopPropagation on the
+          inputs so clicking them doesn't toggle the row. */}
+      <div className="flex items-center gap-2">
+        <span
+          className={`min-w-0 flex-1 text-sm font-bold text-slate-800 dark:text-slate-100 ${
+            expanded ? "break-words" : "truncate"
+          }`}
+        >
           {option.foodName}
         </span>
-        {showAiMeta && <SourceBadge estimated={option.estimated} cloudSourced={option.cloudSourced} />}
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="flex h-7 shrink-0 items-stretch overflow-hidden rounded-md border border-blue-200 bg-white focus-within:border-blue-400 focus-within:ring-1 focus-within:ring-blue-200/60 dark:border-blue-900/40 dark:bg-slate-900"
+        >
+          <input
+            type="number"
+            inputMode="numeric"
+            min={0}
+            value={option.quantity || ""}
+            onChange={(e) => onQuantityChange(e.target.value)}
+            aria-label="כמות"
+            className="w-10 border-0 bg-transparent px-1 text-center text-[12px] font-extrabold text-slate-800 focus:outline-none dark:text-slate-100"
+          />
+          <span className="my-1 w-px bg-blue-100 dark:bg-blue-900/40" aria-hidden />
+          <select
+            value={option.unit}
+            onChange={(e) => onUnitChange(e.target.value as DietV2Unit)}
+            aria-label="יחידת מדידה"
+            className="appearance-none border-0 bg-transparent px-1.5 text-[11px] font-bold text-slate-600 focus:outline-none dark:text-slate-300"
+          >
+            {DIET_V2_UNITS.map((unit) => (
+              <option key={unit} value={unit}>
+                {DIET_V2_UNIT_LABELS[unit]}
+              </option>
+            ))}
+          </select>
+        </div>
+        <button
+          type="button"
+          aria-label="הסר אפשרות"
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove();
+          }}
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-300 transition-colors hover:bg-rose-50 hover:text-rose-600 group-hover:text-slate-400 dark:hover:bg-rose-950/40"
+        >
+          <FaTrashCan size={11} />
+        </button>
       </div>
 
-      {/* Macros chips — calorie hero + 3 micro pills. Hidden in
-          manual mode (trainer authors meal-level macros, the
-          options exist only as suggestions). */}
-      {showAiMeta && (
-        <div className="flex items-center gap-1.5">
-          <MacroPill label="ח" value={option.macros.protein} tone="protein" />
-          <MacroPill label="פ" value={option.macros.carbs} tone="carbs" />
-          <MacroPill label="ש" value={option.macros.fat} tone="fat" />
-          <span className="inline-flex items-baseline gap-1 rounded-lg bg-rose-50 px-2.5 py-1 font-extrabold text-rose-600 dark:bg-rose-950/40 dark:text-rose-300">
-            <span className="text-[10px]">≈</span>
-            <strong className="text-sm">{option.macros.calories}</strong>
-            <span className="text-[10px]">קל׳</span>
-          </span>
+      {/* Expanded content — macros only. Quantity + unit already
+          live in the header, no need to duplicate them here. No
+          stopPropagation here — the macros are display-only, so a
+          click on any empty space inside the expanded area should
+          bubble up and collapse the row. */}
+      {expanded && showAiMeta && (
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-blue-100 pt-2 text-[12px] text-slate-600 dark:border-blue-900/40 dark:text-slate-300">
+          <MacroField label="חלבון" value={option.macros.protein} unit="גרם" />
+          <MacroField label="פחמימה" value={option.macros.carbs} unit="גרם" />
+          <MacroField label="שומן" value={option.macros.fat} unit="גרם" />
+          <MacroField
+            label="קלוריות"
+            value={option.macros.calories}
+            unit="קל׳"
+            tone="calories"
+          />
+          <SourceBadge estimated={option.estimated} cloudSourced={option.cloudSourced} />
         </div>
       )}
-
-      {/* Quantity + unit — segmented control for visual cohesion */}
-      <div className="flex h-9 items-stretch overflow-hidden rounded-lg border border-blue-200 bg-white shadow-inner shadow-blue-50/40 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-200/60 dark:border-blue-900/40 dark:bg-slate-900">
-        <input
-          type="number"
-          inputMode="numeric"
-          min={0}
-          value={option.quantity || ""}
-          onChange={(e) => onQuantityChange(e.target.value)}
-          className="w-16 border-0 bg-transparent px-2 text-center text-sm font-extrabold text-slate-800 focus:outline-none dark:text-slate-100"
-        />
-        <span className="my-1 w-px bg-blue-100 dark:bg-blue-900/40" aria-hidden />
-        <select
-          value={option.unit}
-          onChange={(e) => onUnitChange(e.target.value as DietV2Unit)}
-          className="appearance-none border-0 bg-transparent px-3 text-xs font-bold text-slate-700 focus:outline-none dark:text-slate-200"
-        >
-          {DIET_V2_UNITS.map((unit) => (
-            <option key={unit} value={unit}>
-              {DIET_V2_UNIT_LABELS[unit]}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <button
-        type="button"
-        aria-label="הסר אופציה"
-        onClick={onRemove}
-        className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-300 transition-colors hover:bg-rose-50 hover:text-rose-600 group-hover:text-slate-400 dark:hover:bg-rose-950/40"
-      >
-        <FaTrashCan size={12} />
-      </button>
     </div>
   );
 };
@@ -160,58 +177,46 @@ interface SourceBadgeProps {
   cloudSourced?: boolean;
 }
 
-const SourceBadge: React.FC<SourceBadgeProps> = ({ estimated, cloudSourced }) => {
+// Single simple signal per option: values are either verified
+// (came from a known food) or need a quick check (estimated /
+// upgraded from an external source). The old AI / ענן / מוערך
+// three-tone system meant nothing to non-technical trainers.
+const SourceBadge: React.FC<SourceBadgeProps> = ({ estimated }) => {
   if (estimated) {
     return (
       <span
-        title="המאקרו מוערך לפי הקטגוריה — בודק במאגר הענן…"
+        title="המערכת לא זיהתה את המאכל במאגר — כדאי לבדוק את הערכים לפני שליחה"
         className="inline-flex items-center gap-1 rounded-md bg-amber-100 px-1.5 py-0.5 text-[9px] font-bold text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
       >
-        <FaRobot size={8} />
-        מוערך
+        ⚠ לבדוק
       </span>
     );
   }
-  if (cloudSourced) {
-    return (
-      <span
-        title="המאקרו נמשך ממאגר Open Food Facts"
-        className="inline-flex items-center gap-1 rounded-md bg-sky-100 px-1.5 py-0.5 text-[9px] font-bold text-sky-700 dark:bg-sky-900/40 dark:text-sky-300"
-      >
-        <FaCloudArrowDown size={8} />
-        ענן
-      </span>
-    );
-  }
-  return (
-    <span
-      title="המאקרו חושב אוטומטית ממסד הנתונים"
-      className="inline-flex items-center gap-1 rounded-md bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
+  return null;
+};
+
+interface MacroFieldProps {
+  label: string;
+  value: number;
+  unit: string;
+  tone?: "default" | "calories";
+}
+
+const MacroField: React.FC<MacroFieldProps> = ({ label, value, unit, tone = "default" }) => (
+  <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+    <span className="font-semibold text-slate-500 dark:text-slate-400">{label}:</span>
+    <strong
+      className={
+        tone === "calories"
+          ? "text-[13px] font-extrabold text-rose-600 dark:text-rose-400"
+          : "text-[13px] font-extrabold text-slate-800 dark:text-slate-100"
+      }
     >
-      <FaRobot size={8} />
-      AI
-    </span>
-  );
-};
-
-type MacroTone = "protein" | "carbs" | "fat";
-const MACRO_TONES: Record<MacroTone, string> = {
-  protein: "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300",
-  carbs: "bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300",
-  fat: "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300",
-};
-
-const MacroPill: React.FC<{ label: string; value: number; tone: MacroTone }> = ({
-  label,
-  value,
-  tone,
-}) => (
-  <span
-    className={`inline-flex items-baseline gap-0.5 rounded-md px-1.5 py-0.5 text-[11px] font-bold ${MACRO_TONES[tone]}`}
-  >
-    <span>{label}</span>
-    <strong className="text-[12px]">{value}</strong>
+      {value}
+    </strong>
+    <span className="text-[10px] text-slate-400 dark:text-slate-500">{unit}</span>
   </span>
 );
+
 
 export default OptionRow;

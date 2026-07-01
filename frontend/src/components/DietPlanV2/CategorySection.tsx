@@ -117,7 +117,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({ category, onChange, m
             {CATEGORY_LABELS[category.kind]}
           </span>
           <span className="text-[11px] text-slate-400 transition-colors group-hover:text-slate-600 dark:text-slate-500 dark:group-hover:text-slate-300">
-            הוסף אופציה
+            הוסף אפשרות להחלפה
           </span>
         </span>
         <FaPlus size={9} className="text-slate-400 group-hover:text-blue-600" />
@@ -139,7 +139,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({ category, onChange, m
           </span>
           {hasOptions && (
             <span className="text-[11px] text-slate-500 dark:text-slate-400">
-              {category.options.length} אופציות
+              {category.options.length} אפשרויות להחלפה
             </span>
           )}
         </div>
@@ -170,21 +170,25 @@ const CategorySection: React.FC<CategorySectionProps> = ({ category, onChange, m
       </header>
 
       <div className="flex flex-col gap-2">
-        {category.options.map((option, index) => (
-          <OptionRow
-            key={option.id}
-            option={option}
-            categoryKind={category.kind}
-            macroMode={macroMode}
-            onChange={(next) => onOptionChange(index, next)}
-            onRemove={() => onOptionRemove(index)}
-          />
-        ))}
         <QuickAddInput
           categoryKind={category.kind}
           onQuickAdd={submitQuickAdd}
           onOpenPicker={() => setPickerOpen(true)}
         />
+        {hasOptions && (
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {category.options.map((option, index) => (
+              <OptionRow
+                key={option.id}
+                option={option}
+                categoryKind={category.kind}
+                macroMode={macroMode}
+                onChange={(next) => onOptionChange(index, next)}
+                onRemove={() => onOptionRemove(index)}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       <FoodPicker
@@ -229,7 +233,7 @@ const CategoryAverageBadges: React.FC<CategoryAverageBadgesProps> = ({
   if (!hasOptions) {
     return (
       <span className="text-[10px] italic text-slate-400 dark:text-slate-500">
-        הוסף אופציה כדי לראות ממוצע
+        הוסף אפשרות להחלפה כדי לראות ממוצע
       </span>
     );
   }
@@ -238,9 +242,9 @@ const CategoryAverageBadges: React.FC<CategoryAverageBadgesProps> = ({
     return (
       <span
         className="text-[10px] italic text-amber-600 dark:text-amber-300"
-        title="כל האופציות בקטגוריה מסומנות כמוערכות ולא נכללות בממוצע"
+        title="כל האפשרויות להחלפה בקטגוריה מסומנות כמוערכות ולא נכללות בממוצע"
       >
-        כל האופציות מוערכות — לא נכלל בממוצע
+        כל האפשרויות להחלפה מוערכות — לא נכלל בממוצע
       </span>
     );
   }
@@ -262,7 +266,7 @@ const CategoryAverageBadges: React.FC<CategoryAverageBadgesProps> = ({
       {estimatedCount > 0 && (
         <span
           className="text-[10px] italic text-amber-600 dark:text-amber-300"
-          title="אופציות מוערכות לא נכללות בממוצע"
+          title="אפשרויות להחלפה מוערכות לא נכללות בממוצע"
         >
           ({estimatedCount} לא נכללות)
         </span>

@@ -1,15 +1,15 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   FaApple,
   FaCheck,
   FaClipboardCheck,
   FaCompress,
   FaExpand,
+  FaFloppyDisk,
   FaPlus,
   FaWandMagicSparkles,
   FaWeightScale,
   FaFire,
-  FaFolderOpen,
 } from "react-icons/fa6";
 
 import type { DietV2Meal, DietV2OptionMacros, DietV2Plan } from "@/interfaces/IDietPlanV2";
@@ -28,11 +28,29 @@ interface DietV2PlanExtended extends DietV2Plan {
   supplements: string;
 }
 
-const buildInitialPlan = (): DietV2PlanExtended => ({
-  meals: [buildEmptyMeal(1)],
-  highlights: "",
-  supplements: "",
-});
+const DRAFT_STORAGE_KEY = "dietPlanV2:draft";
+
+const buildInitialPlan = (): DietV2PlanExtended => {
+  // Hydrate from localStorage draft when available so refresh
+  // doesn't wipe the trainer's work. Real save/load through the
+  // backend will replace this once the endpoint is wired.
+  if (typeof window !== "undefined") {
+    try {
+      const raw = window.localStorage.getItem(DRAFT_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as DietV2PlanExtended;
+        if (parsed?.meals?.length) return parsed;
+      }
+    } catch {
+      /* ignore parse errors — start fresh */
+    }
+  }
+  return {
+    meals: [buildEmptyMeal(1)],
+    highlights: "",
+    supplements: "",
+  };
+};
 
 /**
  * Top-level editor for the v2 ("options") diet plan layout.
@@ -55,12 +73,24 @@ const DietPlanV2Editor: React.FC = () => {
   // and clears 800ms later. Real persistence will replace the
   // setTimeout when the mutation hook is wired.
   const [saved, setSaved] = useState(true);
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const markEdited = () => {
     setSaved(false);
-    if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => setSaved(true), 800);
+  };
+
+  // Save handler — right now this is client-side only because
+  // the v2 backend endpoint isn't wired. Once `PUT /diet-plans/:id`
+  // exists, swap this for a real mutation hook. The button + dirty
+  // indicator is here so trainers stop losing plans to refresh.
+  const handleSave = () => {
+    setSaved(true);
+    if (typeof window !== "undefined") {
+      try {
+        window.localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(plan));
+      } catch {
+        /* storage unavailable — best effort */
+      }
+    }
   };
 
   const mutatePlan = (mutator: (current: DietV2PlanExtended) => DietV2PlanExtended) => {
@@ -188,13 +218,16 @@ const DietPlanV2Editor: React.FC = () => {
    * protein, ~45% carbs, ~25% fat. Each meal flips to manual mode
    * so the trainer can fine-tune afterwards.
    */
-  const applyAutoFill = (dailyCalories: number, dailyProtein: number) => {
+  const applyAutoFill = (
+    dailyCalories: number,
+    dailyProtein: number,
+    perMealPercents: number[]
+  ) => {
     mutatePlan((current) => {
       const n = current.meals.length;
       if (n === 0) return current;
-      const split = autoSplit(n);
       const updated = current.meals.map((meal, idx) => {
-        const ratio = split[idx];
+        const ratio = (perMealPercents[idx] ?? 0) / 100;
         const cal = Math.round(dailyCalories * ratio);
         const proteinG = Math.round(dailyProtein * ratio);
         const proteinCal = proteinG * 4;
@@ -271,20 +304,19 @@ const DietPlanV2Editor: React.FC = () => {
 
         <div className="flex flex-wrap items-center gap-1.5">
           <SaveIndicator saved={saved} />
+          <ToolbarButton
+            icon={<FaFloppyDisk size={11} />}
+            label={saved ? "נשמר" : "שמור תפריט"}
+            onClick={handleSave}
+            disabled={saved}
+            tone="brand"
+          />
           {tab === "menu" && (
             <>
               <ToolbarButton
                 icon={<FaWandMagicSparkles size={11} />}
                 label="מלא אוטומטית"
                 onClick={() => setAutoFillOpen(true)}
-                tone="brand"
-              />
-              <ToolbarButton
-                icon={<FaFolderOpen size={11} />}
-                label="טען תבנית"
-                onClick={() => undefined}
-                disabled
-                title="בקרוב — בחירת תבנית v2"
               />
               {plan.meals.length > 1 && (
                 <ToolbarButton
@@ -306,6 +338,7 @@ const DietPlanV2Editor: React.FC = () => {
               defaultCalories={totals.calories || 2200}
               defaultProtein={totals.protein || 180}
               mealsCount={plan.meals.length}
+              mealNames={plan.meals.map((m, i) => m.name || `ארוחה ${i + 1}`)}
               onCancel={() => setAutoFillOpen(false)}
               onApply={applyAutoFill}
             />
@@ -484,24 +517,39 @@ interface AutoFillPanelProps {
   defaultCalories: number;
   defaultProtein: number;
   mealsCount: number;
-  onApply: (calories: number, protein: number) => void;
+  mealNames: string[];
+  onApply: (calories: number, protein: number, perMealPercents: number[]) => void;
   onCancel: () => void;
 }
 
 /**
  * Inline panel for the "מלא אוטומטית" action. The trainer types
- * the daily targets and we distribute them across the existing
- * meals, flipping each meal to manual mode so they can adjust.
+ * the daily targets AND edits the per-meal % split before applying.
+ * No trainer trusts a hard-coded 25/35/10/30, so the split needs to
+ * be visible and editable. The panel seeds with a suggested split
+ * that the trainer can override.
  */
 const AutoFillPanel: React.FC<AutoFillPanelProps> = ({
   defaultCalories,
   defaultProtein,
   mealsCount,
+  mealNames,
   onApply,
   onCancel,
 }) => {
   const [calories, setCalories] = useState(defaultCalories);
   const [protein, setProtein] = useState(defaultProtein);
+  const [percents, setPercents] = useState<number[]>(() =>
+    autoSplit(mealsCount).map((r) => Math.round(r * 100))
+  );
+
+  const total = percents.reduce((sum, p) => sum + p, 0);
+  const isValid = calories > 0 && mealsCount > 0 && total === 100;
+
+  const updatePercent = (idx: number, value: number) => {
+    setPercents((prev) => prev.map((p, i) => (i === idx ? Math.max(0, value) : p)));
+  };
+
   return (
     <section className="rounded-2xl border border-blue-200 bg-gradient-to-l from-blue-50 to-white p-4 shadow-sm dark:border-blue-900/40 dark:from-blue-950/30 dark:to-slate-900">
       <header className="mb-3 flex items-center gap-2">
@@ -511,14 +559,53 @@ const AutoFillPanel: React.FC<AutoFillPanelProps> = ({
         <div>
           <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">מילוי אוטומטי</h3>
           <p className="text-[11px] text-slate-500 dark:text-slate-400">
-            מחלק את היעד היומי בין {mealsCount} הארוחות הקיימות
+            הגדר יעד יומי + חלוקת אחוזים בין {mealsCount} הארוחות
           </p>
         </div>
       </header>
+
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <NumberField label="קלוריות ביום" value={calories} onChange={setCalories} suffix="קק״ל" />
         <NumberField label="חלבון ביום" value={protein} onChange={setProtein} suffix="גרם" />
       </div>
+
+      <div className="mt-3 rounded-xl border border-blue-100 bg-white p-3 dark:border-blue-900/40 dark:bg-slate-900/60">
+        <div className="mb-2 flex items-center justify-between text-[11px] font-bold">
+          <span className="text-slate-600 dark:text-slate-300">חלוקה בין ארוחות</span>
+          <span className={total === 100 ? "text-emerald-600" : "text-rose-600"}>
+            סה״כ: {total}%
+          </span>
+        </div>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {percents.map((p, idx) => (
+            <label key={idx} className="flex items-center gap-2 text-[11px]">
+              <span className="w-24 shrink-0 truncate text-slate-600 dark:text-slate-300">
+                {mealNames[idx] || `ארוחה ${idx + 1}`}
+              </span>
+              <span className="inline-flex flex-1 items-stretch overflow-hidden rounded-md border border-blue-200 bg-white dark:border-blue-900/40 dark:bg-slate-900">
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={0}
+                  max={100}
+                  value={p || ""}
+                  onChange={(e) => updatePercent(idx, Number(e.target.value) || 0)}
+                  className="w-full border-0 bg-transparent px-2 py-1 text-center text-xs font-extrabold text-slate-800 focus:outline-none dark:text-slate-100"
+                />
+                <span className="flex items-center bg-blue-50 px-2 text-[10px] font-bold text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
+                  %
+                </span>
+              </span>
+            </label>
+          ))}
+        </div>
+        {total !== 100 && (
+          <p className="mt-2 text-[10px] font-semibold text-rose-600">
+            סכום האחוזים חייב להיות 100% כדי לחלק
+          </p>
+        )}
+      </div>
+
       <footer className="mt-3 flex items-center justify-end gap-2">
         <button
           type="button"
@@ -529,8 +616,8 @@ const AutoFillPanel: React.FC<AutoFillPanelProps> = ({
         </button>
         <button
           type="button"
-          onClick={() => onApply(calories, protein)}
-          disabled={calories <= 0 || mealsCount === 0}
+          onClick={() => onApply(calories, protein, percents)}
+          disabled={!isValid}
           className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm shadow-blue-500/30 transition-all hover:-translate-y-0.5 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
         >
           <FaWandMagicSparkles size={10} />

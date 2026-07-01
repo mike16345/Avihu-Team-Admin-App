@@ -119,7 +119,7 @@ const MealCard: React.FC<MealCardProps> = ({
               placeholder={`ארוחה ${index}`}
             />
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
-              {totalOptions} אופציות · 4 קטגוריות
+              {totalOptions} אפשרויות · 4 קטגוריות
             </p>
           </div>
         </div>
@@ -147,7 +147,7 @@ const MealCard: React.FC<MealCardProps> = ({
             title={
               macroMode === "auto"
                 ? "כיבוי AI — אחליף לערכים ידניים"
-                : "הפעלת AI — חישוב אוטומטי מהאופציות"
+                : "הפעלת AI — חישוב אוטומטי מהאפשרויות"
             }
             className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11px] font-bold transition-all hover:-translate-y-0.5 ${
               macroMode === "auto"
@@ -247,7 +247,7 @@ const MealMacroInline: React.FC<MealMacroInlineProps> = ({
   if (!hasOptions && mode === "auto") {
     return (
       <span className="text-[11px] italic text-slate-400 dark:text-slate-500">
-        הוסף אופציות לחישוב מאקרו
+        הוסף אפשרויות לחישוב מאקרו
       </span>
     );
   }
