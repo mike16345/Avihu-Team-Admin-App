@@ -13,7 +13,10 @@ const MIN_TIMES_PER_WEEK = 1;
 const MIN_TIME_PER_WORKOUT = 1;
 const MAX_PLAN_NAME_LENGTH = 75;
 const MAX_REST_TIME = 300;
-const CARDIO_TYPES = ["simple", "complex"];
+const CARDIO_TYPES = ["simple", "complex", "steps"];
+const MIN_DAILY_STEPS = 1;
+const MAX_DAILY_STEPS = 100000;
+const PER_DAY_LENGTH = 7;
 
 export const setSchema = z
   .object({
@@ -103,9 +106,24 @@ export const complexCardioSchema = z.object({
   tips: z.string().optional(),
 });
 
+export const stepsCardioSchema = z.object({
+  mode: z.enum(["uniform", "custom"]),
+  daily: z.coerce
+    .number()
+    .min(MIN_DAILY_STEPS, { message: ERROR_MESSAGES.minNumber(MIN_DAILY_STEPS) })
+    .max(MAX_DAILY_STEPS, { message: ERROR_MESSAGES.maxNumber(MAX_DAILY_STEPS) }),
+  perDay: z
+    .array(z.coerce.number().min(0).max(MAX_DAILY_STEPS))
+    .length(PER_DAY_LENGTH)
+    .optional(),
+  tips: z.string().optional(),
+});
+
 export const cardioPlanSchema = z.object({
-  type: z.enum(["simple", "complex"], { message: ERROR_MESSAGES.enumError(CARDIO_TYPES) }),
-  plan: z.union([simpleCardioSchema, complexCardioSchema]),
+  type: z.enum(["simple", "complex", "steps"], {
+    message: ERROR_MESSAGES.enumError(CARDIO_TYPES),
+  }),
+  plan: z.union([simpleCardioSchema, complexCardioSchema, stepsCardioSchema]),
 });
 
 export const workoutPlanSchema = z.object({

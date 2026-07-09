@@ -74,8 +74,10 @@ const WorkoutPlanStatsStrip: React.FC = () => {
 
   // Total weekly cardio minutes. For "simple" plans this is the raw
   // minsPerWeek value; for "complex" plans we sum each workout's
-  // warmUpAmount across all weeks (best-effort summary).
+  // warmUpAmount across all weeks (best-effort summary). For "steps"
+  // plans there are no minutes — surface the daily-step goal instead.
   let cardioWeeklyMins = 0;
+  let cardioStepsSummary = "";
   if (cardio?.type === "simple") {
     const plan = cardio.plan as { minsPerWeek?: number };
     cardioWeeklyMins = Number(plan?.minsPerWeek) || 0;
@@ -95,8 +97,16 @@ const WorkoutPlanStatsStrip: React.FC = () => {
       }, 0);
       cardioWeeklyMins = Math.round(totalAcrossWeeks / weeks.length);
     }
+  } else if (cardio?.type === "steps") {
+    const plan = cardio.plan as { mode?: string; daily?: number; perDay?: number[] };
+    if (plan?.mode === "custom" && Array.isArray(plan.perDay) && plan.perDay.length === 7) {
+      const total = plan.perDay.reduce((acc, value) => acc + (Number(value) || 0), 0);
+      cardioStepsSummary = total ? `${total.toLocaleString("he-IL")} צעדים/שבוע` : "";
+    } else if (plan?.daily) {
+      cardioStepsSummary = `${Number(plan.daily).toLocaleString("he-IL")} צעדים/יום`;
+    }
   }
-  const cardioSummary = cardioWeeklyMins ? `${cardioWeeklyMins} דק׳` : "—";
+  const cardioSummary = cardioStepsSummary || (cardioWeeklyMins ? `${cardioWeeklyMins} דק׳` : "—");
 
   // "Has tips" — check whether the joined tips html has any visible text
   const hasTips = (() => {

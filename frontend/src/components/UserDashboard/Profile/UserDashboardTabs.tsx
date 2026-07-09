@@ -12,6 +12,7 @@ const mainTabs: { id: MainTab; label: string; icon: JSX.Element }[] = [
 const progressSubTabs: { id: ProgressSubTab; label: string }[] = [
   { id: "weight", label: "משקל" },
   { id: "strength", label: "כוח" },
+  { id: "steps", label: "מעקב צעדים" },
   { id: "photos", label: "תמונות" },
   { id: "measurements", label: "היקפים" },
 ];

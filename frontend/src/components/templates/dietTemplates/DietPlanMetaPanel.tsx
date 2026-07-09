@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import { IDietPlan, DietGoal, DietaryRestriction, IMeal } from "@/interfaces/IDietPlan";
+import { DIET_CALORIES_PER_SERVING } from "@/constants/dietCalories";
 import { dietGoalOptions, dietGoalTone, dietaryRestrictionOptions } from "@/lib/dietMeta";
 import { useUsersStore } from "@/store/userStore";
 import { useSubTrainersQuery } from "@/hooks/queries/subTrainers/useSubTrainersQuery";
@@ -27,13 +28,6 @@ type MetaForm = IDietPlan & {
   builtByTrainerId?: string;
 };
 
-const CALORIES_PER_SERVING = {
-  protein: 150,
-  carbs: 120,
-  fats: 100,
-  veggies: 30,
-} as const;
-
 const calculateTotalCalories = ({
   protein,
   carbs,
@@ -48,10 +42,10 @@ const calculateTotalCalories = ({
   freeCalories: number;
 }) =>
   Math.round(
-    protein * CALORIES_PER_SERVING.protein +
-      carbs * CALORIES_PER_SERVING.carbs +
-      fats * CALORIES_PER_SERVING.fats +
-      veggies * CALORIES_PER_SERVING.veggies +
+    protein * DIET_CALORIES_PER_SERVING.protein +
+      carbs * DIET_CALORIES_PER_SERVING.carbs +
+      fats * DIET_CALORIES_PER_SERVING.fats +
+      veggies * DIET_CALORIES_PER_SERVING.veggies +
       freeCalories
   );
 
@@ -253,6 +247,12 @@ const DietPlanMetaPanel: React.FC = () => {
               </div>
             </div>
             <div className="mt-1 text-[10px] text-slate-400 dark:text-slate-500" dir="ltr">
+              {protein}×{DIET_CALORIES_PER_SERVING.protein} + {carbs}×
+              {DIET_CALORIES_PER_SERVING.carbs} + {fats}×{DIET_CALORIES_PER_SERVING.fats} +{" "}
+              {veggies}×{DIET_CALORIES_PER_SERVING.veggies}
+              {getFreeCaloriesFormulaSuffix(Number(freeCalories || 0))}
+            </div>
+            <div className="hidden" dir="ltr">
               {protein}×150 + {carbs}×120 + {fats}×100 + {veggies}×30
               {getFreeCaloriesFormulaSuffix(Number(freeCalories || 0))}
             </div>

@@ -2,6 +2,7 @@ import type React from "react";
 import { useMemo, useRef, useState } from "react";
 import UserFormResponses from "@/components/UserDashboard/FormResponses/UserFormResponses";
 import MeasurementsProgression from "@/components/UserDashboard/MeasurementProgression/MeasurementsProgression";
+import StepsProgression from "@/components/UserDashboard/StepsTracking/StepsProgression";
 import { WeightProgression } from "@/components/UserDashboard/WeightProgression/WeightProgression";
 import { WeightProgressionPhotos } from "@/components/UserDashboard/WeightProgression/WeightProgressionPhotos";
 import { WorkoutProgression } from "@/components/UserDashboard/WorkoutProgression/WorkoutProgression";
@@ -23,6 +24,7 @@ import type { ProgressSubTab } from "./userDashboardTypes";
 interface ProgressTabPanelProps {
   activeSubTab: ProgressSubTab;
   onSubTabChange: (subTab: ProgressSubTab) => void;
+  userId?: string;
 }
 
 interface WorkoutTabPanelProps {
@@ -32,7 +34,7 @@ interface WorkoutTabPanelProps {
   onCloseSwapModal: () => void;
 }
 
-export function ProgressTabPanel({ activeSubTab, onSubTabChange }: ProgressTabPanelProps) {
+export function ProgressTabPanel({ activeSubTab, onSubTabChange, userId }: ProgressTabPanelProps) {
   return (
     <div className="flex flex-col gap-4">
       <ProgressSubTabs activeSubTab={activeSubTab} onSubTabChange={onSubTabChange} />
@@ -41,6 +43,7 @@ export function ProgressTabPanel({ activeSubTab, onSubTabChange }: ProgressTabPa
         {activeSubTab === "weight" && <WeightProgression />}
         {activeSubTab === "measurements" && <MeasurementsProgression />}
         {activeSubTab === "strength" && <WorkoutProgression />}
+        {activeSubTab === "steps" && <StepsProgression />}
         {activeSubTab === "photos" && <WeightProgressionPhotos />}
       </DashboardTabCard>
     </div>
