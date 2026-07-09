@@ -1,7 +1,9 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef } from "react";
 import { useNavigate } from "react-router";
 import { IUser } from "@/interfaces/IUser";
 import useUsersQuery from "@/hooks/queries/user/useUsersQuery";
+import { useStableSearchParams } from "@/hooks/useStableSearchParams";
+import { useScrollRestoration } from "@/hooks/useScrollRestoration";
 import ErrorPage from "@/pages/ErrorPage";
 import Loader from "@/components/ui/Loader";
 import { weightTab } from "@/pages/UserDashboard";
@@ -17,12 +19,30 @@ import {
 } from "@/components/users/usersPageUtils";
 import type { StatusFilter } from "@/components/users/usersPageTypes";
 
+const STATUS_FILTER_VALUES: StatusFilter[] = [
+  "הכל",
+  "פעיל",
+  "משתמשים",
+  "הקפאה",
+  "מסתיים בקרוב",
+  "ללא תאריך סיום",
+];
+
+const parseStatusFilter = (raw: string | null): StatusFilter => {
+  if (!raw) return "הכל";
+  return STATUS_FILTER_VALUES.includes(raw as StatusFilter) ? (raw as StatusFilter) : "הכל";
+};
+
 export const UsersPage = () => {
   const navigate = useNavigate();
   const { data, isLoading, isError, error } = useUsersQuery();
+  const { searchParams, setParam } = useStableSearchParams();
 
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("הכל");
+  const cardsScrollRef = useRef<HTMLDivElement | null>(null);
+  useScrollRestoration(cardsScrollRef);
+
+  const search = searchParams.get("q") ?? "";
+  const statusFilter = parseStatusFilter(searchParams.get("status"));
 
   const sortedUsers = useMemo(() => sortUsersByFinishedDate(data), [data]);
   const filteredUsers = useMemo(
@@ -39,10 +59,26 @@ export const UsersPage = () => {
     navigate(`/users/${user._id}?tab=${weightTab}`, { state: user });
   };
 
-  if (isLoading) return <Loader size="large" />;
+  // URL-driven filters survive the back button — coming back from a
+  // user profile restores the same search + status the trainer left
+  // on. `replace: true` keeps every keystroke from spawning a new
+  // history entry.
+  const handleSearchChange = (value: string) => {
+    setParam("q", value || null, { replace: true });
+  };
+
+  const handleStatusFilterChange = (value: StatusFilter) => {
+    setParam("status", value === "הכל" ? null : value, { replace: true });
+  };
 
   if (isError) return <ErrorPage message={error.message} />;
 
+  // Don't gate the whole page on isLoading — we need the
+  // ScrollableArea (and the ref it carries) to be mounted on the
+  // very first render so useScrollRestoration can attach. The
+  // ResizeObserver inside the hook will re-apply the saved scroll
+  // position as the cards stream in. Otherwise the back button
+  // lands at scrollTop=0 because the ref was null during loading.
   return (
     <div
       dir="rtl"
@@ -54,11 +90,12 @@ export const UsersPage = () => {
       <UsersToolbar
         search={search}
         statusFilter={statusFilter}
-        onSearchChange={setSearch}
-        onStatusFilterChange={setStatusFilter}
+        onSearchChange={handleSearchChange}
+        onStatusFilterChange={handleStatusFilterChange}
       />
-      <UsersCardsGrid users={filteredUsers} onViewUser={handleViewUser} />
-      {filteredUsers.length === 0 && <UsersEmptyState />}
+      <UsersCardsGrid ref={cardsScrollRef} users={filteredUsers} onViewUser={handleViewUser} />
+      {isLoading && <Loader size="large" />}
+      {!isLoading && filteredUsers.length === 0 && <UsersEmptyState />}
     </div>
   );
 };

@@ -34,7 +34,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onClick }) => {
         }
       }}
       dir="rtl"
-      className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-lg"
+      className="group flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-lg"
     >
       <div className="relative aspect-[16/9] w-full overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900">
         {showImage && (
@@ -81,7 +81,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onClick }) => {
           </p>
         )}
 
-        <div className="mt-auto flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-3">
+        <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-3">
           <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 transition-transform group-hover:-translate-x-0.5">
             <FaArrowLeft size={10} />
             קרא עוד

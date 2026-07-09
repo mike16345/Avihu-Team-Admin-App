@@ -163,12 +163,7 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
 
       {isOpen && (
         <div className="flex flex-col gap-3 border-t border-slate-100 bg-slate-50/30 px-5 py-4 dark:border-slate-800">
-          <DragDropWrapper
-            strategy="vertical"
-            items={muscleGroups}
-            onMove={move}
-            idKey="_id"
-          >
+          <DragDropWrapper strategy="vertical" items={muscleGroups} onMove={move} idKey="_id">
             {({ item, index }) => (
               <SortableItem key={item._id} item={item} idKey="_id">
                 {() => (

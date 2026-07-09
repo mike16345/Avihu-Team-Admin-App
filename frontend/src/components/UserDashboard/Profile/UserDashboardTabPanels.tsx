@@ -24,6 +24,7 @@ import type { ProgressSubTab } from "./userDashboardTypes";
 interface ProgressTabPanelProps {
   activeSubTab: ProgressSubTab;
   onSubTabChange: (subTab: ProgressSubTab) => void;
+  userId?: string;
 }
 
 interface WorkoutTabPanelProps {
@@ -33,7 +34,7 @@ interface WorkoutTabPanelProps {
   onCloseSwapModal: () => void;
 }
 
-export function ProgressTabPanel({ activeSubTab, onSubTabChange }: ProgressTabPanelProps) {
+export function ProgressTabPanel({ activeSubTab, onSubTabChange, userId }: ProgressTabPanelProps) {
   return (
     <div className="flex flex-col gap-4">
       <ProgressSubTabs activeSubTab={activeSubTab} onSubTabChange={onSubTabChange} />
@@ -84,18 +85,24 @@ export function WorkoutTabPanel({
           rightmost on screen. */}
       <div className="flex items-center justify-end">
         <div className="flex items-center gap-2">
-          <ActionButton onClick={() => wrapperRef.current?.openPresetPicker()}
-            title="טען תבנית קיימת לתוכנית האימונים">
+          <ActionButton
+            onClick={() => wrapperRef.current?.openPresetPicker()}
+            title="טען תבנית קיימת לתוכנית האימונים"
+          >
             <FaFolderOpen size={11} />
             <span>בחר תבנית</span>
           </ActionButton>
-          <ActionButton onClick={onOpenSwapModal}
-            title="להחליף את התוכנית הפעילה לתקופה מוגבלת. התוכנית הקודמת תישמר בהיסטוריה ותהיה ניתנת לשחזור.">
+          <ActionButton
+            onClick={onOpenSwapModal}
+            title="להחליף את התוכנית הפעילה לתקופה מוגבלת. התוכנית הקודמת תישמר בהיסטוריה ותהיה ניתנת לשחזור."
+          >
             <FaArrowsRotate size={11} />
             <span>החלפה זמנית</span>
           </ActionButton>
-          <ActionButton onClick={() => setHistoryOpen(true)}
-            title="היסטוריית תוכניות אימון של המתאמן">
+          <ActionButton
+            onClick={() => setHistoryOpen(true)}
+            title="היסטוריית תוכניות אימון של המתאמן"
+          >
             <FaClockRotateLeft size={11} />
             <span>היסטוריה</span>
             {historyCount > 0 && (
@@ -201,7 +208,6 @@ function DashboardTabCard({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
-
 
 /** Header action button — one chrome for all three actions in
  *  the workout-tab header (בחר תבנית / החלפה זמנית / היסטוריה).

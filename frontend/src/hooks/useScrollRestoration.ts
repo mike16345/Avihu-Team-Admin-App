@@ -52,16 +52,40 @@ export function useScrollRestoration(containerRef: React.RefObject<HTMLElement |
   const previousKeyRef = useRef<string | null>(null);
 
   /**
-   * Save scroll position of the OUTGOING location whenever the incoming
-   * location changes. Snapshot in useLayoutEffect to read scrollTop
-   * before the new render scrolls the container.
+   * Continuously persist the current scrollTop while the user
+   * scrolls. Saving on unmount / location change is unreliable for
+   * page-level containers because the component (and its ref) may
+   * already be gone by the time React would run the dep-change
+   * effect. Storing on every scroll guarantees the latest position
+   * is in sessionStorage the instant the trainer clicks a card.
    */
   useLayoutEffect(() => {
-    const outgoingKey = previousKeyRef.current;
-    if (outgoingKey && containerRef.current) {
-      writeSaved(outgoingKey, containerRef.current.scrollTop);
-    }
     previousKeyRef.current = location.key;
+    const el = containerRef.current;
+    if (!el) return;
+
+    let saveTimer: ReturnType<typeof setTimeout> | null = null;
+    const onScroll = () => {
+      if (saveTimer) return;
+      saveTimer = setTimeout(() => {
+        saveTimer = null;
+        if (containerRef.current) {
+          writeSaved(location.key, containerRef.current.scrollTop);
+        }
+      }, 80);
+    };
+
+    el.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => {
+      if (saveTimer) clearTimeout(saveTimer);
+      // One last save when the deps change / component unmounts —
+      // catches the final position before navigating away.
+      if (containerRef.current) {
+        writeSaved(location.key, containerRef.current.scrollTop);
+      }
+      el.removeEventListener("scroll", onScroll);
+    };
   }, [location.key, containerRef]);
 
   /**

@@ -69,7 +69,7 @@ export const getUsersStats = (users: IUser[]): UsersStats => {
 
     const daysLeft = DateUtils.getDaysDifference(new Date(), user.dateFinished);
 
-    return daysLeft <= 7 && daysLeft >= 0;
+    return daysLeft <= MINIMUM_WARNING_DAYS && daysLeft >= 0;
   }).length;
 
   return { total, active, inOnboarding, frozen, endingSoon };
