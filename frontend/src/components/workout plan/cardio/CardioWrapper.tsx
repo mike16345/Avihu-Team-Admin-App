@@ -1,8 +1,13 @@
 import React, { useState } from "react";
 import FixedCardioContainer from "./FixedCardioContainer";
 import CardioWeekWrapper from "./CardioWeekWrapper";
+import StepsCardioContainer from "./StepsCardioContainer";
 import { CardioType, ICardioWeek, IComplexCardioType } from "@/interfaces/IWorkoutPlan";
-import { defaultComplexCardioOption, defaultSimpleCardioOption } from "@/constants/cardioOptions";
+import {
+  defaultComplexCardioOption,
+  defaultSimpleCardioOption,
+  defaultStepsCardioOption,
+} from "@/constants/cardioOptions";
 import { toast } from "sonner";
 import type { WorkoutSchemaType } from "@/schemas/workoutPlanSchema";
 import { useFieldArray, useFormContext } from "react-hook-form";
@@ -10,7 +15,8 @@ import CustomAlertDialog from "@/components/Alerts/DialogAlert/CustomAlertDialog
 import { FaPlus } from "react-icons/fa6";
 
 const TYPE_OPTIONS: { id: CardioType; label: string }[] = [
-  { id: "simple", label: "קבוע" },
+  { id: "steps", label: "צעדים יומי" },
+  { id: "simple", label: "זמן אירובי" },
   { id: "complex", label: "בחירה" },
 ];
 
@@ -21,6 +27,7 @@ const getTypeButtonClassName = (active: boolean) => {
 
 const getDefaultCardioPlan = (type: CardioType) => {
   if (type == "complex") return defaultComplexCardioOption;
+  if (type == "steps") return defaultStepsCardioOption;
   return defaultSimpleCardioOption;
 };
 
@@ -96,6 +103,8 @@ const CardioWrapper: React.FC = () => {
       </div>
 
       {cardioPlan.type == `simple` && <FixedCardioContainer />}
+
+      {cardioPlan.type == `steps` && <StepsCardioContainer />}
 
       {cardioPlan.type == `complex` && (
         <>

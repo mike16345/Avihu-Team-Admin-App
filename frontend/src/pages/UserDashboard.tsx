@@ -44,7 +44,11 @@ const isMainTab = (value: string | null): value is MainTab =>
   value === "forms";
 
 const isProgressSub = (value: string | null): value is ProgressSubTab =>
-  value === "weight" || value === "measurements" || value === "strength" || value === "photos";
+  value === "weight" ||
+  value === "measurements" ||
+  value === "strength" ||
+  value === "steps" ||
+  value === "photos";
 
 export const UserDashboard = () => {
   const stateUser = useLocation().state as IUser | undefined;
@@ -244,7 +248,11 @@ export const UserDashboard = () => {
       )}
 
       {mainTab === "progress" && (
-        <ProgressTabPanel activeSubTab={progressSub} onSubTabChange={setProgressSub} />
+        <ProgressTabPanel
+          activeSubTab={progressSub}
+          onSubTabChange={setProgressSub}
+          userId={currentUser?._id}
+        />
       )}
 
       {mainTab === "workout" && (
