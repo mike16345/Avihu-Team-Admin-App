@@ -10,12 +10,16 @@ export type BlogsQueryFilters = {
   groups?: string[];
 };
 
+type BlogsQueryOptions = {
+  enabled?: boolean;
+};
+
 const getNormalizedFilters = ({ query = "", groups = [] }: BlogsQueryFilters) => ({
   query: query.trim(),
   groups: [...groups].filter(Boolean).sort(),
 });
 
-const useBlogsQuery = (filters: BlogsQueryFilters = {}) => {
+const useBlogsQuery = (filters: BlogsQueryFilters = {}, options: BlogsQueryOptions = {}) => {
   const { getPaginatedPosts } = useBlogsApi();
   const normalizedFilters = getNormalizedFilters(filters);
 
@@ -27,6 +31,7 @@ const useBlogsQuery = (filters: BlogsQueryFilters = {}) => {
     getNextPageParam: (lastPage: PaginationResult<IBlog>) => {
       return lastPage.hasNextPage ? { page: lastPage.currentPage + 1, limit: 10 } : undefined;
     },
+    enabled: options.enabled ?? true,
     staleTime: FULL_DAY_STALE_TIME,
   });
 };
