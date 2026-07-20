@@ -14,56 +14,57 @@ type ExerciseCardsGridProps = {
   onOpenExerciseDetails: (exercise: FlatExercise) => void;
 };
 
+const MONTH_MS = 30 * 24 * 60 * 60 * 1000;
+
 const getExerciseCardId = (exercise: FlatExercise) => `${exercise.group}-${exercise.name}`;
 
 const isBodyweightExercise = (sessions: ExerciseSession[]) =>
   sessions.every((session) => session.weight === 0);
 
-const getSessionValue = (session: ExerciseSession, isBodyweight: boolean) => {
-  if (isBodyweight) return session.reps;
-  return session.weight;
+const getSessionValue = (session: ExerciseSession, isBodyweight: boolean) =>
+  isBodyweight ? session.reps : session.weight;
+
+const getSessionUnitLabel = (session: ExerciseSession, isBodyweight: boolean) => {
+  if (!isBodyweight) return "ק״ג";
+  if (session.reps > 30) return "שנ׳";
+  return "חזרות";
 };
 
-const calculateGainPercent = (
-  first: ExerciseSession,
-  last: ExerciseSession,
-  isBodyweight: boolean
-) => {
-  const startValue = getSessionValue(first, isBodyweight);
-  const endValue = getSessionValue(last, isBodyweight);
+// Anchor for the "לפני חודש" column: the first recorded session that falls
+// within the last 30 days. If none exist (long gap since last workout), fall
+// back to the latest session before that window so we still have a meaningful
+// baseline instead of a blank cell.
+const findMonthAnchor = (sessions: ExerciseSession[]) => {
+  const cutoff = new Date(sessions[sessions.length - 1].date.getTime() - MONTH_MS);
+  const insideWindow = sessions.find((session) => session.date.getTime() >= cutoff.getTime());
+  if (insideWindow) return insideWindow;
+  return sessions[Math.max(0, sessions.length - 2)];
+};
 
-  if (startValue === 0) return 0;
-  return Math.round(((endValue - startValue) / startValue) * 100);
+const getLastMonthSessions = (sessions: ExerciseSession[]) => {
+  const cutoff = new Date(sessions[sessions.length - 1].date.getTime() - MONTH_MS);
+  const monthly = sessions.filter((session) => session.date.getTime() >= cutoff.getTime());
+  if (monthly.length >= 2) return monthly;
+  // Ensure at least two points so the sparkline draws a segment
+  return sessions.slice(-Math.max(2, monthly.length));
 };
 
 const getGainToneClassName = (gain: number) => {
-  if (gain > 0) return "text-emerald-600";
-  if (gain < 0) return "text-rose-600";
+  if (gain > 0) return "text-emerald-600 dark:text-emerald-400";
+  if (gain < 0) return "text-rose-600 dark:text-rose-400";
   return "text-slate-400 dark:text-slate-500";
+};
+
+const getGainBadgeClassName = (gain: number) => {
+  if (gain > 0) return "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300";
+  if (gain < 0) return "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300";
+  return "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400";
 };
 
 const getGainDirectionIcon = (gain: number) => {
   if (gain > 0) return "↑";
   if (gain < 0) return "↓";
   return "—";
-};
-
-const getCurrentValueText = (last: ExerciseSession, isBodyweight: boolean) => {
-  if (!isBodyweight) return `${last.weight} ק״ג`;
-
-  if (last.reps > 30) return `${last.reps} שנ׳`;
-  return `${last.reps} חזרות`;
-};
-
-const getCurrentSubtext = (last: ExerciseSession, isBodyweight: boolean) => {
-  if (isBodyweight) return "ללא משקל";
-  return `${last.reps} חזרות`;
-};
-
-const getGainUnitSuffix = (last: ExerciseSession, isBodyweight: boolean) => {
-  if (!isBodyweight) return " ק״ג";
-  if (last.reps > 30) return " שנ׳";
-  return "";
 };
 
 const getExerciseCardBorderClassName = (isSelected: boolean) => {
@@ -130,6 +131,11 @@ const getNextExpandedCardId = (isExpanded: boolean, cardId: string) => {
   return cardId;
 };
 
+const formatSessionDate = (date: Date) => date.toLocaleDateString("he-IL", {
+  day: "2-digit",
+  month: "2-digit",
+});
+
 export function ExerciseCardsGrid({
   exercises,
   selectedExercise,
@@ -144,9 +150,20 @@ export function ExerciseCardsGrid({
         {exercises.map((exercise) => {
           const first = exercise.sessions[0];
           const last = exercise.sessions[exercise.sessions.length - 1];
+          const monthAnchor = findMonthAnchor(exercise.sessions);
           const isBodyweight = isBodyweightExercise(exercise.sessions);
-          const gain = getSessionValue(last, isBodyweight) - getSessionValue(first, isBodyweight);
-          const gainPercent = calculateGainPercent(first, last, isBodyweight);
+
+          const startValue = getSessionValue(first, isBodyweight);
+          const monthValue = getSessionValue(monthAnchor, isBodyweight);
+          const currentValue = getSessionValue(last, isBodyweight);
+
+          // Round to nearest 0.5 so tiny floating-point drift like -0.0500…071
+          // never leaks into the UI as noise.
+          const totalGain = Math.round((currentValue - startValue) * 2) / 2;
+          const monthGain = Math.round((currentValue - monthValue) * 2) / 2;
+          const monthGainPercent =
+            monthValue === 0 ? 0 : Math.round((monthGain / monthValue) * 100);
+
           const colors = groupColors[exercise.group] || defaultColor;
           const isSelected =
             selectedExercise === exercise.name && selectedMuscleGroup === exercise.group;
@@ -155,9 +172,16 @@ export function ExerciseCardsGrid({
           const expandButtonState = getExpandButtonState(isExpanded);
           const ExpandIcon = expandButtonState.Icon;
           const prSessionIndices = getPRSessionIndices(exercise.sessions, isBodyweight);
-          const sparklineValues = exercise.sessions.map((session) =>
+
+          const monthSessions = getLastMonthSessions(exercise.sessions);
+          const sparklineValues = monthSessions.map((session) =>
             getSessionValue(session, isBodyweight)
           );
+
+          const unitLabel = getSessionUnitLabel(last, isBodyweight);
+          const currentSecondaryLabel = isBodyweight ? "" : `${last.reps} חזרות`;
+          const startSecondaryLabel = isBodyweight ? "" : `${first.reps} חזרות`;
+          const monthSecondaryLabel = isBodyweight ? "" : `${monthAnchor.reps} חזרות`;
 
           return (
             <div
@@ -188,31 +212,62 @@ export function ExerciseCardsGrid({
                   </div>
                 </div>
 
-                <div className="mt-3 flex items-end justify-between gap-2">
-                  <div>
-                    <p className="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                      נוכחי
-                    </p>
-                    <p className="text-xl font-bold text-slate-900 dark:text-slate-100">
-                      {getCurrentValueText(last, isBodyweight)}
-                    </p>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                      {getCurrentSubtext(last, isBodyweight)}
-                    </p>
-                  </div>
-                  <div className={`text-end ${getGainToneClassName(gain)}`}>
-                    <p className="text-xs font-semibold">
-                      {getGainDirectionIcon(gain)} {Math.abs(gain)}
-                      {getGainUnitSuffix(last, isBodyweight)}
-                    </p>
-                    <p className="text-[10px] font-bold">
-                      {gainPercent > 0 && "+"}
-                      {gainPercent}% מתחילת ליווי
-                    </p>
-                  </div>
+                <div className="mt-3 grid grid-cols-3 divide-x divide-x-reverse divide-slate-100 dark:divide-slate-800 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
+                  <MetricColumn
+                    label="התחלה"
+                    dateLabel={formatSessionDate(first.date)}
+                    value={startValue}
+                    unit={unitLabel}
+                    secondary={startSecondaryLabel}
+                    tone="muted"
+                  />
+                  <MetricColumn
+                    label="לפני חודש"
+                    dateLabel={formatSessionDate(monthAnchor.date)}
+                    value={monthValue}
+                    unit={unitLabel}
+                    secondary={monthSecondaryLabel}
+                    tone="muted"
+                  />
+                  <MetricColumn
+                    label="נוכחי"
+                    dateLabel={formatSessionDate(last.date)}
+                    value={currentValue}
+                    unit={unitLabel}
+                    secondary={currentSecondaryLabel}
+                    tone="accent"
+                  />
+                </div>
+
+                <div className="mt-2.5 flex flex-wrap items-center gap-1.5 text-[11px]">
+                  <span
+                    className={`inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 font-bold ${getGainBadgeClassName(
+                      monthGain
+                    )}`}
+                  >
+                    {getGainDirectionIcon(monthGain)} {Math.abs(monthGain)} {unitLabel} · חודש
+                  </span>
+                  <span
+                    className={`inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 font-bold ${getGainBadgeClassName(
+                      totalGain
+                    )}`}
+                  >
+                    {getGainDirectionIcon(totalGain)} {Math.abs(totalGain)} {unitLabel} · מתחילת ליווי
+                  </span>
+                  {monthValue !== 0 && (
+                    <span className={`ms-auto font-semibold ${getGainToneClassName(monthGain)}`}>
+                      {monthGainPercent > 0 && "+"}
+                      {monthGainPercent}% החודש
+                    </span>
+                  )}
                 </div>
 
                 <div className="mt-3">
+                  <div className="mb-1 flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500">
+                    <span>{formatSessionDate(monthSessions[0].date)}</span>
+                    <span className="font-semibold uppercase tracking-wider">החודש האחרון</span>
+                    <span>{formatSessionDate(monthSessions[monthSessions.length - 1].date)}</span>
+                  </div>
                   <MiniSparkline values={sparklineValues} gradient={colors.gradient} />
                 </div>
               </button>
@@ -289,6 +344,44 @@ export function ExerciseCardsGrid({
           );
         })}
       </div>
+    </div>
+  );
+}
+
+function MetricColumn({
+  label,
+  dateLabel,
+  value,
+  unit,
+  secondary,
+  tone,
+}: {
+  label: string;
+  dateLabel: string;
+  value: number;
+  unit: string;
+  secondary?: string;
+  tone: "muted" | "accent";
+}) {
+  const valueClassName =
+    tone === "accent"
+      ? "text-slate-900 dark:text-slate-100"
+      : "text-slate-600 dark:text-slate-300";
+  return (
+    <div className="flex flex-col items-center px-2 py-2 text-center">
+      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+        {label}
+      </span>
+      <span className="text-[9px] text-slate-400 dark:text-slate-500">{dateLabel}</span>
+      <span className={`mt-0.5 text-base font-bold leading-tight ${valueClassName}`}>
+        {value}
+        <span className="ms-0.5 text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+          {unit}
+        </span>
+      </span>
+      {secondary && (
+        <span className="text-[10px] text-slate-500 dark:text-slate-400">{secondary}</span>
+      )}
     </div>
   );
 }

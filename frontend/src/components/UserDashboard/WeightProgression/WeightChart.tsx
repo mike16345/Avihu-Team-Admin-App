@@ -110,7 +110,6 @@ export const WeightChart: FC<WeighChartProps> = ({ weighIns }) => {
               axisLine={false}
               tickLine={false}
               tickMargin={8}
-              reversed
               tickFormatter={(value: string) => {
                 const date = DateUtils.convertToDate(value);
                 const month = DateUtils.formatDate(date, "DD/MM");

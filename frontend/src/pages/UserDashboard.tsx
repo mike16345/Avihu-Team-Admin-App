@@ -221,6 +221,20 @@ export const UserDashboard = () => {
     await updateUser.mutateAsync({ id: currentUser._id!, user: updatedUser });
   };
 
+  // Identifies an entry by its ISO timestamp — the closest we have
+  // to a stable id since IStatusHistoryEntry has no `_id`. Two
+  // entries at the exact same ms don't happen in practice.
+  const handleDeleteStatusEntry = async (entryAt: Date | string) => {
+    if (!currentUser) return;
+    const targetKey = new Date(entryAt).getTime();
+    const nextHistory = (currentUser.statusHistory || []).filter(
+      (e) => new Date(e.at).getTime() !== targetKey
+    );
+    const updatedUser: IUser = { ...currentUser, statusHistory: nextHistory };
+
+    await updateUser.mutateAsync({ id: currentUser._id!, user: updatedUser });
+  };
+
   return (
     <div data-testid="user-dashboard" dir="rtl" className="flex flex-col gap-5 font-heebo">
       <UserDashboardHeader
@@ -244,6 +258,7 @@ export const UserDashboard = () => {
           status={status}
           onEdit={() => navigate(`/users/edit/${currentUser?._id}`)}
           onAddStatusNote={handleAddStatusNote}
+          onDeleteStatusEntry={handleDeleteStatusEntry}
         />
       )}
 

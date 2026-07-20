@@ -17,7 +17,7 @@ import useWorkoutPlanPresetsQuery from "@/hooks/queries/workoutPlans/useWorkoutP
 import { collectAllErrors, getZodErrorIssues, ValidationErrorEntry } from "@/lib/utils";
 import ValidationErrorsDialog from "../Alerts/ValidationErrorsDialog";
 import WorkoutPresetPicker from "../templates/workoutTemplates/WorkoutPresetPicker";
-import PresetMetaPanel from "../templates/workoutTemplates/PresetMetaPanel";
+import WorkoutPlanSaveAsTemplateDialog from "../workout plan/WorkoutPlanSaveAsTemplateDialog";
 import useAddWorkoutPlan from "@/hooks/mutations/workouts/useAddWorkoutPlan";
 import useUpdateWorkoutPlan from "@/hooks/mutations/workouts/useUpdateWorkoutPlan";
 import { parseErrorFromObject } from "@/utils/workoutPlanUtils";
@@ -26,7 +26,6 @@ import { invalidateQueryKeys } from "@/QueryClient/queryClient";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { QueryKeys } from "@/enums/QueryKeys";
 import useAddWorkoutPreset from "@/hooks/mutations/workouts/useAddWorkoutPreset";
-import InputModal from "../ui/InputModal";
 import { defaultSimpleCardioOption } from "@/constants/cardioOptions";
 import { ICompleteWorkoutPlan, ISimpleCardioType } from "@/interfaces/IWorkoutPlan";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
@@ -232,8 +231,6 @@ const CreateWorkoutPlanWrapper = forwardRef<CreateWorkoutPlanHandle, CreateWorko
           )}
 
           <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit, onInvalidSubmit)}>
-            <PresetMetaPanel />
-
             {children}
 
             <WorkoutPlanSaveActions
@@ -245,10 +242,14 @@ const CreateWorkoutPlanWrapper = forwardRef<CreateWorkoutPlanHandle, CreateWorko
             />
           </form>
         </div>
-        <InputModal
-          onClose={() => setOpenPresetModal(false)}
+        <WorkoutPlanSaveAsTemplateDialog
           open={openPresetModal}
-          onSubmit={(val) => handleAddPreset(val)}
+          onOpenChange={setOpenPresetModal}
+          onSubmit={(name) => {
+            handleAddPreset(name);
+            setOpenPresetModal(false);
+          }}
+          isSaving={addWorkoutPlanPreset.isPending}
         />
 
         <WorkoutPresetPicker

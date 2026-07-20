@@ -27,13 +27,17 @@ type PhotoGroup = {
 };
 
 function extractUploadDate(storageKey?: string): string | undefined {
+  // Expected key format: `.../images/USERID/YYYY-MM-DD/filename`.
+  // Scan every path segment for a real date so we don't accidentally
+  // render an id (e.g. the userId) when the path is shaped
+  // differently.
   if (!storageKey) return undefined;
-  const parts = storageKey.split("/");
-  const datePart = parts.length >= 3 ? parts[parts.length - 2] : undefined;
-  if (!datePart) return undefined;
-  const match = datePart.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (!match) return datePart;
-  return `${match[3]}/${match[2]}/${match[1]}`;
+  for (const segment of storageKey.split("/")) {
+    const match = segment.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (match) return `${match[3]}/${match[2]}/${match[1]}`;
+  }
+
+  return undefined;
 }
 
 function extractStorageKey(fullUrl?: string): string | undefined {

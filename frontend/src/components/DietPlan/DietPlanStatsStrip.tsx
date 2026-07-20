@@ -1,6 +1,6 @@
 import React from "react";
 import { useFormContext } from "react-hook-form";
-import { FaBowlFood, FaWeightScale, FaFire, FaClipboardCheck } from "react-icons/fa6";
+import { ClipboardCheck, Flame, Scale, Utensils } from "lucide-react";
 import { DIET_CALORIES_PER_SERVING } from "@/constants/dietCalories";
 import type { IDietPlan } from "@/interfaces/IDietPlan";
 
@@ -8,26 +8,24 @@ interface StatProps {
   icon: React.ReactNode;
   label: string;
   value: React.ReactNode;
-  tone: "emerald" | "lime" | "amber" | "sky";
+  // Four shades of the brand blue — same visual family, subtle
+  // variation so each card still reads as its own.
+  tone: "sky" | "blue" | "indigo" | "navy";
 }
 
+// One uniform icon tone across all cards — soft deep-blue → turquoise
+// gradient with a white glyph on top. Lower saturation + faint shadow
+// so it reads as an accent, not as a shiny badge.
+const BRAND_TONE = {
+  iconBg:
+    "bg-gradient-to-br from-blue-600/85 via-blue-500/75 to-teal-300/70 shadow-sm shadow-blue-500/10 ring-1 ring-white/10",
+  iconText: "text-white",
+};
 const TONE: Record<StatProps["tone"], { iconBg: string; iconText: string }> = {
-  emerald: {
-    iconBg: "bg-emerald-100 dark:bg-emerald-900/40",
-    iconText: "text-emerald-700 dark:text-emerald-300",
-  },
-  lime: {
-    iconBg: "bg-lime-100 dark:bg-lime-900/40",
-    iconText: "text-lime-700 dark:text-lime-300",
-  },
-  amber: {
-    iconBg: "bg-amber-100 dark:bg-amber-900/40",
-    iconText: "text-amber-700 dark:text-amber-300",
-  },
-  sky: {
-    iconBg: "bg-sky-100 dark:bg-sky-900/40",
-    iconText: "text-sky-700 dark:text-sky-300",
-  },
+  sky: BRAND_TONE,
+  blue: BRAND_TONE,
+  indigo: BRAND_TONE,
+  navy: BRAND_TONE,
 };
 
 const StatCard: React.FC<StatProps> = ({ icon, label, value, tone }) => {
@@ -88,26 +86,26 @@ const DietPlanStatsStrip: React.FC = () => {
   return (
     <div dir="rtl" className="grid grid-cols-2 gap-3 font-heebo md:grid-cols-4">
       <StatCard
-        tone="emerald"
-        icon={<FaBowlFood size={16} />}
+        tone="sky"
+        icon={<Utensils size={16} strokeWidth={2} />}
         label="מספר ארוחות"
         value={meals.length}
       />
       <StatCard
-        tone="lime"
-        icon={<FaWeightScale size={16} />}
+        tone="blue"
+        icon={<Scale size={16} strokeWidth={2} />}
         label="חלבון · פחמ׳ · שומן"
         value={macroSummary}
       />
       <StatCard
-        tone="amber"
-        icon={<FaFire size={16} />}
+        tone="indigo"
+        icon={<Flame size={16} strokeWidth={2} />}
         label="סך קלוריות"
         value={`${totalKcal.toLocaleString()} קק״ל`}
       />
       <StatCard
-        tone="sky"
-        icon={<FaClipboardCheck size={16} />}
+        tone="navy"
+        icon={<ClipboardCheck size={16} strokeWidth={2} />}
         label="דגשים · תוספים"
         value={`${instructionMark} · ${supplementMark}`}
       />

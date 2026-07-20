@@ -19,21 +19,19 @@ interface StatProps {
   tone: "purple" | "rose" | "emerald" | "sky" | "amber";
 }
 
+// One uniform brand tone across all cards — matches DietPlanStatsStrip.
+// Softer gradient + faint shadow so it reads as accent, not shiny badge.
+const BRAND_TONE = {
+  iconBg:
+    "bg-gradient-to-br from-blue-600/85 via-blue-500/75 to-teal-300/70 shadow-sm shadow-blue-500/10 ring-1 ring-white/10",
+  iconText: "text-white",
+};
 const TONE: Record<StatProps["tone"], { iconBg: string; iconText: string }> = {
-  purple: {
-    iconBg: "bg-blue-100 dark:bg-blue-900/40",
-    iconText: "text-blue-700 dark:text-blue-300",
-  },
-  rose: { iconBg: "bg-rose-100 dark:bg-rose-900/40", iconText: "text-rose-700 dark:text-rose-300" },
-  emerald: {
-    iconBg: "bg-emerald-100 dark:bg-emerald-900/40",
-    iconText: "text-emerald-700 dark:text-emerald-300",
-  },
-  sky: { iconBg: "bg-sky-100 dark:bg-sky-900/40", iconText: "text-sky-700 dark:text-sky-300" },
-  amber: {
-    iconBg: "bg-amber-100 dark:bg-amber-900/40",
-    iconText: "text-amber-700 dark:text-amber-300",
-  },
+  purple: BRAND_TONE,
+  rose: BRAND_TONE,
+  emerald: BRAND_TONE,
+  sky: BRAND_TONE,
+  amber: BRAND_TONE,
 };
 
 const StatCard: React.FC<StatProps> = ({ icon, label, value, tone }) => {
@@ -101,7 +99,7 @@ const WorkoutPlanStatsStrip: React.FC = () => {
     const plan = cardio.plan as { mode?: string; daily?: number; perDay?: number[] };
     if (plan?.mode === "custom" && Array.isArray(plan.perDay) && plan.perDay.length === 7) {
       const total = plan.perDay.reduce((acc, value) => acc + (Number(value) || 0), 0);
-      cardioStepsSummary = total ? `${total.toLocaleString("he-IL")} צעדים/שבוע` : "";
+      cardioStepsSummary = total ? `${total.toLocaleString("he-IL")} צעדים` : "";
     } else if (plan?.daily) {
       cardioStepsSummary = `${Number(plan.daily).toLocaleString("he-IL")} צעדים/יום`;
     }
