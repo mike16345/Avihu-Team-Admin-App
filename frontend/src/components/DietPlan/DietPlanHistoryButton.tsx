@@ -5,11 +5,6 @@ interface Props {
   userId: string;
 }
 
-/**
- * "היסטוריה" toggle — same visual shape as the other toolbar
- * buttons. The panel is anchored directly to this button (via
- * Popover), so it visually flies out from where it was clicked.
- */
 const DietPlanHistoryButton: React.FC<Props> = ({ userId }) => (
   <DietPlanHistoryDialog userId={userId}>
     <button

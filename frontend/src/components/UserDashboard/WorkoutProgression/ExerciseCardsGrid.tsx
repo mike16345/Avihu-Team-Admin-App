@@ -30,10 +30,6 @@ const getSessionUnitLabel = (session: ExerciseSession, isBodyweight: boolean) =>
   return "חזרות";
 };
 
-// Anchor for the "לפני חודש" column: the first recorded session that falls
-// within the last 30 days. If none exist (long gap since last workout), fall
-// back to the latest session before that window so we still have a meaningful
-// baseline instead of a blank cell.
 const findMonthAnchor = (sessions: ExerciseSession[]) => {
   const cutoff = new Date(sessions[sessions.length - 1].date.getTime() - MONTH_MS);
   const insideWindow = sessions.find((session) => session.date.getTime() >= cutoff.getTime());
@@ -45,7 +41,6 @@ const getLastMonthSessions = (sessions: ExerciseSession[]) => {
   const cutoff = new Date(sessions[sessions.length - 1].date.getTime() - MONTH_MS);
   const monthly = sessions.filter((session) => session.date.getTime() >= cutoff.getTime());
   if (monthly.length >= 2) return monthly;
-  // Ensure at least two points so the sparkline draws a segment
   return sessions.slice(-Math.max(2, monthly.length));
 };
 
@@ -157,8 +152,6 @@ export function ExerciseCardsGrid({
           const monthValue = getSessionValue(monthAnchor, isBodyweight);
           const currentValue = getSessionValue(last, isBodyweight);
 
-          // Round to nearest 0.5 so tiny floating-point drift like -0.0500…071
-          // never leaks into the UI as noise.
           const totalGain = Math.round((currentValue - startValue) * 2) / 2;
           const monthGain = Math.round((currentValue - monthValue) * 2) / 2;
           const monthGainPercent =

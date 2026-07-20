@@ -1,12 +1,3 @@
-/**
- * WorkoutPlanStatsStrip — clean stats summary shown above the editor.
- *
- * Reads live form values (so numbers update as the trainer edits) and shows
- * compact pill-cards with: workout count, total exercises, muscle groups,
- * cardio summary, and whether tips exist.
- *
- * Pure presentational — no side effects, no mutations.
- */
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { FaDumbbell, FaListUl, FaPersonRunning, FaClipboardCheck } from "react-icons/fa6";
@@ -19,8 +10,6 @@ interface StatProps {
   tone: "purple" | "rose" | "emerald" | "sky" | "amber";
 }
 
-// One uniform brand tone across all cards — matches DietPlanStatsStrip.
-// Softer gradient + faint shadow so it reads as accent, not shiny badge.
 const BRAND_TONE = {
   iconBg:
     "bg-gradient-to-br from-blue-600/85 via-blue-500/75 to-teal-300/70 shadow-sm shadow-blue-500/10 ring-1 ring-white/10",
@@ -70,10 +59,6 @@ const WorkoutPlanStatsStrip: React.FC = () => {
     0
   );
 
-  // Total weekly cardio minutes. For "simple" plans this is the raw
-  // minsPerWeek value; for "complex" plans we sum each workout's
-  // warmUpAmount across all weeks (best-effort summary). For "steps"
-  // plans there are no minutes — surface the daily-step goal instead.
   let cardioWeeklyMins = 0;
   let cardioStepsSummary = "";
   if (cardio?.type === "simple") {
@@ -85,7 +70,6 @@ const WorkoutPlanStatsStrip: React.FC = () => {
     };
     const weeks = plan?.weeks || [];
     if (weeks.length > 0) {
-      // Average minutes-per-week across the configured weeks.
       const totalAcrossWeeks = weeks.reduce((acc, w) => {
         const weekTotal = (w.workouts || []).reduce(
           (s, wk) => s + (Number(wk?.warmUpAmount) || 0),
@@ -106,7 +90,6 @@ const WorkoutPlanStatsStrip: React.FC = () => {
   }
   const cardioSummary = cardioStepsSummary || (cardioWeeklyMins ? `${cardioWeeklyMins} דק׳` : "—");
 
-  // "Has tips" — check whether the joined tips html has any visible text
   const hasTips = (() => {
     const text = (tips.join(" ") || "").replace(/<[^>]+>/g, "").trim();
     return text.length > 0;

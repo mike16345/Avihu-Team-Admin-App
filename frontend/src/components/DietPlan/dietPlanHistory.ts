@@ -1,10 +1,5 @@
 import type { IDietPlan } from "@/interfaces/IDietPlan";
 
-/**
- * Diet-plan change log — trainer-visible audit trail per trainee.
- * Backed by localStorage today; swap `read`/`writeAll` for a real
- * query/mutation pair when the backend endpoint exists.
- */
 export type DietPlanHistoryType = "save" | "preset-loaded" | "created";
 
 export type MacroKey = "protein" | "carbs" | "fats" | "veggies";
@@ -43,8 +38,6 @@ export interface DietPlanHistoryEntry {
 const MAX_ENTRIES = 50;
 const storageKey = (userId: string) => `dietPlan:history:${userId}`;
 
-/** Compute per-macro portions + free-calories + meal count. Used by
- *  the change tracker to diff two snapshots of the plan. */
 export const computePlanTotals = (plan: IDietPlan | null | undefined): DietPlanTotals => {
   const meals = plan?.meals ?? [];
   const totals: DietPlanTotals = {
@@ -65,9 +58,6 @@ export const computePlanTotals = (plan: IDietPlan | null | undefined): DietPlanT
   return totals;
 };
 
-/** Build a change summary from two snapshots — only fields that
- *  actually moved are included, so the history entry doesn't clutter
- *  with "no change" rows. */
 export const buildChangeSummary = (
   before: DietPlanTotals,
   after: DietPlanTotals,
@@ -107,7 +97,7 @@ const writeAll = (userId: string, entries: DietPlanHistoryEntry[]): void => {
   try {
     window.localStorage.setItem(storageKey(userId), JSON.stringify(entries));
   } catch {
-    /* storage unavailable — best effort */
+    return;
   }
 };
 
@@ -138,6 +128,6 @@ export const clearDietPlanHistory = (userId: string): void => {
   try {
     window.localStorage.removeItem(storageKey(userId));
   } catch {
-    /* best effort */
+    return;
   }
 };

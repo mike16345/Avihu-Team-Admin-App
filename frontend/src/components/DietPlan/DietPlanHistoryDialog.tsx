@@ -24,8 +24,6 @@ import {
 
 interface Props {
   userId: string;
-  /** The trigger button (usually the "היסטוריה" button). The popover
-   *  anchors to it so the panel visually flies out from the button. */
   children: React.ReactNode;
 }
 
@@ -84,12 +82,6 @@ const formatAbsolute = (iso: string): string => {
   }
 };
 
-/**
- * "היסטוריה" popover — anchored to the trigger button (not a
- * centered modal) so it feels like the panel flies out from the
- * button. Renders the trainee's diet-plan change log with a
- * two-step "clear" action at the bottom.
- */
 const DietPlanHistoryDialog: React.FC<Props> = ({ userId, children }) => {
   const [open, setOpen] = useState(false);
   const [entries, setEntries] = useState<DietPlanHistoryEntry[]>([]);
@@ -115,10 +107,6 @@ const DietPlanHistoryDialog: React.FC<Props> = ({ userId, children }) => {
         align="end"
         sideOffset={8}
         collisionPadding={16}
-        // Radix exposes the actual viewport-relative available height
-        // as a CSS var when the popover is positioned; using it (with
-        // 75vh fallback) guarantees the popover is always ≤ what
-        // physically fits, so the inner list can scroll cleanly.
         style={{
           maxHeight: "min(var(--radix-popover-content-available-height, 75vh), 75vh)",
         }}
@@ -286,11 +274,6 @@ const MACRO_ICON: Record<MacroKey, string> = {
   veggies: "🥦",
 };
 
-/** Renders the per-macro / meal-count / free-calories diff for a
- *  history entry. When the entry was recorded but nothing actually
- *  moved (e.g. a save with no changes), we surface that explicitly
- *  instead of hiding — the user asked for every entry to say what
- *  happened. */
 const ChangeDetails: React.FC<{ details: DietPlanChangeSummary }> = ({ details }) => {
   const { macros, freeCalories, mealCount } = details;
   const hasAnything = macros.length > 0 || !!freeCalories || !!mealCount;

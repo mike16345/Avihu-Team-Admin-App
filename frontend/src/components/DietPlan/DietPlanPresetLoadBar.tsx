@@ -10,8 +10,6 @@ export function DietPlanPresetLoadBar({
   onOpenPresetPicker,
 }: DietPlanPresetLoadBarProps) {
   if (embedded) {
-    // Minimal — just the button, no wrapping card / header text.
-    // ms-auto pushes it flush to the (visual) left in RTL.
     return (
       <PresetLoadButton
         onOpenPresetPicker={onOpenPresetPicker}

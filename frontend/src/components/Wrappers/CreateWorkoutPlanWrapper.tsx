@@ -62,13 +62,9 @@ const calculateMinPerWorkout = (workout: WorkoutSchemaType) => {
 interface CreateWorkoutPlanWrapperProps {
   children: React.ReactNode;
   embedded?: boolean;
-  /** Skip the built-in "טען תבנית קיימת" card. Caller will trigger
-   *  the preset picker imperatively via the forwarded ref. */
   hideLoadBar?: boolean;
 }
 
-/** Imperative handle the parent uses to open the preset picker
- *  from somewhere else in the layout (e.g. a header button). */
 export interface CreateWorkoutPlanHandle {
   openPresetPicker: () => void;
 }
@@ -100,9 +96,6 @@ const CreateWorkoutPlanWrapper = forwardRef<CreateWorkoutPlanHandle, CreateWorko
     const [savingToProceed, setSavingToProceed] = useState(false);
     useNavigationBlocker(isDirty, (next) => setPendingNav(() => next));
 
-    // Expose the preset-picker opener so the parent can trigger it
-    // from outside (used when the load bar is hidden and the trigger
-    // lives in the page header instead).
     useImperativeHandle(ref, () => ({
       openPresetPicker: () => setOpenPresetPicker(true),
     }));

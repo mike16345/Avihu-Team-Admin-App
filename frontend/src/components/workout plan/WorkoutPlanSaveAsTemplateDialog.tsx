@@ -9,25 +9,10 @@ import PresetMetaPanel from "../templates/workoutTemplates/PresetMetaPanel";
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Called with the trimmed name when the trainer confirms. The
-   *  parent runs the actual mutation (`handleAddPreset(name)`)
-   *  which reads the tagging values straight from the shared form
-   *  context — so all we do here is collect + validate the name. */
   onSubmit: (name: string) => void;
   isSaving: boolean;
 }
 
-/**
- * "שמור תבנית" dialog — appears only when the trainer chooses to
- * save the trainee's plan as a reusable preset. Bundles the name
- * input with the tagging panel (frequency / level / equipment /
- * muscle focus / etc.) so the tagging never clutters the editor
- * page itself.
- *
- * The panel writes into the same react-hook-form context that the
- * outer wrapper owns; on confirm, the wrapper reads all fields at
- * once.
- */
 const WorkoutPlanSaveAsTemplateDialog: React.FC<Props> = ({
   open,
   onOpenChange,

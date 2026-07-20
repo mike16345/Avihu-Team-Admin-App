@@ -8,14 +8,9 @@ interface StatProps {
   icon: React.ReactNode;
   label: string;
   value: React.ReactNode;
-  // Four shades of the brand blue — same visual family, subtle
-  // variation so each card still reads as its own.
   tone: "sky" | "blue" | "indigo" | "navy";
 }
 
-// One uniform icon tone across all cards — soft deep-blue → turquoise
-// gradient with a white glyph on top. Lower saturation + faint shadow
-// so it reads as an accent, not as a shiny badge.
 const BRAND_TONE = {
   iconBg:
     "bg-gradient-to-br from-blue-600/85 via-blue-500/75 to-teal-300/70 shadow-sm shadow-blue-500/10 ring-1 ring-white/10",

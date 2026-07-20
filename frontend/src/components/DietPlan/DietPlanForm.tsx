@@ -13,8 +13,6 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 
 interface DietPlanFormProps extends PropsWithChildren {
-  /** Rendered in the tabs row (dietplan tab only) so all controls
-   *  share one line — see DietplanTabs.presetLoader. */
   presetLoader?: React.ReactNode;
 }
 
@@ -91,9 +89,6 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ children, presetLoader }) =
     />
   );
 
-  // Compact free-calories chip — sized to match the tab buttons so
-  // the row (tabs + this chip) shares one visual height. Grows on
-  // hover for the same feedback as the tab buttons.
   const renderFreeCaloriesChip = () => (
     <div
       dir="rtl"

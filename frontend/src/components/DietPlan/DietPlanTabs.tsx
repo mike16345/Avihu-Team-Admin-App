@@ -7,10 +7,7 @@ interface DietplanTabsProps {
   dietplan: React.ReactNode;
   tips: React.ReactNode;
   supplements: React.ReactNode;
-  /** Extra chip shown next to the tabs (dietplan tab only). */
   dietplanToolbar?: React.ReactNode;
-  /** Preset-load button — kept in the tabs row so all controls share
-   *  one line instead of stacking. Only visible on dietplan tab. */
   presetLoader?: React.ReactNode;
 }
 
@@ -21,8 +18,6 @@ const TABS: { id: TabKey; label: string; icon: React.ReactNode }[] = [
 ];
 
 const getTabButtonClassName = (isActive: boolean) => {
-  // Subtle grow on hover + selected tab is slightly larger. Blue
-  // brand tone instead of green so it matches the rest of the UI.
   const baseClassName =
     "inline-flex items-center gap-2 rounded-xl px-4 py-1.5 text-sm font-semibold transition-transform duration-150 hover:scale-105";
 

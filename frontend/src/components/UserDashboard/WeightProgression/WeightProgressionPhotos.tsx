@@ -27,10 +27,6 @@ type PhotoGroup = {
 };
 
 function extractUploadDate(storageKey?: string): string | undefined {
-  // Expected key format: `.../images/USERID/YYYY-MM-DD/filename`.
-  // Scan every path segment for a real date so we don't accidentally
-  // render an id (e.g. the userId) when the path is shaped
-  // differently.
   if (!storageKey) return undefined;
   for (const segment of storageKey.split("/")) {
     const match = segment.match(/^(\d{4})-(\d{2})-(\d{2})$/);

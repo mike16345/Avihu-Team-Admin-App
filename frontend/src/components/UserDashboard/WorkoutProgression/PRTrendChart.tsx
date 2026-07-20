@@ -46,7 +46,6 @@ const getValuePadding = (min: number, max: number) => {
   return (max - min) * 0.15;
 };
 
-// Catmull-Rom → cubic Bezier for a soft curved line without overshoot.
 const getSmoothPath = (coords: TrendCoordinate[]) => {
   if (coords.length < 2) return "";
   const first = coords[0];

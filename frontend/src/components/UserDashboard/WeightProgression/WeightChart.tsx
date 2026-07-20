@@ -29,17 +29,12 @@ type WeighChartProps = {
 };
 
 export const WeightChart: FC<WeighChartProps> = ({ weighIns }) => {
-  // Filter out invalid entries (weight 0 / null / NaN) so the line draws cleanly
   const cleanData = weighIns.filter(
     (w) => typeof w.weight === "number" && !isNaN(w.weight) && w.weight > 0
   );
   const minWeighIn = cleanData.length > 0 ? Math.min(...cleanData.map((w) => w.weight)) : 0;
 
   if (cleanData.length === 0) {
-    // Empty state preserves the chart card's footprint and hints at the
-    // axes + plot area, so the trainer reads "this is where the trend
-    // line will appear" — not "broken component". Dashed plot area +
-    // faint gridlines fake the structure of a chart waiting for data.
     return (
       <div
         dir="rtl"

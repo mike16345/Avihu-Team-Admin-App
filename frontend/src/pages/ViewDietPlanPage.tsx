@@ -77,9 +77,6 @@ export const ViewDietPlanPage = ({ embedded = false }: ViewDietPlanPageProps) =>
 
   const [pendingNav, setPendingNav] = useState<(() => void) | null>(null);
   const [savingToProceed, setSavingToProceed] = useState(false);
-  // Last-committed plan totals — the "before" side of every change
-  // summary. Seeded from the fetched plan and updated whenever the
-  // plan is committed (save success) or replaced (preset load).
   const lastCommittedTotals = useRef<DietPlanTotals | null>(null);
 
   useNavigationBlocker(isDirty, (next) => setPendingNav(() => next));
@@ -198,8 +195,6 @@ export const ViewDietPlanPage = ({ embedded = false }: ViewDietPlanPageProps) =>
     if ((error as any)?.status === 404) {
       const normalized = normalizeDietPlan(defaultDietPlan);
       reset(normalized);
-      // Seed the baseline so the first save produces a proper diff
-      // from the empty defaultDietPlan → the trainer's edits.
       lastCommittedTotals.current = computePlanTotals(normalized as IDietPlan);
       setIsNewPlan(true);
       setIsDirty(false);
