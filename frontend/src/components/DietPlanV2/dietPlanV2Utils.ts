@@ -1,8 +1,3 @@
-/**
- * Feature-local helpers for the v2 ("options") diet plan editor.
- * Mock food library will be replaced by an API-backed query when the
- * backend exposes a foods endpoint — keep the shape stable.
- */
 import type {
   DietV2Category,
   DietV2CategoryKind,
@@ -14,22 +9,11 @@ import type {
 export interface FoodLibraryItem {
   id: string;
   name: string;
-  /** Default category this food usually belongs to. */
   kind: DietV2CategoryKind;
   defaultUnit: DietV2Unit;
-  /** Macros per 100g (or per single unit, depending on `defaultUnit`). */
   per100: DietV2OptionMacros;
-  /** Optional alternate / colloquial names for ranking lookups. */
   aliases?: string[];
-  /** Food-specific gram weight for non-default units. Used when the
-   *  generic global conversion is wildly off — e.g. 1 cup of
-   *  cornflakes ≈ 30g, whereas 1 cup of milk = 240g. Whatever isn't
-   *  listed here falls through to GENERIC_UNIT_TO_GRAMS. */
   unitGrams?: Partial<Record<DietV2Unit, number>>;
-  /** Sensible portion to seed the row with when the trainer adds
-   *  this food without an explicit quantity — e.g. a bag of Bamba
-   *  is ~80g, a cottage container is ~200g. Falls back to 100 for
-   *  gram-based foods and 1 for unit-based ones when omitted. */
   defaultQuantity?: number;
 }
 
@@ -66,23 +50,7 @@ export const CATEGORY_TONES: Record<
   },
 };
 
-/**
- * Mock food library — Hebrew labels, common Israeli foods.
- * Macros are approximate per-100g where the default unit is grams,
- * or per-unit for spoons/cups/units/slice. Real data will come from
- * the backend foods table; the shape here intentionally matches.
- */
-/**
- * Production note: this is a mock library used until the backend
- * exposes a foods search endpoint. The target real source is either
- * Open Food Facts (free, has Hebrew labels) or the Israeli Ministry
- * of Health food composition table. The search and matching logic
- * below is shaped to map cleanly onto a server-side endpoint —
- * scoring/normalisation will move to the server, but the consumer
- * code (FoodPicker, parseQuickAddText) won't need to change.
- */
 export const MOCK_FOOD_LIBRARY: FoodLibraryItem[] = [
-  // ===== חלבונים =====
   { id: "f-chicken-breast", name: "חזה עוף", kind: "protein", defaultUnit: "g",
     per100: { protein: 31, carbs: 0, fat: 3.6, calories: 165 } },
   { id: "f-turkey-breast", name: "חזה הודו", kind: "protein", defaultUnit: "g",
@@ -120,7 +88,6 @@ export const MOCK_FOOD_LIBRARY: FoodLibraryItem[] = [
   { id: "f-milk", name: "חלב 3%", kind: "protein", defaultUnit: "cups",
     per100: { protein: 8, carbs: 12, fat: 7.5, calories: 145 } },
 
-  // ===== פחמימות =====
   { id: "f-rice-white", name: "אורז לבן", kind: "carbs", defaultUnit: "g",
     per100: { protein: 2.7, carbs: 28, fat: 0.3, calories: 130 },
     unitGrams: { cups: 158 } },
@@ -160,7 +127,6 @@ export const MOCK_FOOD_LIBRARY: FoodLibraryItem[] = [
   { id: "f-apple", name: "תפוח", kind: "carbs", defaultUnit: "units",
     per100: { protein: 0.5, carbs: 25, fat: 0.3, calories: 95 } },
 
-  // ===== שומנים =====
   { id: "f-olive-oil", name: "שמן זית", kind: "fat", defaultUnit: "spoons",
     per100: { protein: 0, carbs: 0, fat: 14, calories: 124 } },
   { id: "f-butter", name: "חמאה", kind: "fat", defaultUnit: "spoons",
@@ -182,7 +148,6 @@ export const MOCK_FOOD_LIBRARY: FoodLibraryItem[] = [
   { id: "f-olives", name: "זיתים", kind: "fat", defaultUnit: "g",
     per100: { protein: 0.8, carbs: 6, fat: 11, calories: 115 } },
 
-  // ===== ירקות =====
   { id: "f-tomato", name: "עגבנייה", kind: "vegetables", defaultUnit: "g",
     per100: { protein: 0.9, carbs: 3.9, fat: 0.2, calories: 18 } },
   { id: "f-cucumber", name: "מלפפון", kind: "vegetables", defaultUnit: "g",
@@ -208,7 +173,6 @@ export const MOCK_FOOD_LIBRARY: FoodLibraryItem[] = [
   { id: "f-spinach", name: "תרד", kind: "vegetables", defaultUnit: "g",
     per100: { protein: 2.9, carbs: 3.6, fat: 0.4, calories: 23 } },
 
-  // ===== Extended library — proteins =====
   { id: "f-chicken-thigh", name: "ירך עוף", kind: "protein", defaultUnit: "g",
     per100: { protein: 24, carbs: 0, fat: 11, calories: 200 } },
   { id: "f-chicken-shawarma", name: "שווארמה הודו", kind: "protein", defaultUnit: "g",
@@ -263,7 +227,6 @@ export const MOCK_FOOD_LIBRARY: FoodLibraryItem[] = [
   { id: "f-seitan", name: "סייטן", kind: "protein", defaultUnit: "g",
     per100: { protein: 25, carbs: 14, fat: 1.9, calories: 175 } },
 
-  // ===== Extended library — carbs =====
   { id: "f-rice-wild", name: "אורז בר", kind: "carbs", defaultUnit: "g",
     per100: { protein: 4, carbs: 21, fat: 0.3, calories: 101 } },
   { id: "f-pasta-whole", name: "פסטה מלאה מבושלת", kind: "carbs", defaultUnit: "g",
@@ -319,7 +282,6 @@ export const MOCK_FOOD_LIBRARY: FoodLibraryItem[] = [
     aliases: ["סילאן"],
     per100: { protein: 0.1, carbs: 16, fat: 0, calories: 62 } },
 
-  // ===== Extended library — fats =====
   { id: "f-pistachios", name: "פיסטוקים", kind: "fat", defaultUnit: "g",
     per100: { protein: 20, carbs: 28, fat: 45, calories: 562 } },
   { id: "f-pecan", name: "פקאן", kind: "fat", defaultUnit: "g",
@@ -348,7 +310,6 @@ export const MOCK_FOOD_LIBRARY: FoodLibraryItem[] = [
   { id: "f-dark-chocolate", name: "שוקולד מריר 70%", kind: "fat", defaultUnit: "g",
     per100: { protein: 7.8, carbs: 46, fat: 43, calories: 598 } },
 
-  // ===== Extended library — vegetables =====
   { id: "f-cabbage", name: "כרוב", kind: "vegetables", defaultUnit: "g",
     per100: { protein: 1.3, carbs: 5.8, fat: 0.1, calories: 25 } },
   { id: "f-kale", name: "קייל", kind: "vegetables", defaultUnit: "g",
@@ -381,7 +342,6 @@ export const MOCK_FOOD_LIBRARY: FoodLibraryItem[] = [
   { id: "f-chard", name: "מנגולד", kind: "vegetables", defaultUnit: "g",
     per100: { protein: 1.8, carbs: 3.7, fat: 0.2, calories: 19 } },
 
-  // ===== Brand/breakfast cereals (carbs) =====
   { id: "f-cornflakes", name: "קורנפלקס", kind: "carbs", defaultUnit: "g",
     aliases: ["קורנפלקס אלופים", "אלופים", "Cornflakes", "Kellogg"],
     per100: { protein: 7, carbs: 84, fat: 0.4, calories: 357 },
@@ -414,13 +374,6 @@ export const MOCK_FOOD_LIBRARY: FoodLibraryItem[] = [
     per100: { protein: 20, carbs: 25, fat: 8, calories: 240 } },
 ];
 
-/**
- * Category fallback per-100 macros — used when the typed food
- * doesn't match anything in the library. Lets every option still
- * receive sensible numbers (the row stays useful) and the trainer
- * can adjust the macros manually if needed. Tagged with `estimated`
- * downstream so the UI shows a "מוערך" badge for transparency.
- */
 const CATEGORY_FALLBACK_PER100: Record<DietV2CategoryKind, DietV2OptionMacros> = {
   protein: { protein: 25, carbs: 1, fat: 5, calories: 150 },
   carbs: { protein: 3, carbs: 25, fat: 1, calories: 130 },
@@ -443,15 +396,6 @@ export const estimateMacrosForUnknown = (
   };
 };
 
-/**
- * Normalise a Hebrew string for matching:
- *   - lowercase (no-op for Hebrew but keeps Latin food names sane)
- *   - strip Hebrew niqqud marks (U+0591-U+05C7)
- *   - collapse final-letter variants to their base form
- *   - drop punctuation, parens, quotes and extra whitespace
- * Trainers type quickly and inconsistently; normalising both query
- * and corpus through the same function makes ranking robust.
- */
 const FINAL_LETTERS: Record<string, string> = {
   "ך": "כ",
   "ם": "מ",
@@ -472,12 +416,6 @@ export const normaliseHebrew = (raw: string): string =>
     .replace(/\s+/g, " ")
     .trim();
 
-/**
- * Score a food candidate against a normalised query.
- * Higher score = better match. Layered so exact wins over prefix,
- * prefix over word-boundary, word-boundary over substring, and
- * substring over partial-token overlap. Aliases participate.
- */
 const scoreFoodMatch = (food: FoodLibraryItem, normalisedQuery: string): number => {
   if (!normalisedQuery) return 0;
 
@@ -495,7 +433,6 @@ const scoreFoodMatch = (food: FoodLibraryItem, normalisedQuery: string): number 
       best = Math.max(best, 85);
       continue;
     }
-    // Word-boundary match — query is a whole token inside the name.
     const candidateTokens = candidate.split(" ");
     const allQueryTokensInCandidate = queryTokens.every((token) =>
       candidateTokens.some((cTok) => cTok === token)
@@ -512,7 +449,6 @@ const scoreFoodMatch = (food: FoodLibraryItem, normalisedQuery: string): number 
       best = Math.max(best, 55);
       continue;
     }
-    // Token overlap — count how many query tokens appear anywhere.
     const overlap = queryTokens.filter((token) =>
       candidateTokens.some((cTok) => cTok.includes(token) || token.includes(cTok))
     ).length;
@@ -529,8 +465,6 @@ export const searchFoodLibrary = (
   limit = 10
 ): FoodLibraryItem[] => {
   const normalised = normaliseHebrew(query);
-  // No query → return top items of the requested category (or a
-  // broad starter set) so the picker isn't empty when it opens.
   if (!normalised) {
     const pool = kind
       ? MOCK_FOOD_LIBRARY.filter((food) => food.kind === kind)
@@ -542,13 +476,10 @@ export const searchFoodLibrary = (
     .filter((food) => (kind ? food.kind === kind : true))
     .map((food) => ({ food, score: scoreFoodMatch(food, normalised) }))
     .filter((entry) => entry.score > 0)
-    // Same-kind ties go to the shorter name (more specific).
     .sort((a, b) => b.score - a.score || a.food.name.length - b.food.name.length);
 
   if (scored.length >= 3) return scored.slice(0, limit).map((entry) => entry.food);
 
-  // Few same-kind hits — widen to all categories to catch e.g.
-  // "ביצים" typed under the wrong category.
   const wide = MOCK_FOOD_LIBRARY
     .filter((food) => !kind || food.kind !== kind)
     .map((food) => ({ food, score: scoreFoodMatch(food, normalised) }))
@@ -558,12 +489,6 @@ export const searchFoodLibrary = (
   return [...scored, ...wide].slice(0, limit).map((entry) => entry.food);
 };
 
-/**
- * Best-effort grams-per-unit conversion. Used when the trainer
- * chose a unit that doesn't match the food's default unit (e.g.
- * a food whose macros are stored per-100g, but the trainer asks
- * for "3 slices"). Values are typical household-portion sizes.
- */
 const GENERIC_UNIT_TO_GRAMS: Record<DietV2Unit, number> = {
   g: 1,
   spoons: 15,
@@ -574,18 +499,6 @@ const GENERIC_UNIT_TO_GRAMS: Record<DietV2Unit, number> = {
   piece_medium: 80,
 };
 
-/**
- * Compute macros for a known food at a given quantity + unit.
- * When `food.defaultUnit` matches the requested `unit` (or no unit
- * override is given), uses the food's per-100g/per-unit table
- * directly. When the trainer overrides the unit (e.g. yellow
- * cheese stored per-100g but asked for in slices), the requested
- * unit is converted to grams via GENERIC_UNIT_TO_GRAMS and then
- * the per-100g math runs as usual. Conversion-derived rows are
- * marked downstream so the trainer knows to double-check.
- */
-/** Pick the gram weight for one unit of `food`. Food-specific
- *  override wins, then the generic global table. */
 const gramsForUnit = (food: FoodLibraryItem, unit: DietV2Unit): number =>
   food.unitGrams?.[unit] ?? GENERIC_UNIT_TO_GRAMS[unit];
 
@@ -599,11 +512,8 @@ export const computeMacrosFromFood = (
   if (requestedUnit === food.defaultUnit) {
     ratio = food.defaultUnit === "g" ? quantity / 100 : quantity;
   } else if (food.defaultUnit === "g") {
-    // per-100g table + non-gram requested unit → convert to grams
-    // using the food-specific gram weight (or generic fallback).
     ratio = (quantity * gramsForUnit(food, requestedUnit)) / 100;
   } else {
-    // food table is per-unit; trainer asked for a different unit.
     const grams = quantity * gramsForUnit(food, requestedUnit);
     const baseGrams = gramsForUnit(food, food.defaultUnit);
     ratio = grams / baseGrams;
@@ -616,21 +526,11 @@ export const computeMacrosFromFood = (
   };
 };
 
-/** True when the requested unit isn't the food's default unit AND
- *  the food doesn't carry a specific override for it. Override-
- *  backed conversions are accurate enough to NOT be marked as
- *  estimated. */
 export const isConvertedUnit = (food: FoodLibraryItem, unit: DietV2Unit): boolean => {
   if (unit === food.defaultUnit) return false;
   return !food.unitGrams?.[unit];
 };
 
-/**
- * Per the council verdict, the meal card does not carry a typed
- * target — instead show the live macro range across the category's
- * options. min/max preserves the trainer's intent better than a
- * single average (which can lie when options aren't equivalent).
- */
 export interface MacroRange {
   min: number;
   max: number;
@@ -641,10 +541,6 @@ export const computeCategoryRange = (
   category: DietV2Category,
   pick: keyof DietV2OptionMacros
 ): MacroRange | null => {
-  // Estimated rows (macros guessed because the food wasn't matched)
-  // are excluded from the average so they don't pollute it. The
-  // row itself still renders for the trainee to read; it's just
-  // not weighted into the trainer-facing macro summary.
   const reliable = category.options.filter((option) => !option.estimated);
   if (!reliable.length) return null;
   const values = reliable.map((option) => option.macros[pick]);
@@ -665,23 +561,16 @@ export const computeMealRange = (meal: DietV2Meal, pick: keyof DietV2OptionMacro
   return { min: round(min), max: round(max), avg: round(avg) };
 };
 
-/** Shortcut: average of a single macro across a category's options.
- *  Returns 0 when the category is empty. */
 export const computeCategoryAverage = (
   category: DietV2Category,
   pick: keyof DietV2OptionMacros
 ): number => computeCategoryRange(category, pick)?.avg ?? 0;
 
-/** Shortcut: average of a single macro across all of the meal's
- *  categories (sum of category averages). */
 export const computeMealAverage = (
   meal: DietV2Meal,
   pick: keyof DietV2OptionMacros
 ): number => computeMealRange(meal, pick).avg;
 
-/** Returns the "primary" macro key for a given category — the
- *  macro the category is named after. Used by the category card
- *  to highlight one figure (e.g. protein category → protein g). */
 export const primaryMacroForCategory = (
   kind: DietV2CategoryKind
 ): keyof DietV2OptionMacros | null => {
@@ -697,9 +586,26 @@ export const primaryMacroForCategory = (
   }
 };
 
+export const deriveMealManualMacros = (meal: DietV2Meal): DietV2OptionMacros => {
+  const hasAnyCategoryManual = meal.categories.some(
+    (cat) => cat.manualPrimaryGrams != null || cat.manualCalories != null
+  );
+
+  if (!hasAnyCategoryManual) {
+    return meal.manualMacros ?? { protein: 0, carbs: 0, fat: 0, calories: 0 };
+  }
+
+  const totals: DietV2OptionMacros = { protein: 0, carbs: 0, fat: 0, calories: 0 };
+  for (const cat of meal.categories) {
+    const primary = primaryMacroForCategory(cat.kind);
+    if (primary && cat.manualPrimaryGrams != null) totals[primary] += cat.manualPrimaryGrams;
+    if (cat.manualCalories != null) totals.calories += cat.manualCalories;
+  }
+  return totals;
+};
+
 const round = (value: number): number => Math.round(value * 10) / 10;
 
-/** Local id generator — keeps mock data stable until backend assigns ids. */
 let idCounter = 0;
 export const makeLocalId = (prefix: string): string =>
   `${prefix}-${++idCounter}-${Math.floor(Date.now() / 1000)}`;
@@ -708,6 +614,7 @@ export const buildEmptyMeal = (index: number): DietV2Meal => ({
   id: makeLocalId("meal"),
   name: `ארוחה ${index}`,
   categories: DIET_V2_DEFAULT_CATEGORIES.map((kind) => ({ kind, options: [] })),
+  macroMode: "manual",
 });
 
 const DIET_V2_DEFAULT_CATEGORIES: DietV2CategoryKind[] = [
@@ -717,22 +624,13 @@ const DIET_V2_DEFAULT_CATEGORIES: DietV2CategoryKind[] = [
   "vegetables",
 ];
 
-/**
- * Hebrew unit synonyms — every form the trainer might type maps to
- * one canonical DietV2Unit. "ג׳" and "ג" treated as grams; "כף"
- * (singular) and "כפות" (plural) both → spoons; etc.
- */
 const UNIT_SYNONYMS: { match: RegExp; unit: DietV2Unit }[] = [
   { match: /^(גרם|ג׳|ג'|ג|גר|gram|g)$/i, unit: "g" },
   { match: /^(כפות|כף|כפית|כפיות)$/i, unit: "spoons" },
   { match: /^(כוסות|כוס)$/i, unit: "cups" },
   { match: /^(יחידות|יחידה|יח׳|יח)$/i, unit: "units" },
   { match: /^(פרוסות|פרוסה|פרו׳)$/i, unit: "slice" },
-  // Order matters: the more specific "חתיכה בינונית" / "חתיכות
-  // בינוניות" is matched as a two-token sequence in parseQuickAddText
-  // below. Plain "חתיכה"/"חתיכות" maps to the standard 100g piece.
   { match: /^(חתיכות|חתיכה)$/i, unit: "piece" },
-  // Token produced by the multi-word collapse in parseQuickAddText.
   { match: /^__piece_medium__$/i, unit: "piece_medium" },
 ];
 
@@ -750,56 +648,57 @@ export interface ParsedQuickAdd {
   matchedFood: FoodLibraryItem | null;
 }
 
-/**
- * Quick-add parser: takes a free-text Hebrew string like
- *   "300 גרם אורז"             →  qty:300 unit:g     name:"אורז"
- *   "6 כפות אורז"              →  qty:6   unit:spoons name:"אורז"
- *   "3 ביצים"                  →  qty:3   unit:units  name:"ביצים"
- *   "חזה עוף 150"              →  qty:150 unit:g     name:"חזה עוף"
- *   "כוס קורנפלקס 30 גרם"      →  qty:30  unit:g     name:"קורנפלקס"
- *                                 (the number+unit PAIR wins over
- *                                  a loose unit token elsewhere)
- *
- * Strategy:
- *   1. Pick the first numeric token as the quantity.
- *   2. Prefer a unit that sits IMMEDIATELY next to that number
- *      (either side) — `30 גרם` and `גרם 30` are both treated as
- *      an explicit qty+unit pair.
- *   3. Otherwise fall back to any unit token anywhere, or the
- *      matched food's default unit.
- *   4. Drop ALL unit tokens from the name (so "כוס" doesn't
- *      pollute the food name when grams won the pair race).
- */
+export const isPlateDescription = (trimmed: string): boolean => {
+  const tokens = trimmed
+    .replace(/[,،]/g, " ")
+    .replace(/\s+/g, " ")
+    .split(" ")
+    .filter(Boolean);
+  if (tokens.length < 3) return false;
+
+  const numericIndex = tokens.findIndex((tok) => {
+    const num = Number(tok);
+    return Number.isFinite(num) && num > 0;
+  });
+  if (numericIndex <= 0 || numericIndex >= tokens.length - 1) return false;
+
+  const left = tokens[numericIndex - 1];
+  const right = tokens[numericIndex + 1];
+  if (matchUnit(left) || matchUnit(right)) return false;
+  const anyOtherUnit = tokens.some((tok, i) => i !== numericIndex && matchUnit(tok));
+  if (anyOtherUnit) return false;
+  return true;
+};
+
 export const parseQuickAddText = (
   raw: string,
   categoryKind: DietV2CategoryKind
 ): ParsedQuickAdd | null => {
-  // Collapse multi-word unit phrases BEFORE tokenising — e.g.
-  // "חתיכה בינונית" becomes a single sentinel token the unit
-  // matcher recognises. Otherwise the parser would only see
-  // "חתיכה" and resolve to the 100g piece, ignoring the size hint.
-  const text = raw
-    .trim()
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+
+  if (/[+,]/.test(trimmed) || / ו-?/.test(trimmed) || isPlateDescription(trimmed)) {
+    return {
+      quantity: 1,
+      unit: "units",
+      foodName: trimmed,
+      matchedFood: null,
+    };
+  }
+
+  const text = trimmed
     .replace(/[,،]/g, " ")
     .replace(/\s+/g, " ")
     .replace(/\b(חתיכה|חתיכות)\s+(בינונית|בינוניות)\b/gi, "__piece_medium__");
-  if (!text) return null;
 
   const tokens = text.split(" ");
 
-  // Step 1 — locate the first numeric token. When the trainer types
-  // just a name ("חטיף חלבון של Win") with no quantity, default to
-  // 1 of the food's natural unit — better than refusing the input.
   const numericIndex = tokens.findIndex((tok) => {
     const num = Number(tok);
     return Number.isFinite(num) && num > 0;
   });
   const typedQuantity = numericIndex === -1 ? null : Number(tokens[numericIndex]);
 
-  // Step 2 — prefer an adjacent unit (right neighbour first, then
-  // left). When the trainer writes "30 גרם" or "גרם 30" the unit
-  // intent is unambiguous. Skip the adjacency check when there is
-  // no numeric token at all — there's nothing to be adjacent to.
   let unit: DietV2Unit | null = null;
   let consumedUnitIndex = -1;
   if (numericIndex !== -1) {
@@ -816,8 +715,6 @@ export const parseQuickAddText = (
     }
   }
 
-  // Step 3 — fall back to any unit elsewhere in the string if no
-  // adjacent pair was found.
   if (unit === null) {
     for (let i = 0; i < tokens.length; i++) {
       if (i === numericIndex) continue;
@@ -830,9 +727,6 @@ export const parseQuickAddText = (
     }
   }
 
-  // Step 4 — build the food name from everything that wasn't the
-  // number, the consumed unit, or ANY other unit token (so leftover
-  // unit words don't bleed into the food name).
   const nameTokens = tokens.filter((token, index) => {
     if (index === numericIndex) return false;
     if (index === consumedUnitIndex) return false;
@@ -844,36 +738,42 @@ export const parseQuickAddText = (
   if (!foodName) return null;
 
   const matchedFood = bestFoodMatch(foodName, categoryKind);
-  // Unit resolution priority: an explicit unit word wins; otherwise
-  // use the matched library item's default (rice/chicken default to
-  // grams, eggs default to units); otherwise — when the trainer
-  // typed "2 מעדני חלבון גו" with no unit and no library match —
-  // assume the number counts WHOLE ITEMS, not grams. Falling back
-  // to grams turned "2 yogurt" into "2g yogurt" → near-zero kcal.
   const resolvedUnit = unit ?? matchedFood?.defaultUnit ?? "units";
 
-  // Quantity resolution: trainer-typed wins. Otherwise pull the
-  // food's portion default (a Bamba bag = 80g, a cottage tub =
-  // 200g); fall back to 100 for gram foods and 1 for unit foods.
   const fallbackQuantity = resolvedUnit === "g" ? 100 : 1;
   const quantity = typedQuantity ?? matchedFood?.defaultQuantity ?? fallbackQuantity;
 
   return {
     quantity,
     unit: resolvedUnit,
-    foodName: matchedFood?.name ?? foodName,
+    foodName,
     matchedFood: matchedFood ?? null,
   };
 };
 
-/**
- * Quick-add matcher: pick the single best food for a typed phrase.
- * Reuses the same scoring as the picker's search — same-category
- * hits beat cross-category hits, exact normalised matches always
- * win. Returns null when nothing scores above a confidence floor
- * (so the parser falls back to the category estimator instead of
- * silently inserting a wrong food).
- */
+export const parseCompoundQuickAdd = (
+  raw: string,
+  categoryKind: DietV2CategoryKind
+): ParsedQuickAdd[] => {
+  const parts = raw
+    .split(/\n+/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  if (parts.length === 0) return [];
+
+  return parts.map((part) => {
+    const parsed = parseQuickAddText(part, categoryKind);
+    if (parsed) return parsed;
+    return {
+      quantity: 1,
+      unit: "units" as DietV2Unit,
+      foodName: part,
+      matchedFood: null,
+    };
+  });
+};
+
 const QUICK_MATCH_CONFIDENCE_FLOOR = 40;
 
 const bestFoodMatch = (

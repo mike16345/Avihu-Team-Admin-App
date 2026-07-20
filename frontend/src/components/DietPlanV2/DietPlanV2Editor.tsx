@@ -1,15 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   FaApple,
-  FaCheck,
+  FaBookmark,
   FaClipboardCheck,
-  FaCompress,
-  FaExpand,
   FaFloppyDisk,
   FaPlus,
-  FaWandMagicSparkles,
-  FaWeightScale,
-  FaFire,
 } from "react-icons/fa6";
 
 import type { DietV2Meal, DietV2OptionMacros, DietV2Plan } from "@/interfaces/IDietPlanV2";
@@ -20,77 +15,156 @@ import {
   makeLocalId,
 } from "./dietPlanV2Utils";
 import MealCard from "./MealCard";
+import PlanMacroCharts from "./PlanMacroCharts";
+import DietPlanV2TemplateSaveDialog from "./DietPlanV2TemplateSaveDialog";
+import DietPlanV2TemplatePickerDialog from "./DietPlanV2TemplatePickerDialog";
+import SupplementsPanel from "./SupplementsPanel";
+import NotesPanel from "./NotesPanel";
+import { SaveIndicator, TabButton, ToolbarButton } from "./DietPlanV2Toolbar";
+import type { DietV2Template } from "./dietPlanV2Templates";
+import { normaliseSupplements, type DietV2Supplement } from "./dietPlanV2Supplements";
+import { useUsersStore } from "@/store/userStore";
 
-type DietV2Tab = "menu" | "highlights" | "supplements";
+type DietV2Tab = "menu" | "highlights" | "supplements" | "freeCalories";
 
 interface DietV2PlanExtended extends DietV2Plan {
   highlights: string;
-  supplements: string;
+  supplements: DietV2Supplement[];
+}
+
+export type DietV2EditorMode = "trainee" | "template";
+
+interface DietV2EditorProps {
+  initialPlan?: DietV2PlanExtended;
+  onPersist?: (plan: DietV2PlanExtended) => void;
+  mode?: DietV2EditorMode;
+  saveLabel?: string;
+  forceDirty?: boolean;
 }
 
 const DRAFT_STORAGE_KEY = "dietPlanV2:draft";
 
 const buildInitialPlan = (): DietV2PlanExtended => {
-  // Hydrate from localStorage draft when available so refresh
-  // doesn't wipe the trainer's work. Real save/load through the
-  // backend will replace this once the endpoint is wired.
   if (typeof window !== "undefined") {
     try {
       const raw = window.localStorage.getItem(DRAFT_STORAGE_KEY);
       if (raw) {
-        const parsed = JSON.parse(raw) as DietV2PlanExtended;
-        if (parsed?.meals?.length) return parsed;
+        const parsed = JSON.parse(raw);
+        if (parsed?.meals?.length) {
+          return {
+            meals: parsed.meals,
+            highlights: typeof parsed.highlights === "string" ? parsed.highlights : "",
+            supplements: normaliseSupplements(parsed.supplements),
+          };
+        }
       }
     } catch {
-      /* ignore parse errors — start fresh */
     }
   }
   return {
     meals: [buildEmptyMeal(1)],
     highlights: "",
-    supplements: "",
+    supplements: [],
   };
 };
 
-/**
- * Top-level editor for the v2 ("options") diet plan layout.
- * Local state for now — when the API is wired this becomes the
- * consumer of a query/mutation hook pair (per Agents.md three-step
- * data flow).
- */
-const DietPlanV2Editor: React.FC = () => {
-  const [plan, setPlan] = useState<DietV2PlanExtended>(() => buildInitialPlan());
+const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
+  initialPlan,
+  onPersist,
+  mode = "trainee",
+  saveLabel,
+  forceDirty = false,
+}) => {
+  const isTemplateMode = mode === "template";
+  const [plan, setPlan] = useState<DietV2PlanExtended>(
+    () => initialPlan ?? buildInitialPlan()
+  );
   const [tab, setTab] = useState<DietV2Tab>("menu");
-  // Collapsed meal IDs live in the editor so a single "collapse
-  // all" button can flip everyone at once and each card stays in
-  // sync. Individual collapse toggles still work normally.
-  const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set());
-  const [autoFillOpen, setAutoFillOpen] = useState(false);
-  // Drag-and-drop state for native HTML5 reorder.
+  const [collapsedIds, setCollapsedIds] = useState<Set<string>>(
+    () => new Set(plan.meals.map((m) => m.id))
+  );
+  const mealIdKey = plan.meals.map((m) => m.id).join(",");
+  useEffect(() => {
+    setCollapsedIds((prev) => {
+      const current = new Set(plan.meals.map((m) => m.id));
+      const next = new Set<string>();
+      prev.forEach((id) => {
+        if (current.has(id)) next.add(id);
+      });
+      plan.meals.forEach((m) => {
+        if (!prev.has(m.id)) next.add(m.id);
+      });
+      return next;
+    });
+  }, [mealIdKey]);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dropIndex, setDropIndex] = useState<number | null>(null);
-  // Cosmetic "saved" indicator — flips to "saving" on every edit
-  // and clears 800ms later. Real persistence will replace the
-  // setTimeout when the mutation hook is wired.
   const [saved, setSaved] = useState(true);
+  const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
+  const [templatePickerOpen, setTemplatePickerOpen] = useState(false);
+  const [highlightsWarningKey, setHighlightsWarningKey] = useState(0);
+  const [highlightsAttentionActive, setHighlightsAttentionActive] = useState(false);
+  useEffect(() => {
+    if (highlightsWarningKey === 0) return;
+    setHighlightsAttentionActive(true);
+    const timeout = window.setTimeout(() => setHighlightsAttentionActive(false), 1000);
+    return () => window.clearTimeout(timeout);
+  }, [highlightsWarningKey]);
+  const currentTrainerName = useUsersStore((s) => {
+    const u = s.currentUser;
+    if (!u) return "";
+    return [u.firstName, u.lastName].filter(Boolean).join(" ").trim();
+  });
 
   const markEdited = () => {
     setSaved(false);
   };
 
-  // Save handler — right now this is client-side only because
-  // the v2 backend endpoint isn't wired. Once `PUT /diet-plans/:id`
-  // exists, swap this for a real mutation hook. The button + dirty
-  // indicator is here so trainers stop losing plans to refresh.
+  const guardHighlights = (): boolean => {
+    if (plan.highlights.trim().length > 0) return true;
+    setHighlightsWarningKey((k) => k + 1);
+    return false;
+  };
+
   const handleSave = () => {
+    if (!isTemplateMode && !guardHighlights()) return;
     setSaved(true);
+    if (onPersist) {
+      onPersist(plan);
+      return;
+    }
     if (typeof window !== "undefined") {
       try {
         window.localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(plan));
       } catch {
-        /* storage unavailable — best effort */
       }
     }
+  };
+
+  const handleSaveAsTemplate = () => {
+    if (!guardHighlights()) return;
+    setTemplateDialogOpen(true);
+  };
+
+  const handleApplyTemplate = (template: DietV2Template) => {
+    const clonedPlan: DietV2PlanExtended = {
+      meals: template.plan.meals.map((meal) => ({
+        ...meal,
+        id: makeLocalId("meal"),
+        categories: meal.categories.map((cat) => ({
+          ...cat,
+          options: cat.options.map((opt) => ({ ...opt, id: makeLocalId("option") })),
+        })),
+      })),
+      highlights:
+        (template.plan as Partial<DietV2PlanExtended>).highlights ?? plan.highlights,
+      supplements: normaliseSupplements(
+        (template.plan as Partial<DietV2PlanExtended>).supplements
+      ).map((s) => ({ ...s, id: makeLocalId("supp") })),
+    };
+    setPlan(clonedPlan);
+    markEdited();
+    setTemplatePickerOpen(false);
   };
 
   const mutatePlan = (mutator: (current: DietV2PlanExtended) => DietV2PlanExtended) => {
@@ -128,6 +202,60 @@ const DietPlanV2Editor: React.FC = () => {
     });
   };
 
+  const copyCategoryToMeal = (
+    sourceMealId: string,
+    categoryKind: DietV2Meal["categories"][number]["kind"],
+    targetMealId: string
+  ) => {
+    if (sourceMealId === targetMealId) return;
+    mutatePlan((current) => {
+      const source = current.meals.find((m) => m.id === sourceMealId);
+      const sourceCategory = source?.categories.find((c) => c.kind === categoryKind);
+      if (!sourceCategory || sourceCategory.options.length === 0) return current;
+      const clonedOptions = sourceCategory.options.map((option) => ({
+        ...option,
+        id: makeLocalId("option"),
+      }));
+      return {
+        ...current,
+        meals: current.meals.map((meal) => {
+          if (meal.id !== targetMealId) return meal;
+          return {
+            ...meal,
+            categories: meal.categories.map((cat) =>
+              cat.kind === categoryKind
+                ? { ...cat, options: [...cat.options, ...clonedOptions] }
+                : cat
+            ),
+          };
+        }),
+      };
+    });
+  };
+
+  const copyCategoryToNewMeal = (
+    sourceMealId: string,
+    categoryKind: DietV2Meal["categories"][number]["kind"]
+  ) => {
+    mutatePlan((current) => {
+      const source = current.meals.find((m) => m.id === sourceMealId);
+      const sourceCategory = source?.categories.find((c) => c.kind === categoryKind);
+      if (!sourceCategory || sourceCategory.options.length === 0) return current;
+      const newMeal = buildEmptyMeal(current.meals.length + 1);
+      const clonedOptions = sourceCategory.options.map((option) => ({
+        ...option,
+        id: makeLocalId("option"),
+      }));
+      const seeded: DietV2Meal = {
+        ...newMeal,
+        categories: newMeal.categories.map((cat) =>
+          cat.kind === categoryKind ? { ...cat, options: clonedOptions } : cat
+        ),
+      };
+      return { ...current, meals: [...current.meals, seeded] };
+    });
+  };
+
   const removeMeal = (mealId: string) => {
     mutatePlan((current) => ({
       ...current,
@@ -151,14 +279,6 @@ const DietPlanV2Editor: React.FC = () => {
     });
   };
 
-  const allCollapsed = plan.meals.length > 0 && plan.meals.every((m) => collapsedIds.has(m.id));
-  const toggleAll = () => {
-    setCollapsedIds(allCollapsed ? new Set() : new Set(plan.meals.map((m) => m.id)));
-  };
-
-  // Drag-and-drop reorder. We track a separate `dropIndex` so the
-  // target card gets a highlight ring while hovered; on drop we
-  // splice the dragged meal into the target position.
   const onMealDragStart = (idx: number) => {
     setDragIndex(idx);
     setDropIndex(idx);
@@ -184,9 +304,6 @@ const DietPlanV2Editor: React.FC = () => {
     setDropIndex(null);
   };
 
-  // Daily totals respect each meal's macro mode: in manual mode we
-  // use the trainer-typed values, otherwise we sum the category
-  // averages. Mixed plans (some manual + some auto) are fine.
   const sumMealMacro = (key: keyof DietV2OptionMacros) =>
     plan.meals.reduce((acc, meal) => {
       if (meal.macroMode === "manual" && meal.manualMacros) {
@@ -202,79 +319,19 @@ const DietPlanV2Editor: React.FC = () => {
       carbs: Math.round(sumMealMacro("carbs")),
       fat: Math.round(sumMealMacro("fat")),
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [plan.meals],
   );
 
-  const highlightsCount = plan.highlights.trim() ? plan.highlights.trim().split(/\n+/).length : 0;
-  const supplementsCount = plan.supplements.trim()
-    ? plan.supplements.trim().split(/\n+/).length
-    : 0;
-
-  /**
-   * Auto-fill: distribute a daily calorie & protein target across
-   * the existing meals. Uses a typical 25/35/10/30 split for 4
-   * meals, equal split otherwise. Macros allocate ~30% kcal from
-   * protein, ~45% carbs, ~25% fat. Each meal flips to manual mode
-   * so the trainer can fine-tune afterwards.
-   */
-  const applyAutoFill = (
-    dailyCalories: number,
-    dailyProtein: number,
-    perMealPercents: number[]
-  ) => {
-    mutatePlan((current) => {
-      const n = current.meals.length;
-      if (n === 0) return current;
-      const updated = current.meals.map((meal, idx) => {
-        const ratio = (perMealPercents[idx] ?? 0) / 100;
-        const cal = Math.round(dailyCalories * ratio);
-        const proteinG = Math.round(dailyProtein * ratio);
-        const proteinCal = proteinG * 4;
-        const remainingCal = Math.max(0, cal - proteinCal);
-        const carbsG = Math.round((remainingCal * 0.6) / 4);
-        const fatG = Math.round((remainingCal * 0.4) / 9);
-        return {
-          ...meal,
-          macroMode: "manual" as const,
-          manualMacros: {
-            protein: proteinG,
-            carbs: carbsG,
-            fat: fatG,
-            calories: cal,
-          },
-        };
-      });
-      return { ...current, meals: updated };
-    });
-    setAutoFillOpen(false);
-  };
+  const supplementsCount = plan.supplements.length;
+  const showSaved = saved && !forceDirty;
 
   return (
     <div dir="rtl" className="flex flex-col gap-4 font-heebo">
-      {/* 3-card summary strip (meal count moved next to the add-meal
-          button below; the trainer doesn't need it at hero level). */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <SummaryCard
-          icon={<FaWeightScale size={14} />}
-          label="חלבון · פחמ׳ · שומן"
-          value={`${totals.protein} · ${totals.carbs} · ${totals.fat}`}
-        />
-        <SummaryCard
-          icon={<FaFire size={14} />}
-          label="סך קלוריות"
-          value={`${totals.calories} קק״ל`}
-        />
-        <SummaryCard
-          icon={<FaClipboardCheck size={14} />}
-          label="דגשים · תוספים"
-          value={
-            highlightsCount + supplementsCount === 0
-              ? "—·—"
-              : `${highlightsCount} · ${supplementsCount}`
-          }
-        />
-      </div>
+      {/* Macro overview graphs — daily calorie hero + macro-ratio
+          donut. Placed above the small summary strip so the trainer
+          sees the plan's shape (calorie total + energy split) first,
+          then the compact stats below. */}
+      <PlanMacroCharts totals={totals} />
 
       {/* Toolbar — tabs + global actions (load template, auto-fill,
           collapse-all, save indicator). Replaces the heavy "טען
@@ -286,13 +343,14 @@ const DietPlanV2Editor: React.FC = () => {
             icon={<FaApple size={11} />}
             label="תפריט"
             onClick={() => setTab("menu")}
-            primary
           />
           <TabButton
+            key={`highlights-tab-${highlightsWarningKey}`}
             active={tab === "highlights"}
             icon={<FaClipboardCheck size={11} />}
-            label={`דגשים${highlightsCount ? ` · ${highlightsCount}` : ""}`}
+            label="דגשים"
             onClick={() => setTab("highlights")}
+            attention={highlightsAttentionActive}
           />
           <TabButton
             active={tab === "supplements"}
@@ -300,50 +358,49 @@ const DietPlanV2Editor: React.FC = () => {
             label={`תוספים${supplementsCount ? ` · ${supplementsCount}` : ""}`}
             onClick={() => setTab("supplements")}
           />
+          <FreeCaloriesInput
+            active={tab === "freeCalories"}
+            onActivate={() => setTab("freeCalories")}
+            value={plan.freeCalories ?? 0}
+            onChange={(v) =>
+              setPlan((current) => ({
+                ...current,
+                freeCalories: v > 0 ? v : undefined,
+              }))
+            }
+          />
         </nav>
 
         <div className="flex flex-wrap items-center gap-1.5">
           <SaveIndicator saved={saved} />
           <ToolbarButton
             icon={<FaFloppyDisk size={11} />}
-            label={saved ? "נשמר" : "שמור תפריט"}
+            label={showSaved ? "נשמר" : saveLabel ?? "שמור תפריט"}
             onClick={handleSave}
-            disabled={saved}
+            disabled={showSaved}
             tone="brand"
           />
-          {tab === "menu" && (
+          {!isTemplateMode && (
             <>
               <ToolbarButton
-                icon={<FaWandMagicSparkles size={11} />}
-                label="מלא אוטומטית"
-                onClick={() => setAutoFillOpen(true)}
+                icon={<FaBookmark size={11} />}
+                label="שמור כתבנית"
+                onClick={handleSaveAsTemplate}
+                disabled={plan.meals.every((m) => m.categories.every((c) => c.options.length === 0))}
               />
-              {plan.meals.length > 1 && (
-                <ToolbarButton
-                  icon={allCollapsed ? <FaExpand size={11} /> : <FaCompress size={11} />}
-                  label={allCollapsed ? "פתח הכל" : "סגור הכל"}
-                  onClick={toggleAll}
-                />
-              )}
+              <ToolbarButton
+                icon={<FaClipboardCheck size={11} />}
+                label="תבניות"
+                onClick={() => setTemplatePickerOpen(true)}
+              />
             </>
           )}
         </div>
       </div>
 
       {/* Tab content */}
-      {tab === "menu" && (
+      {(tab === "menu" || tab === "freeCalories") && (
         <>
-          {autoFillOpen && (
-            <AutoFillPanel
-              defaultCalories={totals.calories || 2200}
-              defaultProtein={totals.protein || 180}
-              mealsCount={plan.meals.length}
-              mealNames={plan.meals.map((m, i) => m.name || `ארוחה ${i + 1}`)}
-              onCancel={() => setAutoFillOpen(false)}
-              onApply={applyAutoFill}
-            />
-          )}
-
           <div className="flex flex-col gap-4">
             {plan.meals.map((meal, idx) => (
               <MealCard
@@ -351,6 +408,19 @@ const DietPlanV2Editor: React.FC = () => {
                 meal={meal}
                 index={idx + 1}
                 collapsed={collapsedIds.has(meal.id)}
+                siblingMeals={plan.meals
+                  .filter((m) => m.id !== meal.id)
+                  .map((m) => ({
+                    id: m.id,
+                    name: m.name || `ארוחה ${plan.meals.indexOf(m) + 1}`,
+                    index: plan.meals.indexOf(m) + 1,
+                  }))}
+                onCopyCategoryToMeal={(kind, targetId) =>
+                  copyCategoryToMeal(meal.id, kind, targetId)
+                }
+                onCopyCategoryToNewMeal={(kind) =>
+                  copyCategoryToNewMeal(meal.id, kind)
+                }
                 onChange={(next) => updateMeal(meal.id, () => next)}
                 onToggleCollapse={() => toggleCollapse(meal.id)}
                 onDuplicate={() => duplicateMeal(meal.id)}
@@ -389,279 +459,80 @@ const DietPlanV2Editor: React.FC = () => {
       )}
 
       {tab === "supplements" && (
-        <NotesPanel
-          title="תוספים"
-          hint="רשימת תוספי תזונה ומינונים (שורה לכל תוסף)"
-          value={plan.supplements}
-          onChange={(supplements) => mutatePlan((p) => ({ ...p, supplements }))}
-          placeholder={"חלבון מי גבינה — 30 גרם אחרי אימון\nקריאטין — 5 גרם ביום\n..."}
+        <SupplementsPanel
+          items={plan.supplements}
+          onAdd={(name, doseAmount, doseUnit) =>
+            mutatePlan((p) => ({
+              ...p,
+              supplements: [
+                ...p.supplements,
+                { id: makeLocalId("supp"), name, doseAmount, doseUnit },
+              ],
+            }))
+          }
+          onUpdate={(id, patch) =>
+            mutatePlan((p) => ({
+              ...p,
+              supplements: p.supplements.map((s) => (s.id === id ? { ...s, ...patch } : s)),
+            }))
+          }
+          onRemove={(id) =>
+            mutatePlan((p) => ({
+              ...p,
+              supplements: p.supplements.filter((s) => s.id !== id),
+            }))
+          }
         />
       )}
-    </div>
-  );
-};
 
-interface SummaryCardProps {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-}
-
-const SummaryCard: React.FC<SummaryCardProps> = ({ icon, label, value }) => (
-  <div className="flex items-center justify-between gap-3 rounded-2xl border border-blue-100 bg-white px-4 py-3 shadow-sm dark:border-blue-900/40 dark:bg-slate-900">
-    <div className="flex flex-col">
-      <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">{label}</span>
-      <strong className="mt-0.5 text-base font-extrabold text-slate-900 dark:text-slate-100">
-        {value}
-      </strong>
-    </div>
-    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-      {icon}
-    </span>
-  </div>
-);
-
-interface TabButtonProps {
-  active: boolean;
-  icon: React.ReactNode;
-  label: string;
-  onClick: () => void;
-  primary?: boolean;
-}
-
-const TabButton: React.FC<TabButtonProps> = ({ active, icon, label, onClick, primary }) => {
-  const activeClass = primary
-    ? "brand-gradient text-white shadow-md shadow-blue-500/25"
-    : "bg-emerald-600 text-white shadow-md shadow-emerald-500/25";
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-bold transition-all hover:-translate-y-0.5 ${
-        active
-          ? `${activeClass} border-transparent`
-          : "border-slate-200 bg-white text-slate-700 hover:border-blue-300 hover:bg-blue-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
-      }`}
-    >
-      {icon}
-      {label}
-    </button>
-  );
-};
-
-interface ToolbarButtonProps {
-  icon: React.ReactNode;
-  label: string;
-  onClick: () => void;
-  disabled?: boolean;
-  title?: string;
-  tone?: "default" | "brand";
-}
-
-const ToolbarButton: React.FC<ToolbarButtonProps> = ({ icon, label, onClick, disabled, title, tone }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    disabled={disabled}
-    title={title}
-    className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11px] font-bold transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 ${
-      tone === "brand"
-        ? "border-blue-300 bg-blue-600 text-white shadow-sm shadow-blue-500/30 hover:bg-blue-700"
-        : "border-slate-200 bg-white text-slate-700 hover:border-blue-300 hover:bg-blue-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
-    }`}
-  >
-    {icon}
-    {label}
-  </button>
-);
-
-const SaveIndicator: React.FC<{ saved: boolean }> = ({ saved }) => (
-  <span
-    className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-bold transition-colors ${
-      saved
-        ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300"
-        : "bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300"
-    }`}
-    title={saved ? "כל השינויים נשמרו מקומית" : "שומר…"}
-  >
-    {saved ? <FaCheck size={9} /> : <span className="h-2 w-2 animate-pulse rounded-full bg-amber-500" />}
-    {saved ? "נשמר" : "שומר…"}
-  </span>
-);
-
-interface NotesPanelProps {
-  title: string;
-  hint: string;
-  value: string;
-  onChange: (value: string) => void;
-  placeholder: string;
-}
-
-const NotesPanel: React.FC<NotesPanelProps> = ({ title, hint, value, onChange, placeholder }) => (
-  <section className="rounded-2xl border border-blue-100 bg-white p-4 dark:border-blue-900/40 dark:bg-slate-900">
-    <header className="mb-2 flex items-baseline justify-between gap-2">
-      <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">{title}</h3>
-      <span className="text-[11px] text-slate-500 dark:text-slate-400">{hint}</span>
-    </header>
-    <textarea
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      rows={8}
-      className="w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200/60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-    />
-  </section>
-);
-
-interface AutoFillPanelProps {
-  defaultCalories: number;
-  defaultProtein: number;
-  mealsCount: number;
-  mealNames: string[];
-  onApply: (calories: number, protein: number, perMealPercents: number[]) => void;
-  onCancel: () => void;
-}
-
-/**
- * Inline panel for the "מלא אוטומטית" action. The trainer types
- * the daily targets AND edits the per-meal % split before applying.
- * No trainer trusts a hard-coded 25/35/10/30, so the split needs to
- * be visible and editable. The panel seeds with a suggested split
- * that the trainer can override.
- */
-const AutoFillPanel: React.FC<AutoFillPanelProps> = ({
-  defaultCalories,
-  defaultProtein,
-  mealsCount,
-  mealNames,
-  onApply,
-  onCancel,
-}) => {
-  const [calories, setCalories] = useState(defaultCalories);
-  const [protein, setProtein] = useState(defaultProtein);
-  const [percents, setPercents] = useState<number[]>(() =>
-    autoSplit(mealsCount).map((r) => Math.round(r * 100))
-  );
-
-  const total = percents.reduce((sum, p) => sum + p, 0);
-  const isValid = calories > 0 && mealsCount > 0 && total === 100;
-
-  const updatePercent = (idx: number, value: number) => {
-    setPercents((prev) => prev.map((p, i) => (i === idx ? Math.max(0, value) : p)));
-  };
-
-  return (
-    <section className="rounded-2xl border border-blue-200 bg-gradient-to-l from-blue-50 to-white p-4 shadow-sm dark:border-blue-900/40 dark:from-blue-950/30 dark:to-slate-900">
-      <header className="mb-3 flex items-center gap-2">
-        <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-600 text-white">
-          <FaWandMagicSparkles size={12} />
-        </span>
-        <div>
-          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">מילוי אוטומטי</h3>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400">
-            הגדר יעד יומי + חלוקת אחוזים בין {mealsCount} הארוחות
-          </p>
-        </div>
-      </header>
-
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <NumberField label="קלוריות ביום" value={calories} onChange={setCalories} suffix="קק״ל" />
-        <NumberField label="חלבון ביום" value={protein} onChange={setProtein} suffix="גרם" />
-      </div>
-
-      <div className="mt-3 rounded-xl border border-blue-100 bg-white p-3 dark:border-blue-900/40 dark:bg-slate-900/60">
-        <div className="mb-2 flex items-center justify-between text-[11px] font-bold">
-          <span className="text-slate-600 dark:text-slate-300">חלוקה בין ארוחות</span>
-          <span className={total === 100 ? "text-emerald-600" : "text-rose-600"}>
-            סה״כ: {total}%
-          </span>
-        </div>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {percents.map((p, idx) => (
-            <label key={idx} className="flex items-center gap-2 text-[11px]">
-              <span className="w-24 shrink-0 truncate text-slate-600 dark:text-slate-300">
-                {mealNames[idx] || `ארוחה ${idx + 1}`}
-              </span>
-              <span className="inline-flex flex-1 items-stretch overflow-hidden rounded-md border border-blue-200 bg-white dark:border-blue-900/40 dark:bg-slate-900">
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  min={0}
-                  max={100}
-                  value={p || ""}
-                  onChange={(e) => updatePercent(idx, Number(e.target.value) || 0)}
-                  className="w-full border-0 bg-transparent px-2 py-1 text-center text-xs font-extrabold text-slate-800 focus:outline-none dark:text-slate-100"
-                />
-                <span className="flex items-center bg-blue-50 px-2 text-[10px] font-bold text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
-                  %
-                </span>
-              </span>
-            </label>
-          ))}
-        </div>
-        {total !== 100 && (
-          <p className="mt-2 text-[10px] font-semibold text-rose-600">
-            סכום האחוזים חייב להיות 100% כדי לחלק
-          </p>
-        )}
-      </div>
-
-      <footer className="mt-3 flex items-center justify-end gap-2">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="rounded-lg px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
-        >
-          ביטול
-        </button>
-        <button
-          type="button"
-          onClick={() => onApply(calories, protein, percents)}
-          disabled={!isValid}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm shadow-blue-500/30 transition-all hover:-translate-y-0.5 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
-        >
-          <FaWandMagicSparkles size={10} />
-          חלק אוטומטית
-        </button>
-      </footer>
-    </section>
-  );
-};
-
-const NumberField: React.FC<{
-  label: string;
-  value: number;
-  onChange: (n: number) => void;
-  suffix: string;
-}> = ({ label, value, onChange, suffix }) => (
-  <label className="flex flex-col gap-1 text-right">
-    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400">{label}</span>
-    <span className="inline-flex items-stretch overflow-hidden rounded-lg border border-blue-200 bg-white shadow-inner dark:border-blue-900/40 dark:bg-slate-900">
-      <input
-        type="number"
-        inputMode="numeric"
-        min={0}
-        value={value || ""}
-        onChange={(e) => onChange(Math.max(0, Number(e.target.value) || 0))}
-        className="w-full border-0 bg-transparent px-3 py-2 text-sm font-extrabold text-slate-800 focus:outline-none dark:text-slate-100"
+      <DietPlanV2TemplateSaveDialog
+        open={templateDialogOpen}
+        onOpenChange={setTemplateDialogOpen}
+        plan={plan}
+        defaultBuiltBy={currentTrainerName}
       />
-      <span className="flex items-center bg-blue-50 px-2 text-[11px] font-bold text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
-        {suffix}
-      </span>
+
+      <DietPlanV2TemplatePickerDialog
+        open={templatePickerOpen}
+        onOpenChange={setTemplatePickerOpen}
+        onApply={handleApplyTemplate}
+      />
+    </div>
+  );
+};
+
+const FreeCaloriesInput: React.FC<{
+  active: boolean;
+  onActivate: () => void;
+  value: number;
+  onChange: (next: number) => void;
+}> = ({ active, onActivate, value, onChange }) => (
+  <label
+    onClick={onActivate}
+    title="כמות קק״ל שמעבר לתפריט המובנה — לשימוש חופשי של המתאמן"
+    className={`inline-flex items-center rounded-xl border border-blue-700 bg-white font-bold text-blue-700 transition-all dark:border-blue-500 dark:bg-slate-900 dark:text-blue-200 ${
+      active
+        ? "gap-1.5 px-3.5 py-2 text-[13px]"
+        : "gap-1.5 px-3 py-2 text-xs"
+    }`}
+  >
+    <span>קלוריות חופשיות</span>
+    <input
+      type="number"
+      inputMode="numeric"
+      min={0}
+      value={value || ""}
+      onFocus={onActivate}
+      onChange={(e) => onChange(Math.max(0, Number(e.target.value) || 0))}
+      placeholder="0"
+      className={`border-0 bg-transparent p-0 text-center font-extrabold text-slate-900 focus:outline-none focus:ring-0 dark:text-slate-100 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none ${
+        active ? "w-12 text-[13px]" : "w-10 text-xs"
+      }`}
+    />
+    <span className={active ? "text-[11px] font-semibold text-slate-400" : "text-[10px] font-semibold text-slate-400"}>
+      קק״ל
     </span>
   </label>
 );
-
-/**
- * Typical kcal split for N meals. For 4 meals we lean on the
- * classic breakfast-lunch-snack-dinner shape; everything else just
- * splits evenly. The ratios always sum to 1.
- */
-const autoSplit = (n: number): number[] => {
-  if (n === 4) return [0.25, 0.35, 0.1, 0.3];
-  if (n === 5) return [0.22, 0.3, 0.1, 0.28, 0.1];
-  if (n === 3) return [0.3, 0.4, 0.3];
-  return Array.from({ length: n }, () => 1 / n);
-};
 
 export default DietPlanV2Editor;

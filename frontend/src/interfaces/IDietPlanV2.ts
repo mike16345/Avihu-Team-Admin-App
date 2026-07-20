@@ -33,10 +33,32 @@ export const DIET_V2_UNIT_LABELS: Record<DietV2Unit, string> = {
   g: "גרם",
   spoons: "כפות",
   cups: "כוסות",
-  units: "יחידות",
+  units: "יח׳",
   slice: "פרוסות",
   piece: "חתיכה",
   piece_medium: "חתיכה בינונית",
+};
+
+/** Plural form used when quantity > 1. Hebrew nouns like חתיכה
+ *  decline: "1 חתיכה" but "2 חתיכות". Units that already look
+ *  correct as-is (כפות, כוסות, יחידות, פרוסות, גרם) don't need a
+ *  separate plural. */
+const DIET_V2_UNIT_LABELS_PLURAL: Partial<Record<DietV2Unit, string>> = {
+  piece: "חתיכות",
+  piece_medium: "חתיכות בינוניות",
+};
+
+/**
+ * Quantity-aware unit label — pluralises Hebrew forms when the
+ * quantity is > 1. Prefer this in read-only surfaces (trainee view,
+ * summaries) so a trainer who typed "2 חתיכות שניצל" sees exactly
+ * "2 חתיכות שניצל" rendered back, not "2 חתיכה שניצל".
+ */
+export const formatUnitLabel = (unit: DietV2Unit, quantity: number): string => {
+  if (quantity !== 1 && DIET_V2_UNIT_LABELS_PLURAL[unit]) {
+    return DIET_V2_UNIT_LABELS_PLURAL[unit] as string;
+  }
+  return DIET_V2_UNIT_LABELS[unit];
 };
 
 export interface DietV2OptionMacros {
@@ -92,4 +114,8 @@ export interface DietV2Meal {
 
 export interface DietV2Plan {
   meals: DietV2Meal[];
+  /** Free-calories budget (kcal) the trainee can spend outside the
+   *  planned menu. Trainer types it into the editor toolbar; 0 or
+   *  undefined means "no free calories". */
+  freeCalories?: number;
 }

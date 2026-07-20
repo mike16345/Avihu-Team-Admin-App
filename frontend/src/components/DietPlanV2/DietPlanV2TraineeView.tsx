@@ -5,7 +5,9 @@ import type {
   DietV2MealMacroMode,
   DietV2OptionMacros,
   DietV2Plan,
+  DietV2Unit,
 } from "@/interfaces/IDietPlanV2";
+import { formatUnitLabel } from "@/interfaces/IDietPlanV2";
 
 import {
   CATEGORY_LABELS,
@@ -13,8 +15,17 @@ import {
   computeMealAverage,
 } from "./dietPlanV2Utils";
 
+interface DietV2SupplementRef {
+  id: string;
+  name: string;
+  dose: string;
+}
+
 interface DietV2TraineeViewProps {
-  plan: DietV2Plan & { highlights?: string; supplements?: string };
+  plan: DietV2Plan & {
+    highlights?: string;
+    supplements?: DietV2SupplementRef[] | string;
+  };
   trainerName?: string;
   traineeName?: string;
 }
@@ -25,12 +36,18 @@ const parseLines = (raw?: string) =>
     .map((line) => line.trim())
     .filter(Boolean);
 
-/**
- * Read-only render of a DietV2 plan for the trainee. Mobile-first
- * Hebrew, cards + list layout, no editing controls. This is the
- * final artifact that gets shared to the trainee (screen view /
- * print / PDF export downstream).
- */
+const normaliseSupplementList = (
+  raw: DietV2SupplementRef[] | string | undefined
+): { name: string; dose: string }[] => {
+  if (Array.isArray(raw)) return raw.map(({ name, dose }) => ({ name, dose }));
+  return parseLines(raw).map((line) => {
+    const match = line.match(/^(.+?)\s+(\d.*)$/);
+    return match
+      ? { name: match[1].trim(), dose: match[2].trim() }
+      : { name: line, dose: "" };
+  });
+};
+
 const DietV2TraineeView: React.FC<DietV2TraineeViewProps> = ({
   plan,
   trainerName,
@@ -38,7 +55,7 @@ const DietV2TraineeView: React.FC<DietV2TraineeViewProps> = ({
 }) => {
   const totalCalories = plan.meals.reduce((acc, meal) => acc + resolveCal(meal), 0);
   const highlights = parseLines(plan.highlights);
-  const supplements = parseLines(plan.supplements);
+  const supplements = normaliseSupplementList(plan.supplements);
 
   return (
     <div dir="rtl" className="mx-auto flex max-w-2xl flex-col gap-4 p-4 font-heebo">
@@ -76,7 +93,19 @@ const DietV2TraineeView: React.FC<DietV2TraineeViewProps> = ({
       )}
 
       {supplements.length > 0 && (
-        <NotesBlock title="תוספים" tone="indigo" lines={supplements} />
+        <section className="rounded-2xl border border-indigo-100 bg-indigo-50/40 p-4 dark:border-indigo-900/40 dark:bg-indigo-950/30">
+          <h3 className="mb-2 text-sm font-bold text-slate-900 dark:text-slate-100">תוספים</h3>
+          <ul className="flex flex-col gap-1 text-xs text-slate-700 dark:text-slate-200">
+            {supplements.map((s, idx) => (
+              <li key={idx} className="flex items-baseline justify-between gap-3">
+                <strong className="font-semibold">{s.name}</strong>
+                {s.dose && (
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">{s.dose}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
       <footer className="mt-2 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-[11px] text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-300">
@@ -164,7 +193,7 @@ const MealBlock: React.FC<MealBlockProps> = ({ meal, index }) => {
                     <strong className="font-semibold">{opt.foodName}</strong>
                   </span>
                   <span className="shrink-0 text-[11px] text-slate-500 dark:text-slate-400">
-                    {opt.quantity} {unitLabel(opt.unit)}
+                    {opt.quantity} {formatUnitLabel(opt.unit as DietV2Unit, opt.quantity)}
                   </span>
                 </li>
               ))}
@@ -174,19 +203,6 @@ const MealBlock: React.FC<MealBlockProps> = ({ meal, index }) => {
       })}
     </article>
   );
-};
-
-const unitLabel = (unit: string) => {
-  const labels: Record<string, string> = {
-    g: "גרם",
-    spoons: "כפות",
-    cups: "כוסות",
-    units: "יחידות",
-    slice: "פרוסות",
-    piece: "חתיכה",
-    piece_medium: "חתיכה בינונית",
-  };
-  return labels[unit] ?? unit;
 };
 
 const NotesBlock: React.FC<{ title: string; tone: "blue" | "indigo"; lines: string[] }> = ({

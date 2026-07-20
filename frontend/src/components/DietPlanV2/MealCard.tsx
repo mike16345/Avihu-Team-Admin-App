@@ -2,24 +2,28 @@ import { FaChevronDown, FaChevronUp, FaCopy, FaGripVertical, FaRobot, FaTrashCan
 
 import type {
   DietV2Category,
+  DietV2CategoryKind,
   DietV2Meal,
   DietV2MealMacroMode,
   DietV2OptionMacros,
 } from "@/interfaces/IDietPlanV2";
 
-import { computeMealAverage } from "./dietPlanV2Utils";
+import { computeMealAverage, deriveMealManualMacros } from "./dietPlanV2Utils";
 import CategorySection from "./CategorySection";
+import type { MealSibling } from "./CategorySection";
+export type { MealSibling };
 
 interface MealCardProps {
   meal: DietV2Meal;
   index: number;
   collapsed: boolean;
+  siblingMeals: MealSibling[];
+  onCopyCategoryToMeal: (kind: DietV2CategoryKind, targetMealId: string) => void;
+  onCopyCategoryToNewMeal: (kind: DietV2CategoryKind) => void;
   onChange: (meal: DietV2Meal) => void;
   onToggleCollapse: () => void;
   onDuplicate: () => void;
   onRemove: () => void;
-  // HTML5 native drag-and-drop wiring — the editor owns the
-  // ordering state and just hands these handlers down.
   onDragStart: () => void;
   onDragOver: (e: React.DragEvent) => void;
   onDrop: () => void;
@@ -31,6 +35,9 @@ const MealCard: React.FC<MealCardProps> = ({
   meal,
   index,
   collapsed,
+  siblingMeals,
+  onCopyCategoryToMeal,
+  onCopyCategoryToNewMeal,
   onChange,
   onToggleCollapse,
   onDuplicate,
@@ -41,15 +48,17 @@ const MealCard: React.FC<MealCardProps> = ({
   isDragging,
   isDropTarget,
 }) => {
-  const macroMode: DietV2MealMacroMode = meal.macroMode ?? "auto";
+  const macroMode: DietV2MealMacroMode = meal.macroMode ?? "manual";
   const autoMacros: DietV2OptionMacros = {
     protein: computeMealAverage(meal, "protein"),
     carbs: computeMealAverage(meal, "carbs"),
     fat: computeMealAverage(meal, "fat"),
     calories: computeMealAverage(meal, "calories"),
   };
-  const manualMacros: DietV2OptionMacros =
-    meal.manualMacros ?? { protein: 0, carbs: 0, fat: 0, calories: 0 };
+  const manualMacros: DietV2OptionMacros = deriveMealManualMacros(meal);
+  const hasCategoryManualEntries = meal.categories.some(
+    (cat) => cat.manualPrimaryGrams != null || cat.manualCalories != null
+  );
   const displayedMacros = macroMode === "manual" ? manualMacros : autoMacros;
 
   const totalOptions = meal.categories.reduce((acc, c) => acc + c.options.length, 0);
@@ -65,9 +74,6 @@ const MealCard: React.FC<MealCardProps> = ({
 
   const onToggleMacroMode = () => {
     const nextMode: DietV2MealMacroMode = macroMode === "auto" ? "manual" : "auto";
-    // When flipping to manual the first time, seed manualMacros
-    // with the current auto values so the trainer has a starting
-    // point to edit rather than a row of zeros.
     const seededManual = nextMode === "manual" && !meal.manualMacros ? autoMacros : meal.manualMacros;
     onChange({ ...meal, macroMode: nextMode, manualMacros: seededManual });
   };
@@ -94,8 +100,14 @@ const MealCard: React.FC<MealCardProps> = ({
       {/* Header — single dense row: name on the right, macro
           summary inline in the middle, AI toggle + actions left.
           Macros sit IN the header (not a separate band) for the
-          tightest visual rhythm. Wraps on narrow widths. */}
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-blue-100 dark:border-blue-900/40 bg-gradient-to-l from-blue-50/60 to-white px-4 py-3 dark:from-blue-950/30 dark:to-slate-900">
+          tightest visual rhythm. Wraps on narrow widths.
+          Clicking anywhere on the header toggles collapse — nested
+          inputs/buttons stop propagation so they still act on their
+          own click without triggering a toggle. */}
+      <header
+        onClick={onToggleCollapse}
+        className="flex cursor-pointer flex-wrap items-center justify-between gap-3 border-b border-blue-100 bg-gradient-to-l from-blue-50/60 to-white px-4 py-3 dark:border-blue-900/40 dark:from-blue-950/30 dark:to-slate-900"
+      >
         <div className="flex items-center gap-2.5">
           {/* Drag handle — entire card is draggable when grabbing
               the handle; setting draggable on the handle alone keeps
@@ -103,6 +115,7 @@ const MealCard: React.FC<MealCardProps> = ({
           <span
             draggable
             onDragStart={onDragStart}
+            onClick={(e) => e.stopPropagation()}
             title="גרור לסידור הארוחות"
             className="flex h-9 w-5 cursor-grab items-center justify-center text-slate-300 transition-colors hover:text-blue-500 active:cursor-grabbing"
           >
@@ -111,7 +124,7 @@ const MealCard: React.FC<MealCardProps> = ({
           <div className="flex h-9 w-9 items-center justify-center rounded-xl brand-gradient text-white shadow-md shadow-blue-500/25">
             <FaUtensils size={13} />
           </div>
-          <div>
+          <div onClick={(e) => e.stopPropagation()}>
             <input
               value={meal.name}
               onChange={(e) => onNameChange(e.target.value)}
@@ -124,17 +137,23 @@ const MealCard: React.FC<MealCardProps> = ({
           </div>
         </div>
 
-        <MealMacroInline
-          mode={macroMode}
-          displayed={displayedMacros}
-          onManualChange={onManualMacroChange}
-          hasOptions={totalOptions > 0}
-        />
+        <div onClick={(e) => e.stopPropagation()}>
+          <MealMacroInline
+            mode={macroMode}
+            displayed={displayedMacros}
+            onManualChange={onManualMacroChange}
+            hasOptions={totalOptions > 0}
+            readOnly={macroMode === "manual" && hasCategoryManualEntries}
+          />
+        </div>
 
         <div className="flex items-center gap-1.5">
           <button
             type="button"
-            onClick={onToggleCollapse}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleCollapse();
+            }}
             aria-label={collapsed ? "פתח ארוחה" : "סגור ארוחה"}
             title={collapsed ? "פתח ארוחה" : "סגור ארוחה"}
             className="flex h-8 w-8 items-center justify-center rounded-lg border border-blue-100 bg-white text-blue-600 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 dark:border-blue-900/40 dark:bg-slate-900 dark:text-blue-300"
@@ -143,7 +162,10 @@ const MealCard: React.FC<MealCardProps> = ({
           </button>
           <button
             type="button"
-            onClick={onToggleMacroMode}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleMacroMode();
+            }}
             title={
               macroMode === "auto"
                 ? "כיבוי AI — אחליף לערכים ידניים"
@@ -162,7 +184,10 @@ const MealCard: React.FC<MealCardProps> = ({
             type="button"
             aria-label="שכפל ארוחה"
             title="שכפל ארוחה"
-            onClick={onDuplicate}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDuplicate();
+            }}
             className="flex h-8 w-8 items-center justify-center rounded-lg border border-blue-100 bg-white text-blue-600 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 dark:border-blue-900/40 dark:bg-slate-900 dark:text-blue-300"
           >
             <FaCopy size={11} />
@@ -171,7 +196,10 @@ const MealCard: React.FC<MealCardProps> = ({
             type="button"
             aria-label="הסר ארוחה"
             title="הסר ארוחה"
-            onClick={onRemove}
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove();
+            }}
             className="flex h-8 w-8 items-center justify-center rounded-lg border border-rose-100 bg-white text-rose-600 transition-all hover:-translate-y-0.5 hover:border-rose-300 hover:bg-rose-50 dark:border-rose-900/40 dark:bg-slate-900 dark:text-rose-300"
           >
             <FaTrashCan size={11} />
@@ -189,6 +217,9 @@ const MealCard: React.FC<MealCardProps> = ({
               key={category.kind}
               category={category}
               macroMode={macroMode}
+              siblingMeals={siblingMeals}
+              onCopyToMeal={(targetId) => onCopyCategoryToMeal(category.kind, targetId)}
+              onCopyToNewMeal={() => onCopyCategoryToNewMeal(category.kind)}
               onChange={(next) => onCategoryChange(idx, next)}
             />
           ))}
@@ -203,45 +234,21 @@ interface MealMacroInlineProps {
   displayed: DietV2OptionMacros;
   onManualChange: (key: keyof DietV2OptionMacros, raw: string) => void;
   hasOptions: boolean;
+  readOnly?: boolean;
 }
 
-/**
- * Inline meal-level macro summary — sits inside the meal header
- * row to keep a single dense band of information. Compact chips
- * in auto mode, tiny input fields in manual mode. Wraps gracefully
- * when the parent header runs out of horizontal room.
- */
 const MealMacroInline: React.FC<MealMacroInlineProps> = ({
   mode,
   displayed,
   onManualChange,
   hasOptions,
+  readOnly,
 }) => {
-  const items: { key: keyof DietV2OptionMacros; label: string; unit: string; tone: string }[] = [
-    {
-      key: "protein",
-      label: "חלבון",
-      unit: "ג׳",
-      tone: "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300",
-    },
-    {
-      key: "carbs",
-      label: "פחמ׳",
-      unit: "ג׳",
-      tone: "bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300",
-    },
-    {
-      key: "fat",
-      label: "שומן",
-      unit: "ג׳",
-      tone: "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300",
-    },
-    {
-      key: "calories",
-      label: "קל׳",
-      unit: "",
-      tone: "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300",
-    },
+  const items: { key: keyof DietV2OptionMacros; label: string; unit: string }[] = [
+    { key: "protein", label: "חלבון", unit: "גרם" },
+    { key: "carbs", label: "פחמימה", unit: "גרם" },
+    { key: "fat", label: "שומן", unit: "גרם" },
+    { key: "calories", label: "קלוריות", unit: "קל׳" },
   ];
 
   if (!hasOptions && mode === "auto") {
@@ -253,27 +260,38 @@ const MealMacroInline: React.FC<MealMacroInlineProps> = ({
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
-      {items.map((item) => (
-        <div
-          key={item.key}
-          className={`flex items-baseline gap-1 rounded-md px-1.5 py-0.5 ${item.tone}`}
-        >
-          <span className="text-[10px] font-bold">{item.label}</span>
-          {mode === "manual" ? (
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-slate-500 dark:text-slate-400">
+      {items.map((item, idx) => (
+        <span key={item.key} className="inline-flex items-baseline gap-1 whitespace-nowrap">
+          {idx > 0 && (
+            <span className="me-1.5 text-slate-200 dark:text-slate-700" aria-hidden>
+              |
+            </span>
+          )}
+          <span className="font-medium text-slate-400 dark:text-slate-500">{item.label}</span>
+          <span className="text-slate-300 dark:text-slate-600">-</span>
+          {mode === "manual" && !readOnly ? (
             <input
               type="number"
               inputMode="numeric"
               min={0}
               value={displayed[item.key] || ""}
               onChange={(e) => onManualChange(item.key, e.target.value)}
-              className="h-5 w-12 rounded border border-current/30 bg-white/70 px-1 text-center text-xs font-extrabold focus:bg-white focus:outline-none focus:ring-1 focus:ring-current/40 dark:bg-slate-900/60"
+              className={`h-5 w-11 rounded border border-slate-200 bg-white px-1 text-center text-[11px] font-semibold focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-200/60 dark:border-slate-700 dark:bg-slate-900 ${
+                item.key === "calories" ? "text-rose-500 dark:text-rose-400" : "text-slate-600 dark:text-slate-300"
+              }`}
             />
           ) : (
-            <strong className="text-sm font-extrabold">{Math.round(displayed[item.key])}</strong>
+            <span
+              className={`text-[11px] font-semibold ${
+                item.key === "calories" ? "text-rose-500 dark:text-rose-400" : "text-slate-600 dark:text-slate-300"
+              }`}
+            >
+              {Math.round(displayed[item.key])}
+            </span>
           )}
-          {item.unit && <span className="text-[10px]">{item.unit}</span>}
-        </div>
+          <span className="text-[10px] text-slate-300 dark:text-slate-600">{item.unit}</span>
+        </span>
       ))}
     </div>
   );
