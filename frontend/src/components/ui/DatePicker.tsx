@@ -9,8 +9,8 @@
  * Hebrew calendar, a brand-tinted trigger input, and a popover
  * sized to the calendar's natural width.
  */
-import React, { useEffect, useState } from "react";
-import { addDays, format } from "date-fns";
+import React, { useEffect, useRef, useState } from "react";
+import { addDays, format, isValid, parse, startOfDay } from "date-fns";
 import { he } from "date-fns/locale";
 import { FaCalendarDay } from "react-icons/fa6";
 
@@ -42,6 +42,21 @@ interface DatePickerProps {
   placeholder?: string;
 }
 
+const INPUT_FORMATS = ["dd/MM/yyyy", "dd.MM.yyyy", "dd-MM-yyyy", "d/M/yyyy"];
+const DISPLAY_FORMAT = "dd/MM/yyyy";
+
+const formatForInput = (value?: Date) => (value ? format(value, DISPLAY_FORMAT) : "");
+
+const parseInputValue = (raw: string): Date | null => {
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  for (const pattern of INPUT_FORMATS) {
+    const parsed = parse(trimmed, pattern, new Date());
+    if (isValid(parsed)) return parsed;
+  }
+  return null;
+};
+
 const DatePicker: React.FC<DatePickerProps> = ({
   presets,
   noPrevDates,
@@ -52,43 +67,90 @@ const DatePicker: React.FC<DatePickerProps> = ({
   presetTriggerTestId,
   placeholder = "בחר תאריך",
 }) => {
-  const [date, setDate] = useState<Date>();
+  const [date, setDate] = useState<Date | undefined>(selectedDate);
   const [open, setOpen] = useState(false);
+  const [inputValue, setInputValue] = useState<string>(formatForInput(selectedDate));
+  const [month, setMonth] = useState<Date>(selectedDate ?? new Date());
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    setDate(selectedDate);
+    setInputValue(formatForInput(selectedDate));
+    if (selectedDate) setMonth(selectedDate);
+  }, [selectedDate]);
+
+  // When the popover opens, snap the visible month to the currently
+  // selected date so the calendar doesn't reset to "today's month"
+  // after a previous selection.
+  useEffect(() => {
+    if (open && date) setMonth(date);
+  }, [open, date]);
+
+  const commitDate = (next: Date) => {
+    setDate(next);
+    setInputValue(formatForInput(next));
+    setMonth(next);
+    onChangeDate(next);
+  };
 
   const handleSelect = (next?: Date) => {
     if (!next) return;
-    if (noPrevDates && next < new Date()) return;
-    setDate(next);
-    onChangeDate(next);
+    if (noPrevDates && next < startOfDay(new Date())) return;
+    commitDate(next);
     setOpen(false);
   };
 
-  useEffect(() => {
-    if (!selectedDate) return;
-    setDate(selectedDate);
-  }, [selectedDate]);
+  const handleInputBlur = () => {
+    const parsed = parseInputValue(inputValue);
+    if (parsed && (!noPrevDates || parsed >= startOfDay(new Date()))) {
+      commitDate(parsed);
+
+      return;
+    }
+    setInputValue(formatForInput(date));
+  };
+
+  const handleInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      inputRef.current?.blur();
+    }
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          data-testid={triggerTestId}
-          className={cn(
-            "flex h-9 w-full items-center justify-between gap-2 rounded-lg",
-            "border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900",
-            "px-3 text-sm font-medium text-slate-800 dark:text-slate-100",
-            "transition-all hover:border-blue-300 hover:bg-blue-50/40",
-            "focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200/60",
-            !date && "text-slate-400"
-          )}
-        >
-          <FaCalendarDay size={12} className="text-blue-500" />
-          <span className="flex-1 text-start">
-            {date ? format(date, "PPP", { locale: he }) : placeholder}
-          </span>
-        </button>
-      </PopoverTrigger>
+      <div
+        className={cn(
+          "flex h-9 w-full items-center gap-2 rounded-lg",
+          "border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900",
+          "px-3 text-sm font-medium text-slate-800 dark:text-slate-100",
+          "transition-all hover:border-blue-300 hover:bg-blue-50/40",
+          "focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-200/60"
+        )}
+      >
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            aria-label="פתח לוח שנה"
+            data-testid={triggerTestId}
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-blue-500 transition-colors hover:bg-blue-100/60 dark:hover:bg-blue-950/40"
+          >
+            <FaCalendarDay size={12} />
+          </button>
+        </PopoverTrigger>
+        <input
+          ref={inputRef}
+          type="text"
+          inputMode="numeric"
+          dir="ltr"
+          value={inputValue}
+          onChange={(event) => setInputValue(event.target.value)}
+          onBlur={handleInputBlur}
+          onKeyDown={handleInputKeyDown}
+          placeholder={placeholder || "dd/mm/yyyy"}
+          className="flex-1 bg-transparent text-center placeholder:text-slate-400 focus:outline-none"
+        />
+      </div>
       <PopoverContent
         align="start"
         sideOffset={6}
@@ -102,8 +164,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
           <Select
             onValueChange={(value) => {
               const next = addDays(new Date(), parseInt(value));
-              setDate(next);
-              onChangeDate(next);
+              commitDate(next);
               setOpen(false);
             }}
           >
@@ -131,6 +192,8 @@ const DatePicker: React.FC<DatePickerProps> = ({
           dir="rtl"
           locale={he}
           selected={date}
+          month={month}
+          onMonthChange={setMonth}
           onSelect={handleSelect}
           showOutsideDays
           className="rounded-lg"

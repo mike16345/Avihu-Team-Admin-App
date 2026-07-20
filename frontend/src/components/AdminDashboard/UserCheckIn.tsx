@@ -176,9 +176,9 @@ const UserCheckIn = () => {
       case "checkin":
         return checkinActive.map((u) => ({ ...u, navUrl: `/users/${u._id}?tab=${weightTab}` }));
       case "noWorkout":
-        return noWorkoutActive.map((u) => ({ ...u, navUrl: `/workout-plans/${u._id}` }));
+        return noWorkoutActive.map((u) => ({ ...u, navUrl: `/users/${u._id}/?tab=workout` }));
       case "noDiet":
-        return noDietActive.map((u) => ({ ...u, navUrl: `/diet-plans/${u._id}` }));
+        return noDietActive.map((u) => ({ ...u, navUrl: `/users/${u._id}/?tab=diet` }));
       case "expiring":
         return expiringActive.map((u) => ({ ...u, navUrl: `/users/${u._id}?tab=${weightTab}` }));
     }

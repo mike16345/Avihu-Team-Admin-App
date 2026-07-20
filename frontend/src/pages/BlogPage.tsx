@@ -1,38 +1,29 @@
 import BlogList from "@/components/Blog/BlogList";
-import Loader from "@/components/ui/Loader";
+import ScrollableArea from "@/components/ui/ScrollableArea";
 import useBlogsQuery from "@/hooks/queries/blogs/useBlogsQuery";
 import useLessonGroupsQuery from "@/hooks/queries/lessonGroups/useLessonGroupsQuery";
+import { useStableSearchParams } from "@/hooks/useStableSearchParams";
+import { useScrollRestoration } from "@/hooks/useScrollRestoration";
 import { IBlogResponse, ILessonGroup } from "@/interfaces/IBlog";
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LessonGroupsSheet from "@/components/Blog/LessonGroupsSheet";
 import BlogPageHeader from "@/components/Blog/BlogPageHeader";
 import BlogFilterToolbar from "@/components/Blog/BlogFilterToolbar";
 import BlogGroupFilterChips from "@/components/Blog/BlogGroupFilterChips";
 
-const getFilteredBlogs = (
-  blogs: IBlogResponse[],
-  selectedGroups: ILessonGroup[],
-  query: string
-) => {
-  let nextBlogs = blogs;
+const GROUPS_PARAM_DELIMITER = ",";
+const SEARCH_DEBOUNCE_MS = 300;
 
-  if (selectedGroups.length > 0) {
-    const selectedNames = new Set(selectedGroups.map((group) => group.name));
-    nextBlogs = nextBlogs.filter((blog) => blog.group && selectedNames.has(blog.group.name));
-  }
+const parseSelectedGroups = (raw: string | null, available: ILessonGroup[]): ILessonGroup[] => {
+  if (!raw) return [];
+  const wanted = new Set(raw.split(GROUPS_PARAM_DELIMITER).filter(Boolean));
+  return available.filter((group) => wanted.has(group.name));
+};
 
-  if (query.trim()) {
-    const normalizedQuery = query.trim().toLowerCase();
-    nextBlogs = nextBlogs.filter(
-      (blog) =>
-        blog.title?.toLowerCase().includes(normalizedQuery) ||
-        blog.subtitle?.toLowerCase().includes(normalizedQuery) ||
-        blog.content?.toLowerCase().includes(normalizedQuery)
-    );
-  }
-
-  return nextBlogs;
+const serialiseSelectedGroups = (selected: ILessonGroup[]): string | null => {
+  if (selected.length === 0) return null;
+  return selected.map((group) => group.name).join(GROUPS_PARAM_DELIMITER);
 };
 
 const getNextSelectedGroups = (selectedGroups: ILessonGroup[], group: ILessonGroup) => {
@@ -44,48 +35,155 @@ const getNextSelectedGroups = (selectedGroups: ILessonGroup[], group: ILessonGro
   return [...selectedGroups, group];
 };
 
+const normalizeSearchValue = (value?: string) => value?.trim().toLowerCase() ?? "";
+
+const getBlogGroupName = (blog: IBlogResponse) => {
+  if (typeof blog.group === "string") return blog.group;
+  return blog.group?.name ?? "";
+};
+
+const filterBlogsByQuery = (blogs: IBlogResponse[], query: string) => {
+  const normalizedQuery = normalizeSearchValue(query);
+  if (!normalizedQuery) return blogs;
+
+  return blogs.filter((blog) => {
+    const searchableValues = [
+      blog.title,
+      blog.subtitle,
+      blog.content,
+      blog.link,
+      blog.planType,
+      getBlogGroupName(blog),
+    ];
+
+    return searchableValues.some((value) => normalizeSearchValue(value).includes(normalizedQuery));
+  });
+};
+
+const mergeBlogsById = (...blogLists: IBlogResponse[][]) => {
+  const seen = new Set<string>();
+
+  return blogLists.flatMap((blogList) =>
+    blogList.filter((blog) => {
+      if (seen.has(blog._id)) return false;
+      seen.add(blog._id);
+
+      return true;
+    })
+  );
+};
+
 const BlogPage = () => {
   const navigate = useNavigate();
 
-  const {
-    data: blogPages,
-    isLoading,
-    isFetchingNextPage,
-    hasNextPage,
-    fetchNextPage,
-    isError,
-    error,
-  } = useBlogsQuery();
+  const { searchParams, setParam, setParams } = useStableSearchParams();
   const { data: lessonGroups } = useLessonGroupsQuery();
+  const groups = useMemo(() => lessonGroups?.data ?? [], [lessonGroups]);
+  const query = searchParams.get("q") ?? "";
 
-  const [selectedGroups, setSelectedGroups] = useState<ILessonGroup[]>([]);
-  const [query, setQuery] = useState("");
+  const selectedGroups = useMemo(
+    () => parseSelectedGroups(searchParams.get("groups"), groups),
+    [searchParams, groups]
+  );
+
+  const selectedGroupIds = useMemo(
+    () => selectedGroups.map((group) => group._id).filter((id): id is string => Boolean(id)),
+    [selectedGroups]
+  );
+
+  const [debouncedQuery, setDebouncedQuery] = useState(query);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => setDebouncedQuery(query), SEARCH_DEBOUNCE_MS);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [query]);
+
+  const baseBlogQueryFilters = useMemo(() => ({ groups: selectedGroupIds }), [selectedGroupIds]);
+
+  const {
+    data: baseBlogPages,
+    isLoading: isBaseLoading,
+    isFetchingNextPage: isFetchingNextBasePage,
+    hasNextPage: hasNextBasePage,
+    fetchNextPage: fetchNextBasePage,
+    isError: isBaseError,
+    error: baseError,
+  } = useBlogsQuery(baseBlogQueryFilters);
+
+  const baseBlogs = useMemo(
+    () => baseBlogPages?.pages.flatMap((page) => page.results) ?? [],
+    [baseBlogPages]
+  );
+  const totalBlogs = baseBlogPages?.pages[0]?.totalResults ?? baseBlogs.length;
+  const activeQuery = query.trim();
+  const debouncedSearchQuery = debouncedQuery.trim();
+  const hasLoadedAllBaseBlogs = Boolean(
+    baseBlogPages && !hasNextBasePage && baseBlogs.length >= totalBlogs
+  );
+  const shouldSearchServer = Boolean(
+    activeQuery && debouncedSearchQuery === activeQuery && !hasLoadedAllBaseBlogs
+  );
+
+  const {
+    data: serverSearchPages,
+    isFetching: isFetchingServerSearch,
+    isFetchingNextPage: isFetchingNextSearchPage,
+    hasNextPage: hasNextSearchPage,
+    fetchNextPage: fetchNextSearchPage,
+    isError: isSearchError,
+    error: searchError,
+  } = useBlogsQuery(
+    { query: debouncedSearchQuery, groups: selectedGroupIds },
+    { enabled: shouldSearchServer }
+  );
+
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  useScrollRestoration(scrollRef);
+
   const [groupsSheetOpen, setGroupsSheetOpen] = useState(false);
 
   const handleCreateNewBlog = () => navigate("/blogs/create");
 
-  const allBlogs = useMemo(
-    () => blogPages?.pages.flatMap((page) => page.results) ?? [],
-    [blogPages]
+  const localSearchBlogs = useMemo(
+    () => filterBlogsByQuery(baseBlogs, activeQuery),
+    [baseBlogs, activeQuery]
   );
-
-  const blogs = useMemo(
-    () => getFilteredBlogs(allBlogs, selectedGroups, query),
-    [selectedGroups, allBlogs, query]
+  const serverSearchBlogs = useMemo(
+    () => serverSearchPages?.pages.flatMap((page) => page.results) ?? [],
+    [serverSearchPages]
   );
+  const blogs = useMemo(() => {
+    if (!activeQuery) return baseBlogs;
 
-  const toggleGroup = (group: ILessonGroup) => {
-    setSelectedGroups((prev) => getNextSelectedGroups(prev, group));
+    return mergeBlogsById(localSearchBlogs, serverSearchBlogs);
+  }, [activeQuery, baseBlogs, localSearchBlogs, serverSearchBlogs]);
+  const isLoading = isBaseLoading && blogs.length === 0;
+  const isFetchingNextPage =
+    isFetchingNextBasePage ||
+    isFetchingNextSearchPage ||
+    (shouldSearchServer && isFetchingServerSearch && serverSearchBlogs.length === 0);
+  const isError = isBaseError || (isSearchError && blogs.length === 0);
+  const error = isBaseError ? baseError : searchError;
+
+  // URL-driven filters — coming back from a single article preview
+  // restores the same search + group selection the trainer left on.
+  // `replace: true` keeps every keystroke from spawning a history
+  // entry; navigating into an article still pushes one entry, so
+  // browser back and the in-page "חזרה" button behave identically.
+  const handleQueryChange = (value: string) => {
+    setParam("q", value || null, { replace: true });
   };
 
-  const clearFilters = () => {
-    setQuery("");
-    setSelectedGroups([]);
+  const handleToggleGroup = (group: ILessonGroup) => {
+    const next = getNextSelectedGroups(selectedGroups, group);
+    setParam("groups", serialiseSelectedGroups(next), { replace: true });
   };
 
-  if (isLoading) return <Loader />;
+  const handleClearFilters = () => {
+    setParams({ q: null, groups: null }, { replace: true });
+  };
 
-  const groups = lessonGroups?.data || [];
   const hasFilter = selectedGroups.length > 0 || query.trim().length > 0;
 
   return (
@@ -94,29 +192,43 @@ const BlogPage = () => {
 
       <BlogFilterToolbar
         filteredCount={blogs.length}
-        totalCount={allBlogs.length}
+        totalCount={totalBlogs}
         hasFilter={hasFilter}
         query={query}
-        onQueryChange={setQuery}
-        onClearFilters={clearFilters}
+        onQueryChange={handleQueryChange}
+        onClearFilters={handleClearFilters}
       />
 
       <BlogGroupFilterChips
         groups={groups}
         selectedGroups={selectedGroups}
-        onToggleGroup={toggleGroup}
+        onToggleGroup={handleToggleGroup}
         onOpenGroups={() => setGroupsSheetOpen(true)}
       />
 
-      <BlogList
-        blogs={blogs}
-        hasNextPage={hasNextPage}
-        fetchNextPage={fetchNextPage}
-        isFetchingNextPage={isFetchingNextPage}
-        isLoading={isLoading}
-        isError={isError}
-        error={error}
-      />
+      <ScrollableArea
+        ref={scrollRef}
+        className="max-h-[calc(100vh-240px)]"
+        onReachEnd={() => {
+          if (activeQuery) {
+            if (shouldSearchServer && hasNextSearchPage && !isFetchingNextSearchPage) {
+              fetchNextSearchPage();
+            }
+
+            return;
+          }
+
+          if (hasNextBasePage && !isFetchingNextBasePage) fetchNextBasePage();
+        }}
+      >
+        <BlogList
+          blogs={blogs}
+          isFetchingNextPage={isFetchingNextPage}
+          isLoading={isLoading}
+          isError={isError}
+          error={error}
+        />
+      </ScrollableArea>
 
       <LessonGroupsSheet open={groupsSheetOpen} onClose={() => setGroupsSheetOpen(false)} />
     </div>

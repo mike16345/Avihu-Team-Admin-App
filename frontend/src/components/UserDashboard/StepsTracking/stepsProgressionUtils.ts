@@ -1,10 +1,10 @@
+import type { IStepsProgress } from "@/interfaces/IStepsProgress";
+
 /**
  * Feature-local helpers for the step-tracking sub-tab.
  *
- * Mock dataset is used until the mobile app starts pushing real
- * sync data to the server. Once the API exists, replace
- * `buildMockStepsDataset` with a query hook (per Agents.md three-
- * step data flow: api wrapper -> query hook -> consumer).
+ * Server records are shaped here for the dashboard UI so the visual
+ * component can stay focused on rendering.
  */
 
 export type StepsStatus = "on-track" | "slipping" | "off-track";
@@ -12,6 +12,7 @@ export type StepsStatus = "on-track" | "slipping" | "off-track";
 export interface DailySteps {
   steps: number;
   hadSync: boolean;
+  dailyGoal: number;
 }
 
 export interface StepsWeek {
@@ -32,7 +33,7 @@ export interface TraineeBiometrics {
 
 export interface StepsDataset {
   weeks: StepsWeek[];
-  lastSyncedHoursAgo: number;
+  lastSyncedHoursAgo: number | null;
   trainee: TraineeBiometrics;
 }
 
@@ -70,89 +71,120 @@ export interface WeekSummary {
 }
 
 const DAILY_GOAL = 10000;
-const WEEKLY_GOAL = DAILY_GOAL * 6;
+const MAX_WEEKS_TO_DISPLAY = 8;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
-const mockWeekDays = (pattern: number[]): DailySteps[] =>
-  pattern.map((steps, idx) => ({
-    steps,
-    hadSync: !(idx === 3 && steps === 0),
-  }));
+const getLocalDayKey = (date: Date) => {
+  const offsetMs = date.getTimezoneOffset() * 60 * 1000;
+  return new Date(date.getTime() - offsetMs).toISOString().slice(0, 10);
+};
 
-export const buildMockStepsDataset = (): StepsDataset => ({
-  lastSyncedHoursAgo: 2,
-  trainee: {
-    weightKg: 75,
-    heightCm: 178,
-    ageYears: 34,
-    cardioMinsPerWeek: 90,
-  },
-  weeks: [
-    {
-      label: "לפני 7 שבועות",
-      startDate: "04/05/2026",
-      endDate: "10/05/2026",
-      dailyGoal: DAILY_GOAL,
-      weeklyGoal: WEEKLY_GOAL,
-      days: mockWeekDays([6200, 5800, 7100, 4900, 6300, 4200, 0]),
-    },
-    {
-      label: "לפני 6 שבועות",
-      startDate: "11/05/2026",
-      endDate: "17/05/2026",
-      dailyGoal: DAILY_GOAL,
-      weeklyGoal: WEEKLY_GOAL,
-      days: mockWeekDays([7400, 6900, 8200, 7100, 8800, 5400, 0]),
-    },
-    {
-      label: "לפני 5 שבועות",
-      startDate: "18/05/2026",
-      endDate: "24/05/2026",
-      dailyGoal: DAILY_GOAL,
-      weeklyGoal: WEEKLY_GOAL,
-      days: mockWeekDays([8800, 7600, 9100, 8400, 9700, 7200, 0]),
-    },
-    {
-      label: "לפני 4 שבועות",
-      startDate: "25/05/2026",
-      endDate: "31/05/2026",
-      dailyGoal: DAILY_GOAL,
-      weeklyGoal: WEEKLY_GOAL,
-      days: mockWeekDays([9200, 8400, 10100, 8900, 9600, 7800, 0]),
-    },
-    {
-      label: "לפני 3 שבועות",
-      startDate: "01/06/2026",
-      endDate: "07/06/2026",
-      dailyGoal: DAILY_GOAL,
-      weeklyGoal: WEEKLY_GOAL,
-      days: mockWeekDays([8200, 9100, 10500, 7800, 11200, 5900, 0]),
-    },
-    {
-      label: "לפני שבועיים",
-      startDate: "08/06/2026",
-      endDate: "14/06/2026",
-      dailyGoal: DAILY_GOAL,
-      weeklyGoal: WEEKLY_GOAL,
-      days: mockWeekDays([10100, 11200, 9800, 12500, 8900, 9600, 0]),
-    },
-    {
-      label: "שבוע שעבר",
-      startDate: "15/06/2026",
-      endDate: "21/06/2026",
-      dailyGoal: DAILY_GOAL,
-      weeklyGoal: WEEKLY_GOAL,
-      days: mockWeekDays([9800, 8400, 11100, 7200, 9800, 8000, 0]),
-    },
-    {
-      label: "השבוע",
-      startDate: "22/06/2026",
-      endDate: "28/06/2026",
-      dailyGoal: DAILY_GOAL,
-      weeklyGoal: WEEKLY_GOAL,
-      days: mockWeekDays([11200, 9800, 10500, 0, 7600, 6240, 0]),
-    },
-  ],
-});
+const startOfWeek = (date: Date) => {
+  const copy = new Date(date);
+  copy.setHours(0, 0, 0, 0);
+  copy.setDate(copy.getDate() - copy.getDay());
+  return copy;
+};
+
+const parseDayKey = (date: string | Date) => {
+  if (date instanceof Date) return date;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(date)) return new Date(`${date}T00:00:00`);
+  return new Date(date);
+};
+
+const getFirstDisplayWeekStart = (records: IStepsProgress[], currentWeekStart: Date) => {
+  const earliestRecordDate = records.reduce<Date | null>((earliest, record) => {
+    const parsedDate = parseDayKey(record.date);
+    if (Number.isNaN(parsedDate.getTime())) return earliest;
+    if (!earliest || parsedDate < earliest) return parsedDate;
+    return earliest;
+  }, null);
+
+  if (!earliestRecordDate) return currentWeekStart;
+
+  const earliestWeekStart = startOfWeek(earliestRecordDate);
+  const weeksWithRecords =
+    Math.floor((currentWeekStart.getTime() - earliestWeekStart.getTime()) / (7 * DAY_MS)) + 1;
+  const weeksToDisplay = Math.max(1, Math.min(MAX_WEEKS_TO_DISPLAY, weeksWithRecords));
+
+  return new Date(currentWeekStart.getTime() - (weeksToDisplay - 1) * 7 * DAY_MS);
+};
+
+const formatDisplayDate = (date: Date) =>
+  new Intl.DateTimeFormat("he-IL", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
+
+const getWeekLabel = (index: number, totalWeeks: number) => {
+  const weeksAgo = totalWeeks - index - 1;
+
+  if (weeksAgo === 0) return "\u05d4\u05e9\u05d1\u05d5\u05e2";
+  if (weeksAgo === 1) return "\u05e9\u05d1\u05d5\u05e2 \u05e9\u05e2\u05d1\u05e8";
+  if (weeksAgo === 2) return "\u05dc\u05e4\u05e0\u05d9 \u05e9\u05d1\u05d5\u05e2\u05d9\u05d9\u05dd";
+
+  return `\u05dc\u05e4\u05e0\u05d9 ${weeksAgo} \u05e9\u05d1\u05d5\u05e2\u05d5\u05ea`;
+};
+
+const getLatestSyncedHoursAgo = (records: IStepsProgress[]) => {
+  const latest = records.reduce<Date | null>((latestDate, record) => {
+    const syncedAt = new Date(record.syncedAt);
+    if (Number.isNaN(syncedAt.getTime())) return latestDate;
+    if (!latestDate || syncedAt > latestDate) return syncedAt;
+    return latestDate;
+  }, null);
+
+  if (!latest) return null;
+
+  return Math.max(0, Math.round((Date.now() - latest.getTime()) / (60 * 60 * 1000)));
+};
+
+export const buildStepsDataset = (
+  records: IStepsProgress[],
+  trainee: TraineeBiometrics = { weightKg: 75 }
+): StepsDataset => {
+  const byDate = new Map(records.map((record) => [record.date, record]));
+  const currentWeekStart = startOfWeek(new Date());
+  const firstWeekStart = getFirstDisplayWeekStart(records, currentWeekStart);
+  const weeksToDisplay =
+    Math.floor((currentWeekStart.getTime() - firstWeekStart.getTime()) / (7 * DAY_MS)) + 1;
+
+  const weeks: StepsWeek[] = Array.from({ length: weeksToDisplay }, (_, weekIndex) => {
+    const weekStart = new Date(firstWeekStart.getTime() + weekIndex * 7 * DAY_MS);
+    const dayGoals: number[] = [];
+    const days: DailySteps[] = Array.from({ length: 7 }, (_, dayIndex) => {
+      const date = new Date(weekStart.getTime() + dayIndex * DAY_MS);
+      const record = byDate.get(getLocalDayKey(date));
+      const dailyGoal = record?.dailyGoal && record.dailyGoal > 0 ? record.dailyGoal : DAILY_GOAL;
+
+      dayGoals.push(dailyGoal);
+
+      return {
+        steps: record?.steps ?? 0,
+        hadSync: !!record,
+        dailyGoal,
+      };
+    });
+    const weekEnd = new Date(weekStart.getTime() + 6 * DAY_MS);
+    const weeklyGoal = dayGoals.reduce((sum, goal) => sum + goal, 0);
+
+    return {
+      label: getWeekLabel(weekIndex, weeksToDisplay),
+      startDate: formatDisplayDate(weekStart),
+      endDate: formatDisplayDate(weekEnd),
+      dailyGoal: Math.round(weeklyGoal / 7),
+      weeklyGoal,
+      days,
+    };
+  });
+
+  return {
+    weeks,
+    lastSyncedHoursAgo: getLatestSyncedHoursAgo(records),
+    trainee,
+  };
+};
 
 export const summarizeStepsWeek = (week: StepsWeek): WeekSummary => {
   const weekTotal = week.days.reduce((acc, day) => acc + day.steps, 0);
@@ -162,7 +194,7 @@ export const summarizeStepsWeek = (week: StepsWeek): WeekSummary => {
   let streakDays = 0;
   for (let i = week.days.length - 1; i >= 0; i--) {
     const day = week.days[i];
-    if (day.hadSync && day.steps >= week.dailyGoal) {
+    if (day.hadSync && day.steps >= day.dailyGoal) {
       streakDays++;
       continue;
     }

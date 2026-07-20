@@ -52,7 +52,10 @@ const TYPE_FILTERS: { value: FormTypes | "all"; label: string }[] = [
 ];
 
 const countQuestions = (form: IForm) =>
-  (form.sections || []).reduce((accumulator, section) => accumulator + (section.questions?.length || 0), 0);
+  (form.sections || []).reduce(
+    (accumulator, section) => accumulator + (section.questions?.length || 0),
+    0
+  );
 
 const formatDate = (value?: Date) => {
   if (!value) return null;
@@ -264,7 +267,9 @@ const FormPresetGrid: React.FC<FormPresetGridProps> = ({
           if (pendingDeleteForm?._id) onDelete(pendingDeleteForm._id);
           setPendingDeleteForm(null);
         }}
-        title={pendingDeleteForm ? `למחוק את "${pendingDeleteForm.name || "השאלון"}"?` : "למחוק שאלון?"}
+        title={
+          pendingDeleteForm ? `למחוק את "${pendingDeleteForm.name || "השאלון"}"?` : "למחוק שאלון?"
+        }
         alertMessage={
           <>
             השאלון יימחק מרשימת התבניות ולא יהיה זמין לשיוך נוסף.

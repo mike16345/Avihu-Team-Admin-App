@@ -183,7 +183,9 @@ export const WeightProgressionPhotos: FC = () => {
 
     if (uploaded > 0 && showCompletionToast) {
       if (failed === 0) {
-        toast.success(uploaded === 1 ? "התמונה הועלתה בהצלחה!" : `${uploaded} תמונות הועלו בהצלחה!`);
+        toast.success(
+          uploaded === 1 ? "התמונה הועלתה בהצלחה!" : `${uploaded} תמונות הועלו בהצלחה!`
+        );
       } else {
         toast.warning(
           `הועלו ${photosWord(uploaded)} · נכשלו ${photosWord(failed)}${lastError ? ` - ${lastError}` : ""}`
@@ -341,7 +343,9 @@ export const WeightProgressionPhotos: FC = () => {
 
           <label
             className={`inline-flex cursor-pointer items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-md transition-all ${
-              uploading ? "cursor-not-allowed bg-slate-400" : "bg-slate-900 hover:bg-slate-800 hover:shadow-lg"
+              uploading
+                ? "cursor-not-allowed bg-slate-400"
+                : "bg-slate-900 hover:bg-slate-800 hover:shadow-lg"
             }`}
           >
             <FaUpload size={12} />
@@ -462,7 +466,8 @@ export const WeightProgressionPhotos: FC = () => {
                                     </div>
 
                                     {(isBusy ||
-                                      (isSwapPending && swappingGroupKey === group.cycleNumber)) && (
+                                      (isSwapPending &&
+                                        swappingGroupKey === group.cycleNumber)) && (
                                       <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/70 text-xs font-semibold text-slate-700 backdrop-blur-sm dark:text-slate-200">
                                         {isBusy ? "פועל..." : "מעדכן סדר..."}
                                       </div>
@@ -620,7 +625,9 @@ function ComparePane({
   const group = groups[groupIdx];
   const photo = group?.photos[angle];
   const groupOptions = groups.map((entry, index) => ({
-    name: entry.uploadDate ? `מחזור ${entry.cycleNumber} · ${entry.uploadDate}` : `מחזור ${entry.cycleNumber}`,
+    name: entry.uploadDate
+      ? `מחזור ${entry.cycleNumber} · ${entry.uploadDate}`
+      : `מחזור ${entry.cycleNumber}`,
     value: String(index),
   }));
 

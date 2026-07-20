@@ -4,10 +4,11 @@ import FormResponsesTable from "@/components/tables/FormResponsesTable";
 import SignedAgreementsTable from "@/components/agreements/SignedAgreementsTable";
 import { useUrlTab } from "@/hooks/useUrlTab";
 import QuestionnairesTable from "@/components/tables/QuestionnairesTable";
+import ScrollableArea from "@/components/ui/ScrollableArea";
 import { Button } from "@/components/ui/button";
 import { FaClipboardList, FaInbox, FaFileSignature, FaArrowLeft } from "react-icons/fa6";
 
-const tabs = ["forms", "responses", "agreements"];
+const tabs = ["forms", "agreements", "responses"];
 
 const TAB_META: Record<string, { title: string; subtitle: string; icon: React.ReactNode }> = {
   forms: {
@@ -29,8 +30,8 @@ const TAB_META: Record<string, { title: string; subtitle: string; icon: React.Re
 
 const FormPresetsPage = () => {
   const navigate = useNavigate();
-  const { tab, setTab } = useUrlTab({ defaultTab: "forms", tabs });
-  const current = TAB_META[tab] ?? TAB_META.forms;
+  const { tab, setTab } = useUrlTab({ defaultTab: "responses", tabs });
+  const current = TAB_META[tab] ?? TAB_META.responses;
 
   return (
     <div
@@ -66,30 +67,34 @@ const FormPresetsPage = () => {
             שאלונים
           </TabsTrigger>
           <TabsTrigger
-            value="responses"
-            className="gap-2 rounded-lg px-4 py-1.5 text-sm font-bold text-slate-600 dark:text-slate-300 transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm"
-          >
-            <FaInbox size={12} />
-            תשובות
-          </TabsTrigger>
-          <TabsTrigger
             value="agreements"
             className="gap-2 rounded-lg px-4 py-1.5 text-sm font-bold text-slate-600 dark:text-slate-300 transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm"
           >
             <FaFileSignature size={12} />
             הסכמים
           </TabsTrigger>
+          <TabsTrigger
+            value="responses"
+            className="gap-2 rounded-lg px-4 py-1.5 text-sm font-bold text-slate-600 dark:text-slate-300 transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm"
+          >
+            <FaInbox size={12} />
+            תשובות
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="forms" className="mt-4">
-          <QuestionnairesTable />
+        <TabsContent value="forms" className="mt-4" dir="rtl">
+          <ScrollableArea className="max-h-[calc(100vh-240px)]">
+            <QuestionnairesTable />
+          </ScrollableArea>
         </TabsContent>
 
-        <TabsContent value="responses" className="mt-4">
-          <FormResponsesTable paginationKey="responses" />
+        <TabsContent value="responses" className="mt-4" dir="rtl">
+          <ScrollableArea className="max-h-[calc(100vh-240px)]">
+            <FormResponsesTable paginationKey="responses" />
+          </ScrollableArea>
         </TabsContent>
 
-        <TabsContent value="agreements" className="mt-4 flex flex-col gap-3">
+        <TabsContent value="agreements" className="mt-4 flex flex-col gap-3" dir="rtl">
           <div className="flex justify-end">
             <Button
               variant="outline"
@@ -101,7 +106,9 @@ const FormPresetsPage = () => {
               <FaArrowLeft size={10} />
             </Button>
           </div>
-          <SignedAgreementsTable paginationKey="agreements" />
+          <ScrollableArea className="max-h-[calc(100vh-240px)]">
+            <SignedAgreementsTable paginationKey="agreements" />
+          </ScrollableArea>
         </TabsContent>
       </Tabs>
     </div>
