@@ -102,9 +102,7 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ children, presetLoader }) =
           className="h-7 w-20 pe-9 text-end text-base font-bold [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
           type="number"
           value={freeCalories}
-          onChange={(e) =>
-            setValue("freeCalories", Number(e.target.value), { shouldDirty: true })
-          }
+          onChange={(e) => setValue("freeCalories", Number(e.target.value), { shouldDirty: true })}
         />
         <span className="pointer-events-none absolute inset-y-0 left-2 flex items-center text-xs text-slate-400 dark:text-slate-500">
           קק״ל

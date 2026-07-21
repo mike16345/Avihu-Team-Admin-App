@@ -186,9 +186,7 @@ const DietPlanHistoryDialog: React.FC<Props> = ({ userId, children }) => {
 
         {entries.length > 0 && (
           <div className="flex items-center justify-between gap-2 border-t border-slate-100 pt-3 dark:border-slate-800">
-            <span className="text-xs font-semibold text-slate-400">
-              {entries.length} רשומות
-            </span>
+            <span className="text-xs font-semibold text-slate-400">{entries.length} רשומות</span>
             {confirmingClear ? (
               <div className="flex items-center gap-2">
                 <button
@@ -237,8 +235,8 @@ const DiffRow: React.FC<{
   const toneClass = up
     ? "text-emerald-700 dark:text-emerald-300"
     : down
-    ? "text-rose-700 dark:text-rose-300"
-    : "text-slate-500 dark:text-slate-400";
+      ? "text-rose-700 dark:text-rose-300"
+      : "text-slate-500 dark:text-slate-400";
   const DeltaIcon = up ? ArrowUpRight : down ? ArrowDownRight : Minus;
   const suffix = unit ? ` ${unit}` : "";
 

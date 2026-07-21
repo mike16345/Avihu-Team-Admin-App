@@ -51,7 +51,8 @@ const getGainToneClassName = (gain: number) => {
 };
 
 const getGainBadgeClassName = (gain: number) => {
-  if (gain > 0) return "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300";
+  if (gain > 0)
+    return "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300";
   if (gain < 0) return "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300";
   return "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400";
 };
@@ -126,10 +127,11 @@ const getNextExpandedCardId = (isExpanded: boolean, cardId: string) => {
   return cardId;
 };
 
-const formatSessionDate = (date: Date) => date.toLocaleDateString("he-IL", {
-  day: "2-digit",
-  month: "2-digit",
-});
+const formatSessionDate = (date: Date) =>
+  date.toLocaleDateString("he-IL", {
+    day: "2-digit",
+    month: "2-digit",
+  });
 
 export function ExerciseCardsGrid({
   exercises,
@@ -245,7 +247,8 @@ export function ExerciseCardsGrid({
                       totalGain
                     )}`}
                   >
-                    {getGainDirectionIcon(totalGain)} {Math.abs(totalGain)} {unitLabel} · מתחילת ליווי
+                    {getGainDirectionIcon(totalGain)} {Math.abs(totalGain)} {unitLabel} · מתחילת
+                    ליווי
                   </span>
                   {monthValue !== 0 && (
                     <span className={`ms-auto font-semibold ${getGainToneClassName(monthGain)}`}>
@@ -357,9 +360,7 @@ function MetricColumn({
   tone: "muted" | "accent";
 }) {
   const valueClassName =
-    tone === "accent"
-      ? "text-slate-900 dark:text-slate-100"
-      : "text-slate-600 dark:text-slate-300";
+    tone === "accent" ? "text-slate-900 dark:text-slate-100" : "text-slate-600 dark:text-slate-300";
   return (
     <div className="flex flex-col items-center px-2 py-2 text-center">
       <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">

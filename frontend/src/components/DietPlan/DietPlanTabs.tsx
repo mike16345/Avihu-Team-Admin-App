@@ -36,7 +36,10 @@ const DietplanTabs: React.FC<DietplanTabsProps> = ({
   const [active, setActive] = useState<TabKey>("dietplan");
 
   return (
-    <div dir="rtl" className="flex flex-col gap-4 border-t border-slate-100 pt-4 font-heebo dark:border-slate-800/60">
+    <div
+      dir="rtl"
+      className="flex flex-col gap-4 border-t border-slate-100 pt-4 font-heebo dark:border-slate-800/60"
+    >
       <div className="flex flex-wrap items-center gap-3">
         <div className="inline-flex w-fit items-center gap-1 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-1 shadow-sm">
           {TABS.map((t) => {
