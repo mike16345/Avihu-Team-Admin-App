@@ -139,7 +139,7 @@ export function ExerciseDetailModal({ exercise, rawSets, onClose }: ExerciseDeta
           </button>
         </div>
 
-        <div className="grid h-[calc(90vh-140px)] min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[1fr_360px]">
+        <div className="grid h-[calc(90vh-140px)] min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[7fr_3fr]">
           <div className="modal-sets-scroll flex h-full min-h-0 flex-col gap-3 overflow-y-scroll rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/30 p-3 pe-2 lg:order-2">
             {sessions.length === 0 && (
               <p className="px-2 py-6 text-center text-sm text-slate-400 dark:text-slate-500">
@@ -253,7 +253,7 @@ export function ExerciseDetailModal({ exercise, rawSets, onClose }: ExerciseDeta
           </div>
 
           <div className="modal-sets-scroll flex h-full min-h-0 flex-col gap-3 overflow-y-scroll pe-2 lg:order-1">
-            <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-0 pb-3 pt-5">
+            <div className="shrink-0 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-0 pb-5 pt-5">
               <div className="mb-3 flex items-center justify-between px-5">
                 <div>
                   <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">

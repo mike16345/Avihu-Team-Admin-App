@@ -38,6 +38,13 @@ export const findMuscleGroupIndex = (workout: IWorkoutPlan, muscleGroupName: str
 export const getWorkoutExerciseCount = (workout: IWorkoutPlan) =>
   workout.muscleGroups.reduce((total, group) => total + (group.exercises?.length ?? 0), 0);
 
+export const getWorkoutSetCount = (workout: IWorkoutPlan) =>
+  workout.muscleGroups.reduce(
+    (total, group) =>
+      total + (group.exercises ?? []).reduce((sub, ex) => sub + (ex.sets?.length ?? 0), 0),
+    0
+  );
+
 export const getWorkoutDisplayName = (workout: IWorkoutPlan, index: number) => {
   const planName = workout.planName?.trim();
 

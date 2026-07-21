@@ -113,50 +113,52 @@ export function MonthlyPRs({ sessions }: { sessions: ExerciseDetailSession[] }) 
           (המשקל הכבד ביותר בכל חודש)
         </span>
       </div>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+      <ul className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800 overflow-hidden rounded-xl border border-slate-100 dark:border-slate-800">
         {months.map((month, index) => {
           const previousWeight = getPreviousMonthWeight(months, index);
           const delta = getWeightDelta(month.pr.weight, previousWeight);
 
           return (
-            <div
+            <li
               key={month.key}
-              className="relative overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-amber-50/60 via-white to-white p-3"
+              className="flex items-center gap-3 bg-white dark:bg-slate-900 px-3 py-2"
             >
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                    {MONTH_NAMES[month.month - 1]} {month.year}
-                  </p>
-                  <p className="mt-0.5 text-xl font-bold text-slate-900 dark:text-slate-100">
-                    {month.pr.weight}
-                    <span className="text-xs text-slate-500 dark:text-slate-400"> ק״ג</span>
-                  </p>
-                  <p className="mt-0.5 text-[10px] text-slate-500 dark:text-slate-400">
-                    {month.pr.reps} חזרות
-                  </p>
-                </div>
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-md">
-                  <FaBoltLightning size={11} />
-                </div>
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400">
+                <FaBoltLightning size={12} />
               </div>
-              {delta !== null && (
+              <div className="min-w-0 flex-1">
+                <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                  {MONTH_NAMES[month.month - 1]} {month.year}
+                </p>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500">
+                  {month.pr.reps} חזרות
+                </p>
+              </div>
+              <p className="shrink-0 text-sm font-bold tabular-nums text-slate-900 dark:text-slate-100">
+                {month.pr.weight}
+                <span className="ms-0.5 text-[10px] font-medium text-slate-500 dark:text-slate-400">
+                  ק״ג
+                </span>
+              </p>
+              {delta !== null ? (
                 <div
-                  className={`mt-2 inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-[10px] font-bold ${getDeltaClassName(
+                  className={`inline-flex shrink-0 items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[10px] font-bold tabular-nums ${getDeltaClassName(
                     delta
                   )}`}
                 >
                   <span>{getDeltaIcon(delta)}</span>
                   <span>
                     {getDeltaPrefix(delta)}
-                    {delta.toFixed(1)} ק״ג
+                    {delta.toFixed(1)}
                   </span>
                 </div>
+              ) : (
+                <span className="w-12 shrink-0" />
               )}
-            </div>
+            </li>
           );
         })}
-      </div>
+      </ul>
     </div>
   );
 }

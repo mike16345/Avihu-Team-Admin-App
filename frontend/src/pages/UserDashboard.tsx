@@ -55,12 +55,6 @@ export const UserDashboard = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  // Mirror the browser back arrow: when we have a real history
-  // entry behind us, navigate(-1) restores the previous URL — which
-  // is what carries the users-page filter and scroll position.
-  // Falling back to /users only when the dashboard was opened
-  // directly (deep link, refresh) keeps the button useful without
-  // dropping query state when it exists.
   const handleBackToUsersList = () => {
     const canGoBack =
       typeof window !== "undefined" &&
@@ -152,13 +146,11 @@ export const UserDashboard = () => {
     };
 
     if (toStatus === "frozen") {
-      // Freeze snapshots remaining coaching days so unfreezing can restore exactly that time.
       const daysRemaining = getDaysRemaining(currentUser.dateFinished) ?? 0;
       updatedUser.frozenAt = now;
       updatedUser.frozenDaysRemaining = daysRemaining;
       historyEntry.frozenDaysRemaining = daysRemaining;
     } else if (fromStatus === "frozen") {
-      // Unfreeze restores from today using the saved snapshot, not by extending the old date.
       const savedDays = currentUser.frozenDaysRemaining || 0;
       if (savedDays > 0) {
         updatedUser.dateFinished = new Date(now.getTime() + savedDays * 24 * 60 * 60 * 1000);
@@ -221,6 +213,17 @@ export const UserDashboard = () => {
     await updateUser.mutateAsync({ id: currentUser._id!, user: updatedUser });
   };
 
+  const handleDeleteStatusEntry = async (entryAt: Date | string) => {
+    if (!currentUser) return;
+    const targetKey = new Date(entryAt).getTime();
+    const nextHistory = (currentUser.statusHistory || []).filter(
+      (e) => new Date(e.at).getTime() !== targetKey
+    );
+    const updatedUser: IUser = { ...currentUser, statusHistory: nextHistory };
+
+    await updateUser.mutateAsync({ id: currentUser._id!, user: updatedUser });
+  };
+
   return (
     <div data-testid="user-dashboard" dir="rtl" className="flex flex-col gap-5 font-heebo">
       <UserDashboardHeader
@@ -244,6 +247,7 @@ export const UserDashboard = () => {
           status={status}
           onEdit={() => navigate(`/users/edit/${currentUser?._id}`)}
           onAddStatusNote={handleAddStatusNote}
+          onDeleteStatusEntry={handleDeleteStatusEntry}
         />
       )}
 
