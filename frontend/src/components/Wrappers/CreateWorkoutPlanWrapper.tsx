@@ -17,7 +17,7 @@ import useWorkoutPlanPresetsQuery from "@/hooks/queries/workoutPlans/useWorkoutP
 import { collectAllErrors, getZodErrorIssues, ValidationErrorEntry } from "@/lib/utils";
 import ValidationErrorsDialog from "../Alerts/ValidationErrorsDialog";
 import WorkoutPresetPicker from "../templates/workoutTemplates/WorkoutPresetPicker";
-import PresetMetaPanel from "../templates/workoutTemplates/PresetMetaPanel";
+import WorkoutPlanSaveAsTemplateDialog from "../workout plan/WorkoutPlanSaveAsTemplateDialog";
 import useAddWorkoutPlan from "@/hooks/mutations/workouts/useAddWorkoutPlan";
 import useUpdateWorkoutPlan from "@/hooks/mutations/workouts/useUpdateWorkoutPlan";
 import { parseErrorFromObject } from "@/utils/workoutPlanUtils";
@@ -26,7 +26,6 @@ import { invalidateQueryKeys } from "@/QueryClient/queryClient";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { QueryKeys } from "@/enums/QueryKeys";
 import useAddWorkoutPreset from "@/hooks/mutations/workouts/useAddWorkoutPreset";
-import InputModal from "../ui/InputModal";
 import { defaultSimpleCardioOption } from "@/constants/cardioOptions";
 import { ICompleteWorkoutPlan, ISimpleCardioType } from "@/interfaces/IWorkoutPlan";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
@@ -63,13 +62,9 @@ const calculateMinPerWorkout = (workout: WorkoutSchemaType) => {
 interface CreateWorkoutPlanWrapperProps {
   children: React.ReactNode;
   embedded?: boolean;
-  /** Skip the built-in "טען תבנית קיימת" card. Caller will trigger
-   *  the preset picker imperatively via the forwarded ref. */
   hideLoadBar?: boolean;
 }
 
-/** Imperative handle the parent uses to open the preset picker
- *  from somewhere else in the layout (e.g. a header button). */
 export interface CreateWorkoutPlanHandle {
   openPresetPicker: () => void;
 }
@@ -101,9 +96,6 @@ const CreateWorkoutPlanWrapper = forwardRef<CreateWorkoutPlanHandle, CreateWorko
     const [savingToProceed, setSavingToProceed] = useState(false);
     useNavigationBlocker(isDirty, (next) => setPendingNav(() => next));
 
-    // Expose the preset-picker opener so the parent can trigger it
-    // from outside (used when the load bar is hidden and the trigger
-    // lives in the page header instead).
     useImperativeHandle(ref, () => ({
       openPresetPicker: () => setOpenPresetPicker(true),
     }));
@@ -232,8 +224,6 @@ const CreateWorkoutPlanWrapper = forwardRef<CreateWorkoutPlanHandle, CreateWorko
           )}
 
           <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit, onInvalidSubmit)}>
-            <PresetMetaPanel />
-
             {children}
 
             <WorkoutPlanSaveActions
@@ -245,10 +235,14 @@ const CreateWorkoutPlanWrapper = forwardRef<CreateWorkoutPlanHandle, CreateWorko
             />
           </form>
         </div>
-        <InputModal
-          onClose={() => setOpenPresetModal(false)}
+        <WorkoutPlanSaveAsTemplateDialog
           open={openPresetModal}
-          onSubmit={(val) => handleAddPreset(val)}
+          onOpenChange={setOpenPresetModal}
+          onSubmit={(name) => {
+            handleAddPreset(name);
+            setOpenPresetModal(false);
+          }}
+          isSaving={addWorkoutPlanPreset.isPending}
         />
 
         <WorkoutPresetPicker

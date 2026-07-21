@@ -75,20 +75,26 @@ function ExerciseGoalsEditor({ allSets }: { allSets: ExerciseDetailSet[] }) {
         <span className="text-[10px] text-slate-400 dark:text-slate-500">(להציב מטרה למתאמן)</span>
       </div>
 
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-        <div className="rounded-xl border border-slate-200 bg-white p-2.5 dark:border-slate-800 dark:bg-slate-900">
-          <p className="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500">
+      <ul className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800 overflow-hidden rounded-xl border border-slate-100 dark:border-slate-800">
+        <li className="flex items-center gap-3 bg-white dark:bg-slate-900 px-3 py-2.5">
+          <span className="w-16 shrink-0 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
             שיא נוכחי
-          </p>
-          <p className="mt-0.5 text-lg font-bold text-slate-900 dark:text-slate-100">
-            {currentPR} ק״ג
-          </p>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400">{currentReps} חזרות</p>
-        </div>
+          </span>
+          <div className="flex-1">
+            <p className="text-sm font-bold tabular-nums text-slate-900 dark:text-slate-100">
+              {currentPR} <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">ק״ג</span>
+            </p>
+          </div>
+          <span className="shrink-0 text-[11px] text-slate-500 dark:text-slate-400">
+            {currentReps} חזרות
+          </span>
+        </li>
 
-        <div className="rounded-xl border border-blue-200 bg-blue-50/40 p-2.5 dark:border-blue-900/60">
-          <p className="text-[10px] uppercase tracking-wider text-blue-600">יעד</p>
-          <div className="mt-0.5 flex items-baseline gap-1">
+        <li className="flex items-center gap-3 bg-blue-50/30 dark:bg-blue-950/20 px-3 py-2.5">
+          <span className="w-16 shrink-0 text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+            יעד
+          </span>
+          <div className="flex flex-1 flex-wrap items-center gap-2">
             {editing ? (
               <input
                 type="number"
@@ -96,51 +102,55 @@ function ExerciseGoalsEditor({ allSets }: { allSets: ExerciseDetailSet[] }) {
                 onChange={(event) => setGoalWeight(Number(event.target.value))}
                 onBlur={() => setEditing(false)}
                 autoFocus
-                className="w-14 rounded-lg border border-blue-300 bg-white px-1 py-0.5 text-lg font-bold text-blue-700 focus:border-blue-500 focus:outline-none dark:bg-slate-900 dark:text-blue-300"
+                className="w-16 rounded-lg border border-blue-300 bg-white px-1 py-0.5 text-sm font-bold text-blue-700 focus:border-blue-500 focus:outline-none dark:bg-slate-900 dark:text-blue-300"
               />
             ) : (
               <button
                 onClick={() => setEditing(true)}
-                className="text-lg font-bold text-blue-700 dark:text-blue-300"
+                className="text-sm font-bold text-blue-700 dark:text-blue-300"
               >
-                {goalWeight} ק״ג
+                {goalWeight} <span className="text-[10px] font-medium text-blue-600/70">ק״ג</span>
               </button>
             )}
-            <span className="text-xs text-slate-500 dark:text-slate-400">×</span>
+            <span className="text-xs text-slate-400 dark:text-slate-500">×</span>
             <input
               type="number"
               value={goalReps}
               onChange={(event) => setGoalReps(Number(event.target.value))}
-              className="w-10 rounded-lg border border-blue-200 bg-white px-1 py-0.5 text-sm font-bold text-blue-700 focus:border-blue-500 focus:outline-none dark:border-blue-900/60 dark:bg-slate-900 dark:text-blue-300"
+              className="w-12 rounded-lg border border-blue-200 bg-white px-1 py-0.5 text-sm font-bold text-blue-700 focus:border-blue-500 focus:outline-none dark:border-blue-900/60 dark:bg-slate-900 dark:text-blue-300"
             />
             <span className="text-[10px] text-slate-500 dark:text-slate-400">חזרות</span>
             <button
               onClick={() => setEditing(true)}
-              className="ms-auto text-blue-600"
+              className="text-blue-600"
               aria-label="ערוך"
             >
-              <FaPencil size={8} />
+              <FaPencil size={9} />
             </button>
+            <div className="ms-auto min-w-[140px]">
+              <DatePicker
+                selectedDate={parseIsoDate(goalDate)}
+                onChangeDate={(date) => setGoalDate(formatIsoDate(date))}
+                placeholder="בחר תאריך יעד"
+              />
+            </div>
           </div>
-          <div className="mt-1.5">
-            <DatePicker
-              selectedDate={parseIsoDate(goalDate)}
-              onChangeDate={(date) => setGoalDate(formatIsoDate(date))}
-              placeholder="בחר תאריך יעד"
-            />
-          </div>
-        </div>
+        </li>
 
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50/40 p-2.5 dark:border-emerald-900/60">
-          <p className="text-[10px] uppercase tracking-wider text-emerald-600">פער</p>
-          <p className="mt-0.5 text-lg font-bold text-emerald-700 dark:text-emerald-300">
-            {getSignedNumber(gap)} ק״ג
-          </p>
-          <p className="text-[10px] text-emerald-600">
+        <li className="flex items-center gap-3 bg-emerald-50/30 dark:bg-emerald-950/20 px-3 py-2.5">
+          <span className="w-16 shrink-0 text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+            פער
+          </span>
+          <div className="flex-1">
+            <p className="text-sm font-bold tabular-nums text-emerald-700 dark:text-emerald-300">
+              {getSignedNumber(gap)} <span className="text-[10px] font-medium text-emerald-600/70">ק״ג</span>
+            </p>
+          </div>
+          <span className="shrink-0 text-[11px] text-emerald-600 dark:text-emerald-400">
             {gapPct}% עלייה · {getSignedNumber(repsGap)} חזרות
-          </p>
-        </div>
-      </div>
+          </span>
+        </li>
+      </ul>
 
       <div className="mt-3">
         <div className="mb-1 flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
