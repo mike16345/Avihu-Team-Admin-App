@@ -30,8 +30,7 @@ export function ExerciseCardsGrid({
       return <EmptyExerciseCard key={cardId} exercise={exercise} positionLabel={positionLabel} />;
     }
 
-    const isSelected =
-      selectedExercise === exercise.name && selectedMuscleGroup === exercise.group;
+    const isSelected = selectedExercise === exercise.name && selectedMuscleGroup === exercise.group;
 
     return (
       <ExerciseCard

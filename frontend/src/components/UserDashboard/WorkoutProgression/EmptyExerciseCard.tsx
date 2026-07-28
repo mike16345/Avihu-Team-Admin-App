@@ -32,9 +32,7 @@ export function EmptyExerciseCard({ exercise, positionLabel }: EmptyExerciseCard
         </div>
       </div>
       <div className="rounded-lg border border-slate-200/70 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-4 text-center">
-        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-          אין נתונים עדיין
-        </p>
+        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">אין נתונים עדיין</p>
         <p className="mt-0.5 text-[11px] text-slate-400 dark:text-slate-500">
           הנתונים יופיעו לאחר שהמתאמן יזין סטים
         </p>
