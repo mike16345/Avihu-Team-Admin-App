@@ -1,4 +1,5 @@
 import { extractExercises } from "@/lib/workoutUtils";
+import type { ICompleteWorkoutPlan, IExercise } from "@/interfaces/IWorkoutPlan";
 
 import {
   ALL_GROUP_LABEL,
@@ -7,6 +8,74 @@ import {
   type FlatExercise,
   type RecordedSet,
 } from "./workoutProgressionModel";
+
+const getExerciseName = (exercise: IExercise): string => {
+  if (typeof exercise.exerciseId === "string") return exercise.name;
+  return exercise.exerciseId?.name || exercise.name;
+};
+
+export function getWorkoutNames(plan: ICompleteWorkoutPlan | undefined): string[] {
+  return plan?.workoutPlans?.map((wp) => wp.planName).filter(Boolean) ?? [];
+}
+
+export function getExerciseNamesInWorkout(
+  plan: ICompleteWorkoutPlan | undefined,
+  workoutName: string
+): Set<string> {
+  const names = new Set<string>();
+  const workout = plan?.workoutPlans?.find((wp) => wp.planName === workoutName);
+  workout?.muscleGroups?.forEach((mg) => {
+    mg.exercises?.forEach((ex) => {
+      const name = getExerciseName(ex);
+      if (name) names.add(name);
+    });
+  });
+  return names;
+}
+
+export type WorkoutGroupSection = {
+  muscleGroup: string;
+  exercises: FlatExercise[];
+};
+
+export function groupWorkoutExercises(
+  plan: ICompleteWorkoutPlan | undefined,
+  workoutName: string,
+  flatExercises: FlatExercise[]
+): WorkoutGroupSection[] {
+  const workout = plan?.workoutPlans?.find((wp) => wp.planName === workoutName);
+  if (!workout?.muscleGroups?.length) return [];
+
+  const byName = new Map<string, FlatExercise>();
+  flatExercises.forEach((exercise) => byName.set(exercise.name, exercise));
+
+  const sections: WorkoutGroupSection[] = [];
+  workout.muscleGroups.forEach((mg) => {
+    const orderedNames = (mg.exercises ?? [])
+      .map(getExerciseName)
+      .filter((name): name is string => Boolean(name));
+
+    const uniqueOrderedNames: string[] = [];
+    const seen = new Set<string>();
+    orderedNames.forEach((name) => {
+      if (seen.has(name)) return;
+      seen.add(name);
+      uniqueOrderedNames.push(name);
+    });
+
+    if (uniqueOrderedNames.length === 0) return;
+
+    const exercises = uniqueOrderedNames.map((name) => {
+      const existing = byName.get(name);
+      if (existing) return existing;
+      return { name, group: mg.muscleGroup, sessions: [] } as FlatExercise;
+    });
+
+    sections.push({ muscleGroup: mg.muscleGroup, exercises });
+  });
+
+  return sections;
+}
 
 const getServerGroups = (rawData: any) => {
   if (Array.isArray(rawData)) return rawData;

@@ -91,6 +91,13 @@ export const FALLBACK_GROUPS = [
 
 export const ALL_GROUP_LABEL = "\u05d4\u05db\u05dc";
 
+export type ViewMode = "muscle" | "workout";
+
+export const MODE_LABELS: Record<ViewMode, string> = {
+  muscle: "\u05dc\u05e4\u05d9 \u05e9\u05e8\u05d9\u05e8",
+  workout: "\u05dc\u05e4\u05d9 \u05d0\u05d9\u05de\u05d5\u05df",
+};
+
 export type ExerciseGroupColor = typeof defaultColor;
 
 export type ExerciseDetailSet = {

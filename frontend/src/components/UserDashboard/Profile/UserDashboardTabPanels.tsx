@@ -18,6 +18,7 @@ import WorkoutPlans from "@/components/workout plan/WorkoutPlans";
 import { ViewDietPlanPage } from "@/pages/ViewDietPlanPage";
 import { FaArrowsRotate, FaClockRotateLeft, FaFolderOpen } from "react-icons/fa6";
 import useWorkoutPlanHistoryQuery from "@/hooks/queries/workoutPlans/useWorkoutPlanHistoryQuery";
+import SetInputStyleToggle from "./SetInputStyleToggle";
 import { ProgressSubTabs } from "./UserDashboardTabs";
 import type { ProgressSubTab } from "./userDashboardTypes";
 
@@ -85,6 +86,7 @@ export function WorkoutTabPanel({
           rightmost on screen. */}
       <div className="flex items-center justify-end">
         <div className="flex items-center gap-2">
+          {userId && <SetInputStyleToggle userId={userId} />}
           <ActionButton
             onClick={() => wrapperRef.current?.openPresetPicker()}
             title="טען תבנית קיימת לתוכנית האימונים"

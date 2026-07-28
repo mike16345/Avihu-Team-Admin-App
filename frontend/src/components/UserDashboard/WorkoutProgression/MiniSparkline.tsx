@@ -7,20 +7,25 @@ export function MiniSparkline({ values, gradient }: { values: number[]; gradient
   if (values.length === 0) return null;
   const W = 200;
   const H = 40;
+  const PAD_X = 6;
+  const PAD_Y_TOP = 5;
+  const PAD_Y_BOTTOM = 5;
   const min = Math.min(...values);
   const max = Math.max(...values);
   const range = max - min || 1;
-  const stepX = W / Math.max(1, values.length - 1);
+  const usableW = W - 2 * PAD_X;
+  const usableH = H - PAD_Y_TOP - PAD_Y_BOTTOM;
+  const stepX = usableW / Math.max(1, values.length - 1);
 
   const points = values.map((v, i) => ({
-    x: i * stepX,
-    y: H - ((v - min) / range) * (H - 6) - 3,
+    x: PAD_X + i * stepX,
+    y: PAD_Y_TOP + (1 - (v - min) / range) * usableH,
   }));
 
   const linePath = points
     .map((p, i) => `${getLineCommand(i)} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`)
     .join(" ");
-  const areaPath = `${linePath} L ${W} ${H} L 0 ${H} Z`;
+  const areaPath = `${linePath} L ${W - PAD_X} ${H} L ${PAD_X} ${H} Z`;
 
   const colorMap: Record<string, string> = {
     "from-blue-500 to-blue-600": "#3b82f6",
