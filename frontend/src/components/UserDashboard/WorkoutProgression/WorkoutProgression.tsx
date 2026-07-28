@@ -15,11 +15,7 @@ import { ExerciseDetailModal } from "./ExerciseDetailModal";
 import { ProgressNoteCreator } from "./ProgressNoteCreator";
 import { WorkoutEmptyState } from "./WorkoutEmptyState";
 import { WorkoutFilterBar } from "./WorkoutFilterBar";
-import {
-  ALL_GROUP_LABEL,
-  type FlatExercise,
-  type ViewMode,
-} from "./workoutProgressionModel";
+import { ALL_GROUP_LABEL, type FlatExercise, type ViewMode } from "./workoutProgressionModel";
 import {
   flattenRecordedWorkouts,
   getAvailableGroups,
@@ -95,7 +91,7 @@ export const WorkoutProgression = () => {
 
   const handleModeChange = (nextMode: ViewMode) => {
     setMode(nextMode);
-    setFilter(nextMode === "muscle" ? ALL_GROUP_LABEL : workoutNameOptions[0] ?? "");
+    setFilter(nextMode === "muscle" ? ALL_GROUP_LABEL : (workoutNameOptions[0] ?? ""));
   };
 
   useEffect(() => {
