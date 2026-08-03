@@ -7,7 +7,7 @@ import useUserQuery from "@/hooks/queries/user/useUserQuery";
 import { QueryKeys } from "@/enums/QueryKeys";
 import type { IUser } from "@/interfaces/IUser";
 
-type Style = NonNullable<IUser["setInputStyle"]>;
+type Style = NonNullable<IUser["setInputType"]>;
 
 const OPTIONS: { value: Style; label: string }[] = [
   { value: "wheel", label: "גלילה" },
@@ -21,17 +21,17 @@ const LABEL_BY_VALUE: Record<Style, string> = {
 
 export default function SetInputStyleToggle({ userId }: { userId: string }) {
   const { data: user } = useUserQuery(userId);
-  const current: Style = user?.setInputStyle ?? "wheel";
+  const current: Style = user?.setInputType ?? "wheel";
   const { updateUserField } = useUsersApi();
   const qc = useQueryClient();
 
   const [pending, setPending] = useState<Style | null>(null);
 
   const mutation = useMutation({
-    mutationFn: (value: Style) => updateUserField(userId, "setInputStyle", value),
+    mutationFn: (value: Style) => updateUserField(userId, "setInputType", value),
     onSuccess: (_, value) => {
       qc.setQueryData<IUser | undefined>([QueryKeys.USERS, userId], (prev) =>
-        prev ? { ...prev, setInputStyle: value } : prev
+        prev ? { ...prev, setInputType: value } : prev
       );
       qc.invalidateQueries({ queryKey: [QueryKeys.USERS, userId] });
       toast.success(`סגנון הזנת הסטים עודכן ל־${LABEL_BY_VALUE[value]}`);

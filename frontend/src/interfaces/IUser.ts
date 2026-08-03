@@ -33,7 +33,7 @@ export interface IUser extends IBaseUser {
   profileImage?: string;
   onboardingStep?: "form" | "agreement" | "completed";
   accountStatus?: AccountStatus;
-  setInputStyle?: "wheel" | "table";
+  setInputType?: "wheel" | "table";
   /**
    * Freeze snapshot — captured when the trainer marks the trainee
    * as "frozen". Lets the trainer see "this client was frozen with
