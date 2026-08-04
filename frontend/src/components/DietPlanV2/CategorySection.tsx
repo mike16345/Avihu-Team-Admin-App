@@ -47,6 +47,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
   const primaryAvg = primaryMacro ? computeCategoryAverage(category, primaryMacro) : 0;
   const calAvg = computeCategoryAverage(category, "calories");
   const hasOptions = category.options.length > 0;
+  const isFreeCalories = category.kind === "freeCalories";
 
   const onFoodSelected = (food: FoodLibraryItem, overrideQuantity?: number) => {
     const quantity =
@@ -101,6 +102,22 @@ const CategorySection: React.FC<CategorySectionProps> = ({
 
   const quickAdd = useQuickAddController(category.kind, submitQuickAdd, onFoodSelected);
 
+  const manualInputsNode = (
+    <CategoryManualInputs
+      primaryMacro={primaryMacro}
+      primaryGrams={category.manualPrimaryGrams ?? Math.round(primaryAvg)}
+      calories={category.manualCalories ?? Math.round(calAvg)}
+      onChange={(field, value) =>
+        onChange({
+          ...category,
+          ...(field === "primary"
+            ? { manualPrimaryGrams: value }
+            : { manualCalories: value }),
+        })
+      }
+    />
+  );
+
   return (
     <section dir="rtl" className="flex flex-col gap-2 py-1">
       {/* One rectangle wraps the whole "add area" for this category:
@@ -145,6 +162,9 @@ const CategorySection: React.FC<CategorySectionProps> = ({
               {category.options.length}
             </span>
           )}
+          {!collapsed && isFreeCalories && (
+            <div onClick={(e) => e.stopPropagation()}>{manualInputsNode}</div>
+          )}
           {/* Inline quick-add when expanded — same row as chevron /
             label / macros. When collapsed, the search bar is
             replaced by a soft-grey preview strip listing the option
@@ -163,21 +183,9 @@ const CategorySection: React.FC<CategorySectionProps> = ({
             </div>
           )}
           {collapsed && hasOptions && <CategoryOptionsPreview options={category.options} />}
-          {!collapsed && (
+          {!collapsed && !isFreeCalories && (
             <div className="ms-auto" onClick={(e) => e.stopPropagation()}>
-              <CategoryManualInputs
-                primaryMacro={primaryMacro}
-                primaryGrams={category.manualPrimaryGrams ?? Math.round(primaryAvg)}
-                calories={category.manualCalories ?? Math.round(calAvg)}
-                onChange={(field, value) =>
-                  onChange({
-                    ...category,
-                    ...(field === "primary"
-                      ? { manualPrimaryGrams: value }
-                      : { manualCalories: value }),
-                  })
-                }
-              />
+              {manualInputsNode}
             </div>
           )}
           {/* Category-level actions on the far left (end in RTL):
