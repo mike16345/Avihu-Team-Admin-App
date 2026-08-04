@@ -11,7 +11,7 @@ import type { DietV2Meal, DietV2OptionMacros, DietV2Plan } from "@/interfaces/ID
 
 import {
   buildEmptyMeal,
-  computeMealAverage,
+  computeMealTotalsFromCategories,
   makeLocalId,
 } from "./dietPlanV2Utils";
 import MealCard from "./MealCard";
@@ -20,7 +20,7 @@ import DietPlanV2TemplateSaveDialog from "./DietPlanV2TemplateSaveDialog";
 import DietPlanV2TemplatePickerDialog from "./DietPlanV2TemplatePickerDialog";
 import SupplementsPanel from "./SupplementsPanel";
 import NotesPanel from "./NotesPanel";
-import { SaveIndicator, TabButton, ToolbarButton } from "./DietPlanV2Toolbar";
+import { TabButton, ToolbarButton } from "./DietPlanV2Toolbar";
 import type { DietV2Template } from "./dietPlanV2Templates";
 import { normaliseSupplements, type DietV2Supplement } from "./dietPlanV2Supplements";
 import { useUsersStore } from "@/store/userStore";
@@ -304,25 +304,23 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
     setDropIndex(null);
   };
 
-  const sumMealMacro = (key: keyof DietV2OptionMacros) =>
-    plan.meals.reduce((acc, meal) => {
-      if (meal.macroMode === "manual" && meal.manualMacros) {
-        return acc + (meal.manualMacros[key] || 0);
-      }
-      return acc + computeMealAverage(meal, key);
-    }, 0);
-
   const totals = useMemo(
-    () => ({
-      calories: Math.round(sumMealMacro("calories")),
-      protein: Math.round(sumMealMacro("protein")),
-      carbs: Math.round(sumMealMacro("carbs")),
-      fat: Math.round(sumMealMacro("fat")),
-    }),
+    () =>
+      plan.meals.reduce<DietV2OptionMacros>(
+        (acc, meal) => {
+          const t = computeMealTotalsFromCategories(meal.categories);
+          return {
+            protein: acc.protein + t.protein,
+            carbs: acc.carbs + t.carbs,
+            fat: acc.fat + t.fat,
+            calories: acc.calories + t.calories,
+          };
+        },
+        { protein: 0, carbs: 0, fat: 0, calories: 0 },
+      ),
     [plan.meals],
   );
 
-  const supplementsCount = plan.supplements.length;
   const showSaved = saved && !forceDirty;
 
   return (
@@ -333,9 +331,8 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
           then the compact stats below. */}
       <PlanMacroCharts totals={totals} />
 
-      {/* Toolbar — tabs + global actions (load template, auto-fill,
-          collapse-all, save indicator). Replaces the heavy "טען
-          תבנית קיימת" panel. */}
+      <div className="my-4 h-px w-full bg-slate-200 dark:bg-slate-800" />
+
       <div className="flex flex-wrap items-center justify-between gap-2">
         <nav className="flex items-center gap-2">
           <TabButton
@@ -352,27 +349,9 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
             onClick={() => setTab("highlights")}
             attention={highlightsAttentionActive}
           />
-          <TabButton
-            active={tab === "supplements"}
-            icon={<FaPlus size={11} />}
-            label={`תוספים${supplementsCount ? ` · ${supplementsCount}` : ""}`}
-            onClick={() => setTab("supplements")}
-          />
-          <FreeCaloriesInput
-            active={tab === "freeCalories"}
-            onActivate={() => setTab("freeCalories")}
-            value={plan.freeCalories ?? 0}
-            onChange={(v) =>
-              setPlan((current) => ({
-                ...current,
-                freeCalories: v > 0 ? v : undefined,
-              }))
-            }
-          />
         </nav>
 
         <div className="flex flex-wrap items-center gap-1.5">
-          <SaveIndicator saved={saved} />
           <ToolbarButton
             icon={<FaFloppyDisk size={11} />}
             label={showSaved ? "נשמר" : saveLabel ?? "שמור תפריט"}
@@ -399,7 +378,7 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
       </div>
 
       {/* Tab content */}
-      {(tab === "menu" || tab === "freeCalories") && (
+      {tab === "menu" && (
         <>
           <div className="flex flex-col gap-4">
             {plan.meals.map((meal, idx) => (
@@ -437,7 +416,7 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
           <button
             type="button"
             onClick={addMeal}
-            className="flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-blue-300 bg-blue-50/40 px-5 py-4 text-sm font-bold text-blue-700 transition-all hover:-translate-y-0.5 hover:border-blue-500 hover:bg-blue-50 dark:border-blue-900/40 dark:bg-blue-950/20 dark:text-blue-300"
+            className="flex items-center justify-center gap-2 rounded-2xl border border-blue-200/70 bg-blue-50/40 px-5 py-4 text-sm font-bold text-blue-700 transition-all hover:-translate-y-0.5 hover:border-blue-400 hover:bg-blue-50 dark:border-blue-900/40 dark:bg-blue-950/20 dark:text-blue-300"
           >
             <FaPlus size={12} />
             הוסף ארוחה
@@ -500,39 +479,5 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
     </div>
   );
 };
-
-const FreeCaloriesInput: React.FC<{
-  active: boolean;
-  onActivate: () => void;
-  value: number;
-  onChange: (next: number) => void;
-}> = ({ active, onActivate, value, onChange }) => (
-  <label
-    onClick={onActivate}
-    title="כמות קק״ל שמעבר לתפריט המובנה — לשימוש חופשי של המתאמן"
-    className={`inline-flex items-center rounded-xl border border-blue-700 bg-white font-bold text-blue-700 transition-all dark:border-blue-500 dark:bg-slate-900 dark:text-blue-200 ${
-      active
-        ? "gap-1.5 px-3.5 py-2 text-[13px]"
-        : "gap-1.5 px-3 py-2 text-xs"
-    }`}
-  >
-    <span>קלוריות חופשיות</span>
-    <input
-      type="number"
-      inputMode="numeric"
-      min={0}
-      value={value || ""}
-      onFocus={onActivate}
-      onChange={(e) => onChange(Math.max(0, Number(e.target.value) || 0))}
-      placeholder="0"
-      className={`border-0 bg-transparent p-0 text-center font-extrabold text-slate-900 focus:outline-none focus:ring-0 dark:text-slate-100 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none ${
-        active ? "w-12 text-[13px]" : "w-10 text-xs"
-      }`}
-    />
-    <span className={active ? "text-[11px] font-semibold text-slate-400" : "text-[10px] font-semibold text-slate-400"}>
-      קק״ל
-    </span>
-  </label>
-);
 
 export default DietPlanV2Editor;

@@ -2,7 +2,6 @@ import { FaFire, FaUtensils } from "react-icons/fa6";
 
 import type {
   DietV2Meal,
-  DietV2MealMacroMode,
   DietV2OptionMacros,
   DietV2Plan,
   DietV2Unit,
@@ -12,7 +11,6 @@ import { formatUnitLabel } from "@/interfaces/IDietPlanV2";
 import {
   CATEGORY_LABELS,
   CATEGORY_TONES,
-  computeMealAverage,
 } from "./dietPlanV2Utils";
 
 interface DietV2SupplementRef {
@@ -116,22 +114,11 @@ const DietV2TraineeView: React.FC<DietV2TraineeViewProps> = ({
   );
 };
 
-const resolveCal = (meal: DietV2Meal) => {
-  const mode: DietV2MealMacroMode = meal.macroMode ?? "auto";
-  if (mode === "manual" && meal.manualMacros) return meal.manualMacros.calories || 0;
-  return computeMealAverage(meal, "calories");
-};
+const EMPTY_MACROS: DietV2OptionMacros = { protein: 0, carbs: 0, fat: 0, calories: 0 };
 
-const resolveMacros = (meal: DietV2Meal): DietV2OptionMacros => {
-  const mode: DietV2MealMacroMode = meal.macroMode ?? "auto";
-  if (mode === "manual" && meal.manualMacros) return meal.manualMacros;
-  return {
-    protein: computeMealAverage(meal, "protein"),
-    carbs: computeMealAverage(meal, "carbs"),
-    fat: computeMealAverage(meal, "fat"),
-    calories: computeMealAverage(meal, "calories"),
-  };
-};
+const resolveCal = (meal: DietV2Meal) => meal.macros?.calories ?? 0;
+
+const resolveMacros = (meal: DietV2Meal): DietV2OptionMacros => meal.macros ?? EMPTY_MACROS;
 
 interface MealBlockProps {
   meal: DietV2Meal;

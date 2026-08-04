@@ -4,7 +4,6 @@ import { FaFolderOpen, FaPlus, FaTrashCan } from "react-icons/fa6";
 import type {
   DietV2Category,
   DietV2CategoryKind,
-  DietV2MealMacroMode,
   DietV2Option,
 } from "@/interfaces/IDietPlanV2";
 import { formatUnitLabel } from "@/interfaces/IDietPlanV2";
@@ -25,14 +24,13 @@ import { getRankedSuggestions, recordFoodUsage } from "./dietPlanV2FoodHistory";
 import FoodPicker from "./FoodPicker";
 import OptionRow from "./OptionRow";
 import CopyCategoryButton, { type MealSibling } from "./CopyCategoryButton";
-import { CategoryAverageBadges, CategoryManualInputs } from "./CategoryHeaderMacros";
+import { CategoryManualInputs } from "./CategoryHeaderMacros";
 
 export type { MealSibling };
 
 interface CategorySectionProps {
   category: DietV2Category;
   onChange: (category: DietV2Category) => void;
-  macroMode?: DietV2MealMacroMode;
   siblingMeals?: MealSibling[];
   onCopyToMeal?: (targetMealId: string) => void;
   onCopyToNewMeal?: () => void;
@@ -41,7 +39,6 @@ interface CategorySectionProps {
 const CategorySection: React.FC<CategorySectionProps> = ({
   category,
   onChange,
-  macroMode = "auto",
   siblingMeals = [],
   onCopyToMeal,
   onCopyToNewMeal,
@@ -54,8 +51,6 @@ const CategorySection: React.FC<CategorySectionProps> = ({
   const primaryAvg = primaryMacro ? computeCategoryAverage(category, primaryMacro) : 0;
   const calAvg = computeCategoryAverage(category, "calories");
   const hasOptions = category.options.length > 0;
-  const estimatedCount = category.options.filter((opt) => opt.estimated).length;
-  const reliableCount = category.options.length - estimatedCount;
 
   const onFoodSelected = (food: FoodLibraryItem, overrideQuantity?: number) => {
     const quantity =
@@ -109,32 +104,6 @@ const CategorySection: React.FC<CategorySectionProps> = ({
   };
 
   const quickAdd = useQuickAddController(category.kind, submitQuickAdd, onFoodSelected);
-
-  const [adding, setAdding] = useState(false);
-  const isCompactEmpty = !hasOptions && !adding && macroMode !== "manual";
-
-  if (isCompactEmpty) {
-    return (
-      <button
-        type="button"
-        onClick={() => setAdding(true)}
-        dir="rtl"
-        className={`group flex w-full items-center justify-between rounded-xl border border-dashed ${tone.ring} bg-white px-3 py-2 text-right transition-all hover:border-solid hover:bg-blue-50/40 dark:bg-slate-900 dark:hover:bg-blue-950/30`}
-      >
-        <span className="flex items-center gap-2">
-          <span
-            className={`inline-flex items-center rounded-md ${tone.chip} px-2 py-0.5 text-xs font-bold ${tone.chipText}`}
-          >
-            {CATEGORY_LABELS[category.kind]}
-          </span>
-          <span className="text-[11px] text-slate-400 transition-colors group-hover:text-slate-600 dark:text-slate-500 dark:group-hover:text-slate-300">
-            הוסף אפשרות להחלפה
-          </span>
-        </span>
-        <FaPlus size={9} className="text-slate-400 group-hover:text-blue-600" />
-      </button>
-    );
-  }
 
   return (
     <section dir="rtl" className="flex flex-col gap-2 py-1">
@@ -200,8 +169,8 @@ const CategorySection: React.FC<CategorySectionProps> = ({
         {collapsed && hasOptions && (
           <CategoryOptionsPreview options={category.options} />
         )}
-        <div className="ms-auto" onClick={(e) => e.stopPropagation()}>
-          {macroMode === "manual" ? (
+        {!collapsed && (
+          <div className="ms-auto" onClick={(e) => e.stopPropagation()}>
             <CategoryManualInputs
               primaryMacro={primaryMacro}
               primaryGrams={category.manualPrimaryGrams ?? Math.round(primaryAvg)}
@@ -215,17 +184,8 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                 })
               }
             />
-          ) : (
-            <CategoryAverageBadges
-              primaryMacro={primaryMacro}
-              primaryAvg={primaryAvg}
-              calAvg={calAvg}
-              hasOptions={hasOptions}
-              reliableCount={reliableCount}
-              estimatedCount={estimatedCount}
-            />
-          )}
-        </div>
+          </div>
+        )}
         {/* Category-level actions on the far left (end in RTL):
             copy this category-block to another meal, and clear all
             of this category's options at once. Visible in both open
@@ -280,7 +240,6 @@ const CategorySection: React.FC<CategorySectionProps> = ({
               key={option.id}
               option={option}
               categoryKind={category.kind}
-              macroMode={macroMode}
               onChange={(next) => onOptionChange(index, next)}
               onRemove={() => onOptionRemove(index)}
             />

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { FaTrashCan } from "react-icons/fa6";
 
-import type { DietV2MealMacroMode, DietV2Option, DietV2Unit } from "@/interfaces/IDietPlanV2";
+import type { DietV2Option, DietV2Unit } from "@/interfaces/IDietPlanV2";
 import { DIET_V2_UNIT_LABELS, DIET_V2_UNITS } from "@/interfaces/IDietPlanV2";
 
 import {
@@ -16,7 +16,6 @@ import type { DietV2CategoryKind } from "@/interfaces/IDietPlanV2";
 interface OptionRowProps {
   option: DietV2Option;
   categoryKind: DietV2CategoryKind;
-  macroMode?: DietV2MealMacroMode;
   onChange: (option: DietV2Option) => void;
   onRemove: () => void;
 }
@@ -24,8 +23,7 @@ interface OptionRowProps {
 const isCompoundEntry = (foodName: string): boolean =>
   /[+,]/.test(foodName) || / ו-?/.test(foodName);
 
-const OptionRow: React.FC<OptionRowProps> = ({ option, categoryKind, macroMode = "auto", onChange, onRemove }) => {
-  const showAiMeta = macroMode !== "manual";
+const OptionRow: React.FC<OptionRowProps> = ({ option, categoryKind, onChange, onRemove }) => {
   const [expanded, setExpanded] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const isCompound = isCompoundEntry(option.foodName);
@@ -90,14 +88,10 @@ const OptionRow: React.FC<OptionRowProps> = ({ option, categoryKind, macroMode =
           setExpanded(true);
         }
       }}
-      className={`group flex flex-col gap-1 rounded-md bg-slate-100 px-2 py-1.5 transition-all hover:bg-blue-100/80 dark:bg-slate-800/70 dark:hover:bg-blue-950/50 ${
+      className={`group flex flex-col gap-1 rounded-md border border-slate-400/60 bg-slate-100 px-2 py-1.5 transition-all hover:bg-blue-100/80 dark:border-slate-500/50 dark:bg-slate-800/70 dark:hover:bg-blue-950/50 ${
         editingName ? "" : "cursor-pointer"
       }`}
     >
-      {/* Row header: name + inline qty/unit editor + delete. The
-          quantity control lives here (not duplicated in the expanded
-          view) so the trainer edits in place. stopPropagation on the
-          inputs so clicking them doesn't toggle the row. */}
       <div className="flex items-center gap-1.5">
         {editingName ? (
           <input
@@ -113,11 +107,11 @@ const OptionRow: React.FC<OptionRowProps> = ({ option, categoryKind, macroMode =
               }
             }}
             aria-label="שם המאכל"
-            className="min-w-0 flex-1 rounded border border-blue-300 bg-white px-1.5 py-0.5 text-[13px] font-bold text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-200/60 dark:border-blue-900/60 dark:bg-slate-900 dark:text-slate-100"
+            className="min-w-0 flex-1 rounded border border-blue-300 bg-white px-1.5 py-0.5 text-[15px] font-bold text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-200/60 dark:border-blue-900/60 dark:bg-slate-900 dark:text-slate-100"
           />
         ) : (
           <span
-            className={`min-w-0 text-[13px] font-bold text-slate-800 dark:text-slate-100 ${
+            className={`min-w-0 text-[15px] font-bold text-slate-800 dark:text-slate-100 ${
               expanded ? "break-words" : "truncate"
             }`}
             title="לחץ לעריכת השם"
@@ -125,11 +119,6 @@ const OptionRow: React.FC<OptionRowProps> = ({ option, categoryKind, macroMode =
             {option.foodName}
           </span>
         )}
-        {/* Trailing controls — quantity editor (when applicable) and
-            trash sit in a shared group so the quantity is ALWAYS
-            adjacent to the trash. The whole group is pushed to the
-            end via ms-auto, so there's never a stray gap between qty
-            and trash regardless of the food name's length. */}
         <div className="ms-auto flex shrink-0 items-center gap-1.5">
           {!isCompound && (
             <div
@@ -143,14 +132,14 @@ const OptionRow: React.FC<OptionRowProps> = ({ option, categoryKind, macroMode =
                 value={option.quantity || ""}
                 onChange={(e) => onQuantityChange(e.target.value)}
                 aria-label="כמות"
-                className="w-10 border-0 bg-transparent px-0.5 text-center text-[11px] font-extrabold text-slate-800 focus:outline-none dark:text-slate-100"
+                className="w-10 border-0 bg-transparent px-0.5 text-center text-[12px] font-medium text-slate-700 focus:outline-none dark:text-slate-200"
               />
               <span className="my-1 w-px bg-blue-100 dark:bg-blue-900/40" aria-hidden />
               <select
                 value={option.unit}
                 onChange={(e) => onUnitChange(e.target.value as DietV2Unit)}
                 aria-label="יחידת מדידה"
-                className="appearance-none border-0 bg-transparent px-1 text-[10px] font-bold text-slate-600 focus:outline-none dark:text-slate-300"
+                className="appearance-none border-0 bg-transparent px-1 text-[12px] font-medium text-slate-500 focus:outline-none dark:text-slate-400"
               >
                 {DIET_V2_UNITS.map((unit) => (
                   <option key={unit} value={unit}>
@@ -173,76 +162,8 @@ const OptionRow: React.FC<OptionRowProps> = ({ option, categoryKind, macroMode =
           </button>
         </div>
       </div>
-
-      {/* Macros row — in AI (auto) mode we ALWAYS render the same
-          template so trainers see one predictable layout across
-          rows. Recognised foods show numbers; unrecognised rows
-          leave the values blank with a "⚠ לבדוק" badge so the
-          trainer knows to fill them in. */}
-      {showAiMeta && (
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-blue-100 pt-2 text-[12px] text-slate-600 dark:border-blue-900/40 dark:text-slate-300">
-          <MacroField label="חלבון" value={option.macros.protein} unit="גרם" empty={option.estimated} />
-          <MacroField label="פחמימה" value={option.macros.carbs} unit="גרם" empty={option.estimated} />
-          <MacroField label="שומן" value={option.macros.fat} unit="גרם" empty={option.estimated} />
-          <MacroField
-            label="קלוריות"
-            value={option.macros.calories}
-            unit="קל׳"
-            tone="calories"
-            empty={option.estimated}
-          />
-          <SourceBadge estimated={option.estimated} cloudSourced={option.cloudSourced} />
-        </div>
-      )}
     </div>
   );
 };
-
-interface SourceBadgeProps {
-  estimated?: boolean;
-  cloudSourced?: boolean;
-}
-
-const SourceBadge: React.FC<SourceBadgeProps> = ({ estimated }) => {
-  if (estimated) {
-    return (
-      <span
-        title="המערכת לא זיהתה את המאכל במאגר — כדאי לבדוק את הערכים לפני שליחה"
-        className="inline-flex items-center gap-1 rounded-md bg-amber-100 px-1.5 py-0.5 text-[9px] font-bold text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
-      >
-        ⚠ לבדוק
-      </span>
-    );
-  }
-  return null;
-};
-
-interface MacroFieldProps {
-  label: string;
-  value: number;
-  unit: string;
-  tone?: "default" | "calories";
-  empty?: boolean;
-}
-
-const MacroField: React.FC<MacroFieldProps> = ({ label, value, unit, tone = "default", empty }) => (
-  <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
-    <span className="font-semibold text-slate-500 dark:text-slate-400">{label}:</span>
-    {empty ? (
-      <span className="text-[13px] font-bold text-slate-300 dark:text-slate-600">—</span>
-    ) : (
-      <strong
-        className={
-          tone === "calories"
-            ? "text-[13px] font-extrabold text-rose-600 dark:text-rose-400"
-            : "text-[13px] font-extrabold text-slate-800 dark:text-slate-100"
-        }
-      >
-        {value}
-      </strong>
-    )}
-    <span className="text-[10px] text-slate-400 dark:text-slate-500">{unit}</span>
-  </span>
-);
 
 export default OptionRow;

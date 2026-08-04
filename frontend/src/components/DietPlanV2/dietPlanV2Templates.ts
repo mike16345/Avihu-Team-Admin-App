@@ -1,6 +1,6 @@
 import type { DietV2OptionMacros, DietV2Plan } from "@/interfaces/IDietPlanV2";
 
-import { computeMealAverage, makeLocalId } from "./dietPlanV2Utils";
+import { makeLocalId } from "./dietPlanV2Utils";
 
 export type DietV2TemplateGoal = "cutting" | "maintain" | "bulking";
 export type DietV2TemplateGender = "women" | "men" | "both";
@@ -62,12 +62,7 @@ export const sumPlanMacro = (
   plan: DietV2Plan,
   key: keyof DietV2OptionMacros
 ): number =>
-  plan.meals.reduce((acc, meal) => {
-    if (meal.macroMode === "manual" && meal.manualMacros) {
-      return acc + (meal.manualMacros[key] || 0);
-    }
-    return acc + computeMealAverage(meal, key);
-  }, 0);
+  plan.meals.reduce((acc, meal) => acc + (meal.macros?.[key] ?? 0), 0);
 
 export const computePlanMacroTotals = (plan: DietV2Plan): DietV2OptionMacros => ({
   protein: Math.round(sumPlanMacro(plan, "protein")),

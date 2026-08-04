@@ -1,18 +1,10 @@
-/**
- * Diet plan editor v2 — "options" model.
- *
- * A meal is built from categories (protein / carbs / fat / vegetables).
- * Each category contains a list of food options the trainee can choose
- * from. Per the council brief, the meal does NOT carry a typed "target"
- * field — macro figures shown to the trainer are computed live as the
- * range across the category's options.
- */
-
 export const DIET_V2_CATEGORY_KINDS = [
   "protein",
   "carbs",
   "fat",
   "vegetables",
+  "addon",
+  "freeCalories",
 ] as const;
 
 export type DietV2CategoryKind = (typeof DIET_V2_CATEGORY_KINDS)[number];
@@ -39,21 +31,11 @@ export const DIET_V2_UNIT_LABELS: Record<DietV2Unit, string> = {
   piece_medium: "חתיכה בינונית",
 };
 
-/** Plural form used when quantity > 1. Hebrew nouns like חתיכה
- *  decline: "1 חתיכה" but "2 חתיכות". Units that already look
- *  correct as-is (כפות, כוסות, יחידות, פרוסות, גרם) don't need a
- *  separate plural. */
 const DIET_V2_UNIT_LABELS_PLURAL: Partial<Record<DietV2Unit, string>> = {
   piece: "חתיכות",
   piece_medium: "חתיכות בינוניות",
 };
 
-/**
- * Quantity-aware unit label — pluralises Hebrew forms when the
- * quantity is > 1. Prefer this in read-only surfaces (trainee view,
- * summaries) so a trainer who typed "2 חתיכות שניצל" sees exactly
- * "2 חתיכות שניצל" rendered back, not "2 חתיכה שניצל".
- */
 export const formatUnitLabel = (unit: DietV2Unit, quantity: number): string => {
   if (quantity !== 1 && DIET_V2_UNIT_LABELS_PLURAL[unit]) {
     return DIET_V2_UNIT_LABELS_PLURAL[unit] as string;
@@ -74,13 +56,7 @@ export interface DietV2Option {
   quantity: number;
   unit: DietV2Unit;
   macros: DietV2OptionMacros;
-  /** True when macros were derived from a category-level fallback
-   *  (no exact food match in the library). UI surfaces this as a
-   *  "מוערך" badge so the trainer knows to double-check the row. */
   estimated?: boolean;
-  /** True when the row's macros came from a remote (Open Food
-   *  Facts) lookup — usually after a background upgrade from an
-   *  initial estimate. UI surfaces this as a "ענן" badge. */
   cloudSourced?: boolean;
 }
 
@@ -88,34 +64,19 @@ export interface DietV2Category {
   kind: DietV2CategoryKind;
   options: DietV2Option[];
   note?: string;
-  /** When the parent meal is in manual macro mode, the trainer can
-   *  type explicit per-category values that bypass the computed
-   *  averages of the options. Only used when meal.macroMode is
-   *  "manual"; otherwise ignored. */
   manualPrimaryGrams?: number;
   manualCalories?: number;
 }
-
-export type DietV2MealMacroMode = "auto" | "manual";
 
 export interface DietV2Meal {
   id: string;
   name: string;
   categories: DietV2Category[];
   note?: string;
-  /** Controls whether the meal-header macros are computed from the
-   *  options (auto) or typed by the trainer (manual). Defaults to
-   *  auto. Categories below the header always show their computed
-   *  averages — only the meal-level summary swaps. */
-  macroMode?: DietV2MealMacroMode;
-  /** Trainer-entered macros, used when `macroMode === "manual"`. */
-  manualMacros?: DietV2OptionMacros;
+  macros?: DietV2OptionMacros;
 }
 
 export interface DietV2Plan {
   meals: DietV2Meal[];
-  /** Free-calories budget (kcal) the trainee can spend outside the
-   *  planned menu. Trainer types it into the editor toolbar; 0 or
-   *  undefined means "no free calories". */
   freeCalories?: number;
 }

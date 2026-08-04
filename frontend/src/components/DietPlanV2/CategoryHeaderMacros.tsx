@@ -56,10 +56,10 @@ export const CategoryAverageBadges: React.FC<CategoryAverageBadgesProps> = ({
           <span className="text-[10px]">ג׳</span>
         </span>
       )}
-      <span className="inline-flex items-baseline gap-1 rounded-md bg-rose-50 px-2 py-0.5 font-bold text-rose-600 dark:bg-rose-950/40 dark:text-rose-300">
-        <span>≈</span>
-        <strong className="text-[12px]">{Math.round(calAvg)}</strong>
-        <span className="text-[10px]">קל׳</span>
+      <span className="inline-flex items-baseline gap-1 rounded-md bg-emerald-50 px-2 py-0.5 font-bold dark:bg-emerald-950/40">
+        <span className="bg-gradient-to-l from-emerald-300 to-emerald-700 bg-clip-text text-transparent">≈</span>
+        <strong className="bg-gradient-to-l from-emerald-300 to-emerald-700 bg-clip-text text-[12px] text-transparent">{Math.round(calAvg)}</strong>
+        <span className="bg-gradient-to-l from-emerald-300 to-emerald-700 bg-clip-text text-[10px] text-transparent">קל׳</span>
       </span>
       {estimatedCount > 0 && (
         <span
@@ -101,7 +101,7 @@ export const CategoryManualInputs: React.FC<CategoryManualInputsProps> = ({
         <span className="text-[10px]">ג׳</span>
       </span>
     )}
-    <span className="inline-flex items-center gap-1 rounded-md border border-rose-200 bg-rose-50/40 px-2 py-1 font-bold text-rose-600 dark:border-rose-900/40 dark:bg-rose-950/20 dark:text-rose-300">
+    <span className="inline-flex items-center gap-1 rounded-md border border-emerald-200 bg-emerald-50/40 px-2 py-1 font-bold text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-300">
       <span className="text-[10px]">קל׳</span>
       <input
         type="number"

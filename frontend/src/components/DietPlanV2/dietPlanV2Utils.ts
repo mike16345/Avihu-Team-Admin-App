@@ -22,6 +22,8 @@ export const CATEGORY_LABELS: Record<DietV2CategoryKind, string> = {
   carbs: "פחמימה",
   fat: "שומן",
   vegetables: "ירקות",
+  addon: "תוסף תזונה",
+  freeCalories: "קלוריות חופשיות",
 };
 
 export const CATEGORY_TONES: Record<
@@ -47,6 +49,16 @@ export const CATEGORY_TONES: Record<
     ring: "border-blue-200 dark:border-blue-900/40",
     chip: "bg-cyan-50 dark:bg-cyan-950/40",
     chipText: "text-cyan-700 dark:text-cyan-300",
+  },
+  addon: {
+    ring: "border-slate-200 dark:border-slate-800/60",
+    chip: "bg-slate-100 dark:bg-slate-800/50",
+    chipText: "text-slate-700 dark:text-slate-300",
+  },
+  freeCalories: {
+    ring: "border-emerald-100 dark:border-emerald-900/40",
+    chip: "bg-emerald-50 dark:bg-emerald-950/30",
+    chipText: "text-emerald-700 dark:text-emerald-300",
   },
 };
 
@@ -379,6 +391,8 @@ const CATEGORY_FALLBACK_PER100: Record<DietV2CategoryKind, DietV2OptionMacros> =
   carbs: { protein: 3, carbs: 25, fat: 1, calories: 130 },
   fat: { protein: 5, carbs: 5, fat: 50, calories: 500 },
   vegetables: { protein: 1.5, carbs: 5, fat: 0.2, calories: 25 },
+  addon: { protein: 2, carbs: 10, fat: 2, calories: 80 },
+  freeCalories: { protein: 0, carbs: 0, fat: 0, calories: 100 },
 };
 
 export const estimateMacrosForUnknown = (
@@ -571,6 +585,26 @@ export const computeMealAverage = (
   pick: keyof DietV2OptionMacros
 ): number => computeMealRange(meal, pick).avg;
 
+export const computeMealTotalsFromCategories = (
+  categories: DietV2Category[]
+): DietV2OptionMacros => {
+  const totals: DietV2OptionMacros = { protein: 0, carbs: 0, fat: 0, calories: 0 };
+  for (const category of categories) {
+    const primary = primaryMacroForCategory(category.kind);
+    if (primary) {
+      const grams =
+        category.manualPrimaryGrams ??
+        Math.round(computeCategoryAverage(category, primary));
+      totals[primary] += grams;
+    }
+    const calories =
+      category.manualCalories ??
+      Math.round(computeCategoryAverage(category, "calories"));
+    totals.calories += calories;
+  }
+  return totals;
+};
+
 export const primaryMacroForCategory = (
   kind: DietV2CategoryKind
 ): keyof DietV2OptionMacros | null => {
@@ -582,26 +616,10 @@ export const primaryMacroForCategory = (
     case "fat":
       return "fat";
     case "vegetables":
-      return null; // no single macro stands out for veggies
+    case "addon":
+    case "freeCalories":
+      return null;
   }
-};
-
-export const deriveMealManualMacros = (meal: DietV2Meal): DietV2OptionMacros => {
-  const hasAnyCategoryManual = meal.categories.some(
-    (cat) => cat.manualPrimaryGrams != null || cat.manualCalories != null
-  );
-
-  if (!hasAnyCategoryManual) {
-    return meal.manualMacros ?? { protein: 0, carbs: 0, fat: 0, calories: 0 };
-  }
-
-  const totals: DietV2OptionMacros = { protein: 0, carbs: 0, fat: 0, calories: 0 };
-  for (const cat of meal.categories) {
-    const primary = primaryMacroForCategory(cat.kind);
-    if (primary && cat.manualPrimaryGrams != null) totals[primary] += cat.manualPrimaryGrams;
-    if (cat.manualCalories != null) totals.calories += cat.manualCalories;
-  }
-  return totals;
 };
 
 const round = (value: number): number => Math.round(value * 10) / 10;
@@ -614,14 +632,15 @@ export const buildEmptyMeal = (index: number): DietV2Meal => ({
   id: makeLocalId("meal"),
   name: `ארוחה ${index}`,
   categories: DIET_V2_DEFAULT_CATEGORIES.map((kind) => ({ kind, options: [] })),
-  macroMode: "manual",
 });
 
-const DIET_V2_DEFAULT_CATEGORIES: DietV2CategoryKind[] = [
+export const DIET_V2_DEFAULT_CATEGORIES: DietV2CategoryKind[] = [
   "protein",
   "carbs",
   "fat",
   "vegetables",
+  "addon",
+  "freeCalories",
 ];
 
 const UNIT_SYNONYMS: { match: RegExp; unit: DietV2Unit }[] = [
