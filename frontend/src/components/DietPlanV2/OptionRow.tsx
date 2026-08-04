@@ -52,8 +52,7 @@ const OptionRow: React.FC<OptionRowProps> = ({ option, categoryKind, onChange, o
           cloudSourced: true,
         });
       })
-      .catch(() => {
-      });
+      .catch(() => {});
 
     return () => {
       cancelled = true;

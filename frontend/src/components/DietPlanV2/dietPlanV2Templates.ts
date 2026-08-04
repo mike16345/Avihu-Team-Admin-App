@@ -58,10 +58,7 @@ export interface DietV2Template {
 
 export const TEMPLATES_STORAGE_KEY = "dietPlanV2:templates";
 
-export const sumPlanMacro = (
-  plan: DietV2Plan,
-  key: keyof DietV2OptionMacros
-): number =>
+export const sumPlanMacro = (plan: DietV2Plan, key: keyof DietV2OptionMacros): number =>
   plan.meals.reduce((acc, meal) => acc + (meal.macros?.[key] ?? 0), 0);
 
 export const computePlanMacroTotals = (plan: DietV2Plan): DietV2OptionMacros => ({
@@ -88,8 +85,7 @@ export const writeTemplates = (templates: DietV2Template[]): void => {
   if (typeof window === "undefined") return;
   try {
     window.localStorage.setItem(TEMPLATES_STORAGE_KEY, JSON.stringify(templates));
-  } catch {
-  }
+  } catch {}
 };
 
 export const upsertTemplate = (template: DietV2Template): void => {

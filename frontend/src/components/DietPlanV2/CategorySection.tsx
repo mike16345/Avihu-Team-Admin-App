@@ -1,11 +1,7 @@
 import { useEffect, useState } from "react";
 import { FaFolderOpen, FaPlus, FaTrashCan } from "react-icons/fa6";
 
-import type {
-  DietV2Category,
-  DietV2CategoryKind,
-  DietV2Option,
-} from "@/interfaces/IDietPlanV2";
+import type { DietV2Category, DietV2CategoryKind, DietV2Option } from "@/interfaces/IDietPlanV2";
 import { formatUnitLabel } from "@/interfaces/IDietPlanV2";
 
 import {
@@ -112,140 +108,138 @@ const CategorySection: React.FC<CategorySectionProps> = ({
           the search input, and the ambient chip strip. Options grid
           renders OUTSIDE this rectangle as ambient rows below. */}
       <div className="flex flex-col gap-2 rounded-lg border border-slate-200/70 bg-white px-3 py-2.5 dark:border-slate-800 dark:bg-slate-900/60">
-      <header
-        onClick={() => setCollapsed((v) => !v)}
-        className="flex cursor-pointer items-center gap-2"
-        title={collapsed ? "פתח קטגוריה" : "קפל קטגוריה"}
-      >
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            setCollapsed((v) => !v);
-          }}
-          aria-label={collapsed ? "פתח" : "קפל"}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+        <header
+          onClick={() => setCollapsed((v) => !v)}
+          className="flex cursor-pointer items-center gap-2"
+          title={collapsed ? "פתח קטגוריה" : "קפל קטגוריה"}
         >
-          <svg
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            className={`h-5 w-5 transition-transform ${collapsed ? "" : "rotate-180"}`}
-            aria-hidden
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setCollapsed((v) => !v);
+            }}
+            aria-label={collapsed ? "פתח" : "קפל"}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
           >
-            <path
-              fillRule="evenodd"
-              d="M5.3 7.3a1 1 0 011.4 0L10 10.6l3.3-3.3a1 1 0 111.4 1.4l-4 4a1 1 0 01-1.4 0l-4-4a1 1 0 010-1.4z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </button>
-        <span
-          className={`inline-flex h-8 shrink-0 items-center rounded-md ${tone.chip} px-3 text-sm font-bold ${tone.chipText}`}
-        >
-          {CATEGORY_LABELS[category.kind]}
-        </span>
-        {hasOptions && (
-          <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">
-            {category.options.length}
+            <svg
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              className={`h-5 w-5 transition-transform ${collapsed ? "" : "rotate-180"}`}
+              aria-hidden
+            >
+              <path
+                fillRule="evenodd"
+                d="M5.3 7.3a1 1 0 011.4 0L10 10.6l3.3-3.3a1 1 0 111.4 1.4l-4 4a1 1 0 01-1.4 0l-4-4a1 1 0 010-1.4z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </button>
+          <span
+            className={`inline-flex h-8 shrink-0 items-center rounded-md ${tone.chip} px-3 text-sm font-bold ${tone.chipText}`}
+          >
+            {CATEGORY_LABELS[category.kind]}
           </span>
-        )}
-        {/* Inline quick-add when expanded — same row as chevron /
+          {hasOptions && (
+            <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+              {category.options.length}
+            </span>
+          )}
+          {/* Inline quick-add when expanded — same row as chevron /
             label / macros. When collapsed, the search bar is
             replaced by a soft-grey preview strip listing the option
             names in this category so the trainer sees "what's here"
             without expanding. */}
-        {!collapsed && (
-          <div className="min-w-[180px] flex-1" onClick={(e) => e.stopPropagation()}>
-            <QuickAddSearchBar
-              categoryKind={category.kind}
-              value={quickAdd.value}
-              onValueChange={quickAdd.handleChange}
-              onKeyDown={quickAdd.handleKeyDown}
-              onSubmit={quickAdd.tryAdd}
-              onOpenPicker={() => setPickerOpen(true)}
-            />
-          </div>
-        )}
-        {collapsed && hasOptions && (
-          <CategoryOptionsPreview options={category.options} />
-        )}
-        {!collapsed && (
-          <div className="ms-auto" onClick={(e) => e.stopPropagation()}>
-            <CategoryManualInputs
-              primaryMacro={primaryMacro}
-              primaryGrams={category.manualPrimaryGrams ?? Math.round(primaryAvg)}
-              calories={category.manualCalories ?? Math.round(calAvg)}
-              onChange={(field, value) =>
-                onChange({
-                  ...category,
-                  ...(field === "primary"
-                    ? { manualPrimaryGrams: value }
-                    : { manualCalories: value }),
-                })
-              }
-            />
-          </div>
-        )}
-        {/* Category-level actions on the far left (end in RTL):
+          {!collapsed && (
+            <div className="min-w-[180px] flex-1" onClick={(e) => e.stopPropagation()}>
+              <QuickAddSearchBar
+                categoryKind={category.kind}
+                value={quickAdd.value}
+                onValueChange={quickAdd.handleChange}
+                onKeyDown={quickAdd.handleKeyDown}
+                onSubmit={quickAdd.tryAdd}
+                onOpenPicker={() => setPickerOpen(true)}
+              />
+            </div>
+          )}
+          {collapsed && hasOptions && <CategoryOptionsPreview options={category.options} />}
+          {!collapsed && (
+            <div className="ms-auto" onClick={(e) => e.stopPropagation()}>
+              <CategoryManualInputs
+                primaryMacro={primaryMacro}
+                primaryGrams={category.manualPrimaryGrams ?? Math.round(primaryAvg)}
+                calories={category.manualCalories ?? Math.round(calAvg)}
+                onChange={(field, value) =>
+                  onChange({
+                    ...category,
+                    ...(field === "primary"
+                      ? { manualPrimaryGrams: value }
+                      : { manualCalories: value }),
+                  })
+                }
+              />
+            </div>
+          )}
+          {/* Category-level actions on the far left (end in RTL):
             copy this category-block to another meal, and clear all
             of this category's options at once. Visible in both open
             and collapsed states so the trainer can act on a folded
             category without expanding it first. */}
-        <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-          {onCopyToMeal && (
-            <CopyCategoryButton
-              categoryLabel={CATEGORY_LABELS[category.kind]}
-              siblingMeals={siblingMeals}
-              onCopyToMeal={onCopyToMeal}
-              onCopyToNewMeal={onCopyToNewMeal}
+          <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+            {onCopyToMeal && (
+              <CopyCategoryButton
+                categoryLabel={CATEGORY_LABELS[category.kind]}
+                siblingMeals={siblingMeals}
+                onCopyToMeal={onCopyToMeal}
+                onCopyToNewMeal={onCopyToNewMeal}
+                disabled={!hasOptions}
+              />
+            )}
+            <button
+              type="button"
+              onClick={() => onChange({ ...category, options: [] })}
               disabled={!hasOptions}
-            />
-          )}
-          <button
-            type="button"
-            onClick={() => onChange({ ...category, options: [] })}
-            disabled={!hasOptions}
-            title={`נקה את כל האפשרויות של ${CATEGORY_LABELS[category.kind]}`}
-            aria-label="נקה קטגוריה"
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-slate-400 dark:hover:bg-rose-950/40"
-          >
-            <FaTrashCan size={12} />
-          </button>
-        </div>
-      </header>
+              title={`נקה את כל האפשרויות של ${CATEGORY_LABELS[category.kind]}`}
+              aria-label="נקה קטגוריה"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-slate-400 dark:hover:bg-rose-950/40"
+            >
+              <FaTrashCan size={12} />
+            </button>
+          </div>
+        </header>
 
-      {!collapsed && quickAdd.showSuggestions && (
-        <QuickAddSuggestionList
-          suggestions={quickAdd.suggestions}
-          highlightIdx={quickAdd.highlightIdx}
-          categoryKind={category.kind}
-          onPick={quickAdd.commitSuggestion}
-          onHover={quickAdd.setHighlightIdx}
-          hasQuery={quickAdd.hasQuery}
-        />
-      )}
-      {!collapsed && quickAdd.error && (
-        <span className="px-2 text-[10px] font-bold text-rose-600 dark:text-rose-400">
-          לא הצלחתי לפענח — נסה "כמות + יחידה + שם" (לדוגמה "300 גרם אורז")
-        </span>
-      )}
-      {/* Options grid sits INSIDE the rectangle so the rows visibly
+        {!collapsed && quickAdd.showSuggestions && (
+          <QuickAddSuggestionList
+            suggestions={quickAdd.suggestions}
+            highlightIdx={quickAdd.highlightIdx}
+            categoryKind={category.kind}
+            onPick={quickAdd.commitSuggestion}
+            onHover={quickAdd.setHighlightIdx}
+            hasQuery={quickAdd.hasQuery}
+          />
+        )}
+        {!collapsed && quickAdd.error && (
+          <span className="px-2 text-[10px] font-bold text-rose-600 dark:text-rose-400">
+            לא הצלחתי לפענח — נסה "כמות + יחידה + שם" (לדוגמה "300 גרם אורז")
+          </span>
+        )}
+        {/* Options grid sits INSIDE the rectangle so the rows visibly
           belong to their category — no dangling boxes below. A hair
           line at the top separates them from the search/chips area
           without being another full frame. */}
-      {!collapsed && hasOptions && (
-        <div className="mt-1 grid grid-cols-2 gap-1.5 border-t border-slate-100 pt-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 dark:border-slate-800">
-          {category.options.map((option, index) => (
-            <OptionRow
-              key={option.id}
-              option={option}
-              categoryKind={category.kind}
-              onChange={(next) => onOptionChange(index, next)}
-              onRemove={() => onOptionRemove(index)}
-            />
-          ))}
-        </div>
-      )}
+        {!collapsed && hasOptions && (
+          <div className="mt-1 grid grid-cols-2 gap-1.5 border-t border-slate-100 pt-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 dark:border-slate-800">
+            {category.options.map((option, index) => (
+              <OptionRow
+                key={option.id}
+                option={option}
+                categoryKind={category.kind}
+                onChange={(next) => onOptionChange(index, next)}
+                onRemove={() => onOptionRemove(index)}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       <FoodPicker
@@ -301,7 +295,11 @@ function useQuickAddController(
   const hasQuery = trimmed.length > 0;
   const suggestions = isCompoundText
     ? []
-    : getRankedSuggestions(trimmed, categoryKind, hasQuery ? CHIP_SEARCH_COUNT : CHIP_DEFAULT_COUNT);
+    : getRankedSuggestions(
+        trimmed,
+        categoryKind,
+        hasQuery ? CHIP_SEARCH_COUNT : CHIP_DEFAULT_COUNT
+      );
   const showSuggestions = suggestions.length > 0;
 
   useEffect(() => {

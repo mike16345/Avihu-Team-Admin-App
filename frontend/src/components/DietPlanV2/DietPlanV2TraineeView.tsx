@@ -8,10 +8,7 @@ import type {
 } from "@/interfaces/IDietPlanV2";
 import { formatUnitLabel } from "@/interfaces/IDietPlanV2";
 
-import {
-  CATEGORY_LABELS,
-  CATEGORY_TONES,
-} from "./dietPlanV2Utils";
+import { CATEGORY_LABELS, CATEGORY_TONES } from "./dietPlanV2Utils";
 
 interface DietV2SupplementRef {
   id: string;
@@ -40,9 +37,7 @@ const normaliseSupplementList = (
   if (Array.isArray(raw)) return raw.map(({ name, dose }) => ({ name, dose }));
   return parseLines(raw).map((line) => {
     const match = line.match(/^(.+?)\s+(\d.*)$/);
-    return match
-      ? { name: match[1].trim(), dose: match[2].trim() }
-      : { name: line, dose: "" };
+    return match ? { name: match[1].trim(), dose: match[2].trim() } : { name: line, dose: "" };
   });
 };
 
@@ -86,9 +81,7 @@ const DietV2TraineeView: React.FC<DietV2TraineeViewProps> = ({
         <MealBlock key={meal.id} meal={meal} index={idx + 1} />
       ))}
 
-      {highlights.length > 0 && (
-        <NotesBlock title="דגשים לתפריט" tone="blue" lines={highlights} />
-      )}
+      {highlights.length > 0 && <NotesBlock title="דגשים לתפריט" tone="blue" lines={highlights} />}
 
       {supplements.length > 0 && (
         <section className="rounded-2xl border border-indigo-100 bg-indigo-50/40 p-4 dark:border-indigo-900/40 dark:bg-indigo-950/30">
@@ -107,8 +100,8 @@ const DietV2TraineeView: React.FC<DietV2TraineeViewProps> = ({
       )}
 
       <footer className="mt-2 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-[11px] text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-300">
-        התפריט מותאם אישית עבורך. אם יש לך רגישות, אלרגיה או מצב רפואי — התייעץ עם המאמן לפני
-        התחלה. אין לראות בתפריט תחליף לייעוץ תזונתי מקצועי.
+        התפריט מותאם אישית עבורך. אם יש לך רגישות, אלרגיה או מצב רפואי — התייעץ עם המאמן לפני התחלה.
+        אין לראות בתפריט תחליף לייעוץ תזונתי מקצועי.
       </footer>
     </div>
   );
@@ -137,13 +130,23 @@ const MealBlock: React.FC<MealBlockProps> = ({ meal, index }) => {
         </h2>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-slate-600 dark:text-slate-300">
           <span>
-            חלבון <strong className="text-slate-800 dark:text-slate-100">{Math.round(macros.protein)}</strong>ג׳
+            חלבון{" "}
+            <strong className="text-slate-800 dark:text-slate-100">
+              {Math.round(macros.protein)}
+            </strong>
+            ג׳
           </span>
           <span>
-            פחמ׳ <strong className="text-slate-800 dark:text-slate-100">{Math.round(macros.carbs)}</strong>ג׳
+            פחמ׳{" "}
+            <strong className="text-slate-800 dark:text-slate-100">
+              {Math.round(macros.carbs)}
+            </strong>
+            ג׳
           </span>
           <span>
-            שומן <strong className="text-slate-800 dark:text-slate-100">{Math.round(macros.fat)}</strong>ג׳
+            שומן{" "}
+            <strong className="text-slate-800 dark:text-slate-100">{Math.round(macros.fat)}</strong>
+            ג׳
           </span>
           <span className="font-bold text-rose-600 dark:text-rose-400">
             ≈ {Math.round(macros.calories)} קל׳

@@ -1,19 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  FaApple,
-  FaBookmark,
-  FaClipboardCheck,
-  FaFloppyDisk,
-  FaPlus,
-} from "react-icons/fa6";
+import { FaApple, FaBookmark, FaClipboardCheck, FaFloppyDisk, FaPlus } from "react-icons/fa6";
 
 import type { DietV2Meal, DietV2OptionMacros, DietV2Plan } from "@/interfaces/IDietPlanV2";
 
-import {
-  buildEmptyMeal,
-  computeMealTotalsFromCategories,
-  makeLocalId,
-} from "./dietPlanV2Utils";
+import { buildEmptyMeal, computeMealTotalsFromCategories, makeLocalId } from "./dietPlanV2Utils";
 import MealCard from "./MealCard";
 import PlanMacroCharts from "./PlanMacroCharts";
 import DietPlanV2TemplateSaveDialog from "./DietPlanV2TemplateSaveDialog";
@@ -58,8 +48,7 @@ const buildInitialPlan = (): DietV2PlanExtended => {
           };
         }
       }
-    } catch {
-    }
+    } catch {}
   }
   return {
     meals: [buildEmptyMeal(1)],
@@ -76,9 +65,7 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
   forceDirty = false,
 }) => {
   const isTemplateMode = mode === "template";
-  const [plan, setPlan] = useState<DietV2PlanExtended>(
-    () => initialPlan ?? buildInitialPlan()
-  );
+  const [plan, setPlan] = useState<DietV2PlanExtended>(() => initialPlan ?? buildInitialPlan());
   const [tab, setTab] = useState<DietV2Tab>("menu");
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(
     () => new Set(plan.meals.map((m) => m.id))
@@ -136,8 +123,7 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
     if (typeof window !== "undefined") {
       try {
         window.localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(plan));
-      } catch {
-      }
+      } catch {}
     }
   };
 
@@ -156,8 +142,7 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
           options: cat.options.map((opt) => ({ ...opt, id: makeLocalId("option") })),
         })),
       })),
-      highlights:
-        (template.plan as Partial<DietV2PlanExtended>).highlights ?? plan.highlights,
+      highlights: (template.plan as Partial<DietV2PlanExtended>).highlights ?? plan.highlights,
       supplements: normaliseSupplements(
         (template.plan as Partial<DietV2PlanExtended>).supplements
       ).map((s) => ({ ...s, id: makeLocalId("supp") })),
@@ -316,9 +301,9 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
             calories: acc.calories + t.calories,
           };
         },
-        { protein: 0, carbs: 0, fat: 0, calories: 0 },
+        { protein: 0, carbs: 0, fat: 0, calories: 0 }
       ),
-    [plan.meals],
+    [plan.meals]
   );
 
   const showSaved = saved && !forceDirty;
@@ -354,7 +339,7 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
         <div className="flex flex-wrap items-center gap-1.5">
           <ToolbarButton
             icon={<FaFloppyDisk size={11} />}
-            label={showSaved ? "נשמר" : saveLabel ?? "שמור תפריט"}
+            label={showSaved ? "נשמר" : (saveLabel ?? "שמור תפריט")}
             onClick={handleSave}
             disabled={showSaved}
             tone="brand"
@@ -365,7 +350,9 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
                 icon={<FaBookmark size={11} />}
                 label="שמור כתבנית"
                 onClick={handleSaveAsTemplate}
-                disabled={plan.meals.every((m) => m.categories.every((c) => c.options.length === 0))}
+                disabled={plan.meals.every((m) =>
+                  m.categories.every((c) => c.options.length === 0)
+                )}
               />
               <ToolbarButton
                 icon={<FaClipboardCheck size={11} />}
@@ -397,9 +384,7 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
                 onCopyCategoryToMeal={(kind, targetId) =>
                   copyCategoryToMeal(meal.id, kind, targetId)
                 }
-                onCopyCategoryToNewMeal={(kind) =>
-                  copyCategoryToNewMeal(meal.id, kind)
-                }
+                onCopyCategoryToNewMeal={(kind) => copyCategoryToNewMeal(meal.id, kind)}
                 onChange={(next) => updateMeal(meal.id, () => next)}
                 onToggleCollapse={() => toggleCollapse(meal.id)}
                 onDuplicate={() => duplicateMeal(meal.id)}

@@ -141,7 +141,10 @@ const MenuHistoryCard: React.FC<MenuHistoryCardProps> = ({ calories }) => {
             תיעוד שינויים בתפריט
           </span>
         </div>
-        <div className="relative flex flex-1 flex-col items-center justify-center gap-2" style={{ minHeight: HISTORY_CHART_HEIGHT }}>
+        <div
+          className="relative flex flex-1 flex-col items-center justify-center gap-2"
+          style={{ minHeight: HISTORY_CHART_HEIGHT }}
+        >
           <div
             className="rounded-full border-[3px] border-[#047857] bg-white"
             style={{ width: 16, height: 16, boxShadow: "0 0 0 5px rgba(16,185,129,0.22)" }}
@@ -169,8 +172,7 @@ const MenuHistoryCard: React.FC<MenuHistoryCardProps> = ({ calories }) => {
   const range = Math.max(1, maxVal - minVal);
 
   const usableWidth = HISTORY_CHART_WIDTH - HISTORY_PADDING_X * 2;
-  const usableHeight =
-    HISTORY_CHART_HEIGHT - HISTORY_PADDING_TOP - HISTORY_PADDING_BOTTOM;
+  const usableHeight = HISTORY_CHART_HEIGHT - HISTORY_PADDING_TOP - HISTORY_PADDING_BOTTOM;
 
   const projected = points.map((p, i) => {
     const x =
@@ -186,17 +188,13 @@ const MenuHistoryCard: React.FC<MenuHistoryCardProps> = ({ calories }) => {
   const linePath =
     projected.length > 0
       ? `M0,${areaBottom.toFixed(1)} ` +
-        projected
-          .map((pt) => `L${pt.x.toFixed(1)},${pt.y.toFixed(1)}`)
-          .join(" ")
+        projected.map((pt) => `L${pt.x.toFixed(1)},${pt.y.toFixed(1)}`).join(" ")
       : "";
 
   const areaPath =
     projected.length > 0
       ? `M0,${areaBottom.toFixed(1)} ` +
-        projected
-          .map((pt) => `L${pt.x.toFixed(1)},${pt.y.toFixed(1)}`)
-          .join(" ") +
+        projected.map((pt) => `L${pt.x.toFixed(1)},${pt.y.toFixed(1)}`).join(" ") +
         ` L${HISTORY_CHART_WIDTH.toFixed(1)},${areaBottom.toFixed(1)} Z`
       : "";
 
@@ -275,11 +273,7 @@ const MenuHistoryCard: React.FC<MenuHistoryCardProps> = ({ calories }) => {
           const topPct = (pt.y / HISTORY_CHART_HEIGHT) * 100;
           const baseSize = isLatest ? 12 : 7;
           const size = isHovered ? baseSize + 4 : baseSize;
-          const dotColor = isLatest
-            ? "#047857"
-            : i < projected.length / 2
-              ? "#10b981"
-              : "#059669";
+          const dotColor = isLatest ? "#047857" : i < projected.length / 2 ? "#10b981" : "#059669";
           return (
             <div
               key={i}
@@ -295,68 +289,66 @@ const MenuHistoryCard: React.FC<MenuHistoryCardProps> = ({ calories }) => {
                 borderWidth: isLatest || isHovered ? 3 : 2,
                 borderStyle: "solid",
                 borderColor: dotColor,
-                boxShadow:
-                  isHovered || isLatest
-                    ? "0 0 0 4px rgba(16, 185, 129, 0.22)"
-                    : undefined,
+                boxShadow: isHovered || isLatest ? "0 0 0 4px rgba(16, 185, 129, 0.22)" : undefined,
                 zIndex: isHovered ? 5 : 2,
               }}
             />
           );
         })}
-        {hoveredIdx !== null && (() => {
-          const pt = projected[hoveredIdx];
-          const leftPct = (pt.x / HISTORY_CHART_WIDTH) * 100;
-          const topPct = (pt.y / HISTORY_CHART_HEIGHT) * 100;
-          const alignRight = leftPct > 80;
-          const alignLeft = leftPct < 20;
-          const translateX = alignRight ? "-100%" : alignLeft ? "0%" : "-50%";
-          const nudgeX = alignRight ? -6 : alignLeft ? 6 : 0;
-          return (
-            <div
-              className="pointer-events-none absolute z-10 min-w-[168px] rounded-xl border border-emerald-200/70 bg-white p-2.5 shadow-lg shadow-emerald-500/10 dark:border-emerald-800/60 dark:bg-slate-900"
-              style={{
-                left: `calc(${leftPct}% + ${nudgeX}px)`,
-                top: `calc(${topPct}% - 16px)`,
-                transform: `translate(${translateX}, -100%)`,
-              }}
-            >
-              <div className="flex items-baseline justify-between gap-2 border-b border-slate-100 pb-1.5 dark:border-slate-800">
-                <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                  שינוי בתפריט
-                </span>
-                <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
-                  {pt.fullDateLabel}
-                </span>
-              </div>
-              <div className="mt-1.5 flex items-baseline gap-1">
-                <strong className="bg-gradient-to-l from-emerald-400 to-emerald-800 bg-clip-text text-[18px] font-extrabold text-transparent">
-                  {pt.calories}
-                </strong>
-                <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
-                  קק״ל
-                </span>
-                {pt.delta !== 0 && (
-                  <span
-                    className={`ms-auto text-[10px] font-bold ${
-                      pt.delta > 0
-                        ? "text-emerald-600 dark:text-emerald-400"
-                        : "text-rose-500 dark:text-rose-400"
-                    }`}
-                  >
-                    {pt.delta > 0 ? "+" : "−"}
-                    {Math.abs(pt.delta)}
+        {hoveredIdx !== null &&
+          (() => {
+            const pt = projected[hoveredIdx];
+            const leftPct = (pt.x / HISTORY_CHART_WIDTH) * 100;
+            const topPct = (pt.y / HISTORY_CHART_HEIGHT) * 100;
+            const alignRight = leftPct > 80;
+            const alignLeft = leftPct < 20;
+            const translateX = alignRight ? "-100%" : alignLeft ? "0%" : "-50%";
+            const nudgeX = alignRight ? -6 : alignLeft ? 6 : 0;
+            return (
+              <div
+                className="pointer-events-none absolute z-10 min-w-[168px] rounded-xl border border-emerald-200/70 bg-white p-2.5 shadow-lg shadow-emerald-500/10 dark:border-emerald-800/60 dark:bg-slate-900"
+                style={{
+                  left: `calc(${leftPct}% + ${nudgeX}px)`,
+                  top: `calc(${topPct}% - 16px)`,
+                  transform: `translate(${translateX}, -100%)`,
+                }}
+              >
+                <div className="flex items-baseline justify-between gap-2 border-b border-slate-100 pb-1.5 dark:border-slate-800">
+                  <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                    שינוי בתפריט
                   </span>
-                )}
+                  <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
+                    {pt.fullDateLabel}
+                  </span>
+                </div>
+                <div className="mt-1.5 flex items-baseline gap-1">
+                  <strong className="bg-gradient-to-l from-emerald-400 to-emerald-800 bg-clip-text text-[18px] font-extrabold text-transparent">
+                    {pt.calories}
+                  </strong>
+                  <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+                    קק״ל
+                  </span>
+                  {pt.delta !== 0 && (
+                    <span
+                      className={`ms-auto text-[10px] font-bold ${
+                        pt.delta > 0
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : "text-rose-500 dark:text-rose-400"
+                      }`}
+                    >
+                      {pt.delta > 0 ? "+" : "−"}
+                      {Math.abs(pt.delta)}
+                    </span>
+                  )}
+                </div>
+                <div className="mt-1 grid grid-cols-3 gap-1 text-center">
+                  <TooltipStat label="חלבון" value={pt.protein} />
+                  <TooltipStat label="פחמימה" value={pt.carbs} />
+                  <TooltipStat label="שומן" value={pt.fat} />
+                </div>
               </div>
-              <div className="mt-1 grid grid-cols-3 gap-1 text-center">
-                <TooltipStat label="חלבון" value={pt.protein} />
-                <TooltipStat label="פחמימה" value={pt.carbs} />
-                <TooltipStat label="שומן" value={pt.fat} />
-              </div>
-            </div>
-          );
-        })()}
+            );
+          })()}
         {projected.map((pt, i) =>
           pt.showLabel ? (
             <span
@@ -366,7 +358,7 @@ const MenuHistoryCard: React.FC<MenuHistoryCardProps> = ({ calories }) => {
             >
               {pt.dateLabel}
             </span>
-          ) : null,
+          ) : null
         )}
       </div>
     </article>
@@ -396,9 +388,7 @@ const MacroRingsCard: React.FC<MacroRingsCardProps> = ({
       className="flex cursor-pointer select-none flex-col gap-2 rounded-2xl border border-blue-900/40 bg-white p-4 shadow-sm dark:border-blue-500/40 dark:bg-slate-900"
     >
       <div className="flex items-center justify-between gap-2">
-        <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
-          יחסי מאקרו
-        </span>
+        <span className="text-xs font-bold text-slate-500 dark:text-slate-400">יחסי מאקרו</span>
         <span className="text-[10px] font-medium text-slate-300 dark:text-slate-600">
           דאבל־קליק להחלפה
         </span>
@@ -485,9 +475,7 @@ const TooltipStat: React.FC<{ label: string; value: number }> = ({ label, value 
     </div>
     <div className="text-[12px] font-bold text-slate-800 dark:text-slate-100">
       {value}
-      <span className="ms-0.5 text-[9px] font-medium text-slate-500 dark:text-slate-400">
-        ג׳
-      </span>
+      <span className="ms-0.5 text-[9px] font-medium text-slate-500 dark:text-slate-400">ג׳</span>
     </div>
   </div>
 );
@@ -506,10 +494,7 @@ const RING_GRADIENT_DARK = "#047857";
 const MacroRing: React.FC<MacroRingProps> = ({ label, value, percent, unit, Icon }) => {
   const clamped = Math.max(0, Math.min(1, percent));
   const offset = RING_CIRCUMFERENCE * (1 - clamped);
-  const gradientId = useMemo(
-    () => `ring-grad-${Math.random().toString(36).slice(2, 9)}`,
-    [],
-  );
+  const gradientId = useMemo(() => `ring-grad-${Math.random().toString(36).slice(2, 9)}`, []);
 
   return (
     <div className="flex flex-1 flex-col items-center gap-1.5">
@@ -568,10 +553,7 @@ const BIG_RING_RADIUS = (BIG_RING_SIZE - BIG_RING_STROKE) / 2;
 const BIG_RING_CIRC = 2 * Math.PI * BIG_RING_RADIUS;
 
 const BigCalorieRing: React.FC<{ calories: number }> = ({ calories }) => {
-  const gradientId = useMemo(
-    () => `big-ring-${Math.random().toString(36).slice(2, 9)}`,
-    [],
-  );
+  const gradientId = useMemo(() => `big-ring-${Math.random().toString(36).slice(2, 9)}`, []);
   return (
     <div className="flex shrink-0 items-center justify-center">
       <div className="relative" style={{ width: BIG_RING_SIZE, height: BIG_RING_SIZE }}>
@@ -664,12 +646,7 @@ const AdminMacroBar: React.FC<{
   );
 };
 
-const MacroBarsView: React.FC<MacroRingsCardProps> = ({
-  totals,
-  pctProtein,
-  pctCarbs,
-  pctFat,
-}) => (
+const MacroBarsView: React.FC<MacroRingsCardProps> = ({ totals, pctProtein, pctCarbs, pctFat }) => (
   <div className="flex items-center gap-5 pt-1">
     <div className="flex flex-1 flex-col gap-3.5">
       <AdminMacroBar label="חלבון" grams={totals.protein} pct={pctProtein} Icon={FaDrumstickBite} />

@@ -1,4 +1,11 @@
-import { FaChevronDown, FaChevronUp, FaCopy, FaGripVertical, FaTrashCan, FaUtensils } from "react-icons/fa6";
+import {
+  FaChevronDown,
+  FaChevronUp,
+  FaCopy,
+  FaGripVertical,
+  FaTrashCan,
+  FaUtensils,
+} from "react-icons/fa6";
 
 import type {
   DietV2Category,
@@ -9,10 +16,7 @@ import type {
 
 import CategorySection from "./CategorySection";
 import type { MealSibling } from "./CategorySection";
-import {
-  DIET_V2_DEFAULT_CATEGORIES,
-  computeMealTotalsFromCategories,
-} from "./dietPlanV2Utils";
+import { DIET_V2_DEFAULT_CATEGORIES, computeMealTotalsFromCategories } from "./dietPlanV2Utils";
 export type { MealSibling };
 
 interface MealCardProps {
@@ -59,7 +63,7 @@ const MealCard: React.FC<MealCardProps> = ({
       meal.categories.find((c) => c.kind === kind) ?? {
         kind,
         options: [],
-      },
+      }
   );
 
   const onNameChange = (name: string) => {
@@ -211,7 +215,9 @@ const MealMacroInline: React.FC<MealMacroInlineProps> = ({ displayed }) => {
           >
             {displayed[item.key] || 0}
           </span>
-          <span className="text-[10px] font-light text-slate-300 dark:text-slate-500">{item.unit}</span>
+          <span className="text-[10px] font-light text-slate-300 dark:text-slate-500">
+            {item.unit}
+          </span>
         </span>
       ))}
     </div>

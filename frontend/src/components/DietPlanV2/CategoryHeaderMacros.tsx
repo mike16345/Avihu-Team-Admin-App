@@ -57,9 +57,15 @@ export const CategoryAverageBadges: React.FC<CategoryAverageBadgesProps> = ({
         </span>
       )}
       <span className="inline-flex items-baseline gap-1 rounded-md bg-emerald-50 px-2 py-0.5 font-bold dark:bg-emerald-950/40">
-        <span className="bg-gradient-to-l from-emerald-300 to-emerald-700 bg-clip-text text-transparent">≈</span>
-        <strong className="bg-gradient-to-l from-emerald-300 to-emerald-700 bg-clip-text text-[12px] text-transparent">{Math.round(calAvg)}</strong>
-        <span className="bg-gradient-to-l from-emerald-300 to-emerald-700 bg-clip-text text-[10px] text-transparent">קל׳</span>
+        <span className="bg-gradient-to-l from-emerald-300 to-emerald-700 bg-clip-text text-transparent">
+          ≈
+        </span>
+        <strong className="bg-gradient-to-l from-emerald-300 to-emerald-700 bg-clip-text text-[12px] text-transparent">
+          {Math.round(calAvg)}
+        </strong>
+        <span className="bg-gradient-to-l from-emerald-300 to-emerald-700 bg-clip-text text-[10px] text-transparent">
+          קל׳
+        </span>
       </span>
       {estimatedCount > 0 && (
         <span
