@@ -110,9 +110,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
       onChange={(field, value) =>
         onChange({
           ...category,
-          ...(field === "primary"
-            ? { manualPrimaryGrams: value }
-            : { manualCalories: value }),
+          ...(field === "primary" ? { manualPrimaryGrams: value } : { manualCalories: value }),
         })
       }
     />
