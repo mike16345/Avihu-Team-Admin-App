@@ -6,27 +6,39 @@ import Loader from "@/components/ui/Loader";
 import useMuscleGroupsQuery from "@/hooks/queries/MuscleGroups/useMuscleGroupsQuery";
 import useUserRecordedSets from "@/hooks/queries/recordedSets/useUserRecordedSets";
 import useUserQuery from "@/hooks/queries/user/useUserQuery";
+import useWorkoutPlanQuery from "@/hooks/queries/workoutPlans/useWorkoutPlanQuery";
 import ErrorPage from "@/pages/ErrorPage";
 import { workoutTab } from "@/pages/UserDashboard";
 
 import { ExerciseCardsGrid } from "./ExerciseCardsGrid";
 import { ExerciseDetailModal } from "./ExerciseDetailModal";
 import { ProgressNoteCreator } from "./ProgressNoteCreator";
-import { ProgressNoteLauncher } from "./ProgressNoteLauncher";
 import { WorkoutEmptyState } from "./WorkoutEmptyState";
 import { WorkoutFilterBar } from "./WorkoutFilterBar";
-import { ALL_GROUP_LABEL, type FlatExercise } from "./workoutProgressionModel";
+import { ALL_GROUP_LABEL, type FlatExercise, type ViewMode } from "./workoutProgressionModel";
 import {
   flattenRecordedWorkouts,
   getAvailableGroups,
   getDetailRawSets,
+  getExerciseNamesInWorkout,
   getInitialWorkoutSelection,
+  getWorkoutNames,
+  groupWorkoutExercises,
   isExpectedRecordedSetsEmptyError,
 } from "./workoutProgressionUtils";
 
-const getFilteredExercises = (flatExercises: FlatExercise[], filter: string) => {
-  if (filter === ALL_GROUP_LABEL) return flatExercises;
-  return flatExercises.filter((exercise) => exercise.group === filter);
+const getFilteredExercises = (
+  flatExercises: FlatExercise[],
+  filter: string,
+  mode: ViewMode,
+  workoutExerciseNames: Set<string>
+) => {
+  if (mode === "muscle") {
+    if (filter === ALL_GROUP_LABEL) return flatExercises;
+    return flatExercises.filter((exercise) => exercise.group === filter);
+  }
+  if (!filter) return [];
+  return flatExercises.filter((exercise) => workoutExerciseNames.has(exercise.name));
 };
 
 export const WorkoutProgression = () => {
@@ -34,13 +46,16 @@ export const WorkoutProgression = () => {
   const userFirstName = useUserQuery(id).data?.firstName;
   const { data: recordedWorkouts, isLoading, error } = useUserRecordedSets(id);
   const { data: muscleGroupsFromServer } = useMuscleGroupsQuery();
+  const { data: workoutPlanResponse } = useWorkoutPlanQuery(id ?? "");
+  const workoutPlan = workoutPlanResponse?.data;
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState(
     searchParams.get("muscleGroup") || ""
   );
   const [selectedExercise, setSelectedExercise] = useState(searchParams.get("exercise") || "");
-  const [filter, setFilter] = useState<string>(ALL_GROUP_LABEL);
+  const [mode, setMode] = useState<ViewMode>("workout");
+  const [filter, setFilter] = useState<string>("");
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [detailExercise, setDetailExercise] = useState<FlatExercise | null>(null);
   const [noteOpen, setNoteOpen] = useState(false);
@@ -50,15 +65,45 @@ export const WorkoutProgression = () => {
     [recordedWorkouts]
   );
 
-  const availableGroups = useMemo(
+  const muscleGroupOptions = useMemo(
     () => getAvailableGroups(flatExercises, muscleGroupsFromServer),
     [flatExercises, muscleGroupsFromServer]
   );
 
-  const filteredExercises = useMemo(
-    () => getFilteredExercises(flatExercises, filter),
-    [filter, flatExercises]
+  const workoutNameOptions = useMemo(() => getWorkoutNames(workoutPlan), [workoutPlan]);
+
+  const availableGroups = mode === "muscle" ? muscleGroupOptions : workoutNameOptions;
+
+  const workoutExerciseNames = useMemo(
+    () => getExerciseNamesInWorkout(workoutPlan, filter),
+    [workoutPlan, filter]
   );
+
+  const filteredExercises = useMemo(
+    () => getFilteredExercises(flatExercises, filter, mode, workoutExerciseNames),
+    [filter, flatExercises, mode, workoutExerciseNames]
+  );
+
+  const workoutSections = useMemo(() => {
+    if (mode !== "workout" || !filter) return undefined;
+    return groupWorkoutExercises(workoutPlan, filter, flatExercises);
+  }, [mode, filter, workoutPlan, flatExercises]);
+
+  const handleModeChange = (nextMode: ViewMode) => {
+    setMode(nextMode);
+    setFilter(nextMode === "muscle" ? ALL_GROUP_LABEL : (workoutNameOptions[0] ?? ""));
+  };
+
+  useEffect(() => {
+    if (filter !== "") return;
+    if (mode === "muscle") {
+      setFilter(ALL_GROUP_LABEL);
+      return;
+    }
+    if (workoutNameOptions.length > 0) {
+      setFilter(workoutNameOptions[0]);
+    }
+  }, [mode, filter, workoutNameOptions]);
 
   useEffect(() => {
     if (searchParams.get("tab") !== workoutTab || !recordedWorkouts) return;
@@ -103,6 +148,9 @@ export const WorkoutProgression = () => {
         availableGroups={availableGroups}
         filter={filter}
         onFilterChange={setFilter}
+        mode={mode}
+        onModeChange={handleModeChange}
+        onOpenNote={() => setNoteOpen(true)}
       />
 
       {!flatExercises.length && <WorkoutEmptyState userFirstName={userFirstName} />}
@@ -115,6 +163,7 @@ export const WorkoutProgression = () => {
           expandedCard={expandedCard}
           onExpandedCardChange={setExpandedCard}
           onOpenExerciseDetails={openExerciseDetails}
+          sections={workoutSections}
         />
       )}
 
@@ -125,8 +174,6 @@ export const WorkoutProgression = () => {
           onClose={() => setDetailExercise(null)}
         />
       )}
-
-      <ProgressNoteLauncher userFirstName={userFirstName} onOpen={() => setNoteOpen(true)} />
 
       {noteOpen && (
         <ProgressNoteCreator
