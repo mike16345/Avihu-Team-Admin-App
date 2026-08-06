@@ -100,7 +100,10 @@ export function flattenRecordedWorkouts(recordedWorkouts?: any[]): FlatExercise[
   recordedWorkouts.forEach((muscleGroup: any) => {
     Object.keys(muscleGroup.recordedSets || {}).forEach((exerciseName) => {
       const sets: RecordedSet[] = muscleGroup.recordedSets[exerciseName] || [];
-      const sessionsByDate: Record<string, { weight: number; reps: number; date: Date }> = {};
+      const sessionsByDate: Record<
+        string,
+        { weight: number; reps: number; date: Date; rir?: number }
+      > = {};
 
       sets.forEach((set) => {
         const date = new Date(set.date || new Date());
@@ -109,7 +112,7 @@ export function flattenRecordedWorkouts(recordedWorkouts?: any[]): FlatExercise[
         const reps = set.repsDone ?? 0;
 
         if (!sessionsByDate[dateKey] || weight > sessionsByDate[dateKey].weight) {
-          sessionsByDate[dateKey] = { weight, reps, date };
+          sessionsByDate[dateKey] = { weight, reps, date, rir: set.rir ?? undefined };
         }
       });
 
@@ -189,6 +192,7 @@ export function groupExerciseDetailSessions(rawSets: any[]): ExerciseDetailSessi
       setNumber: set.setNumber || 1,
       weight: set.weight ?? 0,
       reps: set.repsDone ?? 0,
+      rir: set.rir ?? undefined,
       program: set.plan,
     });
   });

@@ -1,6 +1,7 @@
 export type RecordedSet = {
   weight?: number;
   repsDone?: number;
+  rir?: number;
   date?: string | Date;
   setNumber?: number;
 };
@@ -8,7 +9,7 @@ export type RecordedSet = {
 export type FlatExercise = {
   name: string;
   group: string;
-  sessions: { date: Date; weight: number; reps: number }[];
+  sessions: { date: Date; weight: number; reps: number; rir?: number }[];
 };
 
 export const groupColors: Record<string, { bg: string; text: string; gradient: string }> = {
@@ -104,6 +105,7 @@ export type ExerciseDetailSet = {
   setNumber: number;
   weight: number;
   reps: number;
+  rir?: number;
   program?: string;
 };
 
