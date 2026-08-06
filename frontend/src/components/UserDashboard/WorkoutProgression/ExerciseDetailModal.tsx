@@ -235,6 +235,14 @@ export function ExerciseDetailModal({ exercise, rawSets, onClose }: ExerciseDeta
                                     חזרות
                                   </span>
                                 </span>
+                                {set.rir != null && (
+                                  <span
+                                    data-testid="exercise-detail-rir"
+                                    className="text-slate-600 dark:text-slate-300"
+                                  >
+                                    RIR {set.rir}
+                                  </span>
+                                )}
                               </div>
                               {set.program && (
                                 <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-semibold text-slate-600 dark:text-slate-300">
