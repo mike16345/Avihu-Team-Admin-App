@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import ConfirmationDialog from "@/components/Alerts/ConfirmationDialog";
@@ -27,9 +27,11 @@ export default function SetInputStyleToggle({ userId }: { userId: string }) {
 
   const [pending, setPending] = useState<Style | null>(null);
 
+  
   const mutation = useMutation({
     mutationFn: (value: Style) => updateUserField(userId, "setInputType", value),
     onSuccess: (_, value) => {
+      console.log("SetInputStyleToggle: mutation success",_, value);
       qc.setQueryData<IUser | undefined>([QueryKeys.USERS, userId], (prev) =>
         prev ? { ...prev, setInputType: value } : prev
       );
@@ -39,6 +41,13 @@ export default function SetInputStyleToggle({ userId }: { userId: string }) {
     onError: () => toast.error("שמירה נכשלה"),
   });
 
+  const handleConfirmChange = useCallback(async () => {
+    if (!pending) return;
+
+    const res = await mutation.mutateAsync(pending);
+    console.log("SetInputStyleToggle: mutation result", res);
+    setPending(null);
+  }, [pending, mutation]);
   return (
     <>
       <div
@@ -71,10 +80,7 @@ export default function SetInputStyleToggle({ userId }: { userId: string }) {
       <ConfirmationDialog
         open={pending !== null}
         onOpenChange={(open) => !open && setPending(null)}
-        onConfirm={() => {
-          if (pending) mutation.mutate(pending);
-          setPending(null);
-        }}
+        onConfirm={handleConfirmChange}
         title="להחליף את סגנון הזנת הסטים?"
         description={
           pending && (
