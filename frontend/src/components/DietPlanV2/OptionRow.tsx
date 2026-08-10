@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { FaTrashCan } from "react-icons/fa6";
 
 import type { DietV2Option, DietV2Unit } from "@/interfaces/IDietPlanV2";
@@ -10,7 +10,6 @@ import {
   isConvertedUnit,
   MOCK_FOOD_LIBRARY,
 } from "./dietPlanV2Utils";
-import { searchOpenFoodFacts } from "./openFoodFactsAdapter";
 import type { DietV2CategoryKind } from "@/interfaces/IDietPlanV2";
 
 interface OptionRowProps {
@@ -27,37 +26,6 @@ const OptionRow: React.FC<OptionRowProps> = ({ option, categoryKind, onChange, o
   const [expanded, setExpanded] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const isCompound = isCompoundEntry(option.foodName);
-  const lastTriedNameRef = useRef<string | null>(null);
-  const optionRef = useRef(option);
-  optionRef.current = option;
-
-  useEffect(() => {
-    if (!option.estimated) return;
-    if (lastTriedNameRef.current === option.foodName) return;
-    lastTriedNameRef.current = option.foodName;
-
-    let cancelled = false;
-    searchOpenFoodFacts(option.foodName, 3)
-      .then((results) => {
-        if (cancelled) return;
-        const best = results[0];
-        if (!best) return;
-        const latest = optionRef.current;
-        const upgradedMacros = computeMacrosFromFood(best, latest.quantity, latest.unit);
-        onChange({
-          ...latest,
-          foodName: best.name,
-          macros: upgradedMacros,
-          estimated: false,
-          cloudSourced: true,
-        });
-      })
-      .catch(() => {});
-
-    return () => {
-      cancelled = true;
-    };
-  }, [option.estimated, option.foodName, onChange]);
 
   const onQuantityChange = (raw: string) => {
     const quantity = Math.max(0, Number(raw) || 0);

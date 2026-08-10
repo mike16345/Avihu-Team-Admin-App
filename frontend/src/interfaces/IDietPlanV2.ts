@@ -57,7 +57,6 @@ export interface DietV2Option {
   unit: DietV2Unit;
   macros: DietV2OptionMacros;
   estimated?: boolean;
-  cloudSourced?: boolean;
 }
 
 export interface DietV2Category {

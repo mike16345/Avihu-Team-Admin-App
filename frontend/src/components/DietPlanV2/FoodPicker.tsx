@@ -1,8 +1,11 @@
-import { useEffect, useRef, useState } from "react";
-import { FaCloudArrowDown, FaMagnifyingGlass, FaXmark } from "react-icons/fa6";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { FaMagnifyingGlass, FaXmark } from "react-icons/fa6";
 
-import { CATEGORY_LABELS, type FoodLibraryItem } from "./dietPlanV2Utils";
-import { useFoodsSearch } from "./useFoodsSearchQuery";
+import {
+  CATEGORY_LABELS,
+  searchFoodLibrary,
+  type FoodLibraryItem,
+} from "./dietPlanV2Utils";
 import type { DietV2CategoryKind } from "@/interfaces/IDietPlanV2";
 
 interface FoodPickerProps {
@@ -24,9 +27,7 @@ const FoodPicker: React.FC<FoodPickerProps> = ({ open, onOpenChange, kind, onSel
     }
   }, [open]);
 
-  const { items, isRemoteLoading, remoteError } = useFoodsSearch(query, kind, {
-    enabled: open,
-  });
+  const items = useMemo(() => searchFoodLibrary(query.trim(), kind, 12), [query, kind]);
 
   if (!open) return null;
 
@@ -49,15 +50,6 @@ const FoodPicker: React.FC<FoodPickerProps> = ({ open, onOpenChange, kind, onSel
             placeholder={`חפש ${kind ? CATEGORY_LABELS[kind] : "מאכל"}…`}
             className="flex-1 bg-transparent text-sm font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none dark:text-slate-100"
           />
-          {isRemoteLoading && (
-            <span
-              title="מחפש גם במאגר המורחב"
-              className="inline-flex items-center gap-1 rounded-md bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:bg-blue-950/40 dark:text-blue-300"
-            >
-              <FaCloudArrowDown size={9} />
-              חיפוש בענן…
-            </span>
-          )}
           <button
             type="button"
             aria-label="סגור"
@@ -69,7 +61,7 @@ const FoodPicker: React.FC<FoodPickerProps> = ({ open, onOpenChange, kind, onSel
         </header>
 
         <ul className="max-h-80 overflow-y-auto py-2">
-          {items.length === 0 && !isRemoteLoading && (
+          {items.length === 0 && (
             <li className="px-4 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
               {query.trim()
                 ? `לא נמצאו תוצאות עבור "${query}"`
@@ -77,7 +69,6 @@ const FoodPicker: React.FC<FoodPickerProps> = ({ open, onOpenChange, kind, onSel
             </li>
           )}
           {items.map((food) => {
-            const isCloud = food.id.startsWith("off-");
             return (
               <li key={food.id}>
                 <button
@@ -86,20 +77,9 @@ const FoodPicker: React.FC<FoodPickerProps> = ({ open, onOpenChange, kind, onSel
                   className="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-right transition-colors hover:bg-blue-50/60 dark:hover:bg-blue-950/30"
                 >
                   <div className="flex flex-col items-end">
-                    <div className="flex items-center gap-1.5">
-                      {isCloud && (
-                        <span
-                          title="נמשך מ-Open Food Facts"
-                          className="inline-flex items-center gap-0.5 rounded-md bg-sky-50 px-1.5 py-0.5 text-[9px] font-bold text-sky-700 dark:bg-sky-950/40 dark:text-sky-300"
-                        >
-                          <FaCloudArrowDown size={8} />
-                          ענן
-                        </span>
-                      )}
-                      <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                        {food.name}
-                      </span>
-                    </div>
+                    <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                      {food.name}
+                    </span>
                     <span className="text-[11px] text-slate-500 dark:text-slate-400">
                       {CATEGORY_LABELS[food.kind]} · {food.per100.calories} קל׳
                       {food.defaultUnit === "g" ? " ל-100ג" : " ליחידה"}
@@ -115,12 +95,6 @@ const FoodPicker: React.FC<FoodPickerProps> = ({ open, onOpenChange, kind, onSel
             );
           })}
         </ul>
-
-        {remoteError && (
-          <div className="border-t border-rose-100 bg-rose-50/40 px-4 py-2 text-[11px] text-rose-700 dark:border-rose-900/40 dark:bg-rose-950/20 dark:text-rose-300">
-            הגישה למאגר המורחב לא הצליחה — מציג רק מאכלים מקומיים. נסה שוב בעוד רגע.
-          </div>
-        )}
       </div>
     </div>
   );
