@@ -56,7 +56,6 @@ export interface DietV2Option {
   quantity: number;
   unit: DietV2Unit;
   macros: DietV2OptionMacros;
-  estimated?: boolean;
 }
 
 export interface DietV2Category {

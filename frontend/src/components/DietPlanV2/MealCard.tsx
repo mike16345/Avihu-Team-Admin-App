@@ -57,6 +57,9 @@ const MealCard: React.FC<MealCardProps> = ({
   const displayedMacros: DietV2OptionMacros = computeMealTotalsFromCategories(meal.categories);
 
   const totalOptions = meal.categories.reduce((acc, c) => acc + c.options.length, 0);
+  const existingMealFoodNames = meal.categories.flatMap((category) =>
+    category.options.map((option) => option.foodName)
+  );
 
   const displayedCategories: DietV2Category[] = DIET_V2_DEFAULT_CATEGORIES.map(
     (kind) =>
@@ -171,6 +174,7 @@ const MealCard: React.FC<MealCardProps> = ({
             <CategorySection
               key={category.kind}
               category={category}
+              existingMealFoodNames={existingMealFoodNames}
               siblingMeals={siblingMeals}
               onCopyToMeal={(targetId) => onCopyCategoryToMeal(category.kind, targetId)}
               onCopyToNewMeal={() => onCopyCategoryToNewMeal(category.kind)}
