@@ -6,6 +6,7 @@ import { leadsScenarios } from "./scenarios/leads";
 import { measurementsScenarios } from "./scenarios/measurements";
 import { presetsScenarios } from "./scenarios/presets";
 import { recordedSetsScenarios } from "./scenarios/recordedSets";
+import { trainersScenarios } from "./scenarios/trainers";
 import { usersScenarios } from "./scenarios/users";
 import { weighInsScenarios } from "./scenarios/weighIns";
 import { workoutPlansScenarios } from "./scenarios/workoutPlans";
@@ -20,6 +21,7 @@ export const mockScenarioRegistry = {
   ...measurementsScenarios,
   ...presetsScenarios,
   ...recordedSetsScenarios,
+  ...trainersScenarios,
   ...usersScenarios,
   ...weighInsScenarios,
   ...workoutPlansScenarios,

@@ -5,6 +5,7 @@ export type TrainerId = string;
 export type SubTrainerId = string;
 
 export const TRAINER_SUBSCRIPTION_PLANS = ["Pro", "בסיסי"] as const;
+export const TRAINER_DIET_PLAN_VERSIONS = [1, 2] as const;
 export const TRAINER_STATUSES = ["active", "inactive", "blocked"] as const;
 export const TRAINER_SOURCES = [
   "פנייה קרה",
@@ -16,6 +17,7 @@ export const TRAINER_SOURCES = [
 ] as const;
 
 export type TrainerSubscriptionPlan = (typeof TRAINER_SUBSCRIPTION_PLANS)[number];
+export type TrainerDietPlanVersion = (typeof TRAINER_DIET_PLAN_VERSIONS)[number];
 export type TrainerStatus = (typeof TRAINER_STATUSES)[number];
 export type TrainerSource = (typeof TRAINER_SOURCES)[number];
 export type SubTrainerPosition = "מאמן" | "תזונאי" | "יועץ תזונה" | "אחר";
@@ -52,6 +54,7 @@ export interface Trainer extends IBaseTrainer {
   status: TrainerStatus;
   source: TrainerSource;
   videoLibraryAccess: boolean;
+  dietPlanVersion: TrainerDietPlanVersion;
   userId?: string;
   isDeleted?: boolean;
   createdAt?: string;
@@ -122,6 +125,7 @@ export type CreateTrainerBody = {
   status: TrainerStatus;
   source: TrainerSource;
   videoLibraryAccess: boolean;
+  dietPlanVersion: TrainerDietPlanVersion;
 };
 
 export type UpdateTrainerBody = {

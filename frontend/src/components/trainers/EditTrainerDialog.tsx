@@ -30,6 +30,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { useUpdateTrainer } from "@/hooks/mutations/trainers/useUpdateTrainer";
 import {
+  TRAINER_DIET_PLAN_VERSIONS,
   TRAINER_STATUSES,
   TRAINER_SUBSCRIPTION_PLANS,
   type TrainerGetOneDTO,
@@ -239,6 +240,30 @@ export const EditTrainerDialog = ({ open, onOpenChange, data }: EditTrainerDialo
                   </FormItem>
                 )}
               />
+
+              <FormItem className="rounded-xl border border-border bg-muted/70 px-4 py-3">
+                <div className="space-y-1 text-right">
+                  <FormLabel>גרסת תפריט תזונה</FormLabel>
+                  <p className="text-xs text-muted-foreground">
+                    שינוי גרסה יהיה זמין בהמשך. כרגע ניתן לצפות בלבד.
+                  </p>
+                </div>
+                <Select value={String(trainer.dietPlanVersion ?? 1)} disabled dir="rtl">
+                  <SelectTrigger
+                    data-testid="trainer-diet-plan-version-edit"
+                    className="border-none bg-background text-muted-foreground"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent dir="rtl">
+                    {TRAINER_DIET_PLAN_VERSIONS.map((version) => (
+                      <SelectItem key={version} value={String(version)}>
+                        V{version}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormItem>
 
               <FormField
                 control={form.control}
