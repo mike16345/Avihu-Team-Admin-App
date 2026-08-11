@@ -5,9 +5,8 @@ import DietPlanV2Editor from "./DietPlanV2Editor";
 import DietPlanV2TemplateMetaPanel, {
   type DietV2TemplateMetaValues,
 } from "./DietPlanV2TemplateMetaPanel";
-import { normaliseSupplements } from "./dietPlanV2Supplements";
 import {
-  computePlanMacroTotals,
+  computeTemplateMacroTotals,
   upsertTemplate,
   type DietV2Template,
 } from "./dietPlanV2Templates";
@@ -34,21 +33,14 @@ const DietPlanV2TemplatePlanEditor: React.FC<Props> = ({ template, onClose, onSa
   }));
 
   const metaDirty =
-    name !== baseline.name ||
-    JSON.stringify(meta) !== JSON.stringify(baseline.meta);
+    name !== baseline.name || JSON.stringify(meta) !== JSON.stringify(baseline.meta);
 
-  const [seed] = useState(() => ({
-    meals: template.plan.meals,
-    freeCalories: template.plan.freeCalories,
-    highlights: "",
-    supplements: normaliseSupplements([]),
-  }));
+  const [seed] = useState(() => template.plan);
 
   const patchMeta = (patch: Partial<DietV2TemplateMetaValues>) =>
     setMeta((prev) => ({ ...prev, ...patch }));
 
   const handlePersist = (nextPlan: typeof seed) => {
-    const plan = { meals: nextPlan.meals, freeCalories: nextPlan.freeCalories };
     const updated: DietV2Template = {
       ...template,
       name: name.trim() || template.name,
@@ -58,9 +50,9 @@ const DietPlanV2TemplatePlanEditor: React.FC<Props> = ({ template, onClose, onSa
       builtBy: meta.builtBy.trim() || undefined,
       notes: meta.notes.trim() || undefined,
       mealsCount: nextPlan.meals.length,
-      macros: computePlanMacroTotals(plan),
+      macros: computeTemplateMacroTotals(nextPlan),
       macrosOverridden: false,
-      plan,
+      plan: nextPlan,
     };
     upsertTemplate(updated);
     setBaseline({ name, meta });
@@ -91,7 +83,9 @@ const DietPlanV2TemplatePlanEditor: React.FC<Props> = ({ template, onClose, onSa
               <FaBowlFood size={18} />
             </div>
             <div className="min-w-0 flex-1">
-              <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">עריכת תבנית תזונה</h1>
+              <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+                עריכת תבנית תזונה
+              </h1>
               <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
                 תבנית חוזרת לשימוש על מתאמנים — שם, מאפיינים, ארוחות ואופציות
               </p>

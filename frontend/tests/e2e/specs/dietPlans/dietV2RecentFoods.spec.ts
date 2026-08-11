@@ -1,136 +1,123 @@
 import { expect, test } from "@playwright/test";
+
 import {
-  getRecentFoodSuggestions,
-  getRecentFoodsStorageKey,
-  mealContainsFood,
-  removeRecentFood,
-  scaleMacrosForQuantity,
-  upsertRecentFood,
-} from "../../../../src/components/DietPlanV2/dietPlanV2RecentFoods";
+  dedupeCatalogCandidates,
+  hasCategoryDuplicate,
+  normalizeCatalogName,
+} from "../../../../src/components/DietPlanV2/dietPlanV2Catalog";
+import { computePlanMacroTotals } from "../../../../src/components/DietPlanV2/dietPlanV2Utils";
+import { dietPlanV2Schema } from "../../../../src/schemas/dietPlanV2Schema";
+import { usesDietPlanV2 } from "../../../../src/lib/dietPlanVersion";
 
-const chicken = {
-  displayName: "חזה עוף",
-  categoryKind: "protein" as const,
-  referenceQuantity: 100,
-  unit: "g" as const,
-  referenceMacros: { protein: 31, carbs: 0, fat: 3.6, calories: 165 },
-};
+test("catalog names normalize surrounding whitespace, repeated whitespace, and case", () => {
+  expect(normalizeCatalogName("  100G   Chicken Breast ")).toBe("100g chicken breast");
+});
 
-test("recent foods - repeat entry - replaces nutrition and increments usage", async () => {
-  const first = upsertRecentFood([], chicken, "2026-08-10T10:00:00.000Z");
-  const updated = upsertRecentFood(
-    first,
-    {
-      ...chicken,
-      displayName: "  חזה   עוף ",
-      referenceQuantity: 150,
-      referenceMacros: { protein: 46.5, carbs: 0, fat: 5.4, calories: 248 },
-    },
-    "2026-08-10T11:00:00.000Z"
+test("same-category duplicate detection ignores normalized spelling differences", () => {
+  expect(hasCategoryDuplicate([{ name: "100g Chicken breast" }], " 100G  chicken breast ")).toBe(
+    true
   );
+  expect(hasCategoryDuplicate([{ name: "100g Chicken breast" }], "200g Chicken breast")).toBe(
+    false
+  );
+});
 
-  expect(updated).toHaveLength(1);
-  expect(updated[0]).toMatchObject({
-    displayName: "חזה עוף",
-    normalizedName: "חזה עוף",
-    referenceQuantity: 150,
-    useCount: 2,
-    lastUsedAt: "2026-08-10T11:00:00.000Z",
-    referenceMacros: { protein: 46.5, carbs: 0, fat: 5.4, calories: 248 },
+test("catalog candidates deduplicate within a category but not across categories", () => {
+  expect(
+    dedupeCatalogCandidates([
+      { name: "Rice", category: "carbs" },
+      { name: " rice ", category: "carbs" },
+      { name: "Rice", category: "protein" },
+    ])
+  ).toEqual([
+    { name: "Rice", category: "carbs" },
+    { name: "Rice", category: "protein" },
+  ]);
+});
+
+test("V2 plan validation requires all four non-negative meal macros", () => {
+  const missingMacros = dietPlanV2Schema.safeParse({
+    version: 2,
+    highlights: "",
+    meals: [
+      {
+        id: "meal-1",
+        name: "Meal 1",
+        categories: [],
+        macros: { calories: 0 },
+      },
+    ],
+  });
+  const negativeMacros = dietPlanV2Schema.safeParse({
+    version: 2,
+    highlights: "",
+    meals: [
+      {
+        id: "meal-1",
+        name: "Meal 1",
+        categories: [],
+        macros: { calories: 0, protein: -1, carbs: 0, fat: 0 },
+      },
+    ],
+  });
+
+  expect(missingMacros.success).toBe(false);
+  expect(negativeMacros.success).toBe(false);
+});
+
+test("V2 plan validation accepts literal names and zero macro values", () => {
+  const result = dietPlanV2Schema.safeParse({
+    version: 2,
+    highlights: "",
+    meals: [
+      {
+        id: "meal-1",
+        name: "Meal 1",
+        categories: [
+          {
+            category: "protein",
+            items: [{ name: "100g Chicken breast" }],
+          },
+        ],
+        macros: { calories: 0, protein: 0, carbs: 0, fat: 0 },
+        freeCalories: { calories: 150, description: "Fruit / snack" },
+        supplements: ["Creatine 5g"],
+      },
+    ],
+  });
+
+  expect(result.success).toBe(true);
+});
+
+test("plan totals use explicit meal macros and keep free calories separate", () => {
+  expect(
+    computePlanMacroTotals({
+      version: 2,
+      highlights: "",
+      meals: [
+        {
+          id: "meal-1",
+          name: "Meal 1",
+          categories: [],
+          macros: { calories: 448, protein: 25, carbs: 45, fat: 12 },
+          freeCalories: { calories: 150, description: "Fruit" },
+        },
+        {
+          id: "meal-2",
+          name: "Meal 2",
+          categories: [],
+          macros: { calories: 590, protein: 40, carbs: 60, fat: 10 },
+        },
+      ],
+    })
+  ).toEqual({
+    macros: { calories: 1038, protein: 65, carbs: 105, fat: 22 },
+    freeCalories: 150,
   });
 });
 
-test("recent foods - same name with another unit or category - remains separate", async () => {
-  const byGram = upsertRecentFood([], chicken, "2026-08-10T10:00:00.000Z");
-  const byPiece = upsertRecentFood(
-    byGram,
-    { ...chicken, referenceQuantity: 1, unit: "piece" },
-    "2026-08-10T11:00:00.000Z"
-  );
-  const anotherCategory = upsertRecentFood(
-    byPiece,
-    { ...chicken, categoryKind: "addon" },
-    "2026-08-10T12:00:00.000Z"
-  );
-
-  expect(anotherCategory).toHaveLength(3);
-});
-
-test("recent foods - suggestions - filters by category and ranks frequent items first", async () => {
-  let foods = upsertRecentFood([], chicken, "2026-08-10T10:00:00.000Z");
-  foods = upsertRecentFood(foods, chicken, "2026-08-10T11:00:00.000Z");
-  foods = upsertRecentFood(
-    foods,
-    { ...chicken, displayName: "טופו", referenceMacros: { protein: 8, carbs: 2, fat: 4, calories: 76 } },
-    "2026-08-10T12:00:00.000Z"
-  );
-  foods = upsertRecentFood(
-    foods,
-    { ...chicken, displayName: "אורז", categoryKind: "carbs" },
-    "2026-08-10T13:00:00.000Z"
-  );
-
-  expect(getRecentFoodSuggestions(foods, "", "protein", 5).map((food) => food.displayName)).toEqual([
-    "חזה עוף",
-    "טופו",
-  ]);
-  expect(getRecentFoodSuggestions(foods, "טו", "protein", 5).map((food) => food.displayName)).toEqual([
-    "טופו",
-  ]);
-});
-
-test("recent foods - capacity - evicts the least recently used entry", async () => {
-  let foods: ReturnType<typeof upsertRecentFood> = [];
-
-  for (let index = 0; index < 101; index += 1) {
-    foods = upsertRecentFood(
-      foods,
-      { ...chicken, displayName: `מאכל ${index}` },
-      new Date(Date.UTC(2026, 7, 10, 10, index)).toISOString(),
-      100
-    );
-  }
-
-  expect(foods).toHaveLength(100);
-  expect(foods.some((food) => food.displayName === "מאכל 0")).toBe(false);
-  expect(foods.some((food) => food.displayName === "מאכל 100")).toBe(true);
-});
-
-test("recent foods - remove - deletes only the selected entry", async () => {
-  let foods = upsertRecentFood([], chicken, "2026-08-10T10:00:00.000Z");
-  foods = upsertRecentFood(
-    foods,
-    { ...chicken, displayName: "טופו" },
-    "2026-08-10T11:00:00.000Z"
-  );
-
-  const remaining = removeRecentFood(foods, foods[0].id);
-
-  expect(remaining).toHaveLength(1);
-  expect(remaining[0].displayName).not.toBe(foods[0].displayName);
-});
-
-test("recent foods - trainer storage key - isolates each trainer", async () => {
-
-  expect(getRecentFoodsStorageKey("trainer-a")).toBe("dietV2:recentFoods:trainer-a");
-  expect(getRecentFoodsStorageKey("trainer-b")).toBe("dietV2:recentFoods:trainer-b");
-});
-
-test("diet option - quantity change - scales all macros proportionally", async () => {
-
-  expect(
-    scaleMacrosForQuantity(
-      { protein: 31, carbs: 2, fat: 3.6, calories: 165 },
-      100,
-      150
-    )
-  ).toEqual({ protein: 46.5, carbs: 3, fat: 5.4, calories: 247.5 });
-  expect(
-    scaleMacrosForQuantity({ protein: 31, carbs: 2, fat: 3.6, calories: 165 }, 0, 150)
-  ).toEqual({ protein: 31, carbs: 2, fat: 3.6, calories: 165 });
-});
-
-test("meal foods - duplicate name - is detected across every category", () => {
-  expect(mealContainsFood(["חזה עוף", "אורז"], "  חזה   עוף ")).toBe(true);
-  expect(mealContainsFood(["חזה עוף", "אורז"], "טופו")).toBe(false);
+test("V2 access follows the trainer setting with the Avihu preview fallback", () => {
+  expect(usesDietPlanV2({ _id: "trainer-a", dietPlanVersion: 2 })).toBe(true);
+  expect(usesDietPlanV2({ _id: "trainer-b", dietPlanVersion: 1 })).toBe(false);
+  expect(usesDietPlanV2({ _id: "6774eb1c730c4c44354db2d0" })).toBe(true);
 });

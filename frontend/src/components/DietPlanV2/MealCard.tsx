@@ -9,14 +9,17 @@ import {
 
 import type {
   DietV2Category,
-  DietV2CategoryKind,
   DietV2Meal,
-  DietV2OptionMacros,
+  DietV2MealCategory,
+  DietV2MealMacros,
 } from "@/interfaces/IDietPlanV2";
 
 import CategorySection from "./CategorySection";
 import type { MealSibling } from "./CategorySection";
-import { DIET_V2_DEFAULT_CATEGORIES, computeMealTotalsFromCategories } from "./dietPlanV2Utils";
+import FreeCaloriesFields from "./FreeCaloriesFields";
+import MealMacroFields from "./MealMacroFields";
+import { DIET_V2_DEFAULT_CATEGORIES } from "./dietPlanV2Utils";
+
 export type { MealSibling };
 
 interface MealCardProps {
@@ -24,14 +27,15 @@ interface MealCardProps {
   index: number;
   collapsed: boolean;
   siblingMeals: MealSibling[];
-  onCopyCategoryToMeal: (kind: DietV2CategoryKind, targetMealId: string) => void;
-  onCopyCategoryToNewMeal: (kind: DietV2CategoryKind) => void;
+  onCopyCategoryToMeal: (category: DietV2MealCategory, targetMealId: string) => void;
+  onCopyCategoryToNewMeal: (category: DietV2MealCategory) => void;
   onChange: (meal: DietV2Meal) => void;
   onToggleCollapse: () => void;
   onDuplicate: () => void;
   onRemove: () => void;
+  canRemove: boolean;
   onDragStart: () => void;
-  onDragOver: (e: React.DragEvent) => void;
+  onDragOver: (event: React.DragEvent) => void;
   onDrop: () => void;
   isDragging?: boolean;
   isDropTarget?: boolean;
@@ -48,35 +52,26 @@ const MealCard: React.FC<MealCardProps> = ({
   onToggleCollapse,
   onDuplicate,
   onRemove,
+  canRemove,
   onDragStart,
   onDragOver,
   onDrop,
   isDragging,
   isDropTarget,
 }) => {
-  const displayedMacros: DietV2OptionMacros = computeMealTotalsFromCategories(meal.categories);
-
-  const totalOptions = meal.categories.reduce((acc, c) => acc + c.options.length, 0);
-  const existingMealFoodNames = meal.categories.flatMap((category) =>
-    category.options.map((option) => option.foodName)
-  );
-
+  const totalItems = meal.categories.reduce((total, category) => total + category.items.length, 0);
   const displayedCategories: DietV2Category[] = DIET_V2_DEFAULT_CATEGORIES.map(
-    (kind) =>
-      meal.categories.find((c) => c.kind === kind) ?? {
-        kind,
-        options: [],
+    (category) =>
+      meal.categories.find((candidate) => candidate.category === category) ?? {
+        category,
+        items: [],
       }
   );
 
-  const onNameChange = (name: string) => {
-    onChange({ ...meal, name });
-  };
-
-  const onCategoryChangeByKind = (kind: DietV2CategoryKind, next: DietV2Category) => {
-    const hasKind = meal.categories.some((c) => c.kind === kind);
-    const categories = hasKind
-      ? meal.categories.map((c) => (c.kind === kind ? next : c))
+  const updateCategory = (categoryName: DietV2MealCategory, next: DietV2Category) => {
+    const exists = meal.categories.some((category) => category.category === categoryName);
+    const categories = exists
+      ? meal.categories.map((category) => (category.category === categoryName ? next : category))
       : [...meal.categories, next];
     onChange({ ...meal, categories });
   };
@@ -98,134 +93,134 @@ const MealCard: React.FC<MealCardProps> = ({
         onClick={onToggleCollapse}
         className="flex cursor-pointer flex-wrap items-center justify-between gap-3 border-b border-blue-100 bg-gradient-to-l from-blue-50/60 to-white px-4 py-3 dark:border-blue-900/40 dark:from-blue-950/30 dark:to-slate-900"
       >
-        <div className="flex items-center gap-2.5">
+        <div className="flex min-w-[220px] items-center gap-2.5">
           <span
             draggable
             onDragStart={onDragStart}
-            onClick={(e) => e.stopPropagation()}
+            onClick={(event) => event.stopPropagation()}
             title="גרור לסידור הארוחות"
             className="flex h-9 w-5 cursor-grab items-center justify-center text-slate-300 transition-colors hover:text-blue-500 active:cursor-grabbing"
           >
             <FaGripVertical size={11} />
           </span>
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl brand-gradient text-white shadow-md shadow-blue-500/25">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl brand-gradient text-white shadow-md shadow-blue-500/25">
             <FaUtensils size={13} />
           </div>
-          <div onClick={(e) => e.stopPropagation()}>
+          <div className="min-w-0" onClick={(event) => event.stopPropagation()}>
             <input
               value={meal.name}
-              onChange={(e) => onNameChange(e.target.value)}
+              onChange={(event) => onChange({ ...meal, name: event.target.value })}
               className="w-full bg-transparent text-base font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none dark:text-slate-100"
               placeholder={`ארוחה ${index}`}
             />
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
-              {totalOptions} אפשרויות · {displayedCategories.length} קטגוריות
+              {totalItems} פריטים · {displayedCategories.length} קטגוריות
             </p>
           </div>
         </div>
 
-        <div onClick={(e) => e.stopPropagation()}>
-          <MealMacroInline displayed={displayedMacros} />
+        <div onClick={(event) => event.stopPropagation()}>
+          <MealMacroInline macros={meal.macros} freeCalories={meal.freeCalories?.calories} />
         </div>
 
         <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleCollapse();
-            }}
-            aria-label={collapsed ? "פתח ארוחה" : "סגור ארוחה"}
-            title={collapsed ? "פתח ארוחה" : "סגור ארוחה"}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-blue-100 bg-white text-blue-600 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 dark:border-blue-900/40 dark:bg-slate-900 dark:text-blue-300"
-          >
+          <HeaderButton label={collapsed ? "פתח ארוחה" : "סגור ארוחה"} onClick={onToggleCollapse}>
             {collapsed ? <FaChevronDown size={11} /> : <FaChevronUp size={11} />}
-          </button>
-          <button
-            type="button"
-            aria-label="שכפל ארוחה"
-            title="שכפל ארוחה"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDuplicate();
-            }}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-blue-100 bg-white text-blue-600 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 dark:border-blue-900/40 dark:bg-slate-900 dark:text-blue-300"
-          >
+          </HeaderButton>
+          <HeaderButton label="שכפל ארוחה" onClick={onDuplicate}>
             <FaCopy size={11} />
-          </button>
-          <button
-            type="button"
-            aria-label="הסר ארוחה"
-            title="הסר ארוחה"
-            onClick={(e) => {
-              e.stopPropagation();
-              onRemove();
-            }}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-rose-100 bg-white text-rose-600 transition-all hover:-translate-y-0.5 hover:border-rose-300 hover:bg-rose-50 dark:border-rose-900/40 dark:bg-slate-900 dark:text-rose-300"
-          >
+          </HeaderButton>
+          <HeaderButton label="הסר ארוחה" onClick={onRemove} disabled={!canRemove} destructive>
             <FaTrashCan size={11} />
-          </button>
+          </HeaderButton>
         </div>
       </header>
 
       {!collapsed && (
         <div className="flex flex-col gap-3 p-4">
+          <MealMacroFields
+            value={meal.macros}
+            mealIndex={index - 1}
+            onChange={(macros) => onChange({ ...meal, macros })}
+          />
+
           {displayedCategories.map((category) => (
             <CategorySection
-              key={category.kind}
+              key={category.category}
               category={category}
-              existingMealFoodNames={existingMealFoodNames}
               siblingMeals={siblingMeals}
-              onCopyToMeal={(targetId) => onCopyCategoryToMeal(category.kind, targetId)}
-              onCopyToNewMeal={() => onCopyCategoryToNewMeal(category.kind)}
-              onChange={(next) => onCategoryChangeByKind(category.kind, next)}
+              onCopyToMeal={(targetId) => onCopyCategoryToMeal(category.category, targetId)}
+              onCopyToNewMeal={() => onCopyCategoryToNewMeal(category.category)}
+              onChange={(next) => updateCategory(category.category, next)}
             />
           ))}
+
+          <FreeCaloriesFields
+            value={meal.freeCalories}
+            onChange={(freeCalories) => onChange({ ...meal, freeCalories })}
+          />
         </div>
       )}
     </article>
   );
 };
 
-interface MealMacroInlineProps {
-  displayed: DietV2OptionMacros;
+interface HeaderButtonProps {
+  label: string;
+  onClick: () => void;
+  destructive?: boolean;
+  disabled?: boolean;
+  children: React.ReactNode;
 }
 
-const MealMacroInline: React.FC<MealMacroInlineProps> = ({ displayed }) => {
-  const items: { key: keyof DietV2OptionMacros; label: string; unit: string }[] = [
-    { key: "protein", label: "חלבון", unit: "גרם" },
-    { key: "carbs", label: "פחמימה", unit: "גרם" },
-    { key: "fat", label: "שומן", unit: "גרם" },
-    { key: "calories", label: "קלוריות", unit: "קל׳" },
-  ];
+const HeaderButton: React.FC<HeaderButtonProps> = ({
+  label,
+  onClick,
+  destructive = false,
+  disabled = false,
+  children,
+}) => (
+  <button
+    type="button"
+    aria-label={label}
+    title={label}
+    disabled={disabled}
+    onClick={(event) => {
+      event.stopPropagation();
+      onClick();
+    }}
+    className={`flex h-8 w-8 items-center justify-center rounded-lg border bg-white transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:translate-y-0 dark:bg-slate-900 ${
+      destructive
+        ? "border-rose-100 text-rose-600 hover:border-rose-300 hover:bg-rose-50 dark:border-rose-900/40 dark:text-rose-300"
+        : "border-blue-100 text-blue-600 hover:border-blue-300 hover:bg-blue-50 dark:border-blue-900/40 dark:text-blue-300"
+    }`}
+  >
+    {children}
+  </button>
+);
 
-  return (
-    <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1 text-[14px] font-light text-slate-400 dark:text-slate-500">
-      {items.map((item, idx) => (
-        <span key={item.key} className="inline-flex items-baseline gap-1 whitespace-nowrap">
-          {idx > 0 && (
-            <span className="me-2 text-slate-200/70 dark:text-slate-700/70" aria-hidden>
-              |
-            </span>
-          )}
-          <span className="text-slate-400 dark:text-slate-500">{item.label}</span>
-          <span className="text-slate-300/60 dark:text-slate-600/60">-</span>
-          <span
-            className={`text-[16px] font-medium ${
-              item.key === "calories"
-                ? "bg-gradient-to-l from-emerald-300 to-emerald-700 bg-clip-text font-bold text-transparent"
-                : "text-slate-500 dark:text-slate-300"
-            }`}
-          >
-            {displayed[item.key] || 0}
-          </span>
-          <span className="text-[10px] font-light text-slate-300 dark:text-slate-500">
-            {item.unit}
-          </span>
-        </span>
-      ))}
-    </div>
-  );
-};
+interface MealMacroInlineProps {
+  macros: DietV2MealMacros;
+  freeCalories?: number;
+}
+
+const displayMacro = (value: number | undefined): number =>
+  Number.isFinite(value) ? (value as number) : 0;
+
+const MealMacroInline: React.FC<MealMacroInlineProps> = ({ macros, freeCalories }) => (
+  <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-[12px] font-semibold text-slate-500 dark:text-slate-400">
+    <span className="text-sm font-extrabold text-rose-600 dark:text-rose-300">
+      {displayMacro(macros.calories)} קק״ל
+    </span>
+    <span>{displayMacro(macros.protein)} ג׳ חלבון</span>
+    <span>{displayMacro(macros.carbs)} ג׳ פחמימה</span>
+    <span>{displayMacro(macros.fat)} ג׳ שומן</span>
+    {!!freeCalories && (
+      <span className="rounded-full border border-dashed border-emerald-300 bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-300">
+        + {freeCalories} חופשי
+      </span>
+    )}
+  </div>
+);
 
 export default MealCard;

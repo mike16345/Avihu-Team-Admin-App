@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { FaBookmark, FaCheck, FaFire, FaUtensils } from "react-icons/fa6";
 
-import type { DietV2Plan } from "@/interfaces/IDietPlanV2";
+import type { IDietPlanV2 } from "@/interfaces/IDietPlanV2";
 import {
   Dialog,
   DialogContent,
@@ -13,7 +13,7 @@ import {
 
 import {
   buildTemplateId,
-  computePlanMacroTotals,
+  computeTemplateMacroTotals,
   TEMPLATE_DIET_TAG_LABELS,
   TEMPLATE_GENDER_LABELS,
   TEMPLATE_GOAL_LABELS,
@@ -27,7 +27,7 @@ import {
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  plan: DietV2Plan;
+  plan: IDietPlanV2;
   onSaved?: (template: DietV2Template) => void;
   defaultBuiltBy?: string;
 }
@@ -39,7 +39,7 @@ const DietPlanV2TemplateSaveDialog: React.FC<Props> = ({
   onSaved,
   defaultBuiltBy = "",
 }) => {
-  const autoTotals = computePlanMacroTotals(plan);
+  const autoTotals = computeTemplateMacroTotals(plan);
   const mealsCount = plan.meals.length;
 
   const [name, setName] = useState("");
@@ -59,7 +59,7 @@ const DietPlanV2TemplateSaveDialog: React.FC<Props> = ({
 
   useEffect(() => {
     if (!open) return;
-    const totals = computePlanMacroTotals(plan);
+    const totals = computeTemplateMacroTotals(plan);
     setName(`תבנית ${plan.meals.length} ארוחות`);
     setProtein(totals.protein);
     setCarbs(totals.carbs);
@@ -116,8 +116,7 @@ const DietPlanV2TemplateSaveDialog: React.FC<Props> = ({
             שמירת תבנית
           </DialogTitle>
           <DialogDescription className="text-right">
-            כל התבניות מופיעות בעמוד "תפריטים" ואפשר לחפש בהן לפי שם, קלוריות
-            ומספר ארוחות.
+            כל התבניות מופיעות בעמוד "תפריטים" ואפשר לחפש בהן לפי שם, קלוריות ומספר ארוחות.
           </DialogDescription>
         </DialogHeader>
 
@@ -189,8 +188,7 @@ const DietPlanV2TemplateSaveDialog: React.FC<Props> = ({
 
           {macrosOverridden && (
             <p className="rounded-md bg-amber-50 px-2 py-1 text-[11px] font-semibold text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
-              ערכי המאקרו נערכו ידנית — יישמרו כפי שרשמת ולא יחושבו מחדש
-              אוטומטית.
+              ערכי המאקרו נערכו ידנית — יישמרו כפי שרשמת ולא יחושבו מחדש אוטומטית.
             </p>
           )}
 
@@ -201,9 +199,10 @@ const DietPlanV2TemplateSaveDialog: React.FC<Props> = ({
                 onChange={(v) => setGoal(v as DietV2TemplateGoal | "")}
                 options={[
                   { value: "", label: "לא נבחר" },
-                  ...(Object.keys(TEMPLATE_GOAL_LABELS) as DietV2TemplateGoal[]).map(
-                    (key) => ({ value: key, label: TEMPLATE_GOAL_LABELS[key] })
-                  ),
+                  ...(Object.keys(TEMPLATE_GOAL_LABELS) as DietV2TemplateGoal[]).map((key) => ({
+                    value: key,
+                    label: TEMPLATE_GOAL_LABELS[key],
+                  })),
                 ]}
               />
             </Field>
@@ -213,9 +212,10 @@ const DietPlanV2TemplateSaveDialog: React.FC<Props> = ({
                 onChange={(v) => setTargetGender(v as DietV2TemplateGender | "")}
                 options={[
                   { value: "", label: "לא נבחר" },
-                  ...(Object.keys(TEMPLATE_GENDER_LABELS) as DietV2TemplateGender[]).map(
-                    (key) => ({ value: key, label: TEMPLATE_GENDER_LABELS[key] })
-                  ),
+                  ...(Object.keys(TEMPLATE_GENDER_LABELS) as DietV2TemplateGender[]).map((key) => ({
+                    value: key,
+                    label: TEMPLATE_GENDER_LABELS[key],
+                  })),
                 ]}
               />
             </Field>
@@ -352,7 +352,9 @@ const MacroInput: React.FC<{
           : "border-slate-200 dark:border-slate-700"
       }`}
     >
-      {icon && <span className={tone === "calories" ? "text-rose-500" : "text-slate-400"}>{icon}</span>}
+      {icon && (
+        <span className={tone === "calories" ? "text-rose-500" : "text-slate-400"}>{icon}</span>
+      )}
       <input
         type="number"
         inputMode="numeric"
@@ -360,7 +362,9 @@ const MacroInput: React.FC<{
         value={value || ""}
         onChange={(e) => onChange(Math.max(0, Number(e.target.value) || 0))}
         className={`min-w-0 flex-1 bg-transparent text-center text-sm font-extrabold focus:outline-none ${
-          tone === "calories" ? "text-rose-600 dark:text-rose-400" : "text-slate-800 dark:text-slate-100"
+          tone === "calories"
+            ? "text-rose-600 dark:text-rose-400"
+            : "text-slate-800 dark:text-slate-100"
         }`}
       />
       <span className="text-[10px] font-semibold text-slate-400">{suffix}</span>

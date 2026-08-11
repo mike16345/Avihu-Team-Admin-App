@@ -118,6 +118,20 @@ test.describe("diet plans page routing and entry", () => {
     mockApi.assertNoUnhandledRequests();
   });
 
+  test("V2 trainers see presets without legacy food-group tabs", async ({ page }) => {
+    const mockApi = await installMockApi(page);
+    mockApi.useScenario("auth.login.v2-success", "analytics.dashboard.success");
+    await loginAsAdmin(page);
+
+    mockApi.useScenario("auth.refresh.v2-success", "analytics.dashboard.success", "users.success");
+    await page.goto(DIET_PLANS_PATH, GOTO_OPTIONS);
+
+    await expect(page.getByTestId("diet-plan-v2-templates-list")).toBeVisible();
+    await expect(page.getByTestId("template-tab-protein")).toHaveCount(0);
+    await expect(page.getByTestId("template-tab-carbItems")).toHaveCount(0);
+    mockApi.assertNoUnhandledRequests();
+  });
+
   test("supports browser back and forward after opening from the sidebar", async ({ page }) => {
     const mockApi = await installMockApi(page);
 

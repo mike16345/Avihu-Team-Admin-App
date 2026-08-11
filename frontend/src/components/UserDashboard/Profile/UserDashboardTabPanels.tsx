@@ -7,6 +7,8 @@ import { WeightProgression } from "@/components/UserDashboard/WeightProgression/
 import { WeightProgressionPhotos } from "@/components/UserDashboard/WeightProgression/WeightProgressionPhotos";
 import { WorkoutProgression } from "@/components/UserDashboard/WorkoutProgression/WorkoutProgression";
 import DietPlanV2Editor from "@/components/DietPlanV2/DietPlanV2Editor";
+import { usesDietPlanV2 } from "@/lib/dietPlanVersion";
+import { useUsersStore } from "@/store/userStore";
 import SwapTemporaryPlanModal from "@/components/UserDashboard/WorkoutPlanHistory/SwapTemporaryPlanModal";
 import WorkoutPlanHistorySection from "@/components/UserDashboard/WorkoutPlanHistory/WorkoutPlanHistorySection";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -35,7 +37,7 @@ interface WorkoutTabPanelProps {
   onCloseSwapModal: () => void;
 }
 
-export function ProgressTabPanel({ activeSubTab, onSubTabChange, userId }: ProgressTabPanelProps) {
+export function ProgressTabPanel({ activeSubTab, onSubTabChange }: ProgressTabPanelProps) {
   return (
     <div className="flex flex-col gap-4">
       <ProgressSubTabs activeSubTab={activeSubTab} onSubTabChange={onSubTabChange} />
@@ -180,28 +182,16 @@ interface DietTabPanelProps {
   userId?: string;
 }
 
-type DietPlanVersion = "meals" | "options";
-
-/** Trainee profiles that may preview the v2 ("options") diet editor.
- *  Temporary feature flag while the new design is being iterated on —
- *  scoped tight to avoid affecting any other trainee. Replaced by the
- *  per-trainer `dietPlanVersion` field on the Trainer entity once the
- *  design lands. */
-const DIET_V2_PREVIEW_USER_IDS = new Set<string>(["6774eb1c730c4c44354db2d0"]);
-
 export function DietTabPanel({ userId }: DietTabPanelProps) {
-  const allowV2Preview = !!userId && DIET_V2_PREVIEW_USER_IDS.has(userId);
-  // Flagged users go straight to v2 — no version toggle needed. The
-  // v1 (meals) editor still renders for everyone else until the
-  // per-trainer version field lands on the Trainer entity.
-  const activeVersion: DietPlanVersion = allowV2Preview ? "options" : "meals";
+  const currentTrainer = useUsersStore((state) => state.currentUser);
+  const showV2 = usesDietPlanV2(currentTrainer) || usesDietPlanV2({ _id: userId });
 
   return (
     <div className="flex flex-col gap-4">
       {userId && <FormResponseBubbleWrapper userId={userId} />}
 
       <DashboardTabCard>
-        {activeVersion === "options" ? (
+        {showV2 ? (
           <DietPlanV2Editor />
         ) : (
           <DietPlanWrapper>

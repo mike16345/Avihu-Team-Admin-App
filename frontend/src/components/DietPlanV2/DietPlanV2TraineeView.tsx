@@ -1,54 +1,28 @@
 import { FaFire, FaUtensils } from "react-icons/fa6";
 
-import type {
-  DietV2Meal,
-  DietV2OptionMacros,
-  DietV2Plan,
-  DietV2Unit,
-} from "@/interfaces/IDietPlanV2";
-import { formatUnitLabel } from "@/interfaces/IDietPlanV2";
+import type { DietV2Meal, IDietPlanV2 } from "@/interfaces/IDietPlanV2";
 
-import { CATEGORY_LABELS, CATEGORY_TONES } from "./dietPlanV2Utils";
-
-interface DietV2SupplementRef {
-  id: string;
-  name: string;
-  dose: string;
-}
+import { CATEGORY_LABELS, CATEGORY_TONES, computePlanMacroTotals } from "./dietPlanV2Utils";
 
 interface DietV2TraineeViewProps {
-  plan: DietV2Plan & {
-    highlights?: string;
-    supplements?: DietV2SupplementRef[] | string;
-  };
+  plan: IDietPlanV2;
   trainerName?: string;
   traineeName?: string;
 }
 
-const parseLines = (raw?: string) =>
-  (raw ?? "")
+const parseLines = (raw: string) =>
+  raw
     .split(/\n+/)
     .map((line) => line.trim())
     .filter(Boolean);
 
-const normaliseSupplementList = (
-  raw: DietV2SupplementRef[] | string | undefined
-): { name: string; dose: string }[] => {
-  if (Array.isArray(raw)) return raw.map(({ name, dose }) => ({ name, dose }));
-  return parseLines(raw).map((line) => {
-    const match = line.match(/^(.+?)\s+(\d.*)$/);
-    return match ? { name: match[1].trim(), dose: match[2].trim() } : { name: line, dose: "" };
-  });
-};
-
-const DietV2TraineeView: React.FC<DietV2TraineeViewProps> = ({
+const DietPlanV2TraineeView: React.FC<DietV2TraineeViewProps> = ({
   plan,
   trainerName,
   traineeName,
 }) => {
-  const totalCalories = plan.meals.reduce((acc, meal) => acc + resolveCal(meal), 0);
+  const totals = computePlanMacroTotals(plan);
   const highlights = parseLines(plan.highlights);
-  const supplements = normaliseSupplementList(plan.supplements);
 
   return (
     <div dir="rtl" className="mx-auto flex max-w-2xl flex-col gap-4 p-4 font-heebo">
@@ -67,51 +41,31 @@ const DietV2TraineeView: React.FC<DietV2TraineeViewProps> = ({
               </p>
             )}
           </div>
-          <span className="inline-flex items-baseline gap-1 rounded-xl bg-rose-50 px-3 py-1.5 dark:bg-rose-950/40">
-            <FaFire size={11} className="text-rose-600" />
-            <strong className="text-base font-extrabold text-rose-700 dark:text-rose-300">
-              {Math.round(totalCalories)}
-            </strong>
-            <span className="text-[11px] text-rose-600 dark:text-rose-400">קל׳ ליום</span>
-          </span>
+          <div className="flex flex-col items-end gap-1">
+            <span className="inline-flex items-baseline gap-1 rounded-xl bg-rose-50 px-3 py-1.5 dark:bg-rose-950/40">
+              <FaFire size={11} className="text-rose-600" />
+              <strong className="text-base font-extrabold text-rose-700 dark:text-rose-300">
+                {Math.round(totals.macros.calories)}
+              </strong>
+              <span className="text-[11px] text-rose-600 dark:text-rose-400">קק״ל</span>
+            </span>
+            {totals.freeCalories > 0 && (
+              <span className="text-[10px] font-bold text-emerald-600">
+                + {Math.round(totals.freeCalories)} קק״ל חופשי
+              </span>
+            )}
+          </div>
         </div>
       </header>
 
-      {plan.meals.map((meal, idx) => (
-        <MealBlock key={meal.id} meal={meal} index={idx + 1} />
+      {plan.meals.map((meal, index) => (
+        <MealBlock key={meal.id} meal={meal} index={index + 1} />
       ))}
 
-      {highlights.length > 0 && <NotesBlock title="דגשים לתפריט" tone="blue" lines={highlights} />}
-
-      {supplements.length > 0 && (
-        <section className="rounded-2xl border border-indigo-100 bg-indigo-50/40 p-4 dark:border-indigo-900/40 dark:bg-indigo-950/30">
-          <h3 className="mb-2 text-sm font-bold text-slate-900 dark:text-slate-100">תוספים</h3>
-          <ul className="flex flex-col gap-1 text-xs text-slate-700 dark:text-slate-200">
-            {supplements.map((s, idx) => (
-              <li key={idx} className="flex items-baseline justify-between gap-3">
-                <strong className="font-semibold">{s.name}</strong>
-                {s.dose && (
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400">{s.dose}</span>
-                )}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      <footer className="mt-2 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-[11px] text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-300">
-        התפריט מותאם אישית עבורך. אם יש לך רגישות, אלרגיה או מצב רפואי — התייעץ עם המאמן לפני התחלה.
-        אין לראות בתפריט תחליף לייעוץ תזונתי מקצועי.
-      </footer>
+      {highlights.length > 0 && <NotesBlock title="דגשים לתפריט" lines={highlights} />}
     </div>
   );
 };
-
-const EMPTY_MACROS: DietV2OptionMacros = { protein: 0, carbs: 0, fat: 0, calories: 0 };
-
-const resolveCal = (meal: DietV2Meal) => meal.macros?.calories ?? 0;
-
-const resolveMacros = (meal: DietV2Meal): DietV2OptionMacros => meal.macros ?? EMPTY_MACROS;
 
 interface MealBlockProps {
   meal: DietV2Meal;
@@ -119,8 +73,7 @@ interface MealBlockProps {
 }
 
 const MealBlock: React.FC<MealBlockProps> = ({ meal, index }) => {
-  const macros = resolveMacros(meal);
-  const nonEmpty = meal.categories.filter((c) => c.options.length > 0);
+  const categories = meal.categories.filter((category) => category.items.length > 0);
 
   return (
     <article className="overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm dark:border-blue-900/40 dark:bg-slate-900">
@@ -129,91 +82,68 @@ const MealBlock: React.FC<MealBlockProps> = ({ meal, index }) => {
           {meal.name || `ארוחה ${index}`}
         </h2>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-slate-600 dark:text-slate-300">
-          <span>
-            חלבון{" "}
-            <strong className="text-slate-800 dark:text-slate-100">
-              {Math.round(macros.protein)}
-            </strong>
-            ג׳
-          </span>
-          <span>
-            פחמ׳{" "}
-            <strong className="text-slate-800 dark:text-slate-100">
-              {Math.round(macros.carbs)}
-            </strong>
-            ג׳
-          </span>
-          <span>
-            שומן{" "}
-            <strong className="text-slate-800 dark:text-slate-100">{Math.round(macros.fat)}</strong>
-            ג׳
-          </span>
+          <span>{meal.macros.protein} ג׳ חלבון</span>
+          <span>{meal.macros.carbs} ג׳ פחמימה</span>
+          <span>{meal.macros.fat} ג׳ שומן</span>
           <span className="font-bold text-rose-600 dark:text-rose-400">
-            ≈ {Math.round(macros.calories)} קל׳
+            {meal.macros.calories} קק״ל
           </span>
+          {!!meal.freeCalories?.calories && (
+            <span className="rounded-full border border-dashed border-emerald-300 bg-emerald-50 px-2 py-0.5 font-bold text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-300">
+              + {meal.freeCalories.calories} חופשי
+            </span>
+          )}
         </div>
       </header>
 
-      {nonEmpty.length === 0 && (
-        <p className="px-4 py-6 text-center text-xs italic text-slate-400 dark:text-slate-500">
-          אין פרטים לארוחה זו
-        </p>
+      {categories.length === 0 && !meal.freeCalories && (
+        <p className="px-4 py-6 text-center text-xs italic text-slate-400">אין פרטים לארוחה זו</p>
       )}
 
-      {nonEmpty.map((cat) => {
-        const tone = CATEGORY_TONES[cat.kind];
+      {categories.map((category) => {
+        const tone = CATEGORY_TONES[category.category];
         return (
-          <div key={cat.kind} className="border-t border-blue-50 px-4 py-2 dark:border-blue-900/30">
-            <div className="mb-1.5 flex items-center gap-2">
-              <span
-                className={`inline-flex items-center rounded-md ${tone.chip} px-2 py-0.5 text-[10px] font-bold ${tone.chipText}`}
-              >
-                {CATEGORY_LABELS[cat.kind]}
-              </span>
-              {cat.options.length > 1 && (
-                <span className="text-[10px] text-slate-400 dark:text-slate-500">
-                  בחר אפשרות אחת
-                </span>
-              )}
-            </div>
-            <ul className="flex flex-col gap-1 text-sm text-slate-700 dark:text-slate-200">
-              {cat.options.map((opt) => (
-                <li key={opt.id} className="flex items-baseline justify-between gap-2">
-                  <span className="min-w-0 truncate">
-                    <strong className="font-semibold">{opt.foodName}</strong>
-                  </span>
-                  <span className="shrink-0 text-[11px] text-slate-500 dark:text-slate-400">
-                    {opt.quantity} {formatUnitLabel(opt.unit as DietV2Unit, opt.quantity)}
-                  </span>
-                </li>
-              ))}
-            </ul>
+          <div
+            key={category.category}
+            className="border-t border-blue-50 px-4 py-3 dark:border-blue-900/30"
+          >
+            <span
+              className={`mb-1.5 inline-flex rounded-md ${tone.chip} px-2 py-0.5 text-[10px] font-bold ${tone.chipText}`}
+            >
+              {CATEGORY_LABELS[category.category]}
+            </span>
+            <p className="text-sm font-medium leading-6 text-slate-700 dark:text-slate-200">
+              {category.items.map((item) => item.name).join(" / ")}
+            </p>
           </div>
         );
       })}
+
+      {meal.freeCalories && (
+        <div className="border-t border-emerald-100 bg-emerald-50/30 px-4 py-3 dark:border-emerald-900/40 dark:bg-emerald-950/10">
+          <strong className="text-sm text-emerald-800 dark:text-emerald-200">
+            קלוריות חופשיות · {meal.freeCalories.calories} קק״ל
+          </strong>
+          {meal.freeCalories.description && (
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+              {meal.freeCalories.description}
+            </p>
+          )}
+        </div>
+      )}
     </article>
   );
 };
 
-const NotesBlock: React.FC<{ title: string; tone: "blue" | "indigo"; lines: string[] }> = ({
-  title,
-  tone,
-  lines,
-}) => (
-  <section
-    className={`rounded-2xl border p-4 ${
-      tone === "blue"
-        ? "border-blue-100 bg-blue-50/40 dark:border-blue-900/40 dark:bg-blue-950/30"
-        : "border-indigo-100 bg-indigo-50/40 dark:border-indigo-900/40 dark:bg-indigo-950/30"
-    }`}
-  >
+const NotesBlock: React.FC<{ title: string; lines: string[] }> = ({ title, lines }) => (
+  <section className="rounded-2xl border border-blue-100 bg-blue-50/40 p-4 dark:border-blue-900/40 dark:bg-blue-950/30">
     <h3 className="mb-2 text-sm font-bold text-slate-900 dark:text-slate-100">{title}</h3>
     <ul className="list-inside list-disc space-y-1 text-xs text-slate-700 dark:text-slate-200">
-      {lines.map((line, idx) => (
-        <li key={idx}>{line}</li>
+      {lines.map((line, index) => (
+        <li key={`${line}-${index}`}>{line}</li>
       ))}
     </ul>
   </section>
 );
 
-export default DietV2TraineeView;
+export default DietPlanV2TraineeView;

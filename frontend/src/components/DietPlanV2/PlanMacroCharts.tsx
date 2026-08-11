@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
-import type { DietV2OptionMacros } from "@/interfaces/IDietPlanV2";
+import type { DietV2MealMacros } from "@/interfaces/IDietPlanV2";
 import { FaDrumstickBite, FaFire, FaSeedling, FaTint } from "react-icons/fa";
 import type { IconType } from "react-icons";
 
 interface Props {
-  totals: DietV2OptionMacros;
+  totals: DietV2MealMacros;
+  freeCalories?: number;
 }
 
 const KCAL_PER_G = { protein: 4, carbs: 4, fat: 9 } as const;
@@ -16,7 +17,7 @@ const RING_STROKE = 7;
 const RING_RADIUS = (RING_SIZE - RING_STROKE) / 2;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 
-const PlanMacroCharts: React.FC<Props> = ({ totals }) => {
+const PlanMacroCharts: React.FC<Props> = ({ totals, freeCalories = 0 }) => {
   const kcalFromProtein = totals.protein * KCAL_PER_G.protein;
   const kcalFromCarbs = totals.carbs * KCAL_PER_G.carbs;
   const kcalFromFat = totals.fat * KCAL_PER_G.fat;
@@ -29,6 +30,7 @@ const PlanMacroCharts: React.FC<Props> = ({ totals }) => {
     <div dir="rtl">
       <MacroRingsCard
         totals={totals}
+        freeCalories={freeCalories}
         pctProtein={pctOf(kcalFromProtein)}
         pctCarbs={pctOf(kcalFromCarbs)}
         pctFat={pctOf(kcalFromFat)}
@@ -38,7 +40,8 @@ const PlanMacroCharts: React.FC<Props> = ({ totals }) => {
 };
 
 interface MacroRingsCardProps {
-  totals: DietV2OptionMacros;
+  totals: DietV2MealMacros;
+  freeCalories: number;
   pctProtein: number;
   pctCarbs: number;
   pctFat: number;
@@ -46,6 +49,7 @@ interface MacroRingsCardProps {
 
 const MacroRingsCard: React.FC<MacroRingsCardProps> = ({
   totals,
+  freeCalories,
   pctProtein,
   pctCarbs,
   pctFat,
@@ -61,9 +65,16 @@ const MacroRingsCard: React.FC<MacroRingsCardProps> = ({
     >
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs font-bold text-slate-500 dark:text-slate-400">יחסי מאקרו</span>
-        <span className="text-[10px] font-medium text-slate-300 dark:text-slate-600">
-          דאבל־קליק להחלפה
-        </span>
+        <div className="flex items-center gap-2">
+          {freeCalories > 0 && (
+            <span className="rounded-full border border-dashed border-emerald-300 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-300">
+              + {Math.round(freeCalories)} קק״ל חופשי
+            </span>
+          )}
+          <span className="text-[10px] font-medium text-slate-300 dark:text-slate-600">
+            דאבל־קליק להחלפה
+          </span>
+        </div>
       </div>
       {view === "rings" ? (
         <div className="flex items-stretch justify-around gap-1 pt-1">
@@ -99,6 +110,7 @@ const MacroRingsCard: React.FC<MacroRingsCardProps> = ({
       ) : (
         <MacroBarsView
           totals={totals}
+          freeCalories={freeCalories}
           pctProtein={pctProtein}
           pctCarbs={pctCarbs}
           pctFat={pctFat}

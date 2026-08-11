@@ -11,6 +11,7 @@ const DIET_PLAN_PRESET_ONE_PATH = `${DIET_PLAN_PRESETS_PATH}/one`;
 const MENU_ITEMS_PATH = "/menuItems";
 const MENU_ITEMS_FOOD_GROUP_PATH = "/menuItems/foodGroup";
 const MENU_ITEMS_ONE_PATH = "/menuItems/one";
+const V2_CATALOG_PATH = "/menuItems/v2";
 const DIET_PLANS_ERROR_MESSAGE = "Diet plan presets request failed";
 const FOOD_GROUPS_ERROR_MESSAGE = "Menu items request failed";
 
@@ -77,6 +78,53 @@ export const dietPlansScenarios = {
       pathname: MENU_ITEMS_PATH,
       fixture: "menuItems.collection",
       variant: "success",
+    }),
+  ],
+  "diet-plans.v2-catalog.success": [
+    apiRoute({
+      method: "GET",
+      pathname: `${V2_CATALOG_PATH}/popular`,
+      data: {
+        protein: [
+          {
+            _id: "catalog-protein-001",
+            trainerId: "trainer-v2-001",
+            category: "protein",
+            name: "100 גרם חזה עוף",
+            normalizedName: "100 גרם חזה עוף",
+            usageCount: 12,
+            lastUsedAt: "2026-08-11T12:00:00.000Z",
+          },
+        ],
+        carbs: [],
+        fat: [],
+        vegetables: [],
+        addon: [],
+        freeCalories: [],
+      },
+      message: "Popular catalog items",
+    }),
+    apiRoute({
+      method: "GET",
+      pathname: `${V2_CATALOG_PATH}/search`,
+      data: [
+        {
+          _id: "catalog-protein-001",
+          trainerId: "trainer-v2-001",
+          category: "protein",
+          name: "100 גרם חזה עוף",
+          normalizedName: "100 גרם חזה עוף",
+          usageCount: 12,
+          lastUsedAt: "2026-08-11T12:00:00.000Z",
+        },
+      ],
+      message: "Catalog search results",
+    }),
+    apiRoute({
+      method: "DELETE",
+      pathname: `${V2_CATALOG_PATH}/one`,
+      data: null,
+      message: "Catalog item deleted",
     }),
   ],
   "diet-plans.food-groups.success": [foodGroupRoute("success")],
