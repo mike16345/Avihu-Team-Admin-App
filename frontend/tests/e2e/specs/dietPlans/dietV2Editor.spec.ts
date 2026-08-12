@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Request } from "@playwright/test";
 
 import { loginAsAdmin } from "../../utils/adminSession";
 import { installMockApi } from "../../utils/mockApi";
@@ -32,6 +32,52 @@ const openV2Editor = async (page: Parameters<typeof installMockApi>[0]) => {
 
   return { editor, mockApi };
 };
+
+const trackCatalogSearchRequests = (page: Parameters<typeof installMockApi>[0]) => {
+  const requests: Request[] = [];
+
+  page.on("request", (request) => {
+    if (
+      request.method() === "GET" &&
+      new URL(request.url()).pathname.endsWith("/menuItems/v2/search")
+    ) {
+      requests.push(request);
+    }
+  });
+
+  return requests;
+};
+
+test("V2 catalog search ignores one-character queries", async ({ page }) => {
+  const requests = trackCatalogSearchRequests(page);
+  const { editor, mockApi } = await openV2Editor(page);
+  const input = editor
+    .getByTestId("diet-v2-category-protein")
+    .getByPlaceholder("חפש או כתוב מאכל ולחץ Enter…");
+
+  await input.fill("c");
+  await page.waitForTimeout(350);
+
+  expect(requests).toHaveLength(0);
+  mockApi.assertNoUnhandledRequests();
+});
+
+test("V2 catalog search sends only the settled term during typing", async ({ page }) => {
+  const requests = trackCatalogSearchRequests(page);
+  const { editor, mockApi } = await openV2Editor(page);
+  const input = editor
+    .getByTestId("diet-v2-category-protein")
+    .getByPlaceholder("חפש או כתוב מאכל ולחץ Enter…");
+
+  await input.pressSequentially("chicken", { delay: 225 });
+  await page.waitForTimeout(400);
+
+  expect(requests).toHaveLength(1);
+  const url = new URL(requests[0].url());
+  expect(url.searchParams.get("q")).toBe("chicken");
+  expect(url.searchParams.get("category")).toBe("protein");
+  mockApi.assertNoUnhandledRequests();
+});
 
 test("V2 editor keeps quick add category-scoped and resets dirty state after save", async ({
   page,

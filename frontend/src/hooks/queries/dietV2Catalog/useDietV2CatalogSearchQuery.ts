@@ -10,8 +10,8 @@ export const useDietV2CatalogSearchQuery = (category: DietV2CatalogCategory, que
 
   return useQuery({
     queryKey: dietV2CatalogKeys.search(category, normalizedQuery),
-    queryFn: () => searchItems(category, normalizedQuery),
-    enabled: normalizedQuery.length > 0,
+    queryFn: ({ signal }) => searchItems(category, normalizedQuery, signal),
+    enabled: normalizedQuery.length >= 2,
     placeholderData: keepPreviousData,
     staleTime: 5 * 60 * 1000,
   });

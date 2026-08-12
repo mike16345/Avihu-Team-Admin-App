@@ -7,7 +7,8 @@ async function request<T>(
   endpoint: string,
   data?: any,
   params?: any,
-  headers?: any
+  headers?: any,
+  signal?: AbortSignal
 ): Promise<T> {
   const request: AxiosRequestConfig = {
     method,
@@ -15,6 +16,7 @@ async function request<T>(
     data,
     params,
     headers,
+    signal,
   };
 
   try {
@@ -26,8 +28,13 @@ async function request<T>(
   }
 }
 
-export async function fetchData<T>(endpoint: string, params?: any, headers?: any): Promise<T> {
-  return request<T>("get", endpoint, undefined, params, headers);
+export async function fetchData<T>(
+  endpoint: string,
+  params?: any,
+  headers?: any,
+  signal?: AbortSignal
+): Promise<T> {
+  return request<T>("get", endpoint, undefined, params, headers, signal);
 }
 
 export async function sendData<T>(

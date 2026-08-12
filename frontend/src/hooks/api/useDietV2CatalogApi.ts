@@ -14,11 +14,16 @@ const useDietV2CatalogApi = () => {
       (response) => response.data
     );
 
-  const searchItems = (category: DietV2CatalogCategory, query: string) =>
-    fetchData<ApiResponse<DietV2CatalogItem[]>>(`${ENDPOINT}/search`, {
-      category,
-      q: query,
-    }).then((response) => response.data);
+  const searchItems = (category: DietV2CatalogCategory, query: string, signal?: AbortSignal) =>
+    fetchData<ApiResponse<DietV2CatalogItem[]>>(
+      `${ENDPOINT}/search`,
+      {
+        category,
+        q: query,
+      },
+      undefined,
+      signal
+    ).then((response) => response.data);
 
   const deleteCatalogItem = (id: string) =>
     deleteItem<ApiResponse<DietV2CatalogItem>>(`${ENDPOINT}/one`, { id }).then(
