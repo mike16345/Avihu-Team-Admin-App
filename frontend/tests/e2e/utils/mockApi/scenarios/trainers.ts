@@ -3,6 +3,7 @@ import { apiRoute, type MockScenarioMap } from "../routes";
 const TRAINERS_ENDPOINT = "/trainers";
 const TRAINERS_PAGINATED_ENDPOINT = `${TRAINERS_ENDPOINT}/paginated`;
 const TRAINERS_ONE_ENDPOINT = `${TRAINERS_ENDPOINT}/one`;
+const SUB_TRAINERS_ENDPOINT = "/subTrainers";
 const SUB_TRAINERS_PAGINATED_ENDPOINT = "/subTrainers/paginated";
 
 const trainer = {
@@ -69,6 +70,12 @@ export const trainersScenarios = {
     }),
   ],
   "trainers.subtrainers.empty": [
+    apiRoute({
+      method: "GET",
+      pathname: SUB_TRAINERS_ENDPOINT,
+      data: [],
+      message: "Sub-trainers loaded",
+    }),
     apiRoute({
       method: "GET",
       pathname: SUB_TRAINERS_PAGINATED_ENDPOINT,

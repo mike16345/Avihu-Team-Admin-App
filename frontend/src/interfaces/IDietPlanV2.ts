@@ -36,6 +36,8 @@ export interface DietV2Meal {
 
 export interface IDietPlanV2 {
   _id?: string;
+  userId?: string;
+  trainerId?: string;
   version: 2;
   meals: DietV2Meal[];
   highlights: string;
@@ -81,4 +83,6 @@ export interface IDietPlanV2Preset extends IDietPlanV2 {
   targetGender?: DietV2TemplateGender;
   dietTags?: DietV2DietTag[];
   builtByTrainerId?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }

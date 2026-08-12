@@ -16,10 +16,14 @@ const openV2Editor = async (page: Parameters<typeof installMockApi>[0]) => {
     "auth.refresh.v2-success",
     "analytics.dashboard.success",
     "users.success",
-    "users.one.success",
+    "users.one.trainee-success",
     "forms.responses.success",
     "forms.responses.latest.empty",
-    "diet-plans.v2-catalog.success"
+    "diet-plans.user.not-found",
+    "diet-plans.v2-catalog.success",
+    "diet-plans.v2-presets.success",
+    "diet-plans.user.v2-save-success",
+    "diet-plans.v2-presets.write-success"
   );
   await page.goto(TRAINEE_PATH, { waitUntil: "domcontentloaded" });
 
@@ -86,44 +90,33 @@ test("V2 editor keeps quick add category-scoped and resets dirty state after sav
 
 test("applying a V2 template leaves the trainee plan dirty and saveable", async ({ page }) => {
   const { editor, mockApi } = await openV2Editor(page);
-  await page.evaluate(() => {
-    window.localStorage.setItem(
-      "dietPlanV2:templates",
-      JSON.stringify([
-        {
-          id: "template-001",
-          name: "תבנית בדיקה",
-          savedAt: "2026-08-11T12:00:00.000Z",
-          mealsCount: 1,
-          macros: { calories: 500, protein: 30, carbs: 50, fat: 15 },
-          plan: {
-            version: 2,
-            highlights: "לשתות מים",
-            meals: [
-              {
-                id: "template-meal-001",
-                name: "ארוחת תבנית",
-                categories: [
-                  { category: "protein", items: [{ name: "טופו 200 גרם" }] },
-                  { category: "carbs", items: [] },
-                  { category: "fat", items: [] },
-                  { category: "vegetables", items: [] },
-                  { category: "addon", items: [] },
-                ],
-                macros: { calories: 500, protein: 30, carbs: 50, fat: 15 },
-              },
-            ],
-          },
-        },
-      ])
-    );
-  });
 
   await editor.getByRole("button", { name: "תבניות" }).click();
-  await page.getByRole("button", { name: /תבנית בדיקה/ }).click();
+  await page.getByRole("button", { name: /תבנית V2 מהשרת/ }).click();
 
-  await expect(editor.locator("input").first()).toHaveValue("ארוחת תבנית");
+  await expect(editor.locator("input").first()).toHaveValue("ארוחת בוקר מהשרת");
   await expect(editor.getByRole("button", { name: "שמור תפריט" })).toBeEnabled();
+  mockApi.assertNoUnhandledRequests();
+});
+
+test("saving a V2 template sends the current plan to the Server", async ({ page }) => {
+  const { editor, mockApi } = await openV2Editor(page);
+  const protein = editor.getByTestId("diet-v2-category-protein");
+  const templateRequest = page.waitForRequest(
+    (request) =>
+      request.method() === "POST" && new URL(request.url()).pathname.endsWith("/presets/dietPlans")
+  );
+
+  await protein.getByPlaceholder("חפש או כתוב מאכל ולחץ Enter…").fill("טופו 200 גרם");
+  await protein.getByPlaceholder("חפש או כתוב מאכל ולחץ Enter…").press("Enter");
+  await editor.getByRole("button", { name: "שמור כתבנית" }).click();
+  await page.getByRole("button", { name: "שמור תבנית", exact: true }).click();
+
+  const payload = (await templateRequest).postDataJSON();
+  expect(payload).toMatchObject({ version: 2, name: "תבנית 1 ארוחות" });
+  expect(payload.meals[0].categories[0].items).toContainEqual({ name: "טופו 200 גרם" });
+  expect(payload).not.toHaveProperty("builtBy");
+  expect(payload).not.toHaveProperty("notes");
   mockApi.assertNoUnhandledRequests();
 });
 

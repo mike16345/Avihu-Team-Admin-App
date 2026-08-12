@@ -4,6 +4,7 @@ import type {
   DietV2TemplateGender,
   DietV2TemplateGoal,
   IDietPlanV2,
+  IDietPlanV2Preset,
 } from "@/interfaces/IDietPlanV2";
 
 import { computePlanMacroTotals, makeLocalId } from "./dietPlanV2Utils";
@@ -38,51 +39,44 @@ export interface DietV2Template {
   id: string;
   name: string;
   savedAt: string;
-  builtBy?: string;
-  allergies?: string;
-  notes?: string;
   goal?: DietV2TemplateGoal;
   targetGender?: DietV2TemplateGender;
   dietTags?: DietV2DietTag[];
   mealsCount: number;
   macros: DietV2MealMacros;
-  macrosOverridden?: boolean;
   plan: IDietPlanV2;
 }
-
-export const TEMPLATES_STORAGE_KEY = "dietPlanV2:templates";
 
 export const computeTemplateMacroTotals = (plan: IDietPlanV2): DietV2MealMacros =>
   computePlanMacroTotals(plan).macros;
 
-export const readTemplates = (): DietV2Template[] => {
-  if (typeof window === "undefined") return [];
-  try {
-    const parsed = JSON.parse(window.localStorage.getItem(TEMPLATES_STORAGE_KEY) ?? "[]");
-    if (!Array.isArray(parsed)) return [];
-
-    return parsed.filter((template) => template?.plan?.version === 2) as DietV2Template[];
-  } catch {
-    return [];
-  }
-};
-
-export const writeTemplates = (templates: DietV2Template[]): void => {
-  if (typeof window === "undefined") return;
-  window.localStorage.setItem(TEMPLATES_STORAGE_KEY, JSON.stringify(templates));
-};
-
-export const upsertTemplate = (template: DietV2Template): void => {
-  const current = readTemplates();
-  const index = current.findIndex((candidate) => candidate.id === template.id);
-  const next = [...current];
-  if (index === -1) next.unshift(template);
-  else next[index] = template;
-  writeTemplates(next);
-};
-
-export const removeTemplate = (id: string): void => {
-  writeTemplates(readTemplates().filter((template) => template.id !== id));
-};
-
 export const buildTemplateId = (): string => makeLocalId("tpl");
+
+export const presetToTemplate = (preset: IDietPlanV2Preset): DietV2Template => ({
+  id: preset._id ?? buildTemplateId(),
+  name: preset.name,
+  savedAt: preset.updatedAt ?? preset.createdAt ?? "",
+  goal: preset.goal,
+  targetGender: preset.targetGender,
+  dietTags: preset.dietTags,
+  mealsCount: preset.meals.length,
+  macros: computeTemplateMacroTotals(preset),
+  plan: {
+    _id: preset._id,
+    version: 2,
+    meals: preset.meals,
+    highlights: preset.highlights,
+  },
+});
+
+export const templateToPreset = (
+  template: Pick<DietV2Template, "name" | "goal" | "targetGender" | "dietTags" | "plan">
+): IDietPlanV2Preset => ({
+  name: template.name,
+  version: 2,
+  meals: template.plan.meals,
+  highlights: template.plan.highlights,
+  goal: template.goal,
+  targetGender: template.targetGender,
+  dietTags: template.dietTags,
+});

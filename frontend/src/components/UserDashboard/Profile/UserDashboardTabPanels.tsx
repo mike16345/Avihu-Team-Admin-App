@@ -6,8 +6,12 @@ import StepsProgression from "@/components/UserDashboard/StepsTracking/StepsProg
 import { WeightProgression } from "@/components/UserDashboard/WeightProgression/WeightProgression";
 import { WeightProgressionPhotos } from "@/components/UserDashboard/WeightProgression/WeightProgressionPhotos";
 import { WorkoutProgression } from "@/components/UserDashboard/WorkoutProgression/WorkoutProgression";
-import DietPlanV2Editor from "@/components/DietPlanV2/DietPlanV2Editor";
-import { usesDietPlanV2 } from "@/lib/dietPlanVersion";
+import DietPlanV2UserEditor from "@/components/DietPlanV2/DietPlanV2UserEditor";
+import Loader from "@/components/ui/Loader";
+import ErrorPage from "@/pages/ErrorPage";
+import useGetDietPlan from "@/hooks/queries/dietPlans/useGetDietPlan";
+import type { IDietPlanV2 } from "@/interfaces/IDietPlanV2";
+import { resolveDietPlanEditorVersion } from "@/lib/dietPlanVersion";
 import { useUsersStore } from "@/store/userStore";
 import SwapTemporaryPlanModal from "@/components/UserDashboard/WorkoutPlanHistory/SwapTemporaryPlanModal";
 import WorkoutPlanHistorySection from "@/components/UserDashboard/WorkoutPlanHistory/WorkoutPlanHistorySection";
@@ -184,15 +188,23 @@ interface DietTabPanelProps {
 
 export function DietTabPanel({ userId }: DietTabPanelProps) {
   const currentTrainer = useUsersStore((state) => state.currentUser);
-  const showV2 = usesDietPlanV2(currentTrainer) || usesDietPlanV2({ _id: userId });
+  const { data, isLoading, error } = useGetDietPlan(userId || "");
+  const existingPlan = data && !data.failed ? data.dietplan : null;
+  const editorVersion = resolveDietPlanEditorVersion(existingPlan, currentTrainer);
+
+  if (!userId || isLoading) return <Loader size="large" />;
+  if (error) return <ErrorPage message={error.message} />;
 
   return (
     <div className="flex flex-col gap-4">
       {userId && <FormResponseBubbleWrapper userId={userId} />}
 
       <DashboardTabCard>
-        {showV2 ? (
-          <DietPlanV2Editor />
+        {editorVersion === 2 ? (
+          <DietPlanV2UserEditor
+            userId={userId}
+            initialPlan={existingPlan?.version === 2 ? (existingPlan as IDietPlanV2) : undefined}
+          />
         ) : (
           <DietPlanWrapper>
             <ViewDietPlanPage embedded />

@@ -37,12 +37,16 @@ import { summariseDietDirty } from "@/utils/dirtyFieldsSummary";
 import { DietPlanPageHeader } from "@/components/DietPlan/DietPlanPageHeader";
 import { DietPlanPresetLoadBar } from "@/components/DietPlan/DietPlanPresetLoadBar";
 import { DietPlanSaveActions } from "@/components/DietPlan/DietPlanSaveActions";
+import DietPlanV2UserEditor from "@/components/DietPlanV2/DietPlanV2UserEditor";
+import type { IDietPlanV2 } from "@/interfaces/IDietPlanV2";
+import { resolveDietPlanEditorVersion } from "@/lib/dietPlanVersion";
+import ErrorPage from "./ErrorPage";
 
 interface ViewDietPlanPageProps {
   embedded?: boolean;
 }
 
-export const ViewDietPlanPage = ({ embedded = false }: ViewDietPlanPageProps) => {
+const DietPlanV1Page = ({ embedded = false }: ViewDietPlanPageProps) => {
   const navigation = useNavigate();
   const { id } = useParams();
   const { users } = useUsersStore();
@@ -156,6 +160,7 @@ export const ViewDietPlanPage = ({ embedded = false }: ViewDietPlanPageProps) =>
   useEffect(() => {
     if (!id || !data) return;
     const { dietplan, failed } = data;
+    if (dietplan.version === 2) return;
     reset(normalizeDietPlan(dietplan));
     if (failed) {
       setIsNewPlan(true);
@@ -240,4 +245,26 @@ export const ViewDietPlanPage = ({ embedded = false }: ViewDietPlanPageProps) =>
       />
     </div>
   );
+};
+
+export const ViewDietPlanPage = ({ embedded = false }: ViewDietPlanPageProps) => {
+  const { id } = useParams();
+  const currentTrainer = useUsersStore((state) => state.currentUser);
+  const { data, isLoading, error } = useGetDietPlan(id || "");
+  const existingPlan = data && !data.failed ? data.dietplan : null;
+  const editorVersion = resolveDietPlanEditorVersion(existingPlan, currentTrainer);
+
+  if (!id || isLoading) return <Loader size="large" />;
+  if (error) return <ErrorPage message={error.message} />;
+
+  if (editorVersion === 2) {
+    return (
+      <DietPlanV2UserEditor
+        userId={id}
+        initialPlan={existingPlan?.version === 2 ? (existingPlan as IDietPlanV2) : undefined}
+      />
+    );
+  }
+
+  return <DietPlanV1Page embedded={embedded} />;
 };

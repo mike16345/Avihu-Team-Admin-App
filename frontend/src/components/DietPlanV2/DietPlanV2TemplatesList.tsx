@@ -1,24 +1,29 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 import {
   FaBookmark,
   FaFire,
   FaMagnifyingGlass,
+  FaPlus,
   FaTrashCan,
-  FaTriangleExclamation,
-  FaUser,
   FaUtensils,
 } from "react-icons/fa6";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+
+import Loader from "@/components/ui/Loader";
+import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
+import { useDeleteDietPlanV2Preset } from "@/hooks/mutations/DietPlans/useDietPlanV2PresetMutations";
+import useDietPlanV2PresetsQuery from "@/hooks/queries/dietPlans/useDietPlanV2PresetsQuery";
+import ErrorPage from "@/pages/ErrorPage";
 
 import DietPlanV2TemplateFilterMultiSelect from "./DietPlanV2TemplateFilterMultiSelect";
 import DietPlanV2TemplatePlanEditor from "./DietPlanV2TemplatePlanEditor";
 import {
-  readTemplates,
-  removeTemplate,
+  presetToTemplate,
   TEMPLATE_DIET_TAG_LABELS,
   TEMPLATE_GENDER_LABELS,
   TEMPLATE_GOAL_LABELS,
-  TEMPLATES_STORAGE_KEY,
   type DietV2DietTag,
   type DietV2Template,
   type DietV2TemplateGender,
@@ -77,34 +82,37 @@ const initialFilters: Filters = {
 };
 
 const DietPlanV2TemplatesList: React.FC = () => {
-  const [templates, setTemplates] = useState<DietV2Template[]>(() => readTemplates());
+  const navigate = useNavigate();
+  const presetsQuery = useDietPlanV2PresetsQuery();
+  const deletePreset = useDeleteDietPlanV2Preset();
+
   const [filters, setFilters] = useState<Filters>(initialFilters);
   const [pendingDelete, setPendingDelete] = useState<DietV2Template | null>(null);
   const [editingPlan, setEditingPlan] = useState<DietV2Template | null>(null);
 
-  useEffect(() => {
-    const refresh = () => setTemplates(readTemplates());
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === TEMPLATES_STORAGE_KEY) refresh();
-    };
-    window.addEventListener("storage", onStorage);
-    window.addEventListener("focus", refresh);
-    return () => {
-      window.removeEventListener("storage", onStorage);
-      window.removeEventListener("focus", refresh);
-    };
-  }, []);
+  const templates = useMemo(
+    () => (presetsQuery.data?.data ?? []).map(presetToTemplate),
+    [presetsQuery.data]
+  );
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!pendingDelete) return;
-    removeTemplate(pendingDelete.id);
-    setTemplates(readTemplates());
-    setPendingDelete(null);
+
+    try {
+      await deletePreset.mutateAsync(pendingDelete.id);
+      toast.success("התבנית נמחקה בהצלחה");
+      setPendingDelete(null);
+    } catch {
+      toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE);
+    }
   };
 
   const filtered = useMemo(() => applyFilters(templates, filters), [templates, filters]);
 
   const hasAny = templates.length > 0;
+
+  if (presetsQuery.isLoading) return <Loader size="large" />;
+  if (presetsQuery.error) return <ErrorPage message={presetsQuery.error.message} />;
 
   return (
     <div
@@ -112,7 +120,17 @@ const DietPlanV2TemplatesList: React.FC = () => {
       dir="rtl"
       className="flex h-[calc(100vh-160px)] min-h-[480px] flex-col gap-4"
     >
-      <FiltersBar filters={filters} onChange={setFilters} />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <FiltersBar filters={filters} onChange={setFilters} />
+        <button
+          type="button"
+          onClick={() => navigate("/presets/dietPlans")}
+          className="inline-flex h-10 shrink-0 items-center gap-2 rounded-xl brand-gradient px-4 text-sm font-bold text-white shadow-sm shadow-blue-500/25 transition-all hover:-translate-y-0.5"
+        >
+          <FaPlus size={11} />
+          הוסף תבנית
+        </button>
+      </div>
 
       {hasAny ? (
         filtered.length === 0 ? (
@@ -145,7 +163,7 @@ const DietPlanV2TemplatesList: React.FC = () => {
         <DietPlanV2TemplatePlanEditor
           template={editingPlan}
           onClose={() => setEditingPlan(null)}
-          onSaved={() => setTemplates(readTemplates())}
+          onSaved={() => setEditingPlan(null)}
         />
       )}
     </div>
@@ -221,11 +239,7 @@ const applyFilters = (templates: DietV2Template[], filters: Filters): DietV2Temp
 
   const matched = templates.filter((t) => {
     if (q) {
-      const haystack = [t.name, t.allergies, t.builtBy, t.notes]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-      if (!haystack.includes(q)) return false;
+      if (!t.name.toLowerCase().includes(q)) return false;
     }
     if (selectedCalRanges.length > 0) {
       const inAny = selectedCalRanges.some(
@@ -403,26 +417,6 @@ const TemplateCard: React.FC<{
           </span>
         ))}
       </div>
-    )}
-
-    {template.allergies && (
-      <p className="flex items-start gap-1.5 rounded-md bg-amber-50 px-2.5 py-1.5 text-xs font-semibold text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
-        <FaTriangleExclamation size={12} className="mt-0.5" />
-        <span>{template.allergies}</span>
-      </p>
-    )}
-    {template.builtBy && (
-      <p className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400">
-        <FaUser size={11} /> {template.builtBy}
-      </p>
-    )}
-    {template.notes && (
-      <p className="line-clamp-2 text-xs text-slate-500 dark:text-slate-400">{template.notes}</p>
-    )}
-    {template.macrosOverridden && (
-      <p className="text-[11px] italic text-slate-400 dark:text-slate-500">
-        ערכי מאקרו נערכו ידנית
-      </p>
     )}
   </article>
 );

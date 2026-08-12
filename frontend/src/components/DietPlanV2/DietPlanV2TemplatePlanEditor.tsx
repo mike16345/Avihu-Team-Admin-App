@@ -1,5 +1,9 @@
 import { useState } from "react";
 import { FaArrowRight, FaBowlFood, FaTag } from "react-icons/fa6";
+import {
+  useCreateDietPlanV2Preset,
+  useUpdateDietPlanV2Preset,
+} from "@/hooks/mutations/DietPlans/useDietPlanV2PresetMutations";
 
 import DietPlanV2Editor from "./DietPlanV2Editor";
 import DietPlanV2TemplateMetaPanel, {
@@ -7,7 +11,8 @@ import DietPlanV2TemplateMetaPanel, {
 } from "./DietPlanV2TemplateMetaPanel";
 import {
   computeTemplateMacroTotals,
-  upsertTemplate,
+  presetToTemplate,
+  templateToPreset,
   type DietV2Template,
 } from "./dietPlanV2Templates";
 
@@ -15,15 +20,21 @@ interface Props {
   template: DietV2Template;
   onClose: () => void;
   onSaved: (updated: DietV2Template) => void;
+  operation?: "create" | "update";
 }
 
-const DietPlanV2TemplatePlanEditor: React.FC<Props> = ({ template, onClose, onSaved }) => {
+const DietPlanV2TemplatePlanEditor: React.FC<Props> = ({
+  template,
+  onClose,
+  onSaved,
+  operation = "update",
+}) => {
+  const createPreset = useCreateDietPlanV2Preset();
+  const updatePreset = useUpdateDietPlanV2Preset();
   const initialMeta: DietV2TemplateMetaValues = {
     goal: template.goal ?? "",
     targetGender: template.targetGender ?? "",
     dietTags: template.dietTags ?? [],
-    builtBy: template.builtBy ?? "",
-    notes: template.notes ?? "",
   };
   const [name, setName] = useState(template.name);
   const [meta, setMeta] = useState<DietV2TemplateMetaValues>(initialMeta);
@@ -40,23 +51,27 @@ const DietPlanV2TemplatePlanEditor: React.FC<Props> = ({ template, onClose, onSa
   const patchMeta = (patch: Partial<DietV2TemplateMetaValues>) =>
     setMeta((prev) => ({ ...prev, ...patch }));
 
-  const handlePersist = (nextPlan: typeof seed) => {
+  const handlePersist = async (nextPlan: typeof seed) => {
     const updated: DietV2Template = {
       ...template,
       name: name.trim() || template.name,
       goal: meta.goal || undefined,
       targetGender: meta.targetGender || undefined,
       dietTags: meta.dietTags.length > 0 ? meta.dietTags : undefined,
-      builtBy: meta.builtBy.trim() || undefined,
-      notes: meta.notes.trim() || undefined,
       mealsCount: nextPlan.meals.length,
       macros: computeTemplateMacroTotals(nextPlan),
-      macrosOverridden: false,
       plan: nextPlan,
     };
-    upsertTemplate(updated);
+    const preset = templateToPreset(updated);
+    const response =
+      operation === "create"
+        ? await createPreset.mutateAsync(preset)
+        : await updatePreset.mutateAsync({ id: template.id, preset });
+    const saved = presetToTemplate(response.data);
     setBaseline({ name, meta });
-    onSaved(updated);
+    onSaved(saved);
+
+    return saved.plan;
   };
 
   return (

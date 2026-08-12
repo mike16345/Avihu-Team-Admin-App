@@ -46,13 +46,19 @@ const openDietPlansDirectly = async (
   mockApi: MockApiController,
   scenarioSelections: readonly MockScenarioSelection[] = defaultDietPlansScenarios()
 ) => {
-  mockApi.useScenario("auth.login.success", "analytics.dashboard.success");
+  mockApi.useScenario("auth.login.success", "analytics.dashboard.success", "users.success");
   await loginAsAdmin(page);
 
   await expectPathname(page, DASHBOARD_PATH);
   await expect(page.getByTestId("admin-dashboard")).toBeVisible();
 
-  mockApi.useScenario("analytics.dashboard.success", ...scenarioSelections);
+  mockApi.useScenario(
+    "auth.refresh.success",
+    "analytics.dashboard.success",
+    "users.success",
+    "trainers.subtrainers.empty",
+    ...scenarioSelections
+  );
   await page.goto(DIET_PLANS_PATH, GOTO_OPTIONS);
 
   await expectPathname(page, DIET_PLANS_PATH);
@@ -64,13 +70,19 @@ const openDietPlansFromSidebar = async (
   mockApi: MockApiController,
   scenarioSelections: readonly MockScenarioSelection[] = defaultDietPlansScenarios()
 ) => {
-  mockApi.useScenario("auth.login.success", "analytics.dashboard.success");
+  mockApi.useScenario("auth.login.success", "analytics.dashboard.success", "users.success");
   await loginAsAdmin(page);
 
   await expectPathname(page, DASHBOARD_PATH);
   await expect(page.getByTestId("admin-dashboard")).toBeVisible();
 
-  mockApi.useScenario("analytics.dashboard.success", ...scenarioSelections);
+  mockApi.useScenario(
+    "auth.refresh.success",
+    "analytics.dashboard.success",
+    "users.success",
+    "trainers.subtrainers.empty",
+    ...scenarioSelections
+  );
   await page.getByTestId("sidebar-link-dietPlans").click();
 
   await expectPathname(page, DIET_PLANS_PATH);
@@ -120,15 +132,44 @@ test.describe("diet plans page routing and entry", () => {
 
   test("V2 trainers see presets without legacy food-group tabs", async ({ page }) => {
     const mockApi = await installMockApi(page);
-    mockApi.useScenario("auth.login.v2-success", "analytics.dashboard.success");
+    const presetRequests = trackRequests(page, "GET", "/presets/dietPlans");
+    mockApi.useScenario("auth.login.v2-success", "analytics.dashboard.success", "users.success");
     await loginAsAdmin(page);
 
-    mockApi.useScenario("auth.refresh.v2-success", "analytics.dashboard.success", "users.success");
+    mockApi.useScenario(
+      "auth.refresh.v2-success",
+      "analytics.dashboard.success",
+      "users.success",
+      "diet-plans.v2-presets.success"
+    );
     await page.goto(DIET_PLANS_PATH, GOTO_OPTIONS);
 
     await expect(page.getByTestId("diet-plan-v2-templates-list")).toBeVisible();
+    await expect(page.getByText("תבנית V2 מהשרת")).toBeVisible();
     await expect(page.getByTestId("template-tab-protein")).toHaveCount(0);
     await expect(page.getByTestId("template-tab-carbItems")).toHaveCount(0);
+    await expect.poll(() => presetRequests.length).toBe(1);
+    expect(new URL(presetRequests[0].url()).searchParams.get("version")).toBe("2");
+    mockApi.assertNoUnhandledRequests();
+  });
+
+  test("V2 trainers open the V2 editor when adding a preset", async ({ page }) => {
+    const mockApi = await installMockApi(page);
+    mockApi.useScenario("auth.login.v2-success", "analytics.dashboard.success", "users.success");
+    await loginAsAdmin(page);
+
+    mockApi.useScenario(
+      "auth.refresh.v2-success",
+      "analytics.dashboard.success",
+      "users.success",
+      "diet-plans.v2-presets.success",
+      "diet-plans.v2-catalog.success"
+    );
+    await page.goto(DIET_PLANS_PATH, GOTO_OPTIONS);
+    await page.getByRole("button", { name: "הוסף תבנית" }).click();
+
+    await expectPathname(page, DIET_PLAN_EDITOR_PATH);
+    await expect(page.getByTestId("diet-v2-editor")).toBeVisible();
     mockApi.assertNoUnhandledRequests();
   });
 

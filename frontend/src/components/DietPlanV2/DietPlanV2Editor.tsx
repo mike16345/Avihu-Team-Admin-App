@@ -8,7 +8,6 @@ import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 import type { DietV2Meal, DietV2MealCategory, IDietPlanV2 } from "@/interfaces/IDietPlanV2";
 import { dietPlanV2Schema } from "@/schemas/dietPlanV2Schema";
-import { useUsersStore } from "@/store/userStore";
 
 import DietPlanV2TemplatePickerDialog from "./DietPlanV2TemplatePickerDialog";
 import DietPlanV2TemplateSaveDialog from "./DietPlanV2TemplateSaveDialog";
@@ -32,8 +31,6 @@ interface DietV2EditorProps {
   forceDirty?: boolean;
 }
 
-const DRAFT_STORAGE_KEY = "dietPlanV2:draft";
-
 const createEmptyPlan = (): IDietPlanV2 => ({
   version: 2,
   meals: [buildEmptyMeal(1)],
@@ -42,15 +39,6 @@ const createEmptyPlan = (): IDietPlanV2 => ({
 
 const readInitialPlan = (initialPlan?: IDietPlanV2): IDietPlanV2 => {
   if (initialPlan) return initialPlan;
-  if (typeof window === "undefined") return createEmptyPlan();
-
-  try {
-    const parsed = JSON.parse(window.localStorage.getItem(DRAFT_STORAGE_KEY) ?? "null");
-    const result = dietPlanV2Schema.safeParse(parsed);
-    if (result.success) return result.data;
-  } catch {
-    return createEmptyPlan();
-  }
 
   return createEmptyPlan();
 };
@@ -93,13 +81,6 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
   const [dropIndex, setDropIndex] = useState<number | null>(null);
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
   const [templatePickerOpen, setTemplatePickerOpen] = useState(false);
-
-  const currentTrainerName = useUsersStore((state) => {
-    const user = state.currentUser;
-    if (!user) return "";
-
-    return [user.firstName, user.lastName].filter(Boolean).join(" ").trim();
-  });
 
   const totals = useMemo(() => computePlanMacroTotals(plan), [plan]);
   const hasPlanItems = plan.meals.some((meal) =>
@@ -189,7 +170,6 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
     try {
       const persisted = await onPersist?.(values);
       const savedPlan = persisted ?? values;
-      if (!onPersist) window.localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(savedPlan));
       reset(savedPlan);
       toast.success("התפריט נשמר בהצלחה");
     } catch {
@@ -322,7 +302,6 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
           open={templateDialogOpen}
           onOpenChange={setTemplateDialogOpen}
           plan={plan}
-          defaultBuiltBy={currentTrainerName}
         />
 
         <DietPlanV2TemplatePickerDialog
