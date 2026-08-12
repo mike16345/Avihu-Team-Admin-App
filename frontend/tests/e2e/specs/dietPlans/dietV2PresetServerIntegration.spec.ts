@@ -80,6 +80,10 @@ test("creating a V2 preset writes it to the Server", async ({ page }) => {
     .getByPlaceholder("חפש או כתוב מאכל ולחץ Enter…");
   await proteinInput.fill("טופו 200 גרם");
   await proteinInput.press("Enter");
+  await editor.getByLabel("קלוריות", { exact: true }).fill("450");
+  await editor.getByLabel("חלבון", { exact: true }).fill("30");
+  await editor.getByLabel("פחמימה", { exact: true }).fill("50");
+  await editor.getByLabel("שומן", { exact: true }).fill("12");
   await editor.getByRole("button", { name: "שמור שינויים בתבנית" }).click();
 
   await expect.poll(() => createRequests.length).toBe(1);

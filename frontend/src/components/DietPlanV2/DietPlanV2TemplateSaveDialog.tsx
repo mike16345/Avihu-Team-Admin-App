@@ -63,7 +63,7 @@ const DietPlanV2TemplateSaveDialog: React.FC<Props> = ({ open, onOpenChange, pla
       const response = await createPreset.mutateAsync({
         name: trimmed,
         version: 2,
-        meals: plan.meals,
+        meals: plan.meals.map((meal) => ({ ...meal, _id: undefined })),
         highlights: plan.highlights,
         goal: goal || undefined,
         targetGender: targetGender || undefined,

@@ -17,7 +17,7 @@ import NotesPanel from "./NotesPanel";
 import PlanMacroCharts from "./PlanMacroCharts";
 import { hasCategoryDuplicate } from "./dietPlanV2Catalog";
 import type { DietV2Template } from "./dietPlanV2Templates";
-import { buildEmptyMeal, computePlanMacroTotals, makeLocalId } from "./dietPlanV2Utils";
+import { buildEmptyMeal, computePlanMacroTotals } from "./dietPlanV2Utils";
 
 type DietV2Tab = "menu" | "highlights";
 
@@ -45,7 +45,7 @@ const readInitialPlan = (initialPlan?: IDietPlanV2): IDietPlanV2 => {
 
 const cloneMeal = (meal: DietV2Meal): DietV2Meal => ({
   ...meal,
-  id: makeLocalId("meal"),
+  _id: undefined,
   name: `${meal.name} (העתק)`,
   categories: meal.categories.map((category) => ({
     ...category,
@@ -55,6 +55,9 @@ const cloneMeal = (meal: DietV2Meal): DietV2Meal => ({
   freeCalories: meal.freeCalories ? { ...meal.freeCalories } : undefined,
   supplements: meal.supplements ? [...meal.supplements] : undefined,
 });
+
+const getMealRenderId = (meal: DietV2Meal, fieldId: string | undefined, index: number): string =>
+  meal._id ?? fieldId ?? `unsaved-meal-${index}`;
 
 const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
   initialPlan,
@@ -68,14 +71,19 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
     resolver: zodResolver(dietPlanV2Schema),
     defaultValues: readInitialPlan(initialPlan),
   });
-  const { control, handleSubmit, reset, setValue, watch } = form;
-  const { append, insert, move, remove } = useFieldArray({ control, name: "meals" });
+  const { control, handleSubmit, reset, setValue, trigger, watch } = form;
+  const { append, fields, insert, move, remove } = useFieldArray({ control, name: "meals" });
   const plan = watch();
   const { isDirty, isSubmitting } = form.formState;
 
   const [tab, setTab] = useState<DietV2Tab>("menu");
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(
-    () => new Set(plan.meals.slice(1).map((meal) => meal.id))
+    () =>
+      new Set(
+        plan.meals
+          .slice(1)
+          .map((meal, index) => getMealRenderId(meal, fields[index + 1]?.id, index + 1))
+      )
   );
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dropIndex, setDropIndex] = useState<number | null>(null);
@@ -93,11 +101,14 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
 
   useUnsavedChangesWarning(isDirty || forceDirty);
 
-  const updateMeal = (mealId: string, next: DietV2Meal) => {
-    const mealIndex = plan.meals.findIndex((meal) => meal.id === mealId);
-    if (mealIndex === -1) return;
+  const updateMeal = (mealIndex: number, next: DietV2Meal) => {
     setValue(`meals.${mealIndex}`, next, { shouldDirty: true, shouldValidate: true });
   };
+
+  const findMealIndexByRenderId = (renderId: string) =>
+    plan.meals.findIndex(
+      (meal, index) => getMealRenderId(meal, fields[index]?.id, index) === renderId
+    );
 
   const toggleCollapse = (mealId: string) => {
     setCollapsedIds((current) => {
@@ -110,12 +121,12 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
   };
 
   const copyCategoryToMeal = (
-    sourceMealId: string,
+    sourceMealIndex: number,
     categoryName: DietV2MealCategory,
-    targetMealId: string
+    targetMealRenderId: string
   ) => {
-    const source = plan.meals.find((meal) => meal.id === sourceMealId);
-    const targetIndex = plan.meals.findIndex((meal) => meal.id === targetMealId);
+    const source = plan.meals[sourceMealIndex];
+    const targetIndex = findMealIndexByRenderId(targetMealRenderId);
     const sourceCategory = source?.categories.find(
       (category) => category.category === categoryName
     );
@@ -138,8 +149,8 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
     setValue(`meals.${targetIndex}`, { ...target, categories }, { shouldDirty: true });
   };
 
-  const copyCategoryToNewMeal = (sourceMealId: string, categoryName: DietV2MealCategory) => {
-    const source = plan.meals.find((meal) => meal.id === sourceMealId);
+  const copyCategoryToNewMeal = (sourceMealIndex: number, categoryName: DietV2MealCategory) => {
+    const source = plan.meals[sourceMealIndex];
     const sourceCategory = source?.categories.find(
       (category) => category.category === categoryName
     );
@@ -163,7 +174,12 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
       meals: template.plan.meals.map((meal) => ({ ...cloneMeal(meal), name: meal.name })),
     };
     reset(appliedPlan, { keepDefaultValues: true });
+    setCollapsedIds(new Set());
     setTemplatePickerOpen(false);
+  };
+
+  const handleOpenTemplateDialog = async () => {
+    if (await trigger()) setTemplateDialogOpen(true);
   };
 
   const persistPlan = handleSubmit(async (values) => {
@@ -219,7 +235,7 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
                 <ToolbarButton
                   icon={<FaBookmark size={11} />}
                   label="שמור כתבנית"
-                  onClick={() => setTemplateDialogOpen(true)}
+                  onClick={handleOpenTemplateDialog}
                   disabled={!hasPlanItems}
                 />
                 <ToolbarButton
@@ -235,41 +251,50 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
         {tab === "menu" && (
           <>
             <div className="flex flex-col gap-4">
-              {plan.meals.map((meal, index) => (
-                <MealCard
-                  key={meal.id}
-                  meal={meal}
-                  index={index + 1}
-                  collapsed={collapsedIds.has(meal.id)}
-                  siblingMeals={plan.meals
-                    .filter((candidate) => candidate.id !== meal.id)
-                    .map((candidate, candidateIndex) => ({
-                      id: candidate.id,
+              {plan.meals.map((meal, index) => {
+                const renderId = getMealRenderId(meal, fields[index]?.id, index);
+                const siblingMeals = plan.meals.flatMap((candidate, candidateIndex) => {
+                  if (candidateIndex === index) return [];
+
+                  return [
+                    {
+                      id: getMealRenderId(candidate, fields[candidateIndex]?.id, candidateIndex),
                       name: candidate.name || `ארוחה ${candidateIndex + 1}`,
                       index: candidateIndex + 1,
-                    }))}
-                  onCopyCategoryToMeal={(category, targetId) =>
-                    copyCategoryToMeal(meal.id, category, targetId)
-                  }
-                  onCopyCategoryToNewMeal={(category) => copyCategoryToNewMeal(meal.id, category)}
-                  onChange={(next) => updateMeal(meal.id, next)}
-                  onToggleCollapse={() => toggleCollapse(meal.id)}
-                  onDuplicate={() => insert(index + 1, cloneMeal(meal))}
-                  onRemove={() => remove(index)}
-                  canRemove={plan.meals.length > 1}
-                  onDragStart={() => {
-                    setDragIndex(index);
-                    setDropIndex(index);
-                  }}
-                  onDragOver={(event) => {
-                    event.preventDefault();
-                    if (dragIndex !== null) setDropIndex(index);
-                  }}
-                  onDrop={() => handleMealDrop(index)}
-                  isDragging={dragIndex === index}
-                  isDropTarget={dropIndex === index && dragIndex !== null && dragIndex !== index}
-                />
-              ))}
+                    },
+                  ];
+                });
+
+                return (
+                  <MealCard
+                    key={renderId}
+                    meal={meal}
+                    index={index + 1}
+                    collapsed={collapsedIds.has(renderId)}
+                    siblingMeals={siblingMeals}
+                    onCopyCategoryToMeal={(category, targetId) =>
+                      copyCategoryToMeal(index, category, targetId)
+                    }
+                    onCopyCategoryToNewMeal={(category) => copyCategoryToNewMeal(index, category)}
+                    onChange={(next) => updateMeal(index, next)}
+                    onToggleCollapse={() => toggleCollapse(renderId)}
+                    onDuplicate={() => insert(index + 1, cloneMeal(meal))}
+                    onRemove={() => remove(index)}
+                    canRemove={plan.meals.length > 1}
+                    onDragStart={() => {
+                      setDragIndex(index);
+                      setDropIndex(index);
+                    }}
+                    onDragOver={(event) => {
+                      event.preventDefault();
+                      if (dragIndex !== null) setDropIndex(index);
+                    }}
+                    onDrop={() => handleMealDrop(index)}
+                    isDragging={dragIndex === index}
+                    isDropTarget={dropIndex === index && dragIndex !== null && dragIndex !== index}
+                  />
+                );
+              })}
             </div>
 
             <button

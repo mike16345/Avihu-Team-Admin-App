@@ -41,7 +41,6 @@ test("V2 plan validation requires all four non-negative meal macros", () => {
     highlights: "",
     meals: [
       {
-        id: "meal-1",
         name: "Meal 1",
         categories: [],
         macros: { calories: 0 },
@@ -53,7 +52,6 @@ test("V2 plan validation requires all four non-negative meal macros", () => {
     highlights: "",
     meals: [
       {
-        id: "meal-1",
         name: "Meal 1",
         categories: [],
         macros: { calories: 0, protein: -1, carbs: 0, fat: 0 },
@@ -71,7 +69,6 @@ test("V2 plan validation accepts literal names and zero macro values", () => {
     highlights: "",
     meals: [
       {
-        id: "meal-1",
         name: "Meal 1",
         categories: [
           {
@@ -96,14 +93,12 @@ test("plan totals use explicit meal macros and keep free calories separate", () 
       highlights: "",
       meals: [
         {
-          id: "meal-1",
           name: "Meal 1",
           categories: [],
           macros: { calories: 448, protein: 25, carbs: 45, fat: 12 },
           freeCalories: { calories: 150, description: "Fruit" },
         },
         {
-          id: "meal-2",
           name: "Meal 2",
           categories: [],
           macros: { calories: 590, protein: 40, carbs: 60, fat: 10 },

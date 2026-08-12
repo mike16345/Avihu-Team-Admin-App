@@ -26,7 +26,7 @@ const v2Plan = {
   highlights: "לשתות מים",
   meals: [
     {
-      id: "meal-v2-001",
+      _id: "507f1f77bcf86cd799439011",
       name: "ארוחת בוקר מהשרת",
       categories: [
         { category: "protein", items: [{ name: "100 גרם חזה עוף" }] },

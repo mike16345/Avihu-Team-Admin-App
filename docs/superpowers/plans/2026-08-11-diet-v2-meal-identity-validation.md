@@ -27,12 +27,12 @@
 - Modify: `/Users/michael/Developer/Avihu/Avihu-Team-Server/server/src/models/dietPlanModel.ts`
 - Modify: `/Users/michael/Developer/Avihu/Avihu-Team-Server/server/src/models/dietPlanV2Schemas.ts`
 - Modify: `/Users/michael/Developer/Avihu/Avihu-Team-Server/server/src/middleware/dietPlanMiddleware.ts`
-- Modify: `/Users/michael/Developer/Avihu/Avihu-Team-Server/server/src/functions/dietPlans/index.ts`
 - Modify: `/Users/michael/Developer/Avihu/Avihu-Team-Server/server/src/services/dietV2CatalogService.ts`
 
 **Interfaces:**
 - Produces: `DietV2Meal._id?: Types.ObjectId | string`.
-- Produces: `validateDietPlanUpdate(event)` using V1 or V2 update schemas with optional `userId`.
+- Produces: method-aware `validateDietPlan(event)` selection using V1 or V2 update schemas with
+  optional `userId` for PUT requests.
 
 - [ ] Write failing Jest tests proving Mongoose generates meal `_id`, preserves a supplied `_id`,
   update validation accepts a missing body `userId`, create validation rejects it, and missing macros
@@ -40,7 +40,7 @@
 - [ ] Run the focused Jest tests and confirm the failures are caused by the old `id` contract and
   create-only validator being reused for updates.
 - [ ] Enable Mongoose meal subdocument `_id`, remove `id`, preserve optional `_id` in catalog content
-  resolution, add update Joi schemas, and wire update routes to `validateDietPlanUpdate`.
+  resolution, add update Joi schemas, and select them for PUT requests in `validateDietPlan`.
 - [ ] Run the focused Jest tests until green.
 
 ### Task 2: Admin meal identity and blank required macros

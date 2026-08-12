@@ -79,6 +79,32 @@ test("V2 catalog search sends only the settled term during typing", async ({ pag
   mockApi.assertNoUnhandledRequests();
 });
 
+test("new V2 meals require all four macro inputs before saving", async ({ page }) => {
+  const createRequests: Request[] = [];
+  page.on("request", (request) => {
+    if (request.method() === "POST" && new URL(request.url()).pathname.endsWith("/dietPlans")) {
+      createRequests.push(request);
+    }
+  });
+  const { editor, mockApi } = await openV2Editor(page);
+
+  await expect(editor.getByLabel("קלוריות", { exact: true })).toHaveValue("");
+  await expect(editor.getByLabel("חלבון", { exact: true })).toHaveValue("");
+  await expect(editor.getByLabel("פחמימה", { exact: true })).toHaveValue("");
+  await expect(editor.getByLabel("שומן", { exact: true })).toHaveValue("");
+
+  const proteinInput = editor
+    .getByTestId("diet-v2-category-protein")
+    .getByPlaceholder("חפש או כתוב מאכל ולחץ Enter…");
+  await proteinInput.fill("טופו 200 גרם");
+  await proteinInput.press("Enter");
+  await editor.getByRole("button", { name: "שמור תפריט" }).click();
+
+  await expect(editor.getByText("שדה חובה")).toHaveCount(4);
+  expect(createRequests).toHaveLength(0);
+  mockApi.assertNoUnhandledRequests();
+});
+
 test("V2 editor keeps quick add category-scoped and resets dirty state after save", async ({
   page,
 }) => {
@@ -155,6 +181,10 @@ test("saving a V2 template sends the current plan to the Server", async ({ page 
 
   await protein.getByPlaceholder("חפש או כתוב מאכל ולחץ Enter…").fill("טופו 200 גרם");
   await protein.getByPlaceholder("חפש או כתוב מאכל ולחץ Enter…").press("Enter");
+  await editor.getByLabel("קלוריות", { exact: true }).fill("450");
+  await editor.getByLabel("חלבון", { exact: true }).fill("30");
+  await editor.getByLabel("פחמימה", { exact: true }).fill("50");
+  await editor.getByLabel("שומן", { exact: true }).fill("12");
   await editor.getByRole("button", { name: "שמור כתבנית" }).click();
   await page.getByRole("button", { name: "שמור תבנית", exact: true }).click();
 

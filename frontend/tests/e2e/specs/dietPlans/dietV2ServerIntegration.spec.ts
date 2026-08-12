@@ -143,6 +143,10 @@ test("a newly-created V2 plan uses update on its next save", async ({ page }) =>
   const proteinInput = protein.getByPlaceholder("חפש או כתוב מאכל ולחץ Enter…");
   await proteinInput.fill("טופו 200 גרם");
   await proteinInput.press("Enter");
+  await editor.getByLabel("קלוריות", { exact: true }).fill("450");
+  await editor.getByLabel("חלבון", { exact: true }).fill("30");
+  await editor.getByLabel("פחמימה", { exact: true }).fill("50");
+  await editor.getByLabel("שומן", { exact: true }).fill("12");
   await editor.getByRole("button", { name: "שמור תפריט" }).click();
   await expect.poll(() => createRequests.length).toBe(1);
 
@@ -172,6 +176,7 @@ test("saving an existing V2 plan replaces it through the user-scoped Server rout
   const requestUrl = new URL(saveRequests[0].url());
   expect(requestUrl.searchParams.get("id")).toBe("user-001");
   expect(saveRequests[0].postDataJSON()).toMatchObject({ version: 2 });
+  expect(saveRequests[0].postDataJSON().meals[0]._id).toBe("507f1f77bcf86cd799439011");
   await expect(editor.getByRole("button", { name: "נשמר" })).toBeDisabled();
   mockApi.assertNoUnhandledRequests();
 });

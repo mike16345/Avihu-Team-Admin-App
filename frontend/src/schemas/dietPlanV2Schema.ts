@@ -28,7 +28,7 @@ const freeCaloriesSchema = z.object({
 });
 
 const mealSchema = z.object({
-  id: z.string().min(1),
+  _id: z.string().optional(),
   name: z.string(),
   categories: z.array(categorySchema),
   macros: mealMacrosSchema,

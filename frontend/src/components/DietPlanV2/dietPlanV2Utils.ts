@@ -60,6 +60,13 @@ export const makeLocalId = (prefix: string): string =>
 export const DIET_V2_DEFAULT_CATEGORIES: DietV2MealCategory[] = [...DIET_V2_MEAL_CATEGORIES];
 
 export const EMPTY_MEAL_MACROS: DietV2MealMacros = {
+  calories: Number.NaN,
+  protein: Number.NaN,
+  carbs: Number.NaN,
+  fat: Number.NaN,
+};
+
+const ZERO_MEAL_MACROS: DietV2MealMacros = {
   calories: 0,
   protein: 0,
   carbs: 0,
@@ -67,7 +74,6 @@ export const EMPTY_MEAL_MACROS: DietV2MealMacros = {
 };
 
 export const buildEmptyMeal = (index: number): DietV2Meal => ({
-  id: makeLocalId("meal"),
   name: `ארוחה ${index}`,
   categories: DIET_V2_DEFAULT_CATEGORIES.map((category) => ({ category, items: [] })),
   macros: { ...EMPTY_MEAL_MACROS },
@@ -92,5 +98,5 @@ export const computePlanMacroTotals = (plan: IDietPlanV2): DietV2PlanTotals =>
       },
       freeCalories: totals.freeCalories + finiteOrZero(meal.freeCalories?.calories),
     }),
-    { macros: { ...EMPTY_MEAL_MACROS }, freeCalories: 0 }
+    { macros: { ...ZERO_MEAL_MACROS }, freeCalories: 0 }
   );

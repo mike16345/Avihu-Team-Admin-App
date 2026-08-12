@@ -59,7 +59,7 @@ const DietPlanV2TraineeView: React.FC<DietV2TraineeViewProps> = ({
       </header>
 
       {plan.meals.map((meal, index) => (
-        <MealBlock key={meal.id} meal={meal} index={index + 1} />
+        <MealBlock key={meal._id ?? index} meal={meal} index={index + 1} />
       ))}
 
       {highlights.length > 0 && <NotesBlock title="דגשים לתפריט" lines={highlights} />}
