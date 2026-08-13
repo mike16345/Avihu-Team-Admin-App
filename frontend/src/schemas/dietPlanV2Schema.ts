@@ -1,8 +1,9 @@
 import { DIET_V2_MEAL_CATEGORIES } from "@/interfaces/IDietPlanV2";
 import { z } from "zod";
 
-const nonNegativeNumber = z.coerce
-  .number({ invalid_type_error: "שדה חובה" })
+const nonNegativeNumber = z
+  .number({ required_error: "שדה חובה", invalid_type_error: "שדה חובה" })
+  .finite("יש להזין מספר תקין")
   .min(0, "הערך חייב להיות 0 או יותר");
 
 const planItemSchema = z.object({
@@ -17,12 +18,34 @@ const macrosSchema = z.object({
   fat: nonNegativeNumber,
 });
 
-const categorySchema = z.object({
-  category: z.enum(DIET_V2_MEAL_CATEGORIES),
-  items: z.array(planItemSchema),
-  macros:macrosSchema
-});
+const optionalMacrosSchema = z
+  .object({
+    calories: nonNegativeNumber.optional(),
+    protein: nonNegativeNumber.optional(),
+    carbs: nonNegativeNumber.optional(),
+    fat: nonNegativeNumber.optional(),
+  })
+  .optional();
 
+const categorySchema = z
+  .object({
+    category: z.enum(DIET_V2_MEAL_CATEGORIES),
+    items: z.array(planItemSchema),
+    macros: optionalMacrosSchema,
+  })
+  .superRefine((category, context) => {
+    if (category.items.length === 0) return;
+
+    (["calories", "protein", "carbs", "fat"] as const).forEach((field) => {
+      if (typeof category.macros?.[field] !== "number") {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "שדה חובה",
+          path: ["macros", field],
+        });
+      }
+    });
+  });
 
 const freeCaloriesSchema = z.object({
   calories: nonNegativeNumber,
@@ -33,6 +56,7 @@ const mealSchema = z.object({
   _id: z.string().optional(),
   name: z.string(),
   categories: z.array(categorySchema),
+  addOns: z.array(planItemSchema),
   macros: macrosSchema,
   freeCalories: freeCaloriesSchema.optional(),
   supplements: z.array(z.string()).optional(),

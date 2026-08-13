@@ -2,7 +2,12 @@ import { FaFire, FaUtensils } from "react-icons/fa6";
 
 import type { DietV2Meal, IDietPlanV2 } from "@/interfaces/IDietPlanV2";
 
-import { CATEGORY_LABELS, CATEGORY_TONES, computePlanMacroTotals } from "./dietPlanV2Utils";
+import {
+  CATEGORY_LABELS,
+  CATEGORY_TONES,
+  computePlanMacroTotals,
+  deriveMealMacros,
+} from "./dietPlanV2Utils";
 
 interface DietV2TraineeViewProps {
   plan: IDietPlanV2;
@@ -74,6 +79,8 @@ interface MealBlockProps {
 
 const MealBlock: React.FC<MealBlockProps> = ({ meal, index }) => {
   const categories = meal.categories.filter((category) => category.items.length > 0);
+  const addOns = meal.addOns ?? [];
+  const macros = deriveMealMacros(meal);
 
   return (
     <article className="overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm dark:border-blue-900/40 dark:bg-slate-900">
@@ -82,12 +89,10 @@ const MealBlock: React.FC<MealBlockProps> = ({ meal, index }) => {
           {meal.name || `ארוחה ${index}`}
         </h2>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-slate-600 dark:text-slate-300">
-          <span>{meal.macros.protein} ג׳ חלבון</span>
-          <span>{meal.macros.carbs} ג׳ פחמימה</span>
-          <span>{meal.macros.fat} ג׳ שומן</span>
-          <span className="font-bold text-rose-600 dark:text-rose-400">
-            {meal.macros.calories} קק״ל
-          </span>
+          <span>{macros.protein} ג׳ חלבון</span>
+          <span>{macros.carbs} ג׳ פחמימה</span>
+          <span>{macros.fat} ג׳ שומן</span>
+          <span className="font-bold text-rose-600 dark:text-rose-400">{macros.calories} קק״ל</span>
           {!!meal.freeCalories?.calories && (
             <span className="rounded-full border border-dashed border-emerald-300 bg-emerald-50 px-2 py-0.5 font-bold text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-300">
               + {meal.freeCalories.calories} חופשי
@@ -96,7 +101,7 @@ const MealBlock: React.FC<MealBlockProps> = ({ meal, index }) => {
         </div>
       </header>
 
-      {categories.length === 0 && !meal.freeCalories && (
+      {categories.length === 0 && addOns.length === 0 && !meal.freeCalories && (
         <p className="px-4 py-6 text-center text-xs italic text-slate-400">אין פרטים לארוחה זו</p>
       )}
 
@@ -118,6 +123,17 @@ const MealBlock: React.FC<MealBlockProps> = ({ meal, index }) => {
           </div>
         );
       })}
+
+      {addOns.length > 0 && (
+        <div className="border-t border-slate-100 bg-slate-50/60 px-4 py-3 dark:border-slate-800 dark:bg-slate-950/30">
+          <span className="mb-1.5 inline-flex rounded-md bg-slate-200 px-2 py-0.5 text-[10px] font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+            תוספות
+          </span>
+          <p className="text-sm font-medium leading-6 text-slate-700 dark:text-slate-200">
+            {addOns.map((item) => item.name).join(" / ")}
+          </p>
+        </div>
+      )}
 
       {meal.freeCalories && (
         <div className="border-t border-emerald-100 bg-emerald-50/30 px-4 py-3 dark:border-emerald-900/40 dark:bg-emerald-950/10">

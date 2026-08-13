@@ -14,11 +14,11 @@ import type {
   IMacros,
 } from "@/interfaces/IDietPlanV2";
 
+import AddOnsFields from "./AddOnsFields";
 import CategorySection from "./CategorySection";
 import type { MealSibling } from "./CategorySection";
 import FreeCaloriesFields from "./FreeCaloriesFields";
-import MealMacroFields from "./MealMacroFields";
-import { DIET_V2_DEFAULT_CATEGORIES } from "./dietPlanV2Utils";
+import { deriveMealMacros, DIET_V2_DEFAULT_CATEGORIES } from "./dietPlanV2Utils";
 
 export type { MealSibling };
 
@@ -59,7 +59,9 @@ const MealCard: React.FC<MealCardProps> = ({
   isDragging,
   isDropTarget,
 }) => {
-  const totalItems = meal.categories.reduce((total, category) => total + category.items.length, 0);
+  const addOns = meal.addOns ?? [];
+  const totalItems =
+    meal.categories.reduce((total, category) => total + category.items.length, 0) + addOns.length;
   const displayedCategories: DietV2Category[] = DIET_V2_DEFAULT_CATEGORIES.map(
     (category) =>
       meal.categories.find((candidate) => candidate.category === category) ?? {
@@ -67,13 +69,14 @@ const MealCard: React.FC<MealCardProps> = ({
         items: [],
       }
   );
+  const mealMacros = deriveMealMacros({ categories: displayedCategories });
 
   const updateCategory = (categoryName: DietV2MealCategory, next: DietV2Category) => {
     const exists = meal.categories.some((category) => category.category === categoryName);
     const categories = exists
       ? meal.categories.map((category) => (category.category === categoryName ? next : category))
       : [...meal.categories, next];
-    onChange({ ...meal, categories });
+    onChange({ ...meal, categories, macros: deriveMealMacros({ categories }) });
   };
 
   return (
@@ -120,7 +123,7 @@ const MealCard: React.FC<MealCardProps> = ({
         </div>
 
         <div onClick={(event) => event.stopPropagation()}>
-          <MealMacroInline macros={meal.macros} freeCalories={meal.freeCalories?.calories} />
+          <MealMacroInline macros={mealMacros} freeCalories={meal.freeCalories?.calories} />
         </div>
 
         <div className="flex items-center gap-1.5">
@@ -138,22 +141,20 @@ const MealCard: React.FC<MealCardProps> = ({
 
       {!collapsed && (
         <div className="flex flex-col gap-3 p-4">
-          <MealMacroFields
-            value={meal.macros}
-            mealIndex={index - 1}
-            onChange={(macros) => onChange({ ...meal, macros })}
-          />
-
-          {displayedCategories.map((category) => (
+          {displayedCategories.map((category, categoryIndex) => (
             <CategorySection
               key={category.category}
               category={category}
+              mealIndex={index - 1}
+              categoryIndex={categoryIndex}
               siblingMeals={siblingMeals}
               onCopyToMeal={(targetId) => onCopyCategoryToMeal(category.category, targetId)}
               onCopyToNewMeal={() => onCopyCategoryToNewMeal(category.category)}
               onChange={(next) => updateCategory(category.category, next)}
             />
           ))}
+
+          <AddOnsFields value={addOns} onChange={(next) => onChange({ ...meal, addOns: next })} />
 
           <FreeCaloriesFields
             value={meal.freeCalories}

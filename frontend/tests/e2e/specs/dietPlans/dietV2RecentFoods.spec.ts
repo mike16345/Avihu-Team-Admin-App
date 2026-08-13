@@ -5,7 +5,10 @@ import {
   hasCategoryDuplicate,
   normalizeCatalogName,
 } from "../../../../src/components/DietPlanV2/dietPlanV2Catalog";
-import { computePlanMacroTotals } from "../../../../src/components/DietPlanV2/dietPlanV2Utils";
+import {
+  computePlanMacroTotals,
+  deriveMealMacros,
+} from "../../../../src/components/DietPlanV2/dietPlanV2Utils";
 import { dietPlanV2Schema } from "../../../../src/schemas/dietPlanV2Schema";
 import { usesDietPlanV2 } from "../../../../src/lib/dietPlanVersion";
 
@@ -35,15 +38,22 @@ test("catalog candidates deduplicate within a category but not across categories
   ]);
 });
 
-test("V2 plan validation requires all four non-negative meal macros", () => {
+test("V2 plan validation requires every macro for non-empty categories", () => {
   const missingMacros = dietPlanV2Schema.safeParse({
     version: 2,
     highlights: "",
     meals: [
       {
         name: "Meal 1",
-        categories: [],
-        macros: { calories: 0 },
+        categories: [
+          {
+            category: "protein",
+            items: [{ name: "Chicken" }],
+            macros: { calories: 100, protein: 20 },
+          },
+        ],
+        addOns: [],
+        macros: { calories: 999, protein: 999, carbs: 999, fat: 999 },
       },
     ],
   });
@@ -53,8 +63,15 @@ test("V2 plan validation requires all four non-negative meal macros", () => {
     meals: [
       {
         name: "Meal 1",
-        categories: [],
-        macros: { calories: 0, protein: -1, carbs: 0, fat: 0 },
+        categories: [
+          {
+            category: "protein",
+            items: [{ name: "Chicken" }],
+            macros: { calories: 100, protein: -1, carbs: 0, fat: 0 },
+          },
+        ],
+        addOns: [],
+        macros: { calories: 0, protein: 0, carbs: 0, fat: 0 },
       },
     ],
   });
@@ -63,7 +80,7 @@ test("V2 plan validation requires all four non-negative meal macros", () => {
   expect(negativeMacros.success).toBe(false);
 });
 
-test("V2 plan validation accepts literal names and zero macro values", () => {
+test("V2 plan validation accepts explicit zero macros and skips empty categories", () => {
   const result = dietPlanV2Schema.safeParse({
     version: 2,
     highlights: "",
@@ -74,11 +91,13 @@ test("V2 plan validation accepts literal names and zero macro values", () => {
           {
             category: "protein",
             items: [{ name: "100g Chicken breast" }],
+            macros: { calories: 0, protein: 0, carbs: 0, fat: 0 },
           },
+          { category: "vegetables", items: [] },
         ],
+        addOns: [{ name: "Creatine 5g" }],
         macros: { calories: 0, protein: 0, carbs: 0, fat: 0 },
         freeCalories: { calories: 150, description: "Fruit / snack" },
-        supplements: ["Creatine 5g"],
       },
     ],
   });
@@ -86,27 +105,51 @@ test("V2 plan validation accepts literal names and zero macro values", () => {
   expect(result.success).toBe(true);
 });
 
-test("plan totals use explicit meal macros and keep free calories separate", () => {
+test("meal and plan totals derive from category macros and keep free calories separate", () => {
+  const firstMeal = {
+    name: "Meal 1",
+    categories: [
+      {
+        category: "protein" as const,
+        items: [{ name: "Chicken" }],
+        macros: { calories: 200, protein: 25, carbs: 0, fat: 5 },
+      },
+      {
+        category: "carbs" as const,
+        items: [{ name: "Rice" }],
+        macros: { calories: 248, protein: 0, carbs: 45, fat: 7 },
+      },
+    ],
+    addOns: [{ name: "Salt" }],
+    macros: { calories: 999, protein: 999, carbs: 999, fat: 999 },
+    freeCalories: { calories: 150, description: "Fruit" },
+  };
+
+  expect(deriveMealMacros(firstMeal)).toEqual({ calories: 448, protein: 25, carbs: 45, fat: 12 });
   expect(
     computePlanMacroTotals({
       version: 2,
       highlights: "",
       meals: [
         {
-          name: "Meal 1",
-          categories: [],
-          macros: { calories: 448, protein: 25, carbs: 45, fat: 12 },
-          freeCalories: { calories: 150, description: "Fruit" },
+          ...firstMeal,
         },
         {
           name: "Meal 2",
-          categories: [],
-          macros: { calories: 590, protein: 40, carbs: 60, fat: 10 },
+          categories: [
+            {
+              category: "vegetables",
+              items: [{ name: "Salad" }],
+              macros: { calories: 50, protein: 2, carbs: 8, fat: 1 },
+            },
+          ],
+          addOns: [],
+          macros: { calories: 0, protein: 0, carbs: 0, fat: 0 },
         },
       ],
     })
   ).toEqual({
-    macros: { calories: 1038, protein: 65, carbs: 105, fat: 22 },
+    macros: { calories: 498, protein: 27, carbs: 53, fat: 13 },
     freeCalories: 150,
   });
 });

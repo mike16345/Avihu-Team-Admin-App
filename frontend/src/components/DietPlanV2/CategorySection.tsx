@@ -4,6 +4,7 @@ import { FaTrashCan } from "react-icons/fa6";
 import type { DietV2Category } from "@/interfaces/IDietPlanV2";
 
 import CatalogQuickAdd from "./CatalogQuickAdd";
+import CategoryMacroFields from "./CategoryMacroFields";
 import CopyCategoryButton, { type MealSibling } from "./CopyCategoryButton";
 import OptionRow from "./OptionRow";
 import { CATEGORY_LABELS, CATEGORY_TONES } from "./dietPlanV2Utils";
@@ -12,6 +13,8 @@ export type { MealSibling };
 
 interface CategorySectionProps {
   category: DietV2Category;
+  mealIndex: number;
+  categoryIndex: number;
   onChange: (category: DietV2Category) => void;
   siblingMeals?: MealSibling[];
   onCopyToMeal?: (targetMealId: string) => void;
@@ -20,6 +23,8 @@ interface CategorySectionProps {
 
 const CategorySection: React.FC<CategorySectionProps> = ({
   category,
+  mealIndex,
+  categoryIndex,
   onChange,
   siblingMeals = [],
   onCopyToMeal,
@@ -88,7 +93,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
           )}
           <button
             type="button"
-            onClick={() => onChange({ ...category, items: [] })}
+            onClick={() => onChange({ ...category, items: [], macros: undefined })}
             disabled={!hasItems}
             aria-label="נקה קטגוריה"
             title="נקה קטגוריה"
@@ -104,8 +109,20 @@ const CategorySection: React.FC<CategorySectionProps> = ({
           <CatalogQuickAdd
             category={category.category}
             existingItems={category.items}
-            onAdd={(item) => onChange({ ...category, items: [...category.items, item] })}
+            onAdd={(item) =>
+              onChange({ ...category, items: [...category.items, item], macros: undefined })
+            }
           />
+
+          {hasItems && (
+            <CategoryMacroFields
+              categoryLabel={CATEGORY_LABELS[category.category]}
+              value={category.macros}
+              mealIndex={mealIndex}
+              categoryIndex={categoryIndex}
+              onChange={(macros) => onChange({ ...category, macros })}
+            />
+          )}
 
           {hasItems && (
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
@@ -117,6 +134,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                     onChange({
                       ...category,
                       items: category.items.filter((_, itemIndex) => itemIndex !== index),
+                      macros: undefined,
                     })
                   }
                 />

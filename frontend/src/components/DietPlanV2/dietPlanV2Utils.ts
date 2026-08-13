@@ -76,7 +76,8 @@ const ZERO_MEAL_MACROS: IMacros = {
 export const buildEmptyMeal = (index: number): DietV2Meal => ({
   name: `ארוחה ${index}`,
   categories: DIET_V2_DEFAULT_CATEGORIES.map((category) => ({ category, items: [] })),
-  macros: { ...EMPTY_MEAL_MACROS },
+  addOns: [],
+  macros: { ...ZERO_MEAL_MACROS },
 });
 
 export interface DietV2PlanTotals {
@@ -87,16 +88,63 @@ export interface DietV2PlanTotals {
 const finiteOrZero = (value: number | undefined): number =>
   Number.isFinite(value) ? (value as number) : 0;
 
+export const deriveMealMacros = (meal: Pick<DietV2Meal, "categories">): IMacros =>
+  meal.categories.reduce<IMacros>(
+    (totals, category) => {
+      if (category.items.length === 0) return totals;
+
+      return {
+        calories: totals.calories + finiteOrZero(category.macros?.calories),
+        protein: totals.protein + finiteOrZero(category.macros?.protein),
+        carbs: totals.carbs + finiteOrZero(category.macros?.carbs),
+        fat: totals.fat + finiteOrZero(category.macros?.fat),
+      };
+    },
+    { ...ZERO_MEAL_MACROS }
+  );
+
 export const computePlanMacroTotals = (plan: IDietPlanV2): DietV2PlanTotals =>
   plan.meals.reduce<DietV2PlanTotals>(
-    (totals, meal) => ({
-      macros: {
-        calories: totals.macros.calories + finiteOrZero(meal.macros.calories),
-        protein: totals.macros.protein + finiteOrZero(meal.macros.protein),
-        carbs: totals.macros.carbs + finiteOrZero(meal.macros.carbs),
-        fat: totals.macros.fat + finiteOrZero(meal.macros.fat),
-      },
-      freeCalories: totals.freeCalories + finiteOrZero(meal.freeCalories?.calories),
-    }),
+    (totals, meal) => {
+      const mealMacros = deriveMealMacros(meal);
+      return {
+        macros: {
+          calories: totals.macros.calories + mealMacros.calories,
+          protein: totals.macros.protein + mealMacros.protein,
+          carbs: totals.macros.carbs + mealMacros.carbs,
+          fat: totals.macros.fat + mealMacros.fat,
+        },
+        freeCalories: totals.freeCalories + finiteOrZero(meal.freeCalories?.calories),
+      };
+    },
     { macros: { ...ZERO_MEAL_MACROS }, freeCalories: 0 }
   );
+
+export const normalizeDietPlanV2 = (plan: IDietPlanV2): IDietPlanV2 => ({
+  ...plan,
+  meals: plan.meals.map((meal) => {
+    const rawCategories = meal.categories as Array<
+      DietV2Meal["categories"][number] & { category: string }
+    >;
+    const legacyAddOns = rawCategories
+      .filter((category) => (category.category as string) === "addon")
+      .flatMap((category) => category.items);
+    const categories = DIET_V2_DEFAULT_CATEGORIES.map((categoryName) => {
+      const category = rawCategories.find((candidate) => candidate.category === categoryName);
+      if (!category) return { category: categoryName, items: [] };
+
+      return {
+        category: categoryName,
+        items: category.items.map((item) => ({ ...item })),
+        macros: category.items.length > 0 ? category.macros : undefined,
+      };
+    });
+
+    return {
+      ...meal,
+      categories,
+      addOns: [...(meal.addOns ?? []), ...legacyAddOns].map((item) => ({ ...item })),
+      macros: deriveMealMacros({ categories }),
+    };
+  }),
+});

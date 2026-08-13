@@ -1,7 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMemo, useState } from "react";
-import { FormProvider, useFieldArray, useForm } from "react-hook-form";
-import { FaApple, FaBookmark, FaClipboardCheck, FaFloppyDisk, FaPlus } from "react-icons/fa6";
+import { FormProvider, useFieldArray, useForm, type FieldErrors } from "react-hook-form";
+import {
+  FaApple,
+  FaBookmark,
+  FaClipboardCheck,
+  FaFloppyDisk,
+  FaPlus,
+  FaTriangleExclamation,
+} from "react-icons/fa6";
 import { toast } from "sonner";
 
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
@@ -17,7 +24,12 @@ import NotesPanel from "./NotesPanel";
 import PlanMacroCharts from "./PlanMacroCharts";
 import { hasCategoryDuplicate } from "./dietPlanV2Catalog";
 import type { DietV2Template } from "./dietPlanV2Templates";
-import { buildEmptyMeal, computePlanMacroTotals } from "./dietPlanV2Utils";
+import {
+  buildEmptyMeal,
+  computePlanMacroTotals,
+  deriveMealMacros,
+  normalizeDietPlanV2,
+} from "./dietPlanV2Utils";
 
 type DietV2Tab = "menu" | "highlights";
 
@@ -38,7 +50,7 @@ const createEmptyPlan = (): IDietPlanV2 => ({
 });
 
 const readInitialPlan = (initialPlan?: IDietPlanV2): IDietPlanV2 => {
-  if (initialPlan) return initialPlan;
+  if (initialPlan) return normalizeDietPlanV2(initialPlan);
 
   return createEmptyPlan();
 };
@@ -50,8 +62,10 @@ const cloneMeal = (meal: DietV2Meal): DietV2Meal => ({
   categories: meal.categories.map((category) => ({
     ...category,
     items: category.items.map((item) => ({ ...item })),
+    macros: category.macros ? { ...category.macros } : undefined,
   })),
-  macros: { ...meal.macros },
+  addOns: (meal.addOns ?? []).map((item) => ({ ...item })),
+  macros: deriveMealMacros(meal),
   freeCalories: meal.freeCalories ? { ...meal.freeCalories } : undefined,
   supplements: meal.supplements ? [...meal.supplements] : undefined,
 });
@@ -74,7 +88,7 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
   const { control, handleSubmit, reset, setValue, trigger, watch } = form;
   const { append, fields, insert, move, remove } = useFieldArray({ control, name: "meals" });
   const plan = watch();
-  const { isDirty, isSubmitting } = form.formState;
+  const { errors, isDirty, isSubmitting, submitCount } = form.formState;
 
   const [tab, setTab] = useState<DietV2Tab>("menu");
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(
@@ -91,12 +105,17 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
   const [templatePickerOpen, setTemplatePickerOpen] = useState(false);
 
   const totals = useMemo(() => computePlanMacroTotals(plan), [plan]);
-  const hasPlanItems = plan.meals.some((meal) =>
-    meal.categories.some((category) => category.items.length > 0)
+
+  const hasPlanItems = plan.meals.some(
+    (meal) =>
+      meal.categories.some((category) => category.items.length > 0) || meal.addOns.length > 0
   );
+  const macroValidationMessages = getMacroValidationMessages(plan, errors);
   const saveDisabled = (!isDirty && !forceDirty) || isSubmitting;
   let saveButtonLabel = saveLabel ?? "שמור תפריט";
+
   if (saveDisabled) saveButtonLabel = "נשמר";
+
   if (isSubmitting) saveButtonLabel = "שומר…";
 
   useUnsavedChangesWarning(isDirty || forceDirty);
@@ -137,16 +156,27 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
       (category) => category.category === categoryName
     ) ?? { category: categoryName, items: [] };
     const items = [...targetCategory.items];
+
     sourceCategory.items.forEach((item) => {
       if (!hasCategoryDuplicate(items, item.name)) items.push({ ...item });
     });
+
+    const targetWasEmpty = targetCategory.items.length === 0;
+    const copiedMacros =
+      targetWasEmpty && sourceCategory.macros ? { ...sourceCategory.macros } : undefined;
     const categories = target.categories.some((category) => category.category === categoryName)
       ? target.categories.map((category) =>
-          category.category === categoryName ? { ...category, items } : category
+          category.category === categoryName
+            ? { ...category, items, macros: copiedMacros }
+            : category
         )
-      : [...target.categories, { category: categoryName, items }];
+      : [...target.categories, { category: categoryName, items, macros: copiedMacros }];
 
-    setValue(`meals.${targetIndex}`, { ...target, categories }, { shouldDirty: true });
+    setValue(
+      `meals.${targetIndex}`,
+      { ...target, categories, macros: deriveMealMacros({ categories }) },
+      { shouldDirty: true, shouldValidate: true }
+    );
   };
 
   const copyCategoryToNewMeal = (sourceMealIndex: number, categoryName: DietV2MealCategory) => {
@@ -161,7 +191,11 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
       ...newMeal,
       categories: newMeal.categories.map((category) =>
         category.category === categoryName
-          ? { ...category, items: sourceCategory.items.map((item) => ({ ...item })) }
+          ? {
+              ...category,
+              items: sourceCategory.items.map((item) => ({ ...item })),
+              macros: sourceCategory.macros ? { ...sourceCategory.macros } : undefined,
+            }
           : category
       ),
     });
@@ -173,7 +207,7 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
       _id: undefined,
       meals: template.plan.meals.map((meal) => ({ ...cloneMeal(meal), name: meal.name })),
     };
-    reset(appliedPlan, { keepDefaultValues: true });
+    reset(normalizeDietPlanV2(appliedPlan), { keepDefaultValues: true });
     setCollapsedIds(new Set());
     setTemplatePickerOpen(false);
   };
@@ -182,16 +216,33 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
     if (await trigger()) setTemplateDialogOpen(true);
   };
 
-  const persistPlan = handleSubmit(async (values) => {
-    try {
-      const persisted = await onPersist?.(values);
-      const savedPlan = persisted ?? values;
-      reset(savedPlan);
-      toast.success("התפריט נשמר בהצלחה");
-    } catch {
-      toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE);
+  const persistPlan = handleSubmit(
+    async (values) => {
+      try {
+        const canonicalPlan = normalizeDietPlanV2(values);
+        const persisted = await onPersist?.(canonicalPlan);
+        const savedPlan = normalizeDietPlanV2(persisted ?? canonicalPlan);
+        reset(savedPlan);
+        toast.success("התפריט נשמר בהצלחה");
+      } catch {
+        toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE);
+      }
+    },
+    (invalidErrors) => {
+      setTab("menu");
+      const invalidMealIds = plan.meals.flatMap((meal, index) =>
+        invalidErrors.meals?.[index]?.categories
+          ? [getMealRenderId(meal, fields[index]?.id, index)]
+          : []
+      );
+      setCollapsedIds((current) => {
+        const next = new Set(current);
+        invalidMealIds.forEach((id) => next.delete(id));
+        return next;
+      });
+      toast.error("חסרים ערכי מאקרו בחלק מהארוחות");
     }
-  });
+  );
 
   const handleMealDrop = (targetIndex: number) => {
     if (dragIndex !== null && dragIndex !== targetIndex) move(dragIndex, targetIndex);
@@ -247,6 +298,28 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
             )}
           </div>
         </div>
+
+        {submitCount > 0 && macroValidationMessages.length > 0 && (
+          <section
+            role="alert"
+            className="rounded-2xl border border-rose-200 bg-rose-50/80 p-4 text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/25 dark:text-rose-200"
+          >
+            <div className="flex items-start gap-3">
+              <FaTriangleExclamation className="mt-0.5 shrink-0" size={15} />
+              <div>
+                <h3 className="text-sm font-extrabold">לא ניתן לשמור עדיין</h3>
+                <p className="mt-0.5 text-[11px] opacity-80">
+                  יש להשלים את השדות הבאים. אפשר להזין 0 כשהערך באמת אפס.
+                </p>
+                <ul className="mt-2 list-inside list-disc space-y-1 text-xs font-semibold">
+                  {macroValidationMessages.map((message) => (
+                    <li key={message}>{message}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </section>
+        )}
 
         {tab === "menu" && (
           <>
@@ -340,3 +413,39 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
 };
 
 export default DietPlanV2Editor;
+
+const MACRO_FIELD_LABELS = {
+  calories: "קלוריות",
+  protein: "חלבון",
+  carbs: "פחמימה",
+  fat: "שומן",
+} as const;
+
+const CATEGORY_ERROR_LABELS: Record<DietV2MealCategory, string> = {
+  protein: "חלבון",
+  carbs: "פחמימה",
+  fat: "שומן",
+  vegetables: "ירקות",
+};
+
+const getMacroValidationMessages = (
+  plan: IDietPlanV2,
+  errors: FieldErrors<IDietPlanV2>
+): string[] =>
+  plan.meals.flatMap((meal, mealIndex) =>
+    meal.categories.flatMap((category, categoryIndex) => {
+      const macroErrors = errors.meals?.[mealIndex]?.categories?.[categoryIndex]?.macros;
+      if (!macroErrors) return [];
+      const missingFields = (
+        Object.keys(MACRO_FIELD_LABELS) as Array<keyof typeof MACRO_FIELD_LABELS>
+      )
+        .filter((field) => macroErrors[field])
+        .map((field) => MACRO_FIELD_LABELS[field]);
+      if (missingFields.length === 0) return [];
+
+      const mealName = meal.name.trim() || `ארוחה ${mealIndex + 1}`;
+      return [
+        `${mealName} · ${CATEGORY_ERROR_LABELS[category.category]}: ${missingFields.join(", ")}`,
+      ];
+    })
+  );
