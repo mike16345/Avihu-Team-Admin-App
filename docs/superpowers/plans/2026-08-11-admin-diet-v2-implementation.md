@@ -33,7 +33,7 @@
 - Replace test: `frontend/tests/e2e/specs/dietPlans/dietV2RecentFoods.spec.ts`
 
 **Interfaces:**
-- Produces: `IDietPlanV2`, `DietV2Meal`, `DietV2Category`, `DietV2PlanItem`, `DietV2MealMacros`, `DietV2FreeCalories`, `DietV2CatalogItem`, `DietV2CatalogCategory`.
+- Produces: `IDietPlanV2`, `DietV2Meal`, `DietV2Category`, `DietV2PlanItem`, `IMacros`, `DietV2FreeCalories`, `DietV2CatalogItem`, `DietV2CatalogCategory`.
 - Produces: `dietPlanV2Schema`, `normalizeCatalogName(name)`, `hasCategoryDuplicate(items, name)`, `dedupeCatalogCandidates(candidates)`, `buildEmptyMeal(index)`, and `computePlanTotals(plan)`.
 
 - [ ] **Step 1: Replace the obsolete recent-food tests with failing contract/helper tests**
@@ -238,7 +238,7 @@ git commit -m "feat(dietPlanV2): simplify category quick add"
 - Test: `frontend/tests/e2e/specs/dietPlans/dietV2MealFields.spec.ts`
 
 **Interfaces:**
-- Consumes: `DietV2Meal`, `DietV2MealMacros`, `DietV2FreeCalories`, and explicit total helpers from Task 1.
+- Consumes: `DietV2Meal`, `IMacros`, `DietV2FreeCalories`, and explicit total helpers from Task 1.
 - Produces: focused controlled field components with inline validation-compatible inputs.
 
 - [ ] **Step 1: Write failing meal-field UI tests**

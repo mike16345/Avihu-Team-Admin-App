@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
-import type { DietV2MealMacros } from "@/interfaces/IDietPlanV2";
+import type { IMacros } from "@/interfaces/IDietPlanV2";
 import { FaDrumstickBite, FaFire, FaSeedling, FaTint } from "react-icons/fa";
 import type { IconType } from "react-icons";
 
 interface Props {
-  totals: DietV2MealMacros;
+  totals: IMacros;
   freeCalories?: number;
 }
 
@@ -40,7 +40,7 @@ const PlanMacroCharts: React.FC<Props> = ({ totals, freeCalories = 0 }) => {
 };
 
 interface MacroRingsCardProps {
-  totals: DietV2MealMacros;
+  totals: IMacros;
   freeCalories: number;
   pctProtein: number;
   pctCarbs: number;

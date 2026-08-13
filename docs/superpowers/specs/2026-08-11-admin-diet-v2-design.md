@@ -43,7 +43,7 @@ export interface DietV2Category {
   items: DietV2PlanItem[];
 }
 
-export interface DietV2MealMacros {
+export interface IMacros {
   calories: number;
   protein: number;
   carbs: number;
@@ -59,7 +59,7 @@ export interface DietV2Meal {
   id: string;
   name: string;
   categories: DietV2Category[];
-  macros: DietV2MealMacros;
+  macros: IMacros;
   freeCalories?: DietV2FreeCalories;
 
   // Provisional pass-through matching the apparent Admin UI shape.

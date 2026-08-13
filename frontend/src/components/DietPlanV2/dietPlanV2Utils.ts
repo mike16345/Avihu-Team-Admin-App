@@ -2,7 +2,7 @@ import type {
   DietV2CatalogCategory,
   DietV2Meal,
   DietV2MealCategory,
-  DietV2MealMacros,
+  IMacros,
   IDietPlanV2,
 } from "@/interfaces/IDietPlanV2";
 import { DIET_V2_MEAL_CATEGORIES } from "@/interfaces/IDietPlanV2";
@@ -59,14 +59,14 @@ export const makeLocalId = (prefix: string): string =>
 
 export const DIET_V2_DEFAULT_CATEGORIES: DietV2MealCategory[] = [...DIET_V2_MEAL_CATEGORIES];
 
-export const EMPTY_MEAL_MACROS: DietV2MealMacros = {
+export const EMPTY_MEAL_MACROS: IMacros = {
   calories: Number.NaN,
   protein: Number.NaN,
   carbs: Number.NaN,
   fat: Number.NaN,
 };
 
-const ZERO_MEAL_MACROS: DietV2MealMacros = {
+const ZERO_MEAL_MACROS: IMacros = {
   calories: 0,
   protein: 0,
   carbs: 0,
@@ -80,7 +80,7 @@ export const buildEmptyMeal = (index: number): DietV2Meal => ({
 });
 
 export interface DietV2PlanTotals {
-  macros: DietV2MealMacros;
+  macros: IMacros;
   freeCalories: number;
 }
 

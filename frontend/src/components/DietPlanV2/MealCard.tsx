@@ -11,7 +11,7 @@ import type {
   DietV2Category,
   DietV2Meal,
   DietV2MealCategory,
-  DietV2MealMacros,
+  IMacros,
 } from "@/interfaces/IDietPlanV2";
 
 import CategorySection from "./CategorySection";
@@ -200,7 +200,7 @@ const HeaderButton: React.FC<HeaderButtonProps> = ({
 );
 
 interface MealMacroInlineProps {
-  macros: DietV2MealMacros;
+  macros: IMacros;
   freeCalories?: number;
 }
 

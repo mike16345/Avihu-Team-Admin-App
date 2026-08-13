@@ -1,6 +1,6 @@
 import type {
   DietV2DietTag,
-  DietV2MealMacros,
+  IMacros,
   DietV2TemplateGender,
   DietV2TemplateGoal,
   IDietPlanV2,
@@ -43,11 +43,11 @@ export interface DietV2Template {
   targetGender?: DietV2TemplateGender;
   dietTags?: DietV2DietTag[];
   mealsCount: number;
-  macros: DietV2MealMacros;
+  macros: IMacros;
   plan: IDietPlanV2;
 }
 
-export const computeTemplateMacroTotals = (plan: IDietPlanV2): DietV2MealMacros =>
+export const computeTemplateMacroTotals = (plan: IDietPlanV2): IMacros =>
   computePlanMacroTotals(plan).macros;
 
 export const buildTemplateId = (): string => makeLocalId("tpl");

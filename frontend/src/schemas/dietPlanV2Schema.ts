@@ -10,17 +10,19 @@ const planItemSchema = z.object({
   catalogItemId: z.string().optional(),
 });
 
-const categorySchema = z.object({
-  category: z.enum(DIET_V2_MEAL_CATEGORIES),
-  items: z.array(planItemSchema),
-});
-
-const mealMacrosSchema = z.object({
+const macrosSchema = z.object({
   calories: nonNegativeNumber,
   protein: nonNegativeNumber,
   carbs: nonNegativeNumber,
   fat: nonNegativeNumber,
 });
+
+const categorySchema = z.object({
+  category: z.enum(DIET_V2_MEAL_CATEGORIES),
+  items: z.array(planItemSchema),
+  macros:macrosSchema
+});
+
 
 const freeCaloriesSchema = z.object({
   calories: nonNegativeNumber,
@@ -31,7 +33,7 @@ const mealSchema = z.object({
   _id: z.string().optional(),
   name: z.string(),
   categories: z.array(categorySchema),
-  macros: mealMacrosSchema,
+  macros: macrosSchema,
   freeCalories: freeCaloriesSchema.optional(),
   supplements: z.array(z.string()).optional(),
 });

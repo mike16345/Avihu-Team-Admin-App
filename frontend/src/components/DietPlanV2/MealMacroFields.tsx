@@ -1,14 +1,14 @@
-import type { DietV2MealMacros, IDietPlanV2 } from "@/interfaces/IDietPlanV2";
+import type { IMacros, IDietPlanV2 } from "@/interfaces/IDietPlanV2";
 import { useFormContext } from "react-hook-form";
 
 interface MealMacroFieldsProps {
-  value: DietV2MealMacros;
+  value: IMacros;
   mealIndex: number;
-  onChange: (value: DietV2MealMacros) => void;
+  onChange: (value: IMacros) => void;
 }
 
 const FIELDS: {
-  key: keyof DietV2MealMacros;
+  key: keyof IMacros;
   label: string;
   unit: string;
   accent: string;
