@@ -1,21 +1,15 @@
 import { useState, useMemo, useCallback } from "react";
-import { UsersCheckIn } from "@/interfaces/IAnalytics";
 import { useNavigate } from "react-router-dom";
-import useAnalyticsApi from "@/hooks/api/useAnalyticsApi";
 import Loader from "../ui/Loader";
-import { toast } from "sonner";
-import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { FaCheck, FaMagnifyingGlass } from "react-icons/fa6";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import ErrorPage from "@/pages/ErrorPage";
-import { FULL_DAY_STALE_TIME, HOUR_STALE_TIME } from "@/constants/constants";
 import { weightTab } from "@/pages/UserDashboard";
-import { QueryKeys } from "@/enums/QueryKeys";
 import { userFullName } from "@/lib/utils";
 import useUsersQuery from "@/hooks/queries/user/useUsersQuery";
 import { deriveAccountStatus } from "@/lib/userStatus";
 import { UserAvatar } from "../users/UserAvatar";
-import useUserCheckIns from "@/hooks/queries/user/useUserCheckIns";
+import useUserAnalytics from "@/hooks/queries/analytics/useUserAnalytics";
+import useCheckOffUser from "@/hooks/mutations/User/useCheckOffUser";
 
 type ActiveView = "checkin" | "noWorkout" | "noDiet" | "expiring";
 type UserListItem = { _id: string; firstName?: string; lastName?: string; navUrl: string };
@@ -71,14 +65,24 @@ const getUserDisplayName = (user: UserListItem, activeView: ActiveView) => {
 
 const UserCheckIn = () => {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const { getAllCheckInUsers, checkOffUser, getUsersWithoutPlans, getUsersExpringThisMonth } =
-    useAnalyticsApi();
+
+  const checkMutation = useCheckOffUser();
+
+  const {
+    usersExpiringThisMonthQuery,
+    usersToCheckQuery,
+    usersWithoutDietPlansQuery,
+    usersWithoutWorkoutPlansQuery,
+  } = useUserAnalytics();
+  const { data: checkinUsers, isLoading: loadingCheckin, isError, error } = usersToCheckQuery;
+  const { data: noWorkoutData, isLoading: loadingW } = usersWithoutWorkoutPlansQuery;
+  const { data: noDietData, isLoading: loadingD } = usersWithoutDietPlansQuery;
+  const { data: expiringData, isLoading: loadingE } = usersExpiringThisMonthQuery;
+
+  const { isLoading: isUsersLoading, data: users } = useUsersQuery();
+
   const [activeView, setActiveView] = useState<ActiveView>("checkin");
   const [search, setSearch] = useState("");
-
-  // Strict allow-list: hide analytics users unless the users query confirms they are active.
-  const { isLoading: isUsersLoading, data: users } = useUsersQuery();
 
   const activeIdSet = useMemo(() => {
     const activeUserIds = new Set<string>();
@@ -95,42 +99,6 @@ const UserCheckIn = () => {
     <T extends { _id: string }>(list: T[]) => list.filter((u) => activeIdSet.has(String(u._id))),
     [activeIdSet]
   );
-
-  const { isLoading: loadingCheckin, isError, error, data: checkinUsers } = useUserCheckIns();
-
-  const { data: noWorkoutData, isLoading: loadingW } = useQuery({
-    queryFn: () => getUsersWithoutPlans("workoutPlan"),
-    queryKey: [QueryKeys.NO_WORKOUT_PLAN],
-    staleTime: HOUR_STALE_TIME * 6,
-  });
-
-  const { data: noDietData, isLoading: loadingD } = useQuery({
-    queryFn: () => getUsersWithoutPlans("dietPlan"),
-    queryKey: [QueryKeys.NO_DIET_PLAN],
-    staleTime: HOUR_STALE_TIME * 6,
-  });
-
-  const { data: expiringData, isLoading: loadingE } = useQuery({
-    queryFn: () => getUsersExpringThisMonth(),
-    queryKey: [QueryKeys.EXPIRING_USERS],
-    staleTime: HOUR_STALE_TIME * 6,
-  });
-
-  const checkMutation = useMutation({
-    mutationFn: (id: string) => checkOffUser(id).then((res) => res.data),
-    onSuccess: (data) => {
-      toast.success("סומן כנבדק");
-      queryClient.setQueryData<UsersCheckIn[] | undefined>(
-        [QueryKeys.USERS_TO_CHECK],
-        (old) => old?.filter((u) => u._id !== data._id) ?? []
-      );
-    },
-    onError: (err: any) => {
-      toast.error(ERROR_MESSAGES.GENERIC_ERROR_MESSAGE, {
-        description: err.response?.data?.message || "",
-      });
-    },
-  });
 
   const checkinActive = useMemo(
     () => onlyActive((checkinUsers ?? []) as { _id: string }[]),
