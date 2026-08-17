@@ -16,7 +16,7 @@ export const useUsersToCheck = () => {
 };
 
 export const useUsersWithoutWorkoutPlans = () => {
-  const trainerId = useUsersStore((state) => state.currentUser?.trainerId);
+  const trainerId = useUsersStore((state) => state.currentUser?.trainerId) || "";
   const { getUsersWithoutPlans } = useAnalyticsApi();
 
   return useQuery({
