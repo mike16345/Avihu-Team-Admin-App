@@ -15,19 +15,12 @@ interface DietV2TraineeViewProps {
   traineeName?: string;
 }
 
-const parseLines = (raw: string) =>
-  raw
-    .split(/\n+/)
-    .map((line) => line.trim())
-    .filter(Boolean);
-
 const DietPlanV2TraineeView: React.FC<DietV2TraineeViewProps> = ({
   plan,
   trainerName,
   traineeName,
 }) => {
   const totals = computePlanMacroTotals(plan);
-  const highlights = parseLines(plan.highlights);
 
   return (
     <div dir="rtl" className="mx-auto flex max-w-2xl flex-col gap-4 p-4 font-heebo">
@@ -67,7 +60,17 @@ const DietPlanV2TraineeView: React.FC<DietV2TraineeViewProps> = ({
         <MealBlock key={meal._id ?? index} meal={meal} index={index + 1} />
       ))}
 
-      {highlights.length > 0 && <NotesBlock title="דגשים לתפריט" lines={highlights} />}
+      {plan.highlights.trim() && (
+        <section className="rounded-xl border border-slate-200 bg-slate-50/60 p-4 dark:border-slate-700 dark:bg-slate-800/50">
+          <h4 className="mb-2 text-sm font-extrabold text-slate-900 dark:text-slate-100">
+            דגשים לתפריט
+          </h4>
+          <div
+            className="prose prose-sm max-w-none text-slate-600 dark:prose-invert dark:text-slate-300"
+            dangerouslySetInnerHTML={{ __html: plan.highlights }}
+          />
+        </section>
+      )}
     </div>
   );
 };
@@ -140,9 +143,9 @@ const MealBlock: React.FC<MealBlockProps> = ({ meal, index }) => {
           <strong className="text-sm text-emerald-800 dark:text-emerald-200">
             קלוריות חופשיות · {meal.freeCalories.calories} קק״ל
           </strong>
-          {meal.freeCalories.description && (
+          {meal.freeCalories.items.length > 0 && (
             <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-              {meal.freeCalories.description}
+              {meal.freeCalories.items.map((item) => item.name).join(" / ")}
             </p>
           )}
         </div>
@@ -150,16 +153,5 @@ const MealBlock: React.FC<MealBlockProps> = ({ meal, index }) => {
     </article>
   );
 };
-
-const NotesBlock: React.FC<{ title: string; lines: string[] }> = ({ title, lines }) => (
-  <section className="rounded-2xl border border-blue-100 bg-blue-50/40 p-4 dark:border-blue-900/40 dark:bg-blue-950/30">
-    <h3 className="mb-2 text-sm font-bold text-slate-900 dark:text-slate-100">{title}</h3>
-    <ul className="list-inside list-disc space-y-1 text-xs text-slate-700 dark:text-slate-200">
-      {lines.map((line, index) => (
-        <li key={`${line}-${index}`}>{line}</li>
-      ))}
-    </ul>
-  </section>
-);
 
 export default DietPlanV2TraineeView;

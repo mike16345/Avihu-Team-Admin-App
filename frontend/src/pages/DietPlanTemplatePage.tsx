@@ -10,6 +10,8 @@ import useMenuItemApi from "@/hooks/api/useMenuItemApi";
 import { ITabs } from "@/interfaces/interfaces";
 import { useUsersStore } from "@/store/userStore";
 import { usesDietPlanV2 } from "@/lib/dietPlanVersion";
+import { useState } from "react";
+import FoodCatalogManagerDialog from "@/components/FoodCatalog/FoodCatalogManagerDialog";
 
 type DeleteMutation = ITabs["tabContent"][number]["deleteFunc"];
 type DeleteMenuItem = ReturnType<typeof useMenuItemApi>["deleteMenuItem"];
@@ -150,7 +152,13 @@ const DietPlanV1Templates = () => {
 
 const DietPlanTemplatePage = () => {
   const currentUser = useUsersStore((state) => state.currentUser);
-  const isStyleV2 = usesDietPlanV2(currentUser);
+  const isAdmin = currentUser?.role === "admin";
+  const [adminVersion, setAdminVersion] = useState<1 | 2>(() =>
+    usesDietPlanV2(currentUser) ? 2 : 1
+  );
+  const [catalogOpen, setCatalogOpen] = useState(false);
+  const selectedVersion = isAdmin ? adminVersion : usesDietPlanV2(currentUser) ? 2 : 1;
+  const isStyleV2 = selectedVersion === 2;
 
   return (
     <div
@@ -158,8 +166,14 @@ const DietPlanTemplatePage = () => {
       dir="rtl"
       className="flex flex-col gap-5 px-1 font-heebo"
     >
-      <DietPlanTemplatesHeader presetsOnly={isStyleV2} />
+      <DietPlanTemplatesHeader
+        presetsOnly={isStyleV2}
+        version={isAdmin ? selectedVersion : undefined}
+        onVersionChange={isAdmin ? setAdminVersion : undefined}
+        onCatalogClick={isAdmin ? () => setCatalogOpen(true) : undefined}
+      />
       {isStyleV2 ? <DietPlanV2TemplatesList /> : <DietPlanV1Templates />}
+      {isAdmin && <FoodCatalogManagerDialog open={catalogOpen} onOpenChange={setCatalogOpen} />}
     </div>
   );
 };

@@ -1,13 +1,19 @@
 import { useFormContext } from "react-hook-form";
 
-import type { IMacros, IDietPlanV2 } from "@/interfaces/IDietPlanV2";
+import type {
+  DietV2CategoryMacros,
+  DietV2MealCategory,
+  IMacros,
+  IDietPlanV2,
+} from "@/interfaces/IDietPlanV2";
 
 interface CategoryMacroFieldsProps {
   categoryLabel: string;
-  value?: IMacros;
+  category: DietV2MealCategory;
+  value?: DietV2CategoryMacros;
   mealIndex: number;
   categoryIndex: number;
-  onChange: (value: IMacros | undefined) => void;
+  onChange: (value: DietV2CategoryMacros | undefined) => void;
 }
 
 const FIELDS: Array<{
@@ -22,8 +28,16 @@ const FIELDS: Array<{
   { key: "fat", label: "שומן", unit: "גרם", accent: "text-indigo-700" },
 ];
 
+const CATEGORY_FIELDS: Record<DietV2MealCategory, Array<keyof IMacros>> = {
+  protein: ["calories", "protein"],
+  carbs: ["calories", "carbs"],
+  fat: ["calories", "fat"],
+  vegetables: ["calories", "carbs"],
+};
+
 const CategoryMacroFields = ({
   categoryLabel,
+  category,
   value,
   mealIndex,
   categoryIndex,
@@ -42,12 +56,12 @@ const CategoryMacroFields = ({
           <p className="text-[10px] text-slate-500">הזן 0 במפורש כשאין ערך</p>
         </div>
         <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
-          כל השדות חובה
+          השדות המוצגים חובה
         </span>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {FIELDS.map((field) => {
+      <div className="grid grid-cols-2 gap-2">
+        {FIELDS.filter((field) => CATEGORY_FIELDS[category].includes(field.key)).map((field) => {
           const error = macroErrors?.[field.key]?.message;
           const errorId = `meal-${mealIndex}-category-${categoryIndex}-${field.key}-error`;
           const fieldValue = value?.[field.key];
@@ -79,12 +93,14 @@ const CategoryMacroFields = ({
                   onChange={(event) => {
                     const nextFieldValue =
                       event.target.value === "" ? undefined : Number(event.target.value);
-                    const next = { ...(value ?? {}) } as Partial<IMacros>;
+                    const next = { ...(value ?? {}) } as Partial<DietV2CategoryMacros>;
                     if (nextFieldValue === undefined) delete next[field.key];
                     else next[field.key] = nextFieldValue;
-                    onChange(Object.keys(next).length > 0 ? (next as IMacros) : undefined);
+                    onChange(
+                      Object.keys(next).length > 0 ? (next as DietV2CategoryMacros) : undefined
+                    );
                   }}
-                  className="w-16 min-w-0 bg-transparent text-left text-base font-extrabold text-slate-800 outline-none dark:text-slate-100"
+                  className="w-16 min-w-0 bg-transparent text-start text-base font-extrabold text-slate-800 outline-none dark:text-slate-100"
                 />
               </span>
               {error && (

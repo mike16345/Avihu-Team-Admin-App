@@ -66,7 +66,9 @@ const cloneMeal = (meal: DietV2Meal): DietV2Meal => ({
   })),
   addOns: (meal.addOns ?? []).map((item) => ({ ...item })),
   macros: deriveMealMacros(meal),
-  freeCalories: meal.freeCalories ? { ...meal.freeCalories } : undefined,
+  freeCalories: meal.freeCalories
+    ? { ...meal.freeCalories, items: meal.freeCalories.items.map((item) => ({ ...item })) }
+    : undefined,
   supplements: meal.supplements ? [...meal.supplements] : undefined,
 });
 
@@ -162,8 +164,13 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
     });
 
     const targetWasEmpty = targetCategory.items.length === 0;
-    const copiedMacros =
-      targetWasEmpty && sourceCategory.macros ? { ...sourceCategory.macros } : undefined;
+    const copiedMacros = targetWasEmpty
+      ? sourceCategory.macros
+        ? { ...sourceCategory.macros }
+        : undefined
+      : targetCategory.macros
+        ? { ...targetCategory.macros }
+        : undefined;
     const categories = target.categories.some((category) => category.category === categoryName)
       ? target.categories.map((category) =>
           category.category === categoryName
@@ -392,7 +399,7 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
             onChange={(highlights) =>
               setValue("highlights", highlights, { shouldDirty: true, shouldValidate: true })
             }
-            placeholder={"שתה 3 ליטר מים ביום\nהפסקה של 4 שעות בין ארוחות\n..."}
+            placeholder="כתוב דגשים, הנחיות ורשימות שיוצגו למתאמן…"
           />
         )}
 

@@ -15,6 +15,7 @@ import { userFullName } from "@/lib/utils";
 import useUsersQuery from "@/hooks/queries/user/useUsersQuery";
 import { deriveAccountStatus } from "@/lib/userStatus";
 import { UserAvatar } from "../users/UserAvatar";
+import useUserCheckIns from "@/hooks/queries/user/useUserCheckIns";
 
 type ActiveView = "checkin" | "noWorkout" | "noDiet" | "expiring";
 type UserListItem = { _id: string; firstName?: string; lastName?: string; navUrl: string };
@@ -95,16 +96,7 @@ const UserCheckIn = () => {
     [activeIdSet]
   );
 
-  const {
-    isLoading: loadingCheckin,
-    isError,
-    error,
-    data: checkinUsers,
-  } = useQuery({
-    queryKey: [QueryKeys.USERS_TO_CHECK],
-    staleTime: FULL_DAY_STALE_TIME,
-    queryFn: getAllCheckInUsers,
-  });
+  const { isLoading: loadingCheckin, isError, error, data: checkinUsers } = useUserCheckIns();
 
   const { data: noWorkoutData, isLoading: loadingW } = useQuery({
     queryFn: () => getUsersWithoutPlans("workoutPlan"),

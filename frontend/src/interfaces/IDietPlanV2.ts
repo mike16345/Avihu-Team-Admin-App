@@ -11,7 +11,14 @@ export interface DietV2PlanItem {
 export interface DietV2Category {
   category: DietV2MealCategory;
   items: DietV2PlanItem[];
-  macros?: IMacros;
+  macros?: DietV2CategoryMacros;
+}
+
+export interface DietV2CategoryMacros {
+  calories: number;
+  protein?: number;
+  carbs?: number;
+  fat?: number;
 }
 
 export interface IMacros {
@@ -23,7 +30,7 @@ export interface IMacros {
 
 export interface DietV2FreeCalories {
   calories: number;
-  description: string;
+  items: DietV2PlanItem[];
 }
 
 export interface DietV2Meal {

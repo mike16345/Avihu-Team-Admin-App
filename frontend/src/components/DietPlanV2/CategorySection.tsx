@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FaTrashCan } from "react-icons/fa6";
+import { toast } from "sonner";
 
 import type { DietV2Category } from "@/interfaces/IDietPlanV2";
 
@@ -8,6 +9,7 @@ import CategoryMacroFields from "./CategoryMacroFields";
 import CopyCategoryButton, { type MealSibling } from "./CopyCategoryButton";
 import OptionRow from "./OptionRow";
 import { CATEGORY_LABELS, CATEGORY_TONES } from "./dietPlanV2Utils";
+import { useUpdateDietV2CatalogItem } from "@/hooks/mutations/dietV2Catalog/useUpdateDietV2CatalogItem";
 
 export type { MealSibling };
 
@@ -31,9 +33,37 @@ const CategorySection: React.FC<CategorySectionProps> = ({
   onCopyToNewMeal,
 }) => {
   const [collapsed, setCollapsed] = useState(false);
+  const updateCatalogItem = useUpdateDietV2CatalogItem();
   const tone = CATEGORY_TONES[category.category];
   const hasItems = category.items.length > 0;
   const preview = category.items.map((item) => item.name).join(" / ");
+  const renameItem = (index: number, name: string) => {
+    const normalized = name.trim().replace(/\s+/g, " ").toLocaleLowerCase();
+    if (
+      category.items.some(
+        (candidate, candidateIndex) =>
+          candidateIndex !== index &&
+          candidate.name.trim().replace(/\s+/g, " ").toLocaleLowerCase() === normalized
+      )
+    ) {
+      toast.error("המאכל כבר קיים בקטגוריה הזו");
+      return;
+    }
+
+    const apply = () =>
+      onChange({
+        ...category,
+        items: category.items.map((candidate, candidateIndex) =>
+          candidateIndex === index ? { ...candidate, name } : candidate
+        ),
+      });
+    const item = category.items[index];
+    if (item.catalogItemId) {
+      updateCatalogItem.mutate({ id: item.catalogItemId, name }, { onSuccess: apply });
+    } else {
+      apply();
+    }
+  };
 
   return (
     <section
@@ -117,6 +147,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
           {hasItems && (
             <CategoryMacroFields
               categoryLabel={CATEGORY_LABELS[category.category]}
+              category={category.category}
               value={category.macros}
               mealIndex={mealIndex}
               categoryIndex={categoryIndex}
@@ -130,6 +161,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                 <OptionRow
                   key={`${item.catalogItemId ?? item.name}-${index}`}
                   item={item}
+                  onRename={(name) => renameItem(index, name)}
                   onRemove={() =>
                     onChange({
                       ...category,

@@ -18,7 +18,7 @@ const macrosSchema = z.object({
   fat: nonNegativeNumber,
 });
 
-const optionalMacrosSchema = z
+const optionalCategoryMacrosSchema = z
   .object({
     calories: nonNegativeNumber.optional(),
     protein: nonNegativeNumber.optional(),
@@ -31,12 +31,19 @@ const categorySchema = z
   .object({
     category: z.enum(DIET_V2_MEAL_CATEGORIES),
     items: z.array(planItemSchema),
-    macros: optionalMacrosSchema,
+    macros: optionalCategoryMacrosSchema,
   })
   .superRefine((category, context) => {
     if (category.items.length === 0) return;
 
-    (["calories", "protein", "carbs", "fat"] as const).forEach((field) => {
+    const fields = {
+      protein: ["calories", "protein"],
+      carbs: ["calories", "carbs"],
+      fat: ["calories", "fat"],
+      vegetables: ["calories", "carbs"],
+    }[category.category] as Array<"calories" | "protein" | "carbs" | "fat">;
+
+    fields.forEach((field) => {
       if (typeof category.macros?.[field] !== "number") {
         context.addIssue({
           code: z.ZodIssueCode.custom,
@@ -49,7 +56,7 @@ const categorySchema = z
 
 const freeCaloriesSchema = z.object({
   calories: nonNegativeNumber,
-  description: z.string(),
+  items: z.array(planItemSchema).min(1, "יש להוסיף לפחות פריט אחד"),
 });
 
 const mealSchema = z.object({

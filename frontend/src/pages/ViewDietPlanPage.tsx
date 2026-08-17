@@ -44,11 +44,13 @@ import ErrorPage from "./ErrorPage";
 
 interface ViewDietPlanPageProps {
   embedded?: boolean;
+  userId?: string;
 }
 
-const DietPlanV1Page = ({ embedded = false }: ViewDietPlanPageProps) => {
+export const DietPlanV1Page = ({ embedded = false, userId }: ViewDietPlanPageProps) => {
   const navigation = useNavigate();
-  const { id } = useParams();
+  const { id: routeId } = useParams();
+  const id = userId ?? routeId;
   const { users } = useUsersStore();
   const { data: fetchedUser } = useUserQuery(id);
   const user = users.find((user) => user._id === id) || fetchedUser;

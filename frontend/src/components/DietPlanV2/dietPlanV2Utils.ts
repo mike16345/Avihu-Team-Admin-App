@@ -144,6 +144,12 @@ export const normalizeDietPlanV2 = (plan: IDietPlanV2): IDietPlanV2 => ({
       ...meal,
       categories,
       addOns: [...(meal.addOns ?? []), ...legacyAddOns].map((item) => ({ ...item })),
+      freeCalories: meal.freeCalories
+        ? {
+            ...meal.freeCalories,
+            items: meal.freeCalories.items.map((item) => ({ ...item })),
+          }
+        : undefined,
       macros: deriveMealMacros({ categories }),
     };
   }),

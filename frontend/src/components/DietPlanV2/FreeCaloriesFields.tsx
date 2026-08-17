@@ -3,6 +3,9 @@ import { FaPlus, FaTrashCan } from "react-icons/fa6";
 import type { DietV2FreeCalories } from "@/interfaces/IDietPlanV2";
 
 import CatalogQuickAdd from "./CatalogQuickAdd";
+import OptionRow from "./OptionRow";
+import { useUpdateDietV2CatalogItem } from "@/hooks/mutations/dietV2Catalog/useUpdateDietV2CatalogItem";
+import { toast } from "sonner";
 
 interface FreeCaloriesFieldsProps {
   value?: DietV2FreeCalories;
@@ -10,11 +13,12 @@ interface FreeCaloriesFieldsProps {
 }
 
 const FreeCaloriesFields: React.FC<FreeCaloriesFieldsProps> = ({ value, onChange }) => {
+  const updateCatalogItem = useUpdateDietV2CatalogItem();
   if (!value) {
     return (
       <button
         type="button"
-        onClick={() => onChange({ calories: 0, description: "" })}
+        onClick={() => onChange({ calories: 0, items: [] })}
         className="flex items-center justify-center gap-2 rounded-xl border border-dashed border-emerald-200 bg-emerald-50/30 px-4 py-3 text-sm font-bold text-emerald-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-950/10 dark:text-emerald-300"
       >
         <FaPlus size={11} />
@@ -23,7 +27,30 @@ const FreeCaloriesFields: React.FC<FreeCaloriesFieldsProps> = ({ value, onChange
     );
   }
 
-  const existingItems = value.description ? [{ name: value.description }] : [];
+  const renameItem = (index: number, name: string) => {
+    const normalized = name.trim().replace(/\s+/g, " ").toLocaleLowerCase();
+    if (
+      value.items.some(
+        (candidate, candidateIndex) =>
+          candidateIndex !== index &&
+          candidate.name.trim().replace(/\s+/g, " ").toLocaleLowerCase() === normalized
+      )
+    ) {
+      toast.error("המאכל כבר קיים בקלוריות החופשיות");
+      return;
+    }
+    const apply = () =>
+      onChange({
+        ...value,
+        items: value.items.map((candidate, candidateIndex) =>
+          candidateIndex === index ? { ...candidate, name } : candidate
+        ),
+      });
+    const item = value.items[index];
+    if (item.catalogItemId) {
+      updateCatalogItem.mutate({ id: item.catalogItemId, name }, { onSuccess: apply });
+    } else apply();
+  };
 
   return (
     <section className="rounded-xl border border-dashed border-emerald-300 bg-emerald-50/40 p-3 dark:border-emerald-900/60 dark:bg-emerald-950/15">
@@ -65,19 +92,29 @@ const FreeCaloriesFields: React.FC<FreeCaloriesFieldsProps> = ({ value, onChange
           />
         </label>
         <div className="flex flex-col gap-2">
-          <input
-            value={value.description}
-            onChange={(event) => onChange({ ...value, description: event.target.value })}
-            placeholder="תיאור חופשי שיוצג למתאמן"
-            aria-label="תיאור קלוריות חופשיות"
-            className="rounded-lg border border-emerald-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 outline-none transition-colors focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-emerald-900/50 dark:bg-slate-900 dark:text-slate-100"
-          />
           <CatalogQuickAdd
             category="freeCalories"
-            existingItems={existingItems}
-            onAdd={(item) => onChange({ ...value, description: item.name })}
-            placeholder="חפש תיאור מהקטלוג או כתוב חדש…"
+            existingItems={value.items}
+            onAdd={(item) => onChange({ ...value, items: [...value.items, item] })}
+            placeholder="חפש או כתוב מאכל חופשי…"
           />
+          {value.items.length > 0 && (
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
+              {value.items.map((item, index) => (
+                <OptionRow
+                  key={`${item.catalogItemId ?? item.name}-${index}`}
+                  item={item}
+                  onRename={(name) => renameItem(index, name)}
+                  onRemove={() =>
+                    onChange({
+                      ...value,
+                      items: value.items.filter((_, itemIndex) => itemIndex !== index),
+                    })
+                  }
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </section>

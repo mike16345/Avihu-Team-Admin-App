@@ -1,4 +1,4 @@
-import { deleteItem, fetchData } from "@/API/api";
+import { deleteItem, fetchData, patchData } from "@/API/api";
 import type {
   DietV2CatalogCategory,
   DietV2CatalogItem,
@@ -30,7 +30,12 @@ const useDietV2CatalogApi = () => {
       (response) => response.data
     );
 
-  return { deleteCatalogItem, getPopularItems, searchItems };
+  const updateCatalogItem = (id: string, name: string) =>
+    patchData<ApiResponse<DietV2CatalogItem>>(`${ENDPOINT}/one`, { name }, { id }).then(
+      (response) => response.data
+    );
+
+  return { deleteCatalogItem, getPopularItems, searchItems, updateCatalogItem };
 };
 
 export default useDietV2CatalogApi;

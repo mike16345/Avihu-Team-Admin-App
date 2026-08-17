@@ -1,5 +1,5 @@
 import type React from "react";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import UserFormResponses from "@/components/UserDashboard/FormResponses/UserFormResponses";
 import MeasurementsProgression from "@/components/UserDashboard/MeasurementProgression/MeasurementsProgression";
 import StepsProgression from "@/components/UserDashboard/StepsTracking/StepsProgression";
@@ -22,11 +22,12 @@ import CreateWorkoutPlanWrapper, {
 import DietPlanWrapper from "@/components/DietPlan/DietPlanWrapper";
 import FormResponseBubbleWrapper from "@/components/formResponses/FormResponseBubbleWrapper";
 import WorkoutPlans from "@/components/workout plan/WorkoutPlans";
-import { ViewDietPlanPage } from "@/pages/ViewDietPlanPage";
+import { DietPlanV1Page } from "@/pages/ViewDietPlanPage";
 import { FaArrowsRotate, FaClockRotateLeft, FaFolderOpen } from "react-icons/fa6";
 import useWorkoutPlanHistoryQuery from "@/hooks/queries/workoutPlans/useWorkoutPlanHistoryQuery";
 import { ProgressSubTabs } from "./UserDashboardTabs";
 import type { ProgressSubTab } from "./userDashboardTypes";
+import DietPlanVersionSwitch from "@/components/DietPlanV2/DietPlanVersionSwitch";
 
 interface ProgressTabPanelProps {
   activeSubTab: ProgressSubTab;
@@ -190,7 +191,14 @@ export function DietTabPanel({ userId }: DietTabPanelProps) {
   const currentTrainer = useUsersStore((state) => state.currentUser);
   const { data, isLoading, error } = useGetDietPlan(userId || "");
   const existingPlan = data && !data.failed ? data.dietplan : null;
-  const editorVersion = resolveDietPlanEditorVersion(existingPlan, currentTrainer);
+  const resolvedVersion = resolveDietPlanEditorVersion(existingPlan, currentTrainer);
+  const isAdmin = currentTrainer?.role === "admin";
+  const [adminVersion, setAdminVersion] = useState<1 | 2 | null>(null);
+  const editorVersion = isAdmin ? (adminVersion ?? resolvedVersion) : resolvedVersion;
+
+  useEffect(() => {
+    setAdminVersion(null);
+  }, [userId, existingPlan?._id, existingPlan?.version]);
 
   if (!userId || isLoading) return <Loader size="large" />;
   if (error) return <ErrorPage message={error.message} />;
@@ -198,6 +206,20 @@ export function DietTabPanel({ userId }: DietTabPanelProps) {
   return (
     <div className="flex flex-col gap-4">
       {userId && <FormResponseBubbleWrapper userId={userId} />}
+
+      {isAdmin && (
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-blue-100 bg-blue-50/40 px-4 py-2.5 dark:border-blue-900/40 dark:bg-blue-950/20">
+          <div>
+            <p className="text-xs font-extrabold text-slate-800 dark:text-slate-100">
+              גרסת תפריט פעילה
+            </p>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400">
+              השינוי יחליף את התפריט הקיים רק לאחר שמירה
+            </p>
+          </div>
+          <DietPlanVersionSwitch value={editorVersion} onChange={setAdminVersion} compact />
+        </div>
+      )}
 
       <DashboardTabCard>
         {editorVersion === 2 ? (
@@ -207,7 +229,7 @@ export function DietTabPanel({ userId }: DietTabPanelProps) {
           />
         ) : (
           <DietPlanWrapper>
-            <ViewDietPlanPage embedded />
+            <DietPlanV1Page embedded userId={userId} />
           </DietPlanWrapper>
         )}
       </DashboardTabCard>
