@@ -23,7 +23,16 @@ const useFoodCatalogApi = () => {
       id,
     }).then((response) => response.data);
 
-  return { create, search, update };
+  const getFoodCatalogItemById = (id: string, signal?: AbortSignal) =>
+    fetchData<ApiResponse<FoodCatalogProduct>>(`${ENDPOINT}/item`, { id }, undefined, signal).then(
+      (response) => {
+        console.log("getFoodCatalogItemById response", response);
+        console.log("getFoodCatalogItemById response.data", response.data);
+        return response.data;
+      }
+    );
+
+  return { create, search, update, getFoodCatalogItemById };
 };
 
 export default useFoodCatalogApi;
