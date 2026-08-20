@@ -140,7 +140,11 @@ test.describe("diet plans page routing and entry", () => {
       "auth.refresh.v2-success",
       "analytics.dashboard.success",
       "users.success",
-      "diet-plans.v2-presets.success"
+      "trainers.subtrainers.empty",
+      "trainers.one.v2-success",
+      "diet-plans.v2-presets.success",
+      "diet-plans.success",
+      "diet-plans.food-groups.success"
     );
     await page.goto(DIET_PLANS_PATH, GOTO_OPTIONS);
 
@@ -150,6 +154,73 @@ test.describe("diet plans page routing and entry", () => {
     await expect(page.getByTestId("template-tab-carbItems")).toHaveCount(0);
     await expect.poll(() => presetRequests.length).toBe(1);
     expect(new URL(presetRequests[0].url()).searchParams.get("version")).toBe("2");
+    mockApi.assertNoUnhandledRequests();
+  });
+
+  test("shows V2 management tabs and the version switch only to Admins", async ({ page }) => {
+    const mockApi = await installMockApi(page);
+    mockApi.useScenario("auth.login.v2-success", "analytics.dashboard.success", "users.success");
+    await loginAsAdmin(page);
+
+    mockApi.useScenario(
+      "auth.refresh.v2-success",
+      "analytics.dashboard.success",
+      "users.success",
+      "trainers.subtrainers.empty",
+      "trainers.one.v2-success",
+      "diet-plans.success",
+      "diet-plans.food-groups.success",
+      "diet-plans.v2-presets.success",
+      "food-catalog.empty"
+    );
+    await page.goto(DIET_PLANS_PATH, GOTO_OPTIONS);
+
+    await expect(page.getByRole("group", { name: "גרסת תפריט" })).toBeVisible();
+    await expect(page.getByTestId("diet-plan-admin-v2-tabs")).toBeVisible();
+    await expect(page.getByRole("link", { name: "תבניות V2" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "מאגר מזון" })).toBeVisible();
+
+    await page.getByRole("button", { name: "V1" }).click();
+    await expect(page.getByTestId("diet-plan-admin-v2-tabs")).toHaveCount(0);
+    await page.getByRole("button", { name: "V2" }).click();
+    await expect(page.getByTestId("diet-plan-admin-v2-tabs")).toBeVisible();
+    await page.getByRole("link", { name: "מאגר מזון" }).click();
+    await expectPathname(page, "/presets/admin/food-catalog");
+    await expect(page.getByRole("link", { name: "מאגר מזון" })).toHaveAttribute(
+      "aria-current",
+      "page"
+    );
+    await expect(page.getByRole("group", { name: "גרסת תפריט" })).toBeVisible();
+    mockApi.assertNoUnhandledRequests();
+  });
+
+  test("does not expose Admin version or catalog controls to a V2 trainer", async ({ page }) => {
+    const mockApi = await installMockApi(page);
+    mockApi.useScenario(
+      "auth.login.trainer-v2-success",
+      "analytics.dashboard.success",
+      "users.success"
+    );
+    await page.goto(LOGIN_PATH, GOTO_OPTIONS);
+    await page.getByTestId("login-email").fill("trainer@example.com");
+    await page.getByTestId("login-password").fill("Secret123!");
+    await page.getByTestId("login-submit").click();
+    await expect(page).not.toHaveURL(/\/login$/);
+
+    mockApi.useScenario(
+      "auth.refresh.trainer-v2-success",
+      "analytics.dashboard.success",
+      "users.success",
+      "diet-plans.v2-presets.success"
+    );
+    await page.goto(DIET_PLANS_PATH, GOTO_OPTIONS);
+
+    await expect(page.getByTestId("diet-plan-v2-templates-list")).toBeVisible();
+    await expect(page.getByRole("group", { name: "גרסת תפריט" })).toHaveCount(0);
+    await expect(page.getByTestId("diet-plan-admin-v2-tabs")).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "מאגר מזון" })).toHaveCount(0);
+    await page.goto("/presets/admin/food-catalog", GOTO_OPTIONS);
+    await expectPathname(page, DASHBOARD_PATH);
     mockApi.assertNoUnhandledRequests();
   });
 

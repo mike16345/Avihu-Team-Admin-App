@@ -84,8 +84,6 @@ const FoodCatalogItemPage = ({ catalogItemId, onBack, onSaved }: FoodCatalogItem
   }
 
   const product = productQuery.data;
-  console.log("product", product);
-
   return (
     <div dir="rtl" className="min-h-full bg-slate-50/40 font-heebo dark:bg-slate-950">
       <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">

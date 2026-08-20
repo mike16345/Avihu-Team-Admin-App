@@ -1,20 +1,16 @@
 import { useEffect, useState } from "react";
-import { Beef, Loader2, Plus, Save, Trash2 } from "lucide-react";
+import { Loader2, Plus, Save } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import FoodCatalogIdentityFields from "./FoodCatalogIdentityFields";
+import FoodCatalogServingCard, { type EditableServing } from "./FoodCatalogServingCard";
 
 import type {
   FoodCatalogItemInput,
   FoodCatalogNutrition,
   FoodCatalogProduct,
 } from "@/interfaces/IFoodCatalog";
-
-type EditableServing = FoodCatalogItemInput["servings"][number] & {
-  key: string;
-};
 
 interface FoodFormState {
   names: {
@@ -156,11 +152,6 @@ const FoodCatalogItemForm = ({
     initialProduct ? productToForm(initialProduct) : emptyForm()
   );
 
-  /*
-   * Important for edit routes:
-   * the component may render once before the query finishes,
-   * so update the form when the loaded product changes.
-   */
   useEffect(() => {
     if (initialProduct) {
       setForm(productToForm(initialProduct));
@@ -264,109 +255,17 @@ const FoodCatalogItemForm = ({
 
   return (
     <div className="space-y-8">
-      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <div className="border-b border-slate-100 px-5 py-5 sm:px-7 dark:border-slate-800">
-          <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">פרטי המזון</h2>
-
-          <p className="mt-1 text-sm text-slate-500">
-            הזן את השמות והמותג של המזון. מספיק למלא שם אחד.
-          </p>
-        </div>
-
-        <div className="grid gap-x-6 gap-y-5 p-5 sm:grid-cols-2 sm:p-7 lg:grid-cols-4">
-          <div className="space-y-2">
-            <Label htmlFor="food-name-he">שם בעברית</Label>
-
-            <Input
-              id="food-name-he"
-              value={form.names.he}
-              placeholder="לדוגמה: חמאת בוטנים"
-              className="h-11"
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-
-                  names: {
-                    ...current.names,
-
-                    he: event.target.value,
-                  },
-                }))
-              }
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="food-name-en">שם באנגלית</Label>
-
-            <Input
-              id="food-name-en"
-              value={form.names.en}
-              placeholder="Peanut Butter"
-              className="h-11"
-              dir="ltr"
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-
-                  names: {
-                    ...current.names,
-
-                    en: event.target.value,
-                  },
-                }))
-              }
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="food-original-name">שם מקור</Label>
-
-            <Input
-              id="food-original-name"
-              value={form.names.original}
-              placeholder="שם כפי שמופיע במקור"
-              className="h-11"
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-
-                  names: {
-                    ...current.names,
-
-                    original: event.target.value,
-                  },
-                }))
-              }
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="food-brand">
-              מותג
-              <span className="me-1 font-normal text-slate-400">אופציונלי</span>
-            </Label>
-
-            <Input
-              id="food-brand"
-              value={form.brand}
-              placeholder="לדוגמה: Skippy"
-              className="h-11"
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-
-                  brand: event.target.value,
-                }))
-              }
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* ========================================= */}
-      {/* Servings */}
-      {/* ========================================= */}
+      <FoodCatalogIdentityFields
+        names={form.names}
+        brand={form.brand}
+        onNameChange={(field, value) =>
+          setForm((current) => ({
+            ...current,
+            names: { ...current.names, [field]: value },
+          }))
+        }
+        onBrandChange={(brand) => setForm((current) => ({ ...current, brand }))}
+      />
 
       <section>
         <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -391,141 +290,18 @@ const FoodCatalogItemForm = ({
 
         <div className="space-y-5">
           {form.servings.map((serving, index) => (
-            <div
+            <FoodCatalogServingCard
               key={serving.key}
-              className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
-            >
-              {/* Serving header */}
-              <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 sm:px-7 dark:border-slate-800">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                    <Beef className="h-4 w-4" />
-                  </div>
-
-                  <div>
-                    <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                      מנה {index + 1}
-                    </h3>
-
-                    {serving.description && (
-                      <p className="mt-0.5 text-xs text-slate-400">{serving.description}</p>
-                    )}
-                  </div>
-                </div>
-
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  disabled={form.servings.length === 1}
-                  onClick={() => removeServing(index)}
-                  aria-label={`מחק מנה ${index + 1}`}
-                  className="text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-
-              <div className="p-5 sm:p-7">
-                {/* Serving definition */}
-                <div className="grid gap-5 sm:grid-cols-3">
-                  <div className="space-y-2">
-                    <Label>תיאור המנה</Label>
-
-                    <Input
-                      value={serving.description}
-                      placeholder="לדוגמה: כף"
-                      className="h-11"
-                      onChange={(event) =>
-                        updateServing(index, {
-                          description: event.target.value,
-                        })
-                      }
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>כמות</Label>
-
-                    <Input
-                      type="number"
-                      min="0.01"
-                      step="any"
-                      value={serving.quantity}
-                      className="h-11"
-                      onChange={(event) =>
-                        updateServing(index, {
-                          quantity: Number(event.target.value),
-                        })
-                      }
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>יחידה</Label>
-
-                    <Input
-                      value={serving.unit}
-                      placeholder="גרם / מ״ל / יחידה"
-                      className="h-11"
-                      onChange={(event) =>
-                        updateServing(index, {
-                          unit: event.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                </div>
-
-                {/* Nutrition separator */}
-                <div className="my-6 border-t border-slate-100 dark:border-slate-800" />
-
-                {/* Nutrition */}
-                <div>
-                  <div className="mb-4">
-                    <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                      ערכים תזונתיים
-                    </h4>
-
-                    <p className="mt-1 text-xs text-slate-400">
-                      הערכים מתייחסים למנה שהוגדרה למעלה.
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-                    {nutritionFields.map((field) => (
-                      <div key={field.key} className="space-y-2">
-                        <Label>{field.label}</Label>
-
-                        <div className="relative">
-                          <Input
-                            type="number"
-                            min="0"
-                            step="any"
-                            value={serving.nutrition[field.key] ?? ""}
-                            className="h-11 ps-14"
-                            onChange={(event) =>
-                              updateNutrition(index, field.key, event.target.value)
-                            }
-                          />
-
-                          <span className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">
-                            {field.suffix}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+              serving={serving}
+              index={index}
+              canRemove={form.servings.length > 1}
+              onChange={(patch) => updateServing(index, patch)}
+              onNutritionChange={(field, value) => updateNutrition(index, field, value)}
+              onRemove={() => removeServing(index)}
+            />
           ))}
         </div>
       </section>
-
-      {/* ========================================= */}
-      {/* Bottom actions */}
-      {/* ========================================= */}
 
       <div className="flex flex-col-reverse gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-end dark:border-slate-800">
         {onCancel && (

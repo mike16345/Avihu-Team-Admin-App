@@ -10,8 +10,8 @@ import useMenuItemApi from "@/hooks/api/useMenuItemApi";
 import { ITabs } from "@/interfaces/interfaces";
 import { useUsersStore } from "@/store/userStore";
 import { usesDietPlanV2 } from "@/lib/dietPlanVersion";
-import { useState } from "react";
-import FoodCatalogManagerDialog from "@/components/FoodCatalog/FoodCatalogManagerDialog";
+import { useSearchParams } from "react-router-dom";
+import DietPlanV2AdminTabs from "@/components/DietPlanV2/DietPlanV2AdminTabs";
 
 type DeleteMutation = ITabs["tabContent"][number]["deleteFunc"];
 type DeleteMenuItem = ReturnType<typeof useMenuItemApi>["deleteMenuItem"];
@@ -153,12 +153,19 @@ const DietPlanV1Templates = () => {
 const DietPlanTemplatePage = () => {
   const currentUser = useUsersStore((state) => state.currentUser);
   const isAdmin = currentUser?.role === "admin";
-  const [adminVersion, setAdminVersion] = useState<1 | 2>(() =>
-    usesDietPlanV2(currentUser) ? 2 : 1
-  );
-  const [catalogOpen, setCatalogOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedVersion = searchParams.get("version");
+  const adminVersion =
+    requestedVersion === "1" || requestedVersion === "2"
+      ? (Number(requestedVersion) as 1 | 2)
+      : usesDietPlanV2(currentUser)
+        ? 2
+        : 1;
   const selectedVersion = isAdmin ? adminVersion : usesDietPlanV2(currentUser) ? 2 : 1;
   const isStyleV2 = selectedVersion === 2;
+  const changeAdminVersion = (version: 1 | 2) => {
+    setSearchParams({ version: String(version) }, { replace: true });
+  };
 
   return (
     <div
@@ -169,11 +176,10 @@ const DietPlanTemplatePage = () => {
       <DietPlanTemplatesHeader
         presetsOnly={isStyleV2}
         version={isAdmin ? selectedVersion : undefined}
-        onVersionChange={isAdmin ? setAdminVersion : undefined}
-        onCatalogClick={isAdmin ? () => setCatalogOpen(true) : undefined}
+        onVersionChange={isAdmin ? changeAdminVersion : undefined}
       />
+      {isAdmin && isStyleV2 ? <DietPlanV2AdminTabs active="presets" /> : null}
       {isStyleV2 ? <DietPlanV2TemplatesList /> : <DietPlanV1Templates />}
-      {isAdmin && <FoodCatalogManagerDialog open={catalogOpen} onOpenChange={setCatalogOpen} />}
     </div>
   );
 };
