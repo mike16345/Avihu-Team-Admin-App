@@ -41,6 +41,12 @@ const trackRequests = (page: Page, method: string, pathnameSuffix: string) => {
   return requests;
 };
 
+const getElementRect = (page: Page, testId: string) =>
+  page.getByTestId(testId).evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+  });
+
 const openDietPlansDirectly = async (
   page: Page,
   mockApi: MockApiController,
@@ -180,6 +186,9 @@ test.describe("diet plans page routing and entry", () => {
     await expect(page.getByRole("link", { name: "תבניות V2" })).toBeVisible();
     await expect(page.getByRole("link", { name: "מאגר מזון" })).toBeVisible();
 
+    const presetsFrame = await getElementRect(page, "diet-plan-v2-templates-list");
+    const presetsToolbar = await getElementRect(page, "diet-plan-v2-toolbar");
+
     await page.getByRole("button", { name: "V1" }).click();
     await expect(page.getByTestId("diet-plan-admin-v2-tabs")).toHaveCount(0);
     await page.getByRole("button", { name: "V2" }).click();
@@ -191,6 +200,16 @@ test.describe("diet plans page routing and entry", () => {
       "page"
     );
     await expect(page.getByRole("group", { name: "גרסת תפריט" })).toBeVisible();
+    const catalogFrame = await getElementRect(page, "food-catalog-page");
+    const catalogToolbar = await getElementRect(page, "food-catalog-toolbar");
+
+    expect(catalogFrame.x).toBeCloseTo(presetsFrame.x, 0);
+    expect(catalogFrame.y).toBeCloseTo(presetsFrame.y, 0);
+    expect(catalogFrame.width).toBeCloseTo(presetsFrame.width, 0);
+    expect(catalogToolbar.x).toBeCloseTo(presetsToolbar.x, 0);
+    expect(catalogToolbar.y).toBeCloseTo(presetsToolbar.y, 0);
+    expect(catalogToolbar.width).toBeCloseTo(presetsToolbar.width, 0);
+    expect(catalogToolbar.height).toBeLessThanOrEqual(52);
     mockApi.assertNoUnhandledRequests();
   });
 

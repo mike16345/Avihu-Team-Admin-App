@@ -120,12 +120,15 @@ const DietPlanV2TemplatesList: React.FC = () => {
       dir="rtl"
       className="flex h-[calc(100vh-160px)] min-h-[480px] flex-col gap-4"
     >
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div
+        data-testid="diet-plan-v2-toolbar"
+        className="flex min-h-[122px] flex-wrap items-stretch justify-between gap-3"
+      >
         <FiltersBar filters={filters} onChange={setFilters} />
         <button
           type="button"
           onClick={() => navigate("/presets/dietPlans")}
-          className="inline-flex h-10 shrink-0 items-center gap-2 rounded-xl brand-gradient px-4 text-sm font-bold text-white shadow-sm shadow-blue-500/25 transition-all hover:-translate-y-0.5"
+          className="inline-flex h-10 shrink-0 self-center items-center gap-2 rounded-xl brand-gradient px-4 text-sm font-bold text-white shadow-sm shadow-blue-500/25 transition-all hover:-translate-y-0.5"
         >
           <FaPlus size={11} />
           הוסף תבנית
