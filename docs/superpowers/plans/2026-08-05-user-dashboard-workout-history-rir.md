@@ -124,10 +124,21 @@ test("shows RIR in compact and detailed workout history", async ({ page }) => {
 
   await page.getByRole("button", { name: "ראה היסטוריה מלאה" }).click();
   await expect(page.getByRole("columnheader", { name: "RIR" })).toBeVisible();
-  await expect(page.getByTestId("exercise-history-rir")).toHaveText(["1", "—", "0", "2"]);
+  await expect(page.getByTestId("exercise-history-rir")).toHaveText([
+    "1",
+    "—",
+    "0",
+    "2",
+  ]);
 
-  await page.getByRole("button", { name: /לחיצת חזה/ }).first().click();
-  await expect(page.getByTestId("exercise-detail-rir")).toHaveText(["RIR 1", "RIR 0"]);
+  await page
+    .getByRole("button", { name: /לחיצת חזה/ })
+    .first()
+    .click();
+  await expect(page.getByTestId("exercise-detail-rir")).toHaveText([
+    "RIR 1",
+    "RIR 0",
+  ]);
   await expect(page.getByTestId("exercise-detail-rir")).toHaveCount(2);
   mockApi.assertNoUnhandledRequests();
 });
@@ -202,14 +213,16 @@ Keep the column in the existing table; do not modify the collapsed three-column 
 After the repetition value in `ExerciseDetailModal`, conditionally render the compact label using a null check that preserves zero:
 
 ```tsx
-{set.rir != null && (
-  <span
-    data-testid="exercise-detail-rir"
-    className="text-slate-600 dark:text-slate-300"
-  >
-    RIR {set.rir}
-  </span>
-)}
+{
+  set.rir != null && (
+    <span
+      data-testid="exercise-detail-rir"
+      className="text-slate-600 dark:text-slate-300"
+    >
+      RIR {set.rir}
+    </span>
+  );
+}
 ```
 
 Keep it within the existing `flex items-baseline gap-3` metrics group so the program badge and row height continue to follow the current layout.

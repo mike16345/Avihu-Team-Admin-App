@@ -82,7 +82,10 @@ function ExerciseGoalsEditor({ allSets }: { allSets: ExerciseDetailSet[] }) {
           </span>
           <div className="flex-1">
             <p className="text-sm font-bold tabular-nums text-slate-900 dark:text-slate-100">
-              {currentPR} <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">ק״ג</span>
+              {currentPR}{" "}
+              <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">
+                ק״ג
+              </span>
             </p>
           </div>
           <span className="shrink-0 text-[11px] text-slate-500 dark:text-slate-400">
@@ -120,11 +123,7 @@ function ExerciseGoalsEditor({ allSets }: { allSets: ExerciseDetailSet[] }) {
               className="w-12 rounded-lg border border-blue-200 bg-white px-1 py-0.5 text-sm font-bold text-blue-700 focus:border-blue-500 focus:outline-none dark:border-blue-900/60 dark:bg-slate-900 dark:text-blue-300"
             />
             <span className="text-[10px] text-slate-500 dark:text-slate-400">חזרות</span>
-            <button
-              onClick={() => setEditing(true)}
-              className="text-blue-600"
-              aria-label="ערוך"
-            >
+            <button onClick={() => setEditing(true)} className="text-blue-600" aria-label="ערוך">
               <FaPencil size={9} />
             </button>
             <div className="ms-auto min-w-[140px]">
@@ -143,7 +142,8 @@ function ExerciseGoalsEditor({ allSets }: { allSets: ExerciseDetailSet[] }) {
           </span>
           <div className="flex-1">
             <p className="text-sm font-bold tabular-nums text-emerald-700 dark:text-emerald-300">
-              {getSignedNumber(gap)} <span className="text-[10px] font-medium text-emerald-600/70">ק״ג</span>
+              {getSignedNumber(gap)}{" "}
+              <span className="text-[10px] font-medium text-emerald-600/70">ק״ג</span>
             </p>
           </div>
           <span className="shrink-0 text-[11px] text-emerald-600 dark:text-emerald-400">

@@ -23,7 +23,10 @@ test("shows RIR in compact and detailed workout history", async ({ page }) => {
   await expect(page.getByRole("columnheader", { name: "RIR" })).toBeVisible();
   await expect(page.getByTestId("exercise-history-rir")).toHaveText(["1", "—", "0", "2"]);
 
-  await page.getByRole("button", { name: /לחיצת חזה/ }).first().click();
+  await page
+    .getByRole("button", { name: /לחיצת חזה/ })
+    .first()
+    .click();
   await expect(page.getByTestId("exercise-detail-rir")).toHaveText(["RIR 1", "RIR 0"]);
   await expect(page.getByTestId("exercise-detail-rir")).toHaveCount(2);
   mockApi.assertNoUnhandledRequests();
