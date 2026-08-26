@@ -7,7 +7,7 @@ const useUserQuery = (userId?: string, enabled = true) => {
   const { getUser } = useUsersApi();
 
   return useQuery({
-    queryKey: [QueryKeys.USERS, userId],
+    queryKey: [QueryKeys.USERS, "one", userId],
     enabled: !!userId && enabled,
     queryFn: () => getUser(userId!),
     staleTime: FULL_DAY_STALE_TIME,

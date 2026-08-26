@@ -9,14 +9,9 @@ import { useDietPlanPresetApi } from "@/hooks/api/useDietPlanPresetsApi";
 import useMenuItemApi from "@/hooks/api/useMenuItemApi";
 import { ITabs } from "@/interfaces/interfaces";
 import { useUsersStore } from "@/store/userStore";
-
-/** Users on the "style 2" diet-plan preview. The templates page for
- *  these users has to hide the style-1 tab shelf entirely — v1's
- *  food-category tabs (protein / carbs / veggies / fats) and the
- *  legacy meal-preset cards are meaningless in the options-based
- *  model. When the per-trainer `dietPlanVersion` field lands on the
- *  Trainer entity, replace this hardcoded set with that flag. */
-const STYLE_V2_USER_IDS = new Set<string>(["6774eb1c730c4c44354db2d0"]);
+import { usesDietPlanV2 } from "@/lib/dietPlanVersion";
+import { useSearchParams } from "react-router-dom";
+import DietPlanV2AdminTabs from "@/components/DietPlanV2/DietPlanV2AdminTabs";
 
 type DeleteMutation = ITabs["tabContent"][number]["deleteFunc"];
 type DeleteMenuItem = ReturnType<typeof useMenuItemApi>["deleteMenuItem"];
@@ -116,9 +111,7 @@ const getDietPlanTabs = (deleteMutations: {
   ],
 });
 
-const DietPlanTemplatePage = () => {
-  const currentUserId = useUsersStore((state) => state.currentUser?._id);
-  const isStyleV2 = !!currentUserId && STYLE_V2_USER_IDS.has(currentUserId);
+const DietPlanV1Templates = () => {
   const { deleteMenuItem } = useMenuItemApi();
   const { deleteDietPlanPreset } = useDietPlanPresetApi();
   const queryClient = useQueryClient();
@@ -154,14 +147,39 @@ const DietPlanTemplatePage = () => {
     deleteFats,
   });
 
+  return <TemplateTabs tabs={tabs} />;
+};
+
+const DietPlanTemplatePage = () => {
+  const currentUser = useUsersStore((state) => state.currentUser);
+  const isAdmin = currentUser?.role === "admin";
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedVersion = searchParams.get("version");
+  const adminVersion =
+    requestedVersion === "1" || requestedVersion === "2"
+      ? (Number(requestedVersion) as 1 | 2)
+      : usesDietPlanV2(currentUser)
+        ? 2
+        : 1;
+  const selectedVersion = isAdmin ? adminVersion : usesDietPlanV2(currentUser) ? 2 : 1;
+  const isStyleV2 = selectedVersion === 2;
+  const changeAdminVersion = (version: 1 | 2) => {
+    setSearchParams({ version: String(version) }, { replace: true });
+  };
+
   return (
     <div
       data-testid="diet-plan-templates-page"
       dir="rtl"
       className="flex flex-col gap-5 px-1 font-heebo"
     >
-      <DietPlanTemplatesHeader />
-      {isStyleV2 ? <DietPlanV2TemplatesList /> : <TemplateTabs tabs={tabs} />}
+      <DietPlanTemplatesHeader
+        presetsOnly={isStyleV2}
+        version={isAdmin ? selectedVersion : undefined}
+        onVersionChange={isAdmin ? changeAdminVersion : undefined}
+      />
+      {isAdmin && isStyleV2 ? <DietPlanV2AdminTabs active="presets" /> : null}
+      {isStyleV2 ? <DietPlanV2TemplatesList /> : <DietPlanV1Templates />}
     </div>
   );
 };

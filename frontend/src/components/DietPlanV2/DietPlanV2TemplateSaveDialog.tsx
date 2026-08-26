@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { FaBookmark, FaCheck, FaFire, FaUtensils } from "react-icons/fa6";
 
-import type { DietV2Plan } from "@/interfaces/IDietPlanV2";
+import type { IDietPlanV2 } from "@/interfaces/IDietPlanV2";
+import { useCreateDietPlanV2Preset } from "@/hooks/mutations/DietPlans/useDietPlanV2PresetMutations";
 import {
   Dialog,
   DialogContent,
@@ -12,12 +13,11 @@ import {
 } from "@/components/ui/dialog";
 
 import {
-  buildTemplateId,
-  computePlanMacroTotals,
+  computeTemplateMacroTotals,
+  presetToTemplate,
   TEMPLATE_DIET_TAG_LABELS,
   TEMPLATE_GENDER_LABELS,
   TEMPLATE_GOAL_LABELS,
-  upsertTemplate,
   type DietV2DietTag,
   type DietV2Template,
   type DietV2TemplateGender,
@@ -27,82 +27,55 @@ import {
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  plan: DietV2Plan;
+  plan: IDietPlanV2;
   onSaved?: (template: DietV2Template) => void;
-  defaultBuiltBy?: string;
 }
 
-const DietPlanV2TemplateSaveDialog: React.FC<Props> = ({
-  open,
-  onOpenChange,
-  plan,
-  onSaved,
-  defaultBuiltBy = "",
-}) => {
-  const autoTotals = computePlanMacroTotals(plan);
+const DietPlanV2TemplateSaveDialog: React.FC<Props> = ({ open, onOpenChange, plan, onSaved }) => {
+  const createPreset = useCreateDietPlanV2Preset();
+  const autoTotals = computeTemplateMacroTotals(plan);
   const mealsCount = plan.meals.length;
 
   const [name, setName] = useState("");
-  const [protein, setProtein] = useState<number>(autoTotals.protein);
-  const [carbs, setCarbs] = useState<number>(autoTotals.carbs);
-  const [fat, setFat] = useState<number>(autoTotals.fat);
-  const [calories, setCalories] = useState<number>(autoTotals.calories);
   const [goal, setGoal] = useState<DietV2TemplateGoal | "">("");
   const [targetGender, setTargetGender] = useState<DietV2TemplateGender | "">("");
   const [dietTags, setDietTags] = useState<DietV2DietTag[]>([]);
-  const [allergies, setAllergies] = useState("");
-  const [builtBy, setBuiltBy] = useState(defaultBuiltBy);
-  const [notes, setNotes] = useState("");
-  const [macrosOverridden, setMacrosOverridden] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     if (!open) return;
-    const totals = computePlanMacroTotals(plan);
     setName(`תבנית ${plan.meals.length} ארוחות`);
-    setProtein(totals.protein);
-    setCarbs(totals.carbs);
-    setFat(totals.fat);
-    setCalories(totals.calories);
     setGoal("");
     setTargetGender("");
     setDietTags([]);
-    setAllergies("");
-    setBuiltBy(defaultBuiltBy);
-    setNotes("");
-    setMacrosOverridden(false);
     setError(null);
     setSaved(false);
-  }, [open, plan, defaultBuiltBy]);
+  }, [open, plan]);
 
-  const markMacroChanged = () => setMacrosOverridden(true);
-
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const trimmed = name.trim();
     if (!trimmed) {
       setError("שם התבנית חובה");
       return;
     }
-    const template: DietV2Template = {
-      id: buildTemplateId(),
-      name: trimmed,
-      savedAt: new Date().toISOString(),
-      builtBy: builtBy.trim() || undefined,
-      allergies: allergies.trim() || undefined,
-      notes: notes.trim() || undefined,
-      goal: goal || undefined,
-      targetGender: targetGender || undefined,
-      dietTags: dietTags.length > 0 ? dietTags : undefined,
-      mealsCount,
-      macros: { protein, carbs, fat, calories },
-      macrosOverridden,
-      plan,
-    };
-    upsertTemplate(template);
-    setSaved(true);
-    onSaved?.(template);
-    window.setTimeout(() => onOpenChange(false), 700);
+    try {
+      const response = await createPreset.mutateAsync({
+        name: trimmed,
+        version: 2,
+        meals: plan.meals.map((meal) => ({ ...meal, _id: undefined })),
+        highlights: plan.highlights,
+        goal: goal || undefined,
+        targetGender: targetGender || undefined,
+        dietTags: dietTags.length > 0 ? dietTags : undefined,
+      });
+      const template = presetToTemplate(response.data);
+      setSaved(true);
+      onSaved?.(template);
+      window.setTimeout(() => onOpenChange(false), 700);
+    } catch {
+      setError("שמירת התבנית נכשלה. אפשר לנסות שוב.");
+    }
   };
 
   return (
@@ -116,8 +89,7 @@ const DietPlanV2TemplateSaveDialog: React.FC<Props> = ({
             שמירת תבנית
           </DialogTitle>
           <DialogDescription className="text-right">
-            כל התבניות מופיעות בעמוד "תפריטים" ואפשר לחפש בהן לפי שם, קלוריות
-            ומספר ארוחות.
+            כל התבניות מופיעות בעמוד "תפריטים" ואפשר לחפש בהן לפי שם, קלוריות ומספר ארוחות.
           </DialogDescription>
         </DialogHeader>
 
@@ -144,13 +116,9 @@ const DietPlanV2TemplateSaveDialog: React.FC<Props> = ({
             <ReadOnlyField label="מספר ארוחות" icon={<FaUtensils size={10} />}>
               <span className="font-bold text-slate-800 dark:text-slate-100">{mealsCount}</span>
             </ReadOnlyField>
-            <MacroInput
+            <MacroValue
               label="קלוריות"
-              value={calories}
-              onChange={(v) => {
-                setCalories(v);
-                markMacroChanged();
-              }}
+              value={autoTotals.calories}
               suffix="קק״ל"
               tone="calories"
               icon={<FaFire size={10} />}
@@ -158,41 +126,10 @@ const DietPlanV2TemplateSaveDialog: React.FC<Props> = ({
           </div>
 
           <div className="grid grid-cols-3 gap-2">
-            <MacroInput
-              label="חלבון"
-              value={protein}
-              onChange={(v) => {
-                setProtein(v);
-                markMacroChanged();
-              }}
-              suffix="גרם"
-            />
-            <MacroInput
-              label="פחמימות"
-              value={carbs}
-              onChange={(v) => {
-                setCarbs(v);
-                markMacroChanged();
-              }}
-              suffix="גרם"
-            />
-            <MacroInput
-              label="שומן"
-              value={fat}
-              onChange={(v) => {
-                setFat(v);
-                markMacroChanged();
-              }}
-              suffix="גרם"
-            />
+            <MacroValue label="חלבון" value={autoTotals.protein} suffix="גרם" />
+            <MacroValue label="פחמימות" value={autoTotals.carbs} suffix="גרם" />
+            <MacroValue label="שומן" value={autoTotals.fat} suffix="גרם" />
           </div>
-
-          {macrosOverridden && (
-            <p className="rounded-md bg-amber-50 px-2 py-1 text-[11px] font-semibold text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
-              ערכי המאקרו נערכו ידנית — יישמרו כפי שרשמת ולא יחושבו מחדש
-              אוטומטית.
-            </p>
-          )}
 
           <div className="grid grid-cols-2 gap-2">
             <Field label="מטרה">
@@ -201,9 +138,10 @@ const DietPlanV2TemplateSaveDialog: React.FC<Props> = ({
                 onChange={(v) => setGoal(v as DietV2TemplateGoal | "")}
                 options={[
                   { value: "", label: "לא נבחר" },
-                  ...(Object.keys(TEMPLATE_GOAL_LABELS) as DietV2TemplateGoal[]).map(
-                    (key) => ({ value: key, label: TEMPLATE_GOAL_LABELS[key] })
-                  ),
+                  ...(Object.keys(TEMPLATE_GOAL_LABELS) as DietV2TemplateGoal[]).map((key) => ({
+                    value: key,
+                    label: TEMPLATE_GOAL_LABELS[key],
+                  })),
                 ]}
               />
             </Field>
@@ -213,9 +151,10 @@ const DietPlanV2TemplateSaveDialog: React.FC<Props> = ({
                 onChange={(v) => setTargetGender(v as DietV2TemplateGender | "")}
                 options={[
                   { value: "", label: "לא נבחר" },
-                  ...(Object.keys(TEMPLATE_GENDER_LABELS) as DietV2TemplateGender[]).map(
-                    (key) => ({ value: key, label: TEMPLATE_GENDER_LABELS[key] })
-                  ),
+                  ...(Object.keys(TEMPLATE_GENDER_LABELS) as DietV2TemplateGender[]).map((key) => ({
+                    value: key,
+                    label: TEMPLATE_GENDER_LABELS[key],
+                  })),
                 ]}
               />
             </Field>
@@ -245,31 +184,6 @@ const DietPlanV2TemplateSaveDialog: React.FC<Props> = ({
                 );
               })}
             </div>
-            <input
-              value={allergies}
-              onChange={(e) => setAllergies(e.target.value)}
-              placeholder="הערות נוספות (אופציונלי)…"
-              className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200/40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-            />
-          </Field>
-
-          <Field label="נבנה ע״י">
-            <input
-              value={builtBy}
-              onChange={(e) => setBuiltBy(e.target.value)}
-              placeholder="שם המאמן שבנה את התבנית"
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200/40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-            />
-          </Field>
-
-          <Field label="הערות (אופציונלי)">
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={2}
-              placeholder="כל דבר נוסף שיעזור לזהות מתי להשתמש בתבנית — סוג האימון, שלב הדיאטה וכו׳"
-              className="w-full resize-none rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200/40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-            />
           </Field>
         </div>
 
@@ -277,7 +191,7 @@ const DietPlanV2TemplateSaveDialog: React.FC<Props> = ({
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={saved}
+            disabled={saved || createPreset.isPending}
             className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold text-white shadow-sm transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70 ${
               saved
                 ? "bg-emerald-600 shadow-emerald-500/30"
@@ -335,14 +249,13 @@ const ReadOnlyField: React.FC<{
   </div>
 );
 
-const MacroInput: React.FC<{
+const MacroValue: React.FC<{
   label: string;
   value: number;
-  onChange: (v: number) => void;
   suffix: string;
   tone?: "default" | "calories";
   icon?: React.ReactNode;
-}> = ({ label, value, onChange, suffix, tone, icon }) => (
+}> = ({ label, value, suffix, tone, icon }) => (
   <div className="flex flex-col gap-1 text-right">
     <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">{label}</span>
     <div
@@ -352,17 +265,18 @@ const MacroInput: React.FC<{
           : "border-slate-200 dark:border-slate-700"
       }`}
     >
-      {icon && <span className={tone === "calories" ? "text-rose-500" : "text-slate-400"}>{icon}</span>}
-      <input
-        type="number"
-        inputMode="numeric"
-        min={0}
-        value={value || ""}
-        onChange={(e) => onChange(Math.max(0, Number(e.target.value) || 0))}
-        className={`min-w-0 flex-1 bg-transparent text-center text-sm font-extrabold focus:outline-none ${
-          tone === "calories" ? "text-rose-600 dark:text-rose-400" : "text-slate-800 dark:text-slate-100"
+      {icon && (
+        <span className={tone === "calories" ? "text-rose-500" : "text-slate-400"}>{icon}</span>
+      )}
+      <span
+        className={`min-w-0 flex-1 text-center text-sm font-extrabold ${
+          tone === "calories"
+            ? "text-rose-600 dark:text-rose-400"
+            : "text-slate-800 dark:text-slate-100"
         }`}
-      />
+      >
+        {value}
+      </span>
       <span className="text-[10px] font-semibold text-slate-400">{suffix}</span>
     </div>
   </div>

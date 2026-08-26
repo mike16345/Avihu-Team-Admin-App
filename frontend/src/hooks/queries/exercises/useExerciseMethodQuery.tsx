@@ -4,12 +4,15 @@ import { IExerciseMethod } from "@/interfaces/IWorkoutPlan";
 import { ApiResponse } from "@/types/types";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { FULL_DAY_STALE_TIME } from "@/constants/constants";
+import { useUsersStore } from "@/store/userStore";
 
 const useExerciseMethodQuery = () => {
+  const trainerId = useUsersStore((state) => state.currentUser?.trainerId) || "";
+
   const { getAllExerciseMethods } = useExerciseMethodApi();
 
   return useQuery<any, any, ApiResponse<IExerciseMethod[]>, any>({
-    queryKey: [QueryKeys.EXERCISE_METHODS],
+    queryKey: [QueryKeys.EXERCISE_METHODS, trainerId],
     queryFn: () => getAllExerciseMethods(),
     staleTime: FULL_DAY_STALE_TIME / 2,
   });

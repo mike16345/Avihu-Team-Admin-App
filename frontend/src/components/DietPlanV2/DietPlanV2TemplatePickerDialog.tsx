@@ -1,41 +1,25 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
-import {
-  FaBookmark,
-  FaFire,
-  FaMagnifyingGlass,
-  FaTriangleExclamation,
-  FaUser,
-  FaUtensils,
-} from "react-icons/fa6";
+import { FaBookmark, FaFire, FaMagnifyingGlass, FaUtensils } from "react-icons/fa6";
 
-import {
-  Dialog,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import Loader from "@/components/ui/Loader";
+import useDietPlanV2PresetsQuery from "@/hooks/queries/dietPlans/useDietPlanV2PresetsQuery";
 
 import DietPlanV2TemplateFilterMultiSelect from "./DietPlanV2TemplateFilterMultiSelect";
 import {
-  readTemplates,
+  presetToTemplate,
   TEMPLATE_DIET_TAG_LABELS,
   TEMPLATE_GENDER_LABELS,
   TEMPLATE_GOAL_LABELS,
-  TEMPLATES_STORAGE_KEY,
   type DietV2DietTag,
   type DietV2Template,
   type DietV2TemplateGender,
   type DietV2TemplateGoal,
 } from "./dietPlanV2Templates";
 
-type CalorieBucket =
-  | "under1400"
-  | "1400_1800"
-  | "1800_2200"
-  | "2200_2600"
-  | "over2600";
+type CalorieBucket = "under1400" | "1400_1800" | "1800_2200" | "2200_2600" | "over2600";
 type MealsBucket = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8plus";
 
 interface Props {
@@ -92,20 +76,13 @@ const initialFilters: Filters = {
 };
 
 const DietPlanV2TemplatePickerDialog: React.FC<Props> = ({ open, onOpenChange, onApply }) => {
-  const [templates, setTemplates] = useState<DietV2Template[]>(() => readTemplates());
+  const presetsQuery = useDietPlanV2PresetsQuery(open);
   const [filters, setFilters] = useState<Filters>(initialFilters);
 
-  useEffect(() => {
-    if (!open) return;
-    setTemplates(readTemplates());
-    setFilters(initialFilters);
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === TEMPLATES_STORAGE_KEY) setTemplates(readTemplates());
-    };
-    window.addEventListener("storage", onStorage);
-
-    return () => window.removeEventListener("storage", onStorage);
-  }, [open]);
+  const templates = useMemo(
+    () => (presetsQuery.data?.data ?? []).map(presetToTemplate),
+    [presetsQuery.data]
+  );
 
   const filtered = useMemo(() => applyFilters(templates, filters), [templates, filters]);
 
@@ -117,9 +94,7 @@ const DietPlanV2TemplatePickerDialog: React.FC<Props> = ({ open, onOpenChange, o
         {/* Lighter, frosted overlay instead of the shared shadcn
             bg-black/80 — the picker is a workflow surface, not a
             destructive confirm, so it shouldn't feel like an alert. */}
-        <DialogPrimitive.Overlay
-          className="fixed inset-0 z-50 bg-slate-500/20 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
-        />
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-slate-500/20 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
         <DialogPrimitive.Content
           dir="rtl"
           className="fixed left-1/2 top-1/2 z-50 flex h-[90vh] max-h-[90vh] w-[96vw] max-w-[1500px] -translate-x-1/2 -translate-y-1/2 flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl shadow-slate-500/20 duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 dark:border-slate-800 dark:bg-slate-900"
@@ -128,42 +103,43 @@ const DietPlanV2TemplatePickerDialog: React.FC<Props> = ({ open, onOpenChange, o
             <X className="h-4 w-4" />
             <span className="sr-only">סגור</span>
           </DialogPrimitive.Close>
-        <DialogHeader className="shrink-0">
-          <DialogTitle className="flex items-center gap-2 text-right">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300">
-              <FaBookmark size={13} />
-            </span>
-            טעינת תבנית קיימת
-          </DialogTitle>
-          <DialogDescription className="text-right">
-            בחר תבנית והיא תיטען אוטומטית לתפריט של המתאמן. השינויים לא ישפיעו על
-            התבנית המקורית.
-          </DialogDescription>
-        </DialogHeader>
+          <DialogHeader className="shrink-0">
+            <DialogTitle className="flex items-center gap-2 text-right">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300">
+                <FaBookmark size={13} />
+              </span>
+              טעינת תבנית קיימת
+            </DialogTitle>
+            <DialogDescription className="text-right">
+              בחר תבנית והיא תיטען אוטומטית לתפריט של המתאמן. השינויים לא ישפיעו על התבנית המקורית.
+            </DialogDescription>
+          </DialogHeader>
 
-        {totalCount === 0 ? (
-          <EmptyState />
-        ) : (
-          <div className="flex min-h-0 flex-1 flex-col gap-3">
-            <FiltersBar filters={filters} onChange={setFilters} />
+          {presetsQuery.isLoading ? (
+            <Loader size="large" />
+          ) : totalCount === 0 ? (
+            <EmptyState />
+          ) : (
+            <div className="flex min-h-0 flex-1 flex-col gap-3">
+              <FiltersBar filters={filters} onChange={setFilters} />
 
-            <div className="min-h-0 flex-1 overflow-y-auto px-1 pt-2">
-              {filtered.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-slate-200 bg-white px-4 py-16 text-center text-sm italic text-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-500">
-                  לא נמצאו תבניות שתואמות לסינון.
-                </div>
-              ) : (
-                <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                  {filtered.map((template) => (
-                    <li key={template.id}>
-                      <TemplateCard template={template} onSelect={() => onApply(template)} />
-                    </li>
-                  ))}
-                </ul>
-              )}
+              <div className="min-h-0 flex-1 overflow-y-auto px-1 pt-2">
+                {filtered.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-slate-200 bg-white px-4 py-16 text-center text-sm italic text-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-500">
+                    לא נמצאו תבניות שתואמות לסינון.
+                  </div>
+                ) : (
+                  <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                    {filtered.map((template) => (
+                      <li key={template.id}>
+                        <TemplateCard template={template} onSelect={() => onApply(template)} />
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
     </Dialog>
@@ -173,15 +149,13 @@ const DietPlanV2TemplatePickerDialog: React.FC<Props> = ({ open, onOpenChange, o
 const applyFilters = (templates: DietV2Template[], filters: Filters): DietV2Template[] => {
   const q = filters.query.trim().toLowerCase();
   const selectedCalRanges = CALORIE_BUCKETS.filter((b) => filters.calorieBuckets.includes(b.value));
-  const selectedMealRanges = MEAL_COUNT_OPTIONS.filter((b) => filters.mealsBuckets.includes(b.value));
+  const selectedMealRanges = MEAL_COUNT_OPTIONS.filter((b) =>
+    filters.mealsBuckets.includes(b.value)
+  );
 
   const matched = templates.filter((t) => {
     if (q) {
-      const haystack = [t.name, t.allergies, t.builtBy, t.notes]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-      if (!haystack.includes(q)) return false;
+      if (!t.name.toLowerCase().includes(q)) return false;
     }
     if (selectedCalRanges.length > 0) {
       const inAny = selectedCalRanges.some(
@@ -193,17 +167,14 @@ const applyFilters = (templates: DietV2Template[], filters: Filters): DietV2Temp
     }
     if (selectedMealRanges.length > 0) {
       const inAny = selectedMealRanges.some(
-        (b) =>
-          (b.min == null || t.mealsCount >= b.min) &&
-          (b.max == null || t.mealsCount <= b.max)
+        (b) => (b.min == null || t.mealsCount >= b.min) && (b.max == null || t.mealsCount <= b.max)
       );
       if (!inAny) return false;
     }
     if (filters.goals.length > 0 && (!t.goal || !filters.goals.includes(t.goal))) return false;
     if (filters.targetGenders.length > 0) {
       const templateGender = t.targetGender ?? "both";
-      const matches =
-        templateGender === "both" || filters.targetGenders.includes(templateGender);
+      const matches = templateGender === "both" || filters.targetGenders.includes(templateGender);
       if (!matches) return false;
     }
     if (filters.dietTags.length > 0) {
@@ -308,16 +279,14 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onSelect }) => (
         unit="קק״ל"
         tone="calories"
       />
-      <MacroPill
-        icon={<FaUtensils size={12} />}
-        value={template.mealsCount}
-        unit="ארוחות"
-      />
+      <MacroPill icon={<FaUtensils size={12} />} value={template.mealsCount} unit="ארוחות" />
       <MacroPill label="ח" value={template.macros.protein} unit="ג׳" />
       <MacroPill label="פ" value={template.macros.carbs} unit="ג׳" />
       <MacroPill label="ש" value={template.macros.fat} unit="ג׳" />
     </div>
-    {(template.goal || template.targetGender || (template.dietTags && template.dietTags.length > 0)) && (
+    {(template.goal ||
+      template.targetGender ||
+      (template.dietTags && template.dietTags.length > 0)) && (
       <div className="flex flex-wrap items-center gap-1.5">
         {template.goal && (
           <span className="rounded-md bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
@@ -339,23 +308,6 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onSelect }) => (
         ))}
       </div>
     )}
-    {template.allergies && (
-      <span className="inline-flex items-center gap-1.5 rounded-md bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
-        <FaTriangleExclamation size={11} />
-        {template.allergies}
-      </span>
-    )}
-    {template.builtBy && (
-      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400">
-        <FaUser size={10} />
-        {template.builtBy}
-      </span>
-    )}
-    {template.notes && (
-      <p className="line-clamp-2 text-xs text-slate-500 dark:text-slate-400">
-        {template.notes}
-      </p>
-    )}
   </button>
 );
 
@@ -366,8 +318,7 @@ const EmptyState: React.FC = () => (
     </div>
     <p className="text-sm font-bold text-slate-700 dark:text-slate-200">אין תבניות עדיין</p>
     <p className="max-w-sm text-[12px] text-slate-500 dark:text-slate-400">
-      לחץ על "שמור כתבנית" בעורך אחרי שתבנה תפריט, והיא תופיע כאן לשימוש חוזר על
-      מתאמנים אחרים.
+      לחץ על "שמור כתבנית" בעורך אחרי שתבנה תפריט, והיא תופיע כאן לשימוש חוזר על מתאמנים אחרים.
     </p>
   </div>
 );

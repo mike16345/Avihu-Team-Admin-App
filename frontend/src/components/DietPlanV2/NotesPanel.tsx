@@ -1,3 +1,5 @@
+import TextEditor from "@/components/ui/TextEditor";
+
 interface NotesPanelProps {
   title: string;
   hint: string;
@@ -12,13 +14,14 @@ const NotesPanel: React.FC<NotesPanelProps> = ({ title, hint, value, onChange, p
       <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">{title}</h3>
       <span className="text-[11px] text-slate-500 dark:text-slate-400">{hint}</span>
     </header>
-    <textarea
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      rows={8}
-      className="w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200/60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-    />
+    <div className="min-h-[260px] overflow-hidden rounded-xl border border-slate-200 bg-white text-sm text-slate-800 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-200/60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
+      <TextEditor
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        className="min-h-[260px]"
+      />
+    </div>
   </section>
 );
 

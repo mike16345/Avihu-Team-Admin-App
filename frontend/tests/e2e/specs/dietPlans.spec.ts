@@ -41,18 +41,30 @@ const trackRequests = (page: Page, method: string, pathnameSuffix: string) => {
   return requests;
 };
 
+const getElementRect = (page: Page, testId: string) =>
+  page.getByTestId(testId).evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+  });
+
 const openDietPlansDirectly = async (
   page: Page,
   mockApi: MockApiController,
   scenarioSelections: readonly MockScenarioSelection[] = defaultDietPlansScenarios()
 ) => {
-  mockApi.useScenario("auth.login.success", "analytics.dashboard.success");
+  mockApi.useScenario("auth.login.success", "analytics.dashboard.success", "users.success");
   await loginAsAdmin(page);
 
   await expectPathname(page, DASHBOARD_PATH);
   await expect(page.getByTestId("admin-dashboard")).toBeVisible();
 
-  mockApi.useScenario("analytics.dashboard.success", ...scenarioSelections);
+  mockApi.useScenario(
+    "auth.refresh.success",
+    "analytics.dashboard.success",
+    "users.success",
+    "trainers.subtrainers.empty",
+    ...scenarioSelections
+  );
   await page.goto(DIET_PLANS_PATH, GOTO_OPTIONS);
 
   await expectPathname(page, DIET_PLANS_PATH);
@@ -64,13 +76,19 @@ const openDietPlansFromSidebar = async (
   mockApi: MockApiController,
   scenarioSelections: readonly MockScenarioSelection[] = defaultDietPlansScenarios()
 ) => {
-  mockApi.useScenario("auth.login.success", "analytics.dashboard.success");
+  mockApi.useScenario("auth.login.success", "analytics.dashboard.success", "users.success");
   await loginAsAdmin(page);
 
   await expectPathname(page, DASHBOARD_PATH);
   await expect(page.getByTestId("admin-dashboard")).toBeVisible();
 
-  mockApi.useScenario("analytics.dashboard.success", ...scenarioSelections);
+  mockApi.useScenario(
+    "auth.refresh.success",
+    "analytics.dashboard.success",
+    "users.success",
+    "trainers.subtrainers.empty",
+    ...scenarioSelections
+  );
   await page.getByTestId("sidebar-link-dietPlans").click();
 
   await expectPathname(page, DIET_PLANS_PATH);
@@ -115,6 +133,133 @@ test.describe("diet plans page routing and entry", () => {
     await openDietPlansFromSidebar(page, mockApi);
 
     await expect(page.getByTestId("diet-plan-presets-table")).toBeVisible();
+    mockApi.assertNoUnhandledRequests();
+  });
+
+  test("V2 trainers see presets without legacy food-group tabs", async ({ page }) => {
+    const mockApi = await installMockApi(page);
+    const presetRequests = trackRequests(page, "GET", "/presets/dietPlans");
+    mockApi.useScenario("auth.login.v2-success", "analytics.dashboard.success", "users.success");
+    await loginAsAdmin(page);
+
+    mockApi.useScenario(
+      "auth.refresh.v2-success",
+      "analytics.dashboard.success",
+      "users.success",
+      "trainers.subtrainers.empty",
+      "trainers.one.v2-success",
+      "diet-plans.v2-presets.success",
+      "diet-plans.success",
+      "diet-plans.food-groups.success"
+    );
+    await page.goto(DIET_PLANS_PATH, GOTO_OPTIONS);
+
+    await expect(page.getByTestId("diet-plan-v2-templates-list")).toBeVisible();
+    await expect(page.getByText("תבנית V2 מהשרת")).toBeVisible();
+    await expect(page.getByTestId("template-tab-protein")).toHaveCount(0);
+    await expect(page.getByTestId("template-tab-carbItems")).toHaveCount(0);
+    await expect.poll(() => presetRequests.length).toBe(1);
+    expect(new URL(presetRequests[0].url()).searchParams.get("version")).toBe("2");
+    mockApi.assertNoUnhandledRequests();
+  });
+
+  test("shows V2 management tabs and the version switch only to Admins", async ({ page }) => {
+    const mockApi = await installMockApi(page);
+    mockApi.useScenario("auth.login.v2-success", "analytics.dashboard.success", "users.success");
+    await loginAsAdmin(page);
+
+    mockApi.useScenario(
+      "auth.refresh.v2-success",
+      "analytics.dashboard.success",
+      "users.success",
+      "trainers.subtrainers.empty",
+      "trainers.one.v2-success",
+      "diet-plans.success",
+      "diet-plans.food-groups.success",
+      "diet-plans.v2-presets.success",
+      "food-catalog.empty"
+    );
+    await page.goto(DIET_PLANS_PATH, GOTO_OPTIONS);
+
+    await expect(page.getByRole("group", { name: "גרסת תפריט" })).toBeVisible();
+    await expect(page.getByTestId("diet-plan-admin-v2-tabs")).toBeVisible();
+    await expect(page.getByRole("link", { name: "תבניות V2" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "מאגר מזון" })).toBeVisible();
+
+    const presetsFrame = await getElementRect(page, "diet-plan-v2-templates-list");
+    const presetsToolbar = await getElementRect(page, "diet-plan-v2-toolbar");
+
+    await page.getByRole("button", { name: "V1" }).click();
+    await expect(page.getByTestId("diet-plan-admin-v2-tabs")).toHaveCount(0);
+    await page.getByRole("button", { name: "V2" }).click();
+    await expect(page.getByTestId("diet-plan-admin-v2-tabs")).toBeVisible();
+    await page.getByRole("link", { name: "מאגר מזון" }).click();
+    await expectPathname(page, "/presets/admin/food-catalog");
+    await expect(page.getByRole("link", { name: "מאגר מזון" })).toHaveAttribute(
+      "aria-current",
+      "page"
+    );
+    await expect(page.getByRole("group", { name: "גרסת תפריט" })).toBeVisible();
+    const catalogFrame = await getElementRect(page, "food-catalog-page");
+    const catalogToolbar = await getElementRect(page, "food-catalog-toolbar");
+
+    expect(catalogFrame.x).toBeCloseTo(presetsFrame.x, 0);
+    expect(catalogFrame.y).toBeCloseTo(presetsFrame.y, 0);
+    expect(catalogFrame.width).toBeCloseTo(presetsFrame.width, 0);
+    expect(catalogToolbar.x).toBeCloseTo(presetsToolbar.x, 0);
+    expect(catalogToolbar.y).toBeCloseTo(presetsToolbar.y, 0);
+    expect(catalogToolbar.width).toBeCloseTo(presetsToolbar.width, 0);
+    expect(catalogToolbar.height).toBeLessThanOrEqual(52);
+    mockApi.assertNoUnhandledRequests();
+  });
+
+  test("does not expose Admin version or catalog controls to a V2 trainer", async ({ page }) => {
+    const mockApi = await installMockApi(page);
+    mockApi.useScenario(
+      "auth.login.trainer-v2-success",
+      "analytics.dashboard.success",
+      "users.success"
+    );
+    await page.goto(LOGIN_PATH, GOTO_OPTIONS);
+    await page.getByTestId("login-email").fill("trainer@example.com");
+    await page.getByTestId("login-password").fill("Secret123!");
+    await page.getByTestId("login-submit").click();
+    await expect(page).not.toHaveURL(/\/login$/);
+
+    mockApi.useScenario(
+      "auth.refresh.trainer-v2-success",
+      "analytics.dashboard.success",
+      "users.success",
+      "diet-plans.v2-presets.success"
+    );
+    await page.goto(DIET_PLANS_PATH, GOTO_OPTIONS);
+
+    await expect(page.getByTestId("diet-plan-v2-templates-list")).toBeVisible();
+    await expect(page.getByRole("group", { name: "גרסת תפריט" })).toHaveCount(0);
+    await expect(page.getByTestId("diet-plan-admin-v2-tabs")).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "מאגר מזון" })).toHaveCount(0);
+    await page.goto("/presets/admin/food-catalog", GOTO_OPTIONS);
+    await expectPathname(page, DASHBOARD_PATH);
+    mockApi.assertNoUnhandledRequests();
+  });
+
+  test("V2 trainers open the V2 editor when adding a preset", async ({ page }) => {
+    const mockApi = await installMockApi(page);
+    mockApi.useScenario("auth.login.v2-success", "analytics.dashboard.success", "users.success");
+    await loginAsAdmin(page);
+
+    mockApi.useScenario(
+      "auth.refresh.v2-success",
+      "analytics.dashboard.success",
+      "users.success",
+      "diet-plans.v2-presets.success",
+      "diet-plans.v2-catalog.success"
+    );
+    await page.goto(DIET_PLANS_PATH, GOTO_OPTIONS);
+    await page.getByRole("button", { name: "הוסף תבנית" }).click();
+
+    await expectPathname(page, DIET_PLAN_EDITOR_PATH);
+    await expect(page.getByTestId("diet-v2-editor")).toBeVisible();
     mockApi.assertNoUnhandledRequests();
   });
 

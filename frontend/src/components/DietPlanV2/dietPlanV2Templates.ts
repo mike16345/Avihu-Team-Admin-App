@@ -1,9 +1,15 @@
-import type { DietV2OptionMacros, DietV2Plan } from "@/interfaces/IDietPlanV2";
+import type {
+  DietV2DietTag,
+  IMacros,
+  DietV2TemplateGender,
+  DietV2TemplateGoal,
+  IDietPlanV2,
+  IDietPlanV2Preset,
+} from "@/interfaces/IDietPlanV2";
 
-import { makeLocalId } from "./dietPlanV2Utils";
+import { computePlanMacroTotals, makeLocalId } from "./dietPlanV2Utils";
 
-export type DietV2TemplateGoal = "cutting" | "maintain" | "bulking";
-export type DietV2TemplateGender = "women" | "men" | "both";
+export type { DietV2DietTag, DietV2TemplateGender, DietV2TemplateGoal };
 
 export const TEMPLATE_GOAL_LABELS: Record<DietV2TemplateGoal, string> = {
   cutting: "חיטוב",
@@ -16,17 +22,6 @@ export const TEMPLATE_GENDER_LABELS: Record<DietV2TemplateGender, string> = {
   men: "גברים",
   both: "לשני המינים",
 };
-
-export type DietV2DietTag =
-  | "vegan"
-  | "vegetarian"
-  | "no_dairy"
-  | "no_fish"
-  | "no_gluten"
-  | "no_lactose"
-  | "no_meat"
-  | "no_nuts"
-  | "kosher";
 
 export const TEMPLATE_DIET_TAG_LABELS: Record<DietV2DietTag, string> = {
   vegan: "טבעוני",
@@ -44,61 +39,44 @@ export interface DietV2Template {
   id: string;
   name: string;
   savedAt: string;
-  builtBy?: string;
-  allergies?: string;
-  notes?: string;
   goal?: DietV2TemplateGoal;
   targetGender?: DietV2TemplateGender;
   dietTags?: DietV2DietTag[];
   mealsCount: number;
-  macros: DietV2OptionMacros;
-  macrosOverridden?: boolean;
-  plan: DietV2Plan;
+  macros: IMacros;
+  plan: IDietPlanV2;
 }
 
-export const TEMPLATES_STORAGE_KEY = "dietPlanV2:templates";
-
-export const sumPlanMacro = (plan: DietV2Plan, key: keyof DietV2OptionMacros): number =>
-  plan.meals.reduce((acc, meal) => acc + (meal.macros?.[key] ?? 0), 0);
-
-export const computePlanMacroTotals = (plan: DietV2Plan): DietV2OptionMacros => ({
-  protein: Math.round(sumPlanMacro(plan, "protein")),
-  carbs: Math.round(sumPlanMacro(plan, "carbs")),
-  fat: Math.round(sumPlanMacro(plan, "fat")),
-  calories: Math.round(sumPlanMacro(plan, "calories")),
-});
-
-export const readTemplates = (): DietV2Template[] => {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = window.localStorage.getItem(TEMPLATES_STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed as DietV2Template[];
-  } catch {
-    return [];
-  }
-};
-
-export const writeTemplates = (templates: DietV2Template[]): void => {
-  if (typeof window === "undefined") return;
-  try {
-    window.localStorage.setItem(TEMPLATES_STORAGE_KEY, JSON.stringify(templates));
-  } catch {}
-};
-
-export const upsertTemplate = (template: DietV2Template): void => {
-  const current = readTemplates();
-  const idx = current.findIndex((t) => t.id === template.id);
-  const next = [...current];
-  if (idx === -1) next.unshift(template);
-  else next[idx] = template;
-  writeTemplates(next);
-};
-
-export const removeTemplate = (id: string): void => {
-  writeTemplates(readTemplates().filter((t) => t.id !== id));
-};
+export const computeTemplateMacroTotals = (plan: IDietPlanV2): IMacros =>
+  computePlanMacroTotals(plan).macros;
 
 export const buildTemplateId = (): string => makeLocalId("tpl");
+
+export const presetToTemplate = (preset: IDietPlanV2Preset): DietV2Template => ({
+  id: preset._id ?? buildTemplateId(),
+  name: preset.name,
+  savedAt: preset.updatedAt ?? preset.createdAt ?? "",
+  goal: preset.goal,
+  targetGender: preset.targetGender,
+  dietTags: preset.dietTags,
+  mealsCount: preset.meals.length,
+  macros: computeTemplateMacroTotals(preset),
+  plan: {
+    _id: preset._id,
+    version: 2,
+    meals: preset.meals,
+    highlights: preset.highlights,
+  },
+});
+
+export const templateToPreset = (
+  template: Pick<DietV2Template, "name" | "goal" | "targetGender" | "dietTags" | "plan">
+): IDietPlanV2Preset => ({
+  name: template.name,
+  version: 2,
+  meals: template.plan.meals,
+  highlights: template.plan.highlights,
+  goal: template.goal,
+  targetGender: template.targetGender,
+  dietTags: template.dietTags,
+});

@@ -25,6 +25,9 @@ export interface IMeal {
 }
 
 export interface IDietPlan {
+  _id?: string;
+  userId?: string;
+  version?: 1;
   meals: IMeal[];
   totalCalories?: number;
   freeCalories: number;
@@ -41,12 +44,7 @@ export interface IDietPlan {
  */
 export type DietGoal = "cutting" | "mass";
 export type DietaryRestriction =
-  | "lactose-free"
-  | "vegetarian"
-  | "no-fish"
-  | "no-meat"
-  | "vegan"
-  | "gluten-free";
+  "lactose-free" | "vegetarian" | "no-fish" | "no-meat" | "vegan" | "gluten-free";
 
 export interface IDietPlanMeta {
   goal?: DietGoal;

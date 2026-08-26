@@ -3,6 +3,7 @@ import { QueryKeys } from "@/enums/QueryKeys";
 import { useBlogsApi } from "@/hooks/api/useBlogsApi";
 import { IBlog } from "@/interfaces/IBlog";
 import { PaginationResult } from "@/interfaces/interfaces";
+import { useUsersStore } from "@/store/userStore";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 export type BlogsQueryFilters = {
@@ -20,11 +21,13 @@ const getNormalizedFilters = ({ query = "", groups = [] }: BlogsQueryFilters) =>
 });
 
 const useBlogsQuery = (filters: BlogsQueryFilters = {}, options: BlogsQueryOptions = {}) => {
+  const trainerId = useUsersStore((state) => state.currentUser?.trainerId) || "";
+
   const { getPaginatedPosts } = useBlogsApi();
   const normalizedFilters = getNormalizedFilters(filters);
 
   return useInfiniteQuery({
-    queryKey: [QueryKeys.BLOGS, normalizedFilters],
+    queryKey: [QueryKeys.BLOGS, trainerId, normalizedFilters],
     initialPageParam: { page: 1, limit: 10 },
     queryFn: ({ pageParam = { page: 1, limit: 10 } }) =>
       getPaginatedPosts({ ...pageParam, ...normalizedFilters }),

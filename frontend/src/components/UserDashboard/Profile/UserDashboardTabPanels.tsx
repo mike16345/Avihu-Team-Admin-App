@@ -1,12 +1,18 @@
 import type React from "react";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import UserFormResponses from "@/components/UserDashboard/FormResponses/UserFormResponses";
 import MeasurementsProgression from "@/components/UserDashboard/MeasurementProgression/MeasurementsProgression";
 import StepsProgression from "@/components/UserDashboard/StepsTracking/StepsProgression";
 import { WeightProgression } from "@/components/UserDashboard/WeightProgression/WeightProgression";
 import { WeightProgressionPhotos } from "@/components/UserDashboard/WeightProgression/WeightProgressionPhotos";
 import { WorkoutProgression } from "@/components/UserDashboard/WorkoutProgression/WorkoutProgression";
-import DietPlanV2Editor from "@/components/DietPlanV2/DietPlanV2Editor";
+import DietPlanV2UserEditor from "@/components/DietPlanV2/DietPlanV2UserEditor";
+import Loader from "@/components/ui/Loader";
+import ErrorPage from "@/pages/ErrorPage";
+import useGetDietPlan from "@/hooks/queries/dietPlans/useGetDietPlan";
+import type { IDietPlanV2 } from "@/interfaces/IDietPlanV2";
+import { resolveDietPlanEditorVersion } from "@/lib/dietPlanVersion";
+import { useUsersStore } from "@/store/userStore";
 import SwapTemporaryPlanModal from "@/components/UserDashboard/WorkoutPlanHistory/SwapTemporaryPlanModal";
 import WorkoutPlanHistorySection from "@/components/UserDashboard/WorkoutPlanHistory/WorkoutPlanHistorySection";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -16,11 +22,12 @@ import CreateWorkoutPlanWrapper, {
 import DietPlanWrapper from "@/components/DietPlan/DietPlanWrapper";
 import FormResponseBubbleWrapper from "@/components/formResponses/FormResponseBubbleWrapper";
 import WorkoutPlans from "@/components/workout plan/WorkoutPlans";
-import { ViewDietPlanPage } from "@/pages/ViewDietPlanPage";
+import { DietPlanV1Page } from "@/pages/ViewDietPlanPage";
 import { FaArrowsRotate, FaClockRotateLeft, FaFolderOpen } from "react-icons/fa6";
 import useWorkoutPlanHistoryQuery from "@/hooks/queries/workoutPlans/useWorkoutPlanHistoryQuery";
 import { ProgressSubTabs } from "./UserDashboardTabs";
 import type { ProgressSubTab } from "./userDashboardTypes";
+import DietPlanVersionSwitch from "@/components/DietPlanV2/DietPlanVersionSwitch";
 
 interface ProgressTabPanelProps {
   activeSubTab: ProgressSubTab;
@@ -35,7 +42,7 @@ interface WorkoutTabPanelProps {
   onCloseSwapModal: () => void;
 }
 
-export function ProgressTabPanel({ activeSubTab, onSubTabChange, userId }: ProgressTabPanelProps) {
+export function ProgressTabPanel({ activeSubTab, onSubTabChange }: ProgressTabPanelProps) {
   return (
     <div className="flex flex-col gap-4">
       <ProgressSubTabs activeSubTab={activeSubTab} onSubTabChange={onSubTabChange} />
@@ -180,32 +187,49 @@ interface DietTabPanelProps {
   userId?: string;
 }
 
-type DietPlanVersion = "meals" | "options";
-
-/** Trainee profiles that may preview the v2 ("options") diet editor.
- *  Temporary feature flag while the new design is being iterated on —
- *  scoped tight to avoid affecting any other trainee. Replaced by the
- *  per-trainer `dietPlanVersion` field on the Trainer entity once the
- *  design lands. */
-const DIET_V2_PREVIEW_USER_IDS = new Set<string>(["6774eb1c730c4c44354db2d0"]);
-
 export function DietTabPanel({ userId }: DietTabPanelProps) {
-  const allowV2Preview = !!userId && DIET_V2_PREVIEW_USER_IDS.has(userId);
-  // Flagged users go straight to v2 — no version toggle needed. The
-  // v1 (meals) editor still renders for everyone else until the
-  // per-trainer version field lands on the Trainer entity.
-  const activeVersion: DietPlanVersion = allowV2Preview ? "options" : "meals";
+  const currentTrainer = useUsersStore((state) => state.currentUser);
+  const { data, isLoading, error } = useGetDietPlan(userId || "");
+  const existingPlan = data && !data.failed ? data.dietplan : null;
+  const resolvedVersion = resolveDietPlanEditorVersion(existingPlan, currentTrainer);
+  const isAdmin = currentTrainer?.role === "admin";
+  const [adminVersion, setAdminVersion] = useState<1 | 2 | null>(null);
+  const editorVersion = isAdmin ? (adminVersion ?? resolvedVersion) : resolvedVersion;
+
+  useEffect(() => {
+    setAdminVersion(null);
+  }, [userId, existingPlan?._id, existingPlan?.version]);
+
+  if (!userId || isLoading) return <Loader size="large" />;
+  if (error) return <ErrorPage message={error.message} />;
 
   return (
     <div className="flex flex-col gap-4">
       {userId && <FormResponseBubbleWrapper userId={userId} />}
 
+      {isAdmin && (
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-blue-100 bg-blue-50/40 px-4 py-2.5 dark:border-blue-900/40 dark:bg-blue-950/20">
+          <div>
+            <p className="text-xs font-extrabold text-slate-800 dark:text-slate-100">
+              גרסת תפריט פעילה
+            </p>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400">
+              השינוי יחליף את התפריט הקיים רק לאחר שמירה
+            </p>
+          </div>
+          <DietPlanVersionSwitch value={editorVersion} onChange={setAdminVersion} compact />
+        </div>
+      )}
+
       <DashboardTabCard>
-        {activeVersion === "options" ? (
-          <DietPlanV2Editor />
+        {editorVersion === 2 ? (
+          <DietPlanV2UserEditor
+            userId={userId}
+            initialPlan={existingPlan?.version === 2 ? (existingPlan as IDietPlanV2) : undefined}
+          />
         ) : (
           <DietPlanWrapper>
-            <ViewDietPlanPage embedded />
+            <DietPlanV1Page embedded userId={userId} />
           </DietPlanWrapper>
         )}
       </DashboardTabCard>
