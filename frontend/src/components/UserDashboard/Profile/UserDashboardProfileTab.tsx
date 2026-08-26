@@ -2,7 +2,9 @@ import { useState } from "react";
 import type { AccountStatus, IUser, IStatusHistoryEntry } from "@/interfaces/IUser";
 import DateUtils from "@/lib/dateUtils";
 import { cn } from "@/lib/utils";
-import { FaPenToSquare, FaUser } from "react-icons/fa6";
+import { FaPenToSquare, FaTrashCan, FaUser } from "react-icons/fa6";
+
+import { CredentialsMessageCard } from "./CredentialsMessageCard";
 import {
   describeSystemEntry,
   formatMonthsAndDays,
@@ -16,6 +18,7 @@ interface UserDashboardProfileTabProps {
   status: AccountStatus;
   onEdit: () => void;
   onAddStatusNote: (note: string) => Promise<void>;
+  onDeleteStatusEntry: (at: Date | string) => Promise<void>;
 }
 
 export function UserDashboardProfileTab({
@@ -23,6 +26,7 @@ export function UserDashboardProfileTab({
   status,
   onEdit,
   onAddStatusNote,
+  onDeleteStatusEntry,
 }: UserDashboardProfileTabProps) {
   if (!user) return null;
 
@@ -64,11 +68,17 @@ export function UserDashboardProfileTab({
             <ProfileField label="הגבלות תזונה" value={user.dietaryType.join(", ")} />
           </div>
         )}
+
+        <CredentialsMessageCard user={user} />
       </div>
 
       <div className="flex w-full flex-col gap-4">
         {status === "frozen" && <FreezeDocumentationCard user={user} />}
-        <StatusHistoryCard user={user} onAddNote={onAddStatusNote} />
+        <StatusHistoryCard
+          user={user}
+          onAddNote={onAddStatusNote}
+          onDeleteEntry={onDeleteStatusEntry}
+        />
       </div>
     </div>
   );
@@ -152,13 +162,32 @@ function FreezeDocumentationCard({ user }: { user: IUser }) {
 function StatusHistoryCard({
   user,
   onAddNote,
+  onDeleteEntry,
 }: {
   user: IUser;
   onAddNote: (note: string) => Promise<void>;
+  onDeleteEntry: (at: Date | string) => Promise<void>;
 }) {
   const [draftNote, setDraftNote] = useState("");
   const [isSavingNote, setIsSavingNote] = useState(false);
   const [showNoteInput, setShowNoteInput] = useState(false);
+  const [pendingDeleteKey, setPendingDeleteKey] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDelete = async (entryAt: Date | string) => {
+    const key = new Date(entryAt).getTime();
+    if (pendingDeleteKey !== key) {
+      setPendingDeleteKey(key);
+      return;
+    }
+    setIsDeleting(true);
+    try {
+      await onDeleteEntry(entryAt);
+      setPendingDeleteKey(null);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const sortedEntries = [...(user.statusHistory || [])].sort(
     (first, second) => new Date(second.at).getTime() - new Date(first.at).getTime()
@@ -254,16 +283,39 @@ function StatusHistoryCard({
         </div>
       ) : (
         <ul className="flex max-h-[400px] flex-col gap-2 overflow-y-auto p-2 custom-scrollbar">
-          {sortedEntries.map((entry, index) => (
-            <StatusHistoryEntry key={index} entry={entry} />
-          ))}
+          {sortedEntries.map((entry, index) => {
+            const entryKey = new Date(entry.at).getTime();
+
+            return (
+              <StatusHistoryEntry
+                key={index}
+                entry={entry}
+                onRequestDelete={() => handleDelete(entry.at)}
+                isPendingDelete={pendingDeleteKey === entryKey}
+                isDeleting={isDeleting && pendingDeleteKey === entryKey}
+                onCancelDelete={() => setPendingDeleteKey(null)}
+              />
+            );
+          })}
         </ul>
       )}
     </section>
   );
 }
 
-function StatusHistoryEntry({ entry }: { entry: IStatusHistoryEntry }) {
+function StatusHistoryEntry({
+  entry,
+  onRequestDelete,
+  isPendingDelete,
+  isDeleting,
+  onCancelDelete,
+}: {
+  entry: IStatusHistoryEntry;
+  onRequestDelete: () => void;
+  isPendingDelete: boolean;
+  isDeleting: boolean;
+  onCancelDelete: () => void;
+}) {
   const isManual = entry.kind === "manual";
   const entryClassName = isManual
     ? "border-amber-200 dark:border-amber-900/40 bg-amber-50/40 dark:bg-amber-950/20"
@@ -276,7 +328,7 @@ function StatusHistoryEntry({ entry }: { entry: IStatusHistoryEntry }) {
     : "text-slate-700 dark:text-slate-200";
 
   return (
-    <li className={cn("flex flex-col gap-2 rounded-xl border px-4 py-3", entryClassName)}>
+    <li className={cn("group relative flex flex-col gap-2 rounded-xl border px-4 py-3", entryClassName)}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-1.5">
           <span
@@ -291,13 +343,46 @@ function StatusHistoryEntry({ entry }: { entry: IStatusHistoryEntry }) {
             {DateUtils.formatDate(new Date(entry.at), "DD/MM/YYYY")}
           </span>
         </div>
-        {!isManual && entry.fromStatus !== entry.toStatus && (
-          <div className="flex items-center gap-1">
-            <StatusPill status={entry.fromStatus} />
-            <span className="text-slate-400 text-xs">→</span>
-            <StatusPill status={entry.toStatus} />
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {!isManual && entry.fromStatus !== entry.toStatus && (
+            <div className="flex items-center gap-1">
+              <StatusPill status={entry.fromStatus} />
+              <span className="text-slate-400 text-xs">→</span>
+              <StatusPill status={entry.toStatus} />
+            </div>
+          )}
+          {isPendingDelete ? (
+            <span className="inline-flex items-center gap-1">
+              <button
+                type="button"
+                onClick={onCancelDelete}
+                disabled={isDeleting}
+                className="rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
+              >
+                ביטול
+              </button>
+              <button
+                type="button"
+                onClick={onRequestDelete}
+                disabled={isDeleting}
+                className="inline-flex items-center gap-1 rounded-md bg-rose-600 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm hover:bg-rose-700 disabled:opacity-60"
+              >
+                <FaTrashCan size={8} />
+                {isDeleting ? "מוחק…" : "מחק"}
+              </button>
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={onRequestDelete}
+              aria-label="מחק רשומה"
+              title="מחק רשומה"
+              className="flex h-6 w-6 items-center justify-center rounded-md text-slate-300 opacity-0 transition-all hover:bg-rose-50 hover:text-rose-600 group-hover:opacity-100 dark:hover:bg-rose-950/40"
+            >
+              <FaTrashCan size={10} />
+            </button>
+          )}
+        </div>
       </div>
 
       {!isManual && (

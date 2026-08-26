@@ -1,6 +1,7 @@
 export type RecordedSet = {
   weight?: number;
   repsDone?: number;
+  rir?: number;
   date?: string | Date;
   setNumber?: number;
 };
@@ -8,7 +9,7 @@ export type RecordedSet = {
 export type FlatExercise = {
   name: string;
   group: string;
-  sessions: { date: Date; weight: number; reps: number }[];
+  sessions: { date: Date; weight: number; reps: number; rir?: number }[];
 };
 
 export const groupColors: Record<string, { bg: string; text: string; gradient: string }> = {
@@ -91,12 +92,20 @@ export const FALLBACK_GROUPS = [
 
 export const ALL_GROUP_LABEL = "\u05d4\u05db\u05dc";
 
+export type ViewMode = "muscle" | "workout";
+
+export const MODE_LABELS: Record<ViewMode, string> = {
+  muscle: "\u05dc\u05e4\u05d9 \u05e9\u05e8\u05d9\u05e8",
+  workout: "\u05dc\u05e4\u05d9 \u05d0\u05d9\u05de\u05d5\u05df",
+};
+
 export type ExerciseGroupColor = typeof defaultColor;
 
 export type ExerciseDetailSet = {
   setNumber: number;
   weight: number;
   reps: number;
+  rir?: number;
   program?: string;
 };
 

@@ -25,6 +25,7 @@ import WorkoutPlans from "@/components/workout plan/WorkoutPlans";
 import { DietPlanV1Page } from "@/pages/ViewDietPlanPage";
 import { FaArrowsRotate, FaClockRotateLeft, FaFolderOpen } from "react-icons/fa6";
 import useWorkoutPlanHistoryQuery from "@/hooks/queries/workoutPlans/useWorkoutPlanHistoryQuery";
+import SetInputStyleToggle from "./SetInputStyleToggle";
 import { ProgressSubTabs } from "./UserDashboardTabs";
 import type { ProgressSubTab } from "./userDashboardTypes";
 import DietPlanVersionSwitch from "@/components/DietPlanV2/DietPlanVersionSwitch";
@@ -64,35 +65,22 @@ export function WorkoutTabPanel({
   onOpenSwapModal,
   onCloseSwapModal,
 }: WorkoutTabPanelProps) {
-  // History list lives in a Sheet/Dialog so it stops pushing the
-  // editor down. Opened from the header button; closes when done.
   const [historyOpen, setHistoryOpen] = useState(false);
 
-  // Count drives the badge on the header button. Same query the
-  // history section uses — react-query dedupes, no extra request.
   const { data: historyData } = useWorkoutPlanHistoryQuery(userId || "");
   const historyCount = useMemo(
     () => (Array.isArray(historyData?.data) ? historyData.data.length : 0),
     [historyData]
   );
 
-  // Imperative handle to trigger the preset picker that lives
-  // inside CreateWorkoutPlanWrapper, so the "בחר תבנית" button
-  // can sit in the page header (minimal, no separate card).
   const wrapperRef = useRef<CreateWorkoutPlanHandle>(null);
 
   return (
     <div className="flex flex-col gap-4">
       {userId && <FormResponseBubbleWrapper userId={userId} />}
-
-      {/* Action cluster — three peers, same chrome (white card,
-          slate border, blue hover). The title/subtitle that used
-          to sit on the right was redundant (the active tab name
-          already says "תוכנית אימונים"), so it was removed —
-          buttons explain themselves. RTL flex: first child is
-          rightmost on screen. */}
       <div className="flex items-center justify-end">
         <div className="flex items-center gap-2">
+          {userId && <SetInputStyleToggle userId={userId} />}
           <ActionButton
             onClick={() => wrapperRef.current?.openPresetPicker()}
             title="טען תבנית קיימת לתוכנית האימונים"
@@ -127,10 +115,6 @@ export function WorkoutTabPanel({
           <WorkoutPlans />
         </CreateWorkoutPlanWrapper>
       </DashboardTabCard>
-
-      {/* History list — opens in a Dialog so it doesn't crowd the
-          editor. The temp-plan banner inside the section still
-          renders when there's an active temporary plan. */}
       {userId && (
         <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
           <DialogContent
@@ -154,11 +138,6 @@ export function WorkoutTabPanel({
                 </div>
               </div>
             </DialogHeader>
-            {/* Body has a generous fixed height for a symmetrical
-                dialog regardless of item count — feels substantial
-                whether the trainer has 2 or 20 archived plans.
-                Scroller is LTR so the scrollbar sits on the right;
-                inner wrapper flips back to RTL for the content. */}
             <div
               className="h-[520px] overflow-y-auto bg-slate-50/40 dark:bg-slate-900/40 p-6"
               dir="ltr"

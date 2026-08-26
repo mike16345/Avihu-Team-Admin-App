@@ -1,5 +1,5 @@
 import { IDietPlan } from "@/interfaces/IDietPlan";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useParams } from "react-router";
 import { defaultDietPlan } from "@/constants/DietPlanConsts";
@@ -36,6 +36,13 @@ import UnsavedChangesDialog from "@/components/Alerts/UnsavedChangesDialog";
 import { summariseDietDirty } from "@/utils/dirtyFieldsSummary";
 import { DietPlanPageHeader } from "@/components/DietPlan/DietPlanPageHeader";
 import { DietPlanPresetLoadBar } from "@/components/DietPlan/DietPlanPresetLoadBar";
+import DietPlanHistoryButton from "@/components/DietPlan/DietPlanHistoryButton";
+import {
+  appendDietPlanHistory,
+  buildChangeSummary,
+  computePlanTotals,
+  type DietPlanTotals,
+} from "@/components/DietPlan/dietPlanHistory";
 import { DietPlanSaveActions } from "@/components/DietPlan/DietPlanSaveActions";
 import DietPlanV2UserEditor from "@/components/DietPlanV2/DietPlanV2UserEditor";
 import type { IDietPlanV2 } from "@/interfaces/IDietPlanV2";
@@ -76,6 +83,7 @@ export const DietPlanV1Page = ({ embedded = false, userId }: ViewDietPlanPagePro
 
   const [pendingNav, setPendingNav] = useState<(() => void) | null>(null);
   const [savingToProceed, setSavingToProceed] = useState(false);
+  const lastCommittedTotals = useRef<DietPlanTotals | null>(null);
 
   useNavigationBlocker(isDirty, (next) => setPendingNav(() => next));
 
@@ -86,6 +94,15 @@ export const DietPlanV1Page = ({ embedded = false, userId }: ViewDietPlanPagePro
   const onSuccess = () => {
     toast.success("תפריט נשמר בהצלחה!");
     invalidateQueryKeys([`${QueryKeys.USER_DIET_PLAN}${id}`]);
+    if (id) {
+      const after = computePlanTotals(getValues());
+      const before = lastCommittedTotals.current ?? after;
+      const details = buildChangeSummary(before, after);
+      const type = isNewPlan ? "created" : "save";
+      const description = type === "created" ? "תפריט תזונה נוצר" : "עודכן תפריט תזונה";
+      appendDietPlanHistory(id, type, description, details);
+      lastCommittedTotals.current = after;
+    }
     if (!embedded) navigation(userProfileDietTab);
   };
 
@@ -141,9 +158,17 @@ export const DietPlanV1Page = ({ embedded = false, userId }: ViewDietPlanPagePro
   };
 
   const handleSelectPreset = (preset: any) => {
-    const { name: _presetName, ...presetData } = preset;
-    void _presetName;
-    reset(normalizeDietPlan(presetData as IDietPlan));
+    const { name: presetName, ...presetData } = preset;
+    const normalized = normalizeDietPlan(presetData as IDietPlan);
+    const before = lastCommittedTotals.current ?? computePlanTotals(getValues());
+    const after = computePlanTotals(normalized as IDietPlan);
+    reset(normalized);
+    if (id) {
+      const label = presetName ? `נטענה תבנית: ${presetName}` : "נטענה תבנית תזונה";
+      const details = buildChangeSummary(before, after, presetName);
+      appendDietPlanHistory(id, "preset-loaded", label, details);
+      lastCommittedTotals.current = after;
+    }
   };
 
   const handleAddPreset = (name: string) => {
@@ -163,7 +188,10 @@ export const DietPlanV1Page = ({ embedded = false, userId }: ViewDietPlanPagePro
     if (!id || !data) return;
     const { dietplan, failed } = data;
     if (dietplan.version === 2) return;
-    reset(normalizeDietPlan(dietplan));
+
+    const normalized = normalizeDietPlan(dietplan);
+    reset(normalized);
+    lastCommittedTotals.current = computePlanTotals(normalized as IDietPlan);
     if (failed) {
       setIsNewPlan(true);
       setIsDirty(true);
@@ -173,7 +201,9 @@ export const DietPlanV1Page = ({ embedded = false, userId }: ViewDietPlanPagePro
   useEffect(() => {
     if (!error) return;
     if ((error as any)?.status === 404) {
-      reset(normalizeDietPlan(defaultDietPlan));
+      const normalized = normalizeDietPlan(defaultDietPlan);
+      reset(normalized);
+      lastCommittedTotals.current = computePlanTotals(normalized as IDietPlan);
       setIsNewPlan(true);
       setIsDirty(false);
     }
@@ -193,12 +223,17 @@ export const DietPlanV1Page = ({ embedded = false, userId }: ViewDietPlanPagePro
       <Form {...form}>
         {embedded && <DietPlanStatsStrip />}
 
-        <DietPlanPresetLoadBar
-          embedded={embedded}
-          onOpenPresetPicker={() => setOpenPickerModal(true)}
-        />
-
-        <DietPlanForm>
+        <DietPlanForm
+          presetLoader={
+            <>
+              <DietPlanPresetLoadBar
+                embedded={embedded}
+                onOpenPresetPicker={() => setOpenPickerModal(true)}
+              />
+              {id && <DietPlanHistoryButton userId={id} />}
+            </>
+          }
+        >
           {hasMeals && (
             <DietPlanSaveActions
               embedded={embedded}

@@ -1,12 +1,3 @@
-/**
- * WorkoutPlanStatsStrip — clean stats summary shown above the editor.
- *
- * Reads live form values (so numbers update as the trainer edits) and shows
- * compact pill-cards with: workout count, total exercises, muscle groups,
- * cardio summary, and whether tips exist.
- *
- * Pure presentational — no side effects, no mutations.
- */
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { FaDumbbell, FaListUl, FaPersonRunning, FaClipboardCheck } from "react-icons/fa6";
@@ -19,21 +10,17 @@ interface StatProps {
   tone: "purple" | "rose" | "emerald" | "sky" | "amber";
 }
 
+const BRAND_TONE = {
+  iconBg:
+    "bg-gradient-to-br from-blue-600/85 via-blue-500/75 to-teal-300/70 shadow-sm shadow-blue-500/10 ring-1 ring-white/10",
+  iconText: "text-white",
+};
 const TONE: Record<StatProps["tone"], { iconBg: string; iconText: string }> = {
-  purple: {
-    iconBg: "bg-blue-100 dark:bg-blue-900/40",
-    iconText: "text-blue-700 dark:text-blue-300",
-  },
-  rose: { iconBg: "bg-rose-100 dark:bg-rose-900/40", iconText: "text-rose-700 dark:text-rose-300" },
-  emerald: {
-    iconBg: "bg-emerald-100 dark:bg-emerald-900/40",
-    iconText: "text-emerald-700 dark:text-emerald-300",
-  },
-  sky: { iconBg: "bg-sky-100 dark:bg-sky-900/40", iconText: "text-sky-700 dark:text-sky-300" },
-  amber: {
-    iconBg: "bg-amber-100 dark:bg-amber-900/40",
-    iconText: "text-amber-700 dark:text-amber-300",
-  },
+  purple: BRAND_TONE,
+  rose: BRAND_TONE,
+  emerald: BRAND_TONE,
+  sky: BRAND_TONE,
+  amber: BRAND_TONE,
 };
 
 const StatCard: React.FC<StatProps> = ({ icon, label, value, tone }) => {
@@ -72,10 +59,6 @@ const WorkoutPlanStatsStrip: React.FC = () => {
     0
   );
 
-  // Total weekly cardio minutes. For "simple" plans this is the raw
-  // minsPerWeek value; for "complex" plans we sum each workout's
-  // warmUpAmount across all weeks (best-effort summary). For "steps"
-  // plans there are no minutes — surface the daily-step goal instead.
   let cardioWeeklyMins = 0;
   let cardioStepsSummary = "";
   if (cardio?.type === "simple") {
@@ -87,7 +70,6 @@ const WorkoutPlanStatsStrip: React.FC = () => {
     };
     const weeks = plan?.weeks || [];
     if (weeks.length > 0) {
-      // Average minutes-per-week across the configured weeks.
       const totalAcrossWeeks = weeks.reduce((acc, w) => {
         const weekTotal = (w.workouts || []).reduce(
           (s, wk) => s + (Number(wk?.warmUpAmount) || 0),
@@ -101,14 +83,13 @@ const WorkoutPlanStatsStrip: React.FC = () => {
     const plan = cardio.plan as { mode?: string; daily?: number; perDay?: number[] };
     if (plan?.mode === "custom" && Array.isArray(plan.perDay) && plan.perDay.length === 7) {
       const total = plan.perDay.reduce((acc, value) => acc + (Number(value) || 0), 0);
-      cardioStepsSummary = total ? `${total.toLocaleString("he-IL")} צעדים/שבוע` : "";
+      cardioStepsSummary = total ? `${total.toLocaleString("he-IL")} צעדים` : "";
     } else if (plan?.daily) {
       cardioStepsSummary = `${Number(plan.daily).toLocaleString("he-IL")} צעדים/יום`;
     }
   }
   const cardioSummary = cardioStepsSummary || (cardioWeeklyMins ? `${cardioWeeklyMins} דק׳` : "—");
 
-  // "Has tips" — check whether the joined tips html has any visible text
   const hasTips = (() => {
     const text = (tips.join(" ") || "").replace(/<[^>]+>/g, "").trim();
     return text.length > 0;

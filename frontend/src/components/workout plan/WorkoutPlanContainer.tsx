@@ -10,7 +10,11 @@ import { generateUUID } from "@/lib/utils";
 
 import { MuscleGroupContainer } from "./MuscleGroupContainer";
 import WorkoutMuscleGroupPills from "./WorkoutMuscleGroupPills";
-import { CopyMuscleGroupRequest, getWorkoutExerciseCount } from "./workoutPlanCopyUtils";
+import {
+  CopyMuscleGroupRequest,
+  getWorkoutExerciseCount,
+  getWorkoutSetCount,
+} from "./workoutPlanCopyUtils";
 
 interface WorkoutContainerProps {
   parentPath: `workoutPlans.${number}`;
@@ -67,6 +71,10 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const muscleGroups = (watch(`${parentPath}.muscleGroups`) as IMuscleGroupWorkouts[]) ?? [];
   const totalExercises = getWorkoutExerciseCount({
+    planName: "",
+    muscleGroups,
+  });
+  const totalSets = getWorkoutSetCount({
     planName: "",
     muscleGroups,
   });
@@ -141,11 +149,16 @@ const WorkoutPlanContainer: React.FC<WorkoutContainerProps> = ({
 
         <WorkoutMuscleGroupPills muscleGroups={muscleGroups} />
 
-        <span className="hidden shrink-0 items-center gap-1.5 rounded-full border border-blue-100/60 bg-blue-50/60 px-2.5 py-1 text-[11px] font-bold text-blue-700 dark:border-blue-900/40 dark:bg-blue-950/30 dark:text-blue-300 md:inline-flex">
-          <span>{muscleGroups.length}</span>
-          <span className="opacity-60">•</span>
-          <span>{totalExercises}</span>
-          <span className="text-[10px] opacity-70">תרגילים</span>
+        <span className="hidden shrink-0 items-center gap-2 rounded-full border border-blue-100/60 bg-blue-50/60 px-3 py-1 text-[11px] font-bold text-blue-700 dark:border-blue-900/40 dark:bg-blue-950/30 dark:text-blue-300 md:inline-flex">
+          <span className="inline-flex items-baseline gap-1">
+            <span>{totalExercises}</span>
+            <span className="text-[10px] font-semibold opacity-70">תרגילים</span>
+          </span>
+          <span className="opacity-40">·</span>
+          <span className="inline-flex items-baseline gap-1">
+            <span>{totalSets}</span>
+            <span className="text-[10px] font-semibold opacity-70">סטים</span>
+          </span>
         </span>
 
         <button
