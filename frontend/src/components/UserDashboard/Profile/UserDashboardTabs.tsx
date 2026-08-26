@@ -15,6 +15,7 @@ const progressSubTabs: { id: ProgressSubTab; label: string }[] = [
   { id: "steps", label: "מעקב צעדים" },
   { id: "photos", label: "תמונות" },
   { id: "measurements", label: "היקפים" },
+  { id: "appFeedback", label: "פידבק אפליקציה" },
 ];
 
 interface UserDashboardTabsProps {

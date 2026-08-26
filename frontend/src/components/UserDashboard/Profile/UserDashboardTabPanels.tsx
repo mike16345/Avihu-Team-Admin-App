@@ -6,6 +6,7 @@ import StepsProgression from "@/components/UserDashboard/StepsTracking/StepsProg
 import { WeightProgression } from "@/components/UserDashboard/WeightProgression/WeightProgression";
 import { WeightProgressionPhotos } from "@/components/UserDashboard/WeightProgression/WeightProgressionPhotos";
 import { WorkoutProgression } from "@/components/UserDashboard/WorkoutProgression/WorkoutProgression";
+import AppFeedbackProgression from "@/components/UserDashboard/AppFeedback/AppFeedbackProgression";
 import SwapTemporaryPlanModal from "@/components/UserDashboard/WorkoutPlanHistory/SwapTemporaryPlanModal";
 import WorkoutPlanHistorySection from "@/components/UserDashboard/WorkoutPlanHistory/WorkoutPlanHistorySection";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -46,6 +47,7 @@ export function ProgressTabPanel({ activeSubTab, onSubTabChange, userId }: Progr
         {activeSubTab === "strength" && <WorkoutProgression />}
         {activeSubTab === "steps" && <StepsProgression />}
         {activeSubTab === "photos" && <WeightProgressionPhotos />}
+        {activeSubTab === "appFeedback" && <AppFeedbackProgression userId={userId} />}
       </DashboardTabCard>
     </div>
   );
