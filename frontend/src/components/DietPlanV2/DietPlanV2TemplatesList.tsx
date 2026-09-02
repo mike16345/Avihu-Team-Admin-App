@@ -124,7 +124,7 @@ const DietPlanV2TemplatesList: React.FC = () => {
         <FiltersBar
           filters={filters}
           onChange={setFilters}
-          onCreate={() => navigate("/presets/dietPlans")}
+          onCreate={() => navigate("/presets/dietPlans?version=2")}
         />
       </div>
 

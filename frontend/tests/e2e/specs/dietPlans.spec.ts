@@ -263,6 +263,25 @@ test.describe("diet plans page routing and entry", () => {
     mockApi.assertNoUnhandledRequests();
   });
 
+  test("Admins who switch to V2 open the V2 editor when adding a preset", async ({ page }) => {
+    const mockApi = await installMockApi(page);
+    await openDietPlansDirectly(page, mockApi, [
+      "diet-plans.success",
+      "diet-plans.food-groups.success",
+      "diet-plans.v2-presets.success",
+      "diet-plans.v2-catalog.success",
+    ]);
+
+    await page.getByRole("button", { name: "V2" }).click();
+    await expect(page.getByTestId("diet-plan-v2-templates-list")).toBeVisible();
+    await page.getByRole("button", { name: "הוסף תבנית" }).click();
+
+    await expectPathname(page, DIET_PLAN_EDITOR_PATH);
+    expect(new URL(page.url()).searchParams.get("version")).toBe("2");
+    await expect(page.getByTestId("diet-v2-editor")).toBeVisible();
+    mockApi.assertNoUnhandledRequests();
+  });
+
   test("supports browser back and forward after opening from the sidebar", async ({ page }) => {
     const mockApi = await installMockApi(page);
 

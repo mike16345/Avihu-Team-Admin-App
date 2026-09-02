@@ -13,7 +13,7 @@ import { useForm } from "react-hook-form";
 import { Form } from "@/components/ui/form";
 import { useQueryClient } from "@tanstack/react-query";
 import { QueryKeys } from "@/enums/QueryKeys";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { MainRoutes } from "@/enums/Routes";
 import { useDirtyFormContext } from "@/context/useFormContext";
 import { dietPlanSchema, validateDietPlan } from "@/components/DietPlan/DietPlanSchema";
@@ -144,13 +144,18 @@ const DietPlanV1PresetPage = () => {
 export const ViewDietPlanPresetPage = () => {
   const { id } = useParams();
   const currentTrainer = useUsersStore((state) => state.currentUser);
+  const [searchParams] = useSearchParams();
   const presetQuery = useDietPlanPresetQuery(id || "undefined");
 
   if (id && presetQuery.isLoading) return <Loader size="large" />;
   if (id && presetQuery.error) return <ErrorPage message={presetQuery.error.message} />;
 
   const storedPreset = presetQuery.data?.data;
-  const useV2Editor = storedPreset ? storedPreset.version === 2 : usesDietPlanV2(currentTrainer);
+  const requestedVersion = searchParams.get("version");
+  const useV2Editor = storedPreset
+    ? storedPreset.version === 2
+    : (currentTrainer?.role === "admin" && requestedVersion === "2") ||
+      usesDietPlanV2(currentTrainer);
 
   if (useV2Editor) {
     return (
