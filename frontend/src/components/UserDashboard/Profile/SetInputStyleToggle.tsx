@@ -27,11 +27,10 @@ export default function SetInputStyleToggle({ userId }: { userId: string }) {
 
   const [pending, setPending] = useState<Style | null>(null);
 
-  
   const mutation = useMutation({
     mutationFn: (value: Style) => updateUserField(userId, "setInputType", value),
     onSuccess: (_, value) => {
-      console.log("SetInputStyleToggle: mutation success",_, value);
+      console.log("SetInputStyleToggle: mutation success", _, value);
       qc.setQueryData<IUser | undefined>([QueryKeys.USERS, userId], (prev) =>
         prev ? { ...prev, setInputType: value } : prev
       );

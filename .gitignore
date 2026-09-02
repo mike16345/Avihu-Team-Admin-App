@@ -416,3 +416,6 @@ test-results/
 Claude-cleanup.md
 claude-cleanup.md
 codex-cleanup-instructions.md
+
+# Local Codex/Superpowers design and implementation notes
+.superpowers/

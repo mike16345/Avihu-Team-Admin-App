@@ -1,11 +1,16 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { ViewDietPlanPresetPage } from "@/pages/ViewDietPlanPresetPage";
 import DietPlanWrapper from "@/components/DietPlan/DietPlanWrapper";
 import WorkoutPlans from "@/components/workout plan/WorkoutPlans";
 import { CreateWorkoutPresetWrapper } from "@/components/templates/workoutTemplates/WorkoutPreset";
 import BlogGroups from "@/components/Blog/BlogGroups";
+import FoodCatalogWrapper from "@/components/Wrappers/FoodCatalogWrapper";
+import FoodCatalogItemPageWrapper from "@/components/Wrappers/FoodCatalogItemWrapper";
+import { useUsersStore } from "@/store/userStore";
 
 const PresetRoutes = () => {
+  const isAdmin = useUsersStore((state) => state.currentUser?.role === "admin");
+  const adminOnly = (element: React.ReactNode) => (isAdmin ? element : <Navigate to="/" replace />);
   return (
     <>
       <Routes>
@@ -41,7 +46,12 @@ const PresetRoutes = () => {
             </DietPlanWrapper>
           }
         />
-
+        <Route path="/admin/food-catalog" element={adminOnly(<FoodCatalogWrapper />)} />
+        <Route path="/admin/food-catalog/new" element={adminOnly(<FoodCatalogItemPageWrapper />)} />
+        <Route
+          path="/admin/food-catalog/:catalogItemId/edit"
+          element={adminOnly(<FoodCatalogItemPageWrapper />)}
+        />
         <Route path="/blogs/groups" element={<BlogGroups />} />
       </Routes>
     </>
