@@ -127,7 +127,7 @@ const DietPlanV2TemplatesList: React.FC = () => {
         <FiltersBar filters={filters} onChange={setFilters} />
         <button
           type="button"
-          onClick={() => navigate("/presets/dietPlans")}
+          onClick={() => navigate("/presets/dietPlans?version=2")}
           className="inline-flex h-10 shrink-0 self-center items-center gap-2 rounded-xl brand-gradient px-4 text-sm font-bold text-white shadow-sm shadow-blue-500/25 transition-all hover:-translate-y-0.5"
         >
           <FaPlus size={11} />
