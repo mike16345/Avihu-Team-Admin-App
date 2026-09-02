@@ -162,19 +162,19 @@ const CategorySection: React.FC<CategorySectionProps> = ({
               </h5>
               <div className="flex flex-wrap gap-3">
                 {category.items.map((item, index) => (
-                <OptionRow
-                  key={`${item.catalogItemId ?? item.name}-${index}`}
-                  item={item}
-                  onRename={(name) => renameItem(index, name)}
-                  onRemove={() =>
-                    onChange({
-                      ...category,
-                      items: category.items.filter((_, itemIndex) => itemIndex !== index),
-                      macros: undefined,
-                    })
-                  }
-                />
-              ))}
+                  <OptionRow
+                    key={`${item.catalogItemId ?? item.name}-${index}`}
+                    item={item}
+                    onRename={(name) => renameItem(index, name)}
+                    onRemove={() =>
+                      onChange({
+                        ...category,
+                        items: category.items.filter((_, itemIndex) => itemIndex !== index),
+                        macros: undefined,
+                      })
+                    }
+                  />
+                ))}
               </div>
             </>
           )}

@@ -2,15 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { FaChevronDown } from "react-icons/fa6";
 
 export type DietFilterTone =
-  | "blue"
-  | "amber"
-  | "violet"
-  | "rose"
-  | "emerald"
-  | "sky"
-  | "indigo"
-  | "pink"
-  | "orange";
+  "blue" | "amber" | "violet" | "rose" | "emerald" | "sky" | "indigo" | "pink" | "orange";
 
 const NEUTRAL_TONE_STYLE = {
   iconText: "text-slate-500 dark:text-slate-400",

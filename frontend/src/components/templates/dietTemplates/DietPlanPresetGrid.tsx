@@ -213,77 +213,77 @@ const DietPlanPresetGrid: React.FC<DietPlanPresetGridProps> = ({
           </button>
 
           {filtersExpanded && (
-          <>
-          <DietPresetFilterDropdown
-            label="מספר ארוחות"
-            icon={<FaUtensils size={11} />}
-            tone="indigo"
-            options={MEAL_COUNT_OPTIONS}
-            selected={mealCounts}
-            onToggle={(value) => setMealCounts(toggleSelection(mealCounts, value))}
-          />
-          <DietPresetFilterDropdown
-            label="הגבלות"
-            icon={<FaCircleExclamation size={11} />}
-            tone="rose"
-            options={dietaryRestrictionOptions}
-            selected={restrictions}
-            onToggle={(value) =>
-              setRestrictions(toggleSelection(restrictions, value as DietaryRestriction))
-            }
-          />
-          <DietPresetFilterDropdown
-            label="סוג תפריט"
-            icon={<FaBullseye size={11} />}
-            tone="violet"
-            options={dietGoalOptions}
-            selected={goals}
-            onToggle={(value) => setGoals(toggleSelection(goals, value))}
-          />
-          <DietPresetFilterDropdown
-            label="קלוריות"
-            icon={<FaFire size={11} />}
-            tone="amber"
-            options={CALORIE_BUCKETS.map((bucket) => ({
-              value: bucket.value,
-              label: bucket.label,
-            }))}
-            selected={buckets}
-            onToggle={(value) => setBuckets(toggleSelection(buckets, value as CalorieBucket))}
-          />
-          <DietPresetFilterDropdown
-            label="חלבון"
-            icon={<FaDrumstickBite size={11} />}
-            tone="pink"
-            options={PROTEIN_OPTIONS}
-            selected={proteinServings}
-            onToggle={(value) => setProteinServings(toggleSelection(proteinServings, value))}
-          />
-          <DietPresetFilterDropdown
-            label="פחמ׳"
-            icon={<FaBreadSlice size={11} />}
-            tone="orange"
-            options={CARB_OPTIONS}
-            selected={carbServings}
-            onToggle={(value) => setCarbServings(toggleSelection(carbServings, value))}
-          />
-          <DietPresetFilterDropdown
-            label="שומן"
-            icon={<FaDroplet size={11} />}
-            tone="sky"
-            options={FAT_OPTIONS}
-            selected={fatServings}
-            onToggle={(value) => setFatServings(toggleSelection(fatServings, value))}
-          />
-          <DietPresetFilterDropdown
-            label="חופשיות"
-            icon={<FaSeedling size={11} />}
-            tone="emerald"
-            options={FREE_CAL_OPTIONS}
-            selected={freeCalories}
-            onToggle={(value) => setFreeCalories(toggleSelection(freeCalories, value))}
-          />
-          </>
+            <>
+              <DietPresetFilterDropdown
+                label="מספר ארוחות"
+                icon={<FaUtensils size={11} />}
+                tone="indigo"
+                options={MEAL_COUNT_OPTIONS}
+                selected={mealCounts}
+                onToggle={(value) => setMealCounts(toggleSelection(mealCounts, value))}
+              />
+              <DietPresetFilterDropdown
+                label="הגבלות"
+                icon={<FaCircleExclamation size={11} />}
+                tone="rose"
+                options={dietaryRestrictionOptions}
+                selected={restrictions}
+                onToggle={(value) =>
+                  setRestrictions(toggleSelection(restrictions, value as DietaryRestriction))
+                }
+              />
+              <DietPresetFilterDropdown
+                label="סוג תפריט"
+                icon={<FaBullseye size={11} />}
+                tone="violet"
+                options={dietGoalOptions}
+                selected={goals}
+                onToggle={(value) => setGoals(toggleSelection(goals, value))}
+              />
+              <DietPresetFilterDropdown
+                label="קלוריות"
+                icon={<FaFire size={11} />}
+                tone="amber"
+                options={CALORIE_BUCKETS.map((bucket) => ({
+                  value: bucket.value,
+                  label: bucket.label,
+                }))}
+                selected={buckets}
+                onToggle={(value) => setBuckets(toggleSelection(buckets, value as CalorieBucket))}
+              />
+              <DietPresetFilterDropdown
+                label="חלבון"
+                icon={<FaDrumstickBite size={11} />}
+                tone="pink"
+                options={PROTEIN_OPTIONS}
+                selected={proteinServings}
+                onToggle={(value) => setProteinServings(toggleSelection(proteinServings, value))}
+              />
+              <DietPresetFilterDropdown
+                label="פחמ׳"
+                icon={<FaBreadSlice size={11} />}
+                tone="orange"
+                options={CARB_OPTIONS}
+                selected={carbServings}
+                onToggle={(value) => setCarbServings(toggleSelection(carbServings, value))}
+              />
+              <DietPresetFilterDropdown
+                label="שומן"
+                icon={<FaDroplet size={11} />}
+                tone="sky"
+                options={FAT_OPTIONS}
+                selected={fatServings}
+                onToggle={(value) => setFatServings(toggleSelection(fatServings, value))}
+              />
+              <DietPresetFilterDropdown
+                label="חופשיות"
+                icon={<FaSeedling size={11} />}
+                tone="emerald"
+                options={FREE_CAL_OPTIONS}
+                selected={freeCalories}
+                onToggle={(value) => setFreeCalories(toggleSelection(freeCalories, value))}
+              />
+            </>
           )}
 
           <button

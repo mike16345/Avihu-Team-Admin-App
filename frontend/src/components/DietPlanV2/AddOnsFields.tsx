@@ -22,7 +22,6 @@ const AddOnsFields = ({ value, onChange, onRemove }: AddOnsFieldsProps) => {
   const hasItems = value.length > 0;
   const preview = value.map((item) => item.name).join(" / ");
 
-
   const renameItem = (index: number, name: string) => {
     const normalized = name.trim().replace(/\s+/g, " ").toLocaleLowerCase();
     if (

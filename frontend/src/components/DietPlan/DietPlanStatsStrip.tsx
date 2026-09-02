@@ -12,17 +12,11 @@ interface StatCardProps {
 const StatCard: React.FC<StatCardProps> = ({ label, value, hint }) => {
   return (
     <div className="relative flex min-h-[60px] flex-1 flex-col justify-between overflow-hidden rounded-xl border border-slate-200 bg-white px-3 py-1.5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
-        {label}
-      </span>
+      <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">{label}</span>
       <div className="flex items-baseline justify-center gap-1.5">
-        <span className="text-xl font-extrabold text-slate-900 dark:text-slate-100">
-          {value}
-        </span>
+        <span className="text-xl font-extrabold text-slate-900 dark:text-slate-100">{value}</span>
         {hint && (
-          <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
-            {hint}
-          </span>
+          <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">{hint}</span>
         )}
       </div>
       <div className="absolute inset-x-0 bottom-0 h-[3px] brand-gradient" />
@@ -69,16 +63,8 @@ const DietPlanStatsStrip: React.FC = () => {
         value={meals.length}
         hint={meals.length === 1 ? "ארוחה" : "ארוחות"}
       />
-      <StatCard
-        label="חלבון · פחמ׳ · שומן"
-        value={macroSummary}
-        hint="מנות ליום"
-      />
-      <StatCard
-        label="סך קלוריות"
-        value={totalKcal.toLocaleString()}
-        hint="קק״ל ליום"
-      />
+      <StatCard label="חלבון · פחמ׳ · שומן" value={macroSummary} hint="מנות ליום" />
+      <StatCard label="סך קלוריות" value={totalKcal.toLocaleString()} hint="קק״ל ליום" />
       <StatCard
         label="דגשים"
         value={instructionsFilled ? "מולא" : "—"}
