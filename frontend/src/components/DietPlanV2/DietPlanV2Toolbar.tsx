@@ -31,9 +31,7 @@ export const TabButton: React.FC<TabButtonProps> = ({
   <button
     type="button"
     onClick={onClick}
-    className={`inline-flex items-center rounded-xl border font-bold transition-all hover:-translate-y-0.5 ${
-      active ? "gap-1.5 px-3.5 py-2 text-[13px]" : "gap-1.5 px-3 py-2 text-xs"
-    } ${getTabClass(active, attention)}`}
+    className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold transition-colors duration-300 ease-out hover:-translate-y-0.5 ${getTabClass(active, attention)}`}
   >
     {icon}
     {label}
@@ -64,7 +62,7 @@ export const ToolbarButton: React.FC<ToolbarButtonProps> = ({
     title={title}
     className={`inline-flex min-w-[7.5rem] items-center justify-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11px] font-bold transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 ${
       tone === "brand"
-        ? "border-blue-300 bg-blue-600 text-white shadow-sm shadow-blue-500/30 hover:bg-blue-700"
+        ? "border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 hover:border-blue-300 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-200 dark:hover:bg-blue-950/50"
         : "border-slate-200 bg-white text-slate-700 hover:border-blue-300 hover:bg-blue-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
     }`}
   >

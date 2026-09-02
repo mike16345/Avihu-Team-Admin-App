@@ -5,6 +5,7 @@ import {
   FaCircleExclamation,
   FaDroplet,
   FaDrumstickBite,
+  FaFilter,
   FaFire,
   FaMagnifyingGlass,
   FaPlus,
@@ -89,6 +90,7 @@ const DietPlanPresetGrid: React.FC<DietPlanPresetGridProps> = ({
   const [restrictions, setRestrictions] = useState<DietaryRestriction[]>([]);
   const [mealCounts, setMealCounts] = useState<string[]>([]);
   const [favoritesOnly, setFavoritesOnly] = useState(false);
+  const [filtersExpanded, setFiltersExpanded] = useState(false);
 
   const currentUser = useUsersStore((state) => state.currentUser);
   const { data: subTrainers = [] } = useSubTrainersQuery();
@@ -183,6 +185,35 @@ const DietPlanPresetGrid: React.FC<DietPlanPresetGridProps> = ({
             />
           </div>
 
+          <button
+            type="button"
+            onClick={() => setFiltersExpanded((v) => !v)}
+            aria-pressed={filtersExpanded}
+            aria-label={filtersExpanded ? "הסתר סינון" : "הצג סינון"}
+            title={filtersExpanded ? "הסתר סינון" : "הצג סינון"}
+            className={`relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border transition-all ${
+              filtersExpanded || hasActiveFilters
+                ? "border-blue-500 bg-blue-50 text-blue-700 dark:border-blue-400 dark:bg-blue-950/40 dark:text-blue-200"
+                : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
+            }`}
+          >
+            <FaFilter size={13} />
+            {hasActiveFilters && (
+              <span className="absolute -top-1.5 -left-1.5 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-blue-600 px-1 text-[10px] font-bold text-white">
+                {goals.length +
+                  buckets.length +
+                  proteinServings.length +
+                  carbServings.length +
+                  fatServings.length +
+                  freeCalories.length +
+                  restrictions.length +
+                  mealCounts.length}
+              </span>
+            )}
+          </button>
+
+          {filtersExpanded && (
+          <>
           <DietPresetFilterDropdown
             label="מספר ארוחות"
             icon={<FaUtensils size={11} />}
@@ -252,18 +283,22 @@ const DietPlanPresetGrid: React.FC<DietPlanPresetGridProps> = ({
             selected={freeCalories}
             onToggle={(value) => setFreeCalories(toggleSelection(freeCalories, value))}
           />
+          </>
+          )}
 
           <button
             type="button"
             onClick={() => setFavoritesOnly((value) => !value)}
             aria-pressed={favoritesOnly}
-            className={`inline-flex h-9 items-center gap-2 rounded-xl border px-3 text-xs font-bold transition-all ${getFavoriteButtonClassName(
-              favoritesOnly
-            )}`}
+            aria-label="מועדפים"
+            title="מועדפים"
+            className={`inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-xl border text-xs font-bold transition-all ${
+              favoritesOnly ? "px-3" : "w-9"
+            } ${getFavoriteButtonClassName(favoritesOnly)}`}
           >
-            <FaStar size={11} />
-            מועדפים
-            {favoritesCount > 0 && (
+            <FaStar size={13} />
+            {favoritesOnly && <span>מועדפים</span>}
+            {favoritesCount > 0 && favoritesOnly && (
               <span
                 className={`inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[10px] font-bold ${getFavoriteCountClassName(
                   favoritesOnly

@@ -8,6 +8,7 @@ import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 import useMenuItemsQuery from "@/hooks/queries/menuItems/useMenuItemsQuery";
 import AddButton from "../ui/buttons/AddButton";
 import DietplanTabs from "./DietPlanTabs";
+import DietPlanUnitModeToggle from "./DietPlanUnitModeToggle";
 import TextEditor from "../ui/TextEditor";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
@@ -57,7 +58,6 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ children, presetLoader }) =
 
   const freeCalories = watch("freeCalories") || 0;
   const instructions = getTextEditorValue(watch("customInstructions"));
-  const supplements = getTextEditorValue(watch("supplements"));
 
   const handleAddMeal = () => {
     append(cloneDefaultMeal());
@@ -79,13 +79,6 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ children, presetLoader }) =
     <TextEditor
       value={instructions}
       onChange={(val) => setValue("customInstructions", [val], { shouldDirty: true })}
-    />
-  );
-
-  const renderSupplementsEditor = () => (
-    <TextEditor
-      value={supplements}
-      onChange={(val) => setValue("supplements", [val], { shouldDirty: true })}
     />
   );
 
@@ -132,10 +125,10 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ children, presetLoader }) =
     <div className="flex h-auto w-full flex-col gap-4">
       <DietplanTabs
         tips={renderTipsEditor()}
-        supplements={renderSupplementsEditor()}
         dietplan={renderDietPlanEditor()}
         dietplanToolbar={renderFreeCaloriesChip()}
         presetLoader={presetLoader}
+        unitModeToggle={<DietPlanUnitModeToggle />}
       />
 
       {children}
