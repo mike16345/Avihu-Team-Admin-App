@@ -26,7 +26,7 @@ const DietPlanVersionSwitch: React.FC<DietPlanVersionSwitchProps> = ({
             : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100"
         }`}
       >
-        V{version}
+        {version === 1 ? "תפריט מנות" : "תפריט מאקרו"}
       </button>
     ))}
   </div>

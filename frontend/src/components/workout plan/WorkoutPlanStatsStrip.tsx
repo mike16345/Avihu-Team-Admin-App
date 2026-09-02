@@ -1,45 +1,24 @@
 import React from "react";
 import { useFormContext } from "react-hook-form";
-import { FaDumbbell, FaListUl, FaPersonRunning, FaClipboardCheck } from "react-icons/fa6";
 import type { WorkoutSchemaType } from "@/schemas/workoutPlanSchema";
 
-interface StatProps {
-  icon: React.ReactNode;
+interface StatCardProps {
   label: string;
   value: React.ReactNode;
-  tone: "purple" | "rose" | "emerald" | "sky" | "amber";
+  hint?: React.ReactNode;
 }
 
-const BRAND_TONE = {
-  iconBg:
-    "bg-gradient-to-br from-blue-600/85 via-blue-500/75 to-teal-300/70 shadow-sm shadow-blue-500/10 ring-1 ring-white/10",
-  iconText: "text-white",
-};
-const TONE: Record<StatProps["tone"], { iconBg: string; iconText: string }> = {
-  purple: BRAND_TONE,
-  rose: BRAND_TONE,
-  emerald: BRAND_TONE,
-  sky: BRAND_TONE,
-  amber: BRAND_TONE,
-};
-
-const StatCard: React.FC<StatProps> = ({ icon, label, value, tone }) => {
-  const t = TONE[tone];
+const StatCard: React.FC<StatCardProps> = ({ label, value, hint }) => {
   return (
-    <div className="flex flex-1 items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 shadow-sm">
-      <div
-        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${t.iconBg} ${t.iconText}`}
-      >
-        {icon}
+    <div className="relative flex min-h-[60px] flex-1 flex-col justify-between overflow-hidden rounded-xl border border-slate-200 bg-white px-3 py-1.5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">{label}</span>
+      <div className="flex items-baseline justify-center gap-1.5">
+        <span className="text-xl font-extrabold text-slate-900 dark:text-slate-100">{value}</span>
+        {hint && (
+          <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">{hint}</span>
+        )}
       </div>
-      <div className="flex min-w-0 flex-col">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-          {label}
-        </span>
-        <span className="truncate text-base font-bold text-slate-900 dark:text-slate-100">
-          {value}
-        </span>
-      </div>
+      <div className="absolute inset-x-0 bottom-0 h-[3px] brand-gradient" />
     </div>
   );
 };
@@ -88,7 +67,8 @@ const WorkoutPlanStatsStrip: React.FC = () => {
       cardioStepsSummary = `${Number(plan.daily).toLocaleString("he-IL")} צעדים/יום`;
     }
   }
-  const cardioSummary = cardioStepsSummary || (cardioWeeklyMins ? `${cardioWeeklyMins} דק׳` : "—");
+  const cardioSummary = cardioStepsSummary || (cardioWeeklyMins ? `${cardioWeeklyMins}` : "—");
+  const cardioHint = cardioStepsSummary ? "" : cardioWeeklyMins ? "דק׳ בשבוע" : "לא הוגדר";
 
   const hasTips = (() => {
     const text = (tips.join(" ") || "").replace(/<[^>]+>/g, "").trim();
@@ -98,28 +78,16 @@ const WorkoutPlanStatsStrip: React.FC = () => {
   return (
     <div dir="rtl" className="grid grid-cols-2 gap-3 font-heebo md:grid-cols-4">
       <StatCard
-        tone="purple"
-        icon={<FaDumbbell size={16} />}
         label="מספר אימונים"
         value={workoutCount}
+        hint={workoutCount === 1 ? "אימון" : "אימונים"}
       />
+      <StatCard label="סך תרגילים" value={exerciseCount} hint="בסה״כ" />
+      <StatCard label="אירובי שבועי" value={cardioSummary} hint={cardioHint} />
       <StatCard
-        tone="rose"
-        icon={<FaListUl size={16} />}
-        label="סך תרגילים"
-        value={exerciseCount}
-      />
-      <StatCard
-        tone="sky"
-        icon={<FaPersonRunning size={16} />}
-        label="אירובי שבועי"
-        value={cardioSummary}
-      />
-      <StatCard
-        tone="amber"
-        icon={<FaClipboardCheck size={16} />}
         label="דגשים"
-        value={hasTips ? "מולא" : "ללא"}
+        value={hasTips ? "מולא" : "—"}
+        hint={hasTips ? "הוזנו לאימון" : "לא הוזנו עדיין"}
       />
     </div>
   );

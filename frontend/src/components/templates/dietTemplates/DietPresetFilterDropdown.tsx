@@ -2,74 +2,28 @@ import React, { useEffect, useRef, useState } from "react";
 import { FaChevronDown } from "react-icons/fa6";
 
 export type DietFilterTone =
-  | "blue"
-  | "amber"
-  | "violet"
-  | "rose"
-  | "emerald"
-  | "sky"
-  | "indigo"
-  | "pink"
-  | "orange";
+  "blue" | "amber" | "violet" | "rose" | "emerald" | "sky" | "indigo" | "pink" | "orange";
+
+const NEUTRAL_TONE_STYLE = {
+  iconText: "text-slate-500 dark:text-slate-400",
+  idleBg: "bg-white dark:bg-slate-900",
+  idleBorder: "border-slate-200 dark:border-slate-700",
+  hover: "hover:border-slate-300",
+};
 
 const TONE_STYLES: Record<
   DietFilterTone,
   { iconText: string; idleBg: string; idleBorder: string; hover: string }
 > = {
-  blue: {
-    iconText: "text-blue-600 dark:text-blue-300",
-    idleBg: "bg-blue-50/60 dark:bg-blue-950/30",
-    idleBorder: "border-blue-100 dark:border-blue-900/60",
-    hover: "hover:bg-blue-100/60 hover:border-blue-300",
-  },
-  amber: {
-    iconText: "text-amber-600 dark:text-amber-300",
-    idleBg: "bg-amber-50/60 dark:bg-amber-950/30",
-    idleBorder: "border-amber-100 dark:border-amber-900/60",
-    hover: "hover:bg-amber-100/60 hover:border-amber-300",
-  },
-  violet: {
-    iconText: "text-violet-600 dark:text-violet-300",
-    idleBg: "bg-violet-50/60 dark:bg-violet-950/30",
-    idleBorder: "border-violet-100 dark:border-violet-900/60",
-    hover: "hover:bg-violet-100/60 hover:border-violet-300",
-  },
-  rose: {
-    iconText: "text-rose-600 dark:text-rose-300",
-    idleBg: "bg-rose-50/60 dark:bg-rose-950/30",
-    idleBorder: "border-rose-100 dark:border-rose-900/60",
-    hover: "hover:bg-rose-100/60 hover:border-rose-300",
-  },
-  emerald: {
-    iconText: "text-emerald-600 dark:text-emerald-300",
-    idleBg: "bg-emerald-50/60 dark:bg-emerald-950/30",
-    idleBorder: "border-emerald-100 dark:border-emerald-900/60",
-    hover: "hover:bg-emerald-100/60 hover:border-emerald-300",
-  },
-  sky: {
-    iconText: "text-sky-600 dark:text-sky-300",
-    idleBg: "bg-sky-50/60 dark:bg-sky-950/30",
-    idleBorder: "border-sky-100 dark:border-sky-900/60",
-    hover: "hover:bg-sky-100/60 hover:border-sky-300",
-  },
-  indigo: {
-    iconText: "text-indigo-600 dark:text-indigo-300",
-    idleBg: "bg-indigo-50/60 dark:bg-indigo-950/30",
-    idleBorder: "border-indigo-100 dark:border-indigo-900/60",
-    hover: "hover:bg-indigo-100/60 hover:border-indigo-300",
-  },
-  pink: {
-    iconText: "text-pink-600 dark:text-pink-300",
-    idleBg: "bg-pink-50/60 dark:bg-pink-950/30",
-    idleBorder: "border-pink-100 dark:border-pink-900/60",
-    hover: "hover:bg-pink-100/60 hover:border-pink-300",
-  },
-  orange: {
-    iconText: "text-orange-600 dark:text-orange-300",
-    idleBg: "bg-orange-50/60 dark:bg-orange-950/30",
-    idleBorder: "border-orange-100 dark:border-orange-900/60",
-    hover: "hover:bg-orange-100/60 hover:border-orange-300",
-  },
+  blue: NEUTRAL_TONE_STYLE,
+  amber: NEUTRAL_TONE_STYLE,
+  violet: NEUTRAL_TONE_STYLE,
+  rose: NEUTRAL_TONE_STYLE,
+  emerald: NEUTRAL_TONE_STYLE,
+  sky: NEUTRAL_TONE_STYLE,
+  indigo: NEUTRAL_TONE_STYLE,
+  pink: NEUTRAL_TONE_STYLE,
+  orange: NEUTRAL_TONE_STYLE,
 };
 
 const getDropdownButtonClassName = (active: boolean, open: boolean, tone: DietFilterTone) => {
@@ -164,16 +118,6 @@ const DietPresetFilterDropdown = <T extends string>({
           tone
         )}`}
       >
-        {icon && (
-          <span
-            className={`flex h-5 w-5 items-center justify-center rounded-md transition-transform group-hover:scale-110 ${getIconClassName(
-              active,
-              tone
-            )}`}
-          >
-            {icon}
-          </span>
-        )}
         {label}
         {selected.length > 0 && (
           <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-white/25 px-1.5 text-[10px] font-bold text-white ring-1 ring-white/40 backdrop-blur">

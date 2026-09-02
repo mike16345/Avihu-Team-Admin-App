@@ -64,7 +64,8 @@ const cloneMeal = (meal: DietV2Meal): DietV2Meal => ({
     items: category.items.map((item) => ({ ...item })),
     macros: category.macros ? { ...category.macros } : undefined,
   })),
-  addOns: (meal.addOns ?? []).map((item) => ({ ...item })),
+  addOns:
+    meal.addOns && meal.addOns.length > 0 ? meal.addOns.map((item) => ({ ...item })) : undefined,
   macros: deriveMealMacros(meal),
   freeCalories: meal.freeCalories
     ? { ...meal.freeCalories, items: meal.freeCalories.items.map((item) => ({ ...item })) }
@@ -94,12 +95,7 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
 
   const [tab, setTab] = useState<DietV2Tab>("menu");
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(
-    () =>
-      new Set(
-        plan.meals
-          .slice(1)
-          .map((meal, index) => getMealRenderId(meal, fields[index + 1]?.id, index + 1))
-      )
+    () => new Set(plan.meals.map((meal, index) => getMealRenderId(meal, fields[index]?.id, index)))
   );
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dropIndex, setDropIndex] = useState<number | null>(null);
@@ -110,7 +106,8 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
 
   const hasPlanItems = plan.meals.some(
     (meal) =>
-      meal.categories.some((category) => category.items.length > 0) || meal.addOns.length > 0
+      meal.categories.some((category) => category.items.length > 0) ||
+      (meal.addOns?.length ?? 0) > 0
   );
   const macroValidationMessages = getMacroValidationMessages(plan, errors);
   const saveDisabled = (!isDirty && !forceDirty) || isSubmitting;

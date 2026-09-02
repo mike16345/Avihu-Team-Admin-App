@@ -1,45 +1,25 @@
 import React from "react";
 import { useFormContext } from "react-hook-form";
-import { ClipboardCheck, Flame, Scale, Utensils } from "lucide-react";
 import { DIET_CALORIES_PER_SERVING } from "@/constants/dietCalories";
 import type { IDietPlan } from "@/interfaces/IDietPlan";
 
-interface StatProps {
-  icon: React.ReactNode;
+interface StatCardProps {
   label: string;
   value: React.ReactNode;
-  tone: "sky" | "blue" | "indigo" | "navy";
+  hint?: React.ReactNode;
 }
 
-const BRAND_TONE = {
-  iconBg:
-    "bg-gradient-to-br from-blue-600/85 via-blue-500/75 to-teal-300/70 shadow-sm shadow-blue-500/10 ring-1 ring-white/10",
-  iconText: "text-white",
-};
-const TONE: Record<StatProps["tone"], { iconBg: string; iconText: string }> = {
-  sky: BRAND_TONE,
-  blue: BRAND_TONE,
-  indigo: BRAND_TONE,
-  navy: BRAND_TONE,
-};
-
-const StatCard: React.FC<StatProps> = ({ icon, label, value, tone }) => {
-  const t = TONE[tone];
+const StatCard: React.FC<StatCardProps> = ({ label, value, hint }) => {
   return (
-    <div className="flex flex-1 items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 shadow-sm">
-      <div
-        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${t.iconBg} ${t.iconText}`}
-      >
-        {icon}
+    <div className="relative flex min-h-[60px] flex-1 flex-col justify-between overflow-hidden rounded-xl border border-slate-200 bg-white px-3 py-1.5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">{label}</span>
+      <div className="flex items-baseline justify-center gap-1.5">
+        <span className="text-xl font-extrabold text-slate-900 dark:text-slate-100">{value}</span>
+        {hint && (
+          <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">{hint}</span>
+        )}
       </div>
-      <div className="flex min-w-0 flex-col">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-          {label}
-        </span>
-        <span className="truncate text-base font-bold text-slate-900 dark:text-slate-100">
-          {value}
-        </span>
-      </div>
+      <div className="absolute inset-x-0 bottom-0 h-[3px] brand-gradient" />
     </div>
   );
 };
@@ -49,7 +29,6 @@ const DietPlanStatsStrip: React.FC = () => {
   const meals = watch("meals") || [];
   const freeCalories = Number(watch("freeCalories")) || 0;
   const instructions = watch("customInstructions") || [];
-  const supplements = watch("supplements") || [];
 
   const totals = meals.reduce(
     (acc, m) => ({
@@ -68,41 +47,28 @@ const DietPlanStatsStrip: React.FC = () => {
     totals.veggies * DIET_CALORIES_PER_SERVING.veggies +
     freeCalories;
 
-  const macroSummary = `${totals.protein} · ${totals.carbs} · ${totals.fats}`;
+  const macroSummary = `${totals.protein} | ${totals.carbs} | ${totals.fats}`;
 
   const hasTextContent = (values: string[]) => {
     const text = (values.join(" ") || "").replace(/<[^>]+>/g, "").trim();
     return text.length > 0;
   };
 
-  const instructionMark = hasTextContent(instructions) ? "✓" : "—";
-  const supplementMark = hasTextContent(supplements) ? "✓" : "—";
+  const instructionsFilled = hasTextContent(instructions);
 
   return (
     <div dir="rtl" className="grid grid-cols-2 gap-3 font-heebo md:grid-cols-4">
       <StatCard
-        tone="sky"
-        icon={<Utensils size={16} strokeWidth={2} />}
         label="מספר ארוחות"
         value={meals.length}
+        hint={meals.length === 1 ? "ארוחה" : "ארוחות"}
       />
+      <StatCard label="חלבון · פחמ׳ · שומן" value={macroSummary} hint="מנות ליום" />
+      <StatCard label="סך קלוריות" value={totalKcal.toLocaleString()} hint="קק״ל ליום" />
       <StatCard
-        tone="blue"
-        icon={<Scale size={16} strokeWidth={2} />}
-        label="חלבון · פחמ׳ · שומן"
-        value={macroSummary}
-      />
-      <StatCard
-        tone="indigo"
-        icon={<Flame size={16} strokeWidth={2} />}
-        label="סך קלוריות"
-        value={`${totalKcal.toLocaleString()} קק״ל`}
-      />
-      <StatCard
-        tone="navy"
-        icon={<ClipboardCheck size={16} strokeWidth={2} />}
-        label="דגשים · תוספים"
-        value={`${instructionMark} · ${supplementMark}`}
+        label="דגשים"
+        value={instructionsFilled ? "מולא" : "—"}
+        hint={instructionsFilled ? "הוזנו לתפריט" : "לא הוזנו עדיין"}
       />
     </div>
   );
