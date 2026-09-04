@@ -5,6 +5,7 @@ import { AxiosError } from "axios";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { ZodError, ZodIssue } from "zod";
+import { encodeCloudFrontPath } from "./imageUrls";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -110,7 +111,7 @@ export const buildPhotoUrls = (urls: string[]) => {
 export const buildPhotoUrl = (url: string) => {
   const cloudfrontUrl = import.meta.env.VITE_CLOUDFRONT_URL;
 
-  return `${cloudfrontUrl}/images/${url}`;
+  return `${cloudfrontUrl}/images/${encodeCloudFrontPath(url)}`;
 };
 
 export const servingTypeToString = (type: string) => {
