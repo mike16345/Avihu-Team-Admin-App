@@ -1,6 +1,7 @@
 import { deleteItem } from "@/API/api";
 import { determineServerUrl } from "@/config/apiConfig";
 import { authFetch } from "@/services/authFetch";
+import { buildSignedImageUploadUrl, createImageObjectName } from "@/lib/imageUrls";
 import { v4 as uuidv4 } from "uuid";
 
 export const useImageApi = () => {
@@ -53,12 +54,12 @@ export const useImageApi = () => {
     }
   };
 
-  const handleUploadImageToS3 = async (name: string, image: string) => {
+  const handleUploadImageToS3 = async (_name: string, image: string) => {
     const api = determineServerUrl();
     const today = new Date().toISOString().split("T")[0];
-    const imageName = name + "-image";
     const id = uuidv4();
-    const url = `${api}/signedUrl?userId=${id}&date=${today}&imageName=${imageName}`;
+    const imageName = createImageObjectName(id);
+    const url = buildSignedImageUploadUrl(api, { userId: id, date: today, imageName });
     const urlToStore = `${id}/${today}/${imageName}`;
 
     const signedUrl = await fetchSignedUrl(url);
