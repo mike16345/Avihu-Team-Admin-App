@@ -1,0 +1,157 @@
+:root {
+  color-scheme: light;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #243047;
+  background: #f5f7fb;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.policy {
+  width: min(100% - 32px, 800px);
+  margin: 40px auto;
+  padding: clamp(28px, 6vw, 64px);
+  background: #ffffff;
+  border: 1px solid #e3e8f1;
+  border-radius: 16px;
+  box-shadow: 0 18px 50px rgba(30, 47, 78, 0.08);
+}
+
+.policy-header {
+  padding-bottom: 28px;
+  margin-bottom: 36px;
+  border-bottom: 1px solid #e3e8f1;
+}
+
+.app-name {
+  margin: 0 0 8px;
+  color: #2863d7;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  color: #14213a;
+  line-height: 1.25;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2rem, 6vw, 3rem);
+  letter-spacing: -0.035em;
+}
+
+h2 {
+  margin: 2.6rem 0 1rem;
+  font-size: clamp(1.45rem, 4vw, 1.8rem);
+  letter-spacing: -0.02em;
+}
+
+h3 {
+  margin: 2rem 0 0.75rem;
+  font-size: 1.2rem;
+}
+
+h4 {
+  margin: 1.5rem 0 0.65rem;
+  font-size: 1rem;
+}
+
+p,
+ul {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+ul {
+  padding-left: 1.4rem;
+}
+
+li + li {
+  margin-top: 0.4rem;
+}
+
+.definitions li + li,
+.spaced-list li + li {
+  margin-top: 0.85rem;
+}
+
+.updated {
+  margin: 10px 0 0;
+  color: #667085;
+  font-size: 0.95rem;
+}
+
+a {
+  color: #1f5cc4;
+  font-weight: 600;
+  text-underline-offset: 0.18em;
+}
+
+a:hover {
+  color: #17499f;
+}
+
+a:focus-visible {
+  outline: 3px solid rgba(40, 99, 215, 0.3);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+@media (max-width: 600px) {
+  body {
+    background: #ffffff;
+  }
+
+  .policy {
+    width: 100%;
+    margin: 0;
+    padding: 28px 20px 44px;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .policy-header {
+    margin-bottom: 28px;
+  }
+}
+
+@media print {
+  body {
+    background: #ffffff;
+  }
+
+  .policy {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+  }
+
+  a {
+    color: inherit;
+  }
+}
