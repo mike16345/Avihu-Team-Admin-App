@@ -1,8 +1,11 @@
+import { useState } from "react";
 import {
+  FaBoltLightning,
   FaChevronDown,
   FaChevronUp,
   FaCopy,
   FaGripVertical,
+  FaPuzzlePiece,
   FaTrashCan,
   FaUtensils,
 } from "react-icons/fa6";
@@ -60,6 +63,8 @@ const MealCard: React.FC<MealCardProps> = ({
   isDropTarget,
 }) => {
   const addOns = meal.addOns ?? [];
+  const [addOnsActivated, setAddOnsActivated] = useState(addOns.length > 0);
+  const [freeCaloriesActivated, setFreeCaloriesActivated] = useState(!!meal.freeCalories);
   const totalItems =
     meal.categories.reduce((total, category) => total + category.items.length, 0) + addOns.length;
   const displayedCategories: DietV2Category[] = DIET_V2_DEFAULT_CATEGORIES.map(
@@ -94,7 +99,7 @@ const MealCard: React.FC<MealCardProps> = ({
     >
       <header
         onClick={onToggleCollapse}
-        className="flex cursor-pointer flex-wrap items-center justify-between gap-3 border-b border-blue-100 bg-gradient-to-l from-blue-50/60 to-white px-4 py-3 dark:border-blue-900/40 dark:from-blue-950/30 dark:to-slate-900"
+        className="group flex cursor-pointer flex-wrap items-center justify-between gap-3 border-b border-blue-100 bg-gradient-to-l from-blue-50/60 to-white px-4 py-3 dark:border-blue-900/40 dark:from-blue-950/30 dark:to-slate-900"
       >
         <div className="flex min-w-[220px] items-center gap-2.5">
           <span
@@ -126,10 +131,39 @@ const MealCard: React.FC<MealCardProps> = ({
           <MealMacroInline macros={mealMacros} freeCalories={meal.freeCalories?.calories} />
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 opacity-0 transition-opacity duration-150 group-hover:opacity-100 focus-within:opacity-100">
           <HeaderButton label={collapsed ? "פתח ארוחה" : "סגור ארוחה"} onClick={onToggleCollapse}>
             {collapsed ? <FaChevronDown size={11} /> : <FaChevronUp size={11} />}
           </HeaderButton>
+          <button
+            type="button"
+            title="הוסף תוספים לארוחה"
+            onClick={(event) => {
+              event.stopPropagation();
+              if (collapsed) onToggleCollapse();
+              setAddOnsActivated(true);
+              if (!meal.addOns) onChange({ ...meal, addOns: [] });
+            }}
+            className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-blue-100 bg-white px-2.5 text-[11px] font-bold text-blue-600 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 dark:border-blue-900/40 dark:bg-slate-900 dark:text-blue-300"
+          >
+            <FaPuzzlePiece size={12} />
+            <span>תוספים</span>
+          </button>
+          <button
+            type="button"
+            title="הוסף קלוריות חופשיות לארוחה"
+            onClick={(event) => {
+              event.stopPropagation();
+              if (collapsed) onToggleCollapse();
+              setFreeCaloriesActivated(true);
+              if (!meal.freeCalories)
+                onChange({ ...meal, freeCalories: { calories: 0, items: [] } });
+            }}
+            className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-blue-100 bg-white px-2.5 text-[11px] font-bold text-blue-600 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 dark:border-blue-900/40 dark:bg-slate-900 dark:text-blue-300"
+          >
+            <FaBoltLightning size={12} />
+            <span>קלוריות חופשיות</span>
+          </button>
           <HeaderButton label="שכפל ארוחה" onClick={onDuplicate}>
             <FaCopy size={11} />
           </HeaderButton>
@@ -154,12 +188,27 @@ const MealCard: React.FC<MealCardProps> = ({
             />
           ))}
 
-          <AddOnsFields value={addOns} onChange={(next) => onChange({ ...meal, addOns: next })} />
+          {addOnsActivated && (
+            <AddOnsFields
+              value={addOns}
+              onChange={(next) => onChange({ ...meal, addOns: next })}
+              onRemove={() => {
+                onChange({ ...meal, addOns: [] });
+                setAddOnsActivated(false);
+              }}
+            />
+          )}
 
-          <FreeCaloriesFields
-            value={meal.freeCalories}
-            onChange={(freeCalories) => onChange({ ...meal, freeCalories })}
-          />
+          {freeCaloriesActivated && (
+            <FreeCaloriesFields
+              value={meal.freeCalories}
+              onChange={(freeCalories) => onChange({ ...meal, freeCalories })}
+              onRemove={() => {
+                onChange({ ...meal, freeCalories: undefined });
+                setFreeCaloriesActivated(false);
+              }}
+            />
+          )}
         </div>
       )}
     </article>
@@ -210,7 +259,7 @@ const displayMacro = (value: number | undefined): number =>
 
 const MealMacroInline: React.FC<MealMacroInlineProps> = ({ macros, freeCalories }) => (
   <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-[12px] font-semibold text-slate-500 dark:text-slate-400">
-    <span className="text-sm font-extrabold text-rose-600 dark:text-rose-300">
+    <span className="text-base font-extrabold text-emerald-800 dark:text-emerald-300">
       {displayMacro(macros.calories)} קק״ל
     </span>
     <span>{displayMacro(macros.protein)} ג׳ חלבון</span>

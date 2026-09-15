@@ -14,7 +14,10 @@ const NotesPanel: React.FC<NotesPanelProps> = ({ title, hint, value, onChange, p
       <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">{title}</h3>
       <span className="text-[11px] text-slate-500 dark:text-slate-400">{hint}</span>
     </header>
-    <div className="min-h-[260px] overflow-hidden rounded-xl border border-slate-200 bg-white text-sm text-slate-800 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-200/60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
+    <div
+      dir="rtl"
+      className="min-h-[260px] overflow-hidden rounded-xl border border-slate-200 bg-white text-sm text-slate-800 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-200/60 [&_.ql-editor]:text-right [&_.ql-editor.ql-blank]:before:!right-3 [&_.ql-editor.ql-blank]:before:!left-auto dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+    >
       <TextEditor
         value={value}
         onChange={onChange}

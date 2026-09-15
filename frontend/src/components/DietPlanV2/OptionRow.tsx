@@ -23,7 +23,7 @@ const OptionRow: React.FC<OptionRowProps> = ({ item, onRemove, onRename }) => {
   return (
     <div
       onDoubleClick={() => onRename && setEditing(true)}
-      className="group flex min-w-0 items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/70 px-3 py-2 transition-colors hover:border-blue-200 hover:bg-blue-50/40 dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-blue-900/60"
+      className="group flex min-w-0 items-center gap-2 rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 transition-colors hover:border-blue-200 hover:bg-blue-50/60 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-blue-900/60"
       title={onRename ? "לחץ פעמיים לעריכה" : undefined}
     >
       {editing ? (
@@ -38,10 +38,10 @@ const OptionRow: React.FC<OptionRowProps> = ({ item, onRemove, onRename }) => {
               setEditing(false);
             }
           }}
-          className="min-w-0 flex-1 rounded-md border border-blue-300 bg-white px-2 py-1 text-sm font-semibold text-slate-800 outline-none ring-2 ring-blue-100 dark:bg-slate-900 dark:text-slate-100"
+          className="min-w-[240px] rounded-md border border-blue-300 bg-white px-2 py-1 text-sm font-semibold text-slate-800 outline-none ring-2 ring-blue-100 [field-sizing:content] dark:bg-slate-900 dark:text-slate-100"
         />
       ) : (
-        <span className="min-w-0 flex-1 text-sm font-semibold leading-6 text-slate-800 dark:text-slate-100">
+        <span className="min-w-0 text-[15px] font-semibold leading-6 text-slate-800 dark:text-slate-100">
           {item.name}
         </span>
       )}

@@ -33,19 +33,15 @@ type DietPlanPresetCardProps = {
   onDelete: (id: string) => void;
 };
 
+const NEUTRAL_MACRO = {
+  bg: "bg-slate-50 dark:bg-slate-800/40",
+  text: "text-slate-700 dark:text-slate-200",
+};
+
 const MACRO_TONE: Record<"rose" | "amber" | "sky", { bg: string; text: string }> = {
-  rose: {
-    bg: "bg-rose-50 dark:bg-rose-950/40",
-    text: "text-rose-700 dark:text-rose-300",
-  },
-  amber: {
-    bg: "bg-amber-50 dark:bg-amber-950/40",
-    text: "text-amber-700 dark:text-amber-300",
-  },
-  sky: {
-    bg: "bg-sky-50 dark:bg-sky-950/40",
-    text: "text-sky-700 dark:text-sky-300",
-  },
+  rose: NEUTRAL_MACRO,
+  amber: NEUTRAL_MACRO,
+  sky: NEUTRAL_MACRO,
 };
 
 const getPresetSubtitle = (goalLabel?: string, calories?: unknown) => {
@@ -175,13 +171,13 @@ const DietPlanPresetCard: React.FC<DietPlanPresetCardProps> = ({
           </span>
         )}
         {freeCaloriesLabel && (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-[11px] font-bold text-sky-700 dark:border-sky-900/60 dark:bg-sky-950/40 dark:text-sky-300">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-800/40 dark:text-slate-200">
             <FaCircleInfo size={9} />
             {freeCaloriesLabel} חופשי
           </span>
         )}
         {caloriesLabel && (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-bold text-amber-700 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-300">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-800/40 dark:text-slate-200">
             <FaFire size={9} />
             {caloriesLabel} קל׳
           </span>

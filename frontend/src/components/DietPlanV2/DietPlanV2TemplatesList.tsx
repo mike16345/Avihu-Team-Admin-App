@@ -120,19 +120,12 @@ const DietPlanV2TemplatesList: React.FC = () => {
       dir="rtl"
       className="flex h-[calc(100vh-160px)] min-h-[480px] flex-col gap-4"
     >
-      <div
-        data-testid="diet-plan-v2-toolbar"
-        className="flex min-h-[122px] flex-wrap items-stretch justify-between gap-3"
-      >
-        <FiltersBar filters={filters} onChange={setFilters} />
-        <button
-          type="button"
-          onClick={() => navigate("/presets/dietPlans")}
-          className="inline-flex h-10 shrink-0 self-center items-center gap-2 rounded-xl brand-gradient px-4 text-sm font-bold text-white shadow-sm shadow-blue-500/25 transition-all hover:-translate-y-0.5"
-        >
-          <FaPlus size={11} />
-          הוסף תבנית
-        </button>
+      <div data-testid="diet-plan-v2-toolbar">
+        <FiltersBar
+          filters={filters}
+          onChange={setFilters}
+          onCreate={() => navigate("/presets/dietPlans")}
+        />
       </div>
 
       {hasAny ? (
@@ -275,15 +268,16 @@ const applyFilters = (templates: DietV2Template[], filters: Filters): DietV2Temp
 };
 
 interface FiltersBarProps {
+  onCreate: () => void;
   filters: Filters;
   onChange: (next: Filters) => void;
 }
 
-const FiltersBar: React.FC<FiltersBarProps> = ({ filters, onChange }) => {
+const FiltersBar: React.FC<FiltersBarProps> = ({ filters, onChange, onCreate }) => {
   const patch = (partial: Partial<Filters>) => onChange({ ...filters, ...partial });
 
   return (
-    <div className="shrink-0 rounded-2xl border border-blue-100 bg-gradient-to-l from-blue-50/40 to-white p-4 dark:border-blue-900/40 dark:from-blue-950/30 dark:to-slate-900">
+    <div className="w-full rounded-2xl border border-blue-100 bg-gradient-to-l from-blue-50/40 to-white p-4 dark:border-blue-900/40 dark:from-blue-950/30 dark:to-slate-900">
       <div className="flex flex-wrap items-center gap-3">
         <span className="flex h-9 min-w-[280px] flex-1 items-center gap-2 rounded-lg border border-blue-200 bg-white px-2.5 shadow-sm shadow-blue-500/5 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-200/60 dark:border-blue-900/40 dark:bg-slate-900">
           <FaMagnifyingGlass size={12} className="text-blue-500" />
@@ -335,6 +329,14 @@ const FiltersBar: React.FC<FiltersBarProps> = ({ filters, onChange }) => {
           }))}
           minWidth={170}
         />
+        <button
+          type="button"
+          onClick={onCreate}
+          className="inline-flex h-10 shrink-0 items-center gap-2 rounded-xl brand-gradient px-4 text-sm font-bold text-white shadow-sm shadow-blue-500/25 transition-all hover:-translate-y-0.5"
+        >
+          <FaPlus size={11} />
+          הוסף תבנית
+        </button>
       </div>
     </div>
   );
