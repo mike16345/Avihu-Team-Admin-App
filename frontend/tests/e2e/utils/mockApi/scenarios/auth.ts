@@ -24,6 +24,48 @@ export const authScenarios = {
       variant: "success",
     }),
   ],
+  "auth.login.v2-success": [
+    jsonRoute({
+      method: "POST",
+      pathname: AUTH_LOGIN_PATH,
+      fixture: {
+        accessToken: "mock-v2-access-token",
+        refreshToken: "mock-v2-refresh-token",
+        sessionId: "session-v2-admin-001",
+        user: {
+          _id: "v2-admin-001",
+          trainerId: "trainer-v2-001",
+          firstName: "אביהו",
+          lastName: "כהן",
+          email: "v2-admin@example.com",
+          role: "admin",
+          hasAccess: true,
+          dietPlanVersion: 2,
+        },
+      },
+    }),
+  ],
+  "auth.login.trainer-v2-success": [
+    jsonRoute({
+      method: "POST",
+      pathname: AUTH_LOGIN_PATH,
+      fixture: {
+        accessToken: "mock-v2-trainer-access-token",
+        refreshToken: "mock-v2-trainer-refresh-token",
+        sessionId: "session-v2-trainer-001",
+        user: {
+          _id: "v2-trainer-001",
+          trainerId: "trainer-v2-001",
+          firstName: "מאמן",
+          lastName: "כהן",
+          email: "trainer@example.com",
+          role: "trainer",
+          hasAccess: true,
+          dietPlanVersion: 2,
+        },
+      },
+    }),
+  ],
   "auth.login.unauthorized": [
     jsonFixtureRoute({
       method: "POST",
@@ -38,6 +80,46 @@ export const authScenarios = {
       pathname: AUTH_REFRESH_PATH,
       fixture: "auth.login",
       variant: "refresh_success",
+    }),
+  ],
+  "auth.refresh.v2-success": [
+    jsonRoute({
+      method: "POST",
+      pathname: AUTH_REFRESH_PATH,
+      fixture: {
+        accessToken: "mock-v2-refreshed-token",
+        refreshToken: "mock-v2-rotated-token",
+        user: {
+          _id: "v2-admin-001",
+          trainerId: "trainer-v2-001",
+          firstName: "אביהו",
+          lastName: "כהן",
+          email: "v2-admin@example.com",
+          role: "admin",
+          hasAccess: true,
+          dietPlanVersion: 2,
+        },
+      },
+    }),
+  ],
+  "auth.refresh.trainer-v2-success": [
+    jsonRoute({
+      method: "POST",
+      pathname: AUTH_REFRESH_PATH,
+      fixture: {
+        accessToken: "mock-v2-trainer-refreshed-token",
+        refreshToken: "mock-v2-trainer-rotated-token",
+        user: {
+          _id: "v2-trainer-001",
+          trainerId: "trainer-v2-001",
+          firstName: "מאמן",
+          lastName: "כהן",
+          email: "trainer@example.com",
+          role: "trainer",
+          hasAccess: true,
+          dietPlanVersion: 2,
+        },
+      },
     }),
   ],
   "auth.refresh.unauthorized": [

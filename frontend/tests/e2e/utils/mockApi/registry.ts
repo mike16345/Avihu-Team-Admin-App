@@ -3,9 +3,11 @@ import { authScenarios } from "./scenarios/auth";
 import { blogsScenarios } from "./scenarios/blogs";
 import { dietPlansScenarios } from "./scenarios/dietPlans";
 import { leadsScenarios } from "./scenarios/leads";
+import { foodCatalogScenarios } from "./scenarios/foodCatalog";
 import { measurementsScenarios } from "./scenarios/measurements";
 import { presetsScenarios } from "./scenarios/presets";
 import { recordedSetsScenarios } from "./scenarios/recordedSets";
+import { trainersScenarios } from "./scenarios/trainers";
 import { usersScenarios } from "./scenarios/users";
 import { weighInsScenarios } from "./scenarios/weighIns";
 import { workoutPlansScenarios } from "./scenarios/workoutPlans";
@@ -16,10 +18,12 @@ export const mockScenarioRegistry = {
   ...authScenarios,
   ...blogsScenarios,
   ...dietPlansScenarios,
+  ...foodCatalogScenarios,
   ...leadsScenarios,
   ...measurementsScenarios,
   ...presetsScenarios,
   ...recordedSetsScenarios,
+  ...trainersScenarios,
   ...usersScenarios,
   ...weighInsScenarios,
   ...workoutPlansScenarios,

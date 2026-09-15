@@ -29,6 +29,7 @@ const trainerBaseSchema = z.object({
 
 export const trainerSchema = trainerBaseSchema.extend({
   password: z.string().min(1, { message: "אנא הכנס סיסמה" }),
+  dietPlanVersion: z.union([z.literal(1), z.literal(2)]),
 });
 
 export const updateTrainerSchema = trainerBaseSchema;

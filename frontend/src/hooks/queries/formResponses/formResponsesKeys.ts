@@ -3,8 +3,9 @@ export type FormResponsesQueryParams = {
 };
 
 export const formResponsesKeys = {
-  all: ["formResponses"] as const,
-  list: (params?: FormResponsesQueryParams) =>
-    [...formResponsesKeys.all, "list", params ?? {}] as const,
-  one: (responseId?: string) => [...formResponsesKeys.all, "one", responseId] as const,
+  all: (trainerId: string) => ["formResponses", trainerId] as const,
+  list: (trainerId: string, params?: FormResponsesQueryParams) =>
+    [...formResponsesKeys.all(trainerId), "list", params ?? {}] as const,
+  one: (responseId?: string, trainerId?: string) =>
+    [...formResponsesKeys.all(trainerId || ""), "one", responseId] as const,
 };

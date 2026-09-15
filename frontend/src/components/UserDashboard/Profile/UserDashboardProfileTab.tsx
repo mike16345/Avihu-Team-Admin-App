@@ -328,7 +328,12 @@ function StatusHistoryEntry({
     : "text-slate-700 dark:text-slate-200";
 
   return (
-    <li className={cn("group relative flex flex-col gap-2 rounded-xl border px-4 py-3", entryClassName)}>
+    <li
+      className={cn(
+        "group relative flex flex-col gap-2 rounded-xl border px-4 py-3",
+        entryClassName
+      )}
+    >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-1.5">
           <span

@@ -6,11 +6,12 @@ import { useUsersStore } from "@/store/userStore";
 import { useQuery } from "@tanstack/react-query";
 
 const useUsersQuery = () => {
+  const currentUser = useUsersStore((state) => state.currentUser);
   const { getAllUsers } = useUsersApi();
   const setUsers = useUsersStore((state) => state.setUsers);
 
   return useQuery({
-    queryKey: [QueryKeys.USERS],
+    queryKey: [QueryKeys.USERS,currentUser?.trainerId],
     staleTime: HOUR_STALE_TIME,
     retry: createRetryFunction(404, 2),
     queryFn: () =>

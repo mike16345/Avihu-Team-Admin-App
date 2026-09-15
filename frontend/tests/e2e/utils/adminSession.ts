@@ -11,4 +11,5 @@ export const loginAsAdmin = async (page: Page) => {
   await page.getByTestId("login-email").fill(ADMIN_EMAIL);
   await page.getByTestId("login-password").fill(ADMIN_PASSWORD);
   await page.getByTestId("login-submit").click();
+  await expect(page.getByTestId("admin-dashboard")).toBeVisible();
 };
