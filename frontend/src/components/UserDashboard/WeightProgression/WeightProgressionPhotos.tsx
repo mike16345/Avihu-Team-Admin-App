@@ -13,6 +13,7 @@ import Loader from "@/components/ui/Loader";
 import { determineServerUrl } from "@/config/apiConfig";
 import { useWeighInPhotosApi } from "@/hooks/api/useWeighInPhotosApi";
 import useUserWeighInPhotosQuery from "@/hooks/queries/weighInPhotos/useUserWeighInPhotosQuery";
+import { buildSignedImageUploadUrl } from "@/lib/imageUrls";
 import { buildPhotoUrls } from "@/lib/utils";
 
 export type Photo = { url?: string; _id?: string; date?: string };
@@ -130,7 +131,11 @@ export const WeightProgressionPhotos: FC = () => {
     for (let index = 0; index < total; index += 1) {
       const file = fileArr[index];
       const imageName = `progress-${Date.now()}-${index}`;
-      const signedUrlEndpoint = `${apiBase}/signedUrl?userId=${id}&date=${today}&imageName=${imageName}`;
+      const signedUrlEndpoint = buildSignedImageUploadUrl(apiBase, {
+        userId: id,
+        date: today,
+        imageName,
+      });
 
       try {
         const signedRes = await fetch(signedUrlEndpoint, {
