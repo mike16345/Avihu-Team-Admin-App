@@ -13,7 +13,7 @@ import { useForm } from "react-hook-form";
 import { Form } from "@/components/ui/form";
 import { useQueryClient } from "@tanstack/react-query";
 import { QueryKeys } from "@/enums/QueryKeys";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { MainRoutes } from "@/enums/Routes";
 import { useDirtyFormContext } from "@/context/useFormContext";
 import { dietPlanSchema, validateDietPlan } from "@/components/DietPlan/DietPlanSchema";
@@ -25,8 +25,12 @@ import DietPlanMetaPanel from "@/components/templates/dietTemplates/DietPlanMeta
 import { DietPlanPresetHeader } from "@/components/templates/dietTemplates/DietPlanPresetHeader";
 import { DietPlanPresetNameCard } from "@/components/templates/dietTemplates/DietPlanPresetNameCard";
 import { DietPlanPresetSaveAction } from "@/components/templates/dietTemplates/DietPlanPresetSaveAction";
+import DietPlanV2PresetPage from "@/components/DietPlanV2/DietPlanV2PresetPage";
+import type { IDietPlanV2Preset } from "@/interfaces/IDietPlanV2";
+import { usesDietPlanV2 } from "@/lib/dietPlanVersion";
+import { useUsersStore } from "@/store/userStore";
 
-export const ViewDietPlanPresetPage = () => {
+const DietPlanV1PresetPage = () => {
   const { setErrors, setIsDirty } = useDirtyFormContext();
 
   const navigation = useNavigate();
@@ -96,9 +100,10 @@ export const ViewDietPlanPresetPage = () => {
 
   useEffect(() => {
     if (!data) return;
+    if (data.data.version === 2) return;
 
     const normalized = normalizeDietPlan(data.data);
-    reset(normalized);
+    reset({ name: data.data.name });
     resetPlanForm(normalized);
     setIsEditingPreset(true);
     setIsDirty(false);
@@ -134,4 +139,31 @@ export const ViewDietPlanPresetPage = () => {
       </Form>
     </div>
   );
+};
+
+export const ViewDietPlanPresetPage = () => {
+  const { id } = useParams();
+  const currentTrainer = useUsersStore((state) => state.currentUser);
+  const [searchParams] = useSearchParams();
+  const presetQuery = useDietPlanPresetQuery(id || "undefined");
+
+  if (id && presetQuery.isLoading) return <Loader size="large" />;
+  if (id && presetQuery.error) return <ErrorPage message={presetQuery.error.message} />;
+
+  const storedPreset = presetQuery.data?.data;
+  const requestedVersion = searchParams.get("version");
+  const useV2Editor = storedPreset
+    ? storedPreset.version === 2
+    : (currentTrainer?.role === "admin" && requestedVersion === "2") ||
+      usesDietPlanV2(currentTrainer);
+
+  if (useV2Editor) {
+    return (
+      <DietPlanV2PresetPage
+        preset={storedPreset?.version === 2 ? (storedPreset as IDietPlanV2Preset) : undefined}
+      />
+    );
+  }
+
+  return <DietPlanV1PresetPage />;
 };

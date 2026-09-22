@@ -31,7 +31,7 @@ const useAnalyticsApi = () => {
       `${ANALYTICS_ENDPOINT}/users?collection=${colection}`
     );
 
-  const getUsersExpringThisMonth = () =>
+  const getUsersExpiringThisMonth = () =>
     fetchData<ApiResponse<UsersWithoutPlans[]>>(`${ANALYTICS_ENDPOINT}/users/expiring`);
 
   const getTrainerDashboardSummary = async (): Promise<DashboardSummaryResponse> => {
@@ -79,7 +79,7 @@ const useAnalyticsApi = () => {
     getTrainerDashboardJoinedByMonth,
     getTrainerDashboardSources,
     getTrainerDashboardSummary,
-    getUsersExpringThisMonth,
+    getUsersExpiringThisMonth,
     getUsersWithoutPlans,
   };
 };

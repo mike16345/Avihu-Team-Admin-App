@@ -2,11 +2,16 @@ import { QueryClient, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner";
 import TemplateTabs from "@/components/templates/TemplateTabs";
 import DietPlanTemplatesHeader from "@/components/templates/dietTemplates/DietPlanTemplatesHeader";
+import DietPlanV2TemplatesList from "@/components/DietPlanV2/DietPlanV2TemplatesList";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { useDietPlanPresetApi } from "@/hooks/api/useDietPlanPresetsApi";
 import useMenuItemApi from "@/hooks/api/useMenuItemApi";
 import { ITabs } from "@/interfaces/interfaces";
+import { useUsersStore } from "@/store/userStore";
+import { usesDietPlanV2 } from "@/lib/dietPlanVersion";
+import { useSearchParams } from "react-router-dom";
+import DietPlanV2AdminTabs from "@/components/DietPlanV2/DietPlanV2AdminTabs";
 
 type DeleteMutation = ITabs["tabContent"][number]["deleteFunc"];
 type DeleteMenuItem = ReturnType<typeof useMenuItemApi>["deleteMenuItem"];
@@ -106,7 +111,7 @@ const getDietPlanTabs = (deleteMutations: {
   ],
 });
 
-const DietPlanTemplatePage = () => {
+const DietPlanV1Templates = () => {
   const { deleteMenuItem } = useMenuItemApi();
   const { deleteDietPlanPreset } = useDietPlanPresetApi();
   const queryClient = useQueryClient();
@@ -142,14 +147,39 @@ const DietPlanTemplatePage = () => {
     deleteFats,
   });
 
+  return <TemplateTabs tabs={tabs} />;
+};
+
+const DietPlanTemplatePage = () => {
+  const currentUser = useUsersStore((state) => state.currentUser);
+  const isAdmin = currentUser?.role === "admin";
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedVersion = searchParams.get("version");
+  const adminVersion =
+    requestedVersion === "1" || requestedVersion === "2"
+      ? (Number(requestedVersion) as 1 | 2)
+      : usesDietPlanV2(currentUser)
+        ? 2
+        : 1;
+  const selectedVersion = isAdmin ? adminVersion : usesDietPlanV2(currentUser) ? 2 : 1;
+  const isStyleV2 = selectedVersion === 2;
+  const changeAdminVersion = (version: 1 | 2) => {
+    setSearchParams({ version: String(version) }, { replace: true });
+  };
+
   return (
     <div
       data-testid="diet-plan-templates-page"
       dir="rtl"
       className="flex flex-col gap-5 px-1 font-heebo"
     >
-      <DietPlanTemplatesHeader />
-      <TemplateTabs tabs={tabs} />
+      <DietPlanTemplatesHeader
+        presetsOnly={isStyleV2}
+        version={isAdmin ? selectedVersion : undefined}
+        onVersionChange={isAdmin ? changeAdminVersion : undefined}
+      />
+      {isAdmin && isStyleV2 ? <DietPlanV2AdminTabs active="presets" /> : null}
+      {isStyleV2 ? <DietPlanV2TemplatesList /> : <DietPlanV1Templates />}
     </div>
   );
 };

@@ -39,6 +39,14 @@ export const presetsScenarios = {
       message: "Form responses loaded",
     }),
   ],
+  "forms.responses.latest.empty": [
+    apiRoute({
+      method: "GET",
+      pathname: `${FORM_RESPONSES_ENDPOINT}/user/latest`,
+      data: null,
+      message: "No form response",
+    }),
+  ],
   "agreements.signed.success": [
     apiRoute({
       method: "GET",

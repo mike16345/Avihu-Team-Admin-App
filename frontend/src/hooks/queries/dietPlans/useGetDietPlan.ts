@@ -3,8 +3,13 @@ import { QueryKeys } from "@/enums/QueryKeys";
 import { useDietPlanApi } from "@/hooks/api/useDietPlanApi";
 import { createRetryFunction } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { IDietPlan } from "@/interfaces/IDietPlan";
 import { defaultDietPlan } from "@/constants/DietPlanConsts";
+import type { AnyDietPlan } from "@/lib/dietPlanVersion";
+
+export interface DietPlanQueryResult {
+  dietplan: AnyDietPlan;
+  failed: boolean;
+}
 
 const useGetDietPlan = (userId: string) => {
   const { getDietPlanByUserId } = useDietPlanApi();
@@ -18,10 +23,12 @@ const useGetDietPlan = (userId: string) => {
       if (error.status === 404) {
         return { dietplan: defaultDietPlan, failed: true };
       }
+
+      throw error;
     }
   };
 
-  return useQuery<{ dietplan: IDietPlan; failed: boolean }>({
+  return useQuery<DietPlanQueryResult>({
     queryKey: [`${QueryKeys.USER_DIET_PLAN}${userId}`],
     enabled: Boolean(userId),
     staleTime: FULL_DAY_STALE_TIME,
