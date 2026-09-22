@@ -82,7 +82,11 @@ export const SaveIndicator: React.FC<{ saved: boolean }> = ({ saved }) => (
     }`}
     title={saved ? "כל השינויים נשמרו מקומית" : "שומר…"}
   >
-    {saved ? <FaCheck size={9} /> : <span className="h-2 w-2 animate-pulse rounded-full bg-amber-500" />}
+    {saved ? (
+      <FaCheck size={9} />
+    ) : (
+      <span className="h-2 w-2 animate-pulse rounded-full bg-amber-500" />
+    )}
     {saved ? "נשמר" : "שומר…"}
   </span>
 );
