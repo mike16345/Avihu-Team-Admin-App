@@ -3,7 +3,7 @@ import { BookOpen, LayoutTemplate } from "lucide-react";
 
 const tabs = [
   {
-    label: "תבניות תפריט מאקרו",
+    label: "תבניות V2",
     to: "/dietPlans?version=2",
     icon: LayoutTemplate,
     activeKey: "presets",
