@@ -83,6 +83,25 @@ export const usersScenarios = {
       variant: "success",
     }),
   ],
+  "users.one.trainee-success": [
+    apiRoute({
+      method: "GET",
+      pathname: USERS_ONE_PATH,
+      data: {
+        _id: "user-001",
+        trainerId: "trainer-v2-001",
+        firstName: "דנה",
+        lastName: "כהן",
+        email: "trainee@example.com",
+        phone: "0500000000",
+        dietaryType: [],
+        dateJoined: "2026-01-01T00:00:00.000Z",
+        hasAccess: true,
+        role: "user",
+      },
+      message: "המשתמש נטען",
+    }),
+  ],
   "users.access.success": [
     jsonFixtureRoute({
       method: "PUT",

@@ -8,6 +8,7 @@ export type SafeAuthUser = Partial<IUser> & {
   favoriteDietPresetIds?: string[];
   sharesFavorites?: boolean;
   trainerId: string;
+  dietPlanVersion?: 1 | 2;
 };
 
 export type LoginResponse = {

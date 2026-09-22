@@ -44,14 +44,20 @@ import {
   type DietPlanTotals,
 } from "@/components/DietPlan/dietPlanHistory";
 import { DietPlanSaveActions } from "@/components/DietPlan/DietPlanSaveActions";
+import DietPlanV2UserEditor from "@/components/DietPlanV2/DietPlanV2UserEditor";
+import type { IDietPlanV2 } from "@/interfaces/IDietPlanV2";
+import { resolveDietPlanEditorVersion } from "@/lib/dietPlanVersion";
+import ErrorPage from "./ErrorPage";
 
 interface ViewDietPlanPageProps {
   embedded?: boolean;
+  userId?: string;
 }
 
-export const ViewDietPlanPage = ({ embedded = false }: ViewDietPlanPageProps) => {
+export const DietPlanV1Page = ({ embedded = false, userId }: ViewDietPlanPageProps) => {
   const navigation = useNavigate();
-  const { id } = useParams();
+  const { id: routeId } = useParams();
+  const id = userId ?? routeId;
   const { users } = useUsersStore();
   const { data: fetchedUser } = useUserQuery(id);
   const user = users.find((user) => user._id === id) || fetchedUser;
@@ -181,6 +187,8 @@ export const ViewDietPlanPage = ({ embedded = false }: ViewDietPlanPageProps) =>
   useEffect(() => {
     if (!id || !data) return;
     const { dietplan, failed } = data;
+    if (dietplan.version === 2) return;
+
     const normalized = normalizeDietPlan(dietplan);
     reset(normalized);
     lastCommittedTotals.current = computePlanTotals(normalized as IDietPlan);
@@ -274,4 +282,26 @@ export const ViewDietPlanPage = ({ embedded = false }: ViewDietPlanPageProps) =>
       />
     </div>
   );
+};
+
+export const ViewDietPlanPage = ({ embedded = false }: ViewDietPlanPageProps) => {
+  const { id } = useParams();
+  const currentTrainer = useUsersStore((state) => state.currentUser);
+  const { data, isLoading, error } = useGetDietPlan(id || "");
+  const existingPlan = data && !data.failed ? data.dietplan : null;
+  const editorVersion = resolveDietPlanEditorVersion(existingPlan, currentTrainer);
+
+  if (!id || isLoading) return <Loader size="large" />;
+  if (error) return <ErrorPage message={error.message} />;
+
+  if (editorVersion === 2) {
+    return (
+      <DietPlanV2UserEditor
+        userId={id}
+        initialPlan={existingPlan?.version === 2 ? (existingPlan as IDietPlanV2) : undefined}
+      />
+    );
+  }
+
+  return <DietPlanV1Page embedded={embedded} />;
 };

@@ -29,7 +29,12 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useCreateTrainer } from "@/hooks/mutations/trainers/useCreateTrainer";
-import { TRAINER_SOURCES, TRAINER_SUBSCRIPTION_PLANS } from "@/interfaces/trainers";
+import {
+  TRAINER_DIET_PLAN_VERSIONS,
+  TRAINER_SOURCES,
+  TRAINER_SUBSCRIPTION_PLANS,
+  type TrainerDietPlanVersion,
+} from "@/interfaces/trainers";
 import { cn } from "@/lib/utils";
 import {
   buildCreateTrainerPayload,
@@ -64,6 +69,7 @@ export const CreateTrainerDialog = ({ open, onOpenChange }: CreateTrainerDialogP
       status: "active",
       source: "פנייה קרה",
       videoLibraryAccess: false,
+      dietPlanVersion: 1,
     },
   });
 
@@ -217,6 +223,45 @@ export const CreateTrainerDialog = ({ open, onOpenChange }: CreateTrainerDialogP
                   />
                 </FormItem>
               </div>
+
+              <FormField
+                control={form.control}
+                name="dietPlanVersion"
+                render={({ field }) => (
+                  <FormItem className="rounded-xl border border-border bg-muted/70 px-4 py-3">
+                    <div className="space-y-1 text-right">
+                      <FormLabel>גרסת תפריט תזונה</FormLabel>
+                      <p className="text-xs text-muted-foreground">
+                        קובע איזו חוויית בניית תפריט תהיה זמינה למאמן
+                      </p>
+                    </div>
+                    <Select
+                      dir="rtl"
+                      value={String(field.value)}
+                      onValueChange={(value) =>
+                        field.onChange(Number(value) as TrainerDietPlanVersion)
+                      }
+                    >
+                      <FormControl>
+                        <SelectTrigger
+                          data-testid="trainer-diet-plan-version-create"
+                          className="border-none bg-background"
+                        >
+                          <SelectValue placeholder="בחר גרסה" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent dir="rtl">
+                        {TRAINER_DIET_PLAN_VERSIONS.map((version) => (
+                          <SelectItem key={version} value={String(version)}>
+                            V{version}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <FormField
