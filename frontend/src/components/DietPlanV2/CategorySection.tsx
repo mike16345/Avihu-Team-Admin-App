@@ -32,7 +32,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
   onCopyToMeal,
   onCopyToNewMeal,
 }) => {
-  const [collapsed, setCollapsed] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
   const updateCatalogItem = useUpdateDietV2CatalogItem();
   const tone = CATEGORY_TONES[category.category];
   const hasItems = category.items.length > 0;
@@ -67,16 +67,18 @@ const CategorySection: React.FC<CategorySectionProps> = ({
 
   return (
     <section
-      dir="rtl"
       data-testid={`diet-v2-category-${category.category}`}
-      className="group rounded-xl border border-slate-200/80 bg-white px-3 py-2.5 shadow-sm shadow-slate-500/5 dark:border-slate-800 dark:bg-slate-900/60"
+      dir="rtl"
+      className="rounded-xl border border-slate-200/80 bg-white px-3 py-2.5 shadow-sm shadow-slate-500/5 dark:border-slate-800 dark:bg-slate-900/60"
     >
-      <div className="flex flex-wrap items-center gap-2">
+      <header
+        onClick={() => setCollapsed((current) => !current)}
+        className="flex cursor-pointer flex-wrap items-center gap-2"
+      >
         <button
           type="button"
-          onClick={() => setCollapsed((current) => !current)}
           aria-label={collapsed ? "פתח קטגוריה" : "קפל קטגוריה"}
-          className="flex h-10 w-8 shrink-0 items-center justify-center rounded-md text-slate-500 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-slate-500 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
         >
           <svg
             viewBox="0 0 20 20"
@@ -91,45 +93,24 @@ const CategorySection: React.FC<CategorySectionProps> = ({
             />
           </svg>
         </button>
-        {!collapsed && (
-          <>
-            <div className="min-w-0 flex-1">
-              <CatalogQuickAdd
-                category={category.category}
-                categoryLabel={CATEGORY_LABELS[category.category]}
-                existingItems={category.items}
-                onAdd={(item) =>
-                  onChange({ ...category, items: [...category.items, item], macros: undefined })
-                }
-              />
-            </div>
-
-            {hasItems && (
-              <div className="min-w-0 md:w-[380px] md:shrink-0">
-                <CategoryMacroFields
-                  categoryLabel={CATEGORY_LABELS[category.category]}
-                  category={category.category}
-                  value={category.macros}
-                  mealIndex={mealIndex}
-                  categoryIndex={categoryIndex}
-                  onChange={(macros) => onChange({ ...category, macros })}
-                />
-              </div>
-            )}
-          </>
+        <span
+          className={`inline-flex h-8 shrink-0 items-center rounded-md ${tone.chip} px-3 text-sm font-bold ${tone.chipText}`}
+        >
+          {CATEGORY_LABELS[category.category]}
+        </span>
+        {hasItems && (
+          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-500 dark:bg-slate-800">
+            {category.items.length}
+          </span>
         )}
-
-        {collapsed && (
-          <p
-            className="min-w-[180px] flex-1 truncate px-2 text-base font-light text-slate-400"
-            title={preview}
-          >
-            {CATEGORY_LABELS[category.category]}: {preview}
+        {collapsed && preview && (
+          <p className="min-w-[180px] flex-1 truncate px-2 text-sm text-slate-500" title={preview}>
+            {preview}
           </p>
         )}
-
         <div
-          className={`mr-auto flex shrink-0 items-center gap-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100 focus-within:opacity-100 ${collapsed ? "flex-row" : "flex-col"}`}
+          className="mr-auto flex shrink-0 items-center gap-1"
+          onClick={(event) => event.stopPropagation()}
         >
           {onCopyToMeal && (
             <CopyCategoryButton
@@ -151,32 +132,46 @@ const CategorySection: React.FC<CategorySectionProps> = ({
             <FaTrashCan size={11} />
           </button>
         </div>
-      </div>
+      </header>
 
       {!collapsed && (
-        <div className="mt-3 flex flex-col gap-2 pl-2 pr-12">
+        <div className="mt-3 flex flex-col gap-3 border-t border-slate-100 pt-3 dark:border-slate-800">
+          <CatalogQuickAdd
+            category={category.category}
+            existingItems={category.items}
+            onAdd={(item) =>
+              onChange({ ...category, items: [...category.items, item], macros: undefined })
+            }
+          />
+
           {hasItems && (
-            <>
-              <h5 className="text-xs font-bold text-slate-500 dark:text-slate-400">
-                אופציות של {CATEGORY_LABELS[category.category]}:
-              </h5>
-              <div className="flex flex-wrap gap-3">
-                {category.items.map((item, index) => (
-                  <OptionRow
-                    key={`${item.catalogItemId ?? item.name}-${index}`}
-                    item={item}
-                    onRename={(name) => renameItem(index, name)}
-                    onRemove={() =>
-                      onChange({
-                        ...category,
-                        items: category.items.filter((_, itemIndex) => itemIndex !== index),
-                        macros: undefined,
-                      })
-                    }
-                  />
-                ))}
-              </div>
-            </>
+            <CategoryMacroFields
+              categoryLabel={CATEGORY_LABELS[category.category]}
+              category={category.category}
+              value={category.macros}
+              mealIndex={mealIndex}
+              categoryIndex={categoryIndex}
+              onChange={(macros) => onChange({ ...category, macros })}
+            />
+          )}
+
+          {hasItems && (
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
+              {category.items.map((item, index) => (
+                <OptionRow
+                  key={`${item.catalogItemId ?? item.name}-${index}`}
+                  item={item}
+                  onRename={(name) => renameItem(index, name)}
+                  onRemove={() =>
+                    onChange({
+                      ...category,
+                      items: category.items.filter((_, itemIndex) => itemIndex !== index),
+                      macros: undefined,
+                    })
+                  }
+                />
+              ))}
+            </div>
           )}
         </div>
       )}
