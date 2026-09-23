@@ -21,28 +21,28 @@ const mealSections = [
     label: "כמות חלבון",
     short: "חלבון",
     source: "protein",
-    chip: "bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300",
+    chip: "text-blue-600 dark:text-blue-400",
   },
   {
     key: "totalCarbs",
     label: "כמות פחמימות",
     short: "פחמ׳",
     source: "carbs",
-    chip: "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300",
+    chip: "text-blue-600 dark:text-blue-400",
   },
   {
     key: "totalFats",
     label: "כמות שומנים",
     short: "שומן",
     source: "fats",
-    chip: "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300",
+    chip: "text-blue-600 dark:text-blue-400",
   },
   {
     key: "totalVeggies",
     label: "כמות ירקות",
     short: "ירק",
     source: "vegetables",
-    chip: "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300",
+    chip: "text-blue-600 dark:text-blue-400",
   },
 ] as const;
 
@@ -203,7 +203,7 @@ export const MealDropDown: FC<MealDropDownProps> = ({
             return (
               <span
                 key={section.key}
-                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-bold ${section.chip}`}
+                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[13px] font-light ${section.chip}`}
               >
                 {section.short}
                 <span className="mx-1 opacity-60">×</span>
@@ -248,7 +248,7 @@ export const MealDropDown: FC<MealDropDownProps> = ({
                         {section.label}
                       </FormLabel>
                       <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-bold ${section.chip}`}
+                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[13px] font-light ${section.chip}`}
                       >
                         {section.short}
                       </span>
