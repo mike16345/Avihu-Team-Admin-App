@@ -202,6 +202,7 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
         <div className="grid grid-cols-2 gap-4">
           {showServingSelections.map((key, i) => {
             const typedKey = key as keyof IServingItem;
+            const optionLabel = i === 0 ? "אופציה א'" : i === 1 ? "אופציה ב'" : "";
 
             return (
               <FormField
@@ -211,6 +212,11 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
                 render={({ field }) => {
                   return (
                     <FormItem>
+                      {optionLabel && (
+                        <div className="text-[11px] font-bold text-blue-600 dark:text-blue-400">
+                          {optionLabel}
+                        </div>
+                      )}
                       <div className="flex items-center justify-between">
                         <FormLabel>{servingTypeToString(key)} במנה</FormLabel>
                         <CustomDropdownMenu
