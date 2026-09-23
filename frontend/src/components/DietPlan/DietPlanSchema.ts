@@ -25,6 +25,7 @@ const dietPlanSchema = z.object({
   freeCalories: z.coerce.number().min(0, { message: ERROR_MESSAGES.minNumber(0) }),
   customInstructions: z.array(z.string()).optional(),
   supplements: z.array(z.string()).optional(),
+  unitDisplayMode: z.union([z.literal(1), z.literal(2)]).optional(),
   // Optional trainer-tagged meta (kept in sync with IDietPlanMeta).
   goal: z.enum(["cutting", "mass"]).optional(),
   calories: z.coerce.number().min(0).max(10000).optional(),

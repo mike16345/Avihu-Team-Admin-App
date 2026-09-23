@@ -130,7 +130,7 @@ const MealBlock: React.FC<MealBlockProps> = ({ meal, index }) => {
       {addOns.length > 0 && (
         <div className="border-t border-slate-100 bg-slate-50/60 px-4 py-3 dark:border-slate-800 dark:bg-slate-950/30">
           <span className="mb-1.5 inline-flex rounded-md bg-slate-200 px-2 py-0.5 text-[10px] font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-            תוספות
+            תוספים
           </span>
           <p className="text-sm font-medium leading-6 text-slate-700 dark:text-slate-200">
             {addOns.map((item) => item.name).join(" / ")}

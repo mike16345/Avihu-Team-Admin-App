@@ -16,6 +16,7 @@ import { hasCategoryDuplicate } from "./dietPlanV2Catalog";
 
 interface CatalogQuickAddProps {
   category: DietV2CatalogCategory;
+  categoryLabel?: string;
   existingItems: DietV2PlanItem[];
   onAdd: (item: DietV2PlanItem) => void;
   placeholder?: string;
@@ -23,6 +24,7 @@ interface CatalogQuickAddProps {
 
 const CatalogQuickAdd: React.FC<CatalogQuickAddProps> = ({
   category,
+  categoryLabel,
   existingItems,
   onAdd,
   placeholder = "חפש או כתוב מאכל ולחץ Enter…",
@@ -70,9 +72,15 @@ const CatalogQuickAdd: React.FC<CatalogQuickAddProps> = ({
   return (
     <>
       <div className="flex flex-col gap-2">
-        <div className="flex min-w-0 items-center gap-2 rounded-lg border border-blue-200 bg-blue-50/40 px-2 py-1.5 shadow-sm transition-colors focus-within:border-blue-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-200/50 dark:border-blue-900/40 dark:bg-blue-950/20 dark:focus-within:bg-slate-900">
-          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
-            {isSearching ? <FaSpinner className="animate-spin" size={10} /> : <FaPlus size={10} />}
+        <div className="flex h-12 min-w-0 items-center gap-2 rounded-lg border border-blue-200 bg-blue-50/40 px-1 shadow-sm transition-colors focus-within:border-blue-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-200/50 dark:border-blue-900/40 dark:bg-blue-950/20 dark:focus-within:bg-slate-900">
+          <span className="flex h-8 shrink-0 items-center justify-center gap-1 px-2.5 text-xs font-bold text-blue-700 dark:text-blue-300">
+            {isSearching ? (
+              <FaSpinner className="animate-spin" size={10} />
+            ) : categoryLabel ? (
+              categoryLabel
+            ) : (
+              <FaPlus size={10} />
+            )}
           </span>
           <input
             value={query}
@@ -88,14 +96,6 @@ const CatalogQuickAdd: React.FC<CatalogQuickAddProps> = ({
             placeholder={placeholder}
             className="min-w-0 flex-1 bg-transparent py-1 text-sm font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none dark:text-slate-100"
           />
-          <button
-            type="button"
-            onClick={addTypedItem}
-            disabled={!query.trim()}
-            className="shrink-0 rounded-md brand-gradient brand-gradient-hover px-3 py-1.5 text-[11px] font-bold text-white shadow-sm shadow-blue-500/20 transition-all disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            הוסף
-          </button>
         </div>
 
         {suggestions.length > 0 && (
