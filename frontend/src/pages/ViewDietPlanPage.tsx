@@ -23,7 +23,7 @@ import { presetNameSchema } from "@/schemas/dietPlanPresetSchema";
 import { getNestedZodError } from "@/lib/utils";
 import useDietPlanPresetsQuery from "@/hooks/queries/dietPlans/useDietPlanPresetsQuery";
 import { cleanWorkoutObject } from "@/utils/workoutPlanUtils";
-import { normalizeDietPlan } from "@/utils/dietPlanUtils";
+import { normalizeDietPlan, normalizePresetForDietPlan } from "@/utils/dietPlanUtils";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@/components/ui/form";
@@ -158,8 +158,8 @@ export const DietPlanV1Page = ({ embedded = false, userId }: ViewDietPlanPagePro
   };
 
   const handleSelectPreset = (preset: any) => {
-    const { name: presetName, ...presetData } = preset;
-    const normalized = normalizeDietPlan(presetData as IDietPlan);
+    const presetName = preset.name;
+    const normalized = normalizePresetForDietPlan(preset);
     const before = lastCommittedTotals.current ?? computePlanTotals(getValues());
     const after = computePlanTotals(normalized as IDietPlan);
     reset(normalized);

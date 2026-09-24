@@ -2,7 +2,8 @@ import { Controller, useFormContext } from "react-hook-form";
 import { FaShoePrints } from "react-icons/fa6";
 
 import type { WorkoutSchemaType } from "@/schemas/workoutPlanSchema";
-import type { StepsCardioMode } from "@/interfaces/IWorkoutPlan";
+import type { IStepsCardioType, StepsCardioMode } from "@/interfaces/IWorkoutPlan";
+import { changeStepsCardioMode } from "@/constants/cardioOptions";
 
 const DAYS = ["א'", "ב'", "ג'", "ד'", "ה'", "ו'", "ש'"] as const;
 const MODE_OPTIONS: { id: StepsCardioMode; label: string }[] = [
@@ -19,7 +20,7 @@ const getModeButtonClassName = (active: boolean) => {
 };
 
 const StepsCardioContainer = () => {
-  const { watch, setValue, control } = useFormContext<WorkoutSchemaType>();
+  const { watch, setValue, getValues, control } = useFormContext<WorkoutSchemaType>();
   const mode = watch("cardio.plan.mode") as StepsCardioMode | undefined;
   const daily = watch("cardio.plan.daily") as number | undefined;
   const perDay = watch("cardio.plan.perDay") as number[] | undefined;
@@ -30,15 +31,10 @@ const StepsCardioContainer = () => {
 
   const handleModeChange = (nextMode: StepsCardioMode) => {
     if (nextMode === mode) return;
-    setValue("cardio.plan.mode", nextMode, { shouldDirty: true });
-    if (nextMode === "custom" && (!perDay || perDay.length !== 7)) {
-      const fill = daily ?? 10000;
-      setValue(
-        "cardio.plan.perDay",
-        [fill, fill, fill, fill, fill, fill, 0],
-        { shouldDirty: true }
-      );
-    }
+    const currentPlan = getValues("cardio.plan") as IStepsCardioType;
+    setValue("cardio.plan", changeStepsCardioMode(currentPlan, nextMode), {
+      shouldDirty: true,
+    });
   };
 
   return (

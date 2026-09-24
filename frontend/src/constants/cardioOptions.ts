@@ -29,5 +29,26 @@ export const defaultComplexCardioOption: IComplexCardioType = {
 export const defaultStepsCardioOption: IStepsCardioType = {
   mode: "uniform",
   daily: 10000,
-  perDay: [10000, 10000, 10000, 10000, 10000, 10000, 0],
+};
+
+export const changeStepsCardioMode = (
+  plan: IStepsCardioType,
+  nextMode: IStepsCardioType["mode"]
+): IStepsCardioType => {
+  if (nextMode === "uniform") {
+    const uniformPlan = { ...plan, mode: "uniform" as const };
+    delete uniformPlan.perDay;
+    return uniformPlan;
+  }
+
+  if (plan.perDay?.length === 7) {
+    return { ...plan, mode: "custom" };
+  }
+
+  const fill = plan.daily ?? 10000;
+  return {
+    ...plan,
+    mode: "custom",
+    perDay: [fill, fill, fill, fill, fill, fill, 0],
+  };
 };

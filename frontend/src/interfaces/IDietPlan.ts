@@ -35,6 +35,7 @@ export interface IDietPlan {
   freeCalories: number;
   fatsPerDay?: number;
   veggiesPerDay?: number;
+  unitDisplayMode?: DietPlanUnitMode;
   customInstructions?: string[];
   supplements: string[];
   unitDisplayMode?: DietPlanUnitMode;
