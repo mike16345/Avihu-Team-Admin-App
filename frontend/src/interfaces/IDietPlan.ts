@@ -38,6 +38,7 @@ export interface IDietPlan {
   unitDisplayMode?: DietPlanUnitMode;
   customInstructions?: string[];
   supplements: string[];
+  unitDisplayMode?: DietPlanUnitMode;
 }
 
 /**
