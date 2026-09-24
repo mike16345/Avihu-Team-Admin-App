@@ -20,21 +20,15 @@ const mealSchema = z.object({
 });
 
 const dietPlanSchema = z.object({
+  version: z.literal(1).optional(),
   meals: z.array(mealSchema),
   totalCalories: z.coerce.number().min(0).optional(),
   freeCalories: z.coerce.number().min(0, { message: ERROR_MESSAGES.minNumber(0) }),
+  fatsPerDay: z.coerce.number().min(0).optional(),
+  veggiesPerDay: z.coerce.number().min(0).optional(),
   customInstructions: z.array(z.string()).optional(),
   supplements: z.array(z.string()).optional(),
-  // Optional trainer-tagged meta (kept in sync with IDietPlanMeta).
-  goal: z.enum(["cutting", "mass"]).optional(),
-  calories: z.coerce.number().min(0).max(10000).optional(),
-  proteinServings: z.coerce.number().min(0).max(30).optional(),
-  carbServings: z.coerce.number().min(0).max(30).optional(),
-  fatServings: z.coerce.number().min(0).max(30).optional(),
-  dietaryRestrictions: z
-    .array(z.enum(["lactose-free", "vegetarian", "vegan", "no-fish", "no-meat", "gluten-free"]))
-    .optional(),
-  builtByTrainerId: z.string().optional(),
+  unitDisplayMode: z.union([z.literal(1), z.literal(2)]).optional(),
 });
 
 function validateDietPlan(dietPlan: IDietPlan) {

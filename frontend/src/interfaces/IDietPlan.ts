@@ -24,6 +24,8 @@ export interface IMeal {
   totalVeggies: DietItemQuantityBlock;
 }
 
+export type DietPlanUnitMode = 1 | 2;
+
 export interface IDietPlan {
   _id?: string;
   userId?: string;
@@ -33,6 +35,7 @@ export interface IDietPlan {
   freeCalories: number;
   fatsPerDay?: number;
   veggiesPerDay?: number;
+  unitDisplayMode?: DietPlanUnitMode;
   customInstructions?: string[];
   supplements: string[];
 }

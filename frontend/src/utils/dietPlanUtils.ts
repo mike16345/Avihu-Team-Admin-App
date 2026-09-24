@@ -35,3 +35,28 @@ export const normalizeDietPlan = (plan: IDietPlan): IDietPlan => ({
   supplements: plan.supplements || [],
   freeCalories: plan.freeCalories ?? 0,
 });
+
+export const normalizePresetForDietPlan = (preset: IDietPlanPreset): IDietPlan => {
+  const normalized = normalizeDietPlan(preset);
+
+  return {
+    ...(normalized.version !== undefined ? { version: normalized.version } : {}),
+    meals: normalized.meals.map((meal) => ({
+      totalProtein: meal.totalProtein,
+      totalCarbs: meal.totalCarbs,
+      totalFats: meal.totalFats,
+      totalVeggies: meal.totalVeggies,
+    })),
+    ...(normalized.totalCalories !== undefined
+      ? { totalCalories: normalized.totalCalories }
+      : {}),
+    freeCalories: normalized.freeCalories,
+    ...(normalized.fatsPerDay !== undefined ? { fatsPerDay: normalized.fatsPerDay } : {}),
+    ...(normalized.veggiesPerDay !== undefined ? { veggiesPerDay: normalized.veggiesPerDay } : {}),
+    ...(normalized.unitDisplayMode !== undefined
+      ? { unitDisplayMode: normalized.unitDisplayMode }
+      : {}),
+    customInstructions: normalized.customInstructions,
+    supplements: normalized.supplements,
+  };
+};
