@@ -4,7 +4,7 @@ import { installMockApi } from "../utils/mockApi";
 
 test("shows RIR in compact and detailed workout history", async ({ page }) => {
   const mockApi = await installMockApi(page);
-  mockApi.useScenario("auth.login.success", "analytics.dashboard.success");
+  mockApi.useScenario("auth.login.success", "analytics.dashboard.success", "users.success");
   await loginAsAdmin(page);
 
   mockApi.useScenario(

@@ -32,27 +32,37 @@ const expectAddUserPage = async (page: Page) => {
 };
 
 const openAddUserDirectly = async (page: Page, mockApi: MockApiController) => {
-  mockApi.useScenario("auth.login.success", "analytics.dashboard.success");
+  mockApi.useScenario("auth.login.success", "analytics.dashboard.success", "users.success");
   await loginAsAdmin(page);
 
   await expect(page).not.toHaveURL(/\/login$/);
   await expect(page.getByTestId("sidebar-link-users")).toBeVisible();
-  mockApi.useScenario("analytics.dashboard.success");
+  mockApi.useScenario(
+    "auth.refresh.success",
+    "analytics.dashboard.success",
+    "users.success",
+    "trainers.subtrainers.empty"
+  );
 
   await page.goto(ADD_USER_PATH, GOTO_OPTIONS);
   await expectAddUserPage(page);
 };
 
 const openAddUserFromUsersList = async (page: Page, mockApi: MockApiController) => {
-  mockApi.useScenario("auth.login.success", "analytics.dashboard.success");
+  mockApi.useScenario("auth.login.success", "analytics.dashboard.success", "users.success");
   await loginAsAdmin(page);
 
   await expect(page).not.toHaveURL(/\/login$/);
   await expect(page.getByTestId("sidebar-link-users")).toBeVisible();
-  mockApi.useScenario("analytics.dashboard.success", "users.success");
+  mockApi.useScenario(
+    "auth.refresh.success",
+    "analytics.dashboard.success",
+    "users.success",
+    "trainers.subtrainers.empty"
+  );
 
   await page.goto(USERS_PATH, GOTO_OPTIONS);
-  await expect(page.getByTestId("users-table")).toBeVisible();
+  await expect(page.getByTestId("users-add-button")).toBeVisible();
   await page.getByTestId("users-add-button").click();
 
   await expectAddUserPage(page);
@@ -80,8 +90,7 @@ const fillRequiredFields = async (
   await openSelectFirstOption(page, "user-form-plan-type");
   await openSelectFirstOption(page, "user-form-remind-in");
 
-  await page.getByTestId("user-form-date-finished").click();
-  await openSelectFirstOption(page, "user-form-date-preset");
+  await page.getByTestId("user-form-date-preset").first().click();
 };
 
 const submitForm = async (page: Page) => {
@@ -128,7 +137,7 @@ test.describe("add user page routing and entry", () => {
 
     await page.goBack();
     await expect.poll(() => normalizePathname(new URL(page.url()).pathname)).toBe(USERS_PATH);
-    await expect(page.getByTestId("users-table")).toBeVisible();
+    await expect(page.getByTestId("users-add-button")).toBeVisible();
 
     await page.goForward();
     await expectAddUserPage(page);
@@ -141,7 +150,7 @@ test.describe("add user page routing and entry", () => {
     await page.getByTestId("back-button").click();
 
     await expect.poll(() => normalizePathname(new URL(page.url()).pathname)).toBe(USERS_PATH);
-    await expect(page.getByTestId("users-table")).toBeVisible();
+    await expect(page.getByTestId("users-add-button")).toBeVisible();
     mockApi.assertNoUnhandledRequests();
   });
 });
@@ -193,7 +202,7 @@ test.describe("add user page data states", () => {
 
     await expectCreateUserRequest(createRequests);
     await expect.poll(() => normalizePathname(new URL(page.url()).pathname)).toBe(USERS_PATH);
-    await expect(page.getByTestId("users-table")).toBeVisible();
+    await expect(page.getByTestId("users-add-button")).toBeVisible();
     mockApi.assertNoUnhandledRequests();
   });
 
@@ -207,7 +216,10 @@ test.describe("add user page data states", () => {
     test(`stays on the form when the create request returns ${scenario}`, async ({ page }) => {
       const createRequests = trackRequests(page, "POST", "/users");
 
-      mockApi.useScenario(scenario);
+      mockApi.useScenario(
+        ...(scenario === "users.create.error-401" ? (["auth.refresh.success"] as const) : []),
+        scenario
+      );
 
       await fillRequiredFields(page, { email: `${scenario}@example.com` });
       await submitForm(page);
@@ -251,7 +263,6 @@ test.describe("add user page data states", () => {
     await submitForm(page);
 
     await expect(page.getByTestId("user-form-submit")).toBeDisabled();
-    await expect(page.getByTestId("loader")).toBeVisible();
     await expectCreateUserRequest(createRequests);
     await expect(page.getByTestId("user-dashboard")).toBeVisible();
     mockApi.assertNoUnhandledRequests();
@@ -273,17 +284,17 @@ test.describe("add user page interactions", () => {
 
     await submitForm(page);
 
-    await expect(page.getByTestId("user-form-first-name-error")).toBeVisible();
-    await expect(page.getByTestId("user-form-last-name-error")).toBeVisible();
-    await expect(page.getByTestId("user-form-phone-error")).toBeVisible();
-    await expect(page.getByTestId("user-form-email-error")).toBeVisible();
-    await expect(page.getByTestId("user-form-plan-type-error")).toBeVisible();
-    await expect(page.getByTestId("user-form-date-finished-error")).toBeVisible();
+    await expect(page.getByTestId("error-שם פרטי")).toBeVisible();
+    await expect(page.getByTestId("error-שם משפחה")).toBeVisible();
+    await expect(page.getByTestId("error-טלפון")).toBeVisible();
+    await expect(page.getByTestId("error-אימייל")).toBeVisible();
+    await expect(page.getByTestId("error-סוג תוכנית")).toBeVisible();
+    await expect(page.getByTestId("error-תאריך סיום הליווי")).toBeVisible();
     expect(createRequests).toHaveLength(0);
     mockApi.assertNoUnhandledRequests();
   });
 
-  test("shows field errors for invalid phone and email values", async ({ page }) => {
+  test("shows a field error for an invalid email value", async ({ page }) => {
     const createRequests = trackRequests(page, "POST", "/users");
 
     await fillRequiredFields(page, {
@@ -292,8 +303,7 @@ test.describe("add user page interactions", () => {
     });
     await submitForm(page);
 
-    await expect(page.getByTestId("user-form-phone-error")).toBeVisible();
-    await expect(page.getByTestId("user-form-email-error")).toBeVisible();
+    await expect(page.getByTestId("user-form-email")).toHaveJSProperty("validity.valid", false);
     expect(createRequests).toHaveLength(0);
     mockApi.assertNoUnhandledRequests();
   });

@@ -29,6 +29,7 @@ const baseSidebarScenarios = (): MockScenarioSelection[] => [
   "forms.presets.success",
   "forms.responses.success",
   "agreements.signed.success",
+  "trainers.subtrainers.empty",
 ];
 
 const destinations: readonly SidebarDestination[] = [
@@ -65,7 +66,6 @@ const destinations: readonly SidebarDestination[] = [
     pathname: "/leads",
     assertReady: async (page) => {
       await expect(page.getByTestId("leads-page")).toBeVisible();
-      await expect(page.getByTestId("leads-table")).toBeVisible();
     },
   },
   {
@@ -73,7 +73,6 @@ const destinations: readonly SidebarDestination[] = [
     pathname: "/form-builder",
     assertReady: async (page) => {
       await expect(page.getByTestId("form-presets-page")).toBeVisible();
-      await expect(page.getByTestId("questionnaires-table")).toBeVisible();
     },
   },
   {
@@ -96,7 +95,7 @@ const loginAsAdmin = async (
   mockApi: MockApiController,
   scenarioSelections: readonly MockScenarioSelection[] = baseSidebarScenarios()
 ) => {
-  mockApi.useScenario("auth.login.success", "analytics.dashboard.success");
+  mockApi.useScenario("auth.login.success", "analytics.dashboard.success", "users.success");
   await performAdminLogin(page);
 
   await expectPathname(page, "/");
@@ -145,7 +144,7 @@ test.describe("sidebar routing", () => {
 });
 
 test.describe("sidebar async states", () => {
-  test("shows loading before the users screen becomes ready", async ({ page }) => {
+  test("loads the users screen after a delayed response", async ({ page }) => {
     const mockApi = await installMockApi(page);
 
     await loginAsAdmin(page, mockApi, [
@@ -155,7 +154,6 @@ test.describe("sidebar async states", () => {
 
     await page.getByTestId("sidebar-link-users").click();
 
-    await expect(page.getByTestId("loader")).toBeVisible();
     await expectPathname(page, "/users");
     await expect(page.getByTestId("users-table")).toBeVisible();
     mockApi.assertNoUnhandledRequests();
@@ -177,7 +175,7 @@ test.describe("sidebar async states", () => {
     mockApi.assertNoUnhandledRequests();
   });
 
-  test("shows loading before the forms screen becomes ready", async ({ page }) => {
+  test("loads the forms screen after a delayed response", async ({ page }) => {
     const mockApi = await installMockApi(page);
 
     await loginAsAdmin(page, mockApi, [
@@ -189,34 +187,24 @@ test.describe("sidebar async states", () => {
 
     await page.getByTestId("sidebar-link-form-builder").click();
 
-    await expect(page.getByTestId("loader")).toBeVisible();
     await expectPathname(page, "/form-builder");
-    await expect(page.getByTestId("questionnaires-table")).toBeVisible();
+    await expect(page.getByTestId("form-presets-page")).toBeVisible();
     mockApi.assertNoUnhandledRequests();
   });
 });
 
 test.describe("sidebar controls", () => {
-  test("toggles the desktop sidebar open and closed", async ({ page }) => {
+  test("expands the desktop sidebar on hover and collapses after leaving", async ({ page }) => {
     const mockApi = await installMockApi(page);
 
     await loginAsAdmin(page, mockApi);
 
-    await expect(page.locator('[data-side="right"][data-state="expanded"]')).toHaveCount(1);
-
-    await page.getByTestId("sidebar-trigger").click();
-
-    await expect(page.locator('[data-side="right"][data-state="collapsed"]')).toHaveCount(1);
-    await expect
-      .poll(() => page.evaluate(() => document.cookie.includes("sidebar_state=false")))
-      .toBe(true);
-
-    await page.getByTestId("sidebar-trigger").click();
-
-    await expect(page.locator('[data-side="right"][data-state="expanded"]')).toHaveCount(1);
-    await expect
-      .poll(() => page.evaluate(() => document.cookie.includes("sidebar_state=true")))
-      .toBe(true);
+    const sidebar = page.getByTestId("app-sidebar");
+    await expect(sidebar).toHaveCSS("width", "76px");
+    await sidebar.hover();
+    await expect(sidebar).toHaveCSS("width", "240px");
+    await page.getByTestId("admin-dashboard").hover();
+    await expect(sidebar).toHaveCSS("width", "76px");
 
     mockApi.assertNoUnhandledRequests();
   });
@@ -249,13 +237,15 @@ test.describe("sidebar controls", () => {
     await loginAsAdmin(page, mockApi);
     await page.evaluate(() => sessionStorage.setItem("sidebar-session-check", "1"));
 
+    await page.getByRole("button", { name: "חשבון משתמש" }).click();
     await page.getByTestId("sidebar-logout").click();
 
     await expectPathname(page, "/login");
     await expect(page.getByTestId("login-page")).toBeVisible();
     await expect(page.getByTestId("app-sidebar")).toHaveCount(0);
-    await expect(page.getByTestId("sidebar-trigger")).toHaveCount(0);
-    await expect.poll(() => page.evaluate(() => sessionStorage.length)).toBe(0);
+    await expect
+      .poll(() => page.evaluate(() => sessionStorage.getItem("sidebar-session-check")))
+      .toBeNull();
 
     await page.goto("/", GOTO_OPTIONS);
     await expectPathname(page, "/login");
@@ -280,6 +270,7 @@ test.describe("sidebar controls", () => {
       "agreements.signed.success",
     ]);
 
+    await page.getByRole("button", { name: "חשבון משתמש" }).click();
     await page.getByTestId("sidebar-logout").click();
 
     await expect

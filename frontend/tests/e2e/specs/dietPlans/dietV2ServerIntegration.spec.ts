@@ -23,6 +23,16 @@ const trackRequests = (page: Page, method: string, pathnameSuffix: string) => {
   return requests;
 };
 
+const expandFirstV2Category = async (page: Page) => {
+  const editor = page.getByTestId("diet-v2-editor");
+  await expect(editor).toBeVisible();
+  const openMealButton = editor.getByRole("button", { name: "פתח ארוחה" });
+  if (await openMealButton.isVisible()) await openMealButton.click();
+  const openCategoryButton = editor.getByRole("button", { name: "פתח קטגוריה" }).first();
+  if (await openCategoryButton.isVisible()) await openCategoryButton.click();
+  return editor;
+};
+
 const openTraineeDiet = async (
   page: Page,
   mockApi: MockApiController,
@@ -138,20 +148,20 @@ test("a newly-created V2 plan uses update on its next save", async ({ page }) =>
     "diet-plans.user.v2-save-success",
   ]);
 
-  const editor = page.getByTestId("diet-v2-editor");
+  const editor = await expandFirstV2Category(page);
   const protein = editor.getByTestId("diet-v2-category-protein");
   const proteinInput = protein.getByPlaceholder("חפש או כתוב מאכל ולחץ Enter…");
   await proteinInput.fill("טופו 200 גרם");
   await proteinInput.press("Enter");
-  await editor.getByLabel("קלוריות", { exact: true }).fill("450");
-  await editor.getByLabel("חלבון", { exact: true }).fill("30");
-  await editor.getByLabel("פחמימה", { exact: true }).fill("50");
-  await editor.getByLabel("שומן", { exact: true }).fill("12");
+  await editor.getByLabel("חלבון קלוריות", { exact: true }).fill("450");
+  await editor.getByLabel("חלבון חלבון", { exact: true }).fill("30");
   await editor.getByRole("button", { name: "שמור תפריט" }).click();
   await expect.poll(() => createRequests.length).toBe(1);
 
-  await editor.getByLabel("חלבון", { exact: true }).fill("30");
-  await editor.getByRole("button", { name: "שמור תפריט" }).click();
+  const updatedEditor = await expandFirstV2Category(page);
+  await updatedEditor.getByLabel("חלבון חלבון", { exact: true }).fill("31");
+  await updatedEditor.getByLabel("חלבון קלוריות", { exact: true }).fill("451");
+  await updatedEditor.getByRole("button", { name: "שמור תפריט" }).click();
   await expect.poll(() => updateRequests.length).toBe(1);
   mockApi.assertNoUnhandledRequests();
 });
@@ -168,8 +178,9 @@ test("saving an existing V2 plan replaces it through the user-scoped Server rout
     "diet-plans.user.v2-save-success",
   ]);
 
-  const editor = page.getByTestId("diet-v2-editor");
-  await editor.getByLabel("חלבון", { exact: true }).fill("30");
+  const editor = await expandFirstV2Category(page);
+  await editor.getByLabel("חלבון חלבון", { exact: true }).fill("31");
+  await editor.getByLabel("חלבון קלוריות", { exact: true }).fill("451");
   await editor.getByRole("button", { name: "שמור תפריט" }).click();
 
   await expect.poll(() => saveRequests.length).toBe(1);

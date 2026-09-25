@@ -118,6 +118,7 @@ const DietPlanPresetCard: React.FC<DietPlanPresetCardProps> = ({
 
   return (
     <article
+      data-testid={preset._id ? `diet-plan-presets-row-${preset._id}` : undefined}
       onClick={handleOpen}
       className="group relative flex cursor-pointer flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-700"
     >
@@ -152,6 +153,9 @@ const DietPlanPresetCard: React.FC<DietPlanPresetCardProps> = ({
             </button>
             <button
               type="button"
+              data-testid={
+                preset._id ? `diet-plan-presets-row-${preset._id}-actions-trigger` : undefined
+              }
               onClick={handleDelete}
               aria-label="מחיקה"
               className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-400 transition-colors hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600 dark:border-slate-800 dark:hover:bg-rose-950/40"

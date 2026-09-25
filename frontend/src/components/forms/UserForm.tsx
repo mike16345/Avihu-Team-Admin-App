@@ -114,6 +114,7 @@ const UserForm = ({
 
 const BackButton = ({ isEdit, onBack }: { isEdit: boolean; onBack: () => void }) => (
   <button
+    data-testid="back-button"
     onClick={onBack}
     className="inline-flex w-fit items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-blue-600"
   >

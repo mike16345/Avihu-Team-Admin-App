@@ -95,8 +95,10 @@ const openDietPlansFromSidebar = async (
   await expect(page.getByTestId("diet-plan-templates-page")).toBeVisible();
 };
 
-const getDietPlansRows = (page: Page) => page.locator('tr[data-testid^="diet-plan-presets-row-"]');
-const getFoodGroupRows = (page: Page) => page.locator('tr[data-testid^="protein-row-"]');
+const getDietPlansRows = (page: Page) =>
+  page.locator('[data-testid^="diet-plan-presets-row-"]:not([data-testid*="-actions-"])');
+const getFoodGroupRows = (page: Page) =>
+  page.locator('[data-testid^="protein-row-"]:not([data-testid*="-actions-"])');
 
 const getDietPlansSearchInput = (page: Page) =>
   page.getByTestId("diet-plan-presets-search-container").getByRole("textbox");
@@ -139,21 +141,27 @@ test.describe("diet plans page routing and entry", () => {
   test("V2 trainers see presets without legacy food-group tabs", async ({ page }) => {
     const mockApi = await installMockApi(page);
     const presetRequests = trackRequests(page, "GET", "/presets/dietPlans");
-    mockApi.useScenario("auth.login.v2-success", "analytics.dashboard.success", "users.success");
-    await loginAsAdmin(page);
+    mockApi.useScenario(
+      "auth.login.trainer-v2-success",
+      "analytics.dashboard.success",
+      "users.success"
+    );
+    await page.goto(LOGIN_PATH, GOTO_OPTIONS);
+    await page.getByTestId("login-email").fill("trainer@example.com");
+    await page.getByTestId("login-password").fill("Secret123!");
+    await page.getByTestId("login-submit").click();
+    await expect(page).not.toHaveURL(/\/login$/);
 
     mockApi.useScenario(
-      "auth.refresh.v2-success",
+      "auth.refresh.trainer-v2-success",
       "analytics.dashboard.success",
       "users.success",
       "trainers.subtrainers.empty",
-      "trainers.one.v2-success",
-      "diet-plans.v2-presets.success",
-      "diet-plans.success",
-      "diet-plans.food-groups.success"
+      "diet-plans.v2-presets.success"
     );
     await page.goto(DIET_PLANS_PATH, GOTO_OPTIONS);
 
+    mockApi.assertNoUnhandledRequests();
     await expect(page.getByTestId("diet-plan-v2-templates-list")).toBeVisible();
     await expect(page.getByText("תבנית V2 מהשרת")).toBeVisible();
     await expect(page.getByTestId("template-tab-protein")).toHaveCount(0);
@@ -183,15 +191,15 @@ test.describe("diet plans page routing and entry", () => {
 
     await expect(page.getByRole("group", { name: "גרסת תפריט" })).toBeVisible();
     await expect(page.getByTestId("diet-plan-admin-v2-tabs")).toBeVisible();
-    await expect(page.getByRole("link", { name: "תבניות V2" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "תבניות תפריט מאקרו" })).toBeVisible();
     await expect(page.getByRole("link", { name: "מאגר מזון" })).toBeVisible();
 
     const presetsFrame = await getElementRect(page, "diet-plan-v2-templates-list");
     const presetsToolbar = await getElementRect(page, "diet-plan-v2-toolbar");
 
-    await page.getByRole("button", { name: "V1" }).click();
+    await page.getByRole("button", { name: "תפריט מנות" }).click();
     await expect(page.getByTestId("diet-plan-admin-v2-tabs")).toHaveCount(0);
-    await page.getByRole("button", { name: "V2" }).click();
+    await page.getByRole("button", { name: "תפריט מאקרו" }).click();
     await expect(page.getByTestId("diet-plan-admin-v2-tabs")).toBeVisible();
     await page.getByRole("link", { name: "מאגר מזון" }).click();
     await expectPathname(page, "/presets/admin/food-catalog");
@@ -272,7 +280,7 @@ test.describe("diet plans page routing and entry", () => {
       "diet-plans.v2-catalog.success",
     ]);
 
-    await page.getByRole("button", { name: "V2" }).click();
+    await page.getByRole("button", { name: "תפריט מאקרו" }).click();
     await expect(page.getByTestId("diet-plan-v2-templates-list")).toBeVisible();
     await page.getByRole("button", { name: "הוסף תבנית" }).click();
 
@@ -435,19 +443,15 @@ test.describe("diet plans page interactions", () => {
     mockApi.assertNoUnhandledRequests();
   });
 
-  test("paginates large preset lists", async ({ page }) => {
+  test("renders the complete large preset list", async ({ page }) => {
     await openDietPlansDirectly(page, mockApi, [
       "diet-plans.large",
       "diet-plans.food-groups.success",
     ]);
 
     await expect(page.getByTestId("diet-plan-presets-row-diet-plan-001")).toBeVisible();
-    await expect(page.getByTestId("diet-plan-presets-row-diet-plan-011")).toHaveCount(0);
-
-    await page.getByTestId("diet-plan-presets-next-page").click();
-
     await expect(page.getByTestId("diet-plan-presets-row-diet-plan-011")).toBeVisible();
-    await expect(page.getByTestId("diet-plan-presets-row-diet-plan-001")).toHaveCount(0);
+    await expect(getDietPlansRows(page)).toHaveCount(12);
     mockApi.assertNoUnhandledRequests();
   });
 
@@ -483,7 +487,7 @@ test.describe("diet plans page interactions", () => {
     mockApi.addScenario("diet-plans.delete.success");
 
     await page.getByTestId("diet-plan-presets-row-diet-plan-001-actions-trigger").click();
-    await page.getByTestId("diet-plan-presets-row-diet-plan-001-delete").click();
+    await page.getByRole("alertdialog").getByRole("button", { name: "מחק" }).click();
 
     await expect.poll(() => deleteRequests.length).toBe(1);
     await expect(page.getByTestId("diet-plan-presets-table")).toBeVisible();
@@ -498,7 +502,7 @@ test.describe("diet plans page interactions", () => {
 
     await openFoodGroupTab(page);
     await page.getByTestId("protein-row-menu-item-001-actions-trigger").click();
-    await page.getByTestId("protein-row-menu-item-001-delete").click();
+    await page.getByRole("alertdialog").getByRole("button", { name: "מחק" }).click();
 
     await expect.poll(() => deleteRequests.length).toBe(1);
     await expect(page.getByTestId("protein-table")).toBeVisible();

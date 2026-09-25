@@ -23,6 +23,7 @@ interface SimplePresetGridProps {
   variant?: "method" | "cardio";
   searchPlaceholder?: string;
   emptyLabel?: string;
+  testIdPrefix?: string;
 }
 
 const VARIANT_META = {
@@ -51,6 +52,7 @@ const SimplePresetGrid: React.FC<SimplePresetGridProps> = ({
   variant = "method",
   searchPlaceholder = "חיפוש…",
   emptyLabel = "לא נמצאו פריטים",
+  testIdPrefix,
 }) => {
   const [search, setSearch] = useState("");
   const [pendingDeleteItem, setPendingDeleteItem] = useState<SimpleItem | null>(null);
@@ -66,7 +68,11 @@ const SimplePresetGrid: React.FC<SimplePresetGridProps> = ({
   const itemCountLabel = getItemCountLabel(filtered.length);
 
   return (
-    <div dir="rtl" className="flex flex-col gap-4 font-heebo">
+    <div
+      data-testid={testIdPrefix ? `${testIdPrefix}-table` : undefined}
+      dir="rtl"
+      className="flex flex-col gap-4 font-heebo"
+    >
       <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="relative min-w-[220px] max-w-[360px] flex-1">
           <FaMagnifyingGlass
@@ -102,6 +108,7 @@ const SimplePresetGrid: React.FC<SimplePresetGridProps> = ({
           {filtered.map((item) => (
             <article
               key={item._id}
+              data-testid={testIdPrefix && item._id ? `${testIdPrefix}-row-${item._id}` : undefined}
               onClick={() => item._id && onView(item._id)}
               className="group flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-400 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
             >
@@ -129,6 +136,11 @@ const SimplePresetGrid: React.FC<SimplePresetGridProps> = ({
                 </button>
                 <button
                   type="button"
+                  data-testid={
+                    testIdPrefix && item._id
+                      ? `${testIdPrefix}-row-${item._id}-actions-trigger`
+                      : undefined
+                  }
                   onClick={(event) => {
                     event.stopPropagation();
                     if (item._id) setPendingDeleteItem(item);

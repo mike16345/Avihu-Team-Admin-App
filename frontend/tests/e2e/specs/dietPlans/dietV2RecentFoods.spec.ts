@@ -38,7 +38,7 @@ test("catalog candidates deduplicate within a category but not across categories
   ]);
 });
 
-test("V2 plan validation requires every macro for non-empty categories", () => {
+test("V2 plan validation requires category-specific macros for non-empty categories", () => {
   const missingMacros = dietPlanV2Schema.safeParse({
     version: 2,
     highlights: "",
@@ -49,7 +49,7 @@ test("V2 plan validation requires every macro for non-empty categories", () => {
           {
             category: "protein",
             items: [{ name: "Chicken" }],
-            macros: { calories: 100, protein: 20 },
+            macros: { calories: 100 },
           },
         ],
         addOns: [],
@@ -97,7 +97,7 @@ test("V2 plan validation accepts explicit zero macros and skips empty categories
         ],
         addOns: [{ name: "Creatine 5g" }],
         macros: { calories: 0, protein: 0, carbs: 0, fat: 0 },
-        freeCalories: { calories: 150, description: "Fruit / snack" },
+        freeCalories: { calories: 150, items: [{ name: "Fruit / snack" }] },
       },
     ],
   });
@@ -154,8 +154,8 @@ test("meal and plan totals derive from category macros and keep free calories se
   });
 });
 
-test("V2 access follows the trainer setting with the Avihu preview fallback", () => {
+test("V2 access follows the trainer setting", () => {
   expect(usesDietPlanV2({ _id: "trainer-a", dietPlanVersion: 2 })).toBe(true);
   expect(usesDietPlanV2({ _id: "trainer-b", dietPlanVersion: 1 })).toBe(false);
-  expect(usesDietPlanV2({ _id: "6774eb1c730c4c44354db2d0" })).toBe(true);
+  expect(usesDietPlanV2({})).toBe(false);
 });

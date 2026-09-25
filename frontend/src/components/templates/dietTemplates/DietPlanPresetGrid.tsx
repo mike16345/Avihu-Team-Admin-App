@@ -168,10 +168,13 @@ const DietPlanPresetGrid: React.FC<DietPlanPresetGridProps> = ({
   };
 
   return (
-    <div dir="rtl" className="flex flex-col gap-4 font-heebo">
+    <div data-testid="diet-plan-presets-table" dir="rtl" className="flex flex-col gap-4 font-heebo">
       <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="flex flex-wrap items-center gap-3">
-          <div className="relative min-w-[220px] max-w-[360px] flex-1">
+          <div
+            data-testid="diet-plan-presets-search-container"
+            className="relative min-w-[220px] max-w-[360px] flex-1"
+          >
             <FaMagnifyingGlass
               size={11}
               className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
@@ -327,6 +330,7 @@ const DietPlanPresetGrid: React.FC<DietPlanPresetGridProps> = ({
           {onAddNew && (
             <button
               type="button"
+              data-testid="template-add-dietplanpresets"
               onClick={onAddNew}
               className="ms-auto inline-flex items-center gap-2 rounded-xl brand-gradient brand-gradient-hover px-4 py-2 text-sm font-bold text-white shadow-sm"
             >

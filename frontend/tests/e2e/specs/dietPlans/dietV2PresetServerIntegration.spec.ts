@@ -46,8 +46,11 @@ test("an existing V2 preset stays V2 when the trainer is currently V1", async ({
 
   const editor = page.getByTestId("diet-v2-editor");
   await expect(editor).toBeVisible();
+  await editor.getByRole("button", { name: "פתח ארוחה" }).click();
+  await editor.getByRole("button", { name: "פתח קטגוריה" }).first().click();
   await expect(page.locator('input[value="תבנית V2 מהשרת"]')).toBeVisible();
-  await editor.getByLabel("חלבון", { exact: true }).fill("30");
+  await editor.getByLabel("חלבון חלבון", { exact: true }).fill("31");
+  await editor.getByLabel("חלבון קלוריות", { exact: true }).fill("451");
   await editor.getByRole("button", { name: "שמור שינויים בתבנית" }).click();
 
   await expect.poll(() => updateRequests.length).toBe(1);
@@ -75,15 +78,16 @@ test("creating a V2 preset writes it to the Server", async ({ page }) => {
   await page.goto(PRESET_EDITOR_PATH, { waitUntil: "domcontentloaded" });
 
   const editor = page.getByTestId("diet-v2-editor");
+  await expect(editor).toBeVisible();
+  await editor.getByRole("button", { name: "פתח ארוחה" }).click();
+  await editor.getByRole("button", { name: "פתח קטגוריה" }).first().click();
   const proteinInput = editor
     .getByTestId("diet-v2-category-protein")
     .getByPlaceholder("חפש או כתוב מאכל ולחץ Enter…");
   await proteinInput.fill("טופו 200 גרם");
   await proteinInput.press("Enter");
-  await editor.getByLabel("קלוריות", { exact: true }).fill("450");
-  await editor.getByLabel("חלבון", { exact: true }).fill("30");
-  await editor.getByLabel("פחמימה", { exact: true }).fill("50");
-  await editor.getByLabel("שומן", { exact: true }).fill("12");
+  await editor.getByLabel("חלבון קלוריות", { exact: true }).fill("450");
+  await editor.getByLabel("חלבון חלבון", { exact: true }).fill("30");
   await editor.getByRole("button", { name: "שמור שינויים בתבנית" }).click();
 
   await expect.poll(() => createRequests.length).toBe(1);

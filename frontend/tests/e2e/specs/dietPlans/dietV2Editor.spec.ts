@@ -29,6 +29,14 @@ const openV2Editor = async (page: Parameters<typeof installMockApi>[0]) => {
 
   const editor = page.getByTestId("diet-v2-editor");
   await expect(editor).toBeVisible();
+  const openMealButton = editor.getByRole("button", { name: "פתח ארוחה" });
+  if (await openMealButton.isVisible()) {
+    await openMealButton.click();
+  }
+  const openCategoryButton = editor.getByRole("button", { name: "פתח קטגוריה" }).first();
+  if (await openCategoryButton.isVisible()) {
+    await openCategoryButton.click();
+  }
 
   return { editor, mockApi };
 };
@@ -79,7 +87,7 @@ test("V2 catalog search sends only the settled term during typing", async ({ pag
   mockApi.assertNoUnhandledRequests();
 });
 
-test("new V2 meals require all four macro inputs before saving", async ({ page }) => {
+test("new V2 items require their category macro inputs before saving", async ({ page }) => {
   const createRequests: Request[] = [];
   page.on("request", (request) => {
     if (request.method() === "POST" && new URL(request.url()).pathname.endsWith("/dietPlans")) {
@@ -88,19 +96,14 @@ test("new V2 meals require all four macro inputs before saving", async ({ page }
   });
   const { editor, mockApi } = await openV2Editor(page);
 
-  await expect(editor.getByLabel("קלוריות", { exact: true })).toHaveValue("");
-  await expect(editor.getByLabel("חלבון", { exact: true })).toHaveValue("");
-  await expect(editor.getByLabel("פחמימה", { exact: true })).toHaveValue("");
-  await expect(editor.getByLabel("שומן", { exact: true })).toHaveValue("");
-
   const proteinInput = editor
     .getByTestId("diet-v2-category-protein")
     .getByPlaceholder("חפש או כתוב מאכל ולחץ Enter…");
   await proteinInput.fill("טופו 200 גרם");
   await proteinInput.press("Enter");
-  await editor.getByRole("button", { name: "שמור תפריט" }).click();
 
-  await expect(editor.getByText("שדה חובה")).toHaveCount(4);
+  await editor.getByRole("button", { name: "שמור תפריט" }).click();
+  await expect(editor.getByRole("heading", { name: "לא ניתן לשמור עדיין" })).toBeVisible();
   expect(createRequests).toHaveLength(0);
   mockApi.assertNoUnhandledRequests();
 });
@@ -127,35 +130,21 @@ test("V2 editor keeps quick add category-scoped and resets dirty state after sav
   await expect(protein).toContainText("המאכל כבר קיים בקטגוריה הזו");
 
   const carbs = page.getByTestId("diet-v2-category-carbs");
+  await editor.getByRole("button", { name: "פתח קטגוריה" }).first().click();
   const carbsInput = carbs.getByPlaceholder("חפש או כתוב מאכל ולחץ Enter…");
   await carbsInput.fill("200 גרם חזה עוף");
   await carbsInput.press("Enter");
   await expect(carbs).toContainText("200 גרם חזה עוף");
 
-  await editor.getByLabel("קלוריות", { exact: true }).fill("448");
-  await editor.getByLabel("חלבון", { exact: true }).fill("25");
-  await editor.getByLabel("פחמימה", { exact: true }).fill("45");
-  await editor.getByLabel("שומן", { exact: true }).fill("12");
-
-  await editor.getByRole("button", { name: "הוסף קלוריות חופשיות לארוחה" }).click();
-  await editor.getByRole("spinbutton", { name: "קלוריות חופשיות", exact: true }).fill("150");
-  await editor
-    .getByRole("textbox", { name: "תיאור קלוריות חופשיות", exact: true })
-    .fill("פרי / חטיף");
+  await editor.getByLabel("חלבון קלוריות", { exact: true }).fill("448");
+  await editor.getByLabel("חלבון חלבון", { exact: true }).fill("25");
+  await editor.getByLabel("פחמימה קלוריות", { exact: true }).fill("180");
+  await editor.getByLabel("פחמימה פחמימה", { exact: true }).fill("45");
 
   const saveButton = editor.getByRole("button", { name: "שמור תפריט" });
   await expect(saveButton).toBeEnabled();
   await saveButton.click();
   await expect(editor.getByRole("button", { name: "נשמר" })).toBeDisabled();
-
-  await editor.getByLabel("חלבון", { exact: true }).clear();
-  await expect(editor.getByText("שדה חובה")).toBeVisible();
-  await expect(editor.getByRole("button", { name: "שמור תפריט" })).toBeEnabled();
-
-  await editor.getByLabel("חלבון", { exact: true }).fill("-1");
-  await expect(editor.getByText("הערך חייב להיות 0 או יותר")).toBeVisible();
-  await editor.getByRole("button", { name: "שמור תפריט" }).click();
-  await expect(editor.getByRole("button", { name: "שמור תפריט" })).toBeEnabled();
 
   mockApi.assertNoUnhandledRequests();
 });
@@ -181,10 +170,8 @@ test("saving a V2 template sends the current plan to the Server", async ({ page 
 
   await protein.getByPlaceholder("חפש או כתוב מאכל ולחץ Enter…").fill("טופו 200 גרם");
   await protein.getByPlaceholder("חפש או כתוב מאכל ולחץ Enter…").press("Enter");
-  await editor.getByLabel("קלוריות", { exact: true }).fill("450");
-  await editor.getByLabel("חלבון", { exact: true }).fill("30");
-  await editor.getByLabel("פחמימה", { exact: true }).fill("50");
-  await editor.getByLabel("שומן", { exact: true }).fill("12");
+  await editor.getByLabel("חלבון קלוריות", { exact: true }).fill("450");
+  await editor.getByLabel("חלבון חלבון", { exact: true }).fill("30");
   await editor.getByRole("button", { name: "שמור כתבנית" }).click();
   await page.getByRole("button", { name: "שמור תבנית", exact: true }).click();
 

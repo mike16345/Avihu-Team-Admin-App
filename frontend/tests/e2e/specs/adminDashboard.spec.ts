@@ -3,7 +3,11 @@ import { type MockScenarioKey, useMockApi as installPageMockApi } from "../utils
 import { loginAsAdmin } from "../utils/adminSession";
 
 const loginToDashboard = async (page: Page, scenarioKeys: MockScenarioKey[]) => {
-  const mockApi = await installPageMockApi(page, ["auth.login.success", ...scenarioKeys]);
+  const mockApi = await installPageMockApi(page, [
+    "auth.login.success",
+    "users.success",
+    ...scenarioKeys,
+  ]);
 
   await loginAsAdmin(page);
   await expect(page.getByTestId("admin-dashboard")).toBeVisible();
@@ -25,35 +29,38 @@ test.describe("admin dashboard", () => {
   test("renders dashboard shortcuts and empty analytics states", async ({ page }) => {
     const mockApi = await loginToDashboard(page, ["analytics.dashboard.success"]);
 
-    await expect(page.getByText("הוסף משתמש")).toBeVisible();
-    await expect(page.getByText("הוסף תפריט")).toBeVisible();
-    await expect(page.getByText("הוסף תבנית אימון")).toBeVisible();
-    await expect(page.getByText("הוסף פוסט")).toBeVisible();
-    await expect(page.getByText("לא נשארו לקוחות לבדיקה!")).toBeVisible();
-    await expect(page.getByText("אין נתונים להצגה!").first()).toBeVisible();
+    await expect(page.getByRole("button", { name: /מתאמן חדש/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /תפריט תזונה/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /תוכנית אימון/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /מאמר חדש/ })).toBeVisible();
+    await expect(page.getByText("כל המתאמנים נבדקו!")).toBeVisible();
+    await expect(page.getByText("כל הלקוחות מוגדרים!")).toBeVisible();
     mockApi.assertNoUnhandledRequests();
   });
 
   test("renders populated analytics data", async ({ page }) => {
-    const mockApi = await loginToDashboard(page, ["analytics.dashboard.populated"]);
+    const mockApi = await loginToDashboard(page, [
+      "analytics.dashboard.populated",
+      "users.dashboard-populated",
+    ]);
+    const dashboard = page.getByTestId("admin-dashboard");
 
-    await expect(page.getByText("מיכל").first()).toBeVisible();
-    await expect(page.getByText("כהן").first()).toBeVisible();
-    await expect(page.getByText("דניאל").first()).toBeVisible();
-    await expect(page.getByText("לוי").first()).toBeVisible();
-    await expect(page.getByText("נועה אברהם").first()).toBeVisible();
-    await expect(page.getByText("אין נתונים להצגה!")).toHaveCount(0);
-    await expect(page.getByText("לא נשארו לקוחות לבדיקה!")).toHaveCount(0);
+    await expect(dashboard.getByText("מיכל כהן", { exact: true }).first()).toBeVisible();
+    await expect(dashboard.getByText("דניאל לוי", { exact: true }).first()).toBeVisible();
+    await expect(dashboard.getByText("נועה אברהם", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("כל המתאמנים נבדקו!")).toHaveCount(0);
+    await expect(page.getByText("כל הלקוחות מוגדרים!")).toHaveCount(0);
     mockApi.assertNoUnhandledRequests();
   });
 
   test("navigates to add user from the primary shortcut", async ({ page }) => {
     const mockApi = await loginToDashboard(page, ["analytics.dashboard.success"]);
+    mockApi.addScenario("trainers.subtrainers.empty");
 
-    await page.getByText("הוסף משתמש").click();
+    await page.getByRole("button", { name: /מתאמן חדש/ }).click();
 
     await expect(page).toHaveURL(/\/users\/add$/);
-    await expect(page.getByText("פרטי משתמש")).toBeVisible();
+    await expect(page.getByTestId("user-form-page")).toBeVisible();
     mockApi.assertNoUnhandledRequests();
   });
 });

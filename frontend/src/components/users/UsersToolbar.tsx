@@ -33,6 +33,7 @@ const UsersToolbar = ({
           className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
         />
         <input
+          data-testid="users-search"
           type="text"
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}

@@ -10,6 +10,12 @@ export const recordedSetsScenarios = {
       data: [],
       message: "No recorded sets",
     }),
+    apiRoute({
+      method: "GET",
+      pathname: "/progressNote/one",
+      data: { userId: "user-001", progressNotes: [] },
+      message: "No progress notes",
+    }),
   ],
   "recorded-sets.user.rir": [
     apiRoute({

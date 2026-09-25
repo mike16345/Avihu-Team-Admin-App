@@ -71,7 +71,7 @@ test("filters complete article pages locally without querying the server search"
     });
   });
 
-  mockApi.useScenario("auth.login.success", "analytics.dashboard.success");
+  mockApi.useScenario("auth.login.success", "analytics.dashboard.success", "users.success");
   await loginAsAdmin(page);
   mockApi.useScenario("analytics.dashboard.success", "users.success", "blogs.success");
 

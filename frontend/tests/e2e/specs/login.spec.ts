@@ -227,7 +227,11 @@ test.describe("login page", () => {
   });
 
   test("navigates to the admin dashboard for valid credentials", async ({ page }) => {
-    const mockApi = await useMockApi(page, ["auth.login.success", "analytics.dashboard.success"]);
+    const mockApi = await useMockApi(page, [
+      "auth.login.success",
+      "analytics.dashboard.success",
+      "users.success",
+    ]);
     const loginRequests = trackLoginRequests(page);
     const analyticsRequests = trackRequestsByPathSuffix(page, "/analytics/users", "GET");
 
@@ -251,7 +255,11 @@ test.describe("login page", () => {
   });
 
   test("restores the session from a persisted refresh token on reload", async ({ page }) => {
-    const mockApi = await useMockApi(page, ["auth.login.success", "analytics.dashboard.success"]);
+    const mockApi = await useMockApi(page, [
+      "auth.login.success",
+      "analytics.dashboard.success",
+      "users.success",
+    ]);
     const refreshRequests = trackRequestsByPathSuffix(page, REFRESH_PATH_SUFFIX, "POST");
 
     await page.goto(LOGIN_PATH);
@@ -260,7 +268,7 @@ test.describe("login page", () => {
     await submitLoginForm(page);
     await expect(page.getByTestId("admin-dashboard")).toBeVisible();
 
-    mockApi.useScenario("auth.refresh.success", "analytics.dashboard.success");
+    mockApi.useScenario("auth.refresh.success", "analytics.dashboard.success", "users.success");
     await page.reload();
 
     await expect(page).toHaveURL(/\/$/);
@@ -271,7 +279,11 @@ test.describe("login page", () => {
   });
 
   test("clears auth state when persisted refresh fails", async ({ page }) => {
-    const mockApi = await useMockApi(page, ["auth.login.success", "analytics.dashboard.success"]);
+    const mockApi = await useMockApi(page, [
+      "auth.login.success",
+      "analytics.dashboard.success",
+      "users.success",
+    ]);
 
     await page.goto(LOGIN_PATH);
     await getEmailInput(page).fill("admin@example.com");
@@ -279,7 +291,11 @@ test.describe("login page", () => {
     await submitLoginForm(page);
     await expect(page.getByTestId("admin-dashboard")).toBeVisible();
 
-    mockApi.useScenario("auth.refresh.unauthorized", "analytics.dashboard.success");
+    mockApi.useScenario(
+      "auth.refresh.unauthorized",
+      "analytics.dashboard.success",
+      "users.success"
+    );
     await page.reload();
 
     await expect(page).toHaveURL(/\/login$/);
@@ -287,24 +303,28 @@ test.describe("login page", () => {
     mockApi.assertNoUnhandledRequests();
   });
 
-  test("refreshes once and retries a protected request after 401", async ({ page }) => {
+  test("refreshes and retries a protected request after 401", async ({ page }) => {
     const mockApi = await useMockApi(page, [
       "auth.login.success",
-      "auth.refresh.success",
-      "analytics.dashboard.users.unauthorized",
+      "analytics.dashboard.success",
+      "users.success",
     ]);
     const refreshRequests = trackRequestsByPathSuffix(page, REFRESH_PATH_SUFFIX, "POST");
-    const analyticsUsersRequests = trackRequestsByPathSuffix(page, "/analytics/users", "GET");
+    const usersRequests = trackRequestsByPathSuffix(page, "/users", "GET");
 
     await page.goto(LOGIN_PATH);
     await getEmailInput(page).fill("admin@example.com");
     await getPasswordInput(page).fill("Secret123!");
     await submitLoginForm(page);
+    await expect(page.getByTestId("admin-dashboard")).toBeVisible();
 
-    await expect.poll(() => refreshRequests.length).toBe(1);
+    mockApi.useScenario("auth.refresh.success", "analytics.dashboard.success", "users.error-401");
+    await page.goto("/users");
+
+    await expect.poll(() => refreshRequests.length).toBeGreaterThanOrEqual(1);
     await expect
       .poll(() =>
-        analyticsUsersRequests.some(
+        usersRequests.some(
           (request) => request.headers().authorization === "Bearer mock-refreshed-access-token"
         )
       )

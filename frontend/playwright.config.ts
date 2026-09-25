@@ -11,7 +11,8 @@ export default defineConfig({
 
   // Determinism > speed for early stages
   fullyParallel: true,
-  retries: isCI ? 2 : 0,
+  // One retry identifies flakes without tripling a broadly broken suite's runtime.
+  retries: isCI ? 1 : 0,
   workers: isCI ? 2 : undefined,
 
   reporter: isCI

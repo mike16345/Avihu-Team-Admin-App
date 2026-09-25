@@ -25,7 +25,10 @@ const getCardClassName = (isExpiringSoon: boolean) => {
 const UsersCardsGrid = forwardRef<HTMLDivElement, UsersCardsGridProps>(
   ({ users, onViewUser }, ref) => (
     <ScrollableArea ref={ref}>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div
+        data-testid="users-table"
+        className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
+      >
         {users.map((user) => (
           <UserCard key={user._id} user={user} onView={() => onViewUser(user)} />
         ))}
@@ -43,7 +46,7 @@ function UserCard({ user, onView }: { user: IUser; onView: () => void }) {
   const statusColors = getUserStatusColors(user);
 
   return (
-    <div className={getCardClassName(isExpiringSoon)}>
+    <div data-testid={`users-row-${user._id}`} className={getCardClassName(isExpiringSoon)}>
       <button
         onClick={onView}
         className="absolute inset-0 z-0 cursor-pointer rounded-2xl"

@@ -36,6 +36,46 @@
     ],
     "message": "Users loaded"
   },
+  "dashboard_populated": {
+    "data": [
+      {
+        "_id": "checkin-user-001",
+        "firstName": "מיכל",
+        "lastName": "כהן",
+        "hasAccess": true,
+        "dateFinished": "2027-12-31T00:00:00.000Z"
+      },
+      {
+        "_id": "checkin-user-002",
+        "firstName": "דניאל",
+        "lastName": "לוי",
+        "hasAccess": true,
+        "dateFinished": "2027-12-31T00:00:00.000Z"
+      },
+      {
+        "_id": "analytics-user-001",
+        "firstName": "נועה",
+        "lastName": "אברהם",
+        "hasAccess": true,
+        "dateFinished": "2027-12-31T00:00:00.000Z"
+      },
+      {
+        "_id": "analytics-user-002",
+        "firstName": "יואב",
+        "lastName": "פרץ",
+        "hasAccess": true,
+        "dateFinished": "2027-12-31T00:00:00.000Z"
+      },
+      {
+        "_id": "expiring-user-001",
+        "firstName": "רוני",
+        "lastName": "שלום",
+        "hasAccess": true,
+        "dateFinished": "2027-12-31T00:00:00.000Z"
+      }
+    ],
+    "message": "Dashboard users loaded"
+  },
   "large": {
     "data": [
       {

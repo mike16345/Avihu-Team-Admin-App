@@ -59,6 +59,7 @@ const createUserErrorRoute = (
 
 export const usersScenarios = {
   "users.success": [usersListRoute("success")],
+  "users.dashboard-populated": [usersListRoute("dashboard_populated")],
   "users.large": [usersListRoute("large")],
   "users.empty": [usersListRoute("empty")],
   "users.malformed": [usersListRoute("malformed")],

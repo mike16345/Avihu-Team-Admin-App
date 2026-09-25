@@ -243,6 +243,7 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
     return (
       <SimplePresetGrid
         data={apiData.data?.data || []}
+        testIdPrefix={activeTab === "proteinItems" ? "protein" : undefined}
         variant={simpleGridCopy.variant}
         onView={(id) => startEdit(id, activeContent.sheetForm)}
         onDelete={(id) => deleteItem(id, activeContent.deleteFunc)}
