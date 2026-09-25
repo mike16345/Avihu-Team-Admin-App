@@ -16,7 +16,7 @@ export function truncateText(value, maxCharacters) {
 }
 
 function countCard(label, value, color) {
-  return `<td style="width:25%;padding:6px"><div style="background:#ffffff;border:1px solid #e5e7eb;border-radius:14px;padding:16px;text-align:center"><div style="color:${color};font-size:28px;font-weight:800;line-height:1">${value}</div><div style="color:#6b7280;font-size:12px;font-weight:700;letter-spacing:.08em;margin-top:8px;text-transform:uppercase">${label}</div></div></td>`;
+  return `<td style="padding:4px;width:25%"><div style="background:#ffffff;border:1px solid #e5e7eb;border-radius:14px;box-sizing:border-box;padding:12px 6px;text-align:center;width:100%"><div style="color:${color};font-size:clamp(18px,5vw,28px);font-weight:800;line-height:1">${value}</div><div style="color:#6b7280;font-size:10px;font-weight:700;letter-spacing:.04em;margin-top:8px;overflow-wrap:anywhere;text-transform:uppercase">${label}</div></div></td>`;
 }
 
 function failureCard(test, index) {
@@ -83,7 +83,7 @@ export function renderHtml(result, options = {}) {
       <h1 style="font-size:28px;line-height:1.2;margin:8px 0 4px">Tests ${failed ? "failed" : "passed"}</h1>
       <div style="color:#4b5563">${escapeHtml(metadata.repository)} · ${escapeHtml(metadata.branch ?? "local")} · ${escapeHtml(String(metadata.commit ?? "").slice(0, 12))}</div>
     </section>
-    <table role="presentation" style="border-collapse:collapse;margin:16px -6px;width:calc(100% + 12px)"><tr>${countCard("Passed", result.counts.passed, "#15803d")}${countCard("Failed", result.counts.failed, "#b91c1c")}${countCard("Skipped", result.counts.skipped, "#a16207")}${countCard("Duration", formatDuration(result.durationMs), "#1d4ed8")}</tr></table>
+    <table role="presentation" style="border-collapse:collapse;margin:16px 0;table-layout:fixed;width:100%"><tr>${countCard("Passed", result.counts.passed, "#15803d")}${countCard("Failed", result.counts.failed, "#b91c1c")}${countCard("Skipped", result.counts.skipped, "#a16207")}${countCard("Duration", formatDuration(result.durationMs), "#1d4ed8")}</tr></table>
     ${failed ? `<section style="margin-top:26px"><h2 style="font-size:20px;margin:0 0 14px">Failures first</h2>${failureCards}${infrastructureCards}</section>` : ""}
     <section style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;margin-top:24px;overflow:auto;padding:18px"><h2 style="font-size:20px;margin:0 0 10px">Suites</h2><table style="border-collapse:collapse;min-width:620px;width:100%"><thead><tr style="color:#6b7280;font-size:11px;letter-spacing:.06em;text-transform:uppercase"><th style="padding:10px;text-align:left">Suite</th><th style="padding:10px;text-align:left">Status</th><th style="padding:10px;text-align:right">Passed</th><th style="padding:10px;text-align:right">Failed</th><th style="padding:10px;text-align:right">Skipped</th><th style="padding:10px;text-align:right">Duration</th></tr></thead><tbody>${suiteRows}</tbody></table></section>
     <section style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;margin-top:24px;padding:18px"><h2 style="font-size:20px;margin:0">Passed and skipped</h2><ul style="list-style:none;margin:10px 0 0;padding:0">${passedAndSkipped || '<li style="color:#6b7280">No passed or skipped tests.</li>'}</ul></section>
