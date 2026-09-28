@@ -7,6 +7,7 @@ import useMuscleGroupsQuery from "@/hooks/queries/MuscleGroups/useMuscleGroupsQu
 import useUserRecordedSets from "@/hooks/queries/recordedSets/useUserRecordedSets";
 import useUserQuery from "@/hooks/queries/user/useUserQuery";
 import useWorkoutPlanQuery from "@/hooks/queries/workoutPlans/useWorkoutPlanQuery";
+import { useMonthlyExerciseGoals } from "@/hooks/queries/useMonthlyExerciseGoals";
 import ErrorPage from "@/pages/ErrorPage";
 import { workoutTab } from "@/pages/UserDashboard";
 
@@ -48,6 +49,7 @@ export const WorkoutProgression = () => {
   const { data: muscleGroupsFromServer } = useMuscleGroupsQuery();
   const { data: workoutPlanResponse } = useWorkoutPlanQuery(id ?? "");
   const workoutPlan = workoutPlanResponse?.data;
+  const { data: monthlyGoals } = useMonthlyExerciseGoals(id);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState(
@@ -153,9 +155,11 @@ export const WorkoutProgression = () => {
         onOpenNote={() => setNoteOpen(true)}
       />
 
-      {!flatExercises.length && <WorkoutEmptyState userFirstName={userFirstName} />}
+      {!flatExercises.length && !(workoutSections && workoutSections.length > 0) && (
+        <WorkoutEmptyState userFirstName={userFirstName} />
+      )}
 
-      {flatExercises.length > 0 && (
+      {(flatExercises.length > 0 || (workoutSections && workoutSections.length > 0)) && (
         <ExerciseCardsGrid
           exercises={filteredExercises}
           selectedExercise={selectedExercise}
@@ -164,6 +168,10 @@ export const WorkoutProgression = () => {
           onExpandedCardChange={setExpandedCard}
           onOpenExerciseDetails={openExerciseDetails}
           sections={workoutSections}
+          userId={id}
+          goals={monthlyGoals}
+          workoutPlan={workoutPlan}
+          currentWorkoutName={filter}
         />
       )}
 

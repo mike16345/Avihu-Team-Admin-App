@@ -1,7 +1,10 @@
-import { FaChevronDown, FaChevronUp, FaDumbbell } from "react-icons/fa6";
+import { useState } from "react";
+import { FaBullseye, FaChevronDown, FaChevronUp, FaDumbbell, FaPen } from "react-icons/fa6";
 
 import { defaultColor, groupColors, type FlatExercise } from "./workoutProgressionModel";
 import { MiniSparkline } from "./MiniSparkline";
+import { RotatingInfoStrip } from "./RotatingInfoStrip";
+import { MonthlyGoalModal } from "./MonthlyGoalModal";
 
 type ExerciseSession = FlatExercise["sessions"][number];
 
@@ -119,6 +122,9 @@ type ExerciseCardProps = {
   isExpanded: boolean;
   onExpandedChange: (cardId: string | null) => void;
   onOpen: (exercise: FlatExercise) => void;
+  userId?: string;
+  goal?: import("@/interfaces/IMonthlyExerciseGoal").IMonthlyExerciseGoal;
+  plannedReps?: string[];
 };
 
 export function ExerciseCard({
@@ -128,7 +134,11 @@ export function ExerciseCard({
   isExpanded,
   onExpandedChange,
   onOpen,
+  userId,
+  goal,
+  plannedReps,
 }: ExerciseCardProps) {
+  const [goalOpen, setGoalOpen] = useState(false);
   const first = exercise.sessions[0];
   const last = exercise.sessions[exercise.sessions.length - 1];
   const monthAnchor = findMonthAnchor(exercise.sessions);
@@ -157,6 +167,7 @@ export function ExerciseCard({
   const monthSecondaryLabel = isBodyweight ? "" : `${monthAnchor.reps} חזרות`;
 
   return (
+    <>
     <div
       className={`overflow-hidden rounded-xl border bg-white dark:bg-slate-900 shadow-sm transition-all hover:shadow-md ${getExerciseCardBorderClassName(
         isSelected
@@ -178,11 +189,51 @@ export function ExerciseCard({
             <h3 className="mt-1.5 text-sm font-bold text-slate-900 dark:text-slate-100">
               {exercise.name}
             </h3>
+            {(plannedReps?.length || goal) && (
+              <div className="mt-2">
+                <RotatingInfoStrip
+                  items={[
+                    ...(plannedReps && plannedReps.length > 0
+                      ? [
+                          {
+                            label: `אימון פירמידה: ${plannedReps.join(" | ")}`,
+                            icon: <FaDumbbell size={10} />,
+                          },
+                        ]
+                      : []),
+                    ...(goal
+                      ? [
+                          {
+                            label: `יעד חודשי: ${goal.targetWeight} ק"ג × ${goal.targetReps} חזרות`,
+                            icon: <FaBullseye size={10} className="text-blue-600" />,
+                          },
+                        ]
+                      : []),
+                  ]}
+                />
+              </div>
+            )}
           </div>
-          <div
-            className={`flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br ${colors.gradient} text-white shadow-sm`}
-          >
-            <FaDumbbell size={12} />
+          <div className="flex flex-col items-end gap-1">
+            {userId && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setGoalOpen(true);
+                }}
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-500 hover:text-blue-600 hover:border-blue-200"
+                title={goal ? "ערוך יעד" : "הגדר יעד"}
+                aria-label={goal ? "ערוך יעד" : "הגדר יעד"}
+              >
+                {goal ? <FaPen size={10} /> : <FaBullseye size={12} />}
+              </button>
+            )}
+            <div
+              className={`flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br ${colors.gradient} text-white shadow-sm`}
+            >
+              <FaDumbbell size={11} />
+            </div>
           </div>
         </div>
 
@@ -235,6 +286,73 @@ export function ExerciseCard({
             </span>
           )}
         </div>
+
+        {goal && (() => {
+          const currentWeight = isBodyweight ? 0 : last.weight;
+          const currentReps = last.reps;
+          const reachedWeight = currentWeight >= goal.targetWeight;
+          const reachedReps = currentReps >= goal.targetReps;
+          const reached = reachedWeight && reachedReps;
+          const exceeded =
+            currentWeight > goal.targetWeight ||
+            (currentWeight === goal.targetWeight && currentReps > goal.targetReps);
+          const status = exceeded
+            ? {
+                label: "🏆 עקף את היעד!",
+                cls:
+                  "border-amber-300 bg-gradient-to-r from-amber-50 to-yellow-50 text-amber-800 dark:border-amber-700/60 dark:from-amber-900/20 dark:to-yellow-900/20 dark:text-amber-200",
+              }
+            : reached
+            ? {
+                label: "✅ הגיע ליעד",
+                cls:
+                  "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-700/60 dark:bg-emerald-900/20 dark:text-emerald-200",
+              }
+            : {
+                label: "🎯 בדרך ליעד",
+                cls:
+                  "border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-700/60 dark:bg-blue-900/20 dark:text-blue-200",
+              };
+          const weightDelta = Math.round((currentWeight - goal.targetWeight) * 2) / 2;
+          const repsDelta = currentReps - goal.targetReps;
+          return (
+            <div
+              className={`mt-2.5 flex items-center justify-between gap-2 rounded-lg border px-2.5 py-1.5 text-[11px] font-bold ${status.cls}`}
+            >
+              <div className="flex flex-col leading-tight text-right">
+                <span>{status.label}</span>
+                <span className="text-[10px] font-semibold opacity-80">
+                  יעד: {goal.targetWeight} ק"ג × {goal.targetReps}
+                  {!isBodyweight && (
+                    <>
+                      {" "}· פער:{" "}
+                      {weightDelta > 0 ? `+${weightDelta}` : weightDelta}
+                      {unitLabel && ` ${unitLabel}`}
+                      {repsDelta !== 0 && (
+                        <>
+                          {" / "}
+                          {repsDelta > 0 ? `+${repsDelta}` : repsDelta} חזרות
+                        </>
+                      )}
+                    </>
+                  )}
+                </span>
+              </div>
+              {(reached || exceeded) && userId && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setGoalOpen(true);
+                  }}
+                  className="rounded-full bg-white/70 dark:bg-slate-900/40 px-2 py-0.5 text-[10px] font-bold shadow-sm hover:bg-white dark:hover:bg-slate-900"
+                >
+                  עדכן יעד →
+                </button>
+              )}
+            </div>
+          );
+        })()}
 
         <div className="mt-3">
           <div className="mb-1 flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500">
@@ -320,6 +438,16 @@ export function ExerciseCard({
         </div>
       )}
     </div>
+    {userId && (
+      <MonthlyGoalModal
+        open={goalOpen}
+        onOpenChange={setGoalOpen}
+        userId={userId}
+        exercise={exercise.name}
+        existing={goal}
+      />
+    )}
+    </>
   );
 }
 

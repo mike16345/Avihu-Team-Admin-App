@@ -2,6 +2,8 @@ import { defaultColor, groupColors, type FlatExercise } from "./workoutProgressi
 import type { WorkoutGroupSection } from "./workoutProgressionUtils";
 import { EmptyExerciseCard } from "./EmptyExerciseCard";
 import { ExerciseCard, getExerciseCardId } from "./ExerciseCard";
+import { IMonthlyExerciseGoal } from "@/interfaces/IMonthlyExerciseGoal";
+import { ICompleteWorkoutPlan } from "@/interfaces/IWorkoutPlan";
 
 type ExerciseCardsGridProps = {
   exercises: FlatExercise[];
@@ -11,6 +13,44 @@ type ExerciseCardsGridProps = {
   onExpandedCardChange: (cardId: string | null) => void;
   onOpenExerciseDetails: (exercise: FlatExercise) => void;
   sections?: WorkoutGroupSection[];
+  userId?: string;
+  goals?: IMonthlyExerciseGoal[];
+  workoutPlan?: ICompleteWorkoutPlan;
+  currentWorkoutName?: string;
+};
+
+const getPlannedReps = (
+  plan: ICompleteWorkoutPlan | undefined,
+  workoutName: string | undefined,
+  exerciseName: string
+): string[] | undefined => {
+  if (!plan || !workoutName) return undefined;
+  const target = exerciseName.trim();
+  const wp = plan.workoutPlans?.find((w) => w.planName === workoutName);
+  if (!wp) return undefined;
+  for (const mg of wp.muscleGroups || []) {
+    for (const ex of mg.exercises || []) {
+      const nm =
+        (ex.exerciseId as any)?.name ??
+        (typeof ex.exerciseId === "string" ? (ex as any).name : (ex as any).name);
+      if ((nm || "").trim() === target) {
+        const sets = (ex as any).sets ?? [];
+        const labels = sets
+          .map((s: any) => {
+            const min = Number(s?.minReps ?? s?.reps);
+            const max = Number(s?.maxReps);
+            if (Number.isFinite(min) && min > 0) {
+              if (Number.isFinite(max) && max > 0 && max !== min) return `${min}-${max}`;
+              return String(min);
+            }
+            return null;
+          })
+          .filter((v: string | null): v is string => !!v);
+        return labels.length > 0 ? labels : undefined;
+      }
+    }
+  }
+  return undefined;
 };
 
 export function ExerciseCardsGrid({
@@ -21,13 +61,31 @@ export function ExerciseCardsGrid({
   onExpandedCardChange,
   onOpenExerciseDetails,
   sections,
+  userId,
+  goals,
+  workoutPlan,
+  currentWorkoutName,
 }: ExerciseCardsGridProps) {
+  const goalByExercise = new Map<string, IMonthlyExerciseGoal>();
+  (goals || []).forEach((g) => goalByExercise.set(g.exercise.trim(), g));
+
   const renderCard = (exercise: FlatExercise, positionIndex: number) => {
     const positionLabel = `תרגיל ${positionIndex}`;
     const cardId = getExerciseCardId(exercise);
+    const goal = goalByExercise.get(exercise.name.trim());
+    const plannedReps = getPlannedReps(workoutPlan, currentWorkoutName, exercise.name);
 
     if (exercise.sessions.length === 0) {
-      return <EmptyExerciseCard key={cardId} exercise={exercise} positionLabel={positionLabel} />;
+      return (
+        <EmptyExerciseCard
+          key={cardId}
+          exercise={exercise}
+          positionLabel={positionLabel}
+          userId={userId}
+          goal={goal}
+          plannedReps={plannedReps}
+        />
+      );
     }
 
     const isSelected = selectedExercise === exercise.name && selectedMuscleGroup === exercise.group;
@@ -41,6 +99,9 @@ export function ExerciseCardsGrid({
         isExpanded={expandedCard === cardId}
         onExpandedChange={onExpandedCardChange}
         onOpen={onOpenExerciseDetails}
+        userId={userId}
+        goal={goal}
+        plannedReps={plannedReps}
       />
     );
   };
