@@ -10,6 +10,15 @@ const { default: config } = await import(
 );
 const workflowPath = path.resolve(repoRoot, config.workflowPath);
 
+test("workflow supplies a non-secret API key to browser tests", async () => {
+  const workflow = await readFile(workflowPath, "utf8");
+
+  assert.match(
+    workflow,
+    /- name: Run tests and build readable report[\s\S]*?env:\n\s+VITE_API_AUTH_TOKEN: e2e-mock-api-key\n\s+run: npm run test:report/,
+  );
+});
+
 test("workflow publishes every report and emails only failures", async () => {
   const workflow = await readFile(workflowPath, "utf8");
 
@@ -21,7 +30,10 @@ test("workflow publishes every report and emails only failures", async () => {
   assert.match(workflow, /smtps:\/\/smtp\.gmail\.com:465/);
   assert.match(workflow, /secrets\.TEST_REPORT_SMTP_USER/);
   assert.match(workflow, /secrets\.TEST_REPORT_SMTP_APP_PASSWORD/);
-  assert.match(workflow, /Failure email skipped because SMTP secrets are unavailable/);
+  assert.match(
+    workflow,
+    /Failure email skipped because SMTP secrets are unavailable/,
+  );
   assert.match(workflow, /exit 1/);
   assert.doesNotMatch(workflow, /echo.*TEST_REPORT_SMTP_APP_PASSWORD/);
 });

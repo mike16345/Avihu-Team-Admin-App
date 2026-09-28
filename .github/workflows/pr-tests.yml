@@ -47,6 +47,8 @@ jobs:
       - name: Run tests and build readable report
         id: test_report
         continue-on-error: true
+        env:
+          VITE_API_AUTH_TOKEN: e2e-mock-api-key
         run: npm run test:report
 
       - name: Add readable test summary
