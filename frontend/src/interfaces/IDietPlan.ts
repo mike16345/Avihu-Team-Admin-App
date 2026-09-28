@@ -6,6 +6,7 @@ export interface ICustomItem {
     grams: number;
     spoons: number;
   };
+  servingOrder?: string[];
 }
 
 export type DietItemQuantityBlock = {
@@ -36,7 +37,6 @@ export interface IDietPlan {
   fatsPerDay?: number;
   veggiesPerDay?: number;
   customInstructions?: string[];
-  supplements: string[];
   unitDisplayMode?: DietPlanUnitMode;
 }
 
@@ -79,6 +79,7 @@ export interface IMenuItem {
   dietaryType: string[];
   foodGroup: string;
   oneServing: IServingItem;
+  servingOrder?: string[];
 }
 
 export interface IMenue {

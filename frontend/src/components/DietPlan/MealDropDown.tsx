@@ -15,6 +15,7 @@ type CatalogItem = {
   _id: string;
   name: string;
   oneServing?: Partial<Record<ServingKey, number>>;
+  servingOrder?: string[];
 };
 
 interface MobilePreviewProps {
@@ -31,18 +32,21 @@ const pickItemUnit = (
   item: CatalogItem,
   unitMode: 1 | 2
 ): { key: ServingKey; amount: number } | undefined => {
-  const keys = Object.entries(item.oneServing || {}).filter(
+  const serving = item.oneServing || {};
+  const availableKeys = Object.entries(serving).filter(
     ([, v]) => typeof v === "number" && (v as number) > 0
   ) as [ServingKey, number][];
-  if (keys.length === 0) return undefined;
-  if (unitMode === 1) {
-    const grams = keys.find(([k]) => k === "grams");
-    if (grams) return { key: grams[0], amount: grams[1] };
-    return { key: keys[0][0], amount: keys[0][1] };
-  }
-  const nonGrams = keys.find(([k]) => k !== "grams");
-  if (nonGrams) return { key: nonGrams[0], amount: nonGrams[1] };
-  return { key: keys[0][0], amount: keys[0][1] };
+  if (availableKeys.length === 0) return undefined;
+
+  const orderedKeys = (item.servingOrder ?? []).filter(
+    (k) => typeof (serving as any)[k] === "number" && (serving as any)[k] > 0
+  ) as ServingKey[];
+  const finalOrder =
+    orderedKeys.length > 0 ? orderedKeys : availableKeys.map(([k]) => k);
+
+  const index = unitMode === 2 && finalOrder.length > 1 ? 1 : 0;
+  const key = finalOrder[index];
+  return { key, amount: (serving as any)[key] as number };
 };
 
 const MobilePreview: FC<MobilePreviewProps> = ({

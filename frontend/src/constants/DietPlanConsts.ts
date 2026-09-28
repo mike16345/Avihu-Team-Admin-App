@@ -11,5 +11,4 @@ export const defaultDietPlan: IDietPlan = {
   meals: [defaultMeal, defaultMeal, defaultMeal, defaultMeal],
   freeCalories: 0,
   customInstructions: [],
-  supplements: [],
 };

@@ -23,7 +23,7 @@ import { menuItemSchema } from "@/schemas/menuItemSchema";
 import { convertStringsToOptions, servingTypeToString } from "@/lib/utils";
 import CustomDropdownMenu from "../Dropdown/DropdownMenu";
 import { Button } from "../ui/button";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Plus, X } from "lucide-react";
 import { IPresetFormProps } from "@/interfaces/interfaces";
 
 interface MenuItemFormProps extends IPresetFormProps {
@@ -156,14 +156,33 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
     menuItemForm.setValue(`oneServing.${prevOptionKey}`, undefined);
   };
 
+  const handleRemoveOption = (index: number) => {
+    if (showServingSelections.length <= 1) return;
+    const removedKey = showServingSelections[index] as keyof IServingItem;
+    const newArr = showServingSelections.filter((_, i) => i !== index);
+    setShowServingSelections(newArr);
+    menuItemForm.setValue(`oneServing.${removedKey}`, undefined);
+  };
+
+  const handleAddOption = () => {
+    if (showServingSelections.length >= 2) return;
+    const firstAvailable = selections.find((s) => !showServingSelections.includes(s));
+    if (!firstAvailable) return;
+    setShowServingSelections([...showServingSelections, firstAvailable]);
+  };
+
   const onSubmit = (values: z.infer<typeof menuItemSchema>) => {
     let menuItemObject = {
       ...values,
       foodGroup,
       dietaryType: dietaryTypes,
+      servingOrder: [...showServingSelections],
     };
 
     menuItemObject = cleanMenuItemObject(menuItemObject);
+    menuItemObject.servingOrder = menuItemObject.servingOrder?.filter(
+      (k) => (menuItemObject.oneServing as any)?.[k] > 0
+    );
 
     if (objectId) {
       updateMenuItem.mutate({ menuItemObject, objectId });
@@ -199,10 +218,11 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
           )}
         />
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           {showServingSelections.map((key, i) => {
             const typedKey = key as keyof IServingItem;
             const optionLabel = i === 0 ? "אופציה א'" : i === 1 ? "אופציה ב'" : "";
+            const canRemove = showServingSelections.length > 1;
 
             return (
               <FormField
@@ -211,35 +231,74 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ objectId, closeSheet, foodG
                 name={`oneServing.${typedKey}`}
                 render={({ field }) => {
                   return (
-                    <FormItem>
+                    <FormItem className="rounded-lg border border-slate-200 bg-slate-50/50 p-3 dark:border-slate-700 dark:bg-slate-800/30">
                       {optionLabel && (
-                        <div className="text-[11px] font-bold text-blue-600 dark:text-blue-400">
-                          {optionLabel}
+                        <div className="mb-2 flex items-center justify-between gap-2">
+                          <span className="rounded-md bg-blue-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
+                            {optionLabel}
+                          </span>
+                          {canRemove && (
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveOption(i)}
+                              className="flex h-5 w-5 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
+                              title="הסר אופציה זו"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          )}
                         </div>
                       )}
-                      <div className="flex items-center justify-between">
-                        <FormLabel>{servingTypeToString(key)} במנה</FormLabel>
+                      <div className="flex items-center justify-between gap-1">
+                        <FormLabel className="text-xs font-medium text-slate-600 dark:text-slate-300">
+                          {servingTypeToString(key)} במנה
+                        </FormLabel>
                         <CustomDropdownMenu
                           handleOptionClick={(val) => handleChangeServingSelection(val, key, i)}
                           options={availableSelections}
                           trigger={
-                            <Button type="button" variant="ghost" className="h-8 w-8 p-0">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              className="h-6 w-6 p-0 text-slate-500 hover:bg-slate-200/60 hover:text-slate-700 dark:hover:bg-slate-700"
+                              title="שנה יחידת מידה"
+                            >
                               <span className="sr-only">Open menu</span>
-                              <MoreHorizontal className="h-4 w-4" />
+                              <MoreHorizontal className="h-3.5 w-3.5" />
                             </Button>
                           }
                         />
                       </div>
                       <FormControl>
-                        <Input type="number" min={0} {...field} />
+                        <Input
+                          type="number"
+                          min={0}
+                          className="mt-1 h-9"
+                          placeholder="0"
+                          {...field}
+                        />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-[10px]" />
                     </FormItem>
                   );
                 }}
               />
             );
           })}
+
+          {showServingSelections.length < 2 && (
+            <button
+              type="button"
+              onClick={handleAddOption}
+              className="group flex flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed border-slate-300 bg-slate-50/40 p-3 text-slate-400 transition-all hover:border-blue-400 hover:bg-blue-50/40 hover:text-blue-600 dark:border-slate-700 dark:bg-slate-800/20 dark:text-slate-500 dark:hover:border-blue-700 dark:hover:bg-blue-950/20 dark:hover:text-blue-400"
+              title="הוסף אופציה ב'"
+            >
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-200/60 transition-colors group-hover:bg-blue-100 dark:bg-slate-700/60 dark:group-hover:bg-blue-900/40">
+                <Plus className="h-4 w-4" />
+              </div>
+              <span className="text-[11px] font-semibold">הוסף אופציה ב'</span>
+            </button>
+          )}
         </div>
 
         <DietaryTypeSelector

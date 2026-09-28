@@ -22,16 +22,18 @@ const ensureDietItem = (item?: Partial<DietItemQuantityBlock>): DietItemQuantity
   extraItems: item?.extraItems ?? [],
 });
 
-export const normalizeDietPlan = (plan: IDietPlan): IDietPlan => ({
-  ...plan,
-  meals: (plan.meals || []).map((meal) => ({
-    ...meal,
-    totalProtein: ensureDietItem(meal.totalProtein),
-    totalCarbs: ensureDietItem(meal.totalCarbs),
-    totalFats: ensureDietItem(meal.totalFats),
-    totalVeggies: ensureDietItem(meal.totalVeggies),
-  })),
-  customInstructions: plan.customInstructions || [],
-  supplements: plan.supplements || [],
-  freeCalories: plan.freeCalories ?? 0,
-});
+export const normalizeDietPlan = (plan: IDietPlan): IDietPlan => {
+  const { supplements: _supplements, ...rest } = plan as IDietPlan & { supplements?: unknown };
+  return {
+    ...rest,
+    meals: (plan.meals || []).map((meal) => ({
+      ...meal,
+      totalProtein: ensureDietItem(meal.totalProtein),
+      totalCarbs: ensureDietItem(meal.totalCarbs),
+      totalFats: ensureDietItem(meal.totalFats),
+      totalVeggies: ensureDietItem(meal.totalVeggies),
+    })),
+    customInstructions: plan.customInstructions || [],
+    freeCalories: plan.freeCalories ?? 0,
+  };
+};
