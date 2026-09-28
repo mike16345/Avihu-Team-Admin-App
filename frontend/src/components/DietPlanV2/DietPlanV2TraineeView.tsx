@@ -82,7 +82,6 @@ interface MealBlockProps {
 
 const MealBlock: React.FC<MealBlockProps> = ({ meal, index }) => {
   const categories = meal.categories.filter((category) => category.items.length > 0);
-  const addOns = meal.addOns ?? [];
   const macros = deriveMealMacros(meal);
 
   return (
@@ -104,7 +103,7 @@ const MealBlock: React.FC<MealBlockProps> = ({ meal, index }) => {
         </div>
       </header>
 
-      {categories.length === 0 && addOns.length === 0 && !meal.freeCalories && (
+      {categories.length === 0 && !meal.freeCalories && (
         <p className="px-4 py-6 text-center text-xs italic text-slate-400">אין פרטים לארוחה זו</p>
       )}
 
@@ -126,17 +125,6 @@ const MealBlock: React.FC<MealBlockProps> = ({ meal, index }) => {
           </div>
         );
       })}
-
-      {addOns.length > 0 && (
-        <div className="border-t border-slate-100 bg-slate-50/60 px-4 py-3 dark:border-slate-800 dark:bg-slate-950/30">
-          <span className="mb-1.5 inline-flex rounded-md bg-slate-200 px-2 py-0.5 text-[10px] font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-            תוספים
-          </span>
-          <p className="text-sm font-medium leading-6 text-slate-700 dark:text-slate-200">
-            {addOns.map((item) => item.name).join(" / ")}
-          </p>
-        </div>
-      )}
 
       {meal.freeCalories && (
         <div className="border-t border-emerald-100 bg-emerald-50/30 px-4 py-3 dark:border-emerald-900/40 dark:bg-emerald-950/10">

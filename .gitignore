@@ -419,3 +419,7 @@ codex-cleanup-instructions.md
 
 # Local Codex/Superpowers design and implementation notes
 .superpowers/
+frontend/.env.local.live-backup
+.DS_Store
+Claude *.md
+.claude/launch *.json

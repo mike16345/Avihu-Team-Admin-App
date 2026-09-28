@@ -195,6 +195,7 @@ const TemplateTabs: React.FC<TemplateTabsProps> = ({ tabs }) => {
   const renderActiveContent = () => {
     if (!activeContent) return null;
 
+
     const actionButton = (
       <TemplateAddButton
         testId={`template-add-${createTemplateTabsTestId(activeContent.value)}`}

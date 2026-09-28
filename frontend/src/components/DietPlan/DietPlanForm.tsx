@@ -12,6 +12,7 @@ import DietPlanUnitModeToggle from "./DietPlanUnitModeToggle";
 import TextEditor from "../ui/TextEditor";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
+import { useDietTipGoals } from "@/hooks/useDietTipGoals";
 
 interface DietPlanFormProps extends PropsWithChildren {
   presetLoader?: React.ReactNode;
@@ -58,6 +59,7 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ children, presetLoader }) =
 
   const freeCalories = watch("freeCalories") || 0;
   const instructions = getTextEditorValue(watch("customInstructions"));
+  const { goals: dietTipGoals } = useDietTipGoals();
 
   const handleAddMeal = () => {
     append(cloneDefaultMeal());
@@ -76,10 +78,36 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ children, presetLoader }) =
   };
 
   const renderTipsEditor = () => (
-    <TextEditor
-      value={instructions}
-      onChange={(val) => setValue("customInstructions", [val], { shouldDirty: true })}
-    />
+    <div className="flex flex-col gap-2">
+      {dietTipGoals.length > 0 && (
+        <div dir="rtl" className="flex flex-wrap items-center gap-2">
+          <span className="text-[12px] font-semibold text-slate-500 dark:text-slate-400">
+            הוסף דגשי ברירת מחדל:
+          </span>
+          {dietTipGoals.map((g) => (
+            <button
+              key={g.key}
+              type="button"
+              onClick={() => {
+                const appendHtml = (g.tips || []).join(" ").trim();
+                if (!appendHtml) return;
+                const merged = instructions.trim()
+                  ? `${instructions} ${appendHtml}`
+                  : appendHtml;
+                setValue("customInstructions", [merged], { shouldDirty: true });
+              }}
+              className="inline-flex items-center gap-1 rounded-lg border border-blue-100 bg-blue-50 px-2.5 py-1 text-[11px] font-bold text-blue-700 hover:bg-blue-100 dark:border-blue-900/40 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-900/40"
+            >
+              + {g.label}
+            </button>
+          ))}
+        </div>
+      )}
+      <TextEditor
+        value={instructions}
+        onChange={(val) => setValue("customInstructions", [val], { shouldDirty: true })}
+      />
+    </div>
   );
 
   const renderFreeCaloriesChip = () => (

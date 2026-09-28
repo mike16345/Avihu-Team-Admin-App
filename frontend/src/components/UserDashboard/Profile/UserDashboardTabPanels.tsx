@@ -44,7 +44,7 @@ interface WorkoutTabPanelProps {
   onCloseSwapModal: () => void;
 }
 
-export function ProgressTabPanel({ activeSubTab, onSubTabChange }: ProgressTabPanelProps) {
+export function ProgressTabPanel({ activeSubTab, onSubTabChange, userId }: ProgressTabPanelProps) {
   return (
     <div className="flex flex-col gap-4">
       <ProgressSubTabs activeSubTab={activeSubTab} onSubTabChange={onSubTabChange} />

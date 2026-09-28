@@ -24,6 +24,7 @@ import TrainerAnalyticsDashboardPage from "@/pages/TrainerAnalyticsDashboardPage
 import TrainerDetailsPage from "@/pages/TrainerDetailsPage";
 import TrainersPage from "@/pages/TrainersPage";
 import ErrorPage from "@/pages/ErrorPage";
+import SettingsPage from "@/pages/SettingsPage";
 import {
   type AppRouteAccessKey,
   canAccessRoute,
@@ -160,6 +161,16 @@ const appRouteDefinitions: AppRouteDefinition[] = [
     accessKey: "agreementsCurrent",
     path: "/agreements/current",
     element: <CurrentAgreementPage />,
+  },
+  {
+    accessKey: "settings",
+    path: "/settings",
+    element: <SettingsPage />,
+  },
+  {
+    accessKey: "settings",
+    path: "/settings/*",
+    element: <SettingsPage />,
   },
 ];
 

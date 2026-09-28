@@ -26,6 +26,7 @@ import {
   UserCog,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import { FiSettings } from "react-icons/fi";
 import { useUsersStore } from "@/store/userStore";
 import LogoutButton from "../Navbar/LogoutButton";
 import { ModeToggle } from "../theme/mode-toggle";
@@ -303,6 +304,13 @@ export function AppSidebar() {
                 </div>
               </div>
               <div className="flex flex-col gap-1">
+                <Link
+                  to="/settings"
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-md border border-slate-200 bg-transparent px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                >
+                  <span>הגדרות</span>
+                  <FiSettings />
+                </Link>
                 <LogoutButton />
               </div>
             </PopoverContent>

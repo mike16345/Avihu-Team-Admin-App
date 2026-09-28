@@ -89,6 +89,7 @@ export const WeightProgressionPhotos: FC = () => {
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [swappingGroupKey, setSwappingGroupKey] = useState<number | null>(null);
   const [pendingDeleteSlot, setPendingDeleteSlot] = useState<PhotoSlot | null>(null);
+  const [pendingDeleteCycle, setPendingDeleteCycle] = useState<PhotoGroup | null>(null);
 
   const replaceInputRef = useRef<HTMLInputElement | null>(null);
   const pendingReplaceKeyRef = useRef<string | null>(null);
@@ -249,6 +250,24 @@ export const WeightProgressionPhotos: FC = () => {
     }
   };
 
+  const confirmDeleteCycle = async () => {
+    if (!pendingDeleteCycle) return;
+    const cycle = pendingDeleteCycle;
+    setPendingDeleteCycle(null);
+    setSwappingGroupKey(cycle.cycleNumber);
+    let latest: string[] | null = null;
+    for (const slot of cycle.photos) {
+      if (!slot.storageKey) continue;
+      const updated = await deletePhoto(slot.storageKey);
+      if (updated) latest = updated;
+    }
+    setSwappingGroupKey(null);
+    if (latest) {
+      setPhotosFromStoredUrls(latest);
+      toast.success(`מחזור ${cycle.cycleNumber} נמחק`);
+    }
+  };
+
   const handleReplaceClick = (slot: PhotoSlot) => {
     if (!slot.storageKey) return;
     pendingReplaceKeyRef.current = slot.storageKey;
@@ -401,6 +420,15 @@ export const WeightProgressionPhotos: FC = () => {
                         · {group.uploadDate}
                       </span>
                     )}
+                    <button
+                      type="button"
+                      onClick={() => setPendingDeleteCycle(group)}
+                      disabled={uploading || !!busyKey || isSwapPending}
+                      title="מחק מחזור"
+                      className="ml-2 flex h-7 w-7 items-center justify-center rounded-lg text-rose-500 transition-all hover:bg-rose-50 disabled:opacity-40"
+                    >
+                      <FaTrash size={11} />
+                    </button>
                   </div>
                   <div className="h-px flex-1 bg-slate-100 dark:bg-slate-800" />
                 </div>
@@ -455,18 +483,6 @@ export const WeightProgressionPhotos: FC = () => {
                                         className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/95 text-slate-700 shadow-sm transition-all hover:bg-blue-50 hover:text-blue-700 disabled:opacity-50 dark:text-slate-200"
                                       >
                                         <FaArrowsRotate size={12} />
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={(event) => {
-                                          event.stopPropagation();
-                                          handleDelete(photo);
-                                        }}
-                                        disabled={isBusy || isSwapPending}
-                                        title="מחק תמונה"
-                                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/95 text-rose-600 shadow-sm transition-all hover:bg-rose-50 disabled:opacity-50"
-                                      >
-                                        <FaTrash size={11} />
                                       </button>
                                     </div>
 
@@ -603,6 +619,23 @@ export const WeightProgressionPhotos: FC = () => {
         alertMessage={
           <>
             התמונה תוסר מגלריית ההתקדמות של המתאמן.
+            <br />
+            לא ניתן לשחזר את הפעולה הזו.
+          </>
+        }
+      />
+
+      <DeleteModal
+        isModalOpen={!!pendingDeleteCycle}
+        setIsModalOpen={(open) => {
+          if (!open) setPendingDeleteCycle(null);
+        }}
+        onCancel={() => setPendingDeleteCycle(null)}
+        onConfirm={confirmDeleteCycle}
+        title={pendingDeleteCycle ? `למחוק את מחזור ${pendingDeleteCycle.cycleNumber}?` : "למחוק מחזור?"}
+        alertMessage={
+          <>
+            כל 4 התמונות של המחזור יימחקו מגלריית ההתקדמות ומאחסון הענן.
             <br />
             לא ניתן לשחזר את הפעולה הזו.
           </>

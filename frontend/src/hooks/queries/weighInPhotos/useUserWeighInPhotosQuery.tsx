@@ -1,7 +1,8 @@
-import { FULL_DAY_STALE_TIME, MIN_STALE_TIME } from "@/constants/constants";
 import { useWeighInPhotosApi } from "@/hooks/api/useWeighInPhotosApi";
 import { buildPhotoUrls } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
+
+const PHOTOS_STALE_MS = 60 * 1000;
 
 const useUserWeighInPhotosQuery = (id?: string) => {
   const { getUserImageUrls } = useWeighInPhotosApi();
@@ -22,7 +23,9 @@ const useUserWeighInPhotosQuery = (id?: string) => {
     queryKey: [id + "-photos"],
     queryFn: handleGetPhotos,
     enabled: !!id,
-    staleTime: FULL_DAY_STALE_TIME / 2,
+    staleTime: PHOTOS_STALE_MS,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
   });
 };
 

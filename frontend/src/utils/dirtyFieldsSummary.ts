@@ -33,10 +33,6 @@ export function summariseDietDirty(dirty: any | undefined): string[] {
   if (isDirtyAnywhere(dirty.customInstructions)) {
     out.push("דגשים נערכו");
   }
-  if (isDirtyAnywhere(dirty.supplements)) {
-    out.push("תוספים נערכו");
-  }
-
   const meals = Array.isArray(dirty.meals) ? dirty.meals : [];
   meals.forEach((m: Dirty, i: number) => {
     if (!isDirtyAnywhere(m)) return;

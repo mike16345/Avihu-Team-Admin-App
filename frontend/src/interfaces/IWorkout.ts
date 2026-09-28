@@ -2,7 +2,7 @@ export interface IRecordedSet {
   plan: string;
   weight: number;
   repsDone: number;
-  rir?: number;
+  rir?: number | null;
   setNumber: number;
   date: Date;
   note: string;

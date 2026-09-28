@@ -68,11 +68,32 @@ export interface IWorkoutPlanHistory {
   assignmentLabel?: string;
 }
 
+export type WorkoutBlockStatus =
+  | "normal"
+  | "low-intensity"
+  | "moderate-intensity"
+  | "high-intensity"
+  | "peak"
+  | "deload";
+
+export interface IWorkoutBlock {
+  id: string;
+  name?: string;
+  workoutPlans: IWorkoutPlan[];
+  status?: WorkoutBlockStatus;
+  tips?: string[];
+}
+
+export type WorkoutPlanMode = "unified" | "blocks";
+
 export interface ICompleteWorkoutPlan extends IWorkoutPlanMeta, IWorkoutPlanHistory {
   userId?: string;
   workoutPlans: IWorkoutPlan[];
   cardio: ICardioPlan;
   tips?: string[];
+  mode?: WorkoutPlanMode;
+  blocks?: IWorkoutBlock[];
+  activeBlockIndex?: number;
 }
 
 export interface ICardioPlan {

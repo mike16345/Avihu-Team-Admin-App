@@ -5,7 +5,6 @@ import {
   FaChevronUp,
   FaCopy,
   FaGripVertical,
-  FaPuzzlePiece,
   FaTrashCan,
   FaUtensils,
 } from "react-icons/fa6";
@@ -17,7 +16,6 @@ import type {
   IMacros,
 } from "@/interfaces/IDietPlanV2";
 
-import AddOnsFields from "./AddOnsFields";
 import CategorySection from "./CategorySection";
 import type { MealSibling } from "./CategorySection";
 import FreeCaloriesFields from "./FreeCaloriesFields";
@@ -62,11 +60,11 @@ const MealCard: React.FC<MealCardProps> = ({
   isDragging,
   isDropTarget,
 }) => {
-  const addOns = meal.addOns ?? [];
-  const [addOnsActivated, setAddOnsActivated] = useState(addOns.length > 0);
   const [freeCaloriesActivated, setFreeCaloriesActivated] = useState(!!meal.freeCalories);
-  const totalItems =
-    meal.categories.reduce((total, category) => total + category.items.length, 0) + addOns.length;
+  const totalItems = meal.categories.reduce(
+    (total, category) => total + category.items.length,
+    0
+  );
   const displayedCategories: DietV2Category[] = DIET_V2_DEFAULT_CATEGORIES.map(
     (category) =>
       meal.categories.find((candidate) => candidate.category === category) ?? {
@@ -137,20 +135,6 @@ const MealCard: React.FC<MealCardProps> = ({
           </HeaderButton>
           <button
             type="button"
-            title="הוסף תוספים לארוחה"
-            onClick={(event) => {
-              event.stopPropagation();
-              if (collapsed) onToggleCollapse();
-              setAddOnsActivated(true);
-              if (!meal.addOns) onChange({ ...meal, addOns: [] });
-            }}
-            className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-blue-100 bg-white px-2.5 text-[11px] font-bold text-blue-600 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 dark:border-blue-900/40 dark:bg-slate-900 dark:text-blue-300"
-          >
-            <FaPuzzlePiece size={12} />
-            <span>תוספים</span>
-          </button>
-          <button
-            type="button"
             title="הוסף קלוריות חופשיות לארוחה"
             onClick={(event) => {
               event.stopPropagation();
@@ -187,17 +171,6 @@ const MealCard: React.FC<MealCardProps> = ({
               onChange={(next) => updateCategory(category.category, next)}
             />
           ))}
-
-          {addOnsActivated && (
-            <AddOnsFields
-              value={addOns}
-              onChange={(next) => onChange({ ...meal, addOns: next })}
-              onRemove={() => {
-                onChange({ ...meal, addOns: [] });
-                setAddOnsActivated(false);
-              }}
-            />
-          )}
 
           {freeCaloriesActivated && (
             <FreeCaloriesFields

@@ -1,8 +1,13 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { toast } from "sonner";
 import { FaPlus } from "react-icons/fa6";
-import { IWorkoutPlan } from "@/interfaces/IWorkoutPlan";
+import {
+  IWorkoutBlock,
+  IWorkoutPlan,
+  WorkoutBlockStatus,
+  WorkoutPlanMode,
+} from "@/interfaces/IWorkoutPlan";
 import { generateUUID } from "@/lib/utils";
 import { WorkoutSchemaType } from "@/schemas/workoutPlanSchema";
 
@@ -12,6 +17,8 @@ import { DragDropWrapper } from "../Wrappers/DragDropWrapper";
 import TextEditor from "../ui/TextEditor";
 import WorkoutTabs from "./WorkoutTabs";
 import WorkoutPlanContainer from "./WorkoutPlanContainer";
+import WorkoutModeToggle from "./WorkoutModeToggle";
+import WorkoutBlocksBar from "./WorkoutBlocksBar";
 import CardioWrapper from "./cardio/CardioWrapper";
 import {
   cloneMuscleGroupForCopy,
@@ -24,7 +31,7 @@ const getWorkoutTipsValue = (tips: string[] | undefined) => tips?.join(" ") || "
 
 const WorkoutPlans = () => {
   const form = useFormContext<WorkoutSchemaType>();
-  const { control, setValue, watch } = form;
+  const { control, setValue, watch, getValues } = form;
   const {
     append: addWorkoutPlan,
     move: moveWorkoutPlan,
@@ -36,6 +43,169 @@ const WorkoutPlans = () => {
   });
 
   const workoutPlans = (watch("workoutPlans") as IWorkoutPlan[]) ?? [];
+
+  const mode = (watch("mode") as WorkoutPlanMode | undefined) || "unified";
+  const blocks = (watch("blocks") as IWorkoutBlock[] | undefined) ?? [];
+  const activeBlockIndex = (watch("activeBlockIndex") as number | undefined) ?? 0;
+  const [currentBlockIndex, setCurrentBlockIndex] = useState<number>(activeBlockIndex);
+
+  const persistCurrentBlock = () => {
+    const currentPlans = (getValues("workoutPlans") as IWorkoutPlan[]) || [];
+    const currentTips = (getValues("tips") as string[] | undefined) || [];
+    const currentBlocks = (getValues("blocks") as IWorkoutBlock[]) || [];
+    if (!currentBlocks[currentBlockIndex]) return;
+    const nextBlocks = currentBlocks.map((b, i) =>
+      i === currentBlockIndex ? { ...b, workoutPlans: currentPlans, tips: currentTips } : b
+    );
+    setValue("blocks", nextBlocks, { shouldDirty: true });
+  };
+
+  const watchedWorkoutPlans = watch("workoutPlans");
+  const watchedTips = watch("tips");
+  useEffect(() => {
+    if (mode !== "blocks") return;
+    const currentBlocks = (getValues("blocks") as IWorkoutBlock[]) || [];
+    if (!currentBlocks[currentBlockIndex]) return;
+    const existing = currentBlocks[currentBlockIndex];
+    const nextPlans = (watchedWorkoutPlans as IWorkoutPlan[]) || [];
+    const nextTips = (watchedTips as string[] | undefined) || [];
+    if (existing.workoutPlans === nextPlans && existing.tips === nextTips) return;
+    const nextBlocks = currentBlocks.map((b, i) =>
+      i === currentBlockIndex ? { ...b, workoutPlans: nextPlans, tips: nextTips } : b
+    );
+    setValue("blocks", nextBlocks, { shouldDirty: true });
+  }, [watchedWorkoutPlans, watchedTips, mode, currentBlockIndex]);
+
+  const handleModeChange = (nextMode: WorkoutPlanMode) => {
+    if (nextMode === mode) return;
+    if (nextMode === "blocks") {
+      const existing = (getValues("blocks") as IWorkoutBlock[]) || [];
+      const seededBlocks =
+        existing.length > 0
+          ? existing
+          : [
+              {
+                id: generateUUID(),
+                workoutPlans: (getValues("workoutPlans") as IWorkoutPlan[]) || [],
+                tips: (getValues("tips") as string[] | undefined) || [],
+              },
+            ];
+      setValue("blocks", seededBlocks, { shouldDirty: true });
+      setValue("activeBlockIndex", activeBlockIndex ?? 0, { shouldDirty: true });
+      setCurrentBlockIndex(activeBlockIndex ?? 0);
+    } else {
+      persistCurrentBlock();
+      const active = (getValues("blocks") as IWorkoutBlock[])?.[activeBlockIndex ?? 0];
+      if (active?.workoutPlans?.length) {
+        setValue("workoutPlans", active.workoutPlans, { shouldDirty: true });
+      }
+      if (active?.tips) {
+        setValue("tips", active.tips, { shouldDirty: true });
+      }
+    }
+    setValue("mode", nextMode, { shouldDirty: true });
+  };
+
+  const handleSelectBlock = (index: number) => {
+    if (index === currentBlockIndex) return;
+    persistCurrentBlock();
+    const nextBlock = ((getValues("blocks") as IWorkoutBlock[]) || [])[index];
+    setValue("workoutPlans", nextBlock?.workoutPlans || [], { shouldDirty: true });
+    setValue("tips", nextBlock?.tips || [], { shouldDirty: true });
+    setCurrentBlockIndex(index);
+  };
+
+  const handleAddBlock = () => {
+    persistCurrentBlock();
+    const currentBlocks = (getValues("blocks") as IWorkoutBlock[]) || [];
+    const newBlock: IWorkoutBlock = { id: generateUUID(), workoutPlans: [], tips: [] };
+    const nextBlocks = [...currentBlocks, newBlock];
+    setValue("blocks", nextBlocks, { shouldDirty: true });
+    setValue("workoutPlans", [], { shouldDirty: true });
+    setValue("tips", [], { shouldDirty: true });
+    setCurrentBlockIndex(nextBlocks.length - 1);
+  };
+
+  const handleDeleteBlock = (index: number) => {
+    const currentBlocks = (getValues("blocks") as IWorkoutBlock[]) || [];
+    if (currentBlocks.length <= 1) return;
+    const nextBlocks = currentBlocks.filter((_, i) => i !== index);
+    const nextCurrentIdx = Math.max(0, currentBlockIndex - (index <= currentBlockIndex ? 1 : 0));
+    const nextActiveIdx = Math.max(
+      0,
+      (activeBlockIndex ?? 0) - (index <= (activeBlockIndex ?? 0) ? 1 : 0)
+    );
+    setValue("blocks", nextBlocks, { shouldDirty: true });
+    setValue("activeBlockIndex", nextActiveIdx, { shouldDirty: true });
+    setValue("workoutPlans", nextBlocks[nextCurrentIdx]?.workoutPlans || [], { shouldDirty: true });
+    setValue("tips", nextBlocks[nextCurrentIdx]?.tips || [], { shouldDirty: true });
+    setCurrentBlockIndex(nextCurrentIdx);
+    toast.success("בלוק נמחק בהצלחה");
+  };
+
+  const handleSetActive = (index: number) => {
+    setValue("activeBlockIndex", index, { shouldDirty: true });
+    toast.success(`בלוק ${index + 1} סומן כפעיל`);
+  };
+
+  const handleDuplicateBlock = (index: number) => {
+    persistCurrentBlock();
+    const currentBlocks = (getValues("blocks") as IWorkoutBlock[]) || [];
+    if (currentBlocks.length >= 8) return;
+    const source = currentBlocks[index];
+    if (!source) return;
+    const clonedPlans: IWorkoutPlan[] = source.workoutPlans.map((wp) => ({
+      ...wp,
+      _id: generateUUID(),
+      muscleGroups: wp.muscleGroups.map((mg) => ({
+        ...mg,
+        _id: generateUUID(),
+        exercises: mg.exercises.map((ex) => ({
+          ...ex,
+          _id: generateUUID(),
+          sets: ex.sets.map((s) => ({ ...s, _id: generateUUID() })),
+        })),
+      })),
+    }));
+    const duplicate: IWorkoutBlock = {
+      id: generateUUID(),
+      status: source.status,
+      name: source.name,
+      workoutPlans: clonedPlans,
+      tips: source.tips ? [...source.tips] : undefined,
+    };
+    const nextBlocks = [...currentBlocks, duplicate];
+    setValue("blocks", nextBlocks, { shouldDirty: true });
+    toast.success(`בלוק ${index + 1} שוכפל לבלוק ${nextBlocks.length}`);
+  };
+
+  const handleSetStatus = (index: number, status: WorkoutBlockStatus | undefined) => {
+    const currentBlocks = (getValues("blocks") as IWorkoutBlock[]) || [];
+    const nextBlocks = currentBlocks.map((b, i) => (i === index ? { ...b, status } : b));
+    setValue("blocks", nextBlocks, { shouldDirty: true });
+  };
+
+  const handleReorderBlocks = (fromIndex: number, toIndex: number) => {
+    if (fromIndex === toIndex) return;
+    persistCurrentBlock();
+    const currentBlocks = (getValues("blocks") as IWorkoutBlock[]) || [];
+    if (fromIndex < 0 || fromIndex >= currentBlocks.length) return;
+    if (toIndex < 0 || toIndex >= currentBlocks.length) return;
+    const nextBlocks = [...currentBlocks];
+    const [moved] = nextBlocks.splice(fromIndex, 1);
+    nextBlocks.splice(toIndex, 0, moved);
+
+    const adjustIndex = (idx: number) => {
+      if (idx === fromIndex) return toIndex;
+      if (fromIndex < idx && idx <= toIndex) return idx - 1;
+      if (toIndex <= idx && idx < fromIndex) return idx + 1;
+      return idx;
+    };
+
+    setValue("blocks", nextBlocks, { shouldDirty: true });
+    setValue("activeBlockIndex", adjustIndex(activeBlockIndex ?? 0), { shouldDirty: true });
+    setCurrentBlockIndex(adjustIndex(currentBlockIndex));
+  };
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const workoutIndex = useRef<number | null>(null);
@@ -147,6 +317,23 @@ const WorkoutPlans = () => {
           tips={renderWorkoutTipsEditor()}
           cardioPlan={<CardioWrapper />}
           workoutPlan={renderWorkoutPlanTab()}
+          header={<WorkoutModeToggle mode={mode} onChange={handleModeChange} />}
+          blocksBar={
+            mode === "blocks" ? (
+              <WorkoutBlocksBar
+                blocks={blocks}
+                currentBlockIndex={currentBlockIndex}
+                activeBlockIndex={activeBlockIndex}
+                onSelectBlock={handleSelectBlock}
+                onAddBlock={handleAddBlock}
+                onDeleteBlock={handleDeleteBlock}
+                onDuplicateBlock={handleDuplicateBlock}
+                onSetActive={handleSetActive}
+                onSetStatus={handleSetStatus}
+                onReorderBlocks={handleReorderBlocks}
+              />
+            ) : null
+          }
         />
       </div>
 

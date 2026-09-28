@@ -15,7 +15,7 @@ export function DietPlanPresetHeader() {
           <div className="flex-1 min-w-0">
             <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">תבנית תפריט</h1>
             <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
-              בנה תפריט תזונה חוזר לשימוש למתאמנים — שם, תיוג, ארוחות ותוספים
+              בנה תפריט תזונה חוזר לשימוש למתאמנים — שם, תיוג וארוחות
             </p>
           </div>
         </div>

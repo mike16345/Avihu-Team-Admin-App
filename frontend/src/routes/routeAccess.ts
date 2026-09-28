@@ -21,7 +21,8 @@ export type AppRouteAccessKey =
   | "presets"
   | "formBuilder"
   | "formResponses"
-  | "agreementsCurrent";
+  | "agreementsCurrent"
+  | "settings";
 
 const nonUserRoles: AppRole[] = ["admin", "trainer", "subTrainer"];
 const adminAndTrainerRoles: AppRole[] = ["admin", "trainer"];
@@ -45,6 +46,7 @@ export const ROUTE_ROLE_ACCESS: Record<AppRouteAccessKey, AppRole[]> = {
   formBuilder: nonUserRoles,
   formResponses: nonUserRoles,
   agreementsCurrent: nonUserRoles,
+  settings: adminAndTrainerRoles,
 };
 
 export const DEFAULT_ROUTE_BY_ROLE: Record<AppRole, string | null> = {

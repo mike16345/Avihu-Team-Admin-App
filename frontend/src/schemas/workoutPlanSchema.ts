@@ -193,6 +193,21 @@ export const fullWorkoutPlanSchema = z
       .array(workoutPlanSchema)
       .min(MIN_WORKOUTS, { message: ERROR_MESSAGES.arrayMin(MIN_WORKOUTS, "תכניות אימון") }),
     cardio: cardioPlanSchema,
+    mode: z.enum(["unified", "blocks"]).optional(),
+    blocks: z
+      .array(
+        z.object({
+          id: z.string(),
+          name: z.string().optional(),
+          workoutPlans: z.array(workoutPlanSchema),
+          status: z
+            .enum(["normal", "low-intensity", "moderate-intensity", "high-intensity", "peak", "deload"])
+            .optional(),
+          tips: z.array(z.string()).optional(),
+        })
+      )
+      .optional(),
+    activeBlockIndex: z.number().int().nonnegative().optional(),
   })
   .merge(workoutMetaSchema);
 
