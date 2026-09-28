@@ -10,7 +10,9 @@ export const useMonthlyExerciseGoals = (userId?: string) => {
     queryKey: [KEY, userId],
     queryFn: () => list(userId!),
     enabled: !!userId,
-    staleTime: 1000 * 60 * 2,
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 };
 
