@@ -697,6 +697,33 @@ export const primaryMacroForCategory = (
   }
 };
 
+/**
+ * Roll up per-category manual macro entries into a meal-level
+ * total. In manual mode the trainer types values PER-CATEGORY
+ * (protein grams, calories, etc.) and the meal-level readout is
+ * the derived sum. This keeps a single source of truth so the
+ * numbers can't drift between the two views. Falls back to the
+ * meal's own `manualMacros` (used by auto-fill) when no category
+ * has been touched yet.
+ */
+export const deriveMealManualMacros = (meal: DietV2Meal): DietV2OptionMacros => {
+  const hasAnyCategoryManual = meal.categories.some(
+    (cat) => cat.manualPrimaryGrams != null || cat.manualCalories != null
+  );
+
+  if (!hasAnyCategoryManual) {
+    return meal.manualMacros ?? { protein: 0, carbs: 0, fat: 0, calories: 0 };
+  }
+
+  const totals: DietV2OptionMacros = { protein: 0, carbs: 0, fat: 0, calories: 0 };
+  for (const cat of meal.categories) {
+    const primary = primaryMacroForCategory(cat.kind);
+    if (primary && cat.manualPrimaryGrams != null) totals[primary] += cat.manualPrimaryGrams;
+    if (cat.manualCalories != null) totals.calories += cat.manualCalories;
+  }
+  return totals;
+};
+
 const round = (value: number): number => Math.round(value * 10) / 10;
 
 /** Local id generator — keeps mock data stable until backend assigns ids. */
@@ -708,6 +735,7 @@ export const buildEmptyMeal = (index: number): DietV2Meal => ({
   id: makeLocalId("meal"),
   name: `ארוחה ${index}`,
   categories: DIET_V2_DEFAULT_CATEGORIES.map((kind) => ({ kind, options: [] })),
+  macroMode: "manual",
 });
 
 const DIET_V2_DEFAULT_CATEGORIES: DietV2CategoryKind[] = [
@@ -770,20 +798,79 @@ export interface ParsedQuickAdd {
  *   4. Drop ALL unit tokens from the name (so "כוס" doesn't
  *      pollute the food name when grams won the pair race).
  */
+/**
+ * Detects "plate descriptions" — a numeric token sandwiched between
+ * word tokens with no explicit unit anywhere in the string. Examples:
+ *   "חביתה 2 ביצים"       → true  (words on both sides of "2")
+ *   "שניצל 3 חתיכות שוקולד" → false (adjacent "חתיכות" is a unit)
+ *   "2 ביצים"              → false (number at start, ordinary qty)
+ *   "300 גרם אורז"          → false (adjacent "גרם" is a unit)
+ *   "אורז 300"              → false (number at end, ordinary qty)
+ * When true the parser bypasses tokenizing and preserves the raw
+ * text as the option's name — the number is part of a description,
+ * not a parseable quantity.
+ */
+export const isPlateDescription = (trimmed: string): boolean => {
+  const tokens = trimmed
+    .replace(/[,،]/g, " ")
+    .replace(/\s+/g, " ")
+    .split(" ")
+    .filter(Boolean);
+  if (tokens.length < 3) return false;
+
+  const numericIndex = tokens.findIndex((tok) => {
+    const num = Number(tok);
+    return Number.isFinite(num) && num > 0;
+  });
+  // Number must be strictly mid-string — words on BOTH sides.
+  if (numericIndex <= 0 || numericIndex >= tokens.length - 1) return false;
+
+  const left = tokens[numericIndex - 1];
+  const right = tokens[numericIndex + 1];
+  // If either neighbour is a unit word, this is a real qty+unit
+  // expression, not a plate description.
+  if (matchUnit(left) || matchUnit(right)) return false;
+  // If any OTHER token is a unit word, the number likely refers to
+  // it (e.g. "אורז 3 כוסות עם רוטב") — parse structured.
+  const anyOtherUnit = tokens.some((tok, i) => i !== numericIndex && matchUnit(tok));
+  if (anyOtherUnit) return false;
+  return true;
+};
+
 export const parseQuickAddText = (
   raw: string,
   categoryKind: DietV2CategoryKind
 ): ParsedQuickAdd | null => {
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+
+  // Compound entry short-circuit — the trainer wrote a whole plate
+  // like "2 ביצים + 1 גביע קוטג׳ + 3 גבנצ׳". Don't try to extract
+  // a single quantity/unit from that — it will strip words the
+  // trainer typed. Keep the raw text as the row name; the UI
+  // hides the qty editor when it detects the compound markers.
+  //
+  // Also trigger for "plate descriptions" — a digit sandwiched
+  // between words with NO explicit unit adjacent ("חביתה 2 ביצים",
+  // "שניצל 3 חתיכות שוקולד"). These read as free-text descriptions
+  // where the number is part of the phrase, not a parseable qty.
+  if (/[+,]/.test(trimmed) || / ו-?/.test(trimmed) || isPlateDescription(trimmed)) {
+    return {
+      quantity: 1,
+      unit: "units",
+      foodName: trimmed,
+      matchedFood: null,
+    };
+  }
+
   // Collapse multi-word unit phrases BEFORE tokenising — e.g.
   // "חתיכה בינונית" becomes a single sentinel token the unit
   // matcher recognises. Otherwise the parser would only see
   // "חתיכה" and resolve to the 100g piece, ignoring the size hint.
-  const text = raw
-    .trim()
+  const text = trimmed
     .replace(/[,،]/g, " ")
     .replace(/\s+/g, " ")
     .replace(/\b(חתיכה|חתיכות)\s+(בינונית|בינוניות)\b/gi, "__piece_medium__");
-  if (!text) return null;
 
   const tokens = text.split(" ");
 
@@ -858,12 +945,48 @@ export const parseQuickAddText = (
   const fallbackQuantity = resolvedUnit === "g" ? 100 : 1;
   const quantity = typedQuantity ?? matchedFood?.defaultQuantity ?? fallbackQuantity;
 
+  // Keep the trainer's exact wording as the row name — if they
+  // typed "דג סלומון" they want to see "דג סלומון", not the library's
+  // shorter "סלומון". The library still drives macro math via
+  // `matchedFood`.
   return {
     quantity,
     unit: resolvedUnit,
-    foodName: matchedFood?.name ?? foodName,
+    foodName,
     matchedFood: matchedFood ?? null,
   };
+};
+
+/**
+ * Multi-line quick-add — one row per line. Trainers may write a
+ * long compound entry like "2 חתיכות דג סלומון + 3 פרוסות גבנצ +
+ * שניצל" and expect the whole phrase to land as a single option,
+ * so we split ONLY on newlines. Whatever the parser can't resolve
+ * cleanly still lands as a row using the raw text as the name.
+ */
+export const parseCompoundQuickAdd = (
+  raw: string,
+  categoryKind: DietV2CategoryKind
+): ParsedQuickAdd[] => {
+  const parts = raw
+    .split(/\n+/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  if (parts.length === 0) return [];
+
+  return parts.map((part) => {
+    const parsed = parseQuickAddText(part, categoryKind);
+    if (parsed) return parsed;
+    // Fallback: keep whatever the trainer typed as the row's name
+    // so nothing is silently dropped.
+    return {
+      quantity: 1,
+      unit: "units" as DietV2Unit,
+      foodName: part,
+      matchedFood: null,
+    };
+  });
 };
 
 /**

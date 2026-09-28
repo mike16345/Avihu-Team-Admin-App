@@ -2,11 +2,21 @@ import { QueryClient, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner";
 import TemplateTabs from "@/components/templates/TemplateTabs";
 import DietPlanTemplatesHeader from "@/components/templates/dietTemplates/DietPlanTemplatesHeader";
+import DietPlanV2TemplatesList from "@/components/DietPlanV2/DietPlanV2TemplatesList";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { useDietPlanPresetApi } from "@/hooks/api/useDietPlanPresetsApi";
 import useMenuItemApi from "@/hooks/api/useMenuItemApi";
 import { ITabs } from "@/interfaces/interfaces";
+import { useUsersStore } from "@/store/userStore";
+
+/** Users on the "style 2" diet-plan preview. The templates page for
+ *  these users has to hide the style-1 tab shelf entirely — v1's
+ *  food-category tabs (protein / carbs / veggies / fats) and the
+ *  legacy meal-preset cards are meaningless in the options-based
+ *  model. When the per-trainer `dietPlanVersion` field lands on the
+ *  Trainer entity, replace this hardcoded set with that flag. */
+const STYLE_V2_USER_IDS = new Set<string>(["6774eb1c730c4c44354db2d0"]);
 
 type DeleteMutation = ITabs["tabContent"][number]["deleteFunc"];
 type DeleteMenuItem = ReturnType<typeof useMenuItemApi>["deleteMenuItem"];
@@ -107,6 +117,8 @@ const getDietPlanTabs = (deleteMutations: {
 });
 
 const DietPlanTemplatePage = () => {
+  const currentUserId = useUsersStore((state) => state.currentUser?._id);
+  const isStyleV2 = !!currentUserId && STYLE_V2_USER_IDS.has(currentUserId);
   const { deleteMenuItem } = useMenuItemApi();
   const { deleteDietPlanPreset } = useDietPlanPresetApi();
   const queryClient = useQueryClient();
@@ -149,7 +161,7 @@ const DietPlanTemplatePage = () => {
       className="flex flex-col gap-5 px-1 font-heebo"
     >
       <DietPlanTemplatesHeader />
-      <TemplateTabs tabs={tabs} />
+      {isStyleV2 ? <DietPlanV2TemplatesList /> : <TemplateTabs tabs={tabs} />}
     </div>
   );
 };

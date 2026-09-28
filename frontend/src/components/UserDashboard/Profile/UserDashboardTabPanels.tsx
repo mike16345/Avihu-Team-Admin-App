@@ -184,14 +184,14 @@ const DIET_V2_PREVIEW_USER_IDS = new Set<string>(["6774eb1c730c4c44354db2d0"]);
 
 export function DietTabPanel({ userId }: DietTabPanelProps) {
   const allowV2Preview = !!userId && DIET_V2_PREVIEW_USER_IDS.has(userId);
-  const [version, setVersion] = useState<DietPlanVersion>("meals");
-  const activeVersion: DietPlanVersion = allowV2Preview ? version : "meals";
+  // Flagged users go straight to v2 — no version toggle needed. The
+  // v1 (meals) editor still renders for everyone else until the
+  // per-trainer version field lands on the Trainer entity.
+  const activeVersion: DietPlanVersion = allowV2Preview ? "options" : "meals";
 
   return (
     <div className="flex flex-col gap-4">
       {userId && <FormResponseBubbleWrapper userId={userId} />}
-
-      {allowV2Preview && <DietVersionToggle version={version} onChange={setVersion} />}
 
       <DashboardTabCard>
         {activeVersion === "options" ? (
@@ -202,43 +202,6 @@ export function DietTabPanel({ userId }: DietTabPanelProps) {
           </DietPlanWrapper>
         )}
       </DashboardTabCard>
-    </div>
-  );
-}
-
-function DietVersionToggle({
-  version,
-  onChange,
-}: {
-  version: DietPlanVersion;
-  onChange: (next: DietPlanVersion) => void;
-}) {
-  const options: { id: DietPlanVersion; label: string }[] = [
-    { id: "meals", label: "תפריט מנות (קיים)" },
-    { id: "options", label: "תפריט אופציות (חדש)" },
-  ];
-  return (
-    <div
-      dir="rtl"
-      className="inline-flex w-fit items-center gap-1 rounded-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-1 shadow-sm"
-    >
-      {options.map((opt) => {
-        const active = opt.id === version;
-        return (
-          <button
-            key={opt.id}
-            type="button"
-            onClick={() => onChange(opt.id)}
-            className={`rounded-full px-4 py-1.5 text-xs font-bold transition-colors ${
-              active
-                ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
-                : "text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800"
-            }`}
-          >
-            {opt.label}
-          </button>
-        );
-      })}
     </div>
   );
 }

@@ -27,9 +27,21 @@ interface OptionRowProps {
   onRemove: () => void;
 }
 
+// A "compound" row = trainer typed a plate ("2 ביצים + 3 גבינה")
+// rather than a single food. In that case a single quantity+unit
+// makes no sense — the text speaks for itself and we hide the qty
+// editor entirely.
+const isCompoundEntry = (foodName: string): boolean =>
+  /[+,]/.test(foodName) || / ו-?/.test(foodName);
+
 const OptionRow: React.FC<OptionRowProps> = ({ option, categoryKind, macroMode = "auto", onChange, onRemove }) => {
   const showAiMeta = macroMode !== "manual";
   const [expanded, setExpanded] = useState(false);
+  // Click the row → enter name-edit mode. Blur / Enter / Esc exit.
+  // Compound rows benefit especially since their long text is where
+  // trainers make the most typos.
+  const [editingName, setEditingName] = useState(false);
+  const isCompound = isCompoundEntry(option.foodName);
   // Background upgrade: when a row was added via Quick-Add and no
   // local food matched (estimated=true), try Open Food Facts once
   // for its name. On a hit we swap in the real macros and drop the
@@ -94,76 +106,112 @@ const OptionRow: React.FC<OptionRowProps> = ({ option, categoryKind, macroMode =
   return (
     <div
       dir="rtl"
-      onClick={() => setExpanded((v) => !v)}
-      className="group flex cursor-pointer flex-col gap-2 rounded-xl border border-blue-100 bg-white px-3 py-2 shadow-sm transition-all hover:border-blue-200 hover:shadow-md hover:shadow-blue-500/5 dark:border-blue-900/40 dark:bg-slate-900 dark:hover:border-blue-800/60"
+      onClick={() => {
+        if (!editingName) {
+          setEditingName(true);
+          setExpanded(true);
+        }
+      }}
+      className={`group flex flex-col gap-1 rounded-md bg-slate-100 px-2 py-1.5 transition-all hover:bg-blue-100/80 dark:bg-slate-800/70 dark:hover:bg-blue-950/50 ${
+        editingName ? "" : "cursor-pointer"
+      }`}
     >
       {/* Row header: name + inline qty/unit editor + delete. The
           quantity control lives here (not duplicated in the expanded
           view) so the trainer edits in place. stopPropagation on the
           inputs so clicking them doesn't toggle the row. */}
-      <div className="flex items-center gap-2">
-        <span
-          className={`min-w-0 flex-1 text-sm font-bold text-slate-800 dark:text-slate-100 ${
-            expanded ? "break-words" : "truncate"
-          }`}
-        >
-          {option.foodName}
-        </span>
-        <div
-          onClick={(e) => e.stopPropagation()}
-          className="flex h-7 shrink-0 items-stretch overflow-hidden rounded-md border border-blue-200 bg-white focus-within:border-blue-400 focus-within:ring-1 focus-within:ring-blue-200/60 dark:border-blue-900/40 dark:bg-slate-900"
-        >
+      <div className="flex items-center gap-1.5">
+        {editingName ? (
           <input
-            type="number"
-            inputMode="numeric"
-            min={0}
-            value={option.quantity || ""}
-            onChange={(e) => onQuantityChange(e.target.value)}
-            aria-label="כמות"
-            className="w-10 border-0 bg-transparent px-1 text-center text-[12px] font-extrabold text-slate-800 focus:outline-none dark:text-slate-100"
+            autoFocus
+            value={option.foodName}
+            onClick={(e) => e.stopPropagation()}
+            onChange={(e) => onChange({ ...option, foodName: e.target.value })}
+            onBlur={() => setEditingName(false)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === "Escape") {
+                e.preventDefault();
+                setEditingName(false);
+              }
+            }}
+            aria-label="שם המאכל"
+            className="min-w-0 flex-1 rounded border border-blue-300 bg-white px-1.5 py-0.5 text-[13px] font-bold text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-200/60 dark:border-blue-900/60 dark:bg-slate-900 dark:text-slate-100"
           />
-          <span className="my-1 w-px bg-blue-100 dark:bg-blue-900/40" aria-hidden />
-          <select
-            value={option.unit}
-            onChange={(e) => onUnitChange(e.target.value as DietV2Unit)}
-            aria-label="יחידת מדידה"
-            className="appearance-none border-0 bg-transparent px-1.5 text-[11px] font-bold text-slate-600 focus:outline-none dark:text-slate-300"
+        ) : (
+          <span
+            className={`min-w-0 text-[13px] font-bold text-slate-800 dark:text-slate-100 ${
+              expanded ? "break-words" : "truncate"
+            }`}
+            title="לחץ לעריכת השם"
           >
-            {DIET_V2_UNITS.map((unit) => (
-              <option key={unit} value={unit}>
-                {DIET_V2_UNIT_LABELS[unit]}
-              </option>
-            ))}
-          </select>
+            {option.foodName}
+          </span>
+        )}
+        {/* Trailing controls — quantity editor (when applicable) and
+            trash sit in a shared group so the quantity is ALWAYS
+            adjacent to the trash. The whole group is pushed to the
+            end via ms-auto, so there's never a stray gap between qty
+            and trash regardless of the food name's length. */}
+        <div className="ms-auto flex shrink-0 items-center gap-1.5">
+          {!isCompound && (
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="flex h-6 shrink-0 items-stretch overflow-hidden rounded-md border border-blue-200 bg-white focus-within:border-blue-400 focus-within:ring-1 focus-within:ring-blue-200/60 dark:border-blue-900/40 dark:bg-slate-900"
+            >
+              <input
+                type="number"
+                inputMode="numeric"
+                min={0}
+                value={option.quantity || ""}
+                onChange={(e) => onQuantityChange(e.target.value)}
+                aria-label="כמות"
+                className="w-10 border-0 bg-transparent px-0.5 text-center text-[11px] font-extrabold text-slate-800 focus:outline-none dark:text-slate-100"
+              />
+              <span className="my-1 w-px bg-blue-100 dark:bg-blue-900/40" aria-hidden />
+              <select
+                value={option.unit}
+                onChange={(e) => onUnitChange(e.target.value as DietV2Unit)}
+                aria-label="יחידת מדידה"
+                className="appearance-none border-0 bg-transparent px-1 text-[10px] font-bold text-slate-600 focus:outline-none dark:text-slate-300"
+              >
+                {DIET_V2_UNITS.map((unit) => (
+                  <option key={unit} value={unit}>
+                    {DIET_V2_UNIT_LABELS[unit]}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          <button
+            type="button"
+            aria-label="הסר אפשרות"
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove();
+            }}
+            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-slate-300 transition-colors hover:bg-rose-50 hover:text-rose-600 group-hover:text-slate-400 dark:hover:bg-rose-950/40"
+          >
+            <FaTrashCan size={10} />
+          </button>
         </div>
-        <button
-          type="button"
-          aria-label="הסר אפשרות"
-          onClick={(e) => {
-            e.stopPropagation();
-            onRemove();
-          }}
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-300 transition-colors hover:bg-rose-50 hover:text-rose-600 group-hover:text-slate-400 dark:hover:bg-rose-950/40"
-        >
-          <FaTrashCan size={11} />
-        </button>
       </div>
 
-      {/* Expanded content — macros only. Quantity + unit already
-          live in the header, no need to duplicate them here. No
-          stopPropagation here — the macros are display-only, so a
-          click on any empty space inside the expanded area should
-          bubble up and collapse the row. */}
-      {expanded && showAiMeta && (
+      {/* Macros row — in AI (auto) mode we ALWAYS render the same
+          template so trainers see one predictable layout across
+          rows. Recognised foods show numbers; unrecognised rows
+          leave the values blank with a "⚠ לבדוק" badge so the
+          trainer knows to fill them in. */}
+      {showAiMeta && (
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-blue-100 pt-2 text-[12px] text-slate-600 dark:border-blue-900/40 dark:text-slate-300">
-          <MacroField label="חלבון" value={option.macros.protein} unit="גרם" />
-          <MacroField label="פחמימה" value={option.macros.carbs} unit="גרם" />
-          <MacroField label="שומן" value={option.macros.fat} unit="גרם" />
+          <MacroField label="חלבון" value={option.macros.protein} unit="גרם" empty={option.estimated} />
+          <MacroField label="פחמימה" value={option.macros.carbs} unit="גרם" empty={option.estimated} />
+          <MacroField label="שומן" value={option.macros.fat} unit="גרם" empty={option.estimated} />
           <MacroField
             label="קלוריות"
             value={option.macros.calories}
             unit="קל׳"
             tone="calories"
+            empty={option.estimated}
           />
           <SourceBadge estimated={option.estimated} cloudSourced={option.cloudSourced} />
         </div>
@@ -200,20 +248,28 @@ interface MacroFieldProps {
   value: number;
   unit: string;
   tone?: "default" | "calories";
+  /** When true, hide the numeric value but keep the label+unit
+   *  template — for unrecognised foods we show a blank slot so the
+   *  trainer sees the layout is complete but knows to check. */
+  empty?: boolean;
 }
 
-const MacroField: React.FC<MacroFieldProps> = ({ label, value, unit, tone = "default" }) => (
+const MacroField: React.FC<MacroFieldProps> = ({ label, value, unit, tone = "default", empty }) => (
   <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
     <span className="font-semibold text-slate-500 dark:text-slate-400">{label}:</span>
-    <strong
-      className={
-        tone === "calories"
-          ? "text-[13px] font-extrabold text-rose-600 dark:text-rose-400"
-          : "text-[13px] font-extrabold text-slate-800 dark:text-slate-100"
-      }
-    >
-      {value}
-    </strong>
+    {empty ? (
+      <span className="text-[13px] font-bold text-slate-300 dark:text-slate-600">—</span>
+    ) : (
+      <strong
+        className={
+          tone === "calories"
+            ? "text-[13px] font-extrabold text-rose-600 dark:text-rose-400"
+            : "text-[13px] font-extrabold text-slate-800 dark:text-slate-100"
+        }
+      >
+        {value}
+      </strong>
+    )}
     <span className="text-[10px] text-slate-400 dark:text-slate-500">{unit}</span>
   </span>
 );

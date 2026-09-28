@@ -1,0 +1,16 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "admin-frontend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--prefix",
+        "/Users/avihubusheri/Desktop/אפליקציה-אביהו-טים/קוד-עבודה/Avihu-Team-Admin-App/frontend"
+      ],
+      "port": 3000
+    }
+  ]
+}
