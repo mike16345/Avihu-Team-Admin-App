@@ -33,7 +33,7 @@ import DietPlanPresetPicker from "@/components/templates/dietTemplates/DietPlanP
 import DietPlanStatsStrip from "@/components/DietPlan/DietPlanStatsStrip";
 import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
 import UnsavedChangesDialog from "@/components/Alerts/UnsavedChangesDialog";
-import { summariseDietDirty } from "@/utils/dirtyFieldsSummary";
+import { isDirtyAnywhere, summariseDietDirty } from "@/utils/dirtyFieldsSummary";
 import { DietPlanPageHeader } from "@/components/DietPlan/DietPlanPageHeader";
 import { DietPlanPresetLoadBar } from "@/components/DietPlan/DietPlanPresetLoadBar";
 import DietPlanHistoryButton from "@/components/DietPlan/DietPlanHistoryButton";
@@ -79,7 +79,7 @@ export const DietPlanV1Page = ({ embedded = false, userId }: ViewDietPlanPagePro
 
   const { reset, getValues, watch, formState } = form;
   const meals = watch("meals");
-  const isDirty = formState.isDirty;
+  const isDirty = formState.isDirty && isDirtyAnywhere(formState.dirtyFields as any);
 
   const [pendingNav, setPendingNav] = useState<(() => void) | null>(null);
   const [savingToProceed, setSavingToProceed] = useState(false);

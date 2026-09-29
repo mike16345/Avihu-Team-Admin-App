@@ -5,6 +5,7 @@ import DeleteModal from "../Alerts/DeleteModal";
 import { CustomItems, IDietPlan } from "@/interfaces/IDietPlan";
 import { defaultMeal } from "@/constants/DietPlanConsts";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
+import { isDirtyAnywhere } from "@/utils/dirtyFieldsSummary";
 import useMenuItemsQuery from "@/hooks/queries/menuItems/useMenuItemsQuery";
 import AddButton from "../ui/buttons/AddButton";
 import DietplanTabs from "./DietPlanTabs";
@@ -46,7 +47,7 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ children, presetLoader }) =
     control,
     watch,
     setValue,
-    formState: { isDirty: formIsDirty },
+    formState: { isDirty: rhfFormIsDirty, dirtyFields: formDirtyFields },
   } = form;
 
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
@@ -147,6 +148,7 @@ const DietPlanForm: React.FC<DietPlanFormProps> = ({ children, presetLoader }) =
     </div>
   );
 
+  const formIsDirty = rhfFormIsDirty && isDirtyAnywhere(formDirtyFields as any);
   useUnsavedChangesWarning(formIsDirty);
 
   return (

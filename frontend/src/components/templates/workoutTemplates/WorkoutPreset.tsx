@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { onSuccess } from "@/lib/query";
 import { QueryKeys } from "@/enums/QueryKeys";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
+import { isDirtyAnywhere } from "@/utils/dirtyFieldsSummary";
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import PresetMetaPanel from "./PresetMetaPanel";
 import { WorkoutPresetEditorHeader } from "./WorkoutPresetEditorHeader";
@@ -59,7 +60,7 @@ export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ childr
     },
   });
   const {
-    formState: { isDirty },
+    formState: { isDirty: rhfIsDirty, dirtyFields },
     getValues,
     reset,
     handleSubmit,
@@ -153,6 +154,7 @@ export const CreateWorkoutPresetWrapper: React.FC<PropsWithChildren> = ({ childr
     reset(data);
   }, [data, reset]);
 
+  const isDirty = rhfIsDirty && isDirtyAnywhere(dirtyFields as any);
   useUnsavedChangesWarning(isDirty);
   const isSaving = addWorkoutPreset.isPending || updateWorkoutPlanPreset.isPending;
 

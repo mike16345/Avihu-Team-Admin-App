@@ -15,7 +15,7 @@
 
 type Dirty = boolean | Dirty[] | { [k: string]: Dirty };
 
-const isDirtyAnywhere = (v: Dirty | undefined): boolean => {
+export const isDirtyAnywhere = (v: Dirty | undefined): boolean => {
   if (v == null) return false;
   if (typeof v === "boolean") return v;
   if (Array.isArray(v)) return v.some(isDirtyAnywhere);

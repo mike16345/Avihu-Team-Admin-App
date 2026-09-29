@@ -8,7 +8,7 @@
         "run",
         "dev",
         "--prefix",
-        "/Users/avihubusheri/Desktop/אפליקציה-אביהו-טים/קוד-עבודה/Avihu-Team-Admin-App/frontend"
+        "/Users/avihubusheri/Projects/avihu-team/Avihu-Team-Admin-App/frontend"
       ],
       "port": 3000
     }

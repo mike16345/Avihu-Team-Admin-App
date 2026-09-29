@@ -13,6 +13,7 @@ import { toast } from "sonner";
 
 import { ERROR_MESSAGES } from "@/enums/ErrorMessages";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
+import { isDirtyAnywhere } from "@/utils/dirtyFieldsSummary";
 import type { DietV2Meal, DietV2MealCategory, IDietPlanV2 } from "@/interfaces/IDietPlanV2";
 import { dietPlanV2Schema } from "@/schemas/dietPlanV2Schema";
 
@@ -90,7 +91,8 @@ const DietPlanV2Editor: React.FC<DietV2EditorProps> = ({
   const { control, handleSubmit, reset, setValue, trigger, watch } = form;
   const { append, fields, insert, move, remove } = useFieldArray({ control, name: "meals" });
   const plan = watch();
-  const { errors, isDirty, isSubmitting, submitCount } = form.formState;
+  const { errors, isDirty: rhfIsDirty, isSubmitting, submitCount, dirtyFields } = form.formState;
+  const isDirty = rhfIsDirty && isDirtyAnywhere(dirtyFields as any);
 
   const [tab, setTab] = useState<DietV2Tab>("menu");
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(

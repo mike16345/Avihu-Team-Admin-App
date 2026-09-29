@@ -36,7 +36,7 @@ import { WorkoutPlanSaveActions } from "../workout plan/WorkoutPlanSaveActions";
 import { WorkoutPresetLoadBar } from "../workout plan/WorkoutPresetLoadBar";
 import { useNavigationBlocker } from "@/hooks/useNavigationBlocker";
 import UnsavedChangesDialog from "../Alerts/UnsavedChangesDialog";
-import { summariseWorkoutDirty } from "@/utils/dirtyFieldsSummary";
+import { isDirtyAnywhere, summariseWorkoutDirty } from "@/utils/dirtyFieldsSummary";
 
 const calculateMinPerWorkout = (workout: WorkoutSchemaType) => {
   let workoutPlan = workout;
@@ -94,7 +94,8 @@ const CreateWorkoutPlanWrapper = forwardRef<CreateWorkoutPlanHandle, CreateWorko
     const [validationErrors, setValidationErrors] = useState<ValidationErrorEntry[]>([]);
     const [pendingNav, setPendingNav] = useState<(() => void) | null>(null);
     const [savingToProceed, setSavingToProceed] = useState(false);
-    useNavigationBlocker(isDirty, (next) => setPendingNav(() => next));
+    const hasRealChanges = isDirty && isDirtyAnywhere(dirtyFields as any);
+    useNavigationBlocker(hasRealChanges, (next) => setPendingNav(() => next));
 
     useImperativeHandle(ref, () => ({
       openPresetPicker: () => setOpenPresetPicker(true),
@@ -184,18 +185,18 @@ const CreateWorkoutPlanWrapper = forwardRef<CreateWorkoutPlanHandle, CreateWorko
       reset(data.data);
     }, [data, reset]);
 
-    useUnsavedChangesWarning(isDirty);
+    useUnsavedChangesWarning(hasRealChanges);
 
     useEffect(() => {
       if (!savingToProceed) return;
-      if (isDirty) return;
+      if (hasRealChanges) return;
       if (pendingNav) {
         const next = pendingNav;
         setPendingNav(null);
         next();
       }
       setSavingToProceed(false);
-    }, [savingToProceed, isDirty, pendingNav]);
+    }, [savingToProceed, hasRealChanges, pendingNav]);
 
     const showSkeleton = isLoadingPlan && isFetchingPlan && !data;
     if (embedded && showSkeleton) {
