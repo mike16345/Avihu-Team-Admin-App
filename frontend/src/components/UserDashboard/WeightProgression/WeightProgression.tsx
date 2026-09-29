@@ -11,7 +11,7 @@ import ProgressNoteWrapper from "../ProgressNotes/ProgressNoteWrapper";
 import Loader from "@/components/ui/Loader";
 import ErrorPage from "@/pages/ErrorPage";
 import { HOUR_STALE_TIME } from "@/constants/constants";
-import { createRetryFunction } from "@/lib/utils";
+import { cn, createRetryFunction } from "@/lib/utils";
 import { QueryKeys } from "@/enums/QueryKeys";
 import DateUtils from "@/lib/dateUtils";
 import { IWeighIn } from "@/interfaces/IWeighIns";
@@ -93,7 +93,15 @@ export const WeightProgression = () => {
     retry: createRetryFunction(404),
   });
 
-  const weighIns = useMemo(() => (data || []) as IWeighIn[], [data]);
+  const allWeighIns = useMemo(() => (data || []) as IWeighIn[], [data]);
+  const [period, setPeriod] = useState<"month" | "3months" | "all">("month");
+
+  const weighIns = useMemo(() => {
+    if (period === "all") return allWeighIns;
+    const days = period === "month" ? 30 : 90;
+    const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+    return allWeighIns.filter((w) => new Date(w.date).getTime() >= cutoff);
+  }, [allWeighIns, period]);
 
   const stats = useMemo(() => {
     if (!weighIns.length) return null;
@@ -120,90 +128,120 @@ export const WeightProgression = () => {
 
   const isLoss = (stats?.change || 0) < 0;
   const changeColor = isLoss
-    ? "text-emerald-600"
+    ? "text-[#48A868]"
     : stats?.change === 0
-      ? "text-slate-700 dark:text-slate-200"
-      : "text-rose-600";
-  const changeBg = isLoss
-    ? "bg-emerald-50 dark:bg-emerald-950/40"
-    : stats?.change === 0
-      ? "bg-slate-50 dark:bg-slate-800"
-      : "bg-rose-50 dark:bg-rose-950/40";
+      ? "text-[#1D2939] dark:text-slate-100"
+      : "text-rose-500";
 
   return (
-    <div dir="rtl" className="flex flex-col gap-4 font-heebo">
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+    <div dir="rtl" className="flex flex-col gap-6 font-heebo">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <StatCard
-          icon={<FaScaleBalanced size={14} className="text-blue-600" />}
+          icon={<FaScaleBalanced size={14} className="text-[#667085]" />}
           label="משקל נוכחי"
           value={stats ? `${stats.current} ק״ג` : "—"}
-          accent="text-blue-600"
+          accent="text-[#1D2939] dark:text-slate-50"
         />
         <StatCard
-          icon={<FaScaleBalanced size={14} className="text-slate-400 dark:text-slate-500" />}
+          icon={<FaScaleBalanced size={14} className="text-[#667085]" />}
           label="משקל התחלתי"
           value={stats ? `${stats.starting} ק״ג` : "—"}
-          accent="text-slate-700 dark:text-slate-200"
+          accent="text-[#1D2939] dark:text-slate-50"
         />
         <StatCard
           icon={
             isLoss ? (
-              <FaArrowTrendDown size={14} className="text-emerald-600" />
+              <FaArrowTrendDown size={14} className="text-[#48A868]" />
             ) : (
-              <FaArrowTrendUp size={14} className="text-rose-600" />
+              <FaArrowTrendUp size={14} className="text-[#667085]" />
             )
           }
           label="שינוי"
           value={stats ? `${stats.change > 0 ? "+" : ""}${stats.change} ק״ג` : "—"}
           accent={stats ? changeColor : "text-slate-400"}
-          bg={stats ? changeBg : "bg-white dark:bg-slate-900"}
         />
         <StatCard
-          icon={<FaCalendarDay size={14} className="text-indigo-600" />}
+          icon={<FaCalendarDay size={14} className="text-[#667085]" />}
           label="שקילה אחרונה"
           value={stats?.lastDate || "—"}
-          accent="text-slate-700 dark:text-slate-200"
+          accent="text-[#1D2939] dark:text-slate-50"
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[320px_1fr]">
-        <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-4 shadow-sm">
-          <h3 className="mb-2 text-sm font-bold text-slate-800 dark:text-slate-100">לוח שנה</h3>
-          <WeightCalendar weighIns={weighIns} />
+      <div className="grid grid-cols-1 items-stretch gap-5 lg:grid-cols-[300px_1fr]">
+        <div className="flex h-full flex-col rounded-[20px] border border-[#E8EDF2] dark:border-slate-800/80 bg-white dark:bg-slate-900 p-6 shadow-[0_4px_20px_rgba(30,50,70,0.04)]">
+          <div className="mb-4 flex flex-col gap-0.5">
+            <h3 className="text-base font-semibold text-[#1D2939] dark:text-slate-50">לוח שנה</h3>
+            <p className="text-xs text-[#667085]">שקילות שבוצעו בחודש</p>
+          </div>
+          <div className="flex flex-1 items-start justify-center">
+            <WeightCalendar weighIns={weighIns} />
+          </div>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-t border-[#E8EDF2] pt-3 text-[10px] text-[#667085]">
+            <span className="inline-flex items-center gap-1.5">
+              <span className="block h-1.5 w-1.5 rounded-full bg-[#7DB7E8]" />
+              שקילה בוצעה
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="block h-1.5 w-1.5 rounded-full bg-[#DCEAF3]" />
+              חסרה שקילה
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="block h-1.5 w-1.5 rounded-full bg-[#E8EDF2]" />
+              אין נתונים
+            </span>
+          </div>
         </div>
 
         <div
           ref={setCardRef}
-          className="relative overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-4 shadow-sm select-none"
+          className="relative flex h-full flex-col overflow-hidden rounded-[20px] border border-[#E8EDF2] dark:border-slate-800/80 bg-white dark:bg-slate-900 p-6 shadow-[0_4px_20px_rgba(30,50,70,0.04)] select-none"
           title={notesOpen ? "לחץ פעמיים לחזרה לגרף" : "לחץ פעמיים לפתקי התקדמות"}
         >
-          <div className="mb-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">
-                {notesOpen ? "פתקי התקדמות" : "גרף משקל"}
-              </h3>
-              <span className="hidden items-center gap-1 rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-medium text-slate-500 dark:text-slate-400 sm:inline-flex">
-                <FaStickyNote size={9} className="text-amber-500" />
-                {notesOpen ? "לחץ פעמיים לחזרה לגרף" : "לחץ פעמיים לפתקים"}
-              </span>
+          <div className="mb-4 flex items-start justify-between">
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-semibold text-[#1D2939] dark:text-slate-50">
+                  {notesOpen ? "פתקי התקדמות" : "גרף משקל"}
+                </h3>
+                <span className="hidden items-center gap-1 rounded-full bg-[#F7F9FB] dark:bg-slate-800 px-2 py-0.5 text-[10px] font-medium text-[#667085] sm:inline-flex">
+                  <FaStickyNote size={9} className="text-[#7DB7E8]" />
+                  {notesOpen ? "לחץ פעמיים לחזרה לגרף" : "לחץ פעמיים לפתקים"}
+                </span>
+              </div>
+              <p className="text-xs text-[#667085]">מעקב אחר השינוי במשקל לאורך זמן</p>
             </div>
             <div className="flex items-center gap-2">
-              {!notesOpen &&
-                (isEmpty ? (
-                  <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-semibold text-slate-500 dark:text-slate-400">
-                    אין נתונים עדיין
-                  </span>
-                ) : (
-                  <span className="rounded-full bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 text-[10px] font-semibold text-blue-700 dark:text-blue-300">
-                    {stats?.totalRecords} שקילות
-                  </span>
-                ))}
+              {!notesOpen && !isEmpty && (
+                <div className="inline-flex items-center gap-0.5 rounded-full border border-[#E8EDF2] bg-white dark:bg-slate-900 p-0.5">
+                  {(["month", "3months", "all"] as const).map((p) => (
+                    <button
+                      key={p}
+                      type="button"
+                      onClick={() => setPeriod(p)}
+                      className={cn(
+                        "rounded-full px-3 py-0.5 text-[11px] font-medium transition-colors",
+                        period === p
+                          ? "bg-[#EAF2F7] text-[#1D2939]"
+                          : "text-[#667085] hover:text-[#1D2939]"
+                      )}
+                    >
+                      {p === "month" ? "חודש" : p === "3months" ? "3 חודשים" : "הכל"}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {!notesOpen && !isEmpty && (
+                <span className="rounded-full bg-[#EAF2F7] dark:bg-slate-800 px-2.5 py-1 text-[11px] font-medium text-[#1D2939] dark:text-slate-200">
+                  {stats?.totalRecords} שקילות
+                </span>
+              )}
               {notesOpen && (
                 <button
                   type="button"
                   data-notes-close
                   onClick={() => setNotesOpen(false)}
-                  className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                  className="flex h-7 w-7 items-center justify-center rounded-lg text-[#667085] hover:bg-[#F7F9FB] hover:text-[#1D2939]"
                   aria-label="סגור"
                 >
                   <HiOutlineX size={16} />
@@ -212,9 +250,9 @@ export const WeightProgression = () => {
             </div>
           </div>
 
-          <div className="relative min-h-[500px]">
+          <div className="relative flex-1 min-h-[320px]">
             <div
-              className={`h-[500px] w-full transition-all duration-300 ${
+              className={`absolute inset-0 transition-all duration-300 ${
                 notesOpen ? "pointer-events-none opacity-0" : "opacity-100"
               }`}
             >
@@ -242,25 +280,19 @@ function StatCard({
   label,
   value,
   accent,
-  bg = "bg-white dark:bg-slate-900",
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
   accent: string;
-  bg?: string;
 }) {
   return (
-    <div
-      className={`rounded-xl border border-slate-200/80 dark:border-slate-800/80 ${bg} p-3 shadow-sm`}
-    >
-      <div className="flex items-center gap-1.5">
+    <div className="rounded-[20px] border border-[#E8EDF2] dark:border-slate-800/80 bg-white dark:bg-slate-900 px-5 py-4 shadow-[0_4px_20px_rgba(30,50,70,0.04)]">
+      <div className="flex items-center gap-2">
         {icon}
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-          {label}
-        </p>
+        <p className="text-[12px] font-medium text-[#667085] dark:text-slate-400">{label}</p>
       </div>
-      <p className={`mt-1 text-lg font-bold ${accent}`}>{value}</p>
+      <p className={`mt-2 text-2xl font-semibold tracking-tight ${accent}`}>{value}</p>
     </div>
   );
 }

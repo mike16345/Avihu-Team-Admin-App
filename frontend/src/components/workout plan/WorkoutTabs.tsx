@@ -30,13 +30,13 @@ const WorkoutTabs: React.FC<WorkoutTabsProps> = ({
   return (
     <div dir="rtl" className="flex flex-col gap-4 font-heebo">
       {header}
-      <div className="relative grid grid-flow-col auto-cols-fr rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-1.5 shadow-sm w-fit min-w-[320px]">
+      <div className="relative grid grid-flow-col auto-cols-fr rounded-full border border-[#E6ECF2] dark:border-slate-800/70 bg-white/95 dark:bg-slate-900/90 p-1 shadow-[0_4px_20px_-12px_rgba(30,50,70,0.10)] backdrop-blur-sm w-fit min-w-[320px]">
         <span
           aria-hidden
-          className="absolute top-1.5 bottom-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 shadow-sm transition-all duration-300 ease-out"
+          className="absolute top-1 bottom-1 rounded-full bg-[#EAF3FF] dark:bg-slate-800/70 transition-all duration-300 ease-out"
           style={{
-            width: `calc((100% - 0.75rem) / ${TABS.length})`,
-            right: `calc(0.375rem + ${activeIndex} * ((100% - 0.75rem) / ${TABS.length}))`,
+            width: `calc((100% - 0.5rem) / ${TABS.length})`,
+            right: `calc(0.25rem + ${activeIndex} * ((100% - 0.5rem) / ${TABS.length}))`,
           }}
         />
         {TABS.map((t) => {
@@ -46,19 +46,13 @@ const WorkoutTabs: React.FC<WorkoutTabsProps> = ({
               key={t.id}
               type="button"
               onClick={() => setTab(t.id)}
-              className={`relative z-10 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors duration-300 ${
+              className={`relative z-10 inline-flex items-center justify-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium transition-colors duration-300 ${
                 active
-                  ? "text-blue-700 dark:text-blue-300"
-                  : "text-slate-600 dark:text-slate-300 hover:text-slate-900"
+                  ? "text-[#172B4D] dark:text-slate-50"
+                  : "text-[#667085] hover:text-[#172B4D]"
               }`}
             >
-              <span
-                className={`transition-colors duration-300 ${
-                  active ? "text-blue-700 dark:text-blue-300" : "text-slate-500 dark:text-slate-400"
-                }`}
-              >
-                {t.icon}
-              </span>
+              <span className="text-[#667085] dark:text-slate-400">{t.icon}</span>
               <span>{t.label}</span>
             </button>
           );
@@ -71,7 +65,7 @@ const WorkoutTabs: React.FC<WorkoutTabsProps> = ({
         {tab === "workout" && workoutPlan}
         {tab === "cardio" && cardioPlan}
         {tab === "tips" && (
-          <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-5 shadow-sm">
+          <div className="rounded-[20px] border border-[#E6ECF2] dark:border-slate-800/80 bg-white dark:bg-slate-900 p-6 shadow-[0_4px_20px_rgba(30,50,70,0.04)]">
             {tips}
           </div>
         )}

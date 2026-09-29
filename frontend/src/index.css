@@ -45,29 +45,32 @@ body {
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 47.4% 11.2%;
+    /* Elevate design system — see UI/UX master spec.
+       Primary text #172B4D, secondary #667085, borders #E6ECF2,
+       primary action #4A90E2 (soft), background #F8FAFC. */
+    --background: 210 33% 98%; /* #F8FAFC */
+    --foreground: 217 51% 20%; /* #172B4D */
 
-    --muted: 210 40% 94%;
-    --muted-foreground: 215.4 16.3% 36.9%;
+    --muted: 210 20% 96%;
+    --muted-foreground: 215 15% 47%; /* #667085 */
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 47.4% 11.2%;
+    --popover-foreground: 217 51% 20%;
 
-    --border: 215 20% 85%;
-    --input: 215 20% 85%;
+    --border: 210 22% 92%; /* #E6ECF2 */
+    --input: 210 22% 92%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 47.4% 11.2%;
+    --card-foreground: 217 51% 20%;
 
-    --primary: 210 100% 40%;
+    --primary: 210 71% 59%; /* #4A90E2 */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 30% 92%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 217 51% 20%;
 
-    --accent: 210 30% 88%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 210 100% 95%; /* #EAF3FF */
+    --accent-foreground: 217 51% 20%;
 
     --destructive: 0 100% 50%;
     --destructive-foreground: 210 40% 98%;

@@ -46,21 +46,20 @@ const InputModal: React.FC<InputModalProps> = ({ onClose, open, onSubmit, title,
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent
         dir="rtl"
-        className="max-w-md p-0 bg-white dark:bg-slate-900 border border-blue-100/60 dark:border-slate-800"
+        className="max-w-md p-0 bg-white dark:bg-slate-900 border border-[#E6ECF2] dark:border-slate-800 rounded-[20px]"
         style={{ fontFamily: "Assistant, Heebo, system-ui, sans-serif" }}
       >
-        {/* Header with brand-gradient icon */}
         <DialogHeader className="p-6 pb-3 text-right">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl brand-gradient text-white shadow-sm">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#F2F6F9] text-[#53677A]">
               <FaTag size={13} />
             </div>
             <div>
-              <DialogTitle className="text-base font-bold text-slate-900 dark:text-slate-100">
+              <DialogTitle className="text-lg font-semibold text-[#172B4D] dark:text-slate-50">
                 {title || "בחר שם לתבנית"}
               </DialogTitle>
               {description && (
-                <DialogDescription className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                <DialogDescription className="text-[12px] text-[#667085] mt-0.5">
                   {description}
                 </DialogDescription>
               )}
@@ -78,27 +77,24 @@ const InputModal: React.FC<InputModalProps> = ({ onClose, open, onSubmit, title,
                     {...field}
                     autoFocus
                     placeholder="לדוגמה: פול-בודי למתחילים"
-                    className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 shadow-sm transition-all focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                    className="w-full rounded-xl border border-[#DCE3EA] dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm text-[#172B4D] dark:text-slate-100 placeholder:text-[#98A2B3] transition-colors focus:border-[#9FC5E8] focus:outline-none focus:ring-2 focus:ring-[#9FC5E8]/40"
                   />
                   <FormMessage className="text-[11px]" />
                 </FormItem>
               )}
             />
 
-            {/* Footer: cancel + save. Save is a tight brand-gradient
-                pill — no more wide flat green. Cancel as a quiet
-                ghost button keeps the modal balanced. */}
             <div className="flex items-center justify-end gap-2 pt-1">
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+                className="rounded-xl border border-[#E2E8F0] bg-white px-4 py-2 text-sm font-medium text-[#344054] hover:bg-[#F4F7FA] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
               >
                 ביטול
               </button>
               <button
                 type="submit"
-                className="inline-flex items-center gap-1.5 rounded-xl brand-gradient brand-gradient-hover px-5 py-2 text-xs font-bold text-white shadow-md shadow-blue-500/25 transition-all hover:-translate-y-0.5"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-[#4A90E2] px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#3F7FCC]"
               >
                 <FaCheck size={11} />
                 <span>שמור</span>

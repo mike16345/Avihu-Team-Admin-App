@@ -21,13 +21,13 @@ export function WorkoutPlanSaveActions({
     return (
       <div
         dir="rtl"
-        className="sticky bottom-0 z-10 mt-3 flex flex-col gap-2 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 p-3 font-heebo shadow-lg backdrop-blur sm:flex-row sm:items-center sm:justify-end"
+        className="sticky bottom-0 z-10 mt-3 flex flex-col gap-2 rounded-full border border-[#E6ECF2] dark:border-slate-800/70 bg-white/95 dark:bg-slate-900/90 px-3 py-2 font-heebo shadow-[0_-4px_20px_-8px_rgba(30,50,70,0.08)] backdrop-blur sm:flex-row sm:items-center sm:justify-end"
       >
         <button
           type="button"
           onClick={onOpenPresetModal}
           disabled={isPlanSaving}
-          className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 transition-colors hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50/40 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center justify-center gap-2 rounded-full border border-[#E6ECF2] dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-1.5 text-sm font-medium text-[#172B4D] dark:text-slate-200 transition-colors hover:bg-[#EAF3FF] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isPresetSaving ? "שומר תבנית…" : "שמור כתבנית"}
         </button>
@@ -65,7 +65,7 @@ function SavePlanButton({
     <button
       type="submit"
       disabled={disabled}
-      className={`inline-flex items-center justify-center gap-2 rounded-xl brand-gradient brand-gradient-hover px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-blue-500/25 transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-full bg-[#3B82F6] px-5 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#2563EB] disabled:cursor-not-allowed disabled:opacity-60 ${className}`}
     >
       {label}
     </button>

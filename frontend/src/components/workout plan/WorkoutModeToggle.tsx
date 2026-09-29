@@ -16,13 +16,13 @@ const WorkoutModeToggle: React.FC<WorkoutModeToggleProps> = ({ mode, onChange })
 
   return (
     <div dir="rtl" className="flex justify-center font-heebo">
-      <div className="relative grid grid-flow-col auto-cols-fr rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-1.5 shadow-sm w-full max-w-md">
+      <div className="relative grid grid-flow-col auto-cols-fr rounded-full border border-[#E6ECF2] dark:border-slate-800/70 bg-white/95 dark:bg-slate-900/90 p-1 shadow-[0_4px_20px_-12px_rgba(30,50,70,0.10)] backdrop-blur-sm w-full max-w-md">
         <span
           aria-hidden
-          className="absolute top-1.5 bottom-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 shadow-sm transition-all duration-300 ease-out"
+          className="absolute top-1 bottom-1 rounded-full bg-[#EAF3FF] dark:bg-slate-800/70 transition-all duration-300 ease-out"
           style={{
-            width: `calc((100% - 0.75rem) / ${MODES.length})`,
-            right: `calc(0.375rem + ${activeIndex} * ((100% - 0.75rem) / ${MODES.length}))`,
+            width: `calc((100% - 0.5rem) / ${MODES.length})`,
+            right: `calc(0.25rem + ${activeIndex} * ((100% - 0.5rem) / ${MODES.length}))`,
           }}
         />
         {MODES.map((m) => {
@@ -32,10 +32,8 @@ const WorkoutModeToggle: React.FC<WorkoutModeToggleProps> = ({ mode, onChange })
               key={m.id}
               type="button"
               onClick={() => onChange(m.id)}
-              className={`relative z-10 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors duration-300 ${
-                isActive
-                  ? "text-blue-700 dark:text-blue-300"
-                  : "text-slate-600 dark:text-slate-300 hover:text-slate-900"
+              className={`relative z-10 inline-flex items-center justify-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium transition-colors duration-300 ${
+                isActive ? "text-[#172B4D] dark:text-slate-50" : "text-[#667085] hover:text-[#172B4D]"
               }`}
             >
               {m.label}

@@ -104,10 +104,10 @@ const NavLink: React.FC<{
     to={to}
     data-testid={testId}
     aria-label={title}
-    className={`group relative flex h-11 items-center gap-3 overflow-hidden rounded-2xl px-3 transition-all ${
+    className={`group relative flex h-11 items-center gap-3 overflow-hidden rounded-xl px-3 transition-colors ${
       active
-        ? "bg-blue-600 text-white shadow-md shadow-blue-600/30"
-        : "text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+        ? "bg-[#EAF3FF] text-[#3F6F9F] dark:bg-slate-800/70 dark:text-slate-50"
+        : "text-[#667085] hover:bg-[#F5F8FB] hover:text-[#172B4D] dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
     }`}
   >
     <span className="flex h-5 w-5 shrink-0 items-center justify-center">
@@ -181,7 +181,7 @@ export function AppSidebar() {
           fontFamily: "Heebo, system-ui, sans-serif",
           width: expanded ? EXPANDED_WIDTH : COLLAPSED_WIDTH,
         }}
-        className="fixed right-0 top-0 z-50 flex h-screen flex-col border-l border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-sm transition-[width] duration-300 ease-out"
+        className="fixed right-0 top-0 z-50 flex h-screen flex-col border-l border-[#E6ECF2] dark:border-slate-800 bg-white dark:bg-slate-950 transition-[width] duration-300 ease-out"
       >
         {/* Header — logo + (label that fades in on expand) */}
         <Link
@@ -216,7 +216,7 @@ export function AppSidebar() {
           {visibleGroups.map((group, gIdx) => (
             <React.Fragment key={gIdx}>
               {gIdx > 0 && (
-                <div aria-hidden className="my-3 mx-1 h-px bg-slate-300 dark:bg-slate-600" />
+                <div aria-hidden className="my-3 mx-1 h-px bg-[#EEF2F6] dark:bg-slate-700" />
               )}
               <ul className="flex flex-col gap-1">
                 {group.map((item) => (
@@ -267,7 +267,7 @@ export function AppSidebar() {
                 <UserAvatar
                   showImage
                   user={user}
-                  className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full brand-gradient text-sm font-bold text-white shadow-md shadow-blue-600/30 ring-2 ring-white dark:ring-slate-900"
+                  className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#4A90E2] text-sm font-semibold text-white ring-2 ring-white dark:ring-slate-900"
                 />
 
                 <span

@@ -10,21 +10,18 @@ interface StatCardProps {
 
 const StatCard: React.FC<StatCardProps> = ({ label, value, hint }) => {
   return (
-    <div className="relative flex min-h-[60px] flex-1 flex-col justify-between overflow-hidden rounded-xl border border-slate-200 bg-white px-3 py-1.5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
-        {label}
-      </span>
-      <div className="flex items-baseline justify-center gap-1.5">
-        <span className="text-xl font-extrabold text-slate-900 dark:text-slate-100">
+    <div className="flex flex-1 flex-col gap-2 px-5 py-4">
+      <span className="text-[12px] font-medium text-[#667085] dark:text-slate-400">{label}</span>
+      <div className="flex items-baseline gap-1.5">
+        <span className="text-2xl font-semibold tracking-tight text-[#172B4D] dark:text-slate-50">
           {value}
         </span>
         {hint && (
-          <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+          <span className="text-[12px] font-medium text-[#667085] dark:text-slate-400">
             {hint}
           </span>
         )}
       </div>
-      <div className="absolute inset-x-0 bottom-0 h-[3px] brand-gradient" />
     </div>
   );
 };
@@ -82,26 +79,21 @@ const WorkoutPlanStatsStrip: React.FC = () => {
   })();
 
   return (
-    <div dir="rtl" className="grid grid-cols-2 gap-3 font-heebo md:grid-cols-4">
-      <StatCard
-        label="מספר אימונים"
-        value={workoutCount}
-        hint={workoutCount === 1 ? "אימון" : "אימונים"}
-      />
-      <StatCard
-        label="סך תרגילים"
-        value={exerciseCount}
-        hint="בסה״כ"
-      />
-      <StatCard
-        label="אירובי שבועי"
-        value={cardioSummary}
-        hint={cardioHint}
-      />
+    <div
+      dir="rtl"
+      className="grid grid-cols-2 divide-x divide-x-reverse divide-[#E6ECF2] rounded-[20px] border border-[#E6ECF2] bg-white shadow-[0_4px_20px_rgba(30,50,70,0.04)] font-heebo dark:border-slate-800/80 dark:bg-slate-900 dark:divide-slate-800/70 md:grid-cols-4"
+    >
       <StatCard
         label="דגשים"
         value={hasTips ? "מולא" : "—"}
         hint={hasTips ? "הוזנו לאימון" : "לא הוזנו עדיין"}
+      />
+      <StatCard label="אירובי שבועי" value={cardioSummary} hint={cardioHint} />
+      <StatCard label="סך תרגילים" value={exerciseCount} hint="בסה״כ" />
+      <StatCard
+        label="מספר אימונים"
+        value={workoutCount}
+        hint={workoutCount === 1 ? "אימון" : "אימונים"}
       />
     </div>
   );

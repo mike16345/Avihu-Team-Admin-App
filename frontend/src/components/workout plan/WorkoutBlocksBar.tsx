@@ -79,10 +79,10 @@ const WorkoutBlocksBar: React.FC<WorkoutBlocksBarProps> = ({
     const statusMeta = getStatusMeta(block.status);
     return (
       <div
-        className={`group relative inline-flex items-center gap-2 rounded-xl border px-3 py-2 shadow-sm transition-colors ${
+        className={`group relative inline-flex items-center gap-2 rounded-full border px-3 py-1.5 transition-colors ${
           isCurrent
-            ? "border-blue-300 bg-blue-50 dark:border-blue-700 dark:bg-blue-950/40"
-            : "border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"
+            ? "border-[#DCEBFA] bg-[#EAF3FF] dark:border-slate-700 dark:bg-slate-800/70"
+            : "border-[#E6ECF2] bg-white dark:border-slate-800 dark:bg-slate-900"
         }`}
       >
         <span
@@ -97,10 +97,10 @@ const WorkoutBlocksBar: React.FC<WorkoutBlocksBarProps> = ({
                   className="flex items-center gap-2"
                 >
                   <span
-                    className={`text-sm font-bold ${
+                    className={`text-sm font-semibold ${
                       isCurrent
-                        ? "text-blue-700 dark:text-blue-300"
-                        : "text-slate-700 dark:text-slate-200"
+                        ? "text-[#172B4D] dark:text-slate-50"
+                        : "text-[#667085] dark:text-slate-300"
                     }`}
                   >
                     בלוק {index + 1}
@@ -174,7 +174,7 @@ const WorkoutBlocksBar: React.FC<WorkoutBlocksBarProps> = ({
 
   return (
     <div dir="rtl" className="flex flex-col gap-3 font-heebo">
-      <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-slate-50/40 dark:bg-slate-900/20 p-3">
+      <div className="rounded-[18px] border border-[#E6ECF2] dark:border-slate-800/70 bg-white dark:bg-slate-900 p-3 shadow-[0_4px_20px_rgba(30,50,70,0.04)]">
         <div className="flex flex-wrap items-center gap-2">
           <DragDropWrapper items={blocks} strategy="horizontal" idKey="id" onMove={onReorderBlocks}>
             {({ item, index }) => (
@@ -188,7 +188,7 @@ const WorkoutBlocksBar: React.FC<WorkoutBlocksBarProps> = ({
             <button
               type="button"
               onClick={onAddBlock}
-              className="inline-flex items-center gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-500 transition-all hover:border-blue-300 hover:bg-blue-50/40 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:border-blue-700 dark:hover:bg-blue-900/20 dark:hover:text-blue-300"
+              className="inline-flex items-center gap-2 rounded-full border border-dashed border-[#E6ECF2] bg-white px-3 py-1.5 text-sm font-medium text-[#667085] transition-colors hover:border-[#DCEBFA] hover:bg-[#EAF3FF] hover:text-[#172B4D] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400"
             >
               <FaPlus size={10} />
               <span>הוסף בלוק</span>

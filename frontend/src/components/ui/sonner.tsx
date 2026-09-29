@@ -70,7 +70,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
           // cascades down.
           icon: "!ms-0 !me-1 !text-blue-600 [&_svg]:!h-4 [&_svg]:!w-4 [&_svg]:!text-blue-600",
           actionButton:
-            "!rounded-md brand-gradient !text-white !text-[11px] !font-bold !px-2.5 !py-1 hover:!brightness-110",
+            "!rounded-lg !bg-[#4A90E2] !text-white !text-[11px] !font-semibold !px-2.5 !py-1 hover:!bg-[#3F7FCC]",
           cancelButton:
             "!rounded-md !border !border-slate-200 dark:!border-slate-800 !bg-white dark:!bg-slate-900 !text-slate-600 dark:!text-slate-300 !text-[11px] !font-semibold !px-2.5 !py-1",
           closeButton:
